@@ -1,6 +1,6 @@
 # General Development Practices
 Here are a few operational guidelines to keep everyone synchronized:
-1. **We will use C++14** and avoid the need for Boost or other third-party libraries. A rundown of new features in C++14 can be found [[here|https://blog.smartbear.com/c-plus-plus/the-biggest-changes-in-c11-and-why-you-should-care/]]. The most important usable features are smart pointers and the OS-agnostic threading library.
+1. **We will use C++14** and avoid the need for other third-party libraries. A rundown of new features in C++14 can be found [[here|https://blog.smartbear.com/c-plus-plus/the-biggest-changes-in-c11-and-why-you-should-care/]]. The most important usable features are smart pointers and the OS-agnostic threading library.
 2. **Fix all compiler warnings.** ```-Wall``` will be turned on during compilation. Developers must address all warnings before pushing new code.
 3. **Avoid duplicate code**. We will maintain a set of reusable utility libraries at 'src/libUtils' such as for logging, tokenizing, and time-locked functions.
 4. **Respect the interface**. We should maintain a highly-cohesive/loosely-coupled design. If we need to expose some inner workings, a redesign should be done.
