@@ -14,6 +14,6 @@ The first two benefits are immediately available once `ccache` is enabled (see t
 hash_dir = false
 base_dir = PARENT_DIRECTORY_ABSOLUTE_PATH
 ```
+Enjoy! And if anything wrong is going with `ccache`, just check the clean command in `ccache` and make your choice.
 
-Enjoy!
 
