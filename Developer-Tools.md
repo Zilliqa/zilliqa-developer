@@ -16,4 +16,20 @@ base_dir = PARENT_DIRECTORY_ABSOLUTE_PATH
 ```
 Enjoy! And if anything wrong is going with `ccache`, just check the clean command in `ccache` and make your choice.
 
+# clang-tidy and clang-format
+
+## Dependencies
+
+The version (5.0.0+) is required:
+- MacOS: `brew install llvm@5`
+- Ubuntu 16.04: `sudo apt install clang-format-5.0 clang-tidy-5.0`
+
+## Usage
+
+Four `make` targets defined in `cmake/LLVMExtraTools.cmake`
+
+- `make clang-format`: check the codebase against `.clang-format` and fail upon any violation.
+- `make clang-format-fix`: apply the suggested changes directly
+- `make clang-tidy`: check the codebase following `.clang-tidy` and suggest the changes
+- `make clang-tidy-fix`: apply the suggested changes directly
 
