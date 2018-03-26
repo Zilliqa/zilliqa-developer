@@ -34,6 +34,6 @@ Four `make` targets defined in `cmake/LLVMExtraTools.cmake`
 > As a result, the travis build will only enforce `clang-format` check presently.
 - `make clang-format`: check the codebase against `.clang-format` and fail upon any violation.
 - `make clang-format-fix`: apply the suggested changes directly
-- ~~`make clang-tidy`: check the codebase following `.clang-tidy` and suggest the changes~~
-- ~~`make clang-tidy-fix`: apply the suggested changes directly~~
+- `make clang-tidy`: check the codebase following `.clang-tidy` and suggest the changes
+- `make clang-tidy-fix`: apply the suggested changes directly
 
