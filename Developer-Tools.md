@@ -1,24 +1,36 @@
 # ccache
 
-`ccache` works as a wrapper for C/C++ compiler and dramatically shorten the building time by caching the temporary files safely. It provides acceleration in the following scanerios:
+`ccache` works as a wrapper for C/C++ compiler and dramatically shorten the building time by caching the temporary files safely. It works even when you clean up your entire build (e.g. `git clean -dfx` or `make clean`, if apply).
 
-1. reducing the time of an incremental build in the same build directory
-2. reducing the time of a fresh build in the same build directory (after things like `make clean` or `git clean -dfx`)
-3. reducing the time of a fresh build in a **different directory**.
+## Installation
 
-The first two benefits are immediately available once `ccache` is enabled (see the top-level `CMakeLists.txt`), however, the third one with **caching across different directories** requires two new lines in the `ccache` config file `$HOME/.ccache/ccache.conf`.
+- MacOS: `brew install ccache`
+- Ubuntu 16.04: `sudo apt install ccache`
 
-> For example, `PARENT_DIRECTORY_ABSOLUTE_PATH` should be `/home/user/workspace` if you have two build directories `/home/user/workspace/zilliqa1` and `/home/user/workspace/zilliqa2`.
+## Usage
+
+### **Speeding up different builds in the same directory**
+
+No configuring needed as CMake will find it and adopt it. It even accelerates build
+
+### **Speeding up different builds in different directories**
+
+Two options needed to be appended to `ccache` config file `$HOME/.ccache/ccache.conf`.
 
 ```
 hash_dir = false
-base_dir = PARENT_DIRECTORY_ABSOLUTE_PATH
+base_dir = COMMON_ABSOLUTE_PATH
 ```
-Enjoy! And if anything wrong is going with `ccache`, just check the clean command in `ccache` and make your choice.
 
-# clang-tidy and clang-format
+> **COMMON_ABSOLUTE_PATH** takes the common absolute path of two or more build directories. (e.g. It will be `/home/user/workspace` if you have two build directories `/home/user/workspace/zilliqa1` and `/home/user/workspace/zilliqa2`)
 
-## Dependencies
+### **Cleaning up the cache if something went wrong**
+
+See `man ccache` to select either `ccache --clear` or `ccache --cleanup`.
+
+# clang-format and clang-tidy
+
+## Installation
 
 The version (5.0.0+) is required:
 - MacOS: `brew install llvm@5`
@@ -26,14 +38,18 @@ The version (5.0.0+) is required:
 
 ## Usage
 
-Four `make` targets defined in `cmake/LLVMExtraTools.cmake`
+Make sure `cmake` is run beforehand.
 
-> **Note**
-> 
-> Two `clang-tidy` commands are pending, see this [pr](https://github.com/Zilliqa/Zilliqa/pull/148).
-> As a result, the travis build will only enforce `clang-format` check presently.
+### Check (or fix) coding style violations
+
 - **`make clang-format`**: check the codebase against `.clang-format` and fail upon any violation.
 - **`make clang-format-fix`**: apply the suggested changes directly
+
+## Check (or fix) wrong coding practices
+
 - **`make clang-tidy`**: check the codebase following `.clang-tidy` and suggest the changes
 - **`make clang-tidy-fix`**: apply the suggested changes directly
 
+## Source
+
+see `cmake/LLVMExtraTools.cmake`.
