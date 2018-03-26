@@ -8,7 +8,7 @@
 
 The first two benefits are immediately available once `ccache` is enabled (see the top-level `CMakeLists.txt`), however, the third one with **caching across different directories** requires two new lines in the `ccache` config file `$HOME/.ccache/ccache.conf`.
 
-> For example, the `PARENT_DIRECTORY_ABSOLUTE_PATH` should be `/home/user/workspace` if you have two build directories `/home/user/workspace/zilliqa1` and `/home/user/workspace/zilliqa2`.
+> For example, `PARENT_DIRECTORY_ABSOLUTE_PATH` should be `/home/user/workspace` if you have two build directories `/home/user/workspace/zilliqa1` and `/home/user/workspace/zilliqa2`.
 
 ```
 hash_dir = false
@@ -32,8 +32,8 @@ Four `make` targets defined in `cmake/LLVMExtraTools.cmake`
 > 
 > Two `clang-tidy` commands are pending, see this [pr](https://github.com/Zilliqa/Zilliqa/pull/148).
 > As a result, the travis build will only enforce `clang-format` check presently.
-- `make clang-format`: check the codebase against `.clang-format` and fail upon any violation.
-- `make clang-format-fix`: apply the suggested changes directly
-- `make clang-tidy`: check the codebase following `.clang-tidy` and suggest the changes
-- `make clang-tidy-fix`: apply the suggested changes directly
+- **`make clang-format`**: check the codebase against `.clang-format` and fail upon any violation.
+- **`make clang-format-fix`**: apply the suggested changes directly
+- **`make clang-tidy`**: check the codebase following `.clang-tidy` and suggest the changes
+- **`make clang-tidy-fix`**: apply the suggested changes directly
 
