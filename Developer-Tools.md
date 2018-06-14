@@ -1,3 +1,8 @@
+
+- [ccache](#ccache)
+- [clang-format and clang-tidy](#clang-format-and-clang-tidy)
+- [git-extras](#git-extras)
+
 # ccache
 
 `ccache` works as a wrapper for C/C++ compiler and dramatically shorten the building time by caching the temporary files safely. It works even when you clean up your entire build (e.g. `git clean -dfx` or `make clean`, if apply).
@@ -55,3 +60,20 @@ Make sure `cmake` is run beforehand.
 ## Source
 
 see `cmake/LLVMExtraTools.cmake`.
+
+# git-extras
+
+## Installation
+
+- MacOS: `brew install git-extras`
+- Ubuntu 16.04: `sudo apt-get install git-extras`
+
+## Usage
+
+### Checking out a specific pull-request locally
+
+If you want to check someone's pull-request, you can just do
+
+```
+git pr PR_NUMBER
+```
