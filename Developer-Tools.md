@@ -47,7 +47,7 @@ Make sure `cmake` is run beforehand.
 - **`make clang-format`**: check the codebase against `.clang-format` and fail upon any violation.
 - **`make clang-format-fix`**: apply the suggested changes directly
 
-## Check (or fix) wrong coding practices
+### Check (or fix) wrong coding practices
 
 - **`make clang-tidy`**: check the codebase following `.clang-tidy` and suggest the changes
 - **`make clang-tidy-fix`**: apply the suggested changes directly
