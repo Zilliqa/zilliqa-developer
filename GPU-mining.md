@@ -14,3 +14,6 @@ If you wish to use CUDA supported GPU for PoW, please download and install CUDA 
 ./build.sh cuda
 ```
 Before start Zilliqa application, please set the FULL_DATASET_MINE and CUDA_GPU_MINE in constants.xml to true to enable the PoW using CUDA GPU.
+
+## Hardware requirement
+The graphic card in PC should have at least 2GB RAM.
