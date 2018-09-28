@@ -18,4 +18,4 @@ If you wish to use CUDA supported GPU for PoW, please download and install CUDA 
 ```
 Before starting Zilliqa application, please set the **FULL_DATASET_MINE** and **CUDA_GPU_MINE** in constants.xml to true to enable the PoW using CUDA GPU.
 ## For Multiple GPUs
-If you have multiple OpenCL or CUDA GPUs, now they can work together. Please set the **NUM_DEVICE_TO_USE** in constants.xml to the number of physical GPUs exist in the PC and you can run Zilliqa to make them work.
+If you have multiple OpenCL or CUDA GPUs, now they can work concurrently. Please set the **NUM_DEVICE_TO_USE** in constants.xml to the number of physical GPUs supported by your PC. Then you can run Zilliqa with multiple GPUs for PoW.
