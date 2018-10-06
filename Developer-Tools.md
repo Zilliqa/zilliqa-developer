@@ -37,15 +37,25 @@ See `man ccache` to select either `ccache --clear` or `ccache --cleanup`.
 
 ## Installation
 
-The version (5.0.0+) is required:
-- MacOS: `brew install llvm@5`
-- Ubuntu 16.04: `sudo apt install clang-format-5.0 clang-tidy-5.0 clang-5.0`
+The version (7.0.0+) is required:
+- MacOS: 
+    ```
+    brew install llvm@7
+    ```
+- Ubuntu 16.04: 
+    ```bash
+    cat <<EOF > /etc/apt/sources.list.d/llvm-7.list
+    deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
+    deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
+    EOF
+    sudo apt-get update && sudo apt-get install clang-format-7 clang-tidy-7 -y
+    ```
 
 Also, `pyyaml` is required: `pip install pyyaml`
  
 ## Usage
 
-Make sure `cmake` is run beforehand.
+Use `./build.sh llvmextra` or add `-DLLVM_EXTRA_TOOLS=ON` flag to cmake
 
 ### Check (or fix) coding style violations
 
