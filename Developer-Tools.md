@@ -55,7 +55,7 @@ Also, `pyyaml` is required: `pip install pyyaml`
  
 ## Usage
 
-Use `./build.sh llvmextra` or add `-DLLVM_EXTRA_TOOLS=ON` flag to cmake
+Use `./build.sh style` or add `-DLLVM_EXTRA_TOOLS=ON` flag to cmake
 
 ### Check (or fix) coding style violations
 
