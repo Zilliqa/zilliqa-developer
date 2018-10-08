@@ -43,14 +43,17 @@ The version (7.0.0+) is required:
     brew install llvm@7
     ```
 - Ubuntu 16.04: 
+
     ```bash
-    cat <<EOF > /etc/apt/sources.list.d/llvm-7.list
+    # http://apt.llvm.org/ 
+    sudo cat <<EOF > /etc/apt/sources.list.d/llvm-7.list
     deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
     deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
     EOF
     curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     sudo apt-get update && sudo apt-get install clang-format-7 clang-tidy-7 -y
     ```
+
 
 Also, `pyyaml` is required: `pip install pyyaml`
  
