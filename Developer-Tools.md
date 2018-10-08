@@ -45,7 +45,7 @@ The version (7.0.0+) is required:
 - Ubuntu 16.04: 
 
     ```bash
-    # http://apt.llvm.org/ 
+    # from http://apt.llvm.org/ 
     sudo cat <<EOF > /etc/apt/sources.list.d/llvm-7.list
     deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
     deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
