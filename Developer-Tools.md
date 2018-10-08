@@ -52,7 +52,8 @@ The version (7.0.0+) is required:
     Then run
     ```bash
     curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    sudo apt-get update && sudo apt-get install clang-format-7 clang-tidy-7 -y
+    sudo apt-get update
+    sudo apt-get install clang-format-7 clang-tidy-7 -y
     ```
 
 
