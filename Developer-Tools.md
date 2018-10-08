@@ -42,7 +42,7 @@ The version (7.0.0+) is required:
     ```
     brew install llvm@7
     ```
-- Ubuntu 16.04:
+- Ubuntu 16.04 (http://apt.llvm.org/):
 
     Create file `/etc/apt/sources.list.d/llvm-7.list` with the following content
     ```
