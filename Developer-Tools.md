@@ -21,7 +21,7 @@ No configuring needed as CMake will find it and adopt it. It even accelerates bu
 ### **Speeding up different builds in different directories**
 
 Two options needed to be appended to `ccache` config file `$HOME/.ccache/ccache.conf`.
-
+If the config file or the directory does not exist, you need to create them.
 ```
 hash_dir = false
 base_dir = COMMON_ABSOLUTE_PATH
