@@ -1,4 +1,4 @@
-# GPU mining
+# Mining Guide
 
 ## General Information
 Welcome to testnet-v3 of Zilliqa. We are inviting all miners to test out the process of Zilliqa’s public node joining with their mining rigs, in order to familiarise everyone with the workflow before the mainnet launch on January 2019. We also encourage all community developers to join this testnet in order to better understand the architecture of the Zilliqa network.
