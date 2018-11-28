@@ -75,7 +75,7 @@ curl https://ipinfo.io/ip
 ```
 ./launch_docker.sh
 ```
-**Note**: We will be adding [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) support for Nvidia GPUs shortly. For AMD GPUs, you will need to follow this guide: https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/.
+**NOTE**: We will be adding [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) support for Nvidia GPUs shortly. For AMD GPUs, you will need to follow this guide: https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/.
 
 7. You will then be prompted to enter some information as shown below:
 ```
