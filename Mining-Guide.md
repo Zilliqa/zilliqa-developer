@@ -24,9 +24,9 @@ A vacuous epoch handles the all the coinbase transactions (reward mechanism), up
 In Zilliqa, each signature submitted by both shard or DS nodes are rewarded equally. The rewards are given out during the Vacuous epoch as discussed earlier.
 
 Say for example, there are 2,500 nodes in the network and the `COINBASE_REWARD` is set at `100,000 ZILs` per DS Epoch, the reward distributed per signature is:
-```
+
 100,000 / (2,500 * 2/3 [Successful signers] * 49 [TX blocks]) = 1.22448979592 ZILs per signature
-```
+
 ## Hardware requirement
 Currently, mining only works with Ubuntu 16.04 OS. Please follow the steps [HERE](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
 
