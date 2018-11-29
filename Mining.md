@@ -3,6 +3,10 @@
 ## General Information
 Welcome to Zilliqa testnet-v3. We are inviting all miners to test out the process of joining as a public node on Zilliqa testnet-v3. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the testnet-v3 in order to better understand the architecture of the Zilliqa network.
 
+- [Minimum hardware requirements](#hardware-requirement)
+- [Steps for mining with docker](#steps-for-mining-with-docker)
+- [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
+
 ### Testnet Difficulty
 The bootstrapped minimum difficulty level is set at `3` for testnet-v3. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
 
@@ -51,9 +55,6 @@ If you wish to use CUDA supported GPU for PoW, please download and install CUDA 
 If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edit the `GPU_TO_USE` parameter in **constants.xml** file to select amount of the GPUs that you would wish to use. 
 
 The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index is correspond to the number of GPUs you have physically in your mining rig.
-
-- [Steps for mining with docker](#steps-for-mining-with-docker)
-- [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
 
 ## Steps for mining with docker
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
