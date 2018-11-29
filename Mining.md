@@ -61,7 +61,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 4. Get the docker image in your command prompt:
 ```
-wget http://afec44962f2dc11e8984a066602678dc-420710417.us-west-2.elb.amazonaws.com/configuration.tar.gz
+wget https://singapore-join.aws.zilliqa.com/configuration.tar.gz
 tar axvf configuration.tar.gz
 ```
 
