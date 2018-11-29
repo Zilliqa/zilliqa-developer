@@ -84,7 +84,7 @@ curl https://ipinfo.io/ip
 7. You will then be prompted to enter some information as shown below:
 ```
 Assign a name to your container (default: zilliqa): [Press Enter to skip if using default]
-Enter your IP address ('NAT' or *.*.*.*): [Key in your IP address as found in step 5]
+Enter your IP address ('NAT' or *.*.*.*): [Key in your IP address as found in step 5 OR just key in NAT]
 Enter your listening port (default: 30303): [Press Enter to skip if using default]
 ```
 8. You are now a miner in the testnet-v3. You can monitor your progress using `tail -f zilliqa-00001-log.txt`. You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
