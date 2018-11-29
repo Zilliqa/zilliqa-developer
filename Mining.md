@@ -52,6 +52,9 @@ If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edi
 
 The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index is correspond to the number of GPUs you have physically in your mining rig.
 
+- [Steps for mining with docker](#steps-for-mining-with-docker)
+- [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
+
 ## Steps for mining with docker
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
 
