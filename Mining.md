@@ -66,14 +66,20 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 3. Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda). You can skip this step if you are mining with CPU.
 ***
 
-4. Get the docker image in your command prompt:
+4. Make a new directory in your Desktop and change directory to it:
+```
+cd ~/Desktop && mkdir testnet-v3 && cd testnet-v3
+```
+***
+
+5. Get the docker image in your command prompt:
 ```
 wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
 tar zxvf configuration.tar.gz
 ```
 ***
 
-5. Enable UPnP if you are in NAT environment or find out your current IP address in your command prompt:
+6. Enable UPnP if you are in NAT environment or find out your current IP address in your command prompt:
 > **NOTE:** Only public IP address and UPnP are supported. If you are using a home router, you are most probably in a NAT environment.
 * Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/).
 * Find your IP address if your have a public IP address in your command prompt:
@@ -82,7 +88,7 @@ curl https://ipinfo.io/ip
 ```
 ***
 
-6. Run the shell script in your command prompt to launch your docker image.
+7. Run the shell script in your command prompt to launch your docker image.
 * For CPU mining:
 ```
 ./launch_docker.sh
@@ -92,7 +98,7 @@ curl https://ipinfo.io/ip
 >**NOTE:** Unfortunately, we don't have direct support for this docker build for AMD GPUs. We recommend you to navigate through this guide [HERE](https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/) if you still wish to use docker **OR** build Zilliqa natively instead of using docker by following instructions found [HERE](#steps-for-mining-natively-without-docker).
 ***
 
-7. You will then be prompted to enter some information as shown below:
+8. You will then be prompted to enter some information as shown below:
 * `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
 
 * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 5]_
@@ -101,19 +107,19 @@ curl https://ipinfo.io/ip
 
 ***
 
-8. You are now a miner in "placeholder" testnet. You can monitor your progress using:
+9. You are now a miner in "placeholder" testnet. You can monitor your progress using:
 ```
 tail -f zilliqa-00001-log.txt
 ``` 
 You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
-9. To check your locally generated public and private key pairs, you can do `less mykey.txt`. The first hex string is your public key, and the second is your private key.
+10. To check your locally generated public and private key pairs, you can do `less mykey.txt`. The first hex string is your public key, and the second is your private key.
 
 >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
-10. If you wish to run multiple GPUs concurrently, you will need to modify your **constants.xml** file following instruction above as found [HERE](#for-multiple-gpus).
+11. If you wish to run multiple GPUs concurrently, you will need to modify your **constants.xml** file following instruction above as found [HERE](#for-multiple-gpus).
 
 ## Steps for mining natively without docker
 To be released...
