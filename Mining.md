@@ -105,7 +105,7 @@ Enter your listening port (default: 30303): [Press Enter to skip if using defaul
 
 9. To check your locally generated public and private key pairs, you can do `less mykey.txt`. The first hex string is your public key, and the second is your private key.
 
-**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
+>**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
 10. If you wish to run multiple GPUs concurrently, you will need to modify your **constants.xml** file following instruction above as found [HERE](#for-multiple-gpus).
