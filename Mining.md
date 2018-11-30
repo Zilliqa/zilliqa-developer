@@ -28,7 +28,7 @@ In the Zilliqa network, rewards are based on the amount of signatures done by a 
 
 Say for example, if there are a total of `2,500` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `100,000` ZILs per DS Epoch, the reward distributed per signature will be:
 
-`100,000 / (2,500 * 2/3 [Successful signers] * 49 [TX blocks]) = 1.224489795920000 ZILs per signature`
+`100,000 / (2,500 * 2/3 [Successful signers] * 49 [TX blocks]) = 1.224489795920 ZILs per signature`
 
 ## Hardware requirement
 Currently, mining only works with Ubuntu 16.04 OS. Please follow the steps [HERE](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
