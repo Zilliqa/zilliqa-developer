@@ -1,14 +1,14 @@
 # Mining Guide
 
 ## General Information
-Welcome to Zilliqa testnet-v3, code-named _Maoshanwang_. We are inviting all miners to test out the process of joining as a public node on _Maoshanwang_ testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the _Maoshanwang_ testnet in order to better understand the architecture of the Zilliqa network.
+Welcome to Zilliqa testnet-v3, code-named "placeholder". We are inviting all miners to test out the process of joining as a public node on "placeholder" testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the "placeholder" testnet in order to better understand the architecture of the Zilliqa network.
 
 - [Minimum hardware requirements](#hardware-requirement)
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
 
 ### Testnet Difficulty
-The bootstrapped minimum difficulty level is set at `3` for the _Maoshanwang_ testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
+The bootstrapped minimum difficulty level is set at `3` for the "placeholder" testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
 
 >**NOTE:** Difficulty level is the log2(Difficulty).
 
@@ -68,8 +68,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 4. Get the docker image in your command prompt:
 ```
-wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
-tar zxvf configuration.tar.gz
+To be released...
 ```
 ***
 
@@ -100,7 +99,7 @@ Enter your listening port (default: 30303): [Press Enter to skip if using defaul
 ```
 ***
 
-8. You are now a miner in _Maoshanwang_ testnet. You can monitor your progress using:
+8. You are now a miner in "placeholder" testnet. You can monitor your progress using:
 ```
 tail -f zilliqa-00001-log.txt
 ``` 
@@ -124,7 +123,7 @@ Join our official mining discussion Gitter channel here: https://gitter.im/Zilli
 Join the community managed Telegram channel here: https://t.me/zilliqaminer
 
 ### Reporting
-If you face an issues or errors while joining the _Maoshanwang_ testnet, please do submit your log.txt files to this Google form here: https://goo.gl/forms/y21CZrSwotvyNoKY2. 
+If you face an issues or errors while joining the "placeholder" testnet, please do submit your log.txt files to this Google form here: https://goo.gl/forms/y21CZrSwotvyNoKY2. 
 
 We will help you out whenever possible.
 
