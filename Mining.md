@@ -1,14 +1,14 @@
 # Mining Guide
 
 ## General Information
-Welcome to Zilliqa testnet-v3. We are inviting all miners to test out the process of joining as a public node on Zilliqa testnet-v3. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the testnet-v3 in order to better understand the architecture of the Zilliqa network.
+Welcome to Zilliqa testnet-v3, code-named _Maoshangwang_. We are inviting all miners to test out the process of joining as a public node on _Maoshangwang_ testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the _Maoshangwang_ testnet in order to better understand the architecture of the Zilliqa network.
 
 - [Minimum hardware requirements](#hardware-requirement)
 - [Steps for mining with docker](#steps-for-mining-with-docker)
 - [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
 
 ### Testnet Difficulty
-The bootstrapped minimum difficulty level is set at `3` for testnet-v3. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
+The bootstrapped minimum difficulty level is set at `3` for the _Maoshangwang_ testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
 
 **NOTE:** Difficulty level is the log2(Difficulty).
 
@@ -56,42 +56,53 @@ If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edi
 
 The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index is correspond to the number of GPUs you have physically in your mining rig.
 
-## Steps for mining with docker
+## Steps for mining with docker (For CPU and Nvidia GPUs mining only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
+
 
 2. Install Docker CE for Ubuntu by following instructions here: https://docs.docker.com/install/linux/docker-ce/ubuntu/.
 
-3. Install OpenCL or CUDA drivers as mentioned above.
+
+3. Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda).
+
 
 4. Get the docker image in your command prompt:
 ```
-wget https://singapore-join.aws.zilliqa.com/configuration.tar.gz
+wget https://zilliqa-join-v3.aws.zilliqa.com/configuration.tar.gz
 tar zxvf configuration.tar.gz
 ```
 
-5. Find out your current IP address in your command prompt:
+
+5. Enable UPnP if you are in NAT environment or find out your current IP address in your command prompt:
+> NOTE: Only public IP address and UPnP are supported. If you are using a home router, you are most probably in a NAT environment.
+* Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/).
+* Find your IP address if your have a public IP address in your command prompt:
 ```
 curl https://ipinfo.io/ip
 ```
-**NOTE:** Only public IP address and UPnP are supported. Please do check if your router supports UPnP and how to enable the UPnP function.
 
 6. Run the shell script in your command prompt to launch your docker image.
 ```
 ./launch_docker.sh
 ```
-**NOTE**: We will be adding [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) support for Nvidia GPUs shortly. For AMD GPUs, you will need to follow this guide: https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/.
+>**NOTE**: We will be adding [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) support for Nvidia GPUs shortly. Unfortunately for AMD GPUs, we don't have direct support for this docker build. We recommend you to navigate through this guide [HERE](https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/) or build Zilliqa natively instead of using docker by following instructions [HERE](#steps-for-mining-natively-without-docker).
+
 
 7. You will then be prompted to enter some information as shown below:
 ```
 Assign a name to your container (default: zilliqa): [Press Enter to skip if using default]
-Enter your IP address ('NAT' or *.*.*.*): [Key in your IP address as found in step 5 OR just key in NAT]
+Enter your IP address ('NAT' or *.*.*.*): [Key in NAT OR your public IP address as found in step 5]
 Enter your listening port (default: 30303): [Press Enter to skip if using default]
 ```
-8. You are now a miner in the testnet-v3. You can monitor your progress using `tail -f zilliqa-00001-log.txt`. You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
+
+8. You are now a miner in _Maoshangwang_ testnet. You can monitor your progress using `tail -f zilliqa-00001-log.txt`. You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
+
 
 9. To check your locally generated public and private key pairs, you can do `less mykey.txt`. The first hex string is your public key, and the second is your private key.
 
 **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
+
+10. If you wish to run multiple GPUs concurrently, you will need to modify your **constants.xml** file following instruction above as found [HERE](#for-multiple-gpus).
 
 ## Steps for mining natively without docker
 To be released...
@@ -103,7 +114,7 @@ Join our official mining discussion Gitter channel here: https://gitter.im/Zilli
 Join the community managed Telegram channel here: https://t.me/zilliqaminer
 
 ### Reporting
-If you face an issues or errors while joining the testnet-v3, please do submit your log.txt files to this Google form here: https://goo.gl/forms/zYe6ZIM9b5m2BdAa2. 
+If you face an issues or errors while joining the _Maoshangwang_ testnet, please do submit your log.txt files to this Google form here: https://goo.gl/forms/zYe6ZIM9b5m2BdAa2. 
 
 We will help you out whenever possible.
 
