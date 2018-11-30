@@ -68,7 +68,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 4. Get the docker image in your command prompt:
 ```
-wget https://zilliqa-join-v3.aws.zilliqa.com/configuration.tar.gz
+wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
 tar zxvf configuration.tar.gz
 ```
 ***
