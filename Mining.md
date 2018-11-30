@@ -66,7 +66,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 4. Get the docker image in your command prompt:
 ```
 wget https://singapore-join.aws.zilliqa.com/configuration.tar.gz
-tar axvf configuration.tar.gz
+tar zxvf configuration.tar.gz
 ```
 
 5. Find out your current IP address in your command prompt:
