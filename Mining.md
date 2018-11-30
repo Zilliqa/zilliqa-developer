@@ -54,7 +54,7 @@ If you wish to use CUDA supported GPU for PoW, please download and install CUDA 
 
 If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edit the `GPU_TO_USE` parameter in **constants.xml** file to select amount of the GPUs that you would wish to use. 
 
-The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index is correspond to the number of GPUs you have physically in your mining rig.
+The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index corresponds to the number of GPUs you have physically in your mining rig.
 
 ## Steps for mining with docker (For CPU and Nvidia GPUs mining only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
