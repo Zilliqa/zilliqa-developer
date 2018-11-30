@@ -92,11 +92,12 @@ curl https://ipinfo.io/ip
 ***
 
 7. You will then be prompted to enter some information as shown below:
-```
-Assign a name to your container (default: zilliqa): [Press Enter to skip if using default]
-Enter your IP address ('NAT' or *.*.*.*): [Key in NAT OR your public IP address as found in step 5]
-Enter your listening port (default: 30303): [Press Enter to skip if using default]
-```
+* `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
+
+* `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 5]_
+
+* `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
+
 ***
 
 8. You are now a miner in "placeholder" testnet. You can monitor your progress using:
