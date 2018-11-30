@@ -10,7 +10,7 @@ Welcome to Zilliqa testnet-v3, code-named _Maoshangwang_. We are inviting all mi
 ### Testnet Difficulty
 The bootstrapped minimum difficulty level is set at `3` for the _Maoshangwang_ testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
 
-**NOTE:** Difficulty level is the log2(Difficulty).
+>**NOTE:** Difficulty level is the log2(Difficulty).
 
 ### Testnet Epoch Architecture
 ![Zilliqa Epoch Architecture](https://i.ibb.co/hgY1j3r/Screenshot-2018-11-28-16-29-39.png)
@@ -74,7 +74,7 @@ tar zxvf configuration.tar.gz
 ***
 
 5. Enable UPnP if you are in NAT environment or find out your current IP address in your command prompt:
-> NOTE: Only public IP address and UPnP are supported. If you are using a home router, you are most probably in a NAT environment.
+> **NOTE:** Only public IP address and UPnP are supported. If you are using a home router, you are most probably in a NAT environment.
 * Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/).
 * Find your IP address if your have a public IP address in your command prompt:
 ```
