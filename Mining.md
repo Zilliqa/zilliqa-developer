@@ -63,7 +63,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 2. Install Docker CE for Ubuntu by following instructions here: https://docs.docker.com/install/linux/docker-ce/ubuntu/.
 ***
 
-3. Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda).
+3. Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda). You can skip this step if you are mining with CPU.
 ***
 
 4. Get the docker image in your command prompt:
