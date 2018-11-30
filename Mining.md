@@ -89,7 +89,7 @@ curl https://ipinfo.io/ip
 ```
 * For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
 
->Unfortunately, we don't have direct support for this docker build for AMD GPUs. We recommend you to navigate through this guide [HERE](https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/) if you still wish to use docker **OR** build Zilliqa natively instead of using docker by following instructions found [HERE](#steps-for-mining-natively-without-docker).
+>**NOTE:** Unfortunately, we don't have direct support for this docker build for AMD GPUs. We recommend you to navigate through this guide [HERE](https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/) if you still wish to use docker **OR** build Zilliqa natively instead of using docker by following instructions found [HERE](#steps-for-mining-natively-without-docker).
 ***
 
 7. You will then be prompted to enter some information as shown below:
@@ -100,7 +100,11 @@ Enter your listening port (default: 30303): [Press Enter to skip if using defaul
 ```
 ***
 
-8. You are now a miner in _Maoshangwang_ testnet. You can monitor your progress using `tail -f zilliqa-00001-log.txt`. You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
+8. You are now a miner in _Maoshangwang_ testnet. You can monitor your progress using:
+```
+tail -f zilliqa-00001-log.txt
+``` 
+You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
 9. To check your locally generated public and private key pairs, you can do `less mykey.txt`. The first hex string is your public key, and the second is your private key.
