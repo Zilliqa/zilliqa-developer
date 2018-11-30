@@ -4,7 +4,7 @@
 Welcome to Zilliqa testnet-v3, code-named _Maoshangwang_. We are inviting all miners to test out the process of joining as a public node on _Maoshangwang_ testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the _Maoshangwang_ testnet in order to better understand the architecture of the Zilliqa network.
 
 - [Minimum hardware requirements](#hardware-requirement)
-- [Steps for mining with docker](#steps-for-mining-with-docker)
+- [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
 
 ### Testnet Difficulty
@@ -56,7 +56,7 @@ If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edi
 
 The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index corresponds to the number of GPUs you have physically in your mining rig.
 
-## Steps for mining with docker (For CPU and Nvidia GPUs mining only)
+## Steps for mining with docker (For CPU or Nvidia GPUs only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
 ***
 
