@@ -80,21 +80,21 @@ tar zxvf configuration.tar.gz
 ```
 ***
 
-6. Enable UPnP if you are in NAT environment or find out your current IP address in your command prompt:
+6. Enable UPnP if you are in NAT environment **OR** find out your current IP address if your have a public IP address in your command prompt:
 > **NOTE:** Only public IP address and UPnP are supported. If you are using a home router, you are most probably in a NAT environment.
-* Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/).
-* Find your IP address if your have a public IP address in your command prompt:
+* **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/).
+* **(Option 2)** Find your IP address if your have a public IP address in your command prompt:
 ```
 curl https://ipinfo.io/ip
 ```
 ***
 
 7. Run the shell script in your command prompt to launch your docker image.
-* For CPU mining:
+* **(Option 1)** For CPU mining:
 ```
 ./launch_docker.sh
 ```
-* For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
+* **(Option 2)** For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
 
 >**NOTE:** Unfortunately, we don't have direct support for this docker build for AMD GPUs. We recommend you to navigate through this guide [HERE](https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/) if you still wish to use docker **OR** build Zilliqa natively instead of using docker by following instructions found [HERE](#steps-for-mining-natively-without-docker).
 ***
