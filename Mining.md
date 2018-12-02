@@ -3,7 +3,7 @@
 ## General Information
 Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all miners to test out the process of joining as a public node on _Mao Shan Wang_ testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the _Mao Shan Wang_ testnet in order to better understand the architecture of the Zilliqa network.
 
-- [Recommended hardware requirements](#hardware-requirement)
+- [Recommended hardware requirements](#hardware-requirement-for-mao-shan-wang-testnet)
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
 
@@ -31,7 +31,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
 
 `10,000,000 / (1,200 * 2/3 [Successful signers] * 99 [TX blocks]) = 126.262626262626263 ZILs per signature`
 
-## Hardware requirement
+## Hardware requirement for _Mao Shan Wang_ testnet
 Currently, mining only works with Ubuntu 16.04 OS. Please follow the steps [HERE](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
 
 We currently support both AMD (with OpenCL) and Nvidia (with CUDA) GPUs.
@@ -40,7 +40,7 @@ The recommended requirements for Zilliqa mining nodes are:
 * x64 Linux operating system such as Ubuntu 16.04.5
 * Intel i5 processor or later
 * 8GB DRR3 RAM or higher
-* Any GPU cards with at least 20 Mh/s (e.g 1 x GTX 1060, 3GB dedicated RAM)
+* **(Optional)** Any GPU cards with at least 20 Mh/s [e.g 1 x GTX 1060, 3GB dedicated RAM]
 
 
 ### For OpenCL
@@ -115,12 +115,16 @@ tail -f zilliqa-00001-log.txt
 You will be notified in the logs when you become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
-10. To check your locally generated public and private key pairs, you can do `less mykey.txt`. The first hex string is your public key, and the second is your private key.
+10. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+```
+less mykey.txt
+```
+The first hex string is your **public key**, and the second hex string is your **private key**.
 
 >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
-11. If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+11. If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 
 ## Steps for mining natively without docker
 To be released...
