@@ -5,7 +5,7 @@ Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all m
 
 - [Recommended hardware requirements](#hardware-requirement-for-mao-shan-wang-testnet)
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
-- [Steps for mining natively without docker](#steps-for-mining-natively-without-docker)
+- [Steps for mining natively](#steps-for-mining-natively)
 
 ### Testnet Difficulty
 The bootstrapped minimum difficulty level is set at `3` for the _Mao Shan Wang_ testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
@@ -111,7 +111,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
     > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 
-    > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively-without-docker).
+    > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively).
 ***
 
 8. You will then be prompted to enter some information as shown below:
@@ -138,7 +138,8 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
     >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-## Steps for mining natively without docker
+
+## Steps for mining natively
 
 1. Make a new directory for Zilliqa:
     ```
