@@ -179,7 +179,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 7. Clone the Zilliqa repository and change directory to it:
     ```
-    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout fcbdf84
+    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout 6151a87
     ```
 ***
 
