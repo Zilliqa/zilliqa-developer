@@ -64,7 +64,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 2. Install Docker CE for Ubuntu by following instructions here: https://docs.docker.com/install/linux/docker-ce/ubuntu/.
 ***
 
-3. Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda). You can skip this step if you are mining with CPU.
+3. **(Optional)** Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda). You can skip this step if you are mining with CPU.
 ***
 
 4. Make a new directory in your Desktop and change directory to it:
@@ -108,8 +108,9 @@ curl https://ipinfo.io/ip
 ./launch_docker.sh
 ```
 * **(Option 2)** For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
+> **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 
->**NOTE:** Unfortunately, we don't have direct support for this docker build for AMD GPUs. We recommend you to navigate through this guide [HERE](https://instinct.radeon.com/en/amd-deep-learning-stack-using-docker/) if you still wish to use docker **OR** build Zilliqa natively instead of using docker by following instructions found [HERE](#steps-for-mining-natively-without-docker).
+> **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively-without-docker).
 ***
 
 8. You will then be prompted to enter some information as shown below:
@@ -137,10 +138,126 @@ The first hex string is your **public key**, and the second hex string is your *
 >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
-11. If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
-
 ## Steps for mining natively without docker
-To be released...
+
+1. Make a new directory for Zilliqa:
+    ```
+    cd ~/Desktop && mkdir Zilliqa
+    ```
+***
+
+2. Make a new directory for Scilla:
+    ```
+    mkdir Scilla
+    ```
+***
+
+3. Make a new directory for join:
+    ```
+    mkdir join
+    ```
+***
+
+4. Clone the Scilla repository and change directory to it:
+    ```
+    git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla
+    ```
+***
+
+5. Find out your current directory path and write it down:
+    ```
+    pwd
+    ```
+***
+
+6. Build the Scilla binary following instructions [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md).
+***
+
+7. Clone the Zilliqa repository and change directory to it:
+    ```
+    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout fcbdf84
+    ```
+***
+
+8. Find out your current directory path again and write it down:
+    ```
+    pwd
+    ```
+***
+
+9. Build Zilliqa following instructions [HERE](https://github.com/Zilliqa/Zilliqa/blob/master/README.md).
+***
+
+10. Download the compressed joining configuration file:
+    ```
+    cd ../join && wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
+    ```
+***
+
+11. Unpack the compressed file:
+    ```
+    tar zxvf configuration.tar.gz
+    ```
+***
+
+12. Edit the _**constants.xml**_ and change the `SCILLA_ROOT` parameter to the full path of the Scilla source directory as found in **step 5**.
+***
+
+13. **(Optional)** If you wish to mine with GPUs, please install the your drivers as found above [HERE](#hardware-requirement-for-mao-shan-wang-testnet) first. Then, please edit the _**constants.xml**_ and change the following:
+    
+    * **For AMD GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `OPENCL_GPU_MINE` parameter from `false` to `true`.
+    * **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
+    > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+***
+
+14. Enable UPnP **OR** do single port forwarding if you are in NAT environment. Else, find out your current public IP address if your have an exposed public IP address:
+
+    > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
+
+    * **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+    ```
+    sudo apt-get install miniupnpc
+    ```
+    Then type this in the command line:
+    ```
+    upnpc -s
+    ```
+    You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
+
+    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, you find out your local IP address of your machine in the "Network Map" tab of your router menu and record this local IP address down.
+
+    * **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
+    ```
+    curl https://ipinfo.io/ip
+    ```
+***
+
+15. Join the Zilliqa testnet with the following command:
+    ```
+    ./launch.sh
+    ```
+***
+
+16. You will be prompted to key in the following details:
+    * `Enter the full path of your zilliqa source code directory:` _[Key in the path you found it step 8]_
+    * `Enter your IP address (NAT or *.*.*.*):` _[Key in **NAT** OR your IP address as found in step 14]_
+    * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
+***
+
+17. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+    ```
+    tail -f zilliqa-00001-log.txt
+    ```
+    You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
+***
+
+18. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+    ```
+    less mykey.txt
+    ```
+    The first hex string is your **public key**, and the second hex string is your **private key**.
+
+    > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
 ## Discussion channels and error reporting
 ### Channels
