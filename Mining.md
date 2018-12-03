@@ -68,75 +68,75 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 ***
 
 4. Make a new directory in your Desktop and change directory to it:
-```
-cd ~/Desktop && mkdir testnet-v3 && cd testnet-v3
-```
+    ```
+    cd ~/Desktop && mkdir testnet-v3 && cd testnet-v3
+    ```
 ***
 
 5. Get the docker image in your command prompt:
-```
-wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
-tar zxvf configuration.tar.gz
-```
+    ```
+    wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
+    tar zxvf configuration.tar.gz
+    ```
 ***
 
 6. Enable UPnP **OR** do single port forwarding if you are in NAT environment. Else, find out your current public IP address if your have an exposed public IP address:
 
-> **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
+    > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
 
-* **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
-```
-sudo apt-get install miniupnpc
-```
-Then type this in the command line:
-```
-upnpc -s
-```
-You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
+    * **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+    ```
+    sudo apt-get install miniupnpc
+    ```
+    Then type this in the command line:
+    ```
+    upnpc -s
+    ```
+    You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
 
-* **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, you find out your local IP address of your machine in the "Network Map" tab of your router menu and record this local IP address down.
+    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, you find out your local IP address of your machine in the "Network Map" tab of your router menu and record this local IP address down.
 
-* **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
-```
-curl https://ipinfo.io/ip
-```
+    * **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
+    ```
+    curl https://ipinfo.io/ip
+    ```
 ***
 
 7. Run the shell script in your command prompt to launch your docker image.
-* **(Option 1)** For CPU mining:
-```
-./launch_docker.sh
-```
-* **(Option 2)** For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
-> **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+    * **(Option 1)** For CPU mining:
+    ```
+    ./launch_docker.sh
+    ```
+    * **(Option 2)** For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
 
-> **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively-without-docker).
+    > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+
+    > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively-without-docker).
 ***
 
 8. You will then be prompted to enter some information as shown below:
-* `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
+    * `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
 
-* `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 6]_
+    * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 6]_
 
-* `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
+    * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
 
 ***
 
 9. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
-```
-tail -f zilliqa-00001-log.txt
-``` 
-You will be notified in the logs when you become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
+    ```
+    tail -f zilliqa-00001-log.txt
+    ``` 
+    You will be notified in the logs when you become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
 10. To check your locally generated public and private key pairs, you can enter this in your command prompt:
-```
-less mykey.txt
-```
-The first hex string is your **public key**, and the second hex string is your **private key**.
+    ```
+    less mykey.txt
+    ```
+    The first hex string is your **public key**, and the second hex string is your **private key**.
 
->**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
-***
+    >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
 ## Steps for mining natively without docker
 
