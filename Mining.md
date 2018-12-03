@@ -53,7 +53,7 @@ If you wish to use CUDA supported GPU for PoW, please download and install CUDA 
 
 ### For Multiple GPUs
 
-If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edit the `GPU_TO_USE` parameter in the _**constants.xml**_ file located in your "testnet-v3" folder to select amount of the GPUs that you would wish to use. 
+If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edit the `GPU_TO_USE` parameter in the _**constants.xml**_ file located in your "join" folder to select amount of the GPUs that you would wish to use. 
 
 The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index corresponds to the number of GPUs you have physically in your mining rig.
 
@@ -69,13 +69,13 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 4. Make a new directory in your Desktop and change directory to it:
     ```
-    cd ~/Desktop && mkdir testnet-v3 && cd testnet-v3
+    cd ~/Desktop && mkdir join && cd join
     ```
 ***
 
 5. Get the docker image in your command prompt:
     ```
-    wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
+    wget https://testnet-join.zilliqa.com/configuration.tar.gz
     tar zxvf configuration.tar.gz
     ```
 ***
@@ -208,7 +208,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 10. Download the compressed joining configuration file:
     ```
-    cd ../join && wget https://testnetv3-join.aws.zilliqa.com/configuration.tar.gz
+    cd ../join && wget https://testnet-join.zilliqa.com/configuration.tar.gz
     ```
 ***
 
