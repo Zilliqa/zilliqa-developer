@@ -94,7 +94,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
     You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
 
-    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, you find out your local IP address of your machine in the "Network Map" tab of your router menu and record this local IP address down.
+    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, find out your local IP address of your machine in the "Network Map" tab of your router menu and record down this local IP address.
 
     * **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
     ```
@@ -242,7 +242,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
     You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
 
-    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, you find out your local IP address of your machine in the "Network Map" tab of your router menu and record this local IP address down.
+    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, find out your local IP address of your machine in the "Network Map" tab of your router menu and record down this local IP address.
 
     * **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
     ```
