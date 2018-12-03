@@ -171,7 +171,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-6. Download the Scilla binary dependencies following instructions [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md). Then, build the Scilla binary:
+6. Download the Scilla binary dependencies for Ubuntu following instructions [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu). Then, build the Scilla binary:
     ```
     make clean; make
     ```
@@ -189,7 +189,21 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-9. Build Zilliqa following instructions [HERE](https://github.com/Zilliqa/Zilliqa/blob/master/README.md).
+9. Download the Zilliqa dependencies and build Zilliqa.
+
+
+    * Downloading the dependencies:
+    ```
+    sudo apt-get update
+    sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
+    libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
+    libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
+    libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
+    ```
+    * Build Zilliqa
+    ```
+    ./build.sh
+    ```
 ***
 
 10. Download the compressed joining configuration file:
