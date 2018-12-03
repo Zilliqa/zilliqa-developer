@@ -80,10 +80,23 @@ tar zxvf configuration.tar.gz
 ```
 ***
 
-6. Enable UPnP if you are in NAT environment **OR** find out your current IP address if your have a public IP address in your command prompt:
-> **NOTE:** Only public IP address and UPnP are supported. If you are using a home router, you are most probably in a NAT environment.
-* **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/).
-* **(Option 2)** Find your IP address if your have a public IP address in your command prompt:
+6. Enable UPnP **OR** do single port forwarding if you are in NAT environment. Else, find out your current public IP address if your have an exposed public IP address:
+
+> **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
+
+* **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+```
+sudo apt-get install miniupnpc
+```
+Then type this in the command line:
+```
+upnpc -s
+```
+You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
+
+* **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, you find out your local IP address of your machine in the "Network Map" tab of your router menu and record this local IP address down.
+
+* **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
 ```
 curl https://ipinfo.io/ip
 ```
@@ -102,7 +115,7 @@ curl https://ipinfo.io/ip
 8. You will then be prompted to enter some information as shown below:
 * `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
 
-* `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 5]_
+* `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 6]_
 
 * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
 
