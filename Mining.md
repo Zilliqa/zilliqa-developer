@@ -80,38 +80,38 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-6. Enable UPnP **OR** do single port forwarding if you are in NAT environment. Else, find out your current public IP address if your have an exposed public IP address:
+6. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b**. Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address:
 
     > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
 
-    * **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
-    ```
-    sudo apt-get install miniupnpc
-    ```
-    Then type this in the command line:
-    ```
-    upnpc -s
-    ```
-    You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
+    * **(Option 1a)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+       ```
+       sudo apt-get install miniupnpc
+       ```
+       Then type this in the command line:
+       ```
+       upnpc -s
+       ```
+       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 below.
 
-    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, find out your local IP address of your machine in the "Network Map" tab of your router menu and record down this local IP address.
+    * **(Option 1b)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, find out your local IP address of your machine in the "Network Map" tab of your router menu and record down this local IP address.
 
-    * **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
-    ```
-    curl https://ipinfo.io/ip
-    ```
+    * **(Option 2)** Find your IP address if you already have a public IP address in your command prompt:
+       ```
+       curl https://ipinfo.io/ip
+       ```
 ***
 
 7. Run the shell script in your command prompt to launch your docker image.
     * **(Option 1)** For CPU mining:
-    ```
-    ./launch_docker.sh
-    ```
+       ```
+       ./launch_docker.sh
+       ```
     * **(Option 2)** For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
 
-    > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+       > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 
-    > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively).
+       > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively).
 ***
 
 8. You will then be prompted to enter some information as shown below:
@@ -193,17 +193,17 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 
     * Downloading the dependencies:
-    ```
-    sudo apt-get update
-    sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
-    libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
-    libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
-    libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
-    ```
+       ```
+       sudo apt-get update
+       sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
+       libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
+       libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
+       libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
+       ```
     * Build Zilliqa
-    ```
-    ./build.sh
-    ```
+       ```
+       ./build.sh
+       ```
 ***
 
 10. Download the compressed joining configuration file:
@@ -225,29 +225,29 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     
     * **For AMD GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `OPENCL_GPU_MINE` parameter from `false` to `true`.
     * **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
-    > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+       > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 ***
 
-14. Enable UPnP **OR** do single port forwarding if you are in NAT environment. Else, find out your current public IP address if your have an exposed public IP address:
+14. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b**. Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address:
 
     > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
 
-    * **(Option 1)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
-    ```
-    sudo apt-get install miniupnpc
-    ```
-    Then type this in the command line:
-    ```
-    upnpc -s
-    ```
-    You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 or Option 3 below.
+    * **(Option 1a)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+       ```
+       sudo apt-get install miniupnpc
+       ```
+       Then type this in the command line:
+       ```
+       upnpc -s
+       ```
+       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 below.
 
-    * **(Option 2)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, find out your local IP address of your machine in the "Network Map" tab of your router menu and record down this local IP address.
+    * **(Option 1b)** Single port forwarding. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). Then, find out your local IP address of your machine in the "Network Map" tab of your router menu and record down this local IP address.
 
-    * **(Option 3)** Find your IP address if your have a public IP address in your command prompt:
-    ```
-    curl https://ipinfo.io/ip
-    ```
+    * **(Option 2)** Find your IP address if you already have a public IP address in your command prompt:
+       ```
+       curl https://ipinfo.io/ip
+       ```
 ***
 
 15. Join the Zilliqa testnet with the following command:
