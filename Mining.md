@@ -171,7 +171,10 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-6. Build the Scilla binary following instructions [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md).
+6. Download the Scilla binary dependencies following instructions [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md). Then, build the Scilla binary:
+    ```
+    make clean; make
+    ```
 ***
 
 7. Clone the Zilliqa repository and change directory to it:
