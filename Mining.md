@@ -110,7 +110,11 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
        ./launch_docker.sh
        ```
-    * **(Option 2)** For Nvidia GPUs mining: We will be adding support using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs shortly. Please stay tuned.
+    * **(Option 2)** For Nvidia GPUs mining:
+       ```
+       ./launch_docker.sh cuda
+       ```
+      Supported using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs.
 
        > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 
@@ -192,10 +196,10 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-9. Download the Zilliqa dependencies and build Zilliqa.
+9. Download the Zilliqa dependencies first, then build Zilliqa for CPU mining **OR** for GPU mining.
 
 
-    * Downloading the dependencies:
+    * First, download the dependencies:
        ```
        sudo apt-get update
        sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
@@ -203,9 +207,17 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
        libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
        ```
-    * Build Zilliqa
+    * **(Option 1)** Build Zilliqa for CPU mining
        ```
        ./build.sh
+       ```
+    * **(Option 2)** Build Zilliqa for Nvidia GPU mining with CUDA
+       ```
+       ./build.sh cuda
+       ```
+    * **(Option 3)** Build Zilliqa for AMD GPU mining with OpenCL
+       ```
+       ./build.sh opencl
        ```
 ***
 
