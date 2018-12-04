@@ -80,7 +80,9 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-6. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b**. Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address:
+6. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b** respectively. 
+   
+   Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address.
 
     > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
 
@@ -92,7 +94,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
        upnpc -s
        ```
-       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 below.
+       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  **Option 1b** below.
 
     * **(Option 1b)** Single port forwarding your local machine IP in the router menu. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). You can then find out your router IP address using your command prompt:
        ```
@@ -243,7 +245,9 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 ***
 
-14. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b**. Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address:
+14. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b** respectively. 
+   
+    Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address.
 
     > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
 
@@ -255,7 +259,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
        upnpc -s
        ```
-       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  Option 2 below.
+       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see **Option 1b** below.
 
     * **(Option 1b)** Single port forwarding your local machine IP in the router menu. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). You can then find out your router IP address using your command prompt:
        ```
