@@ -206,7 +206,14 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-9. Download the Zilliqa dependencies first, then build Zilliqa for CPU mining **OR** for GPU mining.
+9. **(Optional)** Install CUDA drivers for Nvidia GPUs as mentioned above [HERE](#for-cuda)
+   
+   **(Optional)** Install OpenCL drivers for AMD GPUs as mentioned above [HERE](#for-opencl). 
+   
+   > **NOTE:** You can skip this step 9 entirely if you are mining with CPU.
+***
+
+10. Download the Zilliqa dependencies first, then build Zilliqa for CPU mining **OR** for GPU mining.
 
 
     * First, download the dependencies:
@@ -231,29 +238,29 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
 ***
 
-10. Download the compressed joining configuration file:
+11. Download the compressed joining configuration file:
     ```
     cd ../join && wget https://testnet-join.zilliqa.com/configuration.tar.gz
     ```
 ***
 
-11. Unpack the compressed file:
+12. Unpack the compressed file:
     ```
     tar zxvf configuration.tar.gz
     ```
 ***
 
-12. Edit the _**constants.xml**_ in your _join_ folder and change the `SCILLA_ROOT` parameter to the full path of the Scilla source directory as found in **step 5**.
+13. Edit the _**constants.xml**_ in your _join_ folder and change the `SCILLA_ROOT` parameter to the full path of the Scilla source directory as found in **step 5**.
 ***
 
-13. **(Optional)** If you wish to mine with GPUs, please install the your drivers as found above [HERE](#hardware-requirement-for-mao-shan-wang-testnet) first. Then, please edit the _**constants.xml**_ in your _join_ folder and change the following:
+14. **(Optional)** If you wish to mine with GPUs, please install the your drivers as found above [HERE](#hardware-requirement-for-mao-shan-wang-testnet) first. Then, please edit the _**constants.xml**_ in your _join_ folder and change the following:
     
     * **For AMD GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `OPENCL_GPU_MINE` parameter from `false` to `true`.
     * **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
        > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 ***
 
-14. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b** respectively. 
+15. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b** respectively. 
    
     Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address.
 
@@ -280,26 +287,26 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
 ***
 
-15. Join the Zilliqa testnet with the following command:
+16. Join the Zilliqa testnet with the following command:
     ```
     ./launch.sh
     ```
 ***
 
-16. You will be prompted to key in the following details:
+17. You will be prompted to key in the following details:
     * `Enter the full path of your zilliqa source code directory:` _[Key in the path you found it step 8]_
-    * `Enter your IP address (NAT or *.*.*.*):` _[Key in **NAT** OR your IP address as found in step 14]_
+    * `Enter your IP address (NAT or *.*.*.*):` _[Key in **NAT** OR your IP address as found in step 15]_
     * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
 ***
 
-17. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+18. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
     ```
     tail -f zilliqa-00001-log.txt
     ```
     You will be notified in the logs that you have become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
-18. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+19. To check your locally generated public and private key pairs, you can enter this in your command prompt:
     ```
     less mykey.txt
     ```
@@ -308,7 +315,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
-19. To stop mining with native build:
+20. To stop mining with native build:
     ```
     pkill zilliqa
     ```
