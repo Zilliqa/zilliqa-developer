@@ -146,7 +146,12 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     The first hex string is your **public key**, and the second hex string is your **private key**.
 
     >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
+***
 
+11. To stop mining with docker:
+    ```
+    sudo docker stop [DOCKER NAME]
+    ```
 
 ## Steps for mining natively
 
@@ -298,7 +303,12 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     The first hex string is your **public key**, and the second hex string is your **private key**.
 
     > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
+***
 
+19. To stop mining with native build:
+    ```
+    pkill zilliqa
+    ```
 ## Discussion channels and error reporting
 ### Channels
 Join our official mining discussion Gitter channel here: https://gitter.im/Zilliqa/Mining
