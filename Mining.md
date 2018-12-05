@@ -117,7 +117,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
     * **(Option 2)** For Nvidia GPUs mining:
        ```
-       ./launch_docker.sh cuda
+       ./launch_docker.sh --cuda
        ```
       Supported using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs.
 
