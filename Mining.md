@@ -45,7 +45,10 @@ The recommended requirements for Zilliqa mining nodes are:
 
 ### For OpenCL
 
-If you wish to use OpenCL supported GPU for PoW, please run `sudo apt install ocl-icd-opencl-dev` to install the OpenCL developer package.
+If you wish to use OpenCL supported GPU for PoW, please run the following to install the OpenCL developer package.
+```
+sudo apt install ocl-icd-opencl-dev
+```
 
 ### For CUDA
 
