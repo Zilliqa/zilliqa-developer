@@ -115,11 +115,10 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ```
        ./launch_docker.sh
        ```
-    * **(Option 2)** For Nvidia GPUs mining:
+    * **(Option 2)** For Nvidia GPUs mining, please first install the nvidia-docker [**HERE**](https://github.com/NVIDIA/nvidia-docker#ubuntu-140416041804-debian-jessiestretch). Then, launch the mining docker in the command prompt with:
        ```
        ./launch_docker.sh --cuda
        ```
-      Supported using [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) for Nvidia GPUs.
 
        > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
 
