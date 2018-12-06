@@ -7,6 +7,8 @@ Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all m
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively](#steps-for-mining-natively)
 
+For the Chinese version(中文版) of these instructions, please visit [HERE](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
+
 ### Testnet Difficulty
 The bootstrapped minimum difficulty level is set at `3` for the _Mao Shan Wang_ testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
 
