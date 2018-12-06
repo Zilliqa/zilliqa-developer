@@ -252,7 +252,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 13. Edit the _**constants.xml**_ in your _join_ folder and change the `SCILLA_ROOT` parameter to the full path of the Scilla source directory as found in **step 5**.
 ***
 
-14. **(Optional)** If you wish to mine with GPUs, please install the your drivers as found above [HERE](#hardware-requirement-for-mao-shan-wang-testnet) first. Then, please edit the _**constants.xml**_ in your _join_ folder and change the following:
+14. **(Optional)** If you wish to mine with GPUs, please edit the _**constants.xml**_ in your _join_ folder and change the following:
     
     * **For AMD GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `OPENCL_GPU_MINE` parameter from `false` to `true`.
     * **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
