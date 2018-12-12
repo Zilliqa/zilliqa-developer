@@ -1,13 +1,66 @@
 # Mining Guide
 
-## General Information
 Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all miners to test out the process of joining as a public node on _Mao Shan Wang_ testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the _Mao Shan Wang_ testnet in order to better understand the architecture of the Zilliqa network.
 
 - [Recommended hardware requirements](#hardware-requirement-for-mao-shan-wang-testnet)
+- [General information for mining](#general-information)
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively](#steps-for-mining-natively)
 
-For the Chinese version(中文版) of these instructions, please visit [HERE](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
+For the Chinese version(中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
+
+## Hardware requirement for _Mao Shan Wang_ testnet
+Currently, mining works best with Ubuntu. Other Debian distributions should work too. Please follow the steps [**HERE**](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
+
+We currently support both AMD (with OpenCL) and Nvidia (with CUDA) GPUs.
+
+The recommended requirements for Zilliqa mining nodes are:
+* x64 Linux operating system such as Ubuntu 16.04.5
+* Intel i5 processor or later
+* 8GB DRR3 RAM or higher
+* NAT environment or Public IP address
+* **(Optional)** Any GPU cards [e.g 1 x GTX 1060, 3GB dedicated RAM]
+
+### Network setup
+If you are in NAT environment, you can either:
+* Do single port forwarding using **Option 1a**. (**DEFAULT OPTION**)
+* OR enable UPnP mode using **Option 1b** if your router support UPnP.
+
+If you have a public IP address, you don't have to do anything and skip this setup.
+
+> **NOTE:** If you are using a home router, you are most probably in a NAT environment.
+
+* **(Option 1a)** Single port forwarding your local machine IP in the router menu. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu. An example can be found [**HERE**](https://www.linksys.com/us/support-article?articleNum=136711). 
+
+* **(Option 1a)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [**HERE**](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+   ```
+   sudo apt-get install miniupnpc
+   ```
+   Then type this in the command line:
+   ```
+   upnpc -s
+   ```
+   You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". 
+   The former means UPnP mode has been enabled successfully, while the latter means UPnP mode enabling failed.
+
+### OpenCL driver setup
+
+If you wish to use OpenCL supported GPU for PoW, please run the following to install the OpenCL developer package.
+```
+sudo apt install ocl-icd-opencl-dev
+```
+
+### CUDA driver setup
+
+If you wish to use CUDA supported GPU for PoW, please download and install CUDA package from [NVIDIA official webpage](https://developer.nvidia.com/cuda-downloads). You may need to reboot your PC for the installation to take effect. 
+
+### Multiple GPUs setup
+
+If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edit the `GPU_TO_USE` parameter in the _**constants.xml**_ file located in your "join" folder to select amount of the GPUs that you would wish to use. 
+
+The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index corresponds to the number of GPUs you have physically in your mining rig.
+
+## General Information
 
 ### Testnet Difficulty
 The bootstrapped minimum difficulty level is set at `3` for the _Mao Shan Wang_ testnet. This difficulty level is dynamic and adjusts according to number of nodes that are competing to join the Zilliqa network.
@@ -33,35 +86,6 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
 
 `10,000,000 / (1,200 * 2/3 [Successful signers] * 99 [TX blocks]) = 126.262626262626263 ZILs per signature`
 
-## Hardware requirement for _Mao Shan Wang_ testnet
-Currently, mining only works with Ubuntu 16.04 OS. Please follow the steps [HERE](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
-
-We currently support both AMD (with OpenCL) and Nvidia (with CUDA) GPUs.
-
-The recommended requirements for Zilliqa mining nodes are:
-* x64 Linux operating system such as Ubuntu 16.04.5
-* Intel i5 processor or later
-* 8GB DRR3 RAM or higher
-* **(Optional)** Any GPU cards with at least 20 Mh/s [e.g 1 x GTX 1060, 3GB dedicated RAM]
-
-
-### For OpenCL
-
-If you wish to use OpenCL supported GPU for PoW, please run the following to install the OpenCL developer package.
-```
-sudo apt install ocl-icd-opencl-dev
-```
-
-### For CUDA
-
-If you wish to use CUDA supported GPU for PoW, please download and install CUDA package from [NVIDIA official webpage](https://developer.nvidia.com/cuda-downloads). You may need to reboot your PC for the installation to take effect. 
-
-### For Multiple GPUs
-
-If you have multiple OpenCL or CUDA GPUs, they can work concurrently. Please edit the `GPU_TO_USE` parameter in the _**constants.xml**_ file located in your "join" folder to select amount of the GPUs that you would wish to use. 
-
-The index start from `0` and you can select one or more multiple GPUs. For example, `0` for 1 GPU, `0, 1, 2` or `0, 2, 4` for 3 GPUs. Do make sure the largest index corresponds to the number of GPUs you have physically in your mining rig.
-
 ## Steps for mining with docker (For CPU or Nvidia GPUs only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
 ***
@@ -69,7 +93,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 2. Install Docker CE for Ubuntu by following instructions here: https://docs.docker.com/install/linux/docker-ce/ubuntu/.
 ***
 
-3. **(Optional)** Install Nvidia CUDA drivers as mentioned above [HERE](#for-cuda). You can skip this step if you are mining with CPU.
+3. **(Optional)** Install Nvidia CUDA drivers as mentioned above [**HERE**](#cuda-driver-setup). You can skip this step if you are mining with CPU.
 ***
 
 4. Make a new directory in your Desktop and change directory to it:
@@ -85,31 +109,13 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-6. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b** respectively. 
-   
-   Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address.
+6. Find out your current IP address in the command prompt and record it down.
 
-    > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
-
-    * **(Option 1a)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
-       ```
-       sudo apt-get install miniupnpc
-       ```
-       Then type this in the command line:
-       ```
-       upnpc -s
-       ```
-       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see  **Option 1b** below.
-
-    * **(Option 1b)** Single port forwarding your local machine IP in the router menu. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). You can then find out your router IP address using your command prompt:
-       ```
-       curl https://ipinfo.io/ip
-       ```
-
-    * **(Option 2)** Find your public IP address directly if you already have a public IP address in your command prompt:
-       ```
-       curl https://ipinfo.io/ip
-       ```
+   > **NOTE:** If you are using **Option 1b** as stated in the [Network Setup](#network-setup) above, you can skip this step.
+    
+      ```
+      curl https://ipinfo.io/ip
+      ```
 ***
 
 7. Run the shell script in your command prompt to launch your docker image.
@@ -122,7 +128,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
        ./launch_docker.sh --cuda
        ```
 
-       > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+       > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#multiple-gpus-setup).
 
        > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively).
 ***
@@ -130,7 +136,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 8. You will then be prompted to enter some information as shown below:
     * `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
 
-    * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in **NAT** OR your public IP address as found in step 6]_
+    * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in your public IP address as found in step 6 **OR** NAT]_
 
     * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
 
@@ -189,7 +195,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-6. Download the Scilla binary dependencies for Ubuntu following instructions [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu). Then, build the Scilla binary:
+6. Download the Scilla binary dependencies for Ubuntu following instructions [**HERE**](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu). Then, build the Scilla binary:
     ```
     make clean; make
     ```
@@ -207,9 +213,9 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     ```
 ***
 
-9. **(Optional)** Install CUDA drivers for Nvidia GPUs as mentioned above [HERE](#for-cuda)
+9. **(Optional)** Install CUDA drivers for Nvidia GPUs as mentioned above [**HERE**](#cuda-driver-setup)
    
-   **(Optional)** Install OpenCL drivers for AMD GPUs as mentioned above [HERE](#for-opencl). 
+   **(Optional)** Install OpenCL drivers for AMD GPUs as mentioned above [**HERE**](#opencl-driver-setup). 
    
    > **NOTE:** You can skip this step 9 entirely if you are mining with CPU.
 ***
@@ -258,34 +264,16 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
     
     * **For AMD GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `OPENCL_GPU_MINE` parameter from `false` to `true`.
     * **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
-       > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#for-multiple-gpus).
+       > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [HERE](#multiple-gpus-setup).
 ***
 
-15. Enable UPnP **OR** do single port forwarding if you are in NAT environment using **Option 1a** or **Option 1b** respectively. 
-   
-    Else, find out your current public IP address using **Option 2** if you already have an exposed public IP address.
+15. Find out your current IP address in the command prompt and record it down.
 
-    > **NOTE:** If you are using a home router, you are most probably in a NAT environment and can enable UPnP. However, if UPnP does not work, you can do port forwarding instead.
-
-    * **(Option 1a)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [HERE](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
-       ```
-       sudo apt-get install miniupnpc
-       ```
-       Then type this in the command line:
-       ```
-       upnpc -s
-       ```
-       You will get a message "List of UPNP devices found on the network :" **OR** "No IGD UPnP Device found on the network !". The former means UPnP mode has been enabled successfully, while the latter means UPnP mode has an issue. If you belong to the latter case, please see **Option 1b** below.
-
-    * **(Option 1b)** Single port forwarding your local machine IP in the router menu. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu, an example can be found [HERE](https://www.linksys.com/us/support-article?articleNum=136711). You can then find out your router IP address using your command prompt:
-       ```
-       curl https://ipinfo.io/ip
-       ```
-
-    * **(Option 2)** Find your public IP address directly if you already have a public IP address in your command prompt:
-       ```
-       curl https://ipinfo.io/ip
-       ```
+      > **NOTE:** If you are using **Option 1b** as stated in the [Network Setup](#network-setup) above, you can skip this step.
+    
+      ```
+      curl https://ipinfo.io/ip
+      ```
 ***
 
 16. Join the Zilliqa testnet with the following command:
@@ -296,7 +284,7 @@ The index start from `0` and you can select one or more multiple GPUs. For examp
 
 17. You will be prompted to key in the following details:
     * `Enter the full path of your zilliqa source code directory:` _[Key in the path you found it step 8]_
-    * `Enter your IP address (NAT or *.*.*.*):` _[Key in **NAT** OR your IP address as found in step 15]_
+    * `Enter your IP address (NAT or *.*.*.*):` _[Key in your IP address as found in step 15 **OR** NAT]_
     * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
 ***
 
