@@ -310,7 +310,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     ```
 ## Discussion channels and error reporting
 ### Channels
-Join our official mining discussion Gitter channel here: https://gitter.im/Zilliqa/Mining
+Join our official mining discussion forum here: https://forum.zilliqa.com/c/Mining
 
 Join the community managed Telegram channel here: https://t.me/zilliqaminer
 
