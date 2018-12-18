@@ -45,7 +45,7 @@ If you have a public IP address, you don't have to do anything and skip this set
 
 ### OpenCL driver setup
 
-If you wish to use OpenCL supported GPU for PoW, please run the following to install the OpenCL developer package.
+If you wish to use OpenCL supported GPU for PoW, please run the following to install the OpenCL developer package. You may need to reboot your PC for the installation to take effect.
 ```
 sudo apt install ocl-icd-opencl-dev
 ```
