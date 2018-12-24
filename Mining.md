@@ -24,15 +24,15 @@ The recommended requirements for Zilliqa mining nodes are:
 ### Network setup
 If you are in NAT environment, you can either:
 * Do single port forwarding using **Option 1a**. (**DEFAULT OPTION**)
-* OR enable UPnP mode using **Option 1b** if your router support UPnP.
+* Enable UPnP mode using **Option 1b** if your router support UPnP.
 
-If you have a public IP address, you don't have to do anything and skip this setup.
+If you have a public IP address, you can skip this network setup.
 
 > **NOTE:** If you are using a home router, you are most probably in a NAT environment.
 
 * **(Option 1a)** Single port forwarding your local machine IP in the router menu. You can port forward to `30303` for external port (port range), `30303` for internal port (local port) for `BOTH` TCP/UDP protocol in your router menu. An example can be found [**HERE**](https://www.linksys.com/us/support-article?articleNum=136711). 
 
-* **(Option 1a)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [**HERE**](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
+* **(Option 1b)** Enable UPnP mode on your home router. Please Google your home router setting, an example can be found [**HERE**](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the tool below:
    ```
    sudo apt-get install miniupnpc
    ```
