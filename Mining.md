@@ -109,7 +109,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     ```
 ***
 
-6. Ensure that your docker image is the latest:
+6. **(Optional)** Ensure that your docker image is the latest if you have already launched the zilliqa:testnetv3 docker before:
     ```
     sudo docker pull zilliqa/zilliqa:testnetv3
     ```
