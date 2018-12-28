@@ -203,7 +203,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
 
 7. Clone the Zilliqa repository and change directory to it:
     ```
-    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout 4cb83d6
+    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout 761f9cf
     ```
 ***
 
