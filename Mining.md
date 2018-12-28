@@ -109,7 +109,13 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     ```
 ***
 
-6. Find out your current IP address in the command prompt and record it down.
+6. Ensure that your docker image is the latest:
+    ```
+    sudo docker pull zilliqa/zilliqa:testnetv3
+    ```
+***
+
+7. Find out your current IP address in the command prompt and record it down.
 
    > **NOTE:** If you are using **Option 1b** as stated in the [Network Setup](#network-setup) above, you can skip this step.
     
@@ -118,7 +124,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
       ```
 ***
 
-7. Run the shell script in your command prompt to launch your docker image.
+8. Run the shell script in your command prompt to launch your docker image.
     * **(Option 1)** For CPU mining:
        ```
        ./launch_docker.sh
@@ -133,23 +139,23 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
        > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively).
 ***
 
-8. You will then be prompted to enter some information as shown below:
+9. You will then be prompted to enter some information as shown below:
     * `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
 
-    * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in your public IP address as found in step 6 **OR** NAT]_
+    * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in your public IP address as found in step 7 **OR** NAT]_
 
     * `Enter your listening port (default: 30303):` _[Press **Enter** to skip if using default]_
 
 ***
 
-9. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+10. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
     ```
     tail -f zilliqa-00001-log.txt
     ``` 
     You will be notified in the logs when you become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
-10. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+11. To check your locally generated public and private key pairs, you can enter this in your command prompt:
     ```
     less mykey.txt
     ```
@@ -158,7 +164,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
-11. To stop mining with docker:
+12. To stop mining with docker:
     ```
     sudo docker stop [DOCKER NAME]
     ```
