@@ -6,7 +6,7 @@ Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all m
 - [General information for mining](#general-information)
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively](#steps-for-mining-natively)
-- [Steps for rejoining testnet after testnet reset](#steps-for-rejoining-testnet-after-testnet-reset)
+- [Steps for rejoining testnet **(NOTE: Only if you are rejoining after a testnet reset)**](#steps-for-rejoining-testnet-after-testnet-reset)
 
 For the Chinese version(中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
 
