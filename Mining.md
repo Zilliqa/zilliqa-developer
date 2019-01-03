@@ -406,7 +406,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 ***
 
 5. Rebuild Scilla:
-    * First, update and download the latest dependencies for Ubuntu following the steps found [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu)
+    * First, update and download the latest dependencies for Ubuntu following the steps found [**HERE**](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu).
 
     * Remake Scilla:
         ```
