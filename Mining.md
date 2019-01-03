@@ -88,7 +88,7 @@ A vacuous epoch handles the coinbase transactions (reward mechanism), upgrade me
 ### Reward Mechanism
 In the Zilliqa network, rewards are based on the amount of signatures done by a node during a DS epoch. Signatures that are submitted by both shard and DS nodes are rewarded equally. The rewards are consolidated for a DS epoch and given out during the vacuous epoch.
 
-Say for example, if there are a total of `1,200` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82 ` ZILs per DS Epoch, the reward distributed per signature will be:
+Say for example, if there are a total of `1,600` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distributed per signature will be:
 
 `191780.82 / (1,600 * 2/3 [Successful signers] * 99 [TX blocks]) = 1.81610625 ZILs per signature`
 
