@@ -331,7 +331,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 
 3. Remove your _join_ folder:
 
-    > **NOTE:** You might want to save your mykeys.txt file before deleting this folder.
+    > **NOTE:** You might want to save your mykey.txt file before deleting this folder.
 
     ```
     cd ~Desktop && sudo rm -rf join
@@ -420,7 +420,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 
 6. Remove your _join_ folder:
 
-    > **NOTE:** You might want to save your mykeys.txt file before deleting this folder.
+    > **NOTE:** You might want to save your mykey.txt file before deleting this folder.
 
     ```
     cd ~Desktop && sudo rm -rf join
