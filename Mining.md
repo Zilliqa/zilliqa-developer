@@ -6,6 +6,7 @@ Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all m
 - [General information for mining](#general-information)
 - [Steps for mining with docker](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
 - [Steps for mining natively](#steps-for-mining-natively)
+- [Steps for rejoining testnet after testnet reset](#steps-for-rejoining-testnet-after-testnet-reset)
 
 For the Chinese version(中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
 
@@ -49,6 +50,11 @@ If you wish to use OpenCL supported GPU for PoW, please run the following to ins
 ```
 sudo apt install ocl-icd-opencl-dev
 ```
+Do check if your drivers are installed properly with the following command:
+```
+clinfo
+```
+If you are still facing issues such as missing OpenCL drivers, please follow this forum guide found [**HERE**](https://forum.zilliqa.com/t/guide-to-setting-up-6-amd-gpus-on-ubuntu-16-04/180). (Credits to @Speccles96)
 
 ### CUDA driver setup
 
@@ -82,9 +88,9 @@ A vacuous epoch handles the coinbase transactions (reward mechanism), upgrade me
 ### Reward Mechanism
 In the Zilliqa network, rewards are based on the amount of signatures done by a node during a DS epoch. Signatures that are submitted by both shard and DS nodes are rewarded equally. The rewards are consolidated for a DS epoch and given out during the vacuous epoch.
 
-Say for example, if there are a total of `1,200` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `10,000,000` ZILs per DS Epoch, the reward distributed per signature will be:
+Say for example, if there are a total of `1,200` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82 ` ZILs per DS Epoch, the reward distributed per signature will be:
 
-`10,000,000 / (1,200 * 2/3 [Successful signers] * 99 [TX blocks]) = 126.262626262626263 ZILs per signature`
+`191780.82 / (1,600 * 2/3 [Successful signers] * 99 [TX blocks]) = 1.81610625 ZILs per signature`
 
 ## Steps for mining with docker (For CPU or Nvidia GPUs only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
@@ -109,13 +115,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     ```
 ***
 
-6. **(Optional)** Ensure that your docker image is the latest if you have already launched the zilliqa:testnetv3 docker before:
-    ```
-    sudo docker pull zilliqa/zilliqa:testnetv3
-    ```
-***
-
-7. Find out your current IP address in the command prompt and record it down.
+6. Find out your current IP address in the command prompt and record it down.
 
    > **NOTE:** If you are using **Option 1b** as stated in the [Network Setup](#network-setup) above, you can skip this step.
     
@@ -124,7 +124,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
       ```
 ***
 
-8. Run the shell script in your command prompt to launch your docker image.
+7. Run the shell script in your command prompt to launch your docker image.
     * **(Option 1)** For CPU mining:
        ```
        ./launch_docker.sh
@@ -139,7 +139,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
        > **NOTE:** Unfortunately, there is no direct support for this docker build for AMD GPUs. We recommend you to build Zilliqa natively instead of using docker by following instructions below [HERE](#steps-for-mining-natively).
 ***
 
-9. You will then be prompted to enter some information as shown below:
+8. You will then be prompted to enter some information as shown below:
     * `Assign a name to your container (default: zilliqa):` _[Press **Enter** to skip if using default]_
 
     * `Enter your IP address ('NAT' or *.*.*.*):` _[Key in your public IP address as found in step 7 **OR** NAT]_
@@ -148,14 +148,14 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
 
 ***
 
-10. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+9. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
     ```
     tail -f zilliqa-00001-log.txt
     ``` 
     You will be notified in the logs when you become a shard/DS node in the network, if you managed to win the PoW process at the start of the DS epoch.
 ***
 
-11. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+10. To check your locally generated public and private key pairs, you can enter this in your command prompt:
     ```
     less mykey.txt
     ```
@@ -164,7 +164,7 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     >**NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 ***
 
-12. To stop mining with docker:
+11. To stop mining with docker:
     ```
     sudo docker stop [DOCKER NAME]
     ```
@@ -314,6 +314,142 @@ Say for example, if there are a total of `1,200` nodes in the Zilliqa network an
     ```
     pkill zilliqa
     ```
+## Steps for rejoining testnet after testnet reset
+
+### For Docker build
+1. Stop your previous docker image:
+    ```
+    sudo docker stop [DOCKER_NAME]
+    ```
+***
+
+2. Pull the latest docker image:
+    ```
+    sudo docker pull zilliqa/zilliqa:testnetv3
+    ```
+***
+
+3. Remove your _join_ folder:
+
+    > **NOTE:** You might want to save your mykeys.txt file before deleting this folder.
+
+    ```
+    cd ~Desktop && sudo rm -rf join
+    ```
+***
+
+4. Remake the new _join_ folder:
+    ```
+    mkdir join && cd join
+    ```
+***
+
+5. Download the latest configuration file:
+    ```
+    wget https://testnet-join.zilliqa.com/configuration.tar.gz && tar zxvf configuration.tar.gz
+    ```
+***
+
+6. Edit the GPU parameters in the _**constants.xml**_ again if you wish to mine with GPUs.
+***
+
+7. Relaunch your docker container:
+    * **(Option 1)** For CPU mining:
+    ```
+    ./launch_docker.sh
+    ```
+    * **(Option 2)** For Nvidia GPUs mining:
+    ```
+    ./launch_docker.sh --cuda
+    ```
+
+### For Native build
+1. Stop your previous native Zilliqa instance:
+    ```
+    pkill zilliqa
+    ```
+***
+
+2. Download the latest Zilliqa master:
+    ```
+    cd ~/Desktop/Zilliqa && git pull && git checkout 761f9cf
+    ```
+***
+
+3. Rebuild Zilliqa:
+    * First, update and download the latest dependencies:
+        ```
+        sudo apt-get update
+        sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
+        libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
+        libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
+        libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
+        ```
+    * **(Option 1)** Build Zilliqa for CPU mining
+        ```
+        ./build.sh
+        ```
+    * **(Option 2)** Build Zilliqa for Nvidia GPU mining with CUDA
+        ```
+        ./build.sh cuda
+        ```
+    * **(Option 3)** Build Zilliqa for AMD GPU mining with OpenCL
+        ```
+        ./build.sh opencl
+        ```
+***
+
+4. Download the latest Scilla master:
+    ```
+    cd ~Desktop/Scilla && git pull
+    ```
+***
+
+5. Rebuild Scilla:
+    * First, update and download the latest dependencies for Ubuntu following the steps found [HERE](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu)
+
+    * Remake Scilla:
+        ```
+        make clean; make
+        ```
+    * Find out the directory path and write this down:
+        ```
+        pwd
+        ```
+***
+
+6. Remove your _join_ folder:
+
+    > **NOTE:** You might want to save your mykeys.txt file before deleting this folder.
+
+    ```
+    cd ~Desktop && sudo rm -rf join
+    ```
+***
+
+7. Remake the new _join_ folder:
+    ```
+    mkdir join && cd join
+    ```
+***
+
+8. Download the latest configuration file:
+    ```
+    wget https://testnet-join.zilliqa.com/configuration.tar.gz && tar zxvf configuration.tar.gz
+    ```
+***
+
+9. Edit the _**constants.xml**_ in your _join_ folder and change the `SCILLA_ROOT` parameter to the full path of the Scilla source directory as found in **step 5**.
+***
+
+10. Edit the GPU parameters in the _**constants.xml**_ again if you wish to mine with GPUs.
+***
+
+11. Relaunch the native Zilliqa instance:
+    ```
+    ./launch.sh
+    ```
+
 ## Discussion channels and error reporting
 ### Channels
 Join our official mining discussion forum here: https://forum.zilliqa.com/c/Mining
