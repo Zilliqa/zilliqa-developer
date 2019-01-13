@@ -191,7 +191,7 @@ Say for example, if there are a total of `2,400` nodes in the Zilliqa network an
 
 4. Clone the Scilla repository and change directory to it:
     ```
-    git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla
+    git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.0.3
     ```
 ***
 
@@ -395,7 +395,7 @@ Say for example, if there are a total of `2,400` nodes in the Zilliqa network an
 
 4. Download the latest Scilla master:
     ```
-    cd ~Desktop/Scilla && git pull
+    cd ~Desktop/Scilla && git pull && git checkout v0.0.3
     ```
 ***
 
