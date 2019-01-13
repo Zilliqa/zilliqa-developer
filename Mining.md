@@ -76,21 +76,21 @@ The bootstrapped minimum difficulty level is set at `3` for the _Mao Shan Wang_ 
 ### Testnet Epoch Architecture
 ![Zilliqa Epoch Architecture](https://i.ibb.co/hgY1j3r/Screenshot-2018-11-28-16-29-39.png)
 
-At the start of each DS Epoch, all candidates will run the Proof-of-Work (Ethash algorithm) process for a `300` seconds window in order to compete to join the Zilliqa network.
+At the start of each DS Epoch, all candidates will run the Proof-of-Work (Ethash algorithm) process for a `60` seconds window in order to compete to join the Zilliqa network.
 
 Then, nodes that fulfilled the `DS_POW_DIFFICULTY` parameter will be able to join as DS nodes. While, nodes that fulfilled the `POW_DIFFICULTY` parameter will join as shard nodes.
 
-There are a total of `100` TX epochs (each ~1 min) within each DS Epoch (~1.5 hrs). The 100th TX epoch is known as the **Vacuous epoch**.
-> The illustration above depicts the Zilliqa mainnet epoch architecture. For _Mao Shan Wang_ testnet, we are including 100 TX blocks in each DS epoch instead for testing purposes.
+There are a total of `100` TX epochs (each 1~2 min) within each DS Epoch (1.5~2 hrs). The **100th** TX epoch is known as the **Vacuous epoch**.
+> The illustration above depicts the Zilliqa mainnet epoch architecture. For _Mao Shan Wang_ testnet, we are including `100` TX blocks in each DS epoch instead for testing purposes.
 
 A vacuous epoch handles the coinbase transactions (reward mechanism), upgrade mechanism (as there are no forks in pBFT), and persistent state storage (writing to nodes’ DB instead of just storing in just the memory). During a vacuous epoch, the network does not process any regular transactions.
 
 ### Reward Mechanism
 In the Zilliqa network, rewards are based on the amount of signatures done by a node during a DS epoch. Signatures that are submitted by both shard and DS nodes are rewarded equally. The rewards are consolidated for a DS epoch and given out during the vacuous epoch.
 
-Say for example, if there are a total of `1,600` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distributed per signature will be:
+Say for example, if there are a total of `2,400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distributed per signature will be:
 
-`191780.82 / (1,600 * 2/3 [Successful signers] * 99 [TX blocks]) = 1.81610625 ZILs per signature`
+`191780.82 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks]) = 1.2107375 ZILs per signature`
 
 ## Steps for mining with docker (For CPU or Nvidia GPUs only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
