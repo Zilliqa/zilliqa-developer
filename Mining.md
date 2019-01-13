@@ -209,7 +209,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 
 7. Clone the Zilliqa repository and change directory to it:
     ```
-    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout 761f9cf
+    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout 5b987fc
     ```
 ***
 
@@ -323,13 +323,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
     ```
 ***
 
-2. Pull the latest docker image:
-    ```
-    sudo docker pull zilliqa/zilliqa:testnetv3
-    ```
-***
-
-3. Remove your _join_ folder:
+2. Remove your _join_ folder:
 
     > **NOTE:** You might want to save your mykey.txt file before deleting this folder.
 
@@ -338,22 +332,22 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
     ```
 ***
 
-4. Remake the new _join_ folder:
+3. Remake the new _join_ folder:
     ```
     mkdir join && cd join
     ```
 ***
 
-5. Download the latest configuration file:
+4. Download the latest configuration file:
     ```
     wget https://testnet-join.zilliqa.com/configuration.tar.gz && tar zxvf configuration.tar.gz
     ```
 ***
 
-6. Edit the GPU parameters in the _**constants.xml**_ again if you wish to mine with GPUs.
+5. Edit the GPU parameters in the _**constants.xml**_ again if you wish to mine with GPUs.
 ***
 
-7. Relaunch your docker container:
+6. Relaunch your docker container:
     * **(Option 1)** For CPU mining:
     ```
     ./launch_docker.sh
@@ -372,7 +366,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 
 2. Download the latest Zilliqa master:
     ```
-    cd ~/Desktop/Zilliqa && git pull && git checkout 761f9cf
+    cd ~/Desktop/Zilliqa && git pull && git checkout 5b987fc
     ```
 ***
 
