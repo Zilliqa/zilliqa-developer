@@ -209,7 +209,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 
 7. Clone the Zilliqa repository and change directory to it:
     ```
-    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout 5b987fc
+    cd .. && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v3.3.0
     ```
 ***
 
@@ -366,7 +366,7 @@ Say for example, if there are a total of `1,600` nodes in the Zilliqa network an
 
 2. Download the latest Zilliqa master:
     ```
-    cd ~/Desktop/Zilliqa && git pull && git checkout 5b987fc
+    cd ~/Desktop/Zilliqa && git pull && git checkout v3.3.0
     ```
 ***
 
