@@ -235,7 +235,8 @@ Say for example, if there are a total of `2,400` nodes in the Zilliqa network an
        sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
        libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
        libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
-       libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
+       libprotobuf-dev protobuf-compiler libcurl4-openssl-dev libboost-program-options-dev \
+       libssl-dev
        ```
     * **(Option 1)** Build Zilliqa for CPU mining
        ```
@@ -377,7 +378,8 @@ Say for example, if there are a total of `2,400` nodes in the Zilliqa network an
         sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
         libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
         libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
-        libprotobuf-dev protobuf-compiler libcurl4-openssl-dev
+        libprotobuf-dev protobuf-compiler libcurl4-openssl-dev libboost-program-options-dev \
+        libssl-dev
         ```
     * **(Option 1)** Build Zilliqa for CPU mining
         ```
