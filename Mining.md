@@ -86,11 +86,18 @@ There are a total of `100` TX epochs (each 1-2 min) within each DS Epoch (1.5-2 
 A vacuous epoch handles the coinbase transactions (reward mechanism), upgrade mechanism (as there are no forks in pBFT), and persistent state storage (writing to nodes’ DB instead of just storing in just the memory). During a vacuous epoch, the network does not process any regular transactions.
 
 ### Reward Mechanism
-In the Zilliqa network, rewards are based on the amount of signatures done by a node during a DS epoch. Signatures that are submitted by both shard and DS nodes are rewarded equally. The rewards are consolidated for a DS epoch and given out during the vacuous epoch.
+In the Zilliqa network, rewards are based on the accepted PoW solutions and the amount of signatures submitted by a node during a DS epoch. PoW solutions and signatures submitted by both shard and DS nodes are both rewarded equally. The rewards are consolidated for an entire DS epoch and only distributed during the vacuous epoch.
 
-Say for example, if there are a total of `2,400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distributed per signature will be:
+Say for example, if there are a total of `2,400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distribution will be:
 
-`191780.82 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks]) = 1.2107375 ZILs per signature`
+* For PoW submissions (base reward for nodes joining Zilliqa network)
+   ```
+   191780.82*0.15 / 1800 = 15.981735 ZILs per PoW submission accepted
+   ``` 
+* For pBFT signature submissions (first-come-first-serve basis)
+   ```
+   191780.82*0.80 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks]) = 0.96859 ZILs per signature
+   ```
 
 ## Steps for mining with docker (For CPU or Nvidia GPUs only)
 1. Install Ubuntu 16.04.5 OS by following instructions here: http://releases.ubuntu.com/xenial/.
