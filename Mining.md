@@ -97,8 +97,10 @@ If you have a public IP address, you can skip this network setup entirely.
     upnpc -s
     ```
    You should get a message showing either:
-        - "List of UPNP devices found on the network : ..."
-        - **OR** "No IGD UPnP Device found on the network !".
+
+     - "List of UPNP devices found on the network : ..."
+     - **OR** "No IGD UPnP Device found on the network !".
+
    The first message means UPnP mode has been enabled successfully, while the latter means the enabling of UPnP mode has failed.
 
 ### OpenCL driver setup (for AMD/Nvidia)
