@@ -139,22 +139,20 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
 2. Install Docker CE for Ubuntu by following instructions [**HERE**](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-3. **(Optional)** Install Nvidia CUDA drivers as mentioned above [**HERE**](#cuda-driver-setup-for-nvidia). You can skip this step if you are mining with CPU.
-
-4. Make a new directory in your Desktop and change directory to it:
+3. Make a new directory in your Desktop and change directory to it:
 
       ```shell
       cd ~/Desktop && mkdir join && cd join
       ```
 
-5. Get the joining configuration files:
+4. Get the joining configuration files:
 
       ```shell
       wget https://testnet-join.zilliqa.com/configuration.tar.gz
       tar zxvf configuration.tar.gz
       ```
 
-6. Find out your current IP address in the command prompt and record it down.
+5. Find out your current IP address in the command prompt and record it down.
 
    > **NOTE:** If you are using **Option 1b** as stated in the [**Network Setup**](#network-setup) above, you can skip this step.
 
@@ -162,7 +160,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
       curl https://ipinfo.io/ip
       ```
 
-7. Run the shell script in your command prompt to launch your docker image.
+6. Run the shell script in your command prompt to launch your docker image.
 
     - **(Option 1)** For mining with CPU, launch your docker container:
 
@@ -177,20 +175,20 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
        > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [**HERE**](#multiple-gpus-setup).
 
-8. You will be prompted to enter some information as shown below:
+7. You will be prompted to enter some information as shown below:
     - `Assign a name to your container (default: zilliqa):` [Press **Enter** to skip if using default]
 
     - `Enter your IP address ('NAT' or *.*.*.*):` [Key in your IP address as found in step 6 **OR** `NAT` if you using Option 1b]
 
     - `Enter your listening port (default: 30303):` [Press **Enter** to skip if using default]
 
-9. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+8. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
 
       ```shell
       tail -f zilliqa-00001-log.txt
       ```
 
-10. To check your locally generated public and private key pairs, you can enter the followin in your command prompt:
+9. To check your locally generated public and private key pairs, you can enter the followin in your command prompt:
 
       ```shell
       less mykey.txt
@@ -200,7 +198,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-11. To stop the mining client, stop your running docker container:
+10. To stop the mining client, stop your running docker container:
 
       ```
       sudo docker stop zilliqa
