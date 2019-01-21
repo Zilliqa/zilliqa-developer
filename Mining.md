@@ -34,13 +34,13 @@ During a vacuous epoch, the network does not process any transactions.
 
 ### Testnet Difficulty
 
-The bootstrapped difficulty level for the _Mao Shan Wang_ testnet is set at `3`. This difficulty level is dynamic and adjusts for every `+/- 100 PoW` submissions per DS epoch.
+The bootstrapped difficulty level for the _Mao Shan Wang_ testnet is set at `3`. This difficulty level is dynamic and adjusts for every `+/- 100` deviation from the target `1810` submissions per DS epoch.
 
 > **NOTE:** Difficulty level is the log2(Difficulty).
 
-Say if there are `1800` seats available in the network but there are `1900` PoW submissions, the difficulty level will increase by `1` for the next DS epoch.
+Say if there are `1810` seats available in the network but there are `1910` PoW submissions, the difficulty level will increase by `1` for the next DS epoch.
 
-Say if there are `1800` seats available in the network but there are `1700` PoW submissions, the difficulty level will decrease by `1` for the next DS epoch.
+Say if there are `1810` seats available in the network but there are `1710` PoW submissions, the difficulty level will decrease by `1` for the next DS epoch.
 
 ### Reward Mechanism
 
@@ -86,7 +86,7 @@ If you are in NAT environment, you can either:
 
 If you have a public IP address, you can skip this network setup entirely.
 
-- **(Option 1a)** Port forward to port `30303` for both external port (port range) and internal port (local port). You will also have to select for **BOTH** TCP and UDP protocol in your router menu when port forwarding. An example this process can be found [**HERE**](https://www.linksys.com/us/support-article?articleNum=136711).
+- **(Option 1a)** Port forward to port `33333` for both external port (port range) and internal port (local port). You will also have to select the option for **BOTH** TCP and UDP protocol in your router menu when port forwarding. <br><br> An example of this process can be found [**HERE**](https://www.linksys.com/us/support-article?articleNum=136711). After port forwarding, you may check if you have successfully port forwarded with this [**Open Port Check Tool**](https://www.yougetsignal.com/tools/open-ports/).
 
 - **(Option 1b)** Enable UPnP mode on your home router. Please Google how to access your home router setting to enable UPnP, an example can be found [**HERE**](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the following tool:
     ```shell
@@ -101,7 +101,7 @@ If you have a public IP address, you can skip this network setup entirely.
      - "List of UPNP devices found on the network : ..."
      - **OR** "No IGD UPnP Device found on the network !".
 
-   The first message means UPnP mode has been enabled successfully, while the latter means the enabling of UPnP mode has failed.
+   The first message means UPnP mode has been enabled successfully, while the latter means the enabling of UPnP mode has failed. Therefore, you should proceed with using **Option 1a** instead.
 
 ### OpenCL driver setup (for AMD/Nvidia)
 
@@ -182,7 +182,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     - `Enter your IP address ('NAT' or *.*.*.*):` [Key in your IP address as found in step 6 **OR** `NAT` if you using Option 1b]
 
-    - `Enter your listening port (default: 30303):` [Press **Enter** to skip if using default]
+    - `Enter your listening port (default: 33333):` [Press **Enter** to skip if using default]
 
 8. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
 
@@ -229,7 +229,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 4. Clone the Scilla repository and change directory to it:
 
       ```shell
-      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.0.3
+      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.0.4
       ```
 
 5. Find out your Scilla directory path and record it down:
@@ -238,7 +238,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
       pwd
       ```
 
-6. First, download the Scilla dependencies for Ubuntu following instructions found [**HERE**](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu). Then, build the Scilla binary:
+6. First, download the Scilla binary's dependencies for Ubuntu following instructions found [**HERE**](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu). Then, build the Scilla binary:
 
       ```shell
       make clean; make
@@ -247,7 +247,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 7. Clone the Zilliqa repository and change directory to it:
 
       ```
-      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v3.3.0
+      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v3.4.1
       ```
 
 8. Find out your Zilliqa directory path again and write it down:
@@ -256,7 +256,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
       pwd
       ```
 
-9. First, download the Zilliqa dependencies. Then, build Zilliqa for CPU mining with **Option 1** or for GPU mining with **Option 2**/**Option 3**.
+9. First, download the Zilliqa client's dependencies. Then, build Zilliqa with **Option 1** for CPU mining, or with **Option 2**/**Option 3** for GPU mining.
 
     - Download the dependencies:
 
@@ -320,7 +320,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 15. You will be prompted to key in the following details:
     - `Enter the full path of your zilliqa source code directory:` [Key in the path you found it step 8]
     - `Enter your IP address (NAT or *.*.*.*):` [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
-    - `Enter your listening port (default: 30303):` [Press **Enter** to skip if using default]
+    - `Enter your listening port (default: 33333):` [Press **Enter** to skip if using default]
 
 16. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
     ```shell
