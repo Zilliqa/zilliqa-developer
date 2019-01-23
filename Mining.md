@@ -44,19 +44,24 @@ Say if there are `1810` seats available in the network but there are `1710` PoW 
 
 ### Reward Mechanism
 
-In the Zilliqa network, rewards are based on the accepted PoW solutions and the amount of signatures submitted by a node during a DS epoch. PoW solutions and signatures submitted by both shard and DS nodes are both rewarded equally. The rewards are consolidated for an entire DS epoch and only distributed during the vacuous epoch.
+In the Zilliqa network, rewards are split into:
+
+* Base rewards **[25% of total]** for all validating nodes (DS/shard) in the network
+* Flexible rewards **[70% of total]** that are based on the amount of valid and accepted signatures (first 2/3) submitted by a node during a TX epoch
+
+Both base rewards and flexible rewards has the same weightage for all DS and shard nodes. All rewards are consolidated over an entire DS epoch and only distributed during the vacuous epoch.
 
 Say for example, if there are a total of `2,400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distribution will be:
 
-- For PoW submissions (base reward for nodes joining Zilliqa network)
+- For base rewards
     ```shell
-    191780.82 * 0.25 / 1800
-    = 26.636225 ZILs per qualifying PoW submission
+    191780.82 * 0.25 / 2400
+    = 19.977169 ZILs per node per DS Epoch
     ```
 - For pBFT signature submissions (on a first-come-first-serve basis)
     ```shell
     191780.82 * 0.70 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks])
-    = 0.847516 ZILs per signature
+    = 0.847516 ZILs per valid and accepted signature
     ```
 
 ## Hardware requirement for _Mao Shan Wang_ testnet
