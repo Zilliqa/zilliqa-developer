@@ -4,11 +4,11 @@ Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all m
 
 - [General information for mining](#general-information)
 - [Recommended hardware requirements](#hardware-requirement-for-mao-shan-wang-testnet)
-- Steps for mining on Zilliqa
-   - [Initial setup required](#initial-setup)
-   - **(Option 1)** [Setup for local mining with docker image](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
-   - **(Option 2)** [Setup for remote mining with docker image](#steps-for-mining-with-proxy)
-   - **(Option 3)** [Setup for local mining with native build](#steps-for-mining-natively)
+- **Steps for mining on Zilliqa**
+   - **Step 1:** [Initial setup required](#initial-setup)
+   - **Step 2 (Option 1):** [Setup for local mining with docker image](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
+   - **Step 2 (Option 2):** [Setup for remote mining with docker image](#steps-for-mining-with-proxy)
+   - **Step 2 (Option 3):** [Setup for local mining with native build](#steps-for-mining-natively)
 - [Discussion channels](#discussion-channels)
 
 For the Chinese version(中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
