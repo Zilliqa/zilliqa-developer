@@ -187,11 +187,11 @@ Do note that the largest index must correspond to the number of GPUs you have ph
        > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [**HERE**](#multiple-gpus-setup).
 
 7. You will be prompted to enter some information as shown below:
-    - `Assign a name to your container (default: zilliqa):` [Press **Enter** to skip if using default]
+    - `Assign a name to your container (default: zilliqa):` <br> [Press **Enter** to skip if using default]
 
-    - `Enter your IP address ('NAT' or *.*.*.*):` [Key in your IP address as found in step 6 **OR** `NAT` if you using Option 1b]
+    - `Enter your IP address ('NAT' or *.*.*.*):` <br> [Key in your IP address as found in step 6 **OR** `NAT` if you using Option 1b]
 
-    - `Enter your listening port (default: 33333):` [Press **Enter** to skip if using default]
+    - `Enter your listening port (default: 33333):` <br> [Press **Enter** to skip if using default]
 
 8. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
 
@@ -429,9 +429,9 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     ```
 
 15. You will be prompted to key in the following details:
-    - `Enter the full path of your zilliqa source code directory:` [Key in the path you found it step 8]
-    - `Enter your IP address (NAT or *.*.*.*):` [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
-    - `Enter your listening port (default: 33333):` [Press **Enter** to skip if using default]
+    - `Enter the full path of your zilliqa source code directory:` <br> [Key in the path you found it step 8]
+    - `Enter your IP address (NAT or *.*.*.*):` <br> [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
+    - `Enter your listening port (default: 33333):` <br> [Press **Enter** to skip if using default]
 
 16. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
     ```shell
