@@ -279,8 +279,8 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
 9. Once the CPU Zilliqa node is running, you can install **Zilminer** on your separate GPU rigs:
 
-    - **For Windows OS (with CUDA 10.0+):** [**DOWNLOAD HERE**](https://github.com/DurianStallSingapore/ZILMiner/releases/download/v0.1.16/zilminer-0.1.16-cuda10.0-windows-64.zip)
-    - **For Ubuntu OS:** [**DOWNLOAD HERE**](https://github.com/DurianStallSingapore/ZILMiner/releases/download/v0.1.16/zilminer-0.1.16-linux-x86_64.tar.gz)
+    - **For Windows OS (with CUDA 10.0+):** [**DOWNLOAD THE LATEST RELEASE**](https://github.com/DurianStallSingapore/ZILMiner/releases)
+    - **For Ubuntu OS:** [**DOWNLOAD THE LATEST RELEASE**](https://github.com/DurianStallSingapore/ZILMiner/releases)
 
 10. Setup your **Zilminer** on your separate GPU rigs with the following command:
 
