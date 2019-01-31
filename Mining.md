@@ -207,7 +207,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
       tail -f zilliqa-00001-log.txt
       ```
 
-9. To check your locally generated public and private key pairs, you can enter the followin in your command prompt:
+9. To check your locally generated public and private key pairs, you can enter the following in your command prompt:
 
       ```shell
       less mykey.txt
@@ -217,7 +217,13 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-10. To stop the mining client, stop your running docker container:
+10. To check your balance, get your address and input the address in the search bar of https://explorer.zilliqa.com:
+
+      ```shell
+      less myaddr.txt
+      ```
+
+11. To stop the mining client, stop your running docker container:
 
       ```
       sudo docker stop zilliqa
@@ -319,7 +325,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-13. To stop the mining client, stop your running docker container on the CPU node and kill your **Zilminer** process on your GPU rigs:
+13. To check your balance, get your address and input the address in the search bar of https://explorer.zilliqa.com:
+
+      ```shell
+      less myaddr.txt
+      ```
+
+14. To stop the mining client, stop your running docker container on the CPU node and kill your **Zilminer** process on your GPU rigs:
 
       ```
       sudo docker stop zilliqa
@@ -455,7 +467,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-18. To stop Zilliqa client:
+18. To check your balance, get your address and input the address in the search bar of https://explorer.zilliqa.com:
+
+      ```shell
+      less myaddr.txt
+      ```
+
+19. To stop Zilliqa client:
 
     ```shell
     pkill zilliqa
