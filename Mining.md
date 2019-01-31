@@ -11,7 +11,7 @@
    - **Step 2** (Option 3): [Setup for local mining with native build](#mining-with-native-build-locally)
 - [**Discussion channels**](#discussion-channels)
 
-For the Chinese version (中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
+For the Chinese version (中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E4%B8%BB%E7%BD%91%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
 
 ## General Information
 
@@ -36,7 +36,7 @@ During a vacuous epoch, the network does not process any transactions.
 
 ### Proof-of-Work algorithm
 
-Zilliqa is using [**Ethash**](https://github.com/ethereum/wiki/wiki/Ethash) for its PoW algorithm. Hence, Zilliqa uses a **DAG (directed acyclic graph)** for the proof-of-work algorithm, that is generated at an incremental rate for each **DS epoch**. The bootstrap DAG size will be roughly `1.02GB`.
+Zilliqa is using [**Ethash**](https://github.com/ethereum/wiki/wiki/Ethash) for its PoW algorithm. Hence, Zilliqa uses a DAG in its proof-of-work algorithm, that is generated at an incremental rate for each **DS epoch**. The bootstrap DAG size will be roughly `1.02GB`.
 
 ### Network Difficulty
 
