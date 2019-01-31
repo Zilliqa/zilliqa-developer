@@ -217,7 +217,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-10. To check your balance, get your address and input the address in the search bar of https://explorer.zilliqa.com:
+10. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
@@ -325,7 +325,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-13. To check your balance, get your address and input the address in the search bar of https://explorer.zilliqa.com:
+13. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
@@ -467,7 +467,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-18. To check your balance, get your address and input the address in the search bar of https://explorer.zilliqa.com:
+18. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
