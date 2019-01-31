@@ -1,21 +1,21 @@
 # Mining Guide
 
-Welcome to Zilliqa testnet-v3, code-named _Mao Shan Wang_. We are inviting all miners to test out the process of joining as a public node on _Mao Shan Wang_ testnet. We hope this exercise will familiarise everyone with the workflow and also help to find out potential bugs before the mainnet launch by end January 2019. We also encourage all community developers to join the _Mao Shan Wang_ testnet in order to better understand the architecture of the Zilliqa network.
+## Contents
 
-- [General information for mining](#general-information)
-- [Recommended hardware requirements](#hardware-requirement-for-mao-shan-wang-testnet)
+- [**General information for mining**](#general-information)
+- [**Recommended hardware requirements**](#hardware-requirement)
 - **Steps for mining on Zilliqa**
    - **Step 1:** [Initial setup required](#initial-setup)
-   - **Step 2 (Option 1):** [Setup for local mining with docker image](#steps-for-mining-with-docker-for-cpu-or-nvidia-gpus-only)
-   - **Step 2 (Option 2):** [Setup for remote mining with docker image](#steps-for-mining-with-proxy)
-   - **Step 2 (Option 3):** [Setup for local mining with native build](#steps-for-mining-natively)
-- [Discussion channels](#discussion-channels)
+   - **Step 2** (Option 1): [Setup for local mining with docker image](#mining-with-docker-locally-for-cpu-or-nvidia-gpus-only)
+   - **Step 2** (Option 2): [Setup for remote mining with docker image](#mining-with-docker-remotely)
+   - **Step 2** (Option 3): [Setup for local mining with native build](#mining-with-native-build-locally)
+- [**Discussion channels**](#discussion-channels)
 
-For the Chinese version(中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
+For the Chinese version (中文版) of these instructions, please visit [**HERE**](https://github.com/FireStack2018/Awesome-Zilliqa/blob/master/Documents/Mining/Zilliqa%E6%8C%96%E7%9F%BF%E6%8C%87%E5%8D%97.md). (Credits to #Hash1024)
 
 ## General Information
 
-### Testnet Epoch Architecture
+### Epoch Architecture
 
 ![Zilliqa Epoch Architecture](https://i.imgur.com/Da4t6FW.png)
 
@@ -34,9 +34,13 @@ The vacuous epoch is solely for:
 
 During a vacuous epoch, the network does not process any transactions.
 
-### Testnet Difficulty
+### Proof-of-Work algorithm
 
-The bootstrapped difficulty level for the _Mao Shan Wang_ testnet is set at `3`. This difficulty level is dynamic and adjusts for every `+/- 100` deviation from the target `1810` submissions per DS epoch.
+Zilliqa is using [**Ethash**](https://github.com/ethereum/wiki/wiki/Ethash) for its PoW algorithm. Hence, Zilliqa uses a **DAG (directed acyclic graph)** for the proof-of-work algorithm, that is generated at an incremental rate for each **DS epoch**. The bootstrap DAG size will be roughly `1.02GB`.
+
+### Network Difficulty
+
+The bootstrapped difficulty level for the mainnet is set at `10`. This difficulty level is dynamic and adjusts by `+/- 1` for every `+/- 100` deviation from the target `1810` PoW submissions per DS epoch.
 
 > **NOTE:** Difficulty level is the log2(Difficulty).
 
@@ -48,39 +52,43 @@ Say if there are `1810` seats available in the network but there are `1710` PoW 
 
 In the Zilliqa network, rewards are split into:
 
-* Base rewards **[25% of total]** for all validating nodes (DS/shard) in the network
-* Flexible rewards **[70% of total]** that are based on the amount of valid and accepted signatures (first 2/3) submitted by a node during a TX epoch while doing the pBFT consensus
+* Base rewards **[25% of total]** for all validating nodes (DS/shard) in the network.
+* Flexible rewards **[70% of total]** that are based on the amount of valid and accepted (first 2/3 signers within a shard) signatures submitted by a node during a TX epoch while doing the pBFT consensus.
 
-Both base rewards and flexible rewards has the same weightage for all DS and shard nodes. All rewards are consolidated over an entire DS epoch and only distributed during the vacuous epoch.
+Both base rewards and flexible rewards has the same weightage for both DS and shard nodes. All rewards are consolidated over an entire DS epoch and only distributed during the vacuous epoch.
 
-Say for example, if there are a total of `2,400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `191780.82` ZILs per DS Epoch, the reward distribution will be:
+Say for example, if there are a total of `2400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `263698.630137` ZILs per DS Epoch, the reward distribution will be:
 
 - For Base rewards:
     ```shell
-    191780.82 * 0.25 / 2400
-    = 19.977169 ZILs per node per DS Epoch
+    263698.630137 * 0.25 / 2400
+    = 27.4686073059375 ZILs per node per DS Epoch
     ```
 - For Flexible rewards: (on a first-come-first-serve basis)
     ```shell
-    191780.82 * 0.70 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks])
-    = 0.847516 ZILs per valid and accepted signature
+    263698.630137 * 0.70 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks])
+    = 1.165334855403409 ZILs per valid and accepted signature
     ```
 
-## Hardware requirement for _Mao Shan Wang_ testnet
+Find our your daily mining profitability by making a copy of the [**Reward Calculator**](https://docs.google.com/spreadsheets/d/1iA3DvXMiAql6bf1mGHHxfGLICm0wZ2Gav5HzRkP81j4/edit?usp=sharing) and editing the yellow-highlighted cells.
 
-The Zilliqa client is officially supported only on Ubuntu OS. Other Debian distributions may also work. Please follow the steps [**HERE**](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
+## Hardware requirement
 
-However, if you wish to mine using mining rigs operating on Windows OS, please follow these steps for remote mining with docker image [**HERE**](#steps-for-mining-with-proxy).
+The Zilliqa client is officially supported only on Ubuntu OS. 
 
-We currently support both AMD (with OpenCL) and Nvidia (with OpenCL or CUDA) GPUs.
+Please follow the steps [**HERE**](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
+
+If you wish to mine using mining rigs that operate on Windows OS, please follow the remote mining with docker image guide [**HERE**](#steps-for-mining-with-proxy).
+
+Both **AMD** (with OpenCL) and **Nvidia** (with OpenCL or CUDA) GPUs are supported for PoW.
 
 The **minimum** requirements for Zilliqa mining nodes are:
 
 - x64 Linux operating system (e.g Ubuntu 16.04.05)
 - Intel i5 processor or later
-- 8GB DRR3 RAM or higher
-- NAT environment or with Public IP address
-- Any GPU cards with at least 3 GB vRAM
+- 4GB DRR3 RAM or higher
+- NAT environment **OR** Public IP address
+- Any GPUs with at least 2 GB vRAM
 
 ## Initial Setup
 
@@ -95,7 +103,7 @@ If you are in NAT environment, you can either:
 
 If you have a public IP address, you can skip this network setup entirely.
 
-- **(Option 1a)** Port forward to port `33333` for both external port (port range) and internal port (local port). You will also have to select the option for **BOTH** TCP and UDP protocol in your router menu when port forwarding. <br><br> An example of this process can be found [**HERE**](https://www.linksys.com/us/support-article?articleNum=136711). After port forwarding, you may check if you have successfully port forwarded with this [**Open Port Check Tool**](https://www.yougetsignal.com/tools/open-ports/).
+- **(Option 1a)** Port forward to port `33133` for both external port (port range) and internal port (local port). You will also have to select the option for **BOTH** TCP and UDP protocol in your router menu when port forwarding. <br><br> An example of this process can be found [**HERE**](https://www.linksys.com/us/support-article?articleNum=136711). After port forwarding, you may check if you have successfully port forwarded with this [**Open Port Check Tool**](https://www.yougetsignal.com/tools/open-ports/).
 
 - **(Option 1b)** Enable UPnP mode on your home router. Please Google how to access your home router setting to enable UPnP, an example can be found [**HERE**](https://routerguide.net/how-to-enable-upnp-for-rt-ac66u/). You can check if you have enabled it UPnP by installing the following tool:
     ```shell
@@ -110,7 +118,7 @@ If you have a public IP address, you can skip this network setup entirely.
      - "List of UPNP devices found on the network : ..."
      - **OR** "No IGD UPnP Device found on the network !".
 
-   The first message means UPnP mode has been enabled successfully, while the latter means the enabling of UPnP mode has failed. Therefore, you should proceed with using **Option 1a** instead.
+   The first message means UPnP mode has been enabled successfully, while the latter means the enabling of UPnP mode has failed. If you receive the latter message, proceed with using **Option 1a** instead.
 
 ### OpenCL driver setup (for AMD/Nvidia)
 
@@ -135,7 +143,7 @@ If you wish to use CUDA supported GPU for PoW, please download and install CUDA 
 
 If you wish to run multiple AMD or Nvidia GPUs concurrently, edit the `GPU_TO_USE` parameter in the _constants.xml_ file located in your _join_ folder.
 
-The index start from `0` and you can input one or more multiple GPUs by separating their indexes with a `,`. 
+The index start from `0` and you can input one or more multiple GPUs by separating their indexes with a `,`.
 
 For example:
 
@@ -144,7 +152,7 @@ For example:
 
 Do note that the largest index must correspond to the number of GPUs you have physically in your mining rig.
 
-## Steps for mining with docker (For CPU or Nvidia GPUs only)
+## Mining with docker locally (For CPU or Nvidia GPUs only)
 
 1. Install Ubuntu 16.04.5 OS by following instructions [**HERE**](http://releases.ubuntu.com/xenial/).
 
@@ -159,7 +167,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 4. Get the joining configuration files:
 
       ```shell
-      wget https://testnet-join.zilliqa.com/configuration.tar.gz
+      wget https://mainnet-join.zilliqa.com/configuration.tar.gz
       tar zxvf configuration.tar.gz
       ```
 
@@ -191,9 +199,9 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     - `Enter your IP address ('NAT' or *.*.*.*):` <br> [Key in your IP address as found in step 6 **OR** `NAT` if you using Option 1b]
 
-    - `Enter your listening port (default: 33333):` <br> [Press **Enter** to skip if using default]
+    - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
 
-8. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+8. You are now a miner in the Zilliqa mainnet. You can monitor your progress using:
 
       ```shell
       tail -f zilliqa-00001-log.txt
@@ -215,7 +223,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
       sudo docker stop zilliqa
       ```
 
-## Steps for mining with proxy
+## Mining with docker remotely
 
 The setup architecture is illustrated in the image shown below. All communications between these two parties is via JSON-RPC protocol.
 
@@ -241,7 +249,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 4. Get the joining configuration files:
 
       ```shell
-      wget https://testnet-join.zilliqa.com/configuration.tar.gz
+      wget https://mainnet-join.zilliqa.com/configuration.tar.gz
       tar zxvf configuration.tar.gz
       ```
 
@@ -255,7 +263,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     * Set `GETWORK_SERVER_MINE` to `true`.
     * Set `GETWORK_SERVER_PORT` to the port you will be using to GetWork. (default is `4202`)
-    * Set the other mining parameters to `false`:
+    * Set the following mining parameters to `false`:
 
         ```shell
         <CUDA_GPU_MINE>false</CUDA_GPU_MINE>
@@ -275,12 +283,12 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     - `Enter your IP address ('NAT' or *.*.*.*):` <br> [Key in your IP address as found in step 5 **OR** `NAT` if you chose Option 1b during Network setup]
 
-    - `Enter your listening port (default: 33333):` <br> [Press **Enter** to skip if using default]
+    - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
 
 9. Once the CPU Zilliqa node is running, you can install **Zilminer** on your separate GPU rigs:
 
-    - **For Windows OS (with CUDA 10.0+):** [**DOWNLOAD THE LATEST RELEASE**](https://github.com/DurianStallSingapore/ZILMiner/releases)
-    - **For Ubuntu OS:** [**DOWNLOAD THE LATEST RELEASE**](https://github.com/DurianStallSingapore/ZILMiner/releases)
+    - **For Windows OS:** [**DOWNLOAD THE LASTEST RELEASE HERE**](https://github.com/DurianStallSingapore/ZILMiner/releases/)
+    - **For Ubuntu OS:** [**DOWNLOAD THE LASTEST RELEASE HERE**](https://github.com/DurianStallSingapore/ZILMiner/releases/)
 
 10. Setup your **Zilminer** on your separate GPU rigs with the following command:
 
@@ -292,10 +300,10 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     - For `wallet_address` : You can input any arbitrary Zilliqa address if you are mining solo.
     - For `worker_name` : You can input any arbitrary worker name you desire.
-    - For `zil_node_ip` : Please input the IP address of the Zilliqa node you written down in step 5.
+    - For `zil_node_ip` : Please input the IP address of the Zilliqa node in step 5.
     - For `get_work_port` : Please input the port used in `GETWORK_SERVER_PORT`. Default is `4202`.
 
-11. You are now a proxy miner in the _Mao Shan Wang_ testnet. You can monitor your progress on your CPU node using:
+11. You are now a proxy miner in the Zilliqa mainnet. You can monitor your progress on your CPU node using:
 
       ```shell
       tail -f zilliqa-00001-log.txt
@@ -317,7 +325,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
       sudo docker stop zilliqa
       ```
 
-## Steps for mining natively
+## Mining with native build locally
 
 1. Make a new directory for Zilliqa client:
 
@@ -340,7 +348,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 4. Clone the Scilla repository and change directory to it:
 
       ```shell
-      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.0.4
+      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.1.1
       ```
 
 5. Find out your Scilla directory path and record it down:
@@ -358,7 +366,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 7. Clone the Zilliqa repository and change directory to it:
 
       ```
-      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v3.4.1
+      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v4.0.1
       ```
 
 8. Find out your Zilliqa directory path again and write it down:
@@ -399,7 +407,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 10. Download and unpack the compressed joining configuration file:
 
     ```shell
-    cd ../join && wget https://testnet-join.zilliqa.com/configuration.tar.gz && tar zxvf configuration.tar.gz
+    cd ../join && wget https://mainnet-join.zilliqa.com/configuration.tar.gz && tar zxvf configuration.tar.gz
     ```
 11. Edit the _constants.xml_ in your _join_ folder to key in the Scilla directory for the `SCILLA_ROOT` parameter. An example is shown below:
 
@@ -431,9 +439,9 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 15. You will be prompted to key in the following details:
     - `Enter the full path of your zilliqa source code directory:` <br> [Key in the path you found it step 8]
     - `Enter your IP address (NAT or *.*.*.*):` <br> [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
-    - `Enter your listening port (default: 33333):` <br> [Press **Enter** to skip if using default]
+    - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
 
-16. You are now a miner in _Mao Shan Wang_ testnet. You can monitor your progress using:
+16. You are now a miner in Zilliqa mainnet. You can monitor your progress using:
     ```shell
     tail -f zilliqa-00001-log.txt
     ```
@@ -457,6 +465,6 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
 ### Channels
 
-Join our official mining discussion forum here: https://forum.zilliqa.com/c/Mining
+Join our official mining discussion forum: https://forum.zilliqa.com/c/Mining
 
-Join the community managed Telegram channel here: https://t.me/zilliqaminer
+Join the community-managed Telegram channel: https://t.me/zilliqaminer
