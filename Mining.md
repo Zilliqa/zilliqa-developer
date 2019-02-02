@@ -206,6 +206,8 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
 
+       > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
+
 8. You are now a miner in the Zilliqa mainnet. You can monitor your progress using:
 
       ```shell
@@ -295,6 +297,8 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     - `Enter your IP address ('NAT' or *.*.*.*):` <br> [Key in your IP address as found in step 5 **OR** `NAT` if you chose Option 1b during Network setup]
 
     - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
+
+       > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
 
 9. Once the CPU Zilliqa node is running, you can install **Zilminer** on your separate GPU rigs:
 
