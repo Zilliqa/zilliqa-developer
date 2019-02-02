@@ -438,10 +438,11 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
 12. **(Optional)** If you wish to mine with GPUs, please continue to edit the following parameters in the _constants.xml_ file in your _join_ folder:
 
+    > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [**HERE**](#multiple-gpus-setup).
+
     - **For AMD GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `OPENCL_GPU_MINE` parameter from `false` to `true`.
     - **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
 
-    > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [**HERE**](#multiple-gpus-setup).
 
 13. Find out your current IP address in the command prompt and record it down.
 
@@ -461,6 +462,8 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     - `Enter the full path of your zilliqa source code directory:` <br> [Key in the path you found it step 8]
     - `Enter your IP address (NAT or *.*.*.*):` <br> [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
     - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
+
+       > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
 
 16. You are now a miner in Zilliqa mainnet. You can monitor your progress using:
     ```shell
