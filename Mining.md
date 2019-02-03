@@ -55,7 +55,7 @@ In the Zilliqa network, rewards are split into:
 * Base rewards **[25% of total]** for all validating nodes (DS/shard) in the network.
 * Flexible rewards **[70% of total]** that are based on the amount of valid and accepted (first 2/3 signers within a shard) signatures submitted by a node during a TX epoch while doing the pBFT consensus.
 
-Both base rewards and flexible rewards has the same weightage for both DS and shard nodes. All rewards are consolidated over an entire DS epoch and only distributed during the vacuous epoch.
+Both base rewards and flexible rewards has the same weightage for both DS and shard nodes. All rewards are consolidated over an entire DS epoch and only distributed during the vacuous epoch. Do note that the last **5%** of the rewards are given to the lookup and seed nodes.
 
 Say for example, if there are a total of `2400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `263698.630137` ZILs per DS Epoch, the reward distribution will be:
 
