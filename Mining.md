@@ -70,6 +70,8 @@ Say for example, if there are a total of `2400` nodes in the Zilliqa network and
     = 1.165334855403409 ZILs per valid and accepted signature
     ```
 
+> **NOTE:** Guard nodes by Zilliqa are not rewarded. However, the division of rewards before distribution does include the guard nodes in the count. Hence, there are no "bonus" rewards for non-guard nodes.
+
 Find our your daily mining profitability by making a copy of the [**Reward Calculator**](https://docs.google.com/spreadsheets/d/1iA3DvXMiAql6bf1mGHHxfGLICm0wZ2Gav5HzRkP81j4/edit?usp=sharing) and editing the yellow-highlighted cells.
 
 ## Hardware requirement
