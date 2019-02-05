@@ -380,25 +380,27 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
       pwd
       ```
 
-6. First, download the Scilla binary's dependencies for Ubuntu following instructions found [**HERE**](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu). Then, build the Scilla binary:
+6. First, download the Scilla binary's dependencies for Ubuntu following instructions found [**HERE**](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md#ubuntu).
+
+7. Then, build the Scilla binary:
 
       ```shell
       make clean; make
       ```
 
-7. Clone the Zilliqa repository and change directory to it:
+8. Clone the Zilliqa repository and change directory to it:
 
       ```
       cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v4.0.1
       ```
 
-8. Find out your Zilliqa directory path again and write it down:
+9. Find out your Zilliqa directory path again and write it down:
 
       ```
       pwd
       ```
 
-9. First, download the Zilliqa client's dependencies. Then, build Zilliqa with **Option 1** for CPU mining, or with **Option 2**/**Option 3** for GPU mining.
+10. First, download the Zilliqa client's dependencies. Then, build Zilliqa with **Option 1** for CPU mining, or with **Option 2**/**Option 3** for GPU mining.
 
     - Download the dependencies:
 
@@ -427,18 +429,18 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
        ./build.sh opencl
        ```
 
-10. Download and unpack the compressed joining configuration file:
+11. Download and unpack the compressed joining configuration file:
 
     ```shell
     cd ../join && wget https://mainnet-join.zilliqa.com/configuration.tar.gz && tar zxvf configuration.tar.gz
     ```
-11. Edit the _constants.xml_ in your _join_ folder to key in the Scilla directory for the `SCILLA_ROOT` parameter. An example is shown below:
+12. Edit the _constants.xml_ in your _join_ folder to key in the Scilla directory for the `SCILLA_ROOT` parameter. An example is shown below:
 
     ```shell
     <SCILLA_ROOT>/home/ubuntu/Scilla</SCILLA_ROOT>
     ```
 
-12. **(Optional)** If you wish to mine with GPUs, please continue to edit the following parameters in the _constants.xml_ file in your _join_ folder:
+13. **(Optional)** If you wish to mine with GPUs, please continue to edit the following parameters in the _constants.xml_ file in your _join_ folder:
 
     > **NOTE:** If you wish to run multiple GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [**HERE**](#multiple-gpus-setup).
 
@@ -446,7 +448,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     - **For Nvidia GPUs:** Change `FULL_DATASET_MINE` parameter from `false` to  `true`. Change `CUDA_GPU_MINE` parameter from `false` to `true`.
 
 
-13. Find out your current IP address in the command prompt and record it down.
+14. Find out your current IP address in the command prompt and record it down.
 
     > **NOTE:** If you are using **Option 1b** as stated in the [**Network Setup**](#network-setup) above, you can skip this step.
 
@@ -454,25 +456,25 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     curl https://ipinfo.io/ip
     ```
 
-14. Launch the Zilliqa client:
+15. Launch the Zilliqa client:
 
     ```shell
     ./launch.sh
     ```
 
-15. You will be prompted to key in the following details:
+16. You will be prompted to key in the following details:
     - `Enter the full path of your zilliqa source code directory:` <br> [Key in the path you found it step 8]
     - `Enter your IP address (NAT or *.*.*.*):` <br> [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
     - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
 
        > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
 
-16. You are now a miner in Zilliqa mainnet. You can monitor your progress using:
+17. You are now a miner in Zilliqa mainnet. You can monitor your progress using:
     ```shell
     tail -f zilliqa-00001-log.txt
     ```
 
-17. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+18. To check your locally generated public and private key pairs, you can enter this in your command prompt:
 
     ```shell
     less mykey.txt
@@ -481,13 +483,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-18. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
+19. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
       ```
 
-19. To stop Zilliqa client:
+20. To stop Zilliqa client:
 
     ```shell
     pkill zilliqa
