@@ -188,9 +188,8 @@ Do note that the largest index must correspond to the number of GPUs you have ph
          ```shell
          ./launch_docker.sh
          ```
-    - **(Option 2)** For mining with Nvidia GPUs, please first install the `nvidia-docker` [**HERE**](https://github.com/NVIDIA/nvidia-docker#ubuntu-140416041804-debian-jessiestretch). Then, change the following parameters for the _constants.xml_ file in the _join_ folder to `true`:
+    - **(Option 2)** For mining with Nvidia GPUs, please first install the `nvidia-docker` [**HERE**](https://github.com/NVIDIA/nvidia-docker#ubuntu-140416041804-debian-jessiestretch). Then, change the following parameter in the _constants.xml_ file within the _join_ folder to `true`:
          ```shell
-         <FULL_DATASET_MINE>true</FULL_DATASET_MINE>
          <CUDA_GPU_MINE>true</CUDA_GPU_MINE>
          ```
          After which, launch your docker container:
