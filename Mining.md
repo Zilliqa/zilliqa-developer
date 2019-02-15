@@ -309,7 +309,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 10. Setup your **Zilminer** on your separate GPU rigs with the following command:
 
     ```shell
-    zilminer --max-submit=1 --farm-recheck 10000 --work-timeout=7200 --farm-retries=10 --retry-delay=10 -P zil://wallet_address.worker_name@zil_node_ip:get_work_port
+    zilminer -P zil://wallet_address.worker_name@zil_node_ip:get_work_port
     ```
 
     > **NOTE:** You have to change the *wallet_address*, *worker_name*, *zil_node_ip*, and *get_work_port* accordingly.
