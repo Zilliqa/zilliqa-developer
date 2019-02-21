@@ -370,7 +370,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 4. Clone the Scilla repository and change directory to it:
 
       ```shell
-      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.1.1
+      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.2.0
       ```
 
 5. Find out your Scilla directory path and record it down:
@@ -390,7 +390,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 8. Clone the Zilliqa repository and change directory to it:
 
       ```
-      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v4.0.2
+      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v4.1.0
       ```
 
 9. Find out your Zilliqa directory path again and write it down:
