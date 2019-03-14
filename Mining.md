@@ -80,7 +80,7 @@ The Zilliqa client is officially supported only on Ubuntu OS.
 
 Please follow the steps [**HERE**](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
 
-If you wish to mine using mining rigs that operate on Windows OS, please follow the remote mining with docker image guide [**HERE**](#steps-for-mining-with-proxy).
+If you wish to mine using mining rigs that operate on Windows OS, please follow the remote mining with docker image guide [**HERE**](#mining-with-docker-remotely).
 
 Both **AMD** (with OpenCL) and **Nvidia** (with OpenCL or CUDA) GPUs are supported for PoW.
 
