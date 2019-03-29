@@ -455,25 +455,32 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     curl https://ipinfo.io/ip
     ```
 
-15. Launch the Zilliqa client:
+15. Install python dependencies:
+    ```shell
+    sudo apt install python-pip
+    export LC_ALL=C
+    pip install request requests clint futures
+    ```
+
+16. Launch the Zilliqa client:
 
     ```shell
     ./launch.sh
     ```
 
-16. You will be prompted to key in the following details:
+17. You will be prompted to key in the following details:
     - `Enter the full path of your zilliqa source code directory:` <br> [Key in the path you found it step 8]
     - `Enter your IP address (NAT or *.*.*.*):` <br> [Key in your IP address as found in step 13 **OR** `NAT` if you are using Option 1b]
     - `Enter your listening port (default: 33133):` <br> [Press **Enter** to skip if using default]
 
        > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
 
-17. You are now a miner in Zilliqa mainnet. You can monitor your progress using:
+18. You are now a miner in Zilliqa mainnet. You can monitor your progress using:
     ```shell
     tail -f zilliqa-00001-log.txt
     ```
 
-18. To check your locally generated public and private key pairs, you can enter this in your command prompt:
+19. To check your locally generated public and private key pairs, you can enter this in your command prompt:
 
     ```shell
     less mykey.txt
@@ -482,13 +489,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** The key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-19. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
+20. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
       ```
 
-20. To stop Zilliqa client:
+21. To stop Zilliqa client:
 
     ```shell
     pkill zilliqa
