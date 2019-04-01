@@ -184,14 +184,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
       curl https://ipinfo.io/ip
       ```
 
-6. Install python dependencies:
-    ```shell
-    sudo apt install python-pip
-    export LC_ALL=C
-    pip install request requests clint futures
-    ```
-
-7. Run the shell script in your command prompt to launch your docker image.
+6. Run the shell script in your command prompt to launch your docker image.
 
     - **(Option 1)** For mining with CPU, launch your docker container:
 
@@ -210,7 +203,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
        > **NOTE:** If you wish to run multiple Nvidia GPUs concurrently, you will need to modify your _**constants.xml**_ file following instructions as found above [**HERE**](#multiple-gpus-setup).
 
-8. You will be prompted to enter some information as shown below:
+7. You will be prompted to enter some information as shown below:
     - `Assign a name to your container (default: zilliqa):` <br> [Press **Enter** to skip if using default]
 
     - `Enter your IP address ('NAT' or *.*.*.*):` <br> [Key in your IP address as found in step 6 **OR** `NAT` if you using Option 1b]
@@ -219,13 +212,13 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
        > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
 
-9. You are now a miner in the Zilliqa mainnet. You can monitor your progress using:
+8. You are now a miner in the Zilliqa mainnet. You can monitor your progress using:
 
       ```shell
       tail -f zilliqa-00001-log.txt
       ```
 
-10. To check your locally generated public and private key pairs, you can enter the following in your command prompt:
+9. To check your locally generated public and private key pairs, you can enter the following in your command prompt:
 
       ```shell
       less mykey.txt
@@ -235,13 +228,13 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-11. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
+10. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
       ```
 
-12. To stop the mining client, stop your running docker container:
+11. To stop the mining client, stop your running docker container:
 
       ```
       sudo docker stop zilliqa
@@ -296,20 +289,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
         <REMOTE_MINE>false</REMOTE_MINE>
         ```
 
-7. Install python dependencies:
-    ```shell
-    sudo apt install python-pip
-    export LC_ALL=C
-    pip install request requests clint futures
-    ```
-
-8. Run the shell script in your command prompt to launch your docker image.
+7. Run the shell script in your command prompt to launch your docker image.
 
       ```shell
       ./launch_docker.sh
       ```
 
-9. You will be prompted to enter some information as shown below:
+8. You will be prompted to enter some information as shown below:
     - `Assign a name to your container (default: zilliqa):` <br> [Press **Enter** to skip if using default]
 
     - `Enter your IP address ('NAT' or *.*.*.*):` <br> [Key in your IP address as found in step 5 **OR** `NAT` if you chose Option 1b during Network setup]
@@ -318,12 +304,12 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
        > **NOTE:** **DO NOT** duplicate your IP address and use different ports on different CPU nodes. You will be blacklisted by the network and hence not be able to receive any flexible rewards.
 
-10. Once the CPU Zilliqa node is running, you can install **Zilminer** on your separate GPU rigs:
+9. Once the CPU Zilliqa node is running, you can install **Zilminer** on your separate GPU rigs:
 
     - **For Windows OS:** [**DOWNLOAD THE LASTEST RELEASE HERE**](https://github.com/DurianStallSingapore/ZILMiner/releases/)
     - **For Ubuntu OS:** [**DOWNLOAD THE LASTEST RELEASE HERE**](https://github.com/DurianStallSingapore/ZILMiner/releases/)
 
-11. Setup your **Zilminer** on your separate GPU rigs with the following command:
+10. Setup your **Zilminer** on your separate GPU rigs with the following command:
 
     ```shell
     zilminer -P zil://wallet_address.worker_name@zil_node_ip:get_work_port
@@ -336,13 +322,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
     - For `zil_node_ip` : Please input the IP address of the Zilliqa node in step 5.
     - For `get_work_port` : Please input the port used in `GETWORK_SERVER_PORT`. Default is `4202`.
 
-12. You are now a proxy miner in the Zilliqa mainnet. You can monitor your progress on your CPU node using:
+11. You are now a proxy miner in the Zilliqa mainnet. You can monitor your progress on your CPU node using:
 
       ```shell
       tail -f zilliqa-00001-log.txt
       ```
 
-13. To check your locally generated public and private key pairs, you can enter the following in your command prompt on your CPU node:
+12. To check your locally generated public and private key pairs, you can enter the following in your command prompt on your CPU node:
 
       ```shell
       less mykey.txt
@@ -352,13 +338,13 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
     > **NOTE:** This key pair is generated locally on your disk. Do remember to keep your private key somewhere safe!
 
-14. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
+13. To check your balance, get your address and input the address in the search bar of https://viewblock.io/zilliqa:
 
       ```shell
       less myaddr.txt
       ```
 
-15. To stop the mining client, stop your running docker container on the CPU node and kill your **Zilminer** process on your GPU rigs:
+14. To stop the mining client, stop your running docker container on the CPU node and kill your **Zilminer** process on your GPU rigs:
 
       ```
       sudo docker stop zilliqa
