@@ -44,6 +44,7 @@ To contribute with new information or make changes to existing documentation, pl
 
 ## Roadmap
 
+- code owners
+- Formatting and linting
+- Create contribution guide
 - Make use of the [front matter](https://jekyllrb.com/docs/front-matter/) to provide more metadata about the doc.
-
-
