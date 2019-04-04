@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img alt="dev-docs logo" src="https://i.ibb.co/gDtknr3/dev-docs-log.png" height="50px" />
+  <img alt="dev-docs logo" src="https://github.com/Zilliqa/dev-docs/raw/master/images/logs/dev-docs-log.png" height="50px" />
   <h1 align="center">Zilliqa Developer Documentation</h1>
 </p>
 
