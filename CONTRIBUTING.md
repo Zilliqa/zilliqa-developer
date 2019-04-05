@@ -60,4 +60,11 @@ and simply run from the project root to check if you have any style issues.
 markdownlint *.md
 ```
 
+You can add this command as a pre-commit git hook. Add the following content to `.git/hook/pre-commit` and make sure it's executable (`chmod +x pre-commit`)
+
+```bash
+#!/bin/bash
+markdownlint *.md
+```
+
 There's also a great VSCode extension, [markdownlint](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint), that does all the checks for you while you are editing the file. It respects the rules configured for this repository.
