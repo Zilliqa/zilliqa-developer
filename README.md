@@ -9,6 +9,8 @@ Welcome to Zilliqa Developer Documentation!
 
 This is a private repository hosting all the docs for developers inside Zilliqa.
 
+Start reading from [index](index.md).
+
 #### Table of Content
 
 - [Structure](#structure)
@@ -41,6 +43,6 @@ To contribute with new information or make changes to existing documentation, pl
 
 - [x] Code owners
 - [x] Travis CI
-- [ ] Formatting and linting
-- [ ] Create contribution guide
+- [x] Formatting and linting
+- [x] Create contribution guide
 - [ ] Make use of the [front matter](https://jekyllrb.com/docs/front-matter/) to provide more metadata about the doc.
