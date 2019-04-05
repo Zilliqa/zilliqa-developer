@@ -37,7 +37,7 @@ Github already did the indexing for you. Key in your keywords in the search bar 
 
 Create an [issue](https://github.com/Zilliqa/dev-docs/issues) when you feel something can be improved.
 
-To contribute with new information or make changes to existing documentation, please read the [Contributing Guideline](contributing.md).
+To contribute with new information or make changes to existing documentation, please read the [Contributing Guideline](CONTRIBUTING.md).
 
 ## Roadmap
 
