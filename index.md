@@ -2,5 +2,5 @@
 
 Categories
 
-- [Core Protocol](core/index.md)
-- [DevOps](devops/index.md)
+- [Core Protocol](core/README.md)
+- [DevOps](devops/README.md)

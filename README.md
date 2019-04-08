@@ -13,6 +13,7 @@ Start reading from [index](index.md).
 
 #### Table of Content
 
+- [Scope](#scope)
 - [Structure](#structure)
 - [Viewing](#viewing)
 - [Searching](#searching)
@@ -20,6 +21,12 @@ Start reading from [index](index.md).
 - [Roadmap](#roadmap)
 
 ---
+
+## Scope
+
+This repository is essentially a knowledge base for all the developers inside Zilliqa. We encourage you to share any knowledge in any perspective about development.
+
+> A gentle reminder: Don't forget to remove any sensitive information like password and keys before posting anything here.
 
 ## Structure
 
@@ -37,7 +44,7 @@ Github already did the indexing for you. Key in your keywords in the search bar 
 
 Create an [issue](https://github.com/Zilliqa/dev-docs/issues) when you feel something can be improved.
 
-To contribute with new information or make changes to existing documentation, please read the [Contributing Guideline](contributing.md).
+To contribute with new information or make changes to existing documentation, please read the [Contributing Guideline](CONTRIBUTING.md).
 
 ## Roadmap
 
@@ -45,4 +52,6 @@ To contribute with new information or make changes to existing documentation, pl
 - [x] Travis CI
 - [x] Formatting and linting
 - [x] Create contribution guide
+- [ ] Pull request template
+- [ ] Issue template
 - [ ] Make use of the [front matter](https://jekyllrb.com/docs/front-matter/) to provide more metadata about the doc.
