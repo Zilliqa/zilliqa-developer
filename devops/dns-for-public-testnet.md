@@ -25,7 +25,6 @@ First, understand what change you will be making and list them down in a table.
 | 1   | `community441-api.aws.z7a.xyz`      | `dev-api.zilliqa.com`      |
 | 2   | `community441-explorer.aws.z7a.xyz` | `dev-explorer.zilliqa.com` |
 
-
 ## Updating the testnet ingress
 
 ### Checking the existing ingress rules
