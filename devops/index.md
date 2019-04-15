@@ -1,4 +1,5 @@
 # DevOps Documentation Index
 
 - [Mainnet Token Transfer](mainnet-token-transfer.md)
-- [DNS for public testnet](dns-for-public-testnet.md)
+- [DNS for Public Testnet](dns-for-public-testnet.md)
+- [Private API Endpoint](private-api-endpoint.md)
