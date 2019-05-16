@@ -145,3 +145,4 @@ If you see things like `[unkonwn]` in the profiling result or the stack simply d
 
 - [Speedscope](https://github.com/jlfwong/speedscope)
 - [Using perf to profile Ocaml](https://ocaml.org/learn/tutorials/performance_and_profiling.html#Using-perf-on-Linux)
+- [Install debug symbol packages](https://wiki.ubuntu.com/Debug%20Symbol%20Packages)
