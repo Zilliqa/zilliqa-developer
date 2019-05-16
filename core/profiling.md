@@ -21,10 +21,10 @@ Ensure you have an Ubuntu OS (16.04 onwards, other OSes are not yet tested).
 ```console
 $ lsb_release -a
 No LSB modules are available.
-Distributor ID:	Ubuntu
-Description:	Ubuntu 16.04.3 LTS
-Release:	16.04
-Codename:	xenial
+Distributor ID: Ubuntu
+Description:    Ubuntu 16.04.3 LTS
+Release:        16.04
+Codename:       xenial
 ```
 
 Install [`speedscope`](https://github.com/jlfwong/speedscope) on your machine.
