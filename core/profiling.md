@@ -48,7 +48,7 @@ You can choose to run the profiling on your machine or in a docker container.
 
 ### Run in container
 
-Start the container using the command.
+Start the container using the following command.
 
 ```bash
 ./profile.sh docker
@@ -69,7 +69,7 @@ export ZILLIQA_DIR=/the/path/of/zilliqa/directory
 export SCILLA_DIR=/the/path/of/scilla/directory
 ```
 
-Install the necessary tools.
+Setup your environment for profiling.
 
 ```bash
 sudo ./profile setup
