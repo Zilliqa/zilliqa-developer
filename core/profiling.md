@@ -44,7 +44,7 @@ cd profile
 
 You can choose to run the profiling on your machine or in a docker container.
 
-> Using a container saves your time on setting up build environments for Zilliqa and Scilla and also provides an isolated context when running profiling. However, it does not mean any security as it will run in privilege mode for nencessary permissions. Also, it might incur unexpected overhead on performance. So the recommendation is starting with the container solution for learning but using the native solution for reliable result.
+> Using a container saves your time on setting up build environments for Zilliqa and Scilla and also provides an isolated context when running profiling. However, it does not mean any security as it will run in privilege mode for necessary permissions. Also, it might incur unexpected overhead on performance. So the recommendation is starting with the container solution for learning but using the native solution for reliable result.
 
 ### Run in container
 
@@ -62,7 +62,7 @@ Inside the container, run:
 
 ### Run on your machine
 
-Set the directories variables according to your configuration. These are the path to code repositories. Also, make sure you install the build dependencies following the docuemntation in Zilliqa and Scilla.
+Set the directories variables according to your configuration. These are the path to code repositories. Also, make sure you install the build dependencies following the documentation in Zilliqa and Scilla.
 
 ```bash
 export ZILLIQA_DIR=/the/path/of/zilliqa/directory
@@ -135,10 +135,10 @@ The script `profile.sh` is simple, change it for your need.
 
 ### Resolving missing symbols
 
-If you see things like `[unkonwn]` in the profiling result or the stack simply does not make sense, try the following fixes:
+If you see things like `[unknown]` in the profiling result or the stack simply does not make sense, try the following fixes:
 
-1. Re-comple Zilliqa and its dependency (e.g., `g3log`, `libjsoncpp`) with this gcc flag `-fno-omit-frame-pointer`.
-2. Add debug symbols to both Zilliqa (e.g., inserting `-g` complier flag  or using Debug build) and Scilla (see this [tip](https://github.com/Zilliqa/scilla/wiki/Profiling-Scilla-:-Tips)).
+1. Re-compile Zilliqa and its dependency (e.g. `g3log`, `libjsoncpp`) with this gcc flag `-fno-omit-frame-pointer`.
+2. Add debug symbols to both Zilliqa (e.g. inserting `-g` complier flag  or using Debug build) and Scilla (see this [tip](https://github.com/Zilliqa/scilla/wiki/Profiling-Scilla-:-Tips)).
 3. Switch OCaml compiler to the version with frame pointer enabled as per [this doc](https://ocaml.org/learn/tutorials/performance_and_profiling.html#Using-perf-on-Linux).
 
 ## References
