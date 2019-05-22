@@ -56,19 +56,19 @@ Following is more detail about how to apply these 2 upgrade precedures on entire
   ssh mkops
   ```
 
-- Download Zilliqa/Scilla with specified commit
+- Download Zilliqa/Scilla with specified commit.
   ```bash
   git clone --recursive git@github.com:Zilliqa/Zilliqa.git (Mandatory)
   git clone git@github.com:Zilliqa/scilla.git (Optional, download it ONLY when you want to upgrade Scilla)
   ```
-  Note that rolling upgrade can ONLY upgrade Zilliqa OR Scilla at a time.
+  Note that rolling upgrade can ONLY upgrade Zilliqa or Scilla at a time.
 
 - Run `Zilliqa/build/bin/genkeypair` several times to generate some privKey/pubKey pairs, then paste them into 2 separated files named `privKeyFile` and `pubKeyFile`. 
   ```bash
   ./Zilliqa/build/bin/genkeypair
   ```
 
-- Edit `Zilliqa/scripts/release.sh`
+- Edit `Zilliqa/scripts/release.sh`.
   ```console
   privKeyFile="../key/privKeyFile"
   pubKeyFile="../key/pubKeyFile"
@@ -77,7 +77,7 @@ Following is more detail about how to apply these 2 upgrade precedures on entire
   releaseZilliqa="true"                   # "true" for Zilliqa upgrade, "false" for Scilla upgrade
   scillaPath=""                           # "" for Zilliqa upgrade, "scilla_path" for Scilla upgrade
   ```
-- Release Zilliqa/Scilla image to S3
+- Release Zilliqa/Scilla image to S3.
   ```bash
   cd Zilliqa
   ./scripts/release.sh
