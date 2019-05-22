@@ -1,36 +1,30 @@
 # Network Upgrade
 
-This doc describe the way to conduct the token transfer to secure the mining rewards from our own mainnet nodes, including all these nodes:
+This doc describe the way to conduct the upgrade entire network. So far we implement following 2 methods:
 
-- 5 lookup nodes
-- 5 multipliers
-- 180 normal nodes
-- 700 new node
+- Upgrade on Separated Network
+- Rolling Upgrade
 
-Of all these nodes, 5 lookup nodes and 5 multipliers are continuously receiving mining rewards so a periodical transfer is needed. The rest are no longer in the network so it's only one-time effort to secure the rewards and it has been done after the end of bootstrap.
+There are some pros/cons for each method thus they would be applied in different scenarios. Following is more detail about how to apply these 2 upgrade precedures on entire network.
 
 ## Upgrade on Separated Network
+- Pros
+  - Fast, around 2 hours
+  - Changes take effect immediately after upgrading
+  - Once failed, just try again
 
-- Tools:
+- Preparation
 
-  - Docker
-  - [zilliqa-cli](https://github.com/Zilliqa/zilliqa-cli)
-
-- Keypair files:
-
-  - lookup node keypair file (e.g., `lookup_keys.txt`)
-  - multiplier keypair file (e.g., `multiplier_keys.txt`)
-  - normal node keypair file
-  - new node keypair file
-
-- 2 Cold wallet address
-- Zilliqa network API endpoint (e.g., `https://api.zilliqa.com`)
+- Upgrade
 
 ## Rolling Upgrade
+- Pros
+  - Ethereum also adopt [this method](https://blog.ethereum.org/2019/02/22/ethereum-constantinople-st-petersburg-upgrade-announcement/)
+  - Seamless and silent
+  - All transcation will be kept
 
-Create a working directory. Some code and data will be stored here and this directory will be referred as **project root**.
+- Preparation
 
-```bash
-mkdir mainnet-token-transfer
-```
+- Release
 
+- Rolling upgrade
