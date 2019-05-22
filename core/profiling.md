@@ -46,6 +46,15 @@ You can choose to run the profiling on your machine or in a docker container.
 
 > Using a container saves your time on setting up build environments for Zilliqa and Scilla and also provides an isolated context when running profiling. However, it does not mean any security as it will run in privilege mode for necessary permissions. Also, it might incur unexpected overhead on performance. So the recommendation is starting with the container solution for learning but using the native solution for reliable result.
 
+### Caveat
+
+Some kernel changes are required to run `perf` properly, please be aware of these system-level change and keep the original values if you want to restore the settings. The command `./profile.sh setup` will run these commands to change the kernel settings.
+
+```bash
+sysctl -w kernel.perf_event_paranoid=-1
+echo 0 | tee /proc/sys/kernel/kptr_restrict
+```
+
 ### Run in container
 
 Start the container using the following command.
@@ -57,7 +66,7 @@ Start the container using the following command.
 Inside the container, run:
 
 ```bash
-./profile setup
+./profile.sh setup
 ```
 
 ### Run on your machine
@@ -79,7 +88,7 @@ sudo ./profile setup
 
 Remember to update the code to the version you desired to profile. You can modify the source code directly in the referenced code repository. In this tutorial, some changes in Zilliqa are already being made on the branch `feature/perf`.
 
-Let's checkout the branch.
+Let's checkout the branch in Zilliqa repository (e.g., `/zilliqa` in docker).
 
 ```cpp
 git checkout feature/perf
@@ -92,9 +101,11 @@ git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
 git fetch
 ```
 
+You can also make code change in Scilla repository if you need.
+
 ## Step 2: Run the profiling script
 
-Just run
+Go back to the directory with `profile.sh` and just run:
 
 ```bash
 ./profile.sh run
