@@ -1,11 +1,11 @@
 # Network Upgrade
 
-This doc describe the way to conduct the upgrade entire network. So far we implement following 2 methods:
+This doc describes the way to conduct the upgrade entire network. So far we implement the following 2 methods:
 
 - Upgrade on Separated Network
 - Rolling Upgrade
 
-Hers is a comparison table between these 2 methods, and meanwhile the methods would be applied in different scenarios.
+Here is a comparison table between these 2 methods, and meanwhile, the methods would be applied in different scenarios.
 
 |                   |Upgrade on Separated Network|Rolling Upgrade           |
 |-------------------|----------------------------|--------------------------|
@@ -15,7 +15,7 @@ Hers is a comparison table between these 2 methods, and meanwhile the methods wo
 |Transaction History|Drop                        |Keep                      |
 |Once Failed        |Try again                   |Target testnet destroyed  |
 
-Following is detail steps of how to apply these 2 upgrade precedures on entire network.
+Following is detail steps of how to apply these 2 upgrade procedures on the entire network.
 
 ## Upgrade on Separated Network
 
@@ -26,14 +26,14 @@ Following is detail steps of how to apply these 2 upgrade precedures on entire n
   cd testnet
   ```
 
-- Under `testnet` folder, bootstrap a separated testnet `new_testnet` by original testnet (`ori_cluster`/`ori_testnet`).
+- Under `testnet` folder, bootstrap a separate testnet `new_testnet` from the original cluster/testnet (`ori_cluster`/`ori_testnet`).
 
   ```bash
   ./bootstrap.py new_testnet --recover-from-testnet ori_testnet --recover-from-cluster ori_cluster -c commit -t tag...
   cd new_testnet
   ```
 
-  Keep the options as the same as possible with the `ori_testnet`'s bootstrap options.
+  Keep the options the same as much as possible from the `ori_testnet`'s bootstrap options.
 
 - Under `new_testnet` folder, upload `ori_testnet`'s persistence to S3.
 
@@ -106,15 +106,15 @@ Following is detail steps of how to apply these 2 upgrade precedures on entire n
 
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-release-data/?region=ap-southeast-1&tab=overview) and make sure `target_testnet.tar.gz` is uploaded to `S3://zilliqa-release-data`.
 
-- (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/xxx/constants.xml`. If anything changed, release Zilliqa/Scilla image to S3 again.
+- (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/xxx/constants.xml`. If anything changes, release Zilliqa/Scilla image to S3 again.
 
   ```bash
   tar cfz target_testnet.tar.gz -C pubKeyPath pubKeyFile -C $(realpath release) VERSION -C $(realpath constantsDir) constants.xml -C $(realpath constantsDir/l) constants.xml_lookup -C $(realpath release) xxx-Linux-Zilliqa.deb -C $(realpath constantsDir/l2) constants.xml_level2lookup -C $(realpath constantsDir/n) constants.xml_newlookup
   aws s3 cp target_testnet.tar.gz s3://zilliqa-release-data/
   ```
 
-  Note the `pubKeyPath`, `xxx-Linux-Zilliqa.deb` should be changed propertly.
-- Change directory to `target_testnet` to-be-rolling-upgraded.
+  Note the variables `pubKeyPath`, `xxx-Linux-Zilliqa.deb` should be changed properly.
+- Change directory to `target_testnet`.
 
   ```bash
   cd target_testnet
@@ -129,4 +129,4 @@ Following is detail steps of how to apply these 2 upgrade precedures on entire n
 
   TYPE should be applied in sequence: {`lookup`, `level2lookup`, `newlookup`, `dsguard`, `normal`}.
 
-- When running rolling upgrade, separated log files for upgrading pods would be generated under `upgrade_log/` folder.
+- When running the rolling upgrade, separate log files for upgrading pods would be generated under `upgrade_log/` folder.
