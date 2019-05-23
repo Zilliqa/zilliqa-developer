@@ -1,6 +1,6 @@
-# Profiling Zilliqa and Scilla
+# View change
 
-This tutorial shows how to profile Zilliqa and Scilla together in a C++ unit test that executes smart contract.
+This document describes the view change process in Zilliqa
 
 <!-- TOC depthTo:2 -->
 
