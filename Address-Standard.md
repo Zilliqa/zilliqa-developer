@@ -24,7 +24,7 @@ All examples below use the public key `039fbf7df13d0b6798fa16a79daabb97d4424062d
 
 ## Specification
 
-Please refer to [`bip-0173`](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#bech32) for more technical details of the `bech32` technical specification.
+Please refer to [`bip-0173`](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#bech32) for more details of the `bech32` technical specification.
 
 A Zilliqa `bech32` checksummed address consists of the following aspects:
 
