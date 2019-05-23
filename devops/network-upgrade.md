@@ -5,20 +5,20 @@ This doc describe the way to conduct the upgrade entire network. So far we imple
 - Upgrade on Separated Network
 - Rolling Upgrade
 
-Hers is comparison between these 2 methods while they would be applied in different scenarios:
+Hers is a comparison table between these 2 methods, and meanwhile the methods would be applied in different scenarios.
 
 |                   |Upgrade on Separated Network|Rolling Upgrade           |
 |-------------------|----------------------------|--------------------------|
 |Speed              |Fast (2 hrs)                |Slow (2 days)             |
-|User Experience    |Sense time-shifting         |Seamless, Ethereum adopt [this](https://blog.ethereum.org/2019/02/22/ethereum-constantinople-st-petersburg-upgrade-announcement/)|
+|User Experience    |Sense time-shifting         |Seamless and Ethereum adopt [this](https://blog.ethereum.org/2019/02/22/ethereum-constantinople-st-petersburg-upgrade-announcement/)|
 |Changes Take Effect|Immediately                 |Delayed by specified epoch|
 |Transaction History|Drop                        |Keep                      |
 |Once Failed        |Try again                   |Target testnet destroyed  |
 
-Following is more detail about how to apply these 2 upgrade precedures on entire network.
+Following is detail steps of how to apply these 2 upgrade precedures on entire network.
 
 ## Upgrade on Separated Network
-- [Login to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
+- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
   ```bash
   ssh mkops
   cd testnet
@@ -39,9 +39,9 @@ Following is more detail about how to apply these 2 upgrade precedures on entire
   ```
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `ori_testnet.tar.gz` is uploaded to `S3://zilliqa-persistence`.
 
-- Manuall confirm the correctness of constant file inside `configmap/constants.xml`.
+- Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 
-- Launch `new_testnet`
+- Launch `new_testnet`.
   ```bash
   ./testhet.sh up
   ```
@@ -51,19 +51,19 @@ Following is more detail about how to apply these 2 upgrade precedures on entire
   ./testnet.sh remove-ipMap
   ```
 ## Rolling Upgrade
-- [Login to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
+- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
   ```bash
   ssh mkops
   ```
 
-- Download Zilliqa/Scilla with specified commit.
+- Download Zilliqa/Scilla, and check-out to the commit-to-be-upgraded.
   ```bash
   git clone --recursive git@github.com:Zilliqa/Zilliqa.git (Mandatory)
   git clone git@github.com:Zilliqa/scilla.git (Optional, download it ONLY when you want to upgrade Scilla)
   ```
-  Note that rolling upgrade can ONLY upgrade Zilliqa or Scilla at a time.
+  Note that rolling upgrade ONLY can upgrade Zilliqa or Scilla at a time.
 
-- Run `Zilliqa/build/bin/genkeypair` several times to generate some privKey/pubKey pairs, then paste them into 2 separated files named `privKeyFile` and `pubKeyFile`. 
+- Run `Zilliqa/build/bin/genkeypair` several times to generate some privKey/pubKey pairs, then paste the keys into 2 separated files named `privKeyFile` and `pubKeyFile`. 
   ```bash
   ./Zilliqa/build/bin/genkeypair
   ```
@@ -84,12 +84,18 @@ Following is more detail about how to apply these 2 upgrade precedures on entire
   ```
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-release-data/?region=ap-southeast-1&tab=overview) and make sure `target_testnet.tar.gz` is uploaded to `S3://zilliqa-release-data`.
 
-- Change directory to `target_testnet` to be rolling upgraded.
+- (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/xxx/constants.xml`. If anything changed, release Zilliqa/Scilla image to S3 again.
+  ```bash
+  tar cfz target_testnet.tar.gz -C pubKeyPath pubKeyFile -C $(realpath release) VERSION -C $(realpath constantsDir) constants.xml -C $(realpath constantsDir/l) constants.xml_lookup -C $(realpath release) xxx-Linux-Zilliqa.deb -C $(realpath constantsDir/l2) constants.xml_level2lookup -C $(realpath constantsDir/n) constants.xml_newlookup
+  aws s3 cp target_testnet.tar.gz s3://zilliqa-release-data/
+  ```
+  Note the `pubKeyPath`, `xxx-Linux-Zilliqa.deb` should be changed propertly.
+- Change directory to `target_testnet` to-be-rolling-upgraded.
   ```bash
   cd target_testnet
   ```
 
-- Apply rolling upgrade for each TYPE, then once completed, remove unnecessary files.
+- Apply rolling upgrade for each TYPE; once completed, remove unnecessary files.
   ```bash
   ./testnet.sh upgrade-all TYPE
   ./testnet.sh upgrade-all TYPE finish
