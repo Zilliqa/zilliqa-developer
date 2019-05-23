@@ -115,7 +115,7 @@ A total of 6 general view change tests is built into the codebase as macro. To p
 2. `vc8` - When a DS backup is lagged (tx epoch) and the whole network did not enter into view change, check whether the node will rejoin as DS or not. Node with `consensusMyID` 3 will stall for 45s and enter view change to simulate node lagging behind.
 
 
-@@ Special test scenario
+## Special test scenario
 
 Test plan for merging DS Microblock into FinalBlock consensus
 
@@ -130,7 +130,6 @@ Test plan for merging DS Microblock into FinalBlock consensus
 3. Objective: Check fetching missing microblock
    Scenario : DS leader has more microblock received than one of the backups
    Adoption : Letting one of the backups refuse some Microblock submission
-
 4. Objective: Check View Change after fetching missing microblock
    Scenario : DS leader has more microblock received than all of the backups
    Adoption : Letting all of the backups refuse some Microblock submission
