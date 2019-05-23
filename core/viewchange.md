@@ -29,11 +29,11 @@ To conduct view change, the general steps are as follows:
 6. Re-run the stalled consensus 
 
 
-## Usage:
+## Usage
 Allows election of a new leader when the network cannot reach an agreement of the next state and stalled the consensus process
 
 
-## Terminology:
+## Terminology
 1. Candidate leader: Known as the proposed leader, the candidate leader will lead view change consensus round
 2. Faulty leader(s): The current or previous DS leader(s) that is deemed to be faulty
 3. Ejection: Reject the faulty leader(s) to the back of the ds committee. It will then be fully kicked out of the DS committee after the next DS consensus
@@ -43,7 +43,7 @@ Allows election of a new leader when the network cannot reach an agreement of th
 2. Node entered “RunConsensusOnFinalBlock” but final consensus did not complete within the time stipulated
 3. Node entered “RunConsensusOnViewChange” but view change consensus did not complete within the time stipulated
 
-## Setup:
+## Setup
 1. `[VC Block header]` Removal of candidate leader index as the index will be adjusted after view change and will be obsolete
 2. `[VC Block header]` Addition of `vector<pair<PubKey, Peer>>` for tracking all the faulty leaders 
 3. `[Macro]` Add the related test scenario macro. Refer to test macros section.
