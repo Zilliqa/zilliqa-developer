@@ -34,10 +34,13 @@ Following is detail steps of how to apply these 2 upgrade precedures on entire n
 - Under `new_testnet` folder, upload `ori_testnet`'s persistence to S3.
   ```bash
   ./testnet.sh upload ori_cluster ori_testnet
-  (For the scenario need to restore previous block (time-machine), use following command alternatively:)
-  ./testnet.sh upload ori_cluster ori_testnet level2lookup 0 restoredBlockNum
   ```
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `ori_testnet.tar.gz` is uploaded to `S3://zilliqa-persistence`.
+
+- (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `ori_testnet`'s persistence to S3 with given `restoredBlockNum`.
+  ```bash
+  ./testnet.sh upload ori_cluster ori_testnet level2lookup 0 restoredBlockNum
+  ```
 
 - Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 
