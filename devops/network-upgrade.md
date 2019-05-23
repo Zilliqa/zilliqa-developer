@@ -57,7 +57,7 @@ Following is detail steps of how to apply these 2 upgrade procedures on the enti
   ./testhet.sh up
   ```
 
-- After `new_testnet` being launched, remove unnecessary files.
+- After `new_testnet` being launched, remove unnecessary files (`ipMapping.xml`, used to map `ori_testnet`'s IP to `new_testnet`'s IP).
 
   ```bash
   ./testnet.sh remove-ipMap
@@ -120,7 +120,7 @@ Following is detail steps of how to apply these 2 upgrade procedures on the enti
   cd target_testnet
   ```
 
-- Apply rolling upgrade for each TYPE; once completed, remove unnecessary files.
+- Apply rolling upgrade for each TYPE; once completed, remove unnecessary files (`UPGRADE_DONE`, used to mark this POD is upgraded).
 
   ```bash
   ./testnet.sh upgrade-all TYPE
