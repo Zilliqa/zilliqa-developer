@@ -72,26 +72,26 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 ### For Wallets
 
 | Wallet                                                           | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
-| ---------------------------------------------------------------- | -------------------------------------- | ------------------------------------------- |
-| [Moonlet](https://moonlet.xyz/)                                  | NO                                    | YES                                          |
-| [ZilPay](https://zilpay.xyz/)                                    | NO                                    | YES                                          |
-| [Zillet](https://zillet.io/)                                     | NO                                    | YES                                          |
-| [Trust Wallet](https://trustwallet.com/)                         | NO                                    | NO                                          |
-| [Math Wallet](https://www.mathwallet.org/en/)                    | NO                                     | YES                                          |
-| [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) | NO                                     | YES                                          |
-| [xZIL](https://tinyurl.com/y2lzmfl6)                             | NO                                     | YES                                          |
+| ---------------------------------------------------------------- | :------------------------------------: | :-----------------------------------------: |
+| [Moonlet](https://moonlet.xyz/)                                  |                   -                    |             :heavy_check_mark:              |
+| [ZilPay](https://zilpay.xyz/)                                    |                   -                    |             :heavy_check_mark:              |
+| [Zillet](https://zillet.io/)                                     |                   -                    |             :heavy_check_mark:              |
+| [Trust Wallet](https://trustwallet.com/)                         |           :heavy_check_mark:           |                      -                      |
+| [Math Wallet](https://www.mathwallet.org/en/)                    |                   -                    |             :heavy_check_mark:              |
+| [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) |                   -                    |             :heavy_check_mark:              |
+| [xZIL](https://tinyurl.com/y2lzmfl6)                             |                   -                    |             :heavy_check_mark:              |
 
 ### For Exchanges
 
 | Exchanges                             | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
-| ------------------------------------- | -------------------------------------- | ------------------------------------------- |
-| [Binance](https://www.binance.com/)   | NO                                    | YES                                          |
-| [Kucoin](https://www.kucoin.com/)     | YES                                    | NO                                          |                                      |
-| [Upbit](https://upbit.com/)           | NO                                    | NO                                          |
-| [Coinhako](https://www.coinhako.com/) | YES                                    | YES                                          |
-| [Coinone](https://coinone.co.kr/)     | NO                                    | YES                                          |
-| [Huobi](https://www.huobi.com/)     | NO                                    | NO                                          |
-| [OKEx](https://www.okex.com/)     | NO                                    | NO                                          |
+| ------------------------------------- | :------------------------------------: | :-----------------------------------------: |
+| [Binance](https://www.binance.com/)   |                   -                    |             :heavy_check_mark:              |
+| [Kucoin](https://www.kucoin.com/)     |           :heavy_check_mark:           |                      -                      |
+| [Upbit](https://upbit.com/)           |                   -                    |                      -                      |
+| [Coinhako](https://www.coinhako.com/) |           :heavy_check_mark:           |             :heavy_check_mark:              |
+| [Coinone](https://coinone.co.kr/)     |                   -                    |             :heavy_check_mark:              |
+| [Huobi](https://www.huobi.com/)       |                   -                    |                      -                      |
+| [OKEx](https://www.okex.com/)         |                   -                    |                      -                      |
 
 ### For Explorers
 
