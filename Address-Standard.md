@@ -73,10 +73,10 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 
 | Wallet                                                           | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
 | ---------------------------------------------------------------- | -------------------------------------- | ------------------------------------------- |
-| [Moonlet](https://moonlet.xyz/)                                  | YES                                    | NO                                          |
-| [ZilPay](https://zilpay.xyz/)                                    | YES                                    | NO                                          |
-| [Zillet](https://zillet.io/)                                     | YES                                    | NO                                          |
-| [Trust Wallet](https://trustwallet.com/)                         | YES                                    | NO                                          |
+| [Moonlet](https://moonlet.xyz/)                                  | NO                                    | YES                                          |
+| [ZilPay](https://zilpay.xyz/)                                    | NO                                    | YES                                          |
+| [Zillet](https://zillet.io/)                                     | NO                                    | YES                                          |
+| [Trust Wallet](https://trustwallet.com/)                         | NO                                    | NO                                          |
 | [Math Wallet](https://www.mathwallet.org/en/)                    | NO                                     | YES                                          |
 | [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) | NO                                     | YES                                          |
 | [xZIL](https://tinyurl.com/y2lzmfl6)                             | NO                                     | YES                                          |
@@ -85,12 +85,13 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 
 | Exchanges                             | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
 | ------------------------------------- | -------------------------------------- | ------------------------------------------- |
-| [Binance](https://www.binance.com/)   | YES                                    | NO                                          |
-| [Kucoin](https://www.kucoin.com/)     | YES                                    | NO                                          |
-| [OKEx](https://www.okex.com/)         | YES                                    | NO                                          |
-| [Upbit](https://upbit.com/)           | YES                                    | NO                                          |
-| [Coinhako](https://www.coinhako.com/) | YES                                    | NO                                          |
-| [Coinone](https://coinone.co.kr/)     | YES                                    | NO                                          |
+| [Binance](https://www.binance.com/)   | NO                                    | YES                                          |
+| [Kucoin](https://www.kucoin.com/)     | YES                                    | NO                                          |                                      |
+| [Upbit](https://upbit.com/)           | NO                                    | NO                                          |
+| [Coinhako](https://www.coinhako.com/) | YES                                    | YES                                          |
+| [Coinone](https://coinone.co.kr/)     | NO                                    | YES                                          |
+| [Huobi](https://www.huobi.com/)     | NO                                    | NO                                          |
+| [OKEx](https://www.okex.com/)     | NO                                    | NO                                          |
 
 ### For Explorers
 
