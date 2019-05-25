@@ -63,7 +63,7 @@ In order to support both `bech32` (**DEFAULT**) and legacy `base16` (**OPTIONAL*
   - More languages support to come...
 
 - Online utility tool to convert `base16` checksummed addresses to `bech32` format:
-  - [Zilliqa Address Tool](https://coinhako.github.io/zilcheck/)
+  - [Zilliqa Address Tool](https://www.coinhako.com/zil-check)
 
 ## Current Adoption
 
