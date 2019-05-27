@@ -1,6 +1,6 @@
 # View Change
 
-This document describes the view change process in Zilliqa.
+This document describes the view change process in Zilliqa. For automation of viewchange tests, please refer to this [link](https://github.com/Zilliqa/testnet/blob/master/vc_test/VCTESTS.md)
 
 <!-- TOC depthTo:2 -->
 
