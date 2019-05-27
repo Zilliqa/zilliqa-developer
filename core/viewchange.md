@@ -19,7 +19,7 @@ This document describes the view change process in Zilliqa
 
 ## Description
 
-In this version of view change, view change now supports random candidate leader selection and re-selection of candidate leader if it is the faulty leader. This version of view change also fixes the issue where the wrong ds leader is ejected to the back of the queue as a result of a previous hotfix that fixes view change issue after random DS leader election.
+This version of view change supports random candidate leader selection and re-selection of the candidate leader if it is faulty. It also fixes the issue where the wrong ds leader is ejected to the back of the queue, which is the result of a previous hotfix that fixes view change issue after random DS leader election.
 
 To conduct view change, the general steps are as follows:
 
