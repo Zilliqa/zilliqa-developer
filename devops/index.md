@@ -3,3 +3,4 @@
 - [Mainnet Token Transfer](mainnet-token-transfer.md)
 - [DNS for Public Testnet](dns-for-public-testnet.md)
 - [Private API Endpoint](private-api-endpoint.md)
+- [Network Upgrade](network-upgrade.md)
