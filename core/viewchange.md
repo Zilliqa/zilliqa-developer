@@ -72,7 +72,7 @@ Allows election of a new leader when the network cannot reach an agreement of th
 
 9. Candidate leader lead the consensus round
 10. Backup validate leader announcement
-11. View change consensus completed/Stalled
+11. View change consensus completed/stalled
 a. If stalled, wait for timeout and re-run view change consensus with a new candidate leader
 12. Remove faulty leaders (found in Faulty leader vector) from DS Committee
 13. Add faulty leaders (found in Faulty leader vector) to the back DS Committee
