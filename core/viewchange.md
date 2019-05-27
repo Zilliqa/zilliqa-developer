@@ -38,7 +38,7 @@ Allows election of a new leader when the network cannot reach an agreement of th
 
 1. Candidate leader: Known as the proposed leader, the candidate leader will lead view change consensus round
 2. Faulty leader(s): The current or previous DS leader(s) that is deemed to be faulty
-3. Ejection: Reject the faulty leader(s) to the back of the ds committee. It will then be fully kicked out of the DS committee after the next DS consensus
+3. Ejection: Eject the faulty leader(s) to the back of the ds committee. It will then be fully kicked out of the DS committee after the next DS consensus
 
 ## Trigger conditions
 
