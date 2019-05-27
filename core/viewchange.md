@@ -1,6 +1,6 @@
 # View Change
 
-This document describes the view change process in Zilliqa
+This document describes the view change process in Zilliqa.
 
 <!-- TOC depthTo:2 -->
 
