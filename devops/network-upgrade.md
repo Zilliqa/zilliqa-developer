@@ -15,7 +15,7 @@ Here is a comparison table between these 2 methods, and meanwhile, the methods w
 |Transaction History|Drop                        |Keep                      |
 |Once Failed        |Try again                   |Target testnet destroyed  |
 
-Following is detail steps of how to apply these 2 upgrade procedures on the entire network.
+Following is detailed steps of how to apply these 2 upgrade procedures on the entire network.
 
 ## Upgrade on Separated Network
 
@@ -107,7 +107,7 @@ Following is detail steps of how to apply these 2 upgrade procedures on the enti
   ./scripts/release.sh
   ```
 
-  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-release-data/?region=ap-southeast-1&tab=overview) and make sure `<target_testnet>.tar.gz` is uploaded to `S3://zilliqa-release-data`.
+  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-release-data/?region=ap-southeast-1&tab=overview) and make sure `<target_testnet>.tar.gz` is uploaded to `s3://zilliqa-release-data`.
 
 - (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/xxx/constants.xml`. If anything changes, release Zilliqa/Scilla image to S3 again.
 
