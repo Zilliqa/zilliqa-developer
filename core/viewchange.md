@@ -25,8 +25,8 @@ To conduct view change, the general steps are as follows:
 
 1. A stall in consensus must have happened
 2. Network enters into view change state
-3. Candidate leader lead the view change consensus using PBFT
-4. Backup validate the announcement
+3. Candidate leader leads the view change consensus using PBFT
+4. Backups validate the announcement
 5. View change consensus is reached
 6. Re-run the stalled consensus
 
@@ -70,8 +70,8 @@ Allows election of a new leader when the network cannot reach an agreement of th
     H(H((finalblock or vc block hash, vc counter)) repeatedly till an index is not the current faulty leader.
     ```
 
-9. Candidate leader lead the consensus round
-10. Backup validate leader announcement
+9. Candidate leader leads the consensus round
+10. Backups validate leader announcement
 11. View change consensus completed/stalled
 a. If stalled, wait for timeout and re-run view change consensus with a new candidate leader
 12. Remove faulty leaders (found in Faulty leader vector) from DS Committee
