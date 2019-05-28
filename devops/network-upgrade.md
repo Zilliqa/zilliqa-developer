@@ -124,15 +124,21 @@ Following is detail steps of how to apply these 2 upgrade procedures on the enti
   cd <target_testnet>
   ```
 
-- Apply rolling upgrade for each TYPE; once completed, remove unnecessary files (`UPGRADE_DONE`, used to mark this POD is upgraded), and update the commit hash inside <target_testnet>/manifest/TYPE.yaml.
+- Apply rolling upgrade for each <TYPE>; once completed, running `finish` will remove unnecessary files (`UPGRADE_DONE`, used to mark this POD is upgraded) and update the commit hash inside <target_testnet>/manifest/<TYPE>.yaml.
 
   ```bash
-  ./testnet.sh upgrade-all TYPE
-  ./testnet.sh upgrade-all TYPE finish
-  ```
-  TYPE should be applied in sequence: {`lookup`, `level2lookup`, `newlookup`, `dsguard`, `normal`}.
+  # Zilliqa only can be upgrade type-by-type
+  ./testnet.sh upgrade-all <TYPE>
+  ./testnet.sh upgrade-all <TYPE> finish
 
-- (Optional) For verifying pupose, you can specify the start/end index for a small-scale rolling upgrade. (Default: rolling upgrade all if nothing specified)
+  # Scilla can be upgrade all types in one shot, or type-by-type
+  ./testnet.sh upgrade-all all scilla
+  ./testnet.sh upgrade-all all finish scilla
+  ```
+
+  `<TYPE>` should be applied in following sequence: {`lookup`, `level2lookup`, `newlookup`, `dsguard`, `normal`}.
+
+- (Optional, Zilliqa only) For verifying pupose, you can specify the start/end index for a small-scale rolling upgrade. (Default: rolling upgrade all if nothing specified)
 
   ```bash
   ./testnet.sh upgrade-all TYPE <start_node> <end_node>
