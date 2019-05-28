@@ -26,38 +26,38 @@ Following is detail steps of how to apply these 2 upgrade procedures on the enti
   cd testnet
   ```
 
-- Under `testnet` folder, bootstrap a separate testnet `new_testnet` from the original cluster/testnet (`ori_cluster`/`ori_testnet`).
+- Under `testnet` folder, bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
 
   ```bash
-  ./bootstrap.py new_testnet --recover-from-testnet ori_testnet --recover-from-cluster ori_cluster -c commit -t tag...
-  cd new_testnet
+  ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> -c <commit> -t <tag>...
+  cd <new_testnet>
   ```
 
-  Keep the options the same as much as possible from the `ori_testnet`'s bootstrap options.
+  Keep the options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
 
-- Under `new_testnet` folder, upload `ori_testnet`'s persistence to S3.
+- Under `<new_testnet>` folder, upload `<ori_testnet>`'s persistence to S3.
 
   ```bash
-  ./testnet.sh upload ori_cluster ori_testnet
+  ./testnet.sh upload <ori_cluster> <ori_testnet>
   ```
 
-  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `ori_testnet.tar.gz` is uploaded to `S3://zilliqa-persistence`.
+  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `<ori_testnet>.tar.gz` is uploaded to `S3://zilliqa-persistence`.
 
-- (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `ori_testnet`'s persistence to S3 with given `restoredBlockNum`.
+- (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `<ori_testnet>`'s persistence to S3 with given `<restoredBlockNum>`.
 
   ```bash
-  ./testnet.sh upload ori_cluster ori_testnet level2lookup 0 restoredBlockNum
+  ./testnet.sh upload <ori_cluster> <ori_testnet> level2lookup 0 <restoredBlockNum>
   ```
 
 - Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 
-- Launch `new_testnet`.
+- Launch `<new_testnet>`.
 
   ```bash
   ./testhet.sh up
   ```
 
-- After `new_testnet` being launched, remove unnecessary files (`ipMapping.xml`, used to map `ori_testnet`'s IP to `new_testnet`'s IP).
+- After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).
 
   ```bash
   ./testnet.sh remove-ipMap
@@ -124,7 +124,7 @@ Following is detail steps of how to apply these 2 upgrade procedures on the enti
   cd <target_testnet>
   ```
 
-- Apply rolling upgrade for each <TYPE>; once completed, running `finish` will remove unnecessary files (`UPGRADE_DONE`, used to mark this POD is upgraded) and update the commit hash inside <target_testnet>/manifest/<TYPE>.yaml.
+- Apply rolling upgrade for each `<TYPE>`; once completed, running `finish` will remove unnecessary files (`UPGRADE_DONE`, used to mark this POD is upgraded) and update the commit hash inside `<target_testnet>`/manifest/`<TYPE>`.yaml.
 
   ```bash
   # Zilliqa only can be upgrade type-by-type
