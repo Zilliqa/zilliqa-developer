@@ -64,7 +64,7 @@ Allows election of a new leader when the network cannot reach an agreement of th
 8. `CalculateNewLeaderIndex()` calculates candidate leader index using
 
     ```text
-    H(finalblock or vc block hash, vc counter) % size
+    H(finalblock or vc block hash, vc counter) % size (or num of DS guard)
 
     If a previous vc block (for current consensus) exists, use vc block hash. Else use final block hash. If new candidate leader index is current faulty leader, re-calculate using
     H(H(finalblock or vc block hash, vc counter)) repeatedly till an index is not the current faulty leader.
@@ -75,7 +75,7 @@ Allows election of a new leader when the network cannot reach an agreement of th
 11. View change consensus completed/stalled
 a. If stalled, wait for timeout and re-run view change consensus with a new candidate leader
 12. Remove faulty leaders (found in Faulty leader vector) from DS Committee
-13. Add faulty leaders (found in Faulty leader vector) to the back DS Committee
+13. Add faulty leaders (found in Faulty leader vector) to the back DS Committee (if not in guard mode)
 14. Recalculate `m_consensusMyID` by searching for own node inside the DS committee
 15. Set new DS `m_consensusLeaderID`
 16. Store VC block to persistent storage
