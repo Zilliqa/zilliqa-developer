@@ -5,7 +5,7 @@ This doc describes the way to conduct the upgrade entire network. So far we impl
 - Upgrade on Separated Network
 - Rolling Upgrade
 
-See the [link](https://drive.google.com/drive/u/1/folders/1r6xz0zhj-QJr_EEVgKPcYeHw125Dp3Rh) for the presentation of upgrade, including some demo.
+See the [link](https://drive.google.com/drive/u/1/folders/1r6xz0zhj-QJr_EEVgKPcYeHw125Dp3Rh) for the presentation of network upgrade, including some demo.
 
 Here is a comparison table between these 2 methods, and meanwhile, the methods would be applied in different scenarios.
 
