@@ -139,7 +139,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```
 
   `<TYPE>` should be applied in following sequence: {`lookup`, `level2lookup`, `newlookup`, `dsguard`, `normal`}.
-  For the POD with crashed Zilliqa process (ie. no Zilliqa process running), rolling upgrade script will attempt to delete & restart the POD first, then apply upgrading.
+  For the POD with no Zilliqa process running (e.g., the process crashed, the POD is not alive, etc), rolling upgrade script will attempt to delete & restart the POD first, then apply upgrading.
 
 - (Optional, Zilliqa only) For verifying pupose, you can specify the start/end index for a small-scale rolling upgrade. (Default: rolling upgrade all if nothing specified)
 
