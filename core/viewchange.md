@@ -64,10 +64,10 @@ Allows election of a new leader when the network cannot reach an agreement of th
 8. `CalculateNewLeaderIndex()` calculates candidate leader index using
 
     ```text
-    H((finalblock or vc block hash, vc counter) % size
+    H(finalblock or vc block hash, vc counter) % size
 
     If a previous vc block (for current consensus) exists, use vc block hash. Else use final block hash. If new candidate leader index is current faulty leader, re-calculate using
-    H(H((finalblock or vc block hash, vc counter)) repeatedly till an index is not the current faulty leader.
+    H(H(finalblock or vc block hash, vc counter)) repeatedly till an index is not the current faulty leader.
     ```
 
 9. Candidate leader leads the consensus round
