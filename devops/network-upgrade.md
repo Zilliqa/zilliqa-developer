@@ -5,6 +5,8 @@ This doc describes the way to conduct the upgrade entire network. So far we impl
 - Upgrade on Separated Network
 - Rolling Upgrade
 
+See the [link](https://drive.google.com/drive/u/1/folders/1r6xz0zhj-QJr_EEVgKPcYeHw125Dp3Rh) for the presentation of upgrade, including some demo.
+
 Here is a comparison table between these 2 methods, and meanwhile, the methods would be applied in different scenarios.
 
 |                   |Upgrade on Separated Network|Rolling Upgrade           |
@@ -116,7 +118,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   aws s3 cp <target_testnet>.tar.gz s3://zilliqa-release-data/
   ```
 
-  Note the variables `<pubKeyPath>`, `<xxx-Linux-Zilliqa.deb>`, `<target_testnet>` should be changed properly.
+  Note the variables `<pubKeyPath>`, `<xxx-Linux-Zilliqa.deb>` (the deb name could be found in `Zilliqa/release/`), `<target_testnet>` should be changed properly.
 
 - Change directory to `<target_testnet>`.
 
@@ -137,6 +139,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```
 
   `<TYPE>` should be applied in following sequence: {`lookup`, `level2lookup`, `newlookup`, `dsguard`, `normal`}.
+  For the POD with crashed Zilliqa process (ie. no Zilliqa process running), rolling upgrade script will attempt to delete & restart the POD first, then apply upgrading.
 
 - (Optional, Zilliqa only) For verifying pupose, you can specify the start/end index for a small-scale rolling upgrade. (Default: rolling upgrade all if nothing specified)
 
@@ -144,4 +147,18 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ./testnet.sh upgrade-all TYPE <start_node> <end_node>
   ```
 
-- When running the rolling upgrade, separate log files for upgrading pods would be generated under `upgrade_log/` folder.
+- When running the rolling upgrade, separate log files for upgrading pods would be generated under `upgrade_log/` folder. In the meantime, we can monitor the rolling upgrade status by following:
+
+  ```bash
+  ./testnet.sh status | grep <target_testnet>-<TYPE>-<index>   # See if this POD is alive
+  ./testnet.sh epoch TYPE                                      # List the epoch number of every <TYPE> nodes
+  ```
+
+  Or, ssh to the node-under-upgrading, see the rolling upgrade progress:
+
+  ```bash
+  tail -f daemon-log.txt        # See if Zilliqa process is restarted successfully
+  tail -f state-00001-log.txt   # Monitor the epoch number
+  vi zilliqa-00001-log.txt      # Monitor the detail log message
+  gdb zilliqa core.xxx          # For zilliqa node crashed, use gdb to debug
+  ```
