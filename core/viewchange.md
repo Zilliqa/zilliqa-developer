@@ -160,12 +160,14 @@ Test plan for merging DS Microblock into FinalBlock consensus
 4. `vc4` - stall at the start of final consensus for 3 times
 5. `vc5` - stall at the start of vc consensus for 1 time
 6. `vc6` - stall at the start of vc consensus for 2 times
-7. `dm1` - letting one of the backups accept fewer txns from lookup comparing to the others
-8. `dm2` - letting all of the backups accept fewer txns from lookup comparing to the leader
-9. `dm3` - letting one of the backups refuse some Microblock submission
-10. `dm4` - letting all of the backups refuse some Microblock submission
-11. `dm5` - compose the wrong TxBlock, done by composing wrong state root hash in the TxBlock
-12. `dm6` - compose the wrong DSMicroBlock, done by composing wrong tranhashes in the DSMicroBlock
-13. `dm7` - letting the ds leader accept fewer txns from lookup comparing to the others
-14. `dm8` - letting the ds leader and half of the ds committee members accept fewer txns from lookup comparing to the others
-15. `dm9` - letting the ds leader and half of the ds committee members refuse some MicroBlock submission
+7. `vc7` - Node with `consensusMyID 3` will stall for 45s and enter view change to simulate node lagging behind at DS block consensus. Node will precheck and rejoin as DS. Network will not undergo view change
+8. `vc8` - Node with `consensusMyID 3` will stall for 45s and enter view change to simulate node lagging behind at Final block consensus. Node will precheck and rejoin as DS. Network will not undergo view change
+9. `dm1` - letting one of the backups accept fewer txns from lookup comparing to the others
+10. `dm2` - letting all of the backups accept fewer txns from lookup comparing to the leader
+11. `dm3` - letting one of the backups refuse some Microblock submission
+12. `dm4` - letting all of the backups refuse some Microblock submission
+13. `dm5` - compose the wrong TxBlock, done by composing wrong state root hash in the TxBlock
+14. `dm6` - compose the wrong DSMicroBlock, done by composing wrong tranhashes in the DSMicroBlock
+15. `dm7` - letting the ds leader accept fewer txns from lookup comparing to the others
+16. `dm8` - letting the ds leader and half of the ds committee members accept fewer txns from lookup comparing to the others
+17. `dm9` - letting the ds leader and half of the ds committee members refuse some MicroBlock submission
