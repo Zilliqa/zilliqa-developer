@@ -144,14 +144,14 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 - (Optional, Zilliqa only) For verifying pupose, you can specify the start/end index for a small-scale rolling upgrade. (Default: rolling upgrade all if nothing specified)
 
   ```bash
-  ./testnet.sh upgrade-all TYPE <start_node> <end_node>
+  ./testnet.sh upgrade-all <TYPE> <start_node> <end_node>
   ```
 
 - When running the rolling upgrade, separate log files for upgrading pods would be generated under `upgrade_log/` folder. In the meantime, we can monitor the rolling upgrade status by following:
 
   ```bash
   ./testnet.sh status | grep <target_testnet>-<TYPE>-<index>   # See if this POD is alive
-  ./testnet.sh epoch TYPE                                      # List the epoch number of every <TYPE> nodes
+  ./testnet.sh epoch <TYPE>                                      # List the epoch number of every <TYPE> nodes
   ```
 
   Or, ssh to the node-under-upgrading, see the rolling upgrade progress:
