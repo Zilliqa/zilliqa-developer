@@ -11,17 +11,15 @@ AWS Cloud9 is a browser-based service that offers you a coding environment from 
 - **Shareable environment**. The bastion can be shared and thus grant access to human users.
 
 The following topics are covered in this document.
-<!-- TOC -->
 
 - [Creation of bastion](#creation-of-bastion)
 - [Permissions to Other AWS Services](#permissions-to-other-aws-services)
 - [Backup of User Data](#backup-of-user-data)
 - [Example Use Cases](#example-use-cases)
-    - [Kubernetes Clusters Management](#kubernetes-clusters-management)
-    - [Kubernetes Admin/User](#kubernetes-adminuser)
+  - [Kubernetes Clusters Management](#kubernetes-clusters-management)
+  - [Kubernetes Admin/User](#kubernetes-adminuser)
 - [References](#references)
-
-<!-- /TOC -->
+- [TODOs](#todos)
 
 ## Creation of bastion
 
@@ -81,3 +79,7 @@ If you are an admin or user of the Kubernetes clusters, you can also make use of
 ## References
 
 - [AWS Cloud9 User Guide](https://docs.aws.amazon.com/cloud9/latest/user-guide/welcome.html)
+
+## TODOs
+
+- [ ] add guide about sharing bastion with others.
