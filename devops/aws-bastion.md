@@ -1,12 +1,12 @@
 # AWS Cloud9 Bastion
 
-AWS Cloud9 is a browser-based service that offers you a coding environment from any locations. We use it as a tool to manage bastion hosts. This has several benefits in terms of security, cost and maintenance effort:
+AWS Cloud9 is a browser-based service that offers you a coding environment from any location. We use it as a tool to manage bastion hosts. This has several benefits in terms of security, cost and maintenance effort:
 
 - **Permissions built into bastion**. The access permissions to other AWS resources are built into the bastion host using IAM instance profile. Users who log in to bastion do not need to carry any permissions.
 
 - **Restricted access**. By default, the bastion only allows access from a logged-in user through AWS Cloud9 console. Direct access from Internet is disallowed in the security group of the Cloud9 EC2 instance.
 
-- **Cost-saving upon hibernation**. When the bastion is not used by any users or does not have any activites, it will be stopped to save cost. It will resume running when anyone logs in.
+- **Cost-saving upon hibernation**. When the bastion is not used by any users or does not have any activities, it will be stopped to save cost. It will resume running when anyone logs in.
 
 - **Shareable environment**. The bastion can be shared and thus grant access to human users.
 
@@ -46,10 +46,10 @@ You will be forwarded to the Cloud9 page and soon your bastion will be ready to 
 
 By default, your bastion is able to use [AWS Managed Temporary Credentials](https://docs.aws.amazon.com/cloud9/latest/user-guide/auth-and-access-control.html#auth-and-access-control-temporary-managed-credentials-supported), which automatically allows the bastion to access other AWS services on behalf of the AWS entity (account, IAM user, federated user, etc.) you use to create the bastion.
 
-However, this default permission is might be too permissive or too restrictive if
+However, this default permission might be too permissive or too restrictive if
 
 1. you will share the bastion with other users who have less permissions than you.
-2. you need the bastion to have more permissions than the your current account.
+2. you need the bastion to have more permissions than your current account.
 
 For these situations, you can choose to:
 
@@ -64,7 +64,7 @@ Please be aware that the Cloud9 bastion does not provided any backup of the data
 
 ### Kubernetes Clusters Management
 
-Managing Kubernetes cluster involves having access to other AWS resources which are considered critical and risky if unauthroized access happens. There are a few advantages using Cloud9 bastion for this:
+Managing Kubernetes cluster involves having access to other AWS resources which are considered critical and risky if unauthorized access happens. There are a few advantages using Cloud9 bastion for this:
 
 1. The permissions can be safely assigned to the bastion through IAM instance profile and the user account does not need to have them.
 2. If the bastion is in the hibernation state, no one can use the permissions.
