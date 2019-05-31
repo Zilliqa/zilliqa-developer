@@ -4,4 +4,4 @@
 - [DNS for Public Testnet](dns-for-public-testnet.md)
 - [Private API Endpoint](private-api-endpoint.md)
 - [Network Upgrade](network-upgrade.md)
-- [AWS Bastion Management](aws-bastion.md)
+- [AWS Cloud9 Bastion](aws-bastion.md)
