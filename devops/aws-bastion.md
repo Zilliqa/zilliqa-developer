@@ -58,7 +58,7 @@ For these situations, you can choose to:
 
 ## Backup of User Data
 
-Please be aware that the Cloud9 bastion does not provided any backup of the data. It is essentially an EC2 instance managed by Cloud9 with no automatic backup. You will have the same concern of data persistence when you use an EC2 instance. So backup your own data or credentials if they are important.
+Please be aware that the Cloud9 bastion does not provide any backup of the data. It is essentially an EC2 instance managed by Cloud9 with no automatic backups. You will have the same concern of data persistence when you use an EC2 instance. So backup your own data or credentials if they are important.
 
 ## Example Use Cases
 
