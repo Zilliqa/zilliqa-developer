@@ -74,7 +74,7 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 | Wallet                                                           | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
 | ---------------------------------------------------------------- | :------------------------------------: | :-----------------------------------------: |
 | [Moonlet](https://moonlet.xyz/)                                  |          :heavy_check_mark:                     |             :heavy_check_mark:              |
-| [ZilPay](https://zilpay.xyz/)                                    |                   -                    |             :heavy_check_mark:              |
+| [ZilPay](https://zilpay.xyz/)                                    |                   :heavy_check_mark:                    |             :heavy_check_mark:              |
 | [Zillet](https://zillet.io/)                                     |           :heavy_check_mark:                    |             :heavy_check_mark:              |
 | [Trust Wallet](https://trustwallet.com/)                         |           :heavy_check_mark:           |                      -                      |
 | [Math Wallet](https://www.mathwallet.org/en/)                    |                   -                    |             :heavy_check_mark:              |
