@@ -85,9 +85,9 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 
 | Exchanges                             | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
 | ------------------------------------- | :------------------------------------: | :-----------------------------------------: |
-| [Binance](https://www.binance.com/)   |                   -                    |             :heavy_check_mark:              |
+| [Binance](https://www.binance.com/)   |           :heavy_check_mark:           |             -              |
 | [Kucoin](https://www.kucoin.com/)     |           :heavy_check_mark:           |                      -                      |
-| [Upbit](https://upbit.com/)           |                   -                    |                      -                      |
+| [Upbit](https://upbit.com/)           |                   :heavy_check_mark:                    |                      -                      |
 | [Coinhako](https://www.coinhako.com/) |           :heavy_check_mark:           |             :heavy_check_mark:              |
 | [Coinone](https://coinone.co.kr/)     |                   -                    |             :heavy_check_mark:              |
 | [Huobi](https://www.huobi.com/)       |                   -                    |                      -                      |
