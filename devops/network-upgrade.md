@@ -37,6 +37,17 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
   Keep the options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
 
+- Go to AWS webpage for updating `Bucket Policy` of [S3://zilliqa-incremental](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-incremental/?region=ap-southeast-1&tab=permissions), and [S3://zilliqa-statedelta](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-statedelta/?region=ap-southeast-1&tab=permissions); by adding `<new_cluster>` information:
+
+    ```bash
+    "Statement": [
+        {
+            ...
+            "Principal": {
+                "AWS": [
+                    "arn:aws:iam::648273915458:role/nodes.<new_cluster>"
+    ```
+
 - Under `<new_testnet>` folder, upload `<ori_testnet>`'s persistence to S3.
 
   ```bash
