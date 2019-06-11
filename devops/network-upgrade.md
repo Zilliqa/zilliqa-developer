@@ -122,7 +122,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-release-data/?region=ap-southeast-1&tab=overview) and make sure `<target_testnet>.tar.gz` is uploaded to `s3://zilliqa-release-data`.
 
-- (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/xxx/constants.xml`. If anything changes, release Zilliqa/Scilla image to S3 again.
+- (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/<type>/constants.xml_<type>`. If anything changes, release Zilliqa/Scilla image to S3 again.
 
   ```bash
   tar cfz <target_testnet>.tar.gz -C <pubKeyPath> pubKeyFile -C $(realpath ./scripts) miner_info.py -C $(realpath release) VERSION -C $(realpath constantsDir) constants.xml -C $(realpath constantsDir/l) constants.xml_lookup -C $(realpath release) <xxx-Linux-Zilliqa.deb> -C $(realpath constantsDir/l2) constants.xml_level2lookup -C $(realpath constantsDir/n) constants.xml_newlookup
