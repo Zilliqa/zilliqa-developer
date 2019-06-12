@@ -89,9 +89,9 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 | [Kucoin](https://www.kucoin.com/)     |           :heavy_check_mark:           |                      -                      |
 | [Upbit](https://upbit.com/)           |                   :heavy_check_mark:                    |                      -                      |
 | [Coinhako](https://www.coinhako.com/) |           :heavy_check_mark:           |             :heavy_check_mark:              |
-| [Coinone](https://coinone.co.kr/)     |                   -                    |             :heavy_check_mark:              |
+| [Coinone](https://coinone.co.kr/)     |                   :heavy_check_mark:                    |             -              |
 | [Huobi](https://www.huobi.com/)       |                   -                    |                      -                      |
-| [OKEx](https://www.okex.com/)         |                   -                    |                      -                      |
+| [OKEx](https://www.okex.com/)         |                   :heavy_check_mark:                    |                      -                      |
 
 ### For Explorers
 
