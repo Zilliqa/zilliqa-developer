@@ -92,6 +92,7 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 | [Coinone](https://coinone.co.kr/)     |                   :heavy_check_mark:                    |             -              |
 | [Huobi](https://www.huobi.com/)       |                   -                    |                      -                      |
 | [OKEx](https://www.okex.com/)         |                   :heavy_check_mark:                    |                      -                      |
+| [Gate.io](https://www.gate.io/)         |                   :heavy_check_mark:                    |                      -                      |
 
 ### For Explorers
 
