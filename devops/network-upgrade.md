@@ -21,7 +21,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 ## Upgrade on Separated Network
 
-- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit) and go to `testnet` folder.
+- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit), and go to `testnet` folder.
 
   ```bash
   ssh mkops
@@ -68,7 +68,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 - Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 
-- Go to `<new_testnet>` folder, and launch `<new_testnet>`.
+- Go to `<new_testnet>` folder, and launch it.
 
   ```bash
   cd <new_testnet>
