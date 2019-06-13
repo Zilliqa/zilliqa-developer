@@ -21,7 +21,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 ## Upgrade on Separated Network
 
-- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
+- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit) and go to `testnet` folder.
 
   ```bash
   ssh mkops
@@ -34,6 +34,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```bash
   cd <ori_testnet>
   ./testnet.sh back-up
+  cd -
   ```
 
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `<ori_testnet>.tar.gz` is uploaded to `S3://zilliqa-persistence`.
@@ -43,13 +44,13 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```bash
   cd <ori_testnet>
   ./testnet.sh back-up level2lookup 0 <restoredBlockNum>
+  cd -
   ```
 
-- Under `testnet` folder, bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
+- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
 
   ```bash
   ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> -c <commit> -t <tag>...
-  cd <new_testnet>
   ```
 
   Keep the options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
@@ -67,9 +68,10 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 - Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 
-- Launch `<new_testnet>`.
+- Go to `<new_testnet>` folder, and launch `<new_testnet>`.
 
   ```bash
+  cd <new_testnet>
   ./testhet.sh up
   ```
 
