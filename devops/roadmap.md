@@ -18,7 +18,7 @@ We are making some changes to the infrastructure and workflows in order to have 
     - [Testnet Known Limitaitons](#testnet-known-limitaitons)
   - [Mainnet](#mainnet)
 - [Cheatsheet](#cheatsheet)
-- [Other Resources](#other-resources)
+- [References](#references)
 
 ## Background
 
@@ -136,12 +136,11 @@ The mainnet will still run in the current infrastructure and will be managed thr
 
 > *: recovery / upgrade not supported due to the [known issue](#devnet-known-limitations).
 
-## Other Resources
+## References
 
-- Code Repositories
-  - [Zilliqa/testnet](https://github.com/Zilliqa/testnet)
-  - [Zilliqa/genet](https://github.com/Zilliqa/genet)
-- Google Docs
-  - [Kops Bastion Host User Guide][1]
+- [Zilliqa/testnet](https://github.com/Zilliqa/testnet)
+- [Zilliqa/genet](https://github.com/Zilliqa/genet)
+- [Kops Bastion Host User Guide][1]
+- [AWS Cloud9 Bastion](aws-bastion.md)
 
 [1]: https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit#heading=h.jc0npl4cfb8u
