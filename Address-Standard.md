@@ -20,7 +20,7 @@ All examples below use the public key `039fbf7df13d0b6798fa16a79daabb97d4424062d
 
 - Mainnet legacy `base16` checksummed address: `0x7Aa7eA9f4534d8D70224b9c2FB165242F321F12b`
 - Mainnet `bech32` checksummed address: `zil102n74869xnvdwq3yh8p0k9jjgtejruft268tg8`
-- Testnet `bech32` checksummed address: `tzil102n74869xnvdwq3yh8p0k9jjgtejrufty0w0gk`
+- Testnet `bech32` checksummed address: `zil102n74869xnvdwq3yh8p0k9jjgtejruft268tg8`
 
 ## Specification
 
