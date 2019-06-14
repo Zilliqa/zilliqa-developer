@@ -22,7 +22,7 @@ We are making some changes to the infrastructure and workflows in order to have 
 
 ## Background
 
-Prior to this transition, all the Zilliqa networks are running in one AWS account and managed through two bastion hosts running from the same account. As a result, many of the AWS resources are shared between different Kubernetes clusters and networks, which creates security challenges in complete isolation and access control.
+Prior to this transition, all the Zilliqa networks were running in one AWS account and managed through two bastion hosts running from the same account. As a result, many of the AWS resources were shared between different Kubernetes clusters and networks, which created security challenges in complete isolation and access control.
 
 ### Bastions
 
