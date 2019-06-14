@@ -93,7 +93,7 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 | [Huobi](https://www.huobi.com/)       |                   -                    |                      -                      |
 | [OKEx](https://www.okex.com/)         |                   :heavy_check_mark:                    |                      -                      |
 | [Gate.io](https://www.gate.io/)         |                   :heavy_check_mark:                    |                      -                      |
-
+| [CoinEx](https://www.coinex.com/)         |                   :heavy_check_mark:                    |                      -   
 ### For Explorers
 
 [Viewblock explorer](https://viewblock.io/zilliqa) will be supporting both the new `bech32` and legacy `base16` checksummed in the search bar in order to ease the transition to `bech32` checksummed addresses for all Users. A tooltip will also be available for Users to convert between the two address formats temporarily.
