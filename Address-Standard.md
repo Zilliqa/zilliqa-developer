@@ -34,7 +34,7 @@ A Zilliqa `bech32` checksummed address consists of the following aspects:
 | **Example 2** | `zil`                 | `1`       | `48fy8yjxn6jf5w36kqc7x73qd3ufuu24` | `a4u8t9` |
 | **Example 3** | `zil`                 | `1`       | `fdv7u7rll9epgcqv9xxh9lhwq427nsql` | `58qcs9` |
 
-- Do note that the human-readable prefix for [Zilliqa mainnet](https://viewblock.io/zilliqa) is `zil`, and the human-readable prefix for [Zilliqa Developer testnet](https://viewblock.io/zilliqa?network=testnet) is `tzil`.
+- Do note that the human-readable prefix for [Zilliqa mainnet](https://viewblock.io/zilliqa) is `zil`, and the human-readable prefix for [Zilliqa Developer testnet](https://viewblock.io/zilliqa?network=testnet) is also `zil`.
 - Do also note that the last six characters of the data part form a checksum and contain no information.
 
 ## Recommended implementation
