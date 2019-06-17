@@ -90,7 +90,7 @@ In the new design, all the devnets will run in one cluster from a selected AWS a
     - `s3://zilliqa-statedelta`
     - etc.
 
-    As a result, the devnet / testnet running in different AWS account will lose the recovery features unless the issue is resolved permanently or the access is enabled temporarily during the recovery.
+    As a result, the devnet / testnet running in different AWS account will lose the recovery features unless the issue is resolved permanently or the access is enabled temporarily during the recovery. Also, new node joining is unsupported as the persistence data cannot be uploaded to the S3 bucket.
 
 ### Testnet
 
@@ -134,7 +134,7 @@ The mainnet will still run in the current infrastructure and will be managed thr
 | mainnet cluster                            | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`                                |
 | mainnet                                    | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`                                |
 
-> *: recovery / upgrade not supported due to the [known issue](#devnet-known-limitations).
+> *: any S3-related features (recovery, upgrade, node joining) are not supported due to the [known issue](#devnet-known-limitations).
 
 ## References
 
