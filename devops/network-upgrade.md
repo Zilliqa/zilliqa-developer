@@ -21,18 +21,36 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 ## Upgrade on Separated Network
 
-- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
+- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit), and go to `testnet` folder.
 
   ```bash
   ssh mkops
   cd testnet
   ```
 
-- Under `testnet` folder, bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
+- (Optional) Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence and relative key files to S3.
+  Execute this step only when you want to recover to latest tx epoch, because it already be executed automatically every ds epoch.
+
+  ```bash
+  cd <ori_testnet>
+  ./testnet.sh back-up
+  cd -
+  ```
+
+  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `<ori_testnet>.tar.gz` is uploaded to `S3://zilliqa-persistence`.
+
+- (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `<ori_testnet>`'s persistence and relative key files to S3 with given `<restoredBlockNum>`.
+
+  ```bash
+  cd <ori_testnet>
+  ./testnet.sh back-up level2lookup 0 <restoredBlockNum>
+  cd -
+  ```
+
+- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
 
   ```bash
   ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> -c <commit> -t <tag>...
-  cd <new_testnet>
   ```
 
   Keep the options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
@@ -48,25 +66,12 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
                     "arn:aws:iam::648273915458:role/nodes.<new_cluster>"
     ```
 
-- Under `<new_testnet>` folder, upload `<ori_testnet>`'s persistence to S3.
-
-  ```bash
-  ./testnet.sh upload <ori_cluster> <ori_testnet>
-  ```
-
-  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `<ori_testnet>.tar.gz` is uploaded to `S3://zilliqa-persistence`.
-
-- (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `<ori_testnet>`'s persistence to S3 with given `<restoredBlockNum>`.
-
-  ```bash
-  ./testnet.sh upload <ori_cluster> <ori_testnet> level2lookup 0 <restoredBlockNum>
-  ```
-
 - Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 
-- Launch `<new_testnet>`.
+- Go to `<new_testnet>` folder, and launch it.
 
   ```bash
+  cd <new_testnet>
   ./testhet.sh up
   ```
 
