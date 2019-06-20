@@ -12,6 +12,7 @@ AWS Cloud9 is a browser-based service that offers you a coding environment from 
 
 The following topics are covered in this document.
 
+- [Securing your browser](#securing-your-browser)
 - [Creation of bastion](#creation-of-bastion)
 - [Permissions to Other AWS Services](#permissions-to-other-aws-services)
 - [Backup of User Data](#backup-of-user-data)
@@ -20,6 +21,17 @@ The following topics are covered in this document.
   - [Kubernetes Admin/User](#kubernetes-adminuser)
 - [References](#references)
 - [TODOs](#todos)
+
+## Securing your browser
+
+The Cloud9 service or other AWS services might be accessed through browsers all the time. Therefore, it requires a secure browser setup (of course on a secure OS) to prevent security breaches.
+
+In your browser, most of the threats may arise from the extensions you install and the websites you visit. They may contains malicous code that hijacks your sessions or steals your information. To have at least first line of defence, it's highly recommended to access AWS services **from a browser with no extension** installed. Also, if you can please **don't access untrusted websites** from the browser you used for AWS accessing.
+
+To acheive the separation, you may choose either one of these options:
+
+- Use a separate browser for AWS services. For example, you are using Chrome for daily work but you can use a vanilla (i.e., no extesions) Firefox for AWS services
+- Create a separate browser profile with no extensions for AWS services. For example, in Chrome you can have [multiple profiles  (or persons)](https://support.google.com/chrome/answer/2364824?co=GENIE.Platform%3DDesktop&hl=en) for different purpose. This works well if you even want to access multiple AWS accounts at the same time.
 
 ## Creation of bastion
 
