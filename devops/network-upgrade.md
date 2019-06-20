@@ -29,8 +29,15 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```
 
 - (Optional) Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence and relative key files to S3.
-  Execute this step only when you want to recover to latest tx epoch, because it already be executed automatically every ds epoch.
+  if `./testnet.sh back-up auto` is not executed before, execute this:
 
+  ```bash
+  cd <ori_testnet>
+  ./testnet.sh back-up auto
+  cd -
+  ```
+
+  if you want to recover to latest tx epoch, execute this:
   ```bash
   cd <ori_testnet>
   ./testnet.sh back-up
