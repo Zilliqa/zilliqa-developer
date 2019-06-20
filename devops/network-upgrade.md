@@ -47,13 +47,13 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   cd -
   ```
 
-- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
+- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<keyFile>` (`<ori_cluster>-<ori_testnet>-key.tar.gz` under `<ori_testnet>` folder)
 
   ```bash
-  ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> -c <commit> -t <tag>...
+  ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> --key-files <keyFile> -c <commit> -t <tag>...
   ```
 
-  Keep the options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
+  Keep the other options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
 
 - Go to AWS webpage for updating `Bucket Policy` of [S3://zilliqa-incremental](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-incremental/?region=ap-southeast-1&tab=permissions), and [S3://zilliqa-statedelta](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-statedelta/?region=ap-southeast-1&tab=permissions); by adding `<new_cluster>` information:
 
