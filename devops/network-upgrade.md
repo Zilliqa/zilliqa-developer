@@ -31,6 +31,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 - (Optional) Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence to S3, and back-up key files in local.
 
   If `./testnet.sh back-up auto` is not executed before, execute this:
+
   ```bash
   cd <ori_testnet>
   ./testnet.sh back-up auto
@@ -38,6 +39,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```
 
   If you want to recover to latest tx epoch, execute this:
+
   ```bash
   cd <ori_testnet>
   ./testnet.sh back-up
