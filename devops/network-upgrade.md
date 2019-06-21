@@ -28,8 +28,17 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   cd testnet
   ```
 
-- (Optional) Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence and relative key files to S3.
-  Execute this step only when you want to recover to latest tx epoch, because it already be executed automatically every ds epoch.
+- (Optional) Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence to S3, and back-up key files in local.
+
+  If `./testnet.sh back-up auto` is not executed before, execute this:
+
+  ```bash
+  cd <ori_testnet>
+  ./testnet.sh back-up auto
+  cd -
+  ```
+
+  If you want to recover to latest tx epoch, execute this:
 
   ```bash
   cd <ori_testnet>
@@ -38,6 +47,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ```
 
   Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `<ori_testnet>.tar.gz` is uploaded to `S3://zilliqa-persistence`.
+  The `<ori_cluster>-<ori_testnet>-key.tar.gz` will be generated under `<ori_testnet>` folder.
 
 - (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `<ori_testnet>`'s persistence and relative key files to S3 with given `<restoredBlockNum>`.
 
@@ -47,13 +57,13 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   cd -
   ```
 
-- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`).
+- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<keyFile>` (In general, specify `<ori_testnet>/<ori_cluster>-<ori_testnet>-key.tar.gz` here)
 
   ```bash
-  ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> -c <commit> -t <tag>...
+  ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> --key-files <keyFile> -c <commit> -t <tag>...
   ```
 
-  Keep the options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
+  Keep the other options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
 
 - Go to AWS webpage for updating `Bucket Policy` of [S3://zilliqa-incremental](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-incremental/?region=ap-southeast-1&tab=permissions), and [S3://zilliqa-statedelta](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-statedelta/?region=ap-southeast-1&tab=permissions); by adding `<new_cluster>` information:
 
