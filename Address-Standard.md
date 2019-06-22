@@ -78,7 +78,7 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 | [Zillet](https://zillet.io/)                                     |           :heavy_check_mark:                    |             :heavy_check_mark:              |
 | [Trust Wallet](https://trustwallet.com/)                         |           :heavy_check_mark:           |                      -                      |
 | [Math Wallet](https://www.mathwallet.org/en/)                    |                   -                    |             :heavy_check_mark:              |
-| [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) |                   -                    |             :heavy_check_mark:              |
+| [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) |                   :heavy_check_mark:                    |                           |
 | [xZIL](https://tinyurl.com/y2lzmfl6)                             |                   :heavy_check_mark:                    |             -              |
 
 ### For Exchanges
