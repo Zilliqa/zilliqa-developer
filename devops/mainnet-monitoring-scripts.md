@@ -27,10 +27,10 @@ optional arguments:
   --webhook WEBHOOK     Slack webhook URL
 ```
 
-### Deploying the script
+### Deploying the script (ds-ip-check.py)
 
-1. Copy `ds-ip-check.py` into your testnet folder
-2. Execute the script as a background process, like this, for example:
+- Copy `ds-ip-check.py` into your testnet folder
+- Execute the script as a background process, like this, for example:
 
 ```bash
 nohup stdbuf -oL ./ds-ip-check.py \
@@ -40,16 +40,17 @@ nohup stdbuf -oL ./ds-ip-check.py \
  --frequency 60 > nohup-ds-ip-check.out &
 ```
 
-### While the script is running
+### While the script is running (ds-ip-check.py)
 
 A report is sent to the Slack webhook in any of the following cases:
+
 - The script failed to query the DS committee list from a significant number of DS guards (controlled by the constant `FAULTY_MINERINFO_TOLERANCE` inside the script)
 - One or more IP mismatches are detected
 - An exception occurs during the process
 
 To check what the report looks like, you can run the script in test mode (set the constant `TEST_MODE` to `True` inside the script). This will introduce some random errors during the run.
 
-### Terminating the script
+### Terminating the script (ds-ip-check.py)
 
 Simply kill the process.
 
@@ -70,13 +71,13 @@ optional arguments:
                         Polling frequency in minutes (default = 0 or run once)
 ```
 
-### Deploying the script
+### Deploying the script (lookup_autorecover.py)
 
-1. Copy `lookup_autorecover.py` into your testnet folder
-2. Change these constants in the script when necessary:
-   - `DEBUG_MODE` - when `True`, recovery commands are not executed, just reported
-   - `TEST_DATA_MODE` - when `True`, some dummy test data is used instead of real lookup data
-3. (Option 1) Execute the script as a background process, like this, for example:
+- Copy `lookup_autorecover.py` into your testnet folder
+- Change these constants in the script when necessary:
+  - `DEBUG_MODE` - when `True`, recovery commands are not executed, just reported
+  - `TEST_DATA_MODE` - when `True`, some dummy test data is used instead of real lookup data
+- (Option 1) Execute the script as a background process, like this, for example:
 
 ```bash
 nohup stdbuf -oL ./lookup_autorecover.py \
@@ -84,28 +85,28 @@ nohup stdbuf -oL ./lookup_autorecover.py \
  -f 10 > nohup-lookup-autorecover.out &
 ```
 
-4. (Option 2) Alternatively, you can invoke these testnet commands to execute the script:
+- (Option 2) Alternatively, you can invoke these testnet commands to execute the script:
 
 ```bash
 ./testnet.sh lookup-autorecover start  # to start the script
 ./testnet.sh lookup-autorecover status # to get the running process
 ```
 
-### While the script is running
+### While the script is running (lookup_autorecover.py)
 
 A report is sent to the Slack webhook in any of the following cases:
+
 - One or more lookups were recovered
 - A non-numeric or unrecognized epoch number format was processed
 - An exception occurs during the process
 
 To check what the report looks like, you can run the script in test mode (set the constants `DEBUG_MODE` and `TEST_DATA_MODE` to `True` inside the script). This will introduce some random errors during the run.
 
-### Terminating the script
+### Terminating the script (lookup_autorecover.py)
 
 Simply kill the process.
 
 You can also use `./testnet.sh lookup-autorecover stop`, but if you have multiple testnets in the bastion that are using this script, this command will terminate the first process it sees (which may not be the one for your testnet).
-
 
 ## Tx block mining stall checker (monitor_blockchain.py)
 
@@ -134,11 +135,11 @@ optional arguments:
                         WebHook to send to slack or any other service
 ```
 
-### Deploying the script
+### Deploying the script (monitor_blockchain.py)
 
 This script has no dependence on the testnet files. As such, it can be run from anywhere. The steps below are for running it in a new pod in the `dev` cluster.
 
-1. Create a `<podname>.yaml` file with the following contents (in this example, we will use `my-stall-checker` for the `<podname>`):
+- Create a `<podname>.yaml` file with the following contents (in this example, we will use `my-stall-checker` for the `<podname>`):
 
 ```bash
 kind: Pod
@@ -152,38 +153,44 @@ spec:
       command: ["/bin/bash", "-ce", "tail -f /dev/null", ]
   restartPolicy: OnFailure
 ```
-2. Verify you are in the right cluster:
+
+- Verify you are in the right cluster:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl config current-context
 dev.k8s.z7a.xyz
 ```
-3. Launch the pod:
+
+- Launch the pod:
 
 ```bash
-antonio@ip-172-31-44-129:~$ kubectl create -f my-stall-checker.yaml 
+antonio@ip-172-31-44-129:~$ kubectl create -f my-stall-checker.yaml
 pod "my-stall-checker" created
 antonio@ip-172-31-44-129:~$ kubectl get pod my-stall-checker
 NAME               READY     STATUS    RESTARTS   AGE
 my-stall-checker   1/1       Running   0          2m
 ```
-4. Create a folder in the pod:
+
+- Create a folder in the pod:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl exec -it my-stall-checker -- /bin/bash
 root@my-stall-checker:/# mkdir stallchecker
-root@my-stall-checker:/# ls 
+root@my-stall-checker:/# ls
 bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  stallchecker  sys  tmp  usr  var
 root@my-stall-checker:/# exit
 exit
-antonio@ip-172-31-44-129:~$ 
+antonio@ip-172-31-44-129:~$
 ```
-5. Copy the script into the pod:
+
+- Copy the script into the pod:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl cp monitor_blockchain.py my-stall-checker:/stallchecker/
 ```
-6. Execute the script (here `python3.6` installation is also done):
+
+- Execute the script (here `python3.6` installation is also done):
+
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl exec -it my-stall-checker -- /bin/bash
 root@my-stall-checker:/# apt-get update
@@ -208,15 +215,15 @@ root@my-stall-checker:/stallchecker# nohup stdbuf -oL ./monitor_blockchain.py ht
  > nohup-monitor-blockchain.out &
 ```
 
-### While the script is running
+### While the script is running (monitor_blockchain.py)
 
 A report is sent to the Slack webhook in the event that the stall timeout (default = 14 minutes) has been triggered.
 Another report is sent when the stall is averted.
 
-### Terminating the script
+### Terminating the script (monitor_blockchain.py)
 
-1. Kill the process inside the pod
-2. Delete the pod:
+- Kill the process inside the pod
+- Delete the pod:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl delete pod my-stall-checker
@@ -259,11 +266,11 @@ optional arguments:
   --webhook WEBHOOK     Slack webhook URL
 ```
 
-### Deploying the script
+### Deploying the script (txn-sanity-check.py)
 
 This script has no dependence on the testnet files. As such, it can be run from anywhere. The steps below are for running it in a new pod in the `dev` cluster.
 
-1. Create a `<podname>.yaml` file with the following contents (in this example, we will use `my-txn-checker` for the `<podname>`):
+- Create a `<podname>.yaml` file with the following contents (in this example, we will use `my-txn-checker` for the `<podname>`):
 
 ```bash
 kind: Pod
@@ -277,38 +284,44 @@ spec:
       command: ["/bin/bash", "-ce", "tail -f /dev/null", ]
   restartPolicy: OnFailure
 ```
-2. Verify you are in the right cluster:
+
+- Verify you are in the right cluster:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl config current-context
 dev.k8s.z7a.xyz
 ```
-3. Launch the pod:
+
+- Launch the pod:
 
 ```bash
-antonio@ip-172-31-44-129:~$ kubectl create -f my-txn-checker.yaml 
+antonio@ip-172-31-44-129:~$ kubectl create -f my-txn-checker.yaml
 pod "my-txn-checker" created
 antonio@ip-172-31-44-129:~$ kubectl get pod my-txn-checker
 NAME               READY     STATUS    RESTARTS   AGE
 my-txn-checker   1/1       Running   0          2m
 ```
-4. Create a folder in the pod:
+
+- Create a folder in the pod:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl exec -it my-txn-checker -- /bin/bash
 root@my-txn-checker:/# mkdir txnchecker
-root@my-txn-checker:/# ls 
+root@my-txn-checker:/# ls
 bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  txnchecker  sys  tmp  usr  var
 root@my-txn-checker:/# exit
 exit
-antonio@ip-172-31-44-129:~$ 
+antonio@ip-172-31-44-129:~$
 ```
-5. Copy the script into the pod:
+
+- Copy the script into the pod:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl cp txn-sanity-check.py my-txn-checker:/txnchecker/
 ```
-6. Execute the script (here `python3.6` and `pyzil` installation are also done):
+
+- Execute the script (here `python3.6` and `pyzil` installation are also done):
+
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl exec -it my-txn-checker -- /bin/bash
 root@my-txn-checker:/# apt-get update
@@ -345,14 +358,14 @@ root@my-txn-checker:/txnchecker# nohup stdbuf -oL ./txn-sanity-check.py \
  > txn-sanity-check.log &
 ```
 
-### While the script is running
+### While the script is running (txn-sanity-check.py)
 
 A report is sent to the Slack webhook in the event the `pyzil` operations fail.
 
-### Terminating the script
+### Terminating the script (txn-sanity-check.py)
 
-1. Kill the process inside the pod
-2. Delete the pod:
+- Kill the process inside the pod
+- Delete the pod:
 
 ```bash
 antonio@ip-172-31-44-129:~$ kubectl delete pod my-txn-checker
