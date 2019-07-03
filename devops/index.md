@@ -7,3 +7,4 @@
 - [AWS Cloud9 Bastion](aws-bastion.md)
 - [Docker Images](docker-images.md)
 - [Mainnet Monitoring Scripts](mainnet-monitoring-scripts.md)
+- [Mainnet Maintenance](mainnet-maintenance.md)
