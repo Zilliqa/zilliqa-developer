@@ -33,7 +33,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
   ```bash
   cd <ori_testnet>
-  ./testnet.sh back-up
+  ./testnet.sh back-up level2lookup 0
   cd -
   ```
 
