@@ -28,21 +28,20 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   cd testnet
   ```
 
-- (Optional) Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence to S3, and back-up key files in local.
+- Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence to S3, and backup key files in local.
+  If you want to recover to latest tx epoch, backup immediately:
 
-  If `./testnet.sh back-up auto` is not executed before, execute this:
+  ```bash
+  cd <ori_testnet>
+  ./testnet.sh back-up level2lookup 0
+  cd -
+  ```
+
+  (Optional) If `./testnet.sh back-up auto` is not executed before, execute this and the persistence will be upload every xxx80 tx epoch.
 
   ```bash
   cd <ori_testnet>
   ./testnet.sh back-up auto
-  cd -
-  ```
-
-  If you want to recover to latest tx epoch, execute this:
-
-  ```bash
-  cd <ori_testnet>
-  ./testnet.sh back-up
   cd -
   ```
 
@@ -140,7 +139,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 - (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/<type>/constants.xml_<type>`. If anything changes, release Zilliqa/Scilla image to S3 again.
 
   ```bash
-  tar cfz <target_testnet>.tar.gz -C <pubKeyPath> pubKeyFile -C $(realpath ./scripts) miner_info.py -C $(realpath release) VERSION -C $(realpath constantsDir) constants.xml -C $(realpath constantsDir/l) constants.xml_lookup -C $(realpath release) <xxx-Linux-Zilliqa.deb> -C $(realpath constantsDir/l2) constants.xml_level2lookup -C $(realpath constantsDir/n) constants.xml_newlookup
+  tar cfz <target_testnet>.tar.gz -C <pubKeyPath> pubKeyFile -C $(realpath ./scripts) miner_info.py -C $(realpath ./scripts) auto_back_up.py -C $(realpath ./scripts) downloadIncrDB.py -C $(realpath ./scripts) download_and_verify.sh -C $(realpath ./scripts) fetchHistorical.py -C $(realpath ./scripts) fetchHistorical.sh -C $(realpath ./scripts) uploadIncrDB.py -C $(realpath ./tests/Zilliqa) daemon_restart.py -C $(realpath release) VERSION -C $(realpath constantsDir) constants.xml -C $(realpath constantsDir/l) constants.xml_lookup -C $(realpath release) <xxx-Linux-Zilliqa.deb> -C $(realpath constantsDir/l2) constants.xml_level2lookup -C $(realpath constantsDir/n) constants.xml_newlookup
   aws s3 cp <target_testnet>.tar.gz s3://zilliqa-release-data/
   ```
 
