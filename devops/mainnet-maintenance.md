@@ -107,7 +107,7 @@ Missing components
 ```
 
 - The last line should say either "Complete" or "Missing components"
-- If you need more details, go into the `common-00001-log.txt` file generated inside the lookup's subfolder:
+- If you need more details, go into the `common-00001-log.txt` file generated inside the subfolder for that node (in this example, `newlookup-0`):
 
 ```bash
 ubuntu@ip-172-31-42-105:~/testnet/mainnet-brightill$ ./testnet.sh ssh validator 0
