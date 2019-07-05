@@ -8,3 +8,4 @@
 - [Docker Images](docker-images.md)
 - [Mainnet Monitoring Scripts](mainnet-monitoring-scripts.md)
 - [Mainnet Maintenance](mainnet-maintenance.md)
+- [Devnet Maintenance](devnet-maintenance.md)
