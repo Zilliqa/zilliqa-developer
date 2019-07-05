@@ -1,6 +1,6 @@
-# BUCKET CONFIGURATION
+# Bucket Configuration
 
-## PERSISTENCE BUCKET CONFIGURATION
+## Persistence Bucket Configuration
 
 To launch a testnet in a cluster with s3 support, you can specify a bucket
 for s3 operations with the `--bucket=<bucket_name>` option in bootstrap.
@@ -23,7 +23,7 @@ to the testnet.
 ### Bucket Permissions
 
 For this bucket, we would need to give write, delete access to the nodes in the cluster.
-Also due to a caveat in `UploadIncrDB.py` the bucket must be publicly readable.
+Also due to a caveat in `downloadIncrDB.py` the bucket must be publicly readable.
 
 Example, `zilliqa-devnet` bucket policy
 
@@ -59,14 +59,14 @@ Example, `zilliqa-devnet` bucket policy
 
 ```
 
-## RELEASE BUCKET CONFIGURATION
+## Release Bucket Configuration
 
 For upgrading, you can specify the `--release-bucket-name` for choosing the bucket
 to put the release files (.deb and other corresponding files) needed for upgrade.
 
-Make sure the same bucket is being used in `release.sh` script in core repo
+Make sure the same bucket is being used in `release.sh` script in core repository.
 
-*NOTE:* The default bucket is zilliqa-release-data
+*NOTE:* The default bucket is zilliqa-release-data.
 
 ### Bucket Permissions
 
@@ -90,11 +90,23 @@ Example policy:
             "Action": "s3:ListBucket",
             "Resource": "arn:aws:s3:::zilliqa-test-release"
         },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::zilliqa-test-release/*"
+        }
     ]
 }
 ```
 
-## CONFIGURE BASTION TO GIVE ACCESS TO S3 [OPTIONAL]
+## Configure Bastion to give access to s3 [OPTIONAL]
 
 If the bastion is already transparently authenticated, then no need for this step
 
