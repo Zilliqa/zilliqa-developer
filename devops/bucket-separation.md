@@ -1,8 +1,9 @@
 
 ## PERSISTENCE BUCKET CONFIGURATION
 
-To launch a testnet in a cluster wiht s3 support, you can specify bucket from which s3 operations will take place with the `--bucket=<bucket_name>` option in bootstrap. 
-For now, we have 3 types of storage we use the s3 for, these all be a new `folder` in the bucket provided by the argument
+To launch a testnet in a cluster with s3 support, you can specify a bucket for s3 operations with the 
+`--bucket=<bucket_name>` option in bootstrap. 
+For now, we have 3 types of storage we use the s3 for, these all be a new path in the bucket provided by the argument
 
 *NOTE: The default bucket now is zilliqa-devnet*
 
@@ -14,9 +15,9 @@ where `bucket_name` is the parameter specified and `testnet_name` is the name as
 
 #### Bucket Permissions:
 
-For this bucket, we would need to give write, delete access to the nodes in the cluster. Also due to a caveat in `UploadIncrDB.py` the bucket must be publically readable.
+For this bucket, we would need to give write, delete access to the nodes in the cluster. Also due to a caveat in `UploadIncrDB.py` the bucket must be publicly readable.
 
-Example, zilliqa-devnet bucket policy
+Example, `zilliqa-devnet` bucket policy
 
 ```
 {
@@ -58,7 +59,7 @@ For upgrading, you can specify the `--release-bucket-name` for choosing the buck
 
 #### Bucket Permissions:
 
-The bucket needs to be publicly readable if we are trying to upgrade community (or public nodes) as well. Otherwise read permssion for the cluster nodes and write, delete permission for the bastion node is required.
+The bucket needs to be publicly readable if we are trying to upgrade community (or public nodes) as well. Otherwise read permission for the cluster nodes and write, delete permission for the bastion node is required.
 
 
 Example policy:
@@ -81,7 +82,7 @@ Example policy:
 
 ## CONFIGURE BASTION TO GIVE ACCESS TO S3 [OPTIONAL]
 
-If the bastion is already transeparently authenicated, then no need for this step
+If the bastion is already transparently authenticated, then no need for this step
 
 1. Go to zilliqa login page and login
 2. Choose the role which has S3 access.
