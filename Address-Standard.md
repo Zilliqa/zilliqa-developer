@@ -10,7 +10,7 @@ This post is meant to be an informative post detailing the address standard adop
 
 Due to [`EIP-55`](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md) being not widely adopted by wallets and exchanges, the 20-bytes `base16` checksum variation used by Zilliqa protocol to prevent the loss of funds sent to an Ethereum address is not viable.
 
-Hence, Zilliqa shall adopt a variation of the `bech32` format on the wallets/SDKs level in order to prevent Users from sending ERC20 ZIL tokens from their Ethereum wallets (i.e. MyCrypto/MyEtherWallet) to an native ZIL address and vice versa.
+Hence, Zilliqa shall adopt a variation of the `bech32` format on the wallets/SDKs level in order to prevent Users from sending ERC20 ZIL tokens from their Ethereum wallets (i.e. MyCrypto/MyEtherWallet) to a native ZIL address and vice versa.
 
 Please note that the native protocol will still utilise the 20-bytes `base16` checksum on the backend. This is a cosmetic change of the 20-bytes `base16` checksum address to `bech32` format on the wallets/SDKs level only. It will only be visible to end-users.
 
