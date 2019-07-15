@@ -1,6 +1,6 @@
-# Devnet Maintenance
+# Community Testnet Maintenance
 
-This page contains information relevant to maintaining the small-scale testnet for community members (here we use devnet or testnet to refer to the same thing). This testnet resides in the `dev` cluster in `kops` bastion and is usually named `communityvXXX`.
+This page contains information relevant to maintaining the small-scale testnet for community members. This testnet resides in the `dev` cluster in `kops` bastion and is usually named `communityvXXX`.
 
 ## Basic Steps for Recovering the Testnet
 
@@ -15,7 +15,7 @@ In the event of a stall or any issue with the testnet, the fastest way to fix it
    - At the minimum, we just need `monitor_blockchain` and `lookup_autorecover`
    - For both scripts, use the Slack webhook URL for the testnet-alert channel
    - For `lookup_autorecover`, make sure to first terminate the script's process for the existing stalled testnet, before launching a new one
-   - For `lookup_autorecover`, you can set `DEBUG_MODE` to `True` inside the script, because the devnet runs too fast for recovery to work anyway
+   - For `lookup_autorecover`, you can set `DEBUG_MODE` to `True` inside the script, because the testnet runs too fast for recovery to work anyway
 7. Push the new testnet folder to `testnet-park` repo
    - Don't forget to include the `.bootstrap_command` and `.bootstrap_git_commit` files
    - Don't forget to update the list of active testnets in the `testnet-park` README
