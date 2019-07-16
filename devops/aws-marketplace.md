@@ -1,7 +1,7 @@
 
 # Create AWS Marketplace Product
 
-1. Launch an aws instance with OS ubuntu 16.04, using ssh to connect the instance.
+1. Launch an aws instance with OS ubuntu 16.04, using ssh to connect to the instance.
 1. Install Docker CE for Ubuntu 16.04 on the instance by following instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 1. Make a new directory `join_mainnet` and change directory to it.
 
