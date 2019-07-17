@@ -56,7 +56,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   cd -
   ```
 
-- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<S3PersistencePath>` (`s3://301978b4-0c0a-4b6b-ad7b-3a2f63c5182c/persistence/<ori_testnet>.tar.gz `) and `<keyFile>` (`<ori_testnet>/<ori_cluster>-<ori_testnet>-key.tar.gz`)
+- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<S3PersistencePath>` (`s3://301978b4-0c0a-4b6b-ad7b-3a2f63c5182c/persistence/<ori_testnet>.tar.gz`) and `<keyFile>` (`<ori_testnet>/<ori_cluster>-<ori_testnet>-key.tar.gz`)
 
   ```bash
   ./bootstrap.py <new_testnet> \
