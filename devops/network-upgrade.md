@@ -88,7 +88,11 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ./testhet.sh up
   ```
 
-- (Deprecated after `v4.7.0`) <del>After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).</del>
+- (Optional, deprecated after `v4.7.0`) After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).
+
+  ```bash	
+  ./testnet.sh remove-ipMap	
+  ```
 
 ## Rolling Upgrade
 
