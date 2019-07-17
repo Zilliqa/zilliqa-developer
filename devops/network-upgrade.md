@@ -90,8 +90,8 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 - (Optional, deprecated after `v4.7.0`) After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).
 
-  ```bash	
-  ./testnet.sh remove-ipMap	
+  ```bash
+  ./testnet.sh remove-ipMap
   ```
 
 ## Rolling Upgrade
