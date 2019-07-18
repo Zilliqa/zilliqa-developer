@@ -56,10 +56,14 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   cd -
   ```
 
-- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<keyFile>` (In general, specify `<ori_testnet>/<ori_cluster>-<ori_testnet>-key.tar.gz` here)
+- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<S3PersistencePath>` (`s3://301978b4-0c0a-4b6b-ad7b-3a2f63c5182c/persistence/<ori_testnet>.tar.gz`) and `<keyFile>` (`<ori_testnet>/<ori_cluster>-<ori_testnet>-key.tar.gz`)
 
   ```bash
-  ./bootstrap.py <new_testnet> --recover-from-testnet <ori_testnet> --recover-from-cluster <ori_cluster> --key-files <keyFile> -c <commit> -t <tag>...
+  ./bootstrap.py <new_testnet> \
+  --recover-from-s3 <S3PersistencePath> \
+  --recover-key-files <keyFile> \
+  -c <commit> \
+  -t <tag>...
   ```
 
   Keep the other options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
@@ -84,7 +88,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ./testhet.sh up
   ```
 
-- After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).
+- (Optional, deprecated after `v4.7.0`) After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).
 
   ```bash
   ./testnet.sh remove-ipMap
