@@ -90,7 +90,10 @@ Both **AMD** (with OpenCL) and **Nvidia** (with OpenCL or CUDA) GPUs are support
 The **minimum** requirements for Zilliqa mining nodes are:
 
 - x64 Linux operating system (e.g Ubuntu 16.04.05)
-- Intel i5 processor or later
+- Recent dual core processor with at least @ 2.2 GHZ. Examples:
+   - Intel Core i5 or i7 (Skylake)
+   - Intel Xeon (Skylake)
+   - AMD Ryzen
 - 4GB DRR3 RAM or higher
 - NAT environment **OR** Public IP address
 - Any GPUs with at least 2 GB vRAM
