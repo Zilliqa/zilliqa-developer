@@ -20,47 +20,6 @@ used for recovery/back-up.
 where `bucket_name` is the parameter specified and `testnet_name` is the name assigned
 to the testnet.
 
-### Bucket Permissions
-
-For this bucket, we would need to give write, delete access to the nodes in the cluster.  
-*Also due to a caveat in `downloadIncrDB.py` the bucket must be publicly readable.*  
-The reason for this is that even if an internal node needs syncing from the s3 bucket, it
-sends unauthorized HTTP requests.
-
-Example, `zilliqa-devnet` bucket policy
-
-``` json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:ListBucket",
-            "Resource": "arn:aws:s3:::zilliqa-devnet"
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
-            },
-            "Action": [
-                "s3:PutObject",
-                "s3:DeleteObject"
-            ],
-            "Resource": "arn:aws:s3:::zilliqa-devnet/*"
-        },
-        {
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::zilliqa-devnet/*"
-        }
-    ]
-}
-
-```
-
 ## Release Bucket Configuration
 
 For upgrading, you can specify the `--release-bucket-name` for choosing the bucket
@@ -69,44 +28,6 @@ to put the release files (.deb and other corresponding files) needed for upgrade
 Make sure the same bucket is being used in `release.sh` script in core repository.
 
 *NOTE:* The default bucket is zilliqa-release-data.
-
-### Bucket Permissions
-
-The bucket needs to be publicly readable if we are trying to upgrade community
-(or public nodes) as well.
-
-Otherwise read permission for the cluster nodes and write, delete permission
-for the bastion node is required.
-
-Example policy:
-
-``` json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
-            },
-            "Action": "s3:ListBucket",
-            "Resource": "arn:aws:s3:::zilliqa-test-release"
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
-            },
-            "Action": [
-                "s3:PutObject",
-                "s3:DeleteObject",
-                "s3:GetObject"
-            ],
-            "Resource": "arn:aws:s3:::zilliqa-test-release/*"
-        }
-    ]
-}
-```
 
 ## Configure Bastion to give access to s3 [OPTIONAL]
 
@@ -153,3 +74,88 @@ not have access to the s3 web console.
    This would make all the objects of `zilliqa-devnet` publicly readable.
 
 3. Other command lines commands can be found at [S3 APIs list](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html#cli-aws-s3api)
+
+## Appendix
+
+### Bucket Policies
+
+These ideally should be auto-updated while cluster creation.
+
+#### Persistence bucket
+
+For this bucket, we would need to give write, delete access to the nodes in the cluster.  
+*Also due to a caveat in `downloadIncrDB.py` the bucket must be publicly readable.*  
+The reason for this is that even if an internal node needs syncing from the s3 bucket, it
+sends unauthorized HTTP requests.
+
+Example, `zilliqa-devnet` bucket policy
+
+``` json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::zilliqa-devnet"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::zilliqa-devnet/*"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::zilliqa-devnet/*"
+        }
+    ]
+}
+
+```
+
+#### Release Bucket
+
+The bucket needs to be publicly readable if we are trying to upgrade community
+(or public nodes) as well.
+
+Otherwise read permission for the cluster nodes and write, delete permission
+for the bastion node is required.
+
+Example policy:
+
+``` json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
+            },
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::zilliqa-test-release"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::273122647034:role/nodes.newton.dev.z7a.xyz.k8s.local"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::zilliqa-test-release/*"
+        }
+    ]
+}
+```
