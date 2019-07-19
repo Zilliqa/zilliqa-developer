@@ -9,3 +9,4 @@
 - [Mainnet Monitoring Scripts](mainnet-monitoring-scripts.md)
 - [Mainnet Maintenance](mainnet-maintenance.md)
 - [Community Testnet Maintenance](community-testnet-maintenance.md)
+- [AWS Marketplace](aws-marketplace.md)
