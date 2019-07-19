@@ -1,14 +1,10 @@
 # AWS S3 Bucket Configuration
 
-<!-- TOC -->
-
 - [Introduction](#introduction)
 - [Authenticated Access](#authenticated-access)
 - [Unauthenticated Access](#unauthenticated-access)
-    - [Configuring Bucket Policy in Command Line](#configuring-bucket-policy-in-command-line)
+  - [Configuring Bucket Policy in Command Line](#configuring-bucket-policy-in-command-line)
 - [References](#references)
-
-<!-- /TOC -->
 
 ## Introduction
 
@@ -26,7 +22,7 @@ The following tables shows the storage locations for different objects and their
 
 > Note:
 >
-> 1. This pattern table describes the latest development on `master` branch in https://github.com/Zilliqa/testnet.
+> 1. This pattern table describes the latest development on `master` branch in <https://github.com/Zilliqa/testnet>.
 > 2. `<bucket_name>` is the bucket name used in `bootstrap.py --bucket=<bucket_name>`.
 > 3. `<network_name>` is the network name used in `bootstrap.py <network_name>`.
 > 4. Authenticated access is automatically configured during cluster creation.
