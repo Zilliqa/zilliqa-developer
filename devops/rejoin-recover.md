@@ -1,25 +1,4 @@
-# Network Upgrade
-
-This doc describes the way to conduct the upgrade entire network. So far we implement the following 2 methods:
-
-- Upgrade on Separated Network
-- Rolling Upgrade
-
-See the [link](https://drive.google.com/drive/u/1/folders/1r6xz0zhj-QJr_EEVgKPcYeHw125Dp3Rh) for the presentation of network upgrade, including some demo.
-
-Here is a comparison table between these 2 methods, and meanwhile, the methods would be applied in different scenarios.
-
-|                   |Upgrade on Separated Network|Rolling Upgrade           |
-|-------------------|----------------------------|--------------------------|
-|Speed              |Fast (2 hrs)                |Slow (2 days)             |
-|User Experience    |Sense time-shifting         |Seamless and Ethereum adopt [this](https://blog.ethereum.org/2019/02/22/ethereum-constantinople-st-petersburg-upgrade-announcement/)|
-|Changes Take Effect|Immediately                 |Delayed by specified epoch|
-|Transaction History|Drop                        |Keep                      |
-|Once Failed        |Try again                   |Target testnet destroyed  |
-
-Following is detailed steps of how to apply these 2 upgrade procedures on the entire network.
-
-## Upgrade on Separated Network
+## Recover
 
 - [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit), and go to `testnet` folder.
 
@@ -94,7 +73,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   ./testnet.sh remove-ipMap
   ```
 
-## Rolling Upgrade
+## Rejoin
 
 - [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
 
