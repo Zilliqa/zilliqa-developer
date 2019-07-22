@@ -134,7 +134,7 @@ speedscope cputime.perf
 
 It will open your browser for you. You can find more about how to use it in `speedscope` documentation.
 
-![speedscope](images/speedscope.png)
+![speedscope](images/tools/profiling/speedscope.png)
 
 ## More
 
