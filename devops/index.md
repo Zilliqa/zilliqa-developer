@@ -4,6 +4,7 @@
 - [DNS for Public Testnet](dns-for-public-testnet.md)
 - [Private API Endpoint](private-api-endpoint.md)
 - [Network Upgrade](network-upgrade.md)
+- [Rejoin / Recover](rejoin-recover.md)
 - [AWS Cloud9 Bastion](aws-bastion.md)
 - [Docker Images](docker-images.md)
 - [Mainnet Monitoring Scripts](mainnet-monitoring-scripts.md)
