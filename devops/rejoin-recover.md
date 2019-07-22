@@ -55,98 +55,49 @@
 
 ## Rejoin
 
-- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
+  When following scenario happened, `rejoin` process will be applied.
 
-  ```bash
-  ssh mkops
-  ```
+  - A node is kick-out from network for some reason (e.g., Lose POW, recover)
+  - A new node (e.g., community node, `new`/`newlookup` node) want to join to network
 
-- Download Zilliqa/Scilla, and check-out to the commit-to-be-upgraded.
+  Basically, the `rejoin` will keey fetching necessary information (DS info, DS block, TX block, ...) from a random-selected lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
 
-  ```bash
-  git clone git@github.com:Zilliqa/Zilliqa.git (Mandatory)
-  git reset --hard <commit-to-be-upgraded>
-  git clone git@github.com:Zilliqa/scilla.git (Optional, download it ONLY when you want to upgrade Scilla)
-  ```
+![rejoin](images/rejoin.jpg)
 
-  Note that rolling upgrade ONLY can upgrade Zilliqa or Scilla at a time.
+Here is more detail steps for `normal`, `DS`, and `lookup` nodes.
 
-- Run `Zilliqa/build/bin/genkeypair` several times to generate some privKey/pubKey pairs, then paste the keys into 2 separated files named `privKeyFile` and `pubKeyFile`.
+## Normal node
 
-  ```bash
-  ./Zilliqa/build/bin/genkeypair
-  ```
+1. Clean variables in Node class
+2. Retrieve Persistence Storage
+3. Set SyncType to be NORMAL, thus to block some messages that will be received as a healthy normal node
+4. Send Request A: Fetch if any lookup nodes are offline
+5. Wait Request A feedback with conditional variable CV1.
+6. While Loop until SyncType becomes NO_SYNC:
+7. Send Request B: Fetch Latest DSBlocks
+8. Send Request C: Fetch Latest TxBlocks
+9. If PoW2 Started, sleep for BACKUP_POW2_WINDOW_IN_SECONDS, otherwise only NEW_NODE_SYNC_INTERVAL seconds.
+10. If the feedback of Request C contains a new TxBlock, check whether it is a vacuous block, if so, send Request D: Fetch latest Account States.
+11. If the feedback of Request B contains a new DSBlock, Send Request F: Fetch Latest DS Committee Info.
+12. Wait until Request D got feedback, check fetchedDSInfo, if true, start PoW2, otherwise set a conditional variable CV2.
+13. Wait until Request F got feedback, if it is not the first time get the Request F feedback && the Request D Started to listen DSInfo Updating && check if the current epoch is still the epoch when the DS committee changed, then notify CV2.
+14. When CV2 get notified, start PoW2.
+15. Init Mining and submit PoW2.
+16. If received sharding information, change SyncType to NO_SYNC. Stop blocking messages. The normal node now successfully joined the network.
 
-- Edit `Zilliqa/scripts/release.sh`.
+## DS node
 
-  ```console
-  privKeyFile="../key/privKeyFile"
-  pubKeyFile="../key/pubKeyFile"
-  testnet_to_be_upgraded="<target_testnet>"
-  cluster_name="<target_cluster>"         # eg: dev.k8s.z7a.xyz
-  releaseZilliqa="true"                   # "true" for Zilliqa upgrade, "false" for Scilla upgrade
-  scillaPath=""                           # "" for Zilliqa upgrade, "<scilla_path>" for Scilla upgrade
-  ```
+1. If the DS Node was a DS Leader, it will do view change rather than do recovery as a DS Node. It the process of the DS Leader was killed, it will start joining as a Normal Node if triggered by the Daemon.
+2. The steps for DS Node are the same as Normal Node until step 8, besides:
+3. The step 2 is to clean the variables in DirectoryService class. 
+4. The step 3 is to set SyncType to be DS_SYNC. 
+5. The following is the step after step 8.
+6. Wait until Request F got feedback, check isFirstLoop: if true, set to false; if false, mark the currDSExpired as true.
+7. Wait until Request D got feedback, check if the currDSExpired, if false, change the SyncType to NO_SYNC, reset isFirstLoop to true, start RunConsensuOnDSBlock with no PoW1 submission.
+8. This is to make sure the DS Node will declare its success of joining before the new DS Committee generated, then it’s legible to participant the DS Committee Consensus.
 
-  Note the variables `<target_testnet>`, `<target_cluster>`, `<scilla_path>` should be changed properly.
+## Lookup node
 
-- Release Zilliqa/Scilla image to S3.
-
-  ```bash
-  cd Zilliqa
-  ./scripts/release.sh
-  ```
-
-  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-release-data/?region=ap-southeast-1&tab=overview) and make sure `<target_testnet>.tar.gz` is uploaded to `s3://zilliqa-release-data`.
-
-- (Optional) Manually confirm the correctness of constant file inside `Zilliqa/constantDir/<type>/constants.xml_<type>`. If anything changes, release Zilliqa/Scilla image to S3 again.
-
-  ```bash
-  tar cfz <target_testnet>.tar.gz -C <pubKeyPath> pubKeyFile -C $(realpath ./scripts) miner_info.py -C $(realpath ./scripts) auto_back_up.py -C $(realpath ./scripts) downloadIncrDB.py -C $(realpath ./scripts) download_and_verify.sh -C $(realpath ./scripts) fetchHistorical.py -C $(realpath ./scripts) fetchHistorical.sh -C $(realpath ./scripts) uploadIncrDB.py -C $(realpath ./tests/Zilliqa) daemon_restart.py -C $(realpath release) VERSION -C $(realpath constantsDir) constants.xml -C $(realpath constantsDir/l) constants.xml_lookup -C $(realpath release) <xxx-Linux-Zilliqa.deb> -C $(realpath constantsDir/l2) constants.xml_level2lookup -C $(realpath constantsDir/n) constants.xml_newlookup
-  aws s3 cp <target_testnet>.tar.gz s3://zilliqa-release-data/
-  ```
-
-  Note the variables `<pubKeyPath>`, `<xxx-Linux-Zilliqa.deb>` (the deb name could be found in `Zilliqa/release/`), `<target_testnet>` should be changed properly.
-
-- Change directory to `<target_testnet>`.
-
-  ```bash
-  cd <target_testnet>
-  ```
-
-- Apply rolling upgrade for each `<TYPE>`; once completed, running `finish` will remove unnecessary files (`UPGRADE_DONE`, used to mark this POD is upgraded) and update the commit hash inside `<target_testnet>`/manifest/`<TYPE>`.yaml.
-
-  ```bash
-  # Zilliqa only can be upgrade type-by-type
-  ./testnet.sh upgrade-all <TYPE>
-  ./testnet.sh upgrade-all <TYPE> finish
-
-  # Scilla can be upgrade all types in one shot, or type-by-type
-  ./testnet.sh upgrade-all all scilla
-  ./testnet.sh upgrade-all all finish scilla
-  ```
-
-  `<TYPE>` should be applied in following sequence: {`lookup`, `level2lookup`, `newlookup`, `dsguard`, `normal`}.
-  For the POD with no Zilliqa process running (e.g., the process crashed, the POD is not alive, etc), rolling upgrade script will attempt to delete & restart the POD first, then apply upgrading.
-
-- (Optional, Zilliqa only) For verifying pupose, you can specify the start/end index for a small-scale rolling upgrade. (Default: rolling upgrade all if nothing specified)
-
-  ```bash
-  ./testnet.sh upgrade-all <TYPE> <start_node> <end_node>
-  ```
-
-- When running the rolling upgrade, separate log files for upgrading pods would be generated under `upgrade_log/` folder. In the meantime, we can monitor the rolling upgrade status by following:
-
-  ```bash
-  ./testnet.sh status | grep <target_testnet>-<TYPE>-<index>   # See if this POD is alive
-  ./testnet.sh epoch <TYPE>                                      # List the epoch number of every <TYPE> nodes
-  ```
-
-  Or, ssh to the node-under-upgrading, see the rolling upgrade progress:
-
-  ```bash
-  tail -f daemon-log.txt        # See if Zilliqa process is restarted successfully
-  tail -f state-00001-log.txt   # Monitor the epoch number
-  vi zilliqa-00001-log.txt      # Monitor the detail log message
-  gdb zilliqa core.xxx          # For zilliqa node crashed, use gdb to debug
-  ```
+1. Most of the steps for Lookup Node are the same as DS Node excludes:
+2. At the beginning, the lookup node will tell the other lookup nodes that it will be offline.
+3. The last step is to call RSync to get the latest TxBodies.Then set the SyncType to NO_SYNC, and tell the other lookup nodes it will be online.
