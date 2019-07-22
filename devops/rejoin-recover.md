@@ -1,76 +1,52 @@
 ## Recover
 
-- [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit), and go to `testnet` folder.
+  The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
 
   ```bash
-  ssh mkops
-  cd testnet
+  ./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX] 
   ```
 
-- Under `<ori_testnet>` folder, upload `<ori_testnet>`'s persistence to S3, and backup key files in local.
-  If you want to recover to latest tx epoch, backup immediately:
+  If not specify `-u`, by default we will use persistence from `lookup-0` for recovering `level2lookup-x`, and use persistence from `level2lookup-0` for recovering al the other nodes.
 
+- Example 1:
+  If you want to recover `dsguard-0`, please type:
+  
   ```bash
-  cd <ori_testnet>
-  ./testnet.sh back-up level2lookup 0
-  cd -
+  ./testnet.sh recover dsguard 0
   ```
 
-  (Optional) If `./testnet.sh back-up auto` is not executed before, execute this and the persistence will be upload every xxx80 tx epoch.
+  We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
 
+- Example 2:
+  If you want to recover `level2lookup-0`, please type:
+  
   ```bash
-  cd <ori_testnet>
-  ./testnet.sh back-up auto
-  cd -
+  ./testnet.sh recover level2lookup 0
   ```
 
-  Go to [AWS webpage](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-persistence/?region=ap-southeast-1&tab=overview) and make sure `<ori_testnet>.tar.gz` is uploaded to `S3://zilliqa-persistence`.
-  The `<ori_cluster>-<ori_testnet>-key.tar.gz` will be generated under `<ori_testnet>` folder.
+  We don't specify `-u` here, by default it will use persistence from `lookup-0`.
 
-- (Optional, **Time-machine**) If you want to restore previous tx block in current ds epoch, upload `<ori_testnet>`'s persistence and relative key files to S3 with given `<restoredBlockNum>`.
+- Example 3:
+  If you want to recover `normal-3`, `normal-55`, `normal-77`, please type:
 
   ```bash
-  cd <ori_testnet>
-  ./testnet.sh back-up level2lookup 0 <restoredBlockNum>
-  cd -
+  ./testnet.sh recover normal "3 55 77"
   ```
 
-- Bootstrap a separate testnet `<new_testnet>` from the original cluster/testnet (`<ori_cluster>`/`<ori_testnet>`), with given `<S3PersistencePath>` (`s3://301978b4-0c0a-4b6b-ad7b-3a2f63c5182c/persistence/<ori_testnet>.tar.gz`) and `<keyFile>` (`<ori_testnet>/<ori_cluster>-<ori_testnet>-key.tar.gz`)
+  We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
 
+- Example 4:
+  If you want to recover `normal-0` using `dsguard-3`, please type:
+  
   ```bash
-  ./bootstrap.py <new_testnet> \
-  --recover-from-s3 <S3PersistencePath> \
-  --recover-key-files <keyFile> \
-  -c <commit> \
-  -t <tag>...
+  ./testnet.sh recover normal 0 -u dsguard 3
   ```
 
-  Keep the other options the same as much as possible from the `<ori_testnet>`'s bootstrap options.
-
-- Go to AWS webpage for updating `Bucket Policy` of [S3://zilliqa-incremental](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-incremental/?region=ap-southeast-1&tab=permissions), and [S3://zilliqa-statedelta](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-statedelta/?region=ap-southeast-1&tab=permissions); by adding `<new_cluster>` information:
-
-    ```bash
-    "Statement": [
-        {
-            ...
-            "Principal": {
-                "AWS": [
-                    "arn:aws:iam::648273915458:role/nodes.<new_cluster>"
-    ```
-
-- Manually confirm the correctness of constant file inside `configmap/constants.xml`.
-
-- Go to `<new_testnet>` folder, and launch it.
-
+- Example 5:
+  If you want to recover `normal-0`, `normal-4`, `normal-52` using `lookup-9`, please type:
+  
   ```bash
-  cd <new_testnet>
-  ./testhet.sh up
-  ```
-
-- (Optional, deprecated after `v4.7.0`) After `<new_testnet>` being launched, remove unnecessary files (`ipMapping.xml`, used to map `<ori_testnet>`'s IP to `<new_testnet>`'s IP).
-
-  ```bash
-  ./testnet.sh remove-ipMap
+  ./testnet.sh recover normal "0 4 52" -u lookup 9
   ```
 
 ## Rejoin
