@@ -1,9 +1,9 @@
-## Recover
+# Recover
 
   The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
 
   ```bash
-  ./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX] 
+  ./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX]
   ```
 
   If not specify `-u`, by default we will use persistence from `lookup-0` for recovering `level2lookup-x`, and use persistence from `level2lookup-0` for recovering al the other nodes.
@@ -49,7 +49,7 @@
   ./testnet.sh recover normal "0 4 52" -u lookup 9
   ```
 
-## Rejoin
+# Rejoin
 
 - [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
 
