@@ -4,7 +4,7 @@ As a result of IPv4 address scarcity, most home internet gateway devices (IGD) s
 
 ![image01](images/features/nat-resolver/image01.png)
 
-This means that a node behind such devices will be assigned a private IP address and the gateway will route the traffic to and from the outside world. As such, external nodes in the Internet are unable to route messages to node before devices with NAT. For instance, in the diagram below, when Alice wants to route a message to `192.168.1.101:12345`, Alice is unable to do so.
+This means that a node behind such devices will be assigned a private IP address and the gateway will route the traffic to and fro the outside world. As such, external nodes in the Internet are unable to route messages to node before devices with NAT. For instance, in the diagram below, when Alice wants to route a message to `192.168.1.101:12345`, Alice is unable to do so.
 
 ![image02](images/features/nat-resolver/image02.png)
 
