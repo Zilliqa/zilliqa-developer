@@ -1,19 +1,18 @@
 # Recover / Rejoin
 
-  This document will give some useful examples for `recover`, and explain the concept of `rejoin`.
+This document will give some useful examples for `recover`, and explain the concept of `rejoin`.
 
 ## Recover
 
-  The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
+The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
 
-  ```bash
-  ./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX]
-  ```
+```bash
+./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX]
+```
 
-  If not specify `-u`, by default we will use persistence from `lookup-0` for recovering `level2lookup-x`, and use persistence from `level2lookup-0` for recovering al the other nodes.
+If not specify `-u`, by default we will use persistence from `lookup-0` for recovering `level2lookup-x`, and use persistence from `level2lookup-0` for recovering al the other nodes.
 
-- Scenario 1:
-  If you want to recover `dsguard-0`, please type:
+- [Scenario 1] If you want to recover `dsguard-0`, please type:
   
   ```bash
   ./testnet.sh recover dsguard 0
@@ -21,8 +20,7 @@
 
   We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
 
-- Scenario 2:
-  If you want to recover `level2lookup-0`, please type:
+- [Scenario 2] If you want to recover `level2lookup-0`, please type:
   
   ```bash
   ./testnet.sh recover level2lookup 0
@@ -30,8 +28,7 @@
 
   We don't specify `-u` here, by default it will use persistence from `lookup-0`.
 
-- Scenario 3:
-  If you want to recover `normal-3`, `normal-55`, `normal-77`, please type:
+- [Scenario 3] If you want to recover `normal-3`, `normal-55`, `normal-77`, please type:
 
   ```bash
   ./testnet.sh recover normal "3 55 77"
@@ -39,15 +36,13 @@
 
   We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
 
-- Scenario 4:
-  If you want to recover `normal-0` using `dsguard-3`, please type:
+- [Scenario 4] If you want to recover `normal-0` using `dsguard-3`, please type:
   
   ```bash
   ./testnet.sh recover normal 0 -u dsguard 3
   ```
 
-- Scenario 5:
-  If you want to recover `normal-0`, `normal-4`, `normal-52` using `lookup-9`, please type:
+- [Scenario 5] If you want to recover `normal-0`, `normal-4`, `normal-52` using `lookup-9`, please type:
   
   ```bash
   ./testnet.sh recover normal "0 4 52" -u lookup 9
@@ -55,12 +50,12 @@
 
 ## Rejoin
 
-  When following scenario happened, `rejoin` process will be applied.
+When following scenario happened, `rejoin` process will be applied.
 
-  - A node is kick-out from network for some reason (e.g., Lose POW, recover)
-  - A new node (e.g., community node, `new`/`newlookup` node) want to join to network
+- A node is kick-out from network for some reason (e.g., Lose POW, recover)
+- A new node (e.g., community node, `new`/`newlookup` node) want to join to network
 
-  Basically, the `rejoin` will keey fetching necessary information (DS info, DS block, TX block, ...) from a random-selected lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
+Basically, the `rejoin` will keey fetching necessary information (DS info, DS block, TX block, ...) from a random-selected lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
 
 ![rejoin](images/rejoin.jpg)
 
@@ -89,8 +84,8 @@ Here is more detail steps for `normal`, `DS`, and `lookup` nodes.
 
 1. If the DS Node was a DS Leader, it will do view change rather than do recovery as a DS Node. It the process of the DS Leader was killed, it will start joining as a Normal Node if triggered by the Daemon.
 2. The steps for DS Node are the same as Normal Node until step 8, besides:
-3. The step 2 is to clean the variables in DirectoryService class. 
-4. The step 3 is to set SyncType to be DS_SYNC. 
+3. The step 2 is to clean the variables in DirectoryService class.
+4. The step 3 is to set SyncType to be DS_SYNC.
 5. The following is the step after step 8.
 6. Wait until Request F got feedback, check isFirstLoop: if true, set to false; if false, mark the currDSExpired as true.
 7. Wait until Request D got feedback, check if the currDSExpired, if false, change the SyncType to NO_SYNC, reset isFirstLoop to true, start RunConsensuOnDSBlock with no PoW1 submission.
