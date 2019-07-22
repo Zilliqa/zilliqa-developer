@@ -1,4 +1,8 @@
-# Recover
+# Recover / Rejoin
+
+  This document will give some useful examples for `recover`, and explain the concept of `rejoin`.
+
+## Recover
 
   The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
 
@@ -49,7 +53,7 @@
   ./testnet.sh recover normal "0 4 52" -u lookup 9
   ```
 
-# Rejoin
+## Rejoin
 
 - [Log-in to mkops](https://docs.google.com/document/d/1SMnflWGmGQGc3qJOOlGtq-85eBYuyQUg1fjkZlcSIKo/edit)
 
