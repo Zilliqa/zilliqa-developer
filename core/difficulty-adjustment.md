@@ -1,14 +1,16 @@
 # Difficulty Adjustment
 
-Adjust difficulty level of PoW at the end of each DS epoch according to the number of PoW submissions. With a higher difficulty, it can make malicious attack more difficult. And keep the nodes with the most powerful hardware in the network.
+Zilliqa has a dynamic adjustment difficulty level mechanism. This goal of this mechanism is to adjust the difficulty level according to the number of PoW submission received.
+
+When the network received a low number of PoW submission, the mechanism will reduce the difficulty so that more nodes can join and maintain the network. On the other hand. when the network received a high number of PoW submission, the mechanism will increase the difficulty level, making it harder for Sybil attack.
 
 ## Adjustment procedure
 
 1. When we bootstrap the system, every node reads the difficulty level from the constant file. After that, every node will update the difficulty level at the first txn epoch of each DS epoch.
-1. At the beginning of each DS epoch, every DS node will receive PoW submissions and record them. When a DS leader proposes a dsblock, it will call "CalculateNewDifficulty" and “CalculateNewDSDifficulty” to generate a difficulty to replace the field in dsblock and announce it to every DS backup node in DS block consensus protocol.
-1. A DS backup node receives the announcement, and calculates the new difficulty by calling "CalculateNewDifficulty" and “CalculateNewDSDifficulty” as well as compares the result with the one proposed by DS leader. If it matches, it will accept it and continue the consensus protocol. Otherwise, it refuses to reply the leader, which may trigger view change.
+1. At the beginning of each DS epoch, every DS node will receive PoW submissions and record them. When a DS leader proposes a dsblock, it will call "CalculateNewDifficulty" and “CalculateNewDSDifficulty” to calculate the new difficulty levels, insert the difficulty levels into m_dsDifficulty and m_difficulty fields in DS block and finally announce the DS block to every DS backup node via the DS block consensus protocol.
+1. A DS backup node receives the announcement, and calculates the new difficulty by calling "CalculateNewDifficulty" and “CalculateNewDSDifficulty” as well as compares the result with the one proposed by DS leader. If it matches, it will accept it and continue the consensus protocol. Otherwise, it will refuse to commit to the announcement made by the leader. If more than 1/3 of the nodes in the DS committee does not commit to the announcement, view change will be triggered.
 1. Once DS generates the dsblock with new difficulty, DS will broadcast it to shards. Every shard node will accept the new difficulty and use it to do PoW for next DS epoch.
-1. A new node will also get the new difficulty from lookup nodes by retrieving the latest DS block.
+1. A new node will get the latest difficulty from lookup nodes by retrieving the latest DS block.
 
 ## Adjustment formula and parameters
 
