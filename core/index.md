@@ -9,7 +9,6 @@
 - [Gossip Protocol](gossip-protocol.md)
 - [Guard Mode](guard-mode.md)
 - [Lookup Multiplier](lookup-multiplier.md)
-- [NAT Resolver](nat-resolver.md)
 - [Rejoin/Recovery](rejoin-recovery.md)
 - [Transaction Checks](transaction-checks.md)
 - [Tree-based Cluster Broadcasting](tree-based-cluster-broadcasting.md)
@@ -17,4 +16,5 @@
 
 ## Tools
 
+- [NAT Resolver](nat-resolver.md)
 - [Profiling Zilliqa and Scilla](profiling.md)
