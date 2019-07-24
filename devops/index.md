@@ -6,6 +6,7 @@
 - [Network Upgrade](network-upgrade.md)
 - [Recover / Rejoin](rejoin-recover.md)
 - [AWS Cloud9 Bastion](aws-bastion.md)
+- [AWS S3 Bucket Configuration](bucket-separation.md)
 - [Docker Images](docker-images.md)
 - [Mainnet Monitoring Scripts](mainnet-monitoring-scripts.md)
 - [Mainnet Maintenance](mainnet-maintenance.md)
