@@ -56,7 +56,7 @@ When following scenarios happened, `rejoin` process will be applied.
 - A new node (e.g., community node, `new`/`newlookup` node) want to join to network
 - A shard node doesn't receive final block
 
-Basically, the `rejoin` will fetch persistence as much as possible from AWS S3 buckets (incremental & statedelta) first. Then, if still lagging behind, the lacked information (DS info, DS block, TX block, statedelta...) will be fecthed from a random-selected lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
+Basically, the `rejoin` will fetch persistence as much as possible from AWS S3 buckets (`incremental`/`statedelta`) first. Then, if lagging behind, fetch the lacked information (DS info, DS block, TX block, statedelta...) from a random-selected lookup/level2lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
 
 ![rejoin](images/rejoin.jpg)
 
