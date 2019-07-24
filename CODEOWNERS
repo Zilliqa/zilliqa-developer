@@ -2,10 +2,14 @@
 # Each line is a file pattern followed by one or more owners.
 # reference: https://help.github.com/en/articles/about-code-owners
 
-*               @Gnnng
+*                                    @Gnnng
 
-/core/*         @bb111189
+/core/*                              @bb111189
 
-/devops/*       @Gnnng
+/core/difficulty-adjustment.md       @ShengguangXiao
 
-/example/*      @Gnnng
+/devops/*                            @Gnnng
+
+/devops/aws-marketplace.md           @ShengguangXiao
+
+/example/*                           @Gnnng
