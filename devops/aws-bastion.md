@@ -81,7 +81,7 @@ Steps for the environment creator:
 1. Launch the IDE for your environment
 2. Go to AWS Cloud9 > Preferences > AWS Settings > Credentials and disable "AWS managed temporary credentials"
 3. Go to "Share" on the top-right corner of the IDE
-4. Add the ARM for the user to be invited and select `RW` access
+4. Add the ARN for the user to be invited and select `RW` access
 5. After inviting, the environment should now appear in the "Shared with you" section in the other user's Cloud9 management console
 
 ## Backup of User Data
