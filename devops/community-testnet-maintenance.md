@@ -1,6 +1,6 @@
 # Community Testnet Maintenance
 
-This page contains information relevant to maintaining the small-scale testnet for community members. This testnet resides in the `dev` cluster in `kops` bastion and is usually named `communityvXXX`.
+This page contains information relevant to maintaining the small-scale testnet for community members. This testnet resides in a dedicated cluster in `CommunityTestnetBastion` and is usually named `communityvXXX`.
 
 ## Basic Steps for Recovering the Testnet
 
