@@ -127,14 +127,12 @@ The mainnet will still run in the current infrastructure and will be managed thr
 |--------------------------------------------|-----------------------------------------------------|----------------------------------------------------------|
 | new devnet cluster                         | Cloud9 bastion in devnet AWS account                | `--https=dev.z7a.xyz`                                    |
 | new devnet*                                | Any user-owned Cloud9 bastion in devnet AWS account | `--https=dev.z7a.xyz`                                    |
-| new devnet with recovery / upgrade support | [`kops.z7a.xyz` bastion](#kopsz7axyz)               | `--https=aws.z7a.xyz`                                    |
 | new testnet cluster                        | Cloud9 bastion in a dedicated testnet AWS account   | `--https=any.custom.domain --https-profile=profile.yaml` |
 | new testnet*                               | Same Cloud9 bastion where the cluster is launched   | `--https=any.custom.domain --https-profile=profile.yaml` |
-| existing testnet                           | [`kops.z7a.xyz` bastion](#kopsz7axyz)               | Re-use existing options                                  |
 | mainnet cluster                            | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`                                |
 | mainnet                                    | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`                                |
 
-> *: any S3-related features (recovery, upgrade, node joining) are not supported due to the [known issue](#devnet-known-limitations).
+> *: for any S3 related features, please specify the bucket with --bucket and make sure policies are coherent. [Bucket policies](https://github.com/Zilliqa/dev-docs/blob/master/devops/bucket-separation.md)
 
 ## References
 
