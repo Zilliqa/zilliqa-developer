@@ -70,7 +70,7 @@ For these situations, you can choose to:
 
 ## Sharing Created Environments
 
-Steps for the user to be added:
+Steps for the user to be invited:
 
 1. In the AWS applications page, click "Command line or programmatic access" for the correct role (e.g., `Cloud9User`) and account.
 2. Retrieve the AWS environment variables and export to a terminal session on your local machine or other Cloud9 bastions.
