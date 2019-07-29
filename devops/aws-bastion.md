@@ -74,7 +74,7 @@ Steps for the user to be added:
 
 1. In the AWS applications page, click "Command line or programmatic access" for the correct role (e.g., `Cloud9User`) and account.
 2. Retrieve the AWS environment variables and export to a terminal session on your local machine or other Cloud9 bastions.
-3. Execute `aws sts get-caller-identity` to get the following:
+3. Execute `aws sts get-caller-identity --query 'Arn' --output text` to get the ARN (Amazon Resource Name):
 
 ```Shell
 {
