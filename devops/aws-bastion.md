@@ -74,22 +74,14 @@ Steps for the user to be invited:
 
 1. In the AWS applications page, click "Command line or programmatic access" for the correct role (e.g., `Cloud9User`) and account.
 2. Retrieve the AWS environment variables and export to a terminal session on your local machine or other Cloud9 bastions.
-3. Execute `aws sts get-caller-identity --query 'Arn' --output text` to get the ARN (Amazon Resource Name):
-
-```Shell
-{
-    "UserId": "<redacted>",
-    "Account": "<redcated>",
-    "Arn": "<arn-string>"
-}
-```
+3. Execute `aws sts get-caller-identity --query 'Arn' --output text` to get the ARN (Amazon Resource Name).
 
 Steps for the environment creator:
 
 1. Launch the IDE for your environment
 2. Go to AWS Cloud9 > Preferences > AWS Settings > Credentials and disable "AWS managed temporary credentials"
 3. Go to "Share" on the top-right corner of the IDE
-4. Add the IAM username (i.e., the `arn-string`) of the other user and select RW access
+4. Add the ARM for the user to be invited and select `RW` access
 5. After inviting, the environment should now appear in the "Shared with you" section in the other user's Cloud9 management console
 
 ## Backup of User Data
