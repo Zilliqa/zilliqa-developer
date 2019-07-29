@@ -82,7 +82,9 @@ The devnet is a new category for the network used in day-to-day development.
 
 In the new design, all the devnets will run in one cluster from a selected AWS account. However, there are exceptions such as the devnet for testing network upgrade at large scale. This one has to run in a separate cluster regardless of which account is used.
 
-#### Devnet Known Limitations
+#### Devnet Known Limitations (DEPRECATED)  
+
+This issue is resolved and one can specify the bucket for recovery/upgrade/persistence using `--bucket` option during bootstrapping.  
 
 1. Due to the blocking [issue regarding S3](https://github.com/Zilliqa/testnet/issues/512), the following S3 buckets in mainnet AWS acount are not writeable from any other AWS accounts:
     - `s3://zilliqa-persistence`
