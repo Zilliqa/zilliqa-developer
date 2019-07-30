@@ -48,9 +48,9 @@ Unknown:
 Known:
 
 - New feature is stable
-- No Regression
+- No regression
 - Large-scale testing passed
-- Compatibility is confimred
+- Compatibility is confirmed
 
 Unknown:
 
@@ -76,7 +76,7 @@ Master branch always has the most active and latest version.
 
 There could be multiple release branches in the pattern of `release-<major>.<minor>`, such as `release-4.2`.
 
-The release branch always has the latest stable version for a certain minor version. However, some release versions may have already entered end-of-life, and the branches for them are only for achive purpose.
+The release branch always has the latest stable version for a certain minor version. However, some release versions may have already entered end-of-life, and the branches for them are only for archiving purpose.
 
 ## Tagging
 
