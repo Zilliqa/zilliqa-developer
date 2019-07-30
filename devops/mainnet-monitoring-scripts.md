@@ -6,19 +6,23 @@ All scripts are currently located in the [testnet](https://github.com/Zilliqa/te
 
 All scripts are usually launched with a Slack webhook URL as an input parameter. Click [here](https://api.slack.com/incoming-webhooks) to learn more about setting up a webhook.
 
+> **Note:** Our webhooks for **stall-alert** and **testnet-alert** channel can be found in the **Slack Webhooks** Google Doc under our Design Docs folder in Google Drive
+
 ## DS guard IP address consistency check (ds-ip-check.py)
 
 This script retrieves the IP addresses of the DS guards and cross-checks these against the DS committee list returned by querying "GetDSCommittee" in each DS guard.
 
 ```bash
 antonio@antonio-Latitude-7490:~/testnet/testnet$ ./monitoring/ds-ip-check.py --help
-usage: ds-ip-check.py [-h] --dscount DSCOUNT [--frequency FREQUENCY] --testnet
-                      TESTNET [--webhook WEBHOOK]
+usage: ds-ip-check.py [-h] --context CONTEXT --dscount DSCOUNT
+                      [--frequency FREQUENCY] --testnet TESTNET
+                      [--webhook WEBHOOK]
 
 Script to check for DS guard IP change
 
 optional arguments:
   -h, --help            show this help message and exit
+  --context CONTEXT     Cluster name
   --dscount DSCOUNT     Number of DS guards
   --frequency FREQUENCY
                         Checking frequency in minutes (default = 0 or run
@@ -34,6 +38,7 @@ optional arguments:
 
 ```bash
 nohup stdbuf -oL ./ds-ip-check.py \
+ --context brighthill.kube.z7a.xyz \
  --testnet mainnet-brightill \
  --dscount 420 \
  --webhook https://hooks.slack.com/services/ABCDEFGHI/JKLMNOPQR/Abcdefghijklmnopqrstuvwx \
@@ -91,6 +96,8 @@ nohup stdbuf -oL ./lookup_autorecover.py \
 ./testnet.sh lookup-autorecover start  # to start the script
 ./testnet.sh lookup-autorecover status # to get the running process
 ```
+
+> **Note:** The start command uses the webhook URL for our **stall-alert** channel. If you need to deploy the script for a different URL (e.g., for community testnet), then use Option 1 way instead.
 
 ### While the script is running (lookup_autorecover.py)
 
