@@ -11,6 +11,7 @@
 /devops/mainnet-maintenance.md            @ansnunez
 /devops/mainnet-monitoring-scripts.md     @ansnunez
 /devops/network-upgrade.md                @ckyang
+/devops/rejoin-recover.md                 @ckyang
 
 /devops/*                                 @Gnnng
 
