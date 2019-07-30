@@ -15,12 +15,12 @@ The following topics are covered in this document.
 - [Securing your browser](#securing-your-browser)
 - [Creation of bastion](#creation-of-bastion)
 - [Permissions to Other AWS Services](#permissions-to-other-aws-services)
+- [Sharing Created Environments](#sharing-created-environments)
 - [Backup of User Data](#backup-of-user-data)
 - [Example Use Cases](#example-use-cases)
   - [Kubernetes Clusters Management](#kubernetes-clusters-management)
   - [Kubernetes Admin/User](#kubernetes-adminuser)
 - [References](#references)
-- [TODOs](#todos)
 
 ## Securing your browser
 
@@ -68,6 +68,22 @@ For these situations, you can choose to:
 1. [Switch off the AWS Managed Temporary Credentials](https://docs.aws.amazon.com/cloud9/latest/user-guide/auth-and-access-control.html#auth-and-access-control-temporary-managed-credentials-supported)
 2. [Create and Use an Instance Profile to Manage Temporary Credentials](https://docs.aws.amazon.com/cloud9/latest/user-guide/credentials.html#credentials-temporary)
 
+## Sharing Created Environments
+
+Steps for the user to be invited:
+
+1. In the AWS applications page, click "Command line or programmatic access" for the correct role (e.g., `Cloud9User`) and account.
+2. Retrieve the AWS environment variables and export to a terminal session on your local machine or other Cloud9 bastions.
+3. Execute `aws sts get-caller-identity --query 'Arn' --output text` to get the ARN (Amazon Resource Name).
+
+Steps for the environment creator:
+
+1. Launch the IDE for your environment
+2. Go to AWS Cloud9 > Preferences > AWS Settings > Credentials and disable "AWS managed temporary credentials"
+3. Go to "Share" on the top-right corner of the IDE
+4. Add the ARN for the user to be invited and select `RW` access
+5. After inviting, the environment should now appear in the "Shared with you" section in the other user's Cloud9 management console
+
 ## Backup of User Data
 
 Please be aware that the Cloud9 bastion does not provide any backup of the data. It is essentially an EC2 instance managed by Cloud9 with no automatic backups. You will have the same concern of data persistence when you use an EC2 instance. So backup your own data or credentials if they are important.
@@ -91,7 +107,3 @@ If you are an admin or user of the Kubernetes clusters, you can also make use of
 ## References
 
 - [AWS Cloud9 User Guide](https://docs.aws.amazon.com/cloud9/latest/user-guide/welcome.html)
-
-## TODOs
-
-- [ ] add guide about sharing bastion with others.
