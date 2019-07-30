@@ -61,6 +61,7 @@ Unknown:
 Known:
 
 - Existing issues resolved
+- Documentation updated
 
 Unknown:
 
