@@ -12,10 +12,8 @@ We are making some changes to the infrastructure and workflows in order to have 
 - [Zilliqa Network Category](#zilliqa-network-category)
   - [Devnet](#devnet)
     - [Devnet Infrastructure](#devnet-infrastructure)
-    - [Devnet Known Limitations](#devnet-known-limitations)
   - [Testnet](#testnet)
     - [Testnet Infrastructure](#testnet-infrastructure)
-    - [Testnet Known Limitaitons](#testnet-known-limitaitons)
   - [Mainnet](#mainnet)
 - [Cheatsheet](#cheatsheet)
 - [References](#references)
@@ -30,15 +28,9 @@ In the previous operations and also as of now, two EC2 instances were acting as 
 
 #### `kops.z7a.xyz`
 
-This bastion is used to manage all the testnets, including the ones for developers, community and partners.
+**Notice: This bastion is terminated. Please use Cloud9 bastion instead.**
 
-Currently the running networks and clusters are
-
-| Network                         | Cluster              |
-|---------------------------------|----------------------|
-| all developer-launched testnets | `dev.k8s.z7a.xyz`    |
-| community testnet               | `dev.k8s.z7a.xyz`    |
-| proton testnet                  | `proton.k8s.z7a.xyz` |
+This bastion was used to manage all the testnets, including the ones for developers, community and partners.
 
 #### `mkops.z7a.xyz`
 
@@ -82,16 +74,6 @@ The devnet is a new category for the network used in day-to-day development.
 
 In the new design, all the devnets will run in one cluster from a selected AWS account. However, there are exceptions such as the devnet for testing network upgrade at large scale. This one has to run in a separate cluster regardless of which account is used.
 
-#### Devnet Known Limitations
-
-1. Due to the blocking [issue regarding S3](https://github.com/Zilliqa/testnet/issues/512), the following S3 buckets in mainnet AWS acount are not writeable from any other AWS accounts:
-    - `s3://zilliqa-persistence`
-    - `s3://zilliqa-incremental`
-    - `s3://zilliqa-statedelta`
-    - etc.
-
-    As a result, the devnet / testnet running in different AWS account will lose the recovery features unless the issue is resolved permanently or the access is enabled temporarily during the recovery. Also, new node joining is unsupported as the persistence data cannot be uploaded to the S3 bucket.
-
 ### Testnet
 
 This category includes all the networks used by real users from outside for long-term testing and evaluation, such as:
@@ -105,17 +87,10 @@ These testnets are important as it contains user data and sometime has to satisf
 
 Each testnet needs to run in different AWS accounts with Cloud9 bastion used. However for the existing ones, we will not touch them until a clean migration is ready.
 
-| Network           | Users/Partners | Bastion                     | Migration Status |
-|-------------------|----------------|-----------------------------|------------------|
-| community testnet | community      | [kops.z7a.xyz](#kopsz7axyz) | pending*         |
-| proton testnet    | mindshare      | [kops.z7a.xyz](#kopsz7axyz) | pending*         |
-| blue testnet      | mindshare      | Cloud9                      | done             |
-
-> *: The existing testnets will stay unchanged until the existing issues are resolved.
-
-#### Testnet Known Limitaitons
-
-1. The same blocking issue as per [Devnet Known Limitations #1](#devnet-known-limitations).
+| Network           | Users/Partners | Bastion | Migration Status |
+|-------------------|----------------|---------|------------------|
+| community testnet | community      | Cloud9  | done             |
+| blue testnet      | mindshare      | Cloud9  | done             |
 
 ### Mainnet
 
@@ -123,18 +98,16 @@ The mainnet will still run in the current infrastructure and will be managed thr
 
 ## Cheatsheet
 
-| Use case                                   | Bastion                                             | Bootstrap HTTPS options                                  |
-|--------------------------------------------|-----------------------------------------------------|----------------------------------------------------------|
-| new devnet cluster                         | Cloud9 bastion in devnet AWS account                | `--https=dev.z7a.xyz`                                    |
-| new devnet*                                | Any user-owned Cloud9 bastion in devnet AWS account | `--https=dev.z7a.xyz`                                    |
-| new devnet with recovery / upgrade support | [`kops.z7a.xyz` bastion](#kopsz7axyz)               | `--https=aws.z7a.xyz`                                    |
-| new testnet cluster                        | Cloud9 bastion in a dedicated testnet AWS account   | `--https=any.custom.domain --https-profile=profile.yaml` |
-| new testnet*                               | Same Cloud9 bastion where the cluster is launched   | `--https=any.custom.domain --https-profile=profile.yaml` |
-| existing testnet                           | [`kops.z7a.xyz` bastion](#kopsz7axyz)               | Re-use existing options                                  |
-| mainnet cluster                            | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`                                |
-| mainnet                                    | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`                                |
+| Use case             | Bastion                                             | Bootstrap HTTPS options              |
+|----------------------|-----------------------------------------------------|--------------------------------------|
+| new devnet cluster*  | Cloud9 bastion in devnet AWS account                | See README.md in side Cloud9 bastion |
+| new devnet*          | Any user-owned Cloud9 bastion in devnet AWS account | See README.md in side Cloud9 bastion |
+| new testnet cluster* | Cloud9 bastion in a dedicated testnet AWS account   | See README.md in side Cloud9 bastion |
+| new testnet*         | Same Cloud9 bastion where the cluster is launched   | See README.md in side Cloud9 bastion |
+| mainnet cluster      | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`            |
+| mainnet              | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`            |
 
-> *: any S3-related features (recovery, upgrade, node joining) are not supported due to the [known issue](#devnet-known-limitations).
+> *: for any S3 related features, please specify the bucket with --bucket and make sure policies are coherent. See **[Bucket Policies](https://github.com/Zilliqa/dev-docs/blob/master/devops/bucket-separation.md)** for more.
 
 ## References
 
