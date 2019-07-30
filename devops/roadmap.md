@@ -30,7 +30,7 @@ In the previous operations and also as of now, two EC2 instances were acting as 
 
 **Notice: This bastion is terminated. Please use Cloud9 bastion instead.**
 
-This bastion was used to manage all the testnets, including the ones for developers, community and partners. 
+This bastion was used to manage all the testnets, including the ones for developers, community and partners.
 
 #### `mkops.z7a.xyz`
 
