@@ -2,10 +2,16 @@
 # Each line is a file pattern followed by one or more owners.
 # reference: https://help.github.com/en/articles/about-code-owners
 
-*               @Gnnng
+*                                         @Gnnng
 
-/core/*         @bb111189
+/core/*                                   @ansnunez
 
-/devops/*       @Gnnng
+/devops/aws-marketplace.md                @ShengguangXiao
+/devops/community-testnet-maintenance.md  @ansnunez
+/devops/mainnet-maintenance.md            @ansnunez
+/devops/mainnet-monitoring-scripts.md     @ansnunez
+/devops/network-upgrade.md                @ckyang
 
-/example/*      @Gnnng
+/devops/*                                 @Gnnng
+
+/example/*                                @Gnnng
