@@ -91,3 +91,5 @@ Two variants of images are available in [Docker Hub](https://hub.docker.com/r/zi
 
 - CPU mining docker image: same as [git tagging](#git-tagging), such as `v4.2.0` or `v4.2.0-alpha.0`.
 - CUDA mining docker images: starting with [git tagging](#git-tagging) with `-cuda` suffix, such as `v4.2.0-cuda` or `v4.2.0-alpha.0-cuda`.
+
+In addition, the `latest` tag always points to the latest master version of Zilliqa (CPU mining version).
