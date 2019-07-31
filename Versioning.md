@@ -79,6 +79,10 @@ There could be multiple release branches in the pattern of `release-<major>.<min
 
 The release branch always has the latest stable version for a certain minor version. However, some release versions may have already entered end-of-life, and the branches for them are only for archiving purpose.
 
+#### Creation of Release Branch
+
+The release branch should be created when the first tag (typically pre-release tag) for a certain `<major>.<minor>` version is created.
+
 ## Tagging
 
 ### Git Tagging
