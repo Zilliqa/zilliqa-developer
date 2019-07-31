@@ -29,8 +29,8 @@
       history -c
       ```
 
-1. Use a new console try to use ssh connect to the instace, make sure now you
- cannot connect any more. (Because all the access keys are cleared)
+1. Use a new console try to use ssh connect to the instance, make sure now you
+ cannot connect any more. (Because all the access keys are removed)
 1. Login to the aws EC2 management console, create an AMI (Amazon Machine Image)
  from this instance.
 1. Copy the image to US East (N. Virginia).
