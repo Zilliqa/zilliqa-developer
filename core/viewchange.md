@@ -14,6 +14,7 @@ This document describes the view change process in Zilliqa. For automation of vi
 - [General test scenario](#general-test-scenario)
 - [Special test scenario](#special-test-scenario)
 - [Test macro](#test-macro)
+- [Known issues](#known-issues)
 
 <!-- /TOC -->
 
