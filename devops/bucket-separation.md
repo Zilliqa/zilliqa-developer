@@ -108,10 +108,16 @@ The use of `"Principal": "*"` in the policy allows public access and the conditi
 Make sure you have admin access to the bucket `<bucket-name>`. If you are inside the Cloud9 bastion with S3 admin access to `<bucket-name>`, you can directly invoke the following commands. Otherwise, please configured the AWS credentials in command line first.
 
 ```bash
-aws s3api put-bucket-policy --bucket <bucket-name> --policy policy.json
+aws s3api put-bucket-policy --bucket <bucket-name> --policy file://policy.json
 ```
 
 The file `policy.json` should contain a valid bucket policy document as above. Do remember to replace the example bucket name string from `301978b4-****-****-****-3a2f63c5182c` to the one you are configuring (i.e., `<bucket-name>`).
+
+Also, try checking the existing policy before and after configuring:
+
+```bash
+aws s3api get-bucket-policy --bucket <bucket-name>
+```
 
 Other commands under `aws s3api` can be found at [AWS documentation](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html#cli-aws-s3api).
 
