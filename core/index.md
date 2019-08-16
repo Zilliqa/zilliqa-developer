@@ -54,6 +54,7 @@
 - [PoW Algorithm](pow-algorithm.md)
 - [Difficulty Adjustment](difficulty-adjustment.md)
 - [Coinbase / Rewards](coinbase-rewards.md)
+- [Proof of Reputation](proof-of-reputation.md)
 
 ## Mitigation Measures
 
