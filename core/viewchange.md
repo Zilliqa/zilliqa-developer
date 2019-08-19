@@ -174,7 +174,7 @@ Test plan for merging DS Microblock into FinalBlock consensus
 17. `dm9` - letting the ds leader and half of the ds committee members refuse some MicroBlock submission
 
 ## Known issues
-1. `VC7` and `VC8` require uploading of persistent storage from lookup. However, this process is not automated. Hence, these two tests will require manual invention.
+1. `VC7` and `VC8` require uploading of persistent storage from lookup. However, this process is not automated. Hence, these two tests will require manual intervention.
 - Run test
 - Upload lookup incremental DB at epoch 5
 - Observe DS node with `consensusMyID` 3 goes into view change and pre-checking
