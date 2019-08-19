@@ -70,7 +70,7 @@ These are the relevant constants that affect the way our consensus operates:
 
 - `BROADCAST_GOSSIP_MODE` - When this is `true`, `ConsensusLeader` sends the announcement and collective signature messages using gossip. Otherwise, the messages are sent using multicast.
 
-- `COMMIT_TOLERANCE_PERCENT` - This is only used when we have two subsets.
+- `COMMIT_TOLERANCE_PERCENT` - This specifies the percentage of the peers that are needed to send a commit to cut the waiting time (specified by `COMMIT_WINDOW_IN_SECONDS`) prematurely, if the subset count is more than 1.
 
 - `COMMIT_WINDOW_IN_SECONDS` - This specifies the maximum duration the leader will wait to receive commits, if the subset count is more than 1.
 
