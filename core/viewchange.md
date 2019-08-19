@@ -82,7 +82,7 @@ a. If stalled, wait for timeout and re-run view change consensus with a new cand
 16. Store VC block to persistent storage
 17. If stalled consensus is at final block consensus, send the VC block to the lookup and shard nodes. Lookups and shard nodes update the ds composition respectively
 18. If stalled consensus is at DS block consensus, hold and collect VC block(s) to the lookup and shard nodes.
-19. Re-run stalled consensus (DS block or final block consensus). If re-run is at final block consensus, gas limit will be adjusted using exponential backup algorithm.
+19. Re-run stalled consensus (DS block or final block consensus). If re-run is at final block consensus, gas limit will be adjusted using exponential backoff algorithm.
 20. Consensus completed
 21. If DS block consensus, concatenate the DS block with VC block(s) and send to lookup and shard nodes
 22. Lookup and shard nodes will process VC block(s) linearly followed by DS block
