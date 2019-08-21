@@ -19,6 +19,7 @@ The following tables shows the storage locations for different objects and their
 | `s3://<bucket_name>/persistence/*`                | R/W                  | -/-                    | persistence tarballs used for recovery/back-up                      |
 | `s3://<bucket_name>/logs/<network_name>/*`        | R/W                  | -/-                    | logs for each node in the network                                   |
 | `s3://<bucket_name>/release/*`                    | R/W                  | -/-                    | release tarballs                                                    |
+| `s3://<bucket_name>/txns-backup/<network_name>/*` | R/W                  | -/-                    | transactions backup                                                 |
 
 > Note:
 >
