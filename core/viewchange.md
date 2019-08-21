@@ -14,6 +14,7 @@ This document describes the view change process in Zilliqa. For automation of vi
 - [General test scenario](#general-test-scenario)
 - [Special test scenario](#special-test-scenario)
 - [Test macro](#test-macro)
+- [Known issues](#known-issues)
 
 <!-- /TOC -->
 
@@ -81,7 +82,7 @@ a. If stalled, wait for timeout and re-run view change consensus with a new cand
 16. Store VC block to persistent storage
 17. If stalled consensus is at final block consensus, send the VC block to the lookup and shard nodes. Lookups and shard nodes update the ds composition respectively
 18. If stalled consensus is at DS block consensus, hold and collect VC block(s) to the lookup and shard nodes.
-19. Re-run stalled consensus (DS block or final block consensus)
+19. Re-run stalled consensus (DS block or final block consensus). If re-run is at final block consensus, gas limit will be adjusted using exponential backoff algorithm.
 20. Consensus completed
 21. If DS block consensus, concatenate the DS block with VC block(s) and send to lookup and shard nodes
 22. Lookup and shard nodes will process VC block(s) linearly followed by DS block
@@ -171,3 +172,13 @@ Test plan for merging DS Microblock into FinalBlock consensus
 15. `dm7` - letting the ds leader accept fewer txns from lookup comparing to the others
 16. `dm8` - letting the ds leader and half of the ds committee members accept fewer txns from lookup comparing to the others
 17. `dm9` - letting the ds leader and half of the ds committee members refuse some MicroBlock submission
+
+## Known issues
+
+1. `VC7` and `VC8` require uploading of persistent storage from lookup. However, this process is not automated. Hence, these two tests will require manual intervention.
+   - Run test
+   - Upload lookup incremental DB at epoch 5
+   - Observe DS node with `consensusMyID` 3 goes into view change and pre-checking
+   - Check for invocation of `RejoinAsDS()` and `FinishRejoinAsDS()`
+2. `DM3` not working due to constant settings. This is not an issue
+3. `DM8` and `DM9` cannot be accurately validated using script
