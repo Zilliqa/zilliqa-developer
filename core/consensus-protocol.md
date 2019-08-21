@@ -58,7 +58,7 @@ To address this situation, we changed the consensus implementation to support mu
 
 1. Once the leader has stopped accepting commits, it generates two subsets out of the committed peers (both subsets are of size 2/3+1 and includes the leader):
    - Subset 0 = If consensus is within DS committee, prioritize DS guards, and fill in the remaining slots with other DS nodes. If consensus is within shard, nodes are randomly selected, with no bias towards guards.
-   - Subset 1 = Nodes are randomly selected, with no bias towards guards (regardless of whether consensus is done at DS or shard level) ().
+   - Subset 1 = Nodes are randomly selected, with no bias towards guards (regardless of whether consensus is done at DS or shard level).
 
 1. The leader creates two challenges and sends both to all backups who are part of at least one of the two subsets.
 1. The backups validate both challenges and send back responses to both.
