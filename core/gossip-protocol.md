@@ -49,8 +49,7 @@ Stops the Round. Thereby stops gossiping rumors to peers.
    - `KNOWN` : cooling state, stay in this state for a `m_maxRounds` rounds, participating in rumor spreading
    - `OLD` : final state, member stops participating in rumor spreading
 	
-   Every rumor starts with NEW. It either stay in same state or move on to KNOWN /OLD state immediately or in successive rounds based on algo mentioned in whitepaper.
-Every rumor is tied up with round ( consider it as rumor age )
+Every rumor starts with NEW. It either stay in same state or move on to KNOWN /OLD state immediately or in successive rounds based on algo mentioned in whitepaper. Every rumor is tied up with round ( consider it as rumor age).
 	
 Rumor is configured to stay in NEW and KNOWN state for max `<MAX_ROUNDS_IN_BSTATE>` and `<MAX_ROUNDS_IN_CSTATE>` respectively.
 And to brutefully mark rumor as OLD, total rounds is limited to not exceed `<MAX_TOTAL_ROUNDS>`.
