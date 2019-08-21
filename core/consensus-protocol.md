@@ -56,7 +56,7 @@ To address this situation, we changed the consensus implementation to support tw
 
 1. Once the leader has stopped accepting commits, it generates two subsets out of the committed peers (both subsets are of size 2/3+1 and includes the leader):
    - Subset 0 = If consensus is within DS committee, prioritize DS guards, and fill in the remaining slots with other DS nodes. If consensus is within shard, nodes are randomly selected, with no bias towards guards.
-   - Subset 1 = Nodes are randomly selected, with no bias towards guards.
+   - Subset 1 = Nodes are randomly selected, with no bias towards guards (regardless of whether consensus is done at DS or shard level).
 
 1. The leader creates two challenges and sends both to all backups who are part of at least one of the two subsets.
 1. The backups validate both challenges and send back responses to both.
@@ -74,9 +74,9 @@ These are the relevant constants that affect the way our consensus operates:
 
 - `COMMIT_WINDOW_IN_SECONDS` - This specifies the maximum duration the leader will wait to receive commits, if the subset count is more than 1.
 
-- `CONSENSUS_MSG_ORDER_BLOCK_WINDOW` - This is used at the `DirectoryService` or `Node` level to indicate the number of seconds the node will delay processing a consensus message that is not applicable to the current state of the consensus object.
+- `CONSENSUS_MSG_ORDER_BLOCK_WINDOW` - This is used at the `DirectoryService` or `Node` level to indicate the number of seconds the node will delay processing a particular consensus message that is not applicable to the current state of the consensus object (based on `ConsensusCommon::CanProcessMessage()`).
 
-- `CONSENSUS_OBJECT_TIMEOUT` - This is used at the `DirectoryService` or `Node` level to indicate the number of seconds the node will delay processing a consensus message that is not applicable to the current state of the `DirectoryService` or `Node` instance.
+- `CONSENSUS_OBJECT_TIMEOUT` - This is used at the `DirectoryService` or `Node` level to indicate the number of seconds the node will delay processing a consensus message that is not applicable to the current state of the `DirectoryService` or `Node` instance (e.g., a DS node may have received a view change consensus message while it is still not in the `VIEWCHANGE_CONSENSUS` state).
 
 - `DS_NUM_CONSENSUS_SUBSETS` - This indicates the number of consensus subsets to be used for consensus within the DS committee.
 
