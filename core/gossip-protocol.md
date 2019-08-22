@@ -19,12 +19,13 @@ Following interfaces are exposed for node to enable gossiping messages in networ
 Every node in network intializes the RumorManager with the peers from their shard or DSCommittee at start of new DS epoch or after successful view change.
 
 Initialization involves following:
- -Storing peerlist
- -Storing pubkeys of peers from peerlist, DSCommitte members and lookup nodes
- -Storing self peer-info and pub/priv key
- -Starting of Rounds - that runs loop every `ROUND_TIME_IN_MS` ms.
-    -Checks the state of every rumor in RumorHolder (More on RumorHolder later) and sends to `MAX_NEIGHBORS_PER_ROUND` random peers if not old enough.
-    -RumorHolder monitors/changes state of each rumor it holds using Median Counter algorithm as explained in paper ( section 3 ) for every round.
+
+- Storing peerlist
+- Storing pubkeys of peers from peerlist, DSCommitte members and lookup nodes
+- Storing self peer-info and pub/priv key
+- Starting of Rounds - that runs loop every `ROUND_TIME_IN_MS` ms.
+  - Checks the state of every rumor in RumorHolder (More on RumorHolder later) and sends to `MAX_NEIGHBORS_PER_ROUND` random peers if not old enough.
+  - RumorHolder monitors/changes state of each rumor it holds using Median Counter algorithm as explained in paper ( section 3 ) for every round.
 
 ### SpreadRumor
 
@@ -41,24 +42,24 @@ Stops the Round. Thereby stops gossiping rumors to peers.
   
 ## Rumor State Machine
 
-   Every rumor will be in one of following state at any time
+Every rumor will be in one of following state at any time
 
-    - `NEW` : the peer `v` knows `r` and `counter(v,r) = m` (age/round)
-    - `KNOWN` : cooling state, stay in this state for a `m_maxRounds` rounds, participating in rumor spreading
-    - `OLD` : final state, member stops participating in rumor spreading
+- `NEW` : the peer `v` knows `r` and `counter(v,r) = m` (age/round)
+- `KNOWN` : cooling state, stay in this state for a `m_maxRounds` rounds, participating in rumor spreading
+- `OLD` : final state, member stops participating in rumor spreading
 
 Every rumor starts with NEW. It either stay in same state or move on to KNOWN /OLD state immediately or in successive rounds based on algo mentioned in whitepaper. Every rumor is tied up with round ( consider it as rumor age).
 
 Rumor is configured to stay in NEW and KNOWN state for max `<MAX_ROUNDS_IN_BSTATE>` and `<MAX_ROUNDS_IN_CSTATE>` respectively.
 And to brutefully mark rumor as OLD, total rounds is limited to not exceed `<MAX_TOTAL_ROUNDS>`.
 
-    ```xml
+```xml
     <gossip_custom_rounds>
       <MAX_ROUNDS_IN_BSTATE>2</MAX_ROUNDS_IN_BSTATE>
       <MAX_ROUNDS_IN_CSTATE>3</MAX_ROUNDS_IN_CSTATE>
       <MAX_TOTAL_ROUNDS>6</MAX_TOTAL_ROUNDS>
     </gossip_custom_rounds>
-    ```
+```
 
 Rumor State Machine is managed by `RumorHolder`
 
