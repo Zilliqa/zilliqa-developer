@@ -13,8 +13,7 @@ that node has in microblocks (in case of shard node) or tx blocks (in case of ds
 
 ## Process
 
-1. The distribution of rewards take place in vacous epoch. 
+1. The distribution of rewards take place in vacous epoch.
 2. The state change (subtraction from null address and addition to node's address) is reflected in the
 state delta of the ds microblock.
 3. The ds have consensus over the state delta and hence rewards are given.
-
