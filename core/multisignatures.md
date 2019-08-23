@@ -46,6 +46,14 @@ H1(x) = SHA256(0x01||x)
 H2(x) = SHA256(0x11||x)
 ```
 
+This diagram illustrates the original multisignature scheme during consensus:
+
+![image01](images/features/multisignatures/image01.png)
+
+This diagram illustrates the modified scheme based on the auditor's proposal:
+
+![image02](images/features/multisignatures/image02.png)
+
 After these changes, we now identify three domains during the consensus protocol. The "separation" per se refers to the integration of unique byte values into hash operations across different points of the consensus, to effectively carve out domains during the consensus.
 
 1. The first domain-separated hash function basically refers to the node submitting its PoW and its public key, or what we now refer to as the Proof-of-Possession (PoP) phase. While no behavioral change is done in the code for the PoW stage, we created a wrapper function `MultiSig::SignKey` to emphasize that by signing the public key, the node is effectively presenting proof of possessing the private key.
