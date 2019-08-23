@@ -10,6 +10,7 @@
 /core/images/tools/*                      @ansnunez
 /core/images/*                            @ansnunez
 /core/*                                   @ansnunez
+/core/                                    @ansnunez
 
 /devops/aws-marketplace.md                @ShengguangXiao
 /devops/community-testnet-maintenance.md  @ansnunez
