@@ -8,6 +8,17 @@ All scripts are usually launched with a Slack webhook URL as an input parameter.
 
 > **Note:** Our webhooks for **stall-alert** and **testnet-alert** channel can be found in the **Slack Webhooks** Google Doc under our Design Docs folder in Google Drive
 
+## Deployment locations
+
+As of Zilliqa v4.8.0, we have the following scripts deployed:
+
+| Script                | Machine                     | Location                                    | Run Parameters |
+|-----------------------|-----------------------------|---------------------------------------------|----------------|
+| ds-ip-check.py        | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup ./ds-ip-check.py --context \<somerset\> --dscount 420 --frequency 720 --testnet mainnet-somerset --webhook \<stall-alert URL\> & |
+| lookup_autorecover.py | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup ./lookup_autorecover.py --context \<somerset\> --frequency 5 --liveness 100 --testnet mainnet-somerset --webhookalert \<stall-alert URL\> --webhookalive \<status URL\> & |
+| monitor_blockchain.py | MonitoringBastion (DevOps)  | ~/environment/monitors_mainnet/monitor_blockchain | nohup stdbuf -oL ./monitor_blockchain.py `https://api.zilliqa.com` -w \<ZilliqaDevelopment stall-alert URL\> \<Zilliqa stall-alert URL\> > nohup.out & |
+| txn-sanity-check.py   | Currently not deployed | |
+
 ## DS guard IP address consistency check (ds-ip-check.py)
 
 This script retrieves the IP addresses of the DS guards and cross-checks these against the DS committee list returned by querying "GetDSCommittee" in each DS guard.
@@ -64,40 +75,47 @@ Simply kill the process.
 This script retrieves the epoch number of each lookup and recovers the ones that are not within the threshold of the latest epoch number. It also looks for replacement lookups to service API requests.
 
 ```bash
-antonio@antonio-Latitude-7490:~/testnet/testnet$ ./monitoring/lookup_autorecover.py --help
-usage: lookup_autorecover.py [-h] [-u URL] [-f FREQUENCY]
+ansnunez@ansnunez-Latitude-7490:~/testnet/testnet/monitoring$ ./lookup_autorecover.py --help
+usage: lookup_autorecover.py [-h] --context CONTEXT [--debugmode]
+                             [--frequency FREQUENCY] [--liveness LIVENESS]
+                             [--testmode] --testnet TESTNET
+                             [--webhookalert WEBHOOKALERT]
+                             [--webhookalive WEBHOOKALIVE]
 
 Lookup autorecovery script
 
 optional arguments:
   -h, --help            show this help message and exit
-  -u URL, --url URL     Slack webhook URL
-  -f FREQUENCY, --frequency FREQUENCY
+  --context CONTEXT     Testnet cluster (e.g., fortcanning.kube.z7a.xyz)
+  --debugmode           Print but avoid executing the actual testnet commands
+  --frequency FREQUENCY
                         Polling frequency in minutes (default = 0 or run once)
+  --liveness LIVENESS   Send liveness message to Slack (default = 10 or after
+                        every 10th run)
+  --testmode            Use test/dummy data instead of real one
+  --testnet TESTNET     Testnet name (e.g., mainnet-fortcanning)
+  --webhookalert WEBHOOKALERT
+                        Slack webhook URL for alert messages
+  --webhookalive WEBHOOKALIVE
+                        Slack webhook URL for liveness message
 ```
 
 ### Deploying the script (lookup_autorecover.py)
 
 - Copy `lookup_autorecover.py` into your testnet folder
-- Change these constants in the script when necessary:
-  - `DEBUG_MODE` - when `True`, recovery commands are not executed, just reported
-  - `TEST_DATA_MODE` - when `True`, some dummy test data is used instead of real lookup data
-- (Option 1) Execute the script as a background process, like this, for example:
+- Execute the script as a background process, like this, for example:
 
 ```bash
-nohup stdbuf -oL ./lookup_autorecover.py \
- -u https://hooks.slack.com/services/ABCDEFGHI/JKLMNOPQR/Abcdefghijklmnopqrstuvwx \
- -f 10 > nohup-lookup-autorecover.out &
+nohup ./lookup_autorecover.py \
+ --context somerset.cluster.abc.def \
+ --frequency 5 \
+ --liveness 100 \
+ --testnet mainnet-somerset \
+ --webhookalert https://hooks.slack.com/services/ABCDEFGHI/JKLMNOPQR/Abcdefghijklmnopqrstuvwx \
+ --webhookalive https://hooks.slack.com/services/STUVWXYZ/JKLMNOPQR/lmnopqrstuvwxAbcdefghijk &
 ```
 
-- (Option 2) Alternatively, you can invoke these testnet commands to execute the script:
-
-```bash
-./testnet.sh lookup-autorecover start  # to start the script
-./testnet.sh lookup-autorecover status # to get the running process
-```
-
-> **Note:** The start command uses the webhook URL for our **stall-alert** channel. If you need to deploy the script for a different URL (e.g., for community testnet), then use Option 1 way instead.
+- For the first time executing the script, it is recommended to run with option `--testmode` first to confirm that the script works with dummy test data, and then to run a second time with option `--debugmode` to confirm that the script works with real data but without actually executing the recovery commands yet.
 
 ### While the script is running (lookup_autorecover.py)
 
@@ -107,13 +125,9 @@ A report is sent to the Slack webhook in any of the following cases:
 - A non-numeric or unrecognized epoch number format was processed
 - An exception occurs during the process
 
-To check what the report looks like, you can run the script in test mode (set the constants `DEBUG_MODE` and `TEST_DATA_MODE` to `True` inside the script). This will introduce some random errors during the run.
-
 ### Terminating the script (lookup_autorecover.py)
 
 Simply kill the process.
-
-You can also use `./testnet.sh lookup-autorecover stop`, but if you have multiple testnets in the bastion that are using this script, this command will terminate the first process it sees (which may not be the one for your testnet).
 
 ## Tx block mining stall checker (monitor_blockchain.py)
 
