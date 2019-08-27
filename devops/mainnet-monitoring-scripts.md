@@ -16,6 +16,7 @@ As of Zilliqa v4.8.0, we have the following scripts deployed:
 |-----------------------|-----------------------------|---------------------------------------------|----------------|
 | ds-ip-check.py        | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup ./ds-ip-check.py --context \<somerset\> --dscount 420 --frequency 720 --testnet mainnet-somerset --webhook \<stall-alert URL\> & |
 | lookup_autorecover.py | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup ./lookup_autorecover.py --context \<somerset\> --frequency 5 --liveness 100 --testnet mainnet-somerset --webhookalert \<stall-alert URL\> --webhookalive \<status URL\> & |
+| persistence-check.py  | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup python3.4 ./persistence-check.py --apiurl `https://api.zilliqa.com` --concurrent 2 --context \<somerset\> --frequency 12 --testnet mainnet-somerset --webhook \<status URL\> &
 | monitor_blockchain.py | MonitoringBastion (DevOps)  | ~/environment/monitors_mainnet/monitor_blockchain | nohup stdbuf -oL ./monitor_blockchain.py `https://api.zilliqa.com` -w \<ZilliqaDevelopment stall-alert URL\> \<Zilliqa stall-alert URL\> > nohup.out & |
 | txn-sanity-check.py   | Currently not deployed | |
 
@@ -119,11 +120,16 @@ nohup ./lookup_autorecover.py \
 
 ### While the script is running (lookup_autorecover.py)
 
-A report is sent to the Slack webhook in any of the following cases:
+A report is sent to the Slack `webhookalert` channel in any of the following cases:
 
 - One or more lookups were recovered
 - A non-numeric or unrecognized epoch number format was processed
 - An exception occurs during the process
+
+A report is sent to the Slack `webhookalive` channel in any of the following cases:
+
+- After initially launching the script
+- After every `liveness` number of runs
 
 ### Terminating the script (lookup_autorecover.py)
 
@@ -397,3 +403,50 @@ my-txn-checker   1/1       Terminating   0          44m
 antonio@ip-172-31-44-129:~$ kubectl get pod my-txn-checker
 Error from server (NotFound): pods "my-txn-checker" not found
 ```
+
+## Persistence health checker (persistence-check.py)
+
+This script performs `testnet.sh validate` on all the lookups' persistence to check for any errors.
+
+```bash
+ansnunez@ansnunez-Latitude-7490:~/testnet/testnet/monitoring$ ./persistence-check.py --help
+usage: persistence-check.py [-h] --apiurl APIURL [--concurrent CONCURRENT]
+                            --context CONTEXT [--frequency FREQUENCY]
+                            --testnet TESTNET [--webhook WEBHOOK]
+
+Lookup persistence auto-checker script
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --apiurl APIURL       URL for querying
+  --concurrent CONCURRENT
+                        Number of concurrent validations (default = 1)
+  --context CONTEXT     Testnet cluster (e.g., fortcanning.kube.z7a.xyz)
+  --frequency FREQUENCY
+                        Polling frequency in hours (default = 0 or run once)
+  --testnet TESTNET     Testnet name (e.g., mainnet-fortcanning)
+  --webhook WEBHOOK     Slack webhook URL (default = no URL)
+```
+
+### Deploying the script (persistence-check.py)
+
+- Copy `persistence-check.py` into your testnet folder
+- Execute the script as a background process, like this, for example:
+
+```bash
+nohup ./persistence-check.py \
+ --apiurl https://api.zilliqa.com \
+ --concurrent 2 \
+ --context brighthill.kube.z7a.xyz \
+ --frequency 12 \
+ --testnet mainnet-brighthill \
+ --webhook https://hooks.slack.com/services/ABCDEFGHI/JKLMNOPQR/Abcdefghijklmnopqrstuvwx &
+```
+
+### While the script is running (persistence-check.py)
+
+A report is sent to the Slack webhook both when the script starts a new run and after the run completes.
+
+### Terminating the script (persistence-sanity-check.py)
+
+Simply kill the process.
