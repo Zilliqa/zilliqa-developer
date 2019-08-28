@@ -27,7 +27,7 @@ Thus, we should leverage multicast to broadcast the DS block to the nodes within
 
 ## Application
 
-Based on above algorithm, below are the paramters which control broadcasting of DSBLOCK by ds-node to all nodes in the shard.
+Based on above algorithm, below are the parameters which control broadcasting of DSBLOCK by ds-node to all nodes in the shard.
 
 ```xml
 <data_sharing>
