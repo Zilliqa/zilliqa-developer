@@ -23,4 +23,4 @@ A node will generally do the following upon startup:
 - Set up the persistence (e.g., retrieve data from S3)
 - Sync up according to sync type specified, and continue operation from there
 
-Refer to the other documents for in-depth description of the operation of various features.
+Refer to the other [documents](index.md) for in-depth description of the operation of various features.
