@@ -1,4 +1,4 @@
-# Tree-Based-Cluster-Broadcasting
+# Tree Based Cluster Broadcasting
 
 This document describes the purpose, implementation details and application of Tree-Based-Cluster-Broadcasting.
 
