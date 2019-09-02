@@ -9,6 +9,6 @@ script:
 - git remote add wiki https://$GITHUB_PERSONAL_TOKEN@github.com/Zilliqa/Zilliqa.wiki.git > /dev/null 2>&1
 - git fetch source
 - git fetch wiki
-- git merge source/master --no-edit
+- git merge wiki/master --no-edit
 - git push source HEAD:master > /dev/null 2>&1
 - git push wiki HEAD:master > /dev/null 2>&1
