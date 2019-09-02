@@ -30,7 +30,7 @@ Adding exclusion privilege
 1. DS guards
    - When `NEWDSGUARDNETWORKINFO` is received (new IP)
    - Whenever DS committee is updated
-1. Lookup or seed nodes
+1. Lookup nodes
    - Every time a message is sent out
 1. Manual addition of an IP using `miner_info.py whitelist_add`
 
@@ -43,6 +43,7 @@ Removing exclusion privilege
 ## Blacklist removal and clearing
 
 - Non-lookup nodes remove `BLACKLIST_NUM_TO_POP` number of peers from the blacklist at the start of the DS epoch
+- Non-lookup nodes also remove all blacklisted seed nodes from the blacklist at the start of the DS epoch
 - Lookup nodes clear the entire blacklist upon receiving the DS Block
 
 ## Blacklist enabling
