@@ -42,7 +42,7 @@ Once all responses have been collected, the leader generates the collective sign
 
 ## Two-Round Consensus
 
-In actuality the state machine above represents just half a consensus sequence. For additional security, we re-designed the consensus algorithm to undergo two rounds of the sequence above.
+In actuality the state machine above represents just half of the PBFT consensus sequence. A full consensus requires running through the above phases in two rounds.
 
 There are a couple of differences between rounds. First, the announcement triggers the start of round 1. For round 2, the collective signature message serves as the trigger. Second, the message to co-sign in round 1 is the data that the user intends to be verified (e.g., DS Block). For round 2, the message to co-sign is that same data plus the collective signature and response map from round 1.
 
