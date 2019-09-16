@@ -5,6 +5,7 @@
 *                                         @Gnnng
 
 /core/difficulty-adjustment.md            @ShengguangXiao
+/core/rejoin-recover.md                   @ckyang
 
 /core/images/features/*                   @ansnunez
 /core/images/tools/*                      @ansnunez
@@ -17,7 +18,6 @@
 /devops/mainnet-maintenance.md            @ansnunez
 /devops/mainnet-monitoring-scripts.md     @ansnunez
 /devops/network-upgrade.md                @ckyang
-/devops/rejoin-recover.md                 @ckyang
 
 /devops/*                                 @Gnnng
 
