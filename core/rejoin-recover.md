@@ -4,7 +4,6 @@ This document will explain the concept of `recover` and `rejoin`.
 
 ## Recover
 
-
 ## Rejoin
 
 When following scenarios happened, `rejoin` process will be applied.
