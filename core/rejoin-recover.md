@@ -1,52 +1,9 @@
 # Recover / Rejoin
 
-This document will give some useful examples for `recover`, and explain the concept of `rejoin`.
+This document will explain the concept of `recover` and `rejoin`.
 
 ## Recover
 
-The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
-
-```bash
-./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX]
-```
-
-If not specify `-u`, by default we will use persistence from `lookup-0` for recovering `level2lookup-x`, and use persistence from `level2lookup-0` for recovering al the other nodes.
-
-- [Scenario 1] If you want to recover `dsguard-0`, please type:
-  
-  ```bash
-  ./testnet.sh recover dsguard 0
-  ```
-
-  We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
-
-- [Scenario 2] If you want to recover `level2lookup-0`, please type:
-  
-  ```bash
-  ./testnet.sh recover level2lookup 0
-  ```
-
-  We don't specify `-u` here, by default it will use persistence from `lookup-0`.
-
-- [Scenario 3] If you want to recover `normal-3`, `normal-55`, `normal-77`, please type:
-
-  ```bash
-  ./testnet.sh recover normal "3 55 77"
-  ```
-
-  We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
-
-- [Scenario 4] If you want to recover `normal-0` using `dsguard-3`, please type:
-  
-  ```bash
-  ./testnet.sh recover normal 0 -u dsguard 3
-  ```
-
-- [Scenario 5] If you want to recover `normal-0`, `normal-4`, `normal-52` using `lookup-9`, please type:
-  
-  ```bash
-  ./testnet.sh recover normal "0 4 52" -u lookup 9
-  ```
 
 ## Rejoin
 
