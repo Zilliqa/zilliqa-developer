@@ -30,7 +30,7 @@
 - [Blockchain Data](blockchain-data.md)
 - [Transaction Checks](transaction-checks.md)
 - [Local Storage](local-storage.md)
-- [Cloud Storage](cloud-storage.md)
+- [Cloud Storage](https://github.com/Zilliqa/dev-docs/blob/master/devops/bucket-separation.md#introduction)
 
 ## Directory Service
 
@@ -44,7 +44,6 @@
 
 ## Lookup
 
-- [Operational Details (State Machine)](lookup-operational-details.md)
 - [API Server](api-server.md)
 - [Transaction Dispatch](transaction-dispatch.md)
 - [Incremental DB](incremental-db.md)
