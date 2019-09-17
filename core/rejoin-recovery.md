@@ -1,52 +1,6 @@
-# Recover / Rejoin
+# Rejoin / Recovery
 
-This document will give some useful examples for `recover`, and explain the concept of `rejoin`.
-
-## Recover
-
-The `recover` is a kubectl-based command that can recover broken node(s) from using a healthy node's persistence. Here is the command prototype:
-
-```bash
-./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [-u UPLOAD_TYPE UPLOAD_INDEX]
-```
-
-If not specify `-u`, by default we will use persistence from `lookup-0` for recovering `level2lookup-x`, and use persistence from `level2lookup-0` for recovering al the other nodes.
-
-- [Scenario 1] If you want to recover `dsguard-0`, please type:
-  
-  ```bash
-  ./testnet.sh recover dsguard 0
-  ```
-
-  We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
-
-- [Scenario 2] If you want to recover `level2lookup-0`, please type:
-  
-  ```bash
-  ./testnet.sh recover level2lookup 0
-  ```
-
-  We don't specify `-u` here, by default it will use persistence from `lookup-0`.
-
-- [Scenario 3] If you want to recover `normal-3`, `normal-55`, `normal-77`, please type:
-
-  ```bash
-  ./testnet.sh recover normal "3 55 77"
-  ```
-
-  We don't specify `-u` here, by default it will use persistence from `level2looup-0`.
-
-- [Scenario 4] If you want to recover `normal-0` using `dsguard-3`, please type:
-  
-  ```bash
-  ./testnet.sh recover normal 0 -u dsguard 3
-  ```
-
-- [Scenario 5] If you want to recover `normal-0`, `normal-4`, `normal-52` using `lookup-9`, please type:
-  
-  ```bash
-  ./testnet.sh recover normal "0 4 52" -u lookup 9
-  ```
+This document will explain the concept of `rejoin` and `recover`.
 
 ## Rejoin
 
@@ -58,11 +12,11 @@ When following scenarios happened, `rejoin` process will be applied.
 
 Basically, the `rejoin` will fetch persistence as much as possible from AWS S3 buckets (`incremental`/`statedelta`) first. Then, if lagging behind, fetch the lacked information (DS info, DS block, TX block, statedelta...) from a random-selected lookup/level2lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
 
-![rejoin](images/rejoin.jpg)
+![rejoin](images/features/rejoin-recovery/rejoin.jpg)
 
 Here is more detail steps for `normal`, `DS`, and `lookup` nodes.
 
-## Normal node
+### Normal node
 
 1. Download persistence from AWS S3
 2. Clean variables in Node class
@@ -82,7 +36,7 @@ Here is more detail steps for `normal`, `DS`, and `lookup` nodes.
 16. Init Mining and submit PoW2.
 17. If received sharding information, change SyncType to NO_SYNC. Stop blocking messages. The normal node now successfully joined the network.
 
-## DS node
+### DS node
 
 1. Download persistence from AWS S3
 2. If the DS Node was a DS Leader, it will do view change rather than do recovery as a DS Node. It the process of the DS Leader was killed, it will start joining as a Normal Node if triggered by the Daemon.
@@ -94,8 +48,12 @@ Here is more detail steps for `normal`, `DS`, and `lookup` nodes.
 8. Wait until Request D got feedback, check if the currDSExpired, if false, change the SyncType to NO_SYNC, reset isFirstLoop to true, start RunConsensuOnDSBlock with no PoW1 submission.
 9. This is to make sure the DS Node will declare its success of joining before the new DS Committee generated, then it’s legible to participant the DS Committee Consensus.
 
-## Lookup node
+### Lookup node
 
 1. Most of the steps for Lookup Node are the same as DS Node excludes:
 2. At the beginning, the lookup node will tell the other lookup nodes that it will be offline.
 3. The last step is to call RSync to get the latest TxBodies.Then set the SyncType to NO_SYNC, and tell the other lookup nodes it will be online.
+
+## Recover
+
+TBD

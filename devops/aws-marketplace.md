@@ -40,5 +40,5 @@
 `Note: Step 9 and 10 may have some aws permission issues, if encountered, then
  need administrator help to do.`
 1. Scan the image, it takes about half an hour, wait until the result is successful.
-1. Go to the listing, in "add a new listing" select "Free AMI", and then fill in
+1. Go to the "Product -> Server", click "create server product" select "free", and then fill in
  the details of the image, in "Enter your AMI", please input the AMI just shared.
