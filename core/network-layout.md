@@ -23,7 +23,7 @@ JSON queries are generally not routed to these lookups, to avoid overloading the
 
 ## Level2lookup
 
-`Level2lookup` nodes are essentially seed or archival nodes, i.e., full nodes whose primary purpose is the storage of blockchain data, which they receive from the Zilliqa Network through the multipliers. The mainnet API for JSON queries is configured to use these nodes. There are currently 15 `level2lookup` nodes in the mainnet.
+`Level2lookup` nodes are essentially seed or archival nodes, i.e., full nodes whose primary purpose is the storage of blockchain data, which they receive from the Zilliqa Network through the multipliers. The mainnet API for JSON queries is configured to use these nodes. Additionally, we use these nodes to provide new miners the signal when to start PoW mining. There are currently 15 `level2lookup` nodes in the mainnet.
 
 ## Newlookup
 
