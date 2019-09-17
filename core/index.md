@@ -5,7 +5,6 @@
 - [Network Layout](network-layout.md)
 - [Epoch Architecture](epoch-architecture.md)
 - [General Node Operation](general-node-operation.md)
-- [Recover and Rejoin](rejoin-recover.md)
 
 ## Consensus
 

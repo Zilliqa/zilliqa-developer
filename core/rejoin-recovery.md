@@ -14,7 +14,7 @@ When following scenarios happened, `rejoin` process will be applied.
 
 Basically, the `rejoin` will fetch persistence as much as possible from AWS S3 buckets (`incremental`/`statedelta`) first. Then, if lagging behind, fetch the lacked information (DS info, DS block, TX block, statedelta...) from a random-selected lookup/level2lookup node, until vacuous epoch. After a new DS epoch, this node may successfully join back to network, or keep trying to rejoin in next DS epoch. Following is the brief flow chart of this idea:
 
-![rejoin](images/rejoin.jpg)
+![rejoin](images/features/rejoin-recovery/rejoin.jpg)
 
 Here is more detail steps for `normal`, `DS`, and `lookup` nodes.
 
