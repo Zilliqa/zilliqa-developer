@@ -17,6 +17,7 @@
 - [Gossip Protocol](gossip-protocol.md)
 - [Tree-based Cluster Broadcasting](tree-based-cluster-broadcasting.md)
 - [Blacklist](blacklist.md)
+- [Messaging Limits](messaging-limits.md)
 
 ## Messaging
 
