@@ -21,4 +21,4 @@ The volume and size of peer-to-peer communication for a Zilliqa node is controll
 
 ## Active Connections
 
-- `MAX_PEER_CONNECTION`: THe maximum number of active connections to a specific peer.
+- `MAX_PEER_CONNECTION`: The maximum number of active connections to a specific peer.
