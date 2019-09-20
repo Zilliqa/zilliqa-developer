@@ -7,7 +7,7 @@ This feature is to evaluate the performance of DS nodes. The underperformed DS n
 1. When run DS block consensus, the performance of each DS node will be evaluated based on the rewards they got from last DS epoch until the current DS epoch.
 1. At the beginning of each DS epoch, DS leader will call "DetermineByzantineNodes" to find out the underperformed DS nodes based on the criteria set in constants.xml. If found underperformed ds nodes, their pubkeys will be included in DS block announcement and send to all DS backup nodes.
 1. A DS backup node receives the DS announcement, it call "VerifyRemovedByzantineNodes" to verify the proposed DS nodes going to remove from DS committee are really unerperformed. If the check pass, it will accept it and continue the consensus protocol. Otherwise, it will refuse to commit to the announcement made by the leader. If more than 1/3 of the nodes in the DS committee does not commit to the announcement, view change will be triggered.
-1. After the DS block consensus is done, the selected underperformed DS nodes will be removed from the DS committee, and the shard nodes which finished DS PoW will join DS committee to replace the removed DS nodes, hence, can keep the size of the DS committee the same.
+1. After the DS block consensus is done, the selected underperformed DS nodes will be removed from the DS committee and the blockchain network, they need to do PoW again to rejoin the network. The shard nodes which finished DS PoW will join DS committee to replace the removed DS nodes, hence, can keep the size of the DS committee the same.
 
 ## Reference
 
