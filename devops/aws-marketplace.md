@@ -42,3 +42,12 @@
 1. Scan the image, it takes about half an hour, wait until the result is successful.
 1. Go to the "Product -> Server", click "create server product" select "free", and then fill in
  the details of the image, in "Enter your AMI", please input the AMI just shared.
+1. Fills in the details of the product, the items with mark * is mandatory.
+1. Submit the form to AWS for review, it may take a few days to get response from AWS team.
+
+# Add New Version for Existing AWS Marketplace Product
+
+1. Following the same steps of 1~11 of last chapter to create a new AMI, record the AMI name.
+1. Go the AWS marketplace management portal, go to "Product -> Server", open the current product page, clicked the "Edit" button, open the "Add/Edit Version" tab, Toggle option to "Add a New Version", fill in the product new version  details.
+1. If the old version cannot use any more, in "Remove Version" tab select remove old version.
+1. After all the details are filled in, submit to AWS for review, the update version review is very fast, normally can get response from AWS team in 1~2 days.
