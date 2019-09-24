@@ -70,3 +70,4 @@
 
 - [NAT Resolver](nat-resolver.md)
 - [Profiling Zilliqa and Scilla](profiling.md)
+- [Daemon](new-daemon.md)
