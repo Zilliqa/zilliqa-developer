@@ -112,7 +112,7 @@ If your GPU's memory is not sufficient for these 2 miners to run concurrently, a
 
 ### Building from source
 
-See [docs/BUILD.md](docs/BUILD.md) for build/compilation details.
+See [BUILD.md](https://github.com/ethereum-mining/ethminer/blob/master/docs/BUILD.md) for build/compilation details.
 
 ## Reference
 
