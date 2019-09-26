@@ -210,3 +210,7 @@ curl -X POST --data '{"jsonrpc":"2.0", "method":"eth_submitHashrate", "params":[
 ### Miner Register and Reward
 
 ![image01](images/zilliqa-mining-proxy/miner-management.jpg)
+
+## Stratum support
+
+On branch feature/stratum, the stratum protocol is supported. The implemented protocol is stratum2 which is proposed by nicehash. The details of the protocol can get from [here](https://github.com/nicehash/Specifications/blob/master/EthereumStratum_NiceHash_v1.0.0.txt).
