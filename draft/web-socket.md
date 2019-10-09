@@ -1,22 +1,31 @@
+
 # Zilliqa Web-Socket Service
+
 This page describes the protocol, between the Zilliqa Websocket Server and the sdk client, for querying subscription and message pushing.
 
 ## Supported data
+
 The following types of data are the current main focus that we want to consider to be supported by ZWS:
 
 - **New TxBlock**. Which includes TxBlock recently generated and hashes of all the transaction being processed within this block.
 - **Event log**. Which includes all the event log generated for interested contract address
 
 ## Message encoding
+
 For convention, we still use JSON as our encoding format. For example:
+
 ### Subscribe New Block
+
 - query message
+
 ```
 {
   "query":"NewBlock",
 }
 ```
+
 - pushed message
+
 ```
 {
   "TxBlock":{
@@ -27,8 +36,11 @@ For convention, we still use JSON as our encoding format. For example:
   }
 }
 ```
+
 ### Subscribe Event Log
+
 - query message
+
 ```
 {
   "query":"EventLog",
@@ -38,7 +50,9 @@ For convention, we still use JSON as our encoding format. For example:
   }
 }
 ```
+
 - pushed message
+
 ```
 {
   [
