@@ -29,7 +29,7 @@ For convention, we still use JSON as our encoding format. For example:
 {
   "TxBlock":{
     ... // same as the json object by quering jsonrpc for `GetTxBlock`
-  }
+  },
   "TxHashes":{
     ... // same as the json object by querying jsonrpc for `GetRecentTransactions`
   }
@@ -43,10 +43,10 @@ For convention, we still use JSON as our encoding format. For example:
 ```json
 {
   "query":"EventLog",
-  "address":{
+  "address":[
     "0x0000000000000000000000000000000000000000",
     "0x0000000000000000000000000000000000000001"
-  }
+  ]
 }
 ```
 
@@ -73,10 +73,12 @@ For convention, we still use JSON as our encoding format. For example:
             }
           ]
         },
-        ...
       ]
     },
-    ...
+    {
+      "address":"0x0000000000000000000000000000000000000001",
+      "event_logs":[]
+    } // maybe don't need this if there is no event for this address
   ]
 }
 ```
