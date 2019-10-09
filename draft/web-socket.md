@@ -53,32 +53,30 @@ For convention, we still use JSON as our encoding format. For example:
 - pushed message
 
 ```json
-{
-  [
-    {
-      "address":"0x0000000000000000000000000000000000000000",
-      "event_logs":[
-        {
-          "_eventname":"foo1",
-          "params":[
-            {
-              "vname":"bar1",
-              "type":"String",
-              "value":"abc"
-            },
-            {
-              "vname":"bar2",
-              "type":"ByStr32",
-              "value":"0x0000000000000000000000000000000000000001"
-            }
-          ]
-        },
-      ]
-    },
-    {
-      "address":"0x0000000000000000000000000000000000000001",
-      "event_logs":[]
-    } // maybe don't need this if there is no event for this address
-  ]
-}
+[
+  {
+    "address":"0x0000000000000000000000000000000000000000",
+    "event_logs":[
+      {
+        "_eventname":"foo1",
+        "params":[
+          {
+            "vname":"bar1",
+            "type":"String",
+            "value":"abc"
+          },
+          {
+            "vname":"bar2",
+            "type":"ByStr32",
+            "value":"0x0000000000000000000000000000000000000001"
+          }
+        ]
+      },
+    ]
+  },
+  {
+    "address":"0x0000000000000000000000000000000000000001",
+    "event_logs":[]
+  } // maybe don't need this if there is no event for this address
+]
 ```
