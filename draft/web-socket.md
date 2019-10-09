@@ -17,7 +17,7 @@ For convention, we still use JSON as our encoding format. For example:
 
 - query message
 
-```
+```json
 {
   "query":"NewBlock",
 }
@@ -25,7 +25,7 @@ For convention, we still use JSON as our encoding format. For example:
 
 - pushed message
 
-```
+```json
 {
   "TxBlock":{
     ... // same as the json object by quering jsonrpc for `GetTxBlock`
@@ -40,7 +40,7 @@ For convention, we still use JSON as our encoding format. For example:
 
 - query message
 
-```
+```json
 {
   "query":"EventLog",
   "address":{
@@ -52,7 +52,7 @@ For convention, we still use JSON as our encoding format. For example:
 
 - pushed message
 
-```
+```json
 {
   [
     {
