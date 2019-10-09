@@ -1,4 +1,3 @@
-
 # Zilliqa Web-Socket Service
 
 This page describes the protocol, between the Zilliqa Websocket Server and the sdk client, for querying subscription and message pushing.
