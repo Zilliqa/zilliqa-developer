@@ -43,7 +43,7 @@ For convention, we still use JSON as our encoding format. For example:
 ```json
 {
   "query":"EventLog",
-  "address":[
+  "addresses":[
     "0x0000000000000000000000000000000000000000",
     "0x0000000000000000000000000000000000000001"
   ]
