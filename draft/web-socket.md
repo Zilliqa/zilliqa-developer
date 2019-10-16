@@ -31,7 +31,7 @@ For convention, we still use JSON as our encoding format. For example:
     // same as the json object by quering jsonrpc for `GetTxBlock`
   },
   "TxHashes":{
-    // same as the json object by querying jsonrpc for `GetRecentTransactions`
+    // same as the json object by querying jsonrpc for `GetTransactionsForTxBlock`
   }
 }
 ```
