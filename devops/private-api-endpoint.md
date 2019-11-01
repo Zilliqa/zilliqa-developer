@@ -7,20 +7,18 @@ In this doc, mainnet is being used as the context for illustration. Therefore, t
 - [Background](#background)
   - [Lookups](#lookups)
   - [Services](#services)
-- [Steps](#steps)
-  - [Create manifest file](#create-manifest-file)
-  - [Label the lookup](#label-the-lookup)
-  - [Open the lookup](#open-the-lookup)
+- [Creating New Private API Endpoint](#creating-new-private-api-endpoint)
+- [Migrating Private API Endpoints](#migrating-private-api-endpoints)
 
 ## Background
 
 ### Lookups
 
-The mainnet has 5 lookups, 15 level-2 lookups and up to 10 new lookups (aka seed nodes) for API services.
+The mainnet has 5 lookups, 15 level-2 lookups and up to 5 new lookups (aka seed nodes) for API services.
 
 - 5 lookups are critical and not only doing transaction forwarding but also incremental DB uploading in some of them. Their API service are not opened.
 - 15 level-2 lookups are intended for official API from Zilliqa (api.zilliqa.com), out of which 5 are constantly opened and serving traffic.
-- 10 new lookups are reserved for exclusive API access for partners.
+- 5 new lookups are reserved for exclusive API access for partners.
 
 Level-2 lookups and new lookups are mostly identical and can be used interchangeably.
 
@@ -42,139 +40,96 @@ spec:
 
 This will pick pods from level-2 lookup who has the value `opened` for the label `jsonrpc`.
 
-## Steps
+## Creating New Private API Endpoint
 
-Let's go through the steps for setting up a private API endpoint for a user `customer1`.
+Let's go through the steps for setting up private API endpoints for customers `foo` and `bar`.
 
-### Create manifest file
-
-In the testnet `manifest` folder, create a file `customer1.yaml` with the following content:
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: mainnet-changi-api-customer1        # 1. service name
-  labels:
-    testnet: mainnet-changi
-spec:
-  type: ClusterIP
-  ports:
-  - port: 80
-    targetPort: 4201
-    name: zilliqa-api
-  selector:
-    testnet: mainnet-changi
-    app: zilliqa
-    type: newlookup                         # 2. lookup pod type
-    customer: customer1                     # 3. customer label
-    jsonrpc: opened
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: mainnet-changi-api-customer1        # 4. ingress name
-  labels:
-    testnet: mainnet-changi
-    external: "true"
-  annotations:
-    kubernetes.io/ingress.class: ingress-aws-zilliqa-com
-    ingress.kubernetes.io/force-ssl-redirect: "true"
-spec:
-  rules:
-  - host: f78a53621d.aws.zilliqa.com        # 5. random domain name ended with aws.zilliqa.com
-    http:
-      paths:
-      - backend:
-          serviceName: mainnet-changi-api-customer1     # 6. service name
-          servicePort: 80
-```
-
-Customize the numbered fields with your preference. Do note the following requirements:
-
-| No. | Item               | Requirement                                                                                               |
-|-----|--------------------|-----------------------------------------------------------------------------------------------------------|
-| 1   | service name       | A unique service name in the cluster, recommended to indicate the customer name for easier management.    |
-| 2   | lookup type label  | A string that is one of `lookup`, `level2lookup` and `newlookup`. For private endpoints, use `newlookup`. |
-| 2   | customer label     | A unique customer name as label selector. The label value will be used later.                             |
-| 3   | ingress name       | A unique ingress name in the cluster, recommended to indicate the customer name for easier management.    |
-| 4   | random domain name | A long random domain name with at least 10 characters, ended with `aws.zilliqa.com`.                      |
-| 5   | service name       | A string same as the service name in field #1.                                                            |
-
-Create the resources declared in the manifest through
+During bootstrap, add `--private-api` option to set the name and ID for the customers.
 
 ```console
-$ ./testnet.sh create customer1
-Creating customer1 ...
-service "mainnet-changi-api-customer1" created
-ingress.extensions "mainnet-changi-api-customer1" created
+$ ./bootstrap.py mainnet-changi --private-api foo:abcde00001 --private-api bar:abcde00002
+...(omitted)...
+/testnet/mainnet-changi/manifest/foo.yaml (private api endpoint)
+/testnet/mainnet-changi/manifest/bar.yaml (private api endpoint)
+...(omitted)...
 ```
 
-Some other operations you might find useful:
+> **NOTE**: The value of `--private-api` is of the form `CUSTOMER:ID` where `ID` will be used in the url for the private API endpoint. For example, `foo:abcde00001` results in `abcde00001.example.com`.
 
-- `./testnet.sh replace customer1`: Update the cluster after your local change in the manifest `manifest/customer1.yaml`.
-- `./testnet.sh delete customer1`: Remove the resources declared in the manifest `manifest/customer1.yaml`.
-
-### Label the lookup
-
-As you may have seen, the labels `type` and `customer` are used to identify the pods connected to different services. Also, the label `jsonrpc` is used to open or close the pods. By default, all the lookups already have `type` and `jsonrpc` pods. We only need to add new label `customer` while we are labelling the lookup pods. Since we have decided to use `newlookup` for private API endpoints, we simply label the `newlookup` pods with `customer`.
-
-First, let's use `kubectl get pods --show-labels` to check the existing labels.
+After the network is up and newlookup is ready, create the resources for the customers.
 
 ```console
-$ kubectl get pods --show-labels -l type=newlookup
-mainnet-changi-newlookup-0   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-0,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-1   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-1,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-2   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-2,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-3   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-3,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-4   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-4,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-5   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-5,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-6   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-6,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-7   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-7,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-8   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-8,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-9   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-9,testnet=mainnet-changi,type=newlookup
+$ ./testnet.sh create foo bar
+Creating foo bar ...
+service "mainnet-changi-api-foo" created
+ingress.extensions "mainnet-changi-api-foo" created
+service "mainnet-changi-api-bar" created
+ingress.extensions "mainnet-changi-api-bar" created
 ```
 
-Then, we select the pods without existing `customer` labels, e.g., `mainnet-changi-newlookup-0` and `mainnet-changi-newlookup-1` and label them.
+You should be able to see the new URLs soon with `./testnet.sh url`
 
 ```console
-$ kubectl label pods mainnet-changi-newlookup-0 mainnet-changi-newlookup-1 customer=customer1
-pod "mainnet-changi-newlookup-0" labeled
-pod "mainnet-changi-newlookup-1" labeled
+$ ./testnet.sh url
+NAME                     HOSTS                                ADDRESS                           PORT    AGE
+...(omitted)...
+mainnet-changi-api-foo   abcde00001.mainnet.aws.zilliqa.com   xyz.us-west-2.elb.amazonaws.com   80      6d18h
+mainnet-changi-api-bar   abcde00002.mainnet.aws.zilliqa.com   xyz.us-west-2.elb.amazonaws.com   80      6d18h
+...(omitted)...
 ```
 
-Now if you run `kubectl get pods --show-labels` again you will see the new labels on the pods we selected.
+## Migrating Private API Endpoints
+
+The migration happens when a new mainnet `mainnet-new-born` will replace the old one `mainnet-ancient`.
+
+Assume we have the following private API endpoints to migrate.
+
+| Customer | ID           | URL                                  |
+|----------|--------------|--------------------------------------|
+| `apple`  | `aaaaa00001` | `aaaaa00001.mainnet.aws.zilliqa.com` |
+| `banana` | `bbbbb00001` | `bbbbb00001.mainnet.aws.zilliqa.com` |
+
+First, when bootstrapping `mainnet-new-born`, following the same steps in [Creating New Private API Endpoint](#creating-new-private-api-endpoint) with the correct `--private-api` parameters. In this migration example, use `--private-api apple:aaaaa00001 --private-api banana:bbbbb00001`.
+
+Now you should have two running mainnets, both with private API endpoints created.
+
+To start directing the traffic to the new ones, delete the resources in old mainnet:
 
 ```console
-$ kubectl get pods --show-labels -l type=newlookup
-NAME                         READY     STATUS    RESTARTS   AGE       LABELS
-mainnet-changi-newlookup-0   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,customer=binance,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-0,testnet=mainnet-changi,type=newlookup
-mainnet-changi-newlookup-1   1/1       Running   0          13d       app=zilliqa,controller-revision-hash=mainnet-changi-newlookup-5cfddc5bc5,customer=binance,jsonrpc=opened,statefulset.kubernetes.io/pod-name=mainnet-changi-newlookup-1,testnet=mainnet-changi,type=newlookup
-...
+$ ./testnet.sh delete apple banana
+Deleting apple banana ...
+service "mainnet-ancient-api-apple" created
+ingress.extensions "mainnet-ancient-api-apple" created
+service "mainnet-ancient-api-banana" created
+ingress.extensions "mainnet-ancient-api-banana" created
 ```
 
-### Open the lookup
-
-If you selected lookups are not opened yet.
+Then in the new network, delete the DNS records so that new records will be created automatically. Before you confirm the deletion, please carefully check the records to be deleted from the temporary file (e.g., simple run `cat /tmp/route53-delete-record.v7UvCW` in another terminal).
 
 ```console
-$ ./testnet.sh jsonrpc newlookup status
-mainnet-changi-newlookup-0 closed # 0 and 1 are closed
-mainnet-changi-newlookup-1 closed
-mainnet-changi-newlookup-2 opened
-mainnet-changi-newlookup-3 opened
-mainnet-changi-newlookup-4 opened
-mainnet-changi-newlookup-5 opened
-mainnet-changi-newlookup-6 opened
-mainnet-changi-newlookup-7 opened
-mainnet-changi-newlookup-8 opened
-mainnet-changi-newlookup-9 opened
+$ ./testnet.sh release-private-api
+found hosted zone with ID: 'Z2M2***XHDH'
+Confirm the deletion described in file '/tmp/route53-delete-record.v7UvCW'? [y/N]: y
+{
+    "ChangeInfo": {
+        "Status": "PENDING",
+        "Comment": "Deleting",
+        "SubmittedAt": "2019-11-01T05:41:27.823Z",
+        "Id": "/change/C7HCTP14J5T6R"
+    }
+}
+
+Hints:
+
+  To check if the records are created in new cluster, run 'kubectl --context new-born.cluster.z7a.xyz --namespace=kube-system logs  -l "app.kubernetes.io/name=external-dns"'
 ```
 
-Just open it.
+As the hint suggested, you can check the log of `external-dns` to see if the new records are created:
 
 ```console
-$ ./testnet.sh jsonrpc newlookup open 0 1
-pod "mainnet-changi-newlookup-0" labeled
-pod "mainnet-changi-newlookup-1" labeled
+$ kubectl --namespace=kube-system logs -l "app.kubernetes.io/name=external-dns" | grep CREATE
+time="2019-11-01T05:41:33Z" level=info msg="Desired change: CREATE aaaaa00001.mainnet.aws.zilliqa.com A"
+time="2019-11-01T05:41:33Z" level=info msg="Desired change: CREATE bbbbb00001.mainnet.aws.zilliqa.com A"
+time="2019-11-01T05:41:33Z" level=info msg="Desired change: CREATE aaaaa00001.mainnet.aws.zilliqa.com TXT"
+time="2019-11-01T05:41:33Z" level=info msg="Desired change: CREATE bbbbb00001.mainnet.aws.zilliqa.com TXT"
 ```
