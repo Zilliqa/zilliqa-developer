@@ -98,10 +98,10 @@ To start directing the traffic to the new ones, delete the resources in old main
 ```console
 $ ./testnet.sh delete apple banana
 Deleting apple banana ...
-service "mainnet-ancient-api-apple" created
-ingress.extensions "mainnet-ancient-api-apple" created
-service "mainnet-ancient-api-banana" created
-ingress.extensions "mainnet-ancient-api-banana" created
+service "mainnet-ancient-api-apple" deleted
+ingress.extensions "mainnet-ancient-api-apple" deleted
+service "mainnet-ancient-api-banana" deleted
+ingress.extensions "mainnet-ancient-api-banana" deleted
 ```
 
 Then in the new network, delete the DNS records so that new records will be created automatically. Before you confirm the deletion, please carefully check the records to be deleted from the temporary file (e.g., simple run `cat /tmp/route53-delete-record.v7UvCW` in another terminal).
