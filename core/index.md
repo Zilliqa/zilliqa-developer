@@ -49,6 +49,7 @@
 - [Transaction Dispatch](transaction-dispatch.md)
 - [Incremental DB](incremental-db.md)
 - [Multiplier](multiplier.md)
+- [Websocket Server](websocket-server.md)
 
 ## Mining
 
