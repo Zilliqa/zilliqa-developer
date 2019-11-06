@@ -23,10 +23,13 @@ For convention, we still use JSON as our encoding format. For example:
 }
 ```
 
+Once succsfully subscribed, server will echo the query message to the client
+
 - pushed message
 
 ```json
 {
+  "type":"NewBlock",
   "TxBlock":{
     // same as the json object by quering jsonrpc for `GetTxBlock`
   },
@@ -50,33 +53,57 @@ For convention, we still use JSON as our encoding format. For example:
 }
 ```
 
+Once succesfully subscribed, server will echo the query message to the client
+
 - pushed message
 
 ```json
-[
-  {
-    "address":"0x0000000000000000000000000000000000000000",
-    "event_logs":[
-      {
-        "_eventname":"foo1",
-        "params":[
-          {
-            "vname":"bar1",
-            "type":"String",
-            "value":"abc"
-          },
-          {
-            "vname":"bar2",
-            "type":"ByStr32",
-            "value":"0x0000000000000000000000000000000000000001"
-          }
-        ]
-      },
-    ]
-  },
-  {
-    "address":"0x0000000000000000000000000000000000000001",
-    "event_logs":[]
-  } // maybe don't need this if there is no event for this address
-]
+{
+  "type":"EventLog",
+  "value":
+  [
+    {
+      "address":"0x0000000000000000000000000000000000000000",
+      "event_logs":[
+        {
+          "_eventname":"foo1",
+          "params":[
+            {
+              "vname":"bar1",
+              "type":"String",
+              "value":"abc"
+            },
+            {
+              "vname":"bar2",
+              "type":"ByStr32",
+              "value":"0x0000000000000000000000000000000000000001"
+            }
+          ]
+        },
+      ]
+    },
+    {
+      "address":"0x0000000000000000000000000000000000000001",
+      "event_logs":[]
+    } // maybe don't need this if there is no event for this address
+  ]
+}
 ```
+
+### Unsubscribe 
+- query message
+```json
+{
+  "query":"Unsubscribe",
+  "type":["EventLog", "NewBlock"]
+}
+```
+
+If the client subscribed NewBlock only, the server will return
+```json
+{
+  "type":"Unsubscribe",
+  "result":["NewBlock"]
+}
+```
+
