@@ -95,15 +95,8 @@ Once succesfully subscribed, server will echo the query message to the client
 ```json
 {
   "query":"Unsubscribe",
-  "type":["EventLog", "NewBlock"]
+  "type":"EventLog"
 }
 ```
 
-If the client subscribed NewBlock only, the server will return
-```json
-{
-  "type":"Unsubscribe",
-  "result":["NewBlock"]
-}
-```
-
+Once succesfully ubsubscribed, server will echo the query message to the client
