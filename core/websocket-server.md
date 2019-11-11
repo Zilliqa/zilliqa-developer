@@ -137,7 +137,7 @@ Special error message:
   ]
 }
 ```
-Notice that for address 0x1111111111111111111111111111111111111111 is not presented in the message since it doesn't have any event log released in this epoch.
+Notice that for address `0x1111111111111111111111111111111111111111` is not presented in the message since it doesn't have any event log released in this epoch.
 
 ### Unsubscribe 
 
@@ -154,7 +154,7 @@ Once succesfully ubsubscribed, server will echo the query message to the client,
 otherwise will return error message.
 
 Special error message:
-**invalid type field**, which tells the client the type field is invalid, if could either be not found, malformed or not available.
+- **invalid type field**, which tells the client the type field is invalid, if could either be not found, malformed or not available.
 
 #### expected field in notification
 
