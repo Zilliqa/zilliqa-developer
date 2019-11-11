@@ -26,6 +26,7 @@ Usually an **error message** will be responded to the client if the query failed
 ```
 
 The following error messages will be applied to all kinds of query if being invalid:
+
 - **invalid query field**. Which tells the client if the query is invalid, it could be not found, empty, malformed, or not available
 
 ## Message encoding
@@ -64,10 +65,10 @@ The followings are case by case for each subscription:
 
 #### response message
 
-Once succsfully subscribed, server will echo the query message to the client, 
-otherwise will return error message.
+Once succsfully subscribed, server will echo the query message to the client, otherwise will return error message.
 
-Special error message: 
+Special error message:
+
 - **NA**`
 
 #### expected field in notification
@@ -106,9 +107,9 @@ Once succesfully subscribed, server will echo the query message to the client,
 otherwise will return error message.
 
 Special error message:
+
 - **invalid addresses field**, which tells the client the addresses field is invalid, it could either be not found, malformed or empty
 - **no contract found in list**, which tells the client the addresses provided are all of non contract
-
 
 #### expected field in notification
 
@@ -140,11 +141,13 @@ Special error message:
   ]
 }
 ```
+
 Notice that for address `0x1111111111111111111111111111111111111111` is not presented in the message since it doesn't have any event log released in this epoch.
 
-### Unsubscribe 
+### Unsubscribe
 
 #### query message
+
 ```json
 {
   "query":"Unsubscribe",
@@ -153,10 +156,12 @@ Notice that for address `0x1111111111111111111111111111111111111111` is not pres
 ```
 
 #### response message
+
 Once succesfully ubsubscribed, server will echo the query message to the client,
 otherwise will return error message.
 
 Special error message:
+
 - **invalid type field**, which tells the client the type field is invalid, if could either be not found, malformed or not available.
 
 #### expected field in notification
@@ -169,7 +174,9 @@ Special error message:
 ```
 
 ## Example
+
 Client subscribe NewBlock:
+
 ```json
 {
  "query":"NewBlock"
@@ -177,6 +184,7 @@ Client subscribe NewBlock:
 ```
 
 Client subscribe EventLog:
+
 ```json
 {
  "query":"EventLog",
@@ -188,6 +196,7 @@ Client subscribe EventLog:
 ```
 
 Client unsubscribe NewBlock:
+
 ```json
 {
   "query":"Unsubscribe",
@@ -196,6 +205,7 @@ Client unsubscribe NewBlock:
 ```
 
 Notification:
+
 ```json
 {
   "type":"notification",
@@ -280,5 +290,7 @@ Notification:
     }
   ]
 }
+
 ```
+
 And in the next tx block, the client won't be receiving `NewBlock` in notification
