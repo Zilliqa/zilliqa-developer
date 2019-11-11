@@ -22,6 +22,7 @@ Usually an **error message** will be responded to the client if the query failed
   "type":"Error",
   "error":"..."
 }
+```
 
 The following error messages will be applied to all kinds of query if being invalid:
 - **invalid query field**. Which tells the client if the query is invalid, it could be not found, empty, malformed, or not available
@@ -37,11 +38,11 @@ The epoch message will be presented in this way:
   "type":"notification",
   "data":[
     {
-      "query":"..."
+      "query":"...",
       "...":"..."
     },
     {
-      "query":"..."
+      "query":"...",
       "...":"..."
     }
   ]
