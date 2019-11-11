@@ -6,12 +6,13 @@ This page describes the protocol, between the Zilliqa Websocket Server and the s
 
 Client can subscribe their interested topics or unsubscribe certain topic by sending query, if the query failed they will normally be notified immediately with related error message. For every Tx block(epoch), the subscribed content will be sent from server to each client in one message where an array contains all their subscribed topic if updated, which we name **notification**.
 
-## Supported data
+## Supported query
 
 The following types of data are the current main focus that we want to consider to be supported by ZWS:
 
 - **New TxBlock**. Which includes TxBlock recently generated and hashes of all the transaction being processed within this block.
 - **Event log**. Which includes all the event log generated for interested contract address
+- **Unsubscribe**. Which tells the server to unsubscribe certain topic for the client
 
 ## Exception handling
 
