@@ -70,7 +70,9 @@ For these situations, you can choose to:
 
 ## Sharing Created Environments
 
-Steps for the user to be invited:
+As a owner of Cloud9 environment (or admin), you can share the environment with other users.
+
+Steps for the invitee:
 
 1. In the AWS applications page, click "Command line or programmatic access" for the correct role (e.g., `Cloud9User`) and account.
 2. Retrieve the AWS environment variables and export to a terminal session on your local machine or other Cloud9 bastions.
@@ -83,6 +85,8 @@ Steps for the environment creator:
 3. Go to "Share" on the top-right corner of the IDE
 4. Add the ARN for the user to be invited and select `RW` access
 5. After inviting, the environment should now appear in the "Shared with you" section in the other user's Cloud9 management console
+
+Steps for the admin: [Official Documentation](https://docs.aws.amazon.com/cloud9/latest/user-guide/share-environment.html#share-environment-admin-user)
 
 ## Backup of User Data
 
