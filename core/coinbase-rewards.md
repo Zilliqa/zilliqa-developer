@@ -18,7 +18,7 @@ that node has in microblocks (in case of shard node) or tx blocks (in case of ds
 state delta of the ds microblock.
 3. The ds have consensus over the state delta and hence rewards are given.
 4. Cosigs from first tx epoch (of current ds epoch) until vacuous epoch are considered for signature based rewards distribution.
-5. Cosigs from shards only are considered for vacuous epoch. That's because DS committee calculates the coinbase reward distribution, reach consensus among them and generate final block in vacuous epoch.
+5. Cosigs from shards only are considered for vacuous epoch (i.e., the tx block cosigs are excluded). That's because DS committee calculates the coinbase reward distribution, reach consensus among them and generate final block in vacuous epoch.
 
 ## Technical note
 
