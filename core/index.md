@@ -61,7 +61,8 @@
 ## Mitigation Measures
 
 - [Guard Mode](guard-mode.md)
-- [Rejoin / Recovery](rejoin-recovery.md)
+- [Join / Rejoin](join-rejoin.md)
+- [Recovery](recovery.md)
 - [View Change](viewchange.md)
 - [Transaction Backup](transaction-backup.md)
 - [Diagnostic Data](diagnostic-data.md)
