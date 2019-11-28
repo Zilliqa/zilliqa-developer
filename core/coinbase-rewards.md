@@ -29,3 +29,4 @@ state delta of the ds microblock.
     `m_coinbaseRewardees[5][0] --> {Cosigs from Microblock proposed by shard 0}`
     `m_coinbaseRewardees[5][1] --> {Cosigs from Microblock proposed by shard 1}`
     `m_coinbaseRewardees[6][-1]--> {Cosigs from TxBlock mined by DS Committee}`
+    This is because `IncreaseEpochNum` is called (inside `StoreFinalBlock`) before `SaveCoinbase` for TxBlock runs.
