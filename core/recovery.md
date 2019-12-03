@@ -1,0 +1,81 @@
+
+# Recovery
+
+`Recovery` enables zilliqa controlled nodes to be recovered if they go out of sync with network.
+Recovery mechanism can be used with different nodes of types - dsguard, shard guard, other normal nodes,
+lookup, newlookup and level2lookup.
+
+**Procedure :**
+
+```Usage: ./testnet.sh recover TYPE "INDEX1 INDEX2 INDEX3 ..." [ -u UPLOAD_TYPE UPLOAD_INDEX ]
+
+TYPE could be normal, lookup, new, newlookup, level2lookup, dsguard
+INDEX needs be a valid integer
+UPLOAD_TYPE could be normal, lookup, new, newlookup, level2lookup, dsguard to indicate the upload node type
+UPLOAD_INDEX needs be a valid integer, to indicate to upload node index
+
+```
+
+Above script will download persistence from the specified `UPLOAD_TYPE` node and restart the zilliqa process using daemon (already running in container) with `syncType = RECOVERY_ALL_SYNC`.
+
+Based on the type of node being recovered and its existing state in current network, it will be recovered as  detailed out below.
+
+## DS Guard Node Recovery
+
+1. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script.
+2. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
+3. Checks if node is part of current ds committee, (which will always be the case for dsguards)
+    a) Save coin base for final block and all microblocks, from last DS epoch to current TX epoch.
+    b) Send request to upper seeds `level2lookup 10- 14` to remove node IP from their relaxed blacklist, if any.
+    c) If any of the coinbase is missing for any epoch or any shard, request cosigs for them from the random upper seed.
+    d) Set `m_shardID` and `m_consensusMyID`.
+4. Invokes `WakeupAtTxEpoch` which will start with `FinalBlockConsensus`.
+5. Done.
+6. There are two possibilities hereafter:
+
+- Start consensus on next block successfully and rejoined.
+- We missed new final block during recovery process in which case it will go for VC Precheck failure followed by **triggering of `RejoinAsDS`**. Refer [Rejoin](join-rejoin.md###`DirectoryService::RejoinAsDS`)
+
+## Shard Guard Node Recovery
+
+1. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script.
+2. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
+3. Checks if node is part of sharding structure,
+    a) Set `m_shardID` and `m_consensusMyID`.
+4. Invokes `WakeupAtTxEpoch` which will start with state on `WAITING_FINALBLOCK`.
+5. Send request to upper seeds and his peers to remove node IP from their relaxed blacklist, if any.
+6. Done.
+7. There are two possibilities hereafter:
+
+- Receives next final block and joined back.
+- We missed new final block during recovery process in which case **it will trigger `RejoinAsNormal`**. Refer [Rejoin](join-rejoin.md###`Node::RejoinAsNormal`)
+
+## Other Node (Not part of ds committe or any shard)
+
+1. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script.
+2. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
+3. If node is not part of sharding structure or current ds committee, **It triggers `RejoinAsNormal`**. Refer [Rejoin](join-rejoin.md###`Node::RejoinAsNormal`)
+4. Done.
+
+## NewLookup / Level2Lookup Node Recovery
+
+1. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script.
+2. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
+3. Invokes `WakeupAtTxEpoch` which will start with state on `WAITING_FINALBLOCK`.
+4. Done.
+5. There are two possibilities hereafter:
+
+- Receives next final block and joined back.
+- We missed new final block during recovery process in which case **it will trigger `RejoinAsNewlookup`**.
+Based on number of final blocks missed over period of recovery, Rejoin will be either based out of incremental db or it will continue syncing the missing blocks from lookup. For details refer [Rejoin](join-rejoin.md###`Lookup::RejoinAsNewlookup`)
+
+## Lookup Node Recovery
+
+1. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script.
+2. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
+3. Invokes `WakeupAtTxEpoch` which will start with state on `WAITING_FINALBLOCK`.
+4. Done.
+5. There are two possibilities hereafter:
+
+- Receives next final block and joined back.
+- We missed new final block during recovery process in which case **it will trigger `RejoinAsLookup`**. Refer [Rejoin](join-rejoin.md###`Lookup::RejoinAsLookup`)
