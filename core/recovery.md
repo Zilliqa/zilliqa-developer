@@ -24,7 +24,6 @@ Based on the type of node being recovered and its existing state in current netw
 
 ## DS Guard Node Recovery
 
-
 1. Kills Zilliqa process, and suspend the new process re-launching.
 2. Testnet script downloads Persistence Storage.
 3. Resumes to launch Zilliqa process with `syncType 5` i.e. `RECOVERY_ALL_SYNC`
@@ -88,7 +87,7 @@ Based on number of final blocks missed over period of recovery, Rejoin will be e
 1. Kills Zilliqa process, and suspend the new process re-launching.
 2. Testnet script downloads Persistence Storage.
 3. Resumes to launch Zilliqa process with `syncType 5` i.e. `RECOVERY_ALL_SYNC`
-5. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script in step (2).
+4. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script in step (2).
 5. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
 6. Invokes `WakeupAtTxEpoch` which will start with state on `WAITING_FINALBLOCK`.
 
