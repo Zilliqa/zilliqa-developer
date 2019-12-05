@@ -41,6 +41,13 @@ There are two possibilities hereafter:
 - Start consensus on next block successfully and rejoined.
 - We missed new final block during recovery process in which case it will go for VC Precheck failure followed by **triggering of `RejoinAsDS`**. Refer [Rejoin](join-rejoin.md###`DirectoryService::RejoinAsDS`)
 
+## DS Guard Node Pod/Instance Deletion
+
+1. On instance or Pod deletion of dsguard, new pod is assigned to that dsguard and zilliqa process is launced with `syncType = GUARD_DS_SYNC`.
+2. Set `m_ds.m_awaitingToSubmitNetworkInfoUpdate = true`.
+3. Set `m_ds.m_dsguardPodDelete = true`.
+4. Triggers `DirectoryService::RejoinAsDS`.Refer [Rejoin](join-rejoin.md###`DirectoryService::RejoinAsDS`)
+
 ## Shard Guard Node Recovery
 
 1. Kills Zilliqa process, and suspend the new process re-launching.
@@ -57,6 +64,12 @@ There are two possibilities hereafter:
 
 - Receives next final block and joined back.
 - We missed new final block during recovery process in which case **it will trigger `RejoinAsNormal`**. Refer [Rejoin](join-rejoin.md###`Node::RejoinAsNormal`)
+
+## Shard Guard Node Pod/Instance Deletion
+
+1. On instance or Pod deletion of dsguard, new pod is assigned to that dsguard and zilliqa process is launced with `syncType = RECOVER_ALL_SYNC`.
+2. Node don't receive any messages from peers because of IP change and is stuck.
+3. We can recover such node in next ds epoch, after which it will not be part of any shard and will trigger `RejoinAsNormal`**. Refer [Rejoin](join-rejoin.md###`Node::RejoinAsNormal`)
 
 ## Other Node (Not part of ds committe or any shard)
 

@@ -72,12 +72,16 @@ This document will walk through joining and rejoining of different types of node
 2. While Loop until SyncType becomes NO_SYNC:
 3. Fetch Latest DSBlocks and Latest TxBlocks from a random upper seed.
 4. On receiving new TxBlock, fetch the corresponding statedeltas and calculate current state. Check whether it is a vacuous block, if so, after calculating state will move the state update to disk.
-5. If not vacuous epoch,
-    a) Fetch the latest Sharding Structure from a random upper seed and identify if already part of any shard.
-    b) **If not part of any shard , then its indeed new miner** and continue to 4.
-    c) **Otherwise, already part of one of shard**. Set my shard members and shardId. Set `syncType = NO_SYNC` and send request to shard peers to remove IP from their relaxed blacklist.
-    d) Start next Tx epoch where it initializes node variables like m_consensusID, m_consensusLeaderID, etc. Identify being BACKUP or leader, initializes Rumor Manager and starts with MicroBlockConsensus.
-    The normal node now successfully joined the network as Shard Node.
+5. If node is dsguard and if rejoining was triggered because the pod/instance was deleted i.e. `m_ds.m_dsguardPodDelete = true`(Refer [DSGuard Pod Deletion](recovery.md##DSGuardNodePod/InstanceDeletion)), then invokes `FinishRejoinAsDS` only if its vacous epoch.
+6. Otherwise, trigger `FinishRejoinAsDS` immediately.
+
+### `DirectoryService::FinishRejoinAsDS`
+
+1. Recheck if node is still part of ds committee. If not triggers `RejoinAsNormal`.
+2. If node is awaiting sending new IP to network i.e. `m_ds.m_awaitingToSubmitNetworkInfoUpdate = true`(Refer [DSGuard Pod Deletion](recovery.md##DSGuardNodePod/InstanceDeletion)), send new IP to the network.
+3. If current epoch is already first tx epoch of new ds epoch, fetch the sharding structure again.
+4. If not vacuous epoch, start next Tx epoch where it initializes node variables like m_consensusID, m_consensusLeaderID, etc. Identify being BACKUP or leader, initializes Rumor Manager and starts with state `MICROBLOCK_SUBMISSION`.
+5. If vacuous epoch, start new ds epoch and starts with state `POW_SUBMISSION`.
 
 ## DS node - when VC Precheck fails
 
