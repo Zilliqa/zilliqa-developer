@@ -240,7 +240,9 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 11. To stop the mining client, stop your running docker container:
 
       ```
+      sudo docker ps (get zilliqa's CONTAINER_ID here)
       sudo docker stop zilliqa
+      sudo docker rm CONTAINER_ID
       ```
 
 ## Mining with docker remotely
