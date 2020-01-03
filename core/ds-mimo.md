@@ -1,6 +1,6 @@
 # DS Committee Multiple In Multiple Out (DS MIMO)
 
-## NOTICE
+## Notice
 
 DS committee ejection has been superseded by [DS Reputation](ds-reputation.md)
 
