@@ -2,23 +2,4 @@
 # Each line is a file pattern followed by one or more owners.
 # reference: https://help.github.com/en/articles/about-code-owners
 
-*                                         @Gnnng
-
-/core/difficulty-adjustment.md            @ShengguangXiao
-
-/core/images/features/*                   @ansnunez
-/core/images/tools/*                      @ansnunez
-/core/images/*                            @ansnunez
-/core/*                                   @ansnunez
-/core/                                    @ansnunez
-
-/devops/aws-marketplace.md                @ShengguangXiao
-/devops/community-testnet-maintenance.md  @ansnunez
-/devops/mainnet-maintenance.md            @ansnunez
-/devops/mainnet-monitoring-scripts.md     @ansnunez
-/devops/network-upgrade.md                @ckyang
-/devops/rejoin-recover.md                 @ckyang
-
-/devops/*                                 @Gnnng
-
-/example/*                                @Gnnng
+*                                         @ansnunez

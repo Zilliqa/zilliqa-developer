@@ -17,6 +17,7 @@
 - [Gossip Protocol](gossip-protocol.md)
 - [Tree-based Cluster Broadcasting](tree-based-cluster-broadcasting.md)
 - [Blacklist](blacklist.md)
+- [Messaging Limits](messaging-limits.md)
 
 ## Messaging
 
@@ -30,7 +31,7 @@
 - [Blockchain Data](blockchain-data.md)
 - [Transaction Checks](transaction-checks.md)
 - [Local Storage](local-storage.md)
-- [Cloud Storage](cloud-storage.md)
+- [Cloud Storage](https://github.com/Zilliqa/dev-docs/blob/master/devops/bucket-separation.md#introduction)
 
 ## Directory Service
 
@@ -44,11 +45,11 @@
 
 ## Lookup
 
-- [Operational Details (State Machine)](lookup-operational-details.md)
 - [API Server](api-server.md)
 - [Transaction Dispatch](transaction-dispatch.md)
 - [Incremental DB](incremental-db.md)
 - [Multiplier](multiplier.md)
+- [Websocket Server](websocket-server.md)
 
 ## Mining
 
@@ -60,7 +61,8 @@
 ## Mitigation Measures
 
 - [Guard Mode](guard-mode.md)
-- [Rejoin / Recovery](rejoin-recovery.md)
+- [Join / Rejoin](join-rejoin.md)
+- [Recovery](recovery.md)
 - [View Change](viewchange.md)
 - [Transaction Backup](transaction-backup.md)
 - [Diagnostic Data](diagnostic-data.md)
@@ -70,3 +72,4 @@
 
 - [NAT Resolver](nat-resolver.md)
 - [Profiling Zilliqa and Scilla](profiling.md)
+- [Daemon](new-daemon.md)
