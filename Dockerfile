@@ -58,7 +58,6 @@ WORKDIR ${SOURCE_DIR}
 
 COPY boot.json ./boot.json
 COPY constants.xml ./constants.xml
-
 EXPOSE 5555
 
 ENTRYPOINT ["/zilliqa/build/bin/isolatedServer", "-f", "boot.json", "&>> /logs/isolated-server.logs"]
