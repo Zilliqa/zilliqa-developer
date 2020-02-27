@@ -1,0 +1,29 @@
+version: '3'
+
+networks:
+  zilliqa:
+
+services:
+  #isolatedserver
+  isolatedserver:
+    build: ./Dockerfile
+    container_name: isolatedserver
+    #    restart: always
+    volumes:
+    - ./logs:/zilliqa/logs
+    ports:
+    - "5555:5555"
+    networks:
+      - zilliqa
+  isolatedserver_faucet:
+    build: ./faucet/Dockerfile
+    container_name: isolatedserver_faucet
+    #    restart: always
+    volumes:
+    - ./logs:/zilliqa/logs
+    ports:
+    - "5556:5556"
+    networks:
+      - zilliqa
+    links:
+      - isolatedserver
