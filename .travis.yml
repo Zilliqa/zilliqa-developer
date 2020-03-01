@@ -4,6 +4,6 @@ services:
   - docker
 
 script:
-  - docker build -t micovi/zilliqa-isolated-server .
-  - docker run -d -p 5555:5555 micovi/zilliqa-isolated-server
+  - docker-compose build
+  - docker-compose up
   - docker ps -a
