@@ -1,0 +1,74 @@
+scilla_version 0
+
+import BoolUtils IntUtils
+
+library FundAccounts
+
+let one_msg =
+    fun (msg : Message) =>
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+let one = Uint32 1
+
+let not_owner_code = Uint32 0
+let deposit_success_code = Uint32 1
+let registration_error_code = Uint32 2
+let registered_success_code = Uint32 3
+let user_not_exists_code = Uint32 4
+
+let mk_deposit_failed_event =
+  fun (sender : ByStr20) =>
+    {_eventname : "deposit_failed";
+     sender: sender;
+     code: not_owner_code }
+
+let mk_deposit_success_event =
+  fun(sender : ByStr20) =>
+    {_eventname : "deposit_successful";
+     sender: sender;
+     code: deposit_success_code }
+     
+let mk_registration_failed_event =
+  fun (user_address : ByStr20) =>
+  fun (sender : ByStr20) =>
+  {_eventname : "user_registration_failed";
+   user_address: user_address;
+   sender: sender;
+   code: registration_error_code }
+
+let mk_registration_success_event =
+  fun (user_address : ByStr20) =>
+  fun (sender : ByStr20) =>
+  {_eventname : "user_registration_successful";
+   user_address: user_address;
+   sender: sender;
+   code: registered_success_code }
+
+contract FundAccounts
+(owner: ByStr20,
+zils_per_account : Uint128,
+blocks_to_wait: Uint128)
+
+field users: Map ByStr20 BNum = Emp ByStr20 BNum
+
+(* Only owner can deposit ZIL *)
+transition deposit()
+    accept;
+    e = mk_deposit_success_event _sender;
+    event e
+end
+
+transition register_user(user_address: ByStr20)
+  user_exists <- exists users[user_address];
+  blk <- & BLOCKNUMBER;
+    users[user_address] := blk;
+    e = mk_registration_success_event user_address _sender;
+    event e;
+    msg = {_tag: "";
+            _recipient: user_address;
+            _amount: zils_per_account;
+            code: registered_success_code };
+    msgs = one_msg msg;
+    send msgs
+end
