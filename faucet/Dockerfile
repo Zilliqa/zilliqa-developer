@@ -1,7 +1,9 @@
-FROM nodejs:10
+FROM node:10
 
-COPY ./ ./faucet
+COPY . ./faucet
 WORKDIR /faucet
 
 RUN npm install
-ENTRYPOINT node faucetGenerator.js
+RUN npm run build
+
+ENTRYPOINT node ./dist/server.js
