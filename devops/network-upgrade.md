@@ -125,6 +125,7 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
   pubKeyFile="../key/pubKeyFile"
   testnet_to_be_upgraded="<target_testnet>"
   cluster_name="<target_cluster>"         # eg: dev.k8s.z7a.xyz
+  release_bucket_name=""                  # specify the S3 bucket-name that will store released binary
   releaseZilliqa="true"                   # "true" for Zilliqa upgrade, "false" for Scilla upgrade
   scillaPath=""                           # "" for Zilliqa upgrade, "<scilla_path>" for Scilla upgrade
   ```
