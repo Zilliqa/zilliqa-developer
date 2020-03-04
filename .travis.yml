@@ -28,10 +28,10 @@ before_deploy:
   - export PATH=$PATH:$HOME/.local/bin
   - docker load -i docker_images/images.tar || true
 
-#deploy:
-#  provider: script
-#  skip_cleanup: true
-#  script:
-#    - ./scripts/ci_build.sh
-#  on:
-#    branch: master
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+    - ./scripts/ci_build.sh
+  on:
+    branch: master
