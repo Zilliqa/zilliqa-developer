@@ -234,6 +234,7 @@
         <CONTRACT_STATES_MIGRATED>false</CONTRACT_STATES_MIGRATED>
     </recovery>
     <smart_contract>
+        <CONTRACT_FILE_EXTENSION>.scilla</CONTRACT_FILE_EXTENSION>
         <ENABLE_SC>true</ENABLE_SC>
         <SCILLA_ROOT>/scilla/0</SCILLA_ROOT>
         <SCILLA_CHECKER>bin/scilla-checker</SCILLA_CHECKER>
