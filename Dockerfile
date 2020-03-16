@@ -1,4 +1,4 @@
-FROM zilliqa/scilla:latest
+FROM zilliqa/scilla:v0.6.0
 
 RUN apt-get update \
     && apt-get install -y software-properties-common \
