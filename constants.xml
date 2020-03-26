@@ -153,7 +153,9 @@
         <ENABLE_STATUS_RPC>true</ENABLE_STATUS_RPC>
         <SCILLA_IPC_SOCKET_PATH>/tmp/zilliqa.sock</SCILLA_IPC_SOCKET_PATH>
         <ENABLE_WEBSOCKET>false</ENABLE_WEBSOCKET>
-        <WEBSOCKET_PORT>4401</WEBSOCKET_PORT>
+	<WEBSOCKET_PORT>4401</WEBSOCKET_PORT>
+	<ENABLE_STAKING_RPC>false</ENABLE_STAKING_RPC>
+	<STAKING_RPC_PORT>4501</STAKING_RPC_PORT>
     </jsonrpc>
     <network_composition>
         <!-- Shard size will be automatically calculated if COMM_SIZE = 0 -->
