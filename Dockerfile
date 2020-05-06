@@ -1,4 +1,4 @@
-FROM zilliqa/scilla:v0.6.0
+FROM zilliqa/scilla:v0.7.0
 
 RUN apt-get update \
     && apt-get install -y software-properties-common \
@@ -40,7 +40,7 @@ RUN apt-get update \
     && pip install  request requests clint futures \
     && pip3 install requests clint future
 
-ARG ZILLIQA_VERSION=feature/kaya_binary
+ARG ZILLIQA_VERSION=v6.2.0
 ARG REPO=https://github.com/Zilliqa/Zilliqa.git
 ARG SOURCE_DIR=/zilliqa
 ARG BUILD_DIR=/zilliqa/build
