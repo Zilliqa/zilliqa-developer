@@ -64,13 +64,13 @@ Say for example, if there are a total of `2400` nodes in the Zilliqa network and
 
 - For Base rewards:
     ```shell
-    263698.630137 * 0.25 / 2400
-    = 27.4686073059375 ZILs per node per DS Epoch
+    197,244.577625571 * 0.25 / 2400
+    = 20.5463101693 ZILs per node per DS Epoch
     ```
 - For Flexible rewards: (on a first-come-first-serve basis)
     ```shell
-    263698.630137 * 0.70 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks])
-    = 1.165334855403409 ZILs per valid and accepted signature
+    197,244.577625571 * 0.70 / (2,400 * 2/3 [Successful signers] * 99 [TX blocks])
+    = 0.87166164354 ZILs per valid and accepted signature
     ```
 
 > **NOTE:** Guard nodes by Zilliqa are not rewarded. However, the division of rewards before distribution does include the guard nodes in the count. Hence, there are no "bonus" rewards for non-guard nodes.
