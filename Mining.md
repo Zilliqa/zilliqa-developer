@@ -60,7 +60,7 @@ In the Zilliqa network, rewards are split into:
 
 Both base rewards and flexible rewards has the same weightage for both DS and shard nodes. All rewards are consolidated over an entire DS epoch and only distributed during the vacuous epoch. Do note that the last **5%** of the rewards are given to the lookup and seed nodes.
 
-Say for example, if there are a total of `2400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `263698.630137` ZILs per DS Epoch, the reward distribution will be:
+Say for example, if there are a total of `2400` nodes in the Zilliqa network and the `COINBASE_REWARD` is set at `197,244.577625571` ZILs per DS Epoch, the reward distribution will be:
 
 - For Base rewards:
     ```shell
