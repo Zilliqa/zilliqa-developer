@@ -36,6 +36,22 @@ The verification procedure is (as noted in `Schnorr::Verify`):
 5. return r' == r
 ```
 
+## Dev History
+1. 2017: Amrit wrote the first version in C (no copy)
+2. 2017: Antonio C++-ized into first Zilliqa repo
+   - https://github.com/Zilliqa/nuQoin/pull/12
+3. Dec 2018: Modification of multisig hashing operation after security audit:
+   - Slack discussion ("audit" private channel)
+   - https://github.com/Zilliqa/Zilliqa/pull/1097
+4. Jan 2019: Some re-org and better handling of initialization
+   - https://github.com/Zilliqa/Zilliqa/pull/1274
+5. Jan 2019: Code moved into its own repo
+   - https://github.com/Zilliqa/schnorr
+6. May 2019: Trezor/Trustwallet support (TrustWallet repo)
+   - https://github.com/trezor/trezor-firmware/pull/93
+7. Jan 2020: Small fix for `BN_nnmod`
+   - https://github.com/Zilliqa/schnorr/pull/1
+
 ## Notes
 
 The Schnorr algorithm was initially based on section 4.2.3 page 24 of version 1.0 of [BSI TR-03111 Elliptic Curve Cryptography (ECC)](https://www.bsi.bund.de/EN/Publications/TechnicalGuidelines/TR03111/BSITR03111.html).
