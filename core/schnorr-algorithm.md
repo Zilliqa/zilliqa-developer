@@ -37,26 +37,27 @@ The verification procedure is (as noted in `Schnorr::Verify`):
 ```
 
 ## Dev History
+
 1. 2017: Amrit wrote the first version in C (no copy)
 
 2. 2017: Antonio C++-ized into first Zilliqa repo
-   - [PR](https://github.com/Zilliqa/nuQoin/pull/12)
+   - [Pull Request](https://github.com/Zilliqa/nuQoin/pull/12)
 
 3. Dec 2018: Modification of multisig hashing operation after security audit
    - Slack discussion ("audit" private channel)
-   - [PR](https://github.com/Zilliqa/Zilliqa/pull/1097)
+   - [Pull Request](https://github.com/Zilliqa/Zilliqa/pull/1097)
 
 4. Jan 2019: Some re-org and better handling of initialization
-   - [PR](https://github.com/Zilliqa/Zilliqa/pull/1274)
+   - [Pull Request](https://github.com/Zilliqa/Zilliqa/pull/1274)
 
 5. Jan 2019: Code moved into its own repo
    - [libSchnorr](https://github.com/Zilliqa/schnorr)
 
 6. May 2019: Trezor/Trustwallet support (TrustWallet repo)
-   - [PR](https://github.com/trezor/trezor-firmware/pull/93)
+   - [Pull Request](https://github.com/trezor/trezor-firmware/pull/93)
 
 7. Jan 2020: Small fix for `BN_nnmod`
-   - [PR](https://github.com/Zilliqa/schnorr/pull/1)
+   - [Pull Request](https://github.com/Zilliqa/schnorr/pull/1)
 
 ## Notes
 
