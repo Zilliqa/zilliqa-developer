@@ -19,11 +19,11 @@ The error codes corresponding to it are:
 | 16 | Dropped | The txn is not sharded to the correct shard |
 | 17 | Dropped | The contract call txn does not have contract txn and from account in same shard |
 | 18 | Dropped | Code of the contract txn is higher than the prescribed limit |
-| 19 | Dropped | Verifiaction of transaction failed (Signature check failure, chain id, version check failure) |
+| 19 | Dropped | Verifiaction of transaction failed (Signature , chain id, version check failure) |
 | 20 | Dropped | The gas limit of txn is insufficient |
 | 21 | Dropped | The account has insufficient balance |
 | 22 | Dropped | The transaction has insufficient gas to invoke scilla checker |
 | 23 | Dropped | Same Txn was already present |
 | 24 | Dropped | A txn with same nonce and higher gas price was present|
-| 25 | Dropped | The account for which the transaction is meant for (to address) is invalid. Trying to send contract account zils. or calling a non-contract account. |
+| 25 | Dropped | The account for which the transaction is meant for (to address) is invalid. Maybe the txn is trying to send contract account zils or is calling a non-contract account. |
 | 26 | Dropped | Failure to add the contract account to the state |
