@@ -513,6 +513,5 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
 ### Channels
 
-Join our official mining discussion forum: https://forum.zilliqa.com/c/Mining
-
+Join our official Discord channel: https://discord.gg/XMRE9tt
 Join the community-managed Telegram channel: https://t.me/zilliqaminer
