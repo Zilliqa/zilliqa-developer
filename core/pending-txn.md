@@ -47,7 +47,7 @@ A transaction hash which is reported by the API generally follows this cycle:
 
 2. The shard processes the transaction and if the transaction is not valid, pushes it to dropped transactions in its own memory. If the transaction if deemed to be valid but cannot be confirmed right now, it is pushed to the mempool. This transaction is hereby pending.
 
-3. The shard then collects all the dropped and pending transactions and sends it to the lookup. This step also may introduce some delay as it only happens after the microblock consensus.
+3. The shard then collects all the dropped and pending transactions and sends it to the lookup. This step also may introduce some delay as it only happens after the recieval of final block.
 
 ### Exceptions
 
