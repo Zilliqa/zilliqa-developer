@@ -17,13 +17,13 @@ The error codes corresponding to it are:
 | 11 | Dropped | Failure in invocation of scilla libraries |
 | 12 | Dropped | Failure in contract account initialisation |
 | 13 | Dropped | The account from which the transaction is sent is invalid |
-| 14 | Dropped | The gas limit of a txn is higher than the shard/DS limit |
+| 14 | Dropped | The gas limit of the txn is higher than the DS or shard microblock gas limit |
 | 15 | Dropped | The txn type could not be classified as payment, contract deploy or contract call  |
 | 16 | Dropped | The txn is not sharded to the correct shard |
-| 17 | Dropped | The contract call txn does not have contract txn and from account in same shard |
+| 17 | Dropped | The sender account and the contract being called is not in the same shard |
 | 18 | Dropped | Size of the `code` field within the contract txn is higher than the prescribed limit |
 | 19 | Dropped | Verification of txn failed (Signature, chain id or version check failure) |
-| 20 | Dropped | The gas limit of txn is insufficient |
+| 20 | Dropped | Insufficient txn gas limitt |
 | 21 | Dropped | The account has insufficient balance |
 | 22 | Dropped | The txn has insufficient gas to invoke the Scilla checker |
 | 23 | Dropped | Duplicated txn. The current txn was already present |
