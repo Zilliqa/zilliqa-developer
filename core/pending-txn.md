@@ -43,11 +43,11 @@ The error codes corresponding to it are:
 
 A transaction hash which is reported by the API generally follows this cycle:
 
-1. The lookup accepts the transaction, does premilinary checks and sends it to the shard. This part may introduce some delay as the lookup sends transactions to the shard only after it recieves a final block.
+1. The lookup accepts the transaction, does preliminary checks and sends it to the shard. There may be a delay in the reporting of this information as the lookup sends transactions to the shard only after it receives the finalblock.
 
 2. The shard processes the transaction and if the transaction is not valid, pushes it to dropped transactions in its own memory. If the transaction if deemed to be valid but cannot be confirmed right now, it is pushed to the mempool. This transaction is hereby pending.
 
-3. The shard then collects all the dropped and pending transactions and sends it to the lookup. This step also may introduce some delay as it only happens after the recieval of final block.
+3. The shard then collects all the dropped and pending transactions and sends it to the lookup. This step also may introduce a delay in reporting as it only happens after receiving the finalblock.
 
 ### Exceptions
 
