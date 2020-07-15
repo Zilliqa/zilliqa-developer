@@ -40,7 +40,7 @@ RUN apt-get update \
     && pip install  request requests clint futures \
     && pip3 install requests clint future
 
-ARG ZILLIQA_VERSION=master
+ARG ZILLIQA_VERSION=v6.3.0
 ARG REPO=https://github.com/Zilliqa/Zilliqa.git
 ARG SOURCE_DIR=/zilliqa
 ARG BUILD_DIR=/zilliqa/build
