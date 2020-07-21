@@ -30,7 +30,7 @@ RUN apt-get update \
     ocl-icd-opencl-dev \
     pkg-config \
     libsecp256k1-dev \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG ZILLIQA_VERSION=v6.3.0
 ARG REPO=https://github.com/Zilliqa/Zilliqa.git
