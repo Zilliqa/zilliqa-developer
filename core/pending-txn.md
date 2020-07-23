@@ -28,7 +28,7 @@ The error codes corresponding to it are:
 | 22 | Dropped | The txn has insufficient gas to invoke the Scilla checker |
 | 23 | Dropped | Duplicated txn. The current txn was already present |
 | 24 | Dropped | There is/are txn(s) with same nonce with a higher gas price was present|
-| 25 | Dropped | The account for which the transaction is meant for (to address) is invalid. Maybe the txn is trying to send contract account zils or is calling a non-contract account. |
+| 25 | Dropped | The to address of the txn is invalid due to 1) Sending of payment transaction to contract address. 2) A contract call txn is being sent to a non-existent account  |
 | 26 | Dropped | Failed to add the contract account to the state |
 
 ## Pending Transaction Lifecycle
