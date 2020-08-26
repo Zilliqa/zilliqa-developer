@@ -415,7 +415,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
         libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
         libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
         libprotobuf-dev protobuf-compiler libcurl4-openssl-dev libboost-program-options-dev \
-        libssl-dev
+        libssl-dev python3-dev libboost-python-dev python3-setuptools python3-pip gawk
         ```
 
     - **(Option 1)** Build Zilliqa for CPU mining:
