@@ -4,7 +4,6 @@
 echo $MODE
 if [ "$MODE" == "load" ]; then
     echo "loading persistence."
-    mkdir -p 
     isolatedServer -l -t 5000 >> /zilliqa/logs/isolated-server.logs
 else
     echo "loading from file."
