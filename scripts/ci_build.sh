@@ -14,6 +14,9 @@ regionID=us-west-2
 application=zilliqa-isolated-server
 registryURL=${accountID}.dkr.ecr.${regionID}.amazonaws.com/$application
 
+eval "$(aws ecr get-login --no-include-email --region $regionID --registry-ids $zilliqa_ecr_id)"
+
+docker build -t "$registryURL:latest" -t "$registryURL:$commit" .
 eval "$(aws ecr get-login --no-include-email --region $regionID)"
-docker build --build-arg DEPLOY_ENV="stg" -t "$registryURL:latest" -t "$registryURL:$commit" .
 docker push "$registryURL"
+
