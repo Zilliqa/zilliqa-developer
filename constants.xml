@@ -34,6 +34,13 @@
         <SEED_SYNC_SMALL_PULL_INTERVAL>5</SEED_SYNC_SMALL_PULL_INTERVAL>
         <SEED_SYNC_LARGE_PULL_INTERVAL>10</SEED_SYNC_LARGE_PULL_INTERVAL>
     </seed>
+    <remotestorageDB>
+        <REMOTESTORAGE_DB_HOST/>
+        <REMOTESTORAGE_DB_NAME>txn</REMOTESTORAGE_DB_NAME>
+        <REMOTESTORAGE_DB_PORT>27017</REMOTESTORAGE_DB_PORT>
+        <REMOTESTORAGE_DB_ENABLE>false</REMOTESTORAGE_DB_ENABLE>
+        <REMOTESTORAGE_DB_TLS_FILE/>
+    </remotestorageDB>
     <consensus>
         <TOLERANCE_FRACTION>0.667</TOLERANCE_FRACTION>
         <COMMIT_WINDOW_IN_SECONDS>10</COMMIT_WINDOW_IN_SECONDS>
@@ -42,6 +49,7 @@
         <DS_NUM_CONSENSUS_SUBSETS>2</DS_NUM_CONSENSUS_SUBSETS>
         <SHARD_NUM_CONSENSUS_SUBSETS>1</SHARD_NUM_CONSENSUS_SUBSETS>
         <COMMIT_TOLERANCE_PERCENT>80</COMMIT_TOLERANCE_PERCENT>
+        <SUBSET0_RESPONSE_DELAY_IN_MS>1000</SUBSET0_RESPONSE_DELAY_IN_MS>
     </consensus>
     <data_sharing>
         <BROADCAST_TREEBASED_CLUSTER_MODE>true</BROADCAST_TREEBASED_CLUSTER_MODE>
@@ -271,7 +279,6 @@
         <LIBRARY_CODE_EXTENSION>.scillib</LIBRARY_CODE_EXTENSION>
         <EXTLIB_FOLDER>scilla_libs</EXTLIB_FOLDER>
         <ENABLE_SCILLA_MULTI_VERSION>true</ENABLE_SCILLA_MULTI_VERSION>
-        <FIELDS_MAP_DEPTH_INDICATOR>_fields_map_depth</FIELDS_MAP_DEPTH_INDICATOR>
         <LOG_SC>false</LOG_SC>
         <DISABLE_SCILLA_LIB>true</DISABLE_SCILLA_LIB>
     </smart_contract>
@@ -311,36 +318,40 @@
         <ENABLE_TXNS_BACKUP>false</ENABLE_TXNS_BACKUP>
         <SHARDLDR_SAVE_TXN_LOCALLY>false</SHARDLDR_SAVE_TXN_LOCALLY>
         <BLOOM_FILTER_FALSE_RATE>0.000001</BLOOM_FILTER_FALSE_RATE>
+        <COINBASE_UPDATE_TARGET_DS>8000</COINBASE_UPDATE_TARGET_DS>
+        <COINBASE_REWARD_PER_DS_NEW>275000000000000000</COINBASE_REWARD_PER_DS_NEW>
+        <BASE_REWARD_IN_PERCENT_NEW>20</BASE_REWARD_IN_PERCENT_NEW>
+        <LOOKUP_REWARD_IN_PERCENT_NEW>40</LOOKUP_REWARD_IN_PERCENT_NEW>
     </transactions>
     <verifier>
         <VERIFIER_PATH>./historicalDB</VERIFIER_PATH>
         <VERIFIER_PUBKEY/>
         <SEED_PORT>33133</SEED_PORT>
-	    <exclusion_list>	
-            <entry>	
-                <TXBLOCK>175334</TXBLOCK>	
-                <MICROBLOCK>0</MICROBLOCK>	
-            </entry>	
-            <entry>	
-                <TXBLOCK>175637</TXBLOCK>	
-                <MICROBLOCK>0</MICROBLOCK>	
-            </entry>	
-            <entry>	
-                <TXBLOCK>175637</TXBLOCK>	
-                <MICROBLOCK>1</MICROBLOCK>	
-            </entry>	
-            <entry>	
-                <TXBLOCK>175637</TXBLOCK>	
-                <MICROBLOCK>2</MICROBLOCK>	
-            </entry>	
-            <entry>	
-                <TXBLOCK>175701</TXBLOCK>	
-                <MICROBLOCK>0</MICROBLOCK>	
-            </entry>	
-            <entry>	
-                <TXBLOCK>175701</TXBLOCK>	
-                <MICROBLOCK>1</MICROBLOCK>	
-            </entry>	
+        <exclusion_list>
+            <entry>
+                <TXBLOCK>175334</TXBLOCK>
+                <MICROBLOCK>0</MICROBLOCK>
+            </entry>
+            <entry>
+                <TXBLOCK>175637</TXBLOCK>
+                <MICROBLOCK>0</MICROBLOCK>
+            </entry>
+            <entry>
+                <TXBLOCK>175637</TXBLOCK>
+                <MICROBLOCK>1</MICROBLOCK>
+            </entry>
+            <entry>
+                <TXBLOCK>175637</TXBLOCK>
+                <MICROBLOCK>2</MICROBLOCK>
+            </entry>
+            <entry>
+                <TXBLOCK>175701</TXBLOCK>
+                <MICROBLOCK>0</MICROBLOCK>
+            </entry>
+            <entry>
+                <TXBLOCK>175701</TXBLOCK>
+                <MICROBLOCK>1</MICROBLOCK>
+            </entry>
         </exclusion_list>
     </verifier>
     <viewchange>
