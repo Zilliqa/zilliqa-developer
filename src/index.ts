@@ -168,7 +168,12 @@ function createDirectoryContents(templatePath: string, projectName: string, proj
 
       try {
         if (projectChoice === 'blank-project') {
-          contents = template.render(contents, { projectName });
+          const rarr = projectName.split('/');
+          if (rarr.length) {
+            contents = template.render(contents, { projectName: rarr[0] });
+          } else {
+            contents = template.render(contents, { projectName });
+          }
         }
       } catch (error) {
         console.log(file);
