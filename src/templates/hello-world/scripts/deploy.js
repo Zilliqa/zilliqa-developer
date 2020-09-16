@@ -21,4 +21,4 @@ async function deploy() {
     return await helloWorld.deploy(ZT.accounts[0].address, init);
 }
 
-deploy();
+module.exports = deploy;
