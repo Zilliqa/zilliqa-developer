@@ -12,7 +12,7 @@ async function deploy() {
 
     await ZT.importAccounts([ACCOUNT_PRIVATEKEY]);
 
-    const contractCode = fs.readFileSync(path.join(__dirname, '../<%= projectName %>'), 'utf8');
+    const contractCode = fs.readFileSync(path.join(__dirname, '../<%= projectName %>.scilla'), 'utf8');
 
     const init = JSON.parse(fs.readFileSync(path.join(__dirname, '../init.json'), 'utf8'));
 

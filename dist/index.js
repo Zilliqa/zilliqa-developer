@@ -126,7 +126,13 @@ function createDirectoryContents(templatePath, projectName, projectChoice, confi
             var contents = fs.readFileSync(origFilePath, 'utf8');
             try {
                 if (projectChoice === 'blank-project') {
-                    contents = template.render(contents, { projectName: projectName });
+                    var rarr = projectName.split('/');
+                    if (rarr.length) {
+                        contents = template.render(contents, { projectName: rarr[0] });
+                    }
+                    else {
+                        contents = template.render(contents, { projectName: projectName });
+                    }
                 }
             }
             catch (error) {
