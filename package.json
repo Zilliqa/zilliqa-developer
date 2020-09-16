@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc && shx rm -rf dist/templates && shx cp -r templates dist"
+    "build": "tsc && shx rm -rf dist/templates && shx cp -r src/templates dist"
   },
   "bin": {
     "scilla-boilerplate": "./dist/index.js"
