@@ -6,7 +6,7 @@ var fs = require("fs");
 var path = require("path");
 var shell = require("shelljs");
 var template = require("./utils/template");
-var chalk_1 = require("chalk");
+var chalk = require("chalk");
 var yargs = require("yargs");
 var CHOICES = fs.readdirSync(path.join(__dirname, 'templates'));
 var QUESTIONS = [
@@ -49,7 +49,7 @@ inquirer.prompt(QUESTIONS)
     if (!createProject(tartgetPath)) {
         return;
     }
-    createDirectoryContents(templatePath, projectName, templateConfig);
+    createDirectoryContents(templatePath, projectName, projectChoice, templateConfig);
     if (!postProcess(options)) {
         return;
     }
@@ -57,12 +57,12 @@ inquirer.prompt(QUESTIONS)
 });
 function showMessage(options) {
     console.log('');
-    console.log(chalk_1.default.green('Scaffoling done.'));
-    console.log('Enter project directory: ', chalk_1.default.green("cd " + options.projectName));
+    console.log(chalk.green('Scaffoling done.'));
+    console.log('Enter project directory: ', chalk.green("cd " + options.projectName));
     var message = options.config.postMessage;
     if (message) {
         console.log('');
-        console.log(chalk_1.default.yellow(message));
+        console.log(chalk.yellow(message));
         console.log('');
     }
 }
@@ -78,7 +78,7 @@ function getTemplateConfig(templatePath) {
 }
 function createProject(projectPath) {
     if (fs.existsSync(projectPath)) {
-        console.log(chalk_1.default.red("Folder " + projectPath + " exists. Delete or use another name."));
+        console.log(chalk.red("Folder " + projectPath + " exists. Delete or use another name."));
         return false;
     }
     fs.mkdirSync(projectPath);
@@ -109,12 +109,12 @@ function postProcessNode(options) {
         }
     }
     else {
-        console.log(chalk_1.default.red('No yarn or npm found. Cannot run installation.'));
+        console.log(chalk.red('No yarn or npm found. Cannot run installation.'));
     }
     return true;
 }
 var SKIP_FILES = ['node_modules', '.template.json'];
-function createDirectoryContents(templatePath, projectName, config) {
+function createDirectoryContents(templatePath, projectName, projectChoice, config) {
     var filesToCreate = fs.readdirSync(templatePath);
     filesToCreate.forEach(function (file) {
         var origFilePath = path.join(templatePath, file);
@@ -124,14 +124,25 @@ function createDirectoryContents(templatePath, projectName, config) {
             return;
         if (stats.isFile()) {
             var contents = fs.readFileSync(origFilePath, 'utf8');
-            contents = template.render(contents, { projectName: projectName });
+            try {
+                if (projectChoice === 'blank-project') {
+                    contents = template.render(contents, { projectName: projectName });
+                }
+            }
+            catch (error) {
+                console.log(file);
+                console.error(error);
+            }
+            if (file === 'contract.scilla') {
+                file = projectName + ".scilla";
+            }
             var writePath = path.join(CURR_DIR, projectName, file);
             fs.writeFileSync(writePath, contents, 'utf8');
         }
         else if (stats.isDirectory()) {
             fs.mkdirSync(path.join(CURR_DIR, projectName, file));
             // recursive call
-            createDirectoryContents(path.join(templatePath, file), path.join(projectName, file), config);
+            createDirectoryContents(path.join(templatePath, file), path.join(projectName, file), projectChoice, config);
         }
     });
 }

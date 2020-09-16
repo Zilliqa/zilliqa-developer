@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as shell from 'shelljs';
 import * as template from './utils/template';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import * as yargs from 'yargs';
 
 const CHOICES = fs.readdirSync(path.join(__dirname, 'templates'));
@@ -68,7 +68,7 @@ inquirer.prompt(QUESTIONS)
       return;
     }
 
-    createDirectoryContents(templatePath, projectName, templateConfig);
+    createDirectoryContents(templatePath, projectName, projectChoice, templateConfig);
 
     if (!postProcess(options)) {
       return;
@@ -80,7 +80,7 @@ inquirer.prompt(QUESTIONS)
 function showMessage(options: CliOptions) {
   console.log('');
   console.log(chalk.green('Scaffoling done.'));
-  console.log('Enter project directory: ',chalk.green(`cd ${options.projectName}`));
+  console.log('Enter project directory: ', chalk.green(`cd ${options.projectName}`));
   const message = options.config.postMessage;
 
   if (message) {
@@ -152,7 +152,7 @@ function postProcessNode(options: CliOptions) {
 
 const SKIP_FILES = ['node_modules', '.template.json'];
 
-function createDirectoryContents(templatePath: string, projectName: string, config: TemplateConfig) {
+function createDirectoryContents(templatePath: string, projectName: string, projectChoice: string, config: TemplateConfig) {
   const filesToCreate = fs.readdirSync(templatePath);
 
   filesToCreate.forEach(file => {
@@ -166,7 +166,18 @@ function createDirectoryContents(templatePath: string, projectName: string, conf
     if (stats.isFile()) {
       let contents = fs.readFileSync(origFilePath, 'utf8');
 
-      contents = template.render(contents, { projectName });
+      try {
+        if (projectChoice === 'blank-project') {
+          contents = template.render(contents, { projectName });
+        }
+      } catch (error) {
+        console.log(file);
+        console.error(error);
+      }
+
+      if (file === 'contract.scilla') {
+        file = `${projectName}.scilla`;
+      }
 
       const writePath = path.join(CURR_DIR, projectName, file);
       fs.writeFileSync(writePath, contents, 'utf8');
@@ -174,7 +185,7 @@ function createDirectoryContents(templatePath: string, projectName: string, conf
       fs.mkdirSync(path.join(CURR_DIR, projectName, file));
 
       // recursive call
-      createDirectoryContents(path.join(templatePath, file), path.join(projectName, file), config);
+      createDirectoryContents(path.join(templatePath, file), path.join(projectName, file), projectChoice, config);
     }
   });
 }

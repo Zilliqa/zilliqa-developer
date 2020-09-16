@@ -1,6 +1,6 @@
 {
-  "name": "<%= projectName %>",
-  "scillaFile": "<%= projectName %>.scilla",
+  "name": "@micovi/scilla-hello-world",
+  "scillaFile": "hello-world.scilla",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
