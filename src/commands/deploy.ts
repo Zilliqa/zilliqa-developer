@@ -22,9 +22,9 @@ const deploy = () => {
         {
             title: 'Deploy contract',
             task: async (ctx) => {
-                const [tx, contract] = await postProcessNode()
-                ctx.tx = tx;
-                ctx.contract = contract;
+                const response = await postProcessNode()
+                ctx.tx = response[0];
+                ctx.contract = response[1];
             }
         }
     ]);

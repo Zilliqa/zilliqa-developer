@@ -8,7 +8,7 @@ const ACCOUNT_PRIVATEKEY = process.env.ACCOUNT_PRIVATEKEY;
 const ZilTest = require('zilliqa-testing-library').ZilTest;
 
 async function deploy() {
-    const ZT = new ZilTest(NETWORK_URL);
+    const ZT = new ZilTest({ network: NETWORK_URL });
 
     await ZT.importAccounts([ACCOUNT_PRIVATEKEY]);
 

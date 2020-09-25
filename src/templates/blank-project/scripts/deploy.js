@@ -13,7 +13,7 @@ const ZilTest = require("zilliqa-testing-library").ZilTest;
 
 async function deploy() {
     // Initialize Zilliqa RPC Provider
-    const ZT = new ZilTest(NETWORK_URL);
+    const ZT = new ZilTest({ network: NETWORK_URL });
 
     // Import the wallet from PRIVATE KEY that wa provided
     await ZT.importAccounts([ACCOUNT_PRIVATEKEY]);
