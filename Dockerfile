@@ -1,4 +1,4 @@
-FROM 648273915458.dkr.ecr.us-west-2.amazonaws.com/zilliqa:716a887
+FROM 648273915458.dkr.ecr.us-west-2.amazonaws.com/zilliqa:e661c12
 #FROM zilliqa/zilliqa:v7.0.0-alpha.5
 
 ARG SOURCE_DIR=/zilliqa
