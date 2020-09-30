@@ -15,7 +15,7 @@ application=zilliqa-isolated-server
 registryURL=${accountID}.dkr.ecr.${regionID}.amazonaws.com/$application
 
 # Uncomment below if we're pulling from zilliqa ecr
-#eval "$(aws ecr get-login --no-include-email --region $regionID --registry-ids $zilliqa_ecr_id)"
+eval "$(aws ecr get-login --no-include-email --region $regionID --registry-ids $zilliqa_ecr_id)"
 
 docker build -t "$registryURL:latest" -t "$registryURL:$commit" .
 eval "$(aws ecr get-login --no-include-email --region $regionID)"
