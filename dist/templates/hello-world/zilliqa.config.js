@@ -9,7 +9,7 @@ module.exports = {
   // PRIVATE KEY should never be hardcoded in any file.
   accountPrivateKey: process.env.ACCOUNT_PRIVATE_KEY,
   // Scilla file used for deployment
-  contractFile: "<%= projectName %>.scilla",
+  contractFile: "hello-world.scilla",
   // Init params used in deployment transaction (can be replaced with a JSON Object)
   init: JSON.parse(
     fs.readFileSync(path.join(__dirname, "./init.json"), "utf8")
