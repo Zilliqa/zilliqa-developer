@@ -28,7 +28,9 @@ You can scaffold a new Scilla project using `scilla-boilerplate init` command. T
 
 ### scripts/deploy.js
 
-**This file is required by the `scilla-boilerplate deploy` command.**
+**This file is NOT required by the `scilla-boilerplate deploy` command.**
+
+You can use it to replace the default scilla deploy script, if you need more advanced commands before deployment.
 
 It should always export a function called `deploy` that returns a tuple containing `transactionObject` with a receipt property and `contractObject` with an address property. (eg. result from `contract.deploy` method provided by Zilliqa Testing Library).
 
