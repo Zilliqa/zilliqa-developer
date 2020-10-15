@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 
 // Initialize testing library
-const ZilTest = require('zilliqa-testing-library');
+const ZilTest = require('zilliqa-testing-library').default;
 const Test = new ZilTest();
 
 // Read contract file

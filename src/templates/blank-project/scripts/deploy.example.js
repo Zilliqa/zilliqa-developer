@@ -9,7 +9,7 @@ const NETWORK_URL = process.env.NETWORK_URL;
 const ACCOUNT_PRIVATEKEY = process.env.ACCOUNT_PRIVATEKEY;
 
 // Import zilliqa-testing-library
-const ZilTest = require("zilliqa-testing-library").ZilTest;
+const ZilTest = require("zilliqa-testing-library").default;
 
 async function deploy() {
     // Initialize Zilliqa RPC Provider
