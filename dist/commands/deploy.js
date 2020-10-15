@@ -41,16 +41,33 @@ var chalk = require("chalk");
 var shell = require("shelljs");
 var Listr = require("listr");
 var yargs = require("yargs");
+var zilliqa_testing_library_1 = require("zilliqa-testing-library");
+var fs = require("fs");
+var path = require("path");
 var CURR_DIR = process.cwd();
 function postProcessNode() {
     return __awaiter(this, void 0, void 0, function () {
-        var deploy;
+        var config, ZT, contractCode, contract;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    deploy = require(CURR_DIR + '/scripts/deploy.js');
-                    return [4 /*yield*/, deploy()];
-                case 1: return [2 /*return*/, _a.sent()];
+                    config = require(CURR_DIR + '/zilliqa.config.js');
+                    ZT = new zilliqa_testing_library_1.default({ network: config.networkUrl });
+                    // Import the wallet from PRIVATE KEY that wa provided
+                    return [4 /*yield*/, ZT.importAccounts([config.accountPrivateKey])];
+                case 1:
+                    // Import the wallet from PRIVATE KEY that wa provided
+                    _a.sent();
+                    contractCode = fs.readFileSync(path.join(CURR_DIR, config.contractFile), "utf8");
+                    return [4 /*yield*/, ZT.loadContract(contractCode)];
+                case 2:
+                    contract = _a.sent();
+                    if (!(contract !== undefined && contract.deploy !== undefined)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, contract.deploy(ZT.accounts[0].address, config.init)];
+                case 3: 
+                // helloWorld.deploy return a tuple containing transaction object and a contract object
+                return [2 /*return*/, _a.sent()];
+                case 4: throw new Error('Contract could not be imported. Maybe scilla-checker failed');
             }
         });
     });
@@ -66,14 +83,14 @@ var deploy = function () {
         {
             title: 'Deploy contract',
             task: function (ctx) { return __awaiter(_this, void 0, void 0, function () {
-                var _a, tx, contract;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
+                var response;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
                         case 0: return [4 /*yield*/, postProcessNode()];
                         case 1:
-                            _a = _b.sent(), tx = _a[0], contract = _a[1];
-                            ctx.tx = tx;
-                            ctx.contract = contract;
+                            response = _a.sent();
+                            ctx.tx = response[0];
+                            ctx.contract = response[1];
                             return [2 /*return*/];
                     }
                 });

@@ -4,13 +4,39 @@ import * as chalk from 'chalk';
 import * as shell from 'shelljs';
 import * as Listr from 'listr';
 import * as yargs from 'yargs';
+import ZilTest from "zilliqa-testing-library";
+import * as fs from 'fs';
+import * as path from "path";
 
 const CURR_DIR = process.cwd();
 
 async function postProcessNode() {
-    const deploy = require(CURR_DIR + '/scripts/deploy.js');
+    const config = require(CURR_DIR + '/zilliqa.config.js');
 
-    return await deploy();
+
+    // Initialize Zilliqa RPC Provider
+    const ZT = new ZilTest({ network: config.networkUrl });
+
+    // Import the wallet from PRIVATE KEY that wa provided
+    await ZT.importAccounts([config.accountPrivateKey]);
+
+    // Read contract code from root directory of the project and store it for deployment.
+    const contractCode = fs.readFileSync(
+        path.join(CURR_DIR, config.contractFile),
+        "utf8"
+    );
+
+    // Load contract into the Zilliqa Testing Library. 
+    // This function will also run scilla-checker on the contract. 
+    // More informations cn be found on the Zilliqa Testing Library documentation.
+    const contract = await ZT.loadContract(contractCode);
+
+    if (contract !== undefined && contract.deploy !== undefined) {
+        // helloWorld.deploy return a tuple containing transaction object and a contract object
+        return await contract.deploy(ZT.accounts[0].address, config.init);
+    } else {
+        throw new Error('Contract could not be imported. Maybe scilla-checker failed');
+    }
 }
 
 const deploy = () => {

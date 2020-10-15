@@ -14,6 +14,6 @@
     "dotenv": "^8.2.0",
     "mocha": "^8.1.3",
     "scilla-boilerplate": "git+https://github.com/micovi/scilla-boilerplate.git",
-    "zilliqa-testing-library": "git+https://github.com/zilliqa/zilliqa-testing-library.git"
+    "zilliqa-testing-library": "git+https://github.com/zilliqa/zilliqa-testing-library.git#develop"
   }
 }
