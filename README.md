@@ -36,16 +36,16 @@ For normal use case, the provided constants.xml would be sufficient. For any spe
 
 ## To Create the Image
 1) run the following:
-`./local_scripts/rebuild_image.sh`
-A image named `zilliqa-isolated-server:1.0` will be created on your local docker registry
+   `./local_scripts/rebuild_image.sh`
+   A image named `zilliqa-isolated-server:1.0` will be created on your local docker registry
 
 ## Preparing the Persistence
 1) If you know the mainnet bucket id that you're using, run the following:
-`export BUCKET_ID=<insert bucket id here> && ./local_script/download_persistence.sh <persistence file>`
+   `export BUCKET_ID=<insert bucket id here> && ./local_script/download_persistence.sh <persistence file>`
 2) If you do not have the mainnet bucket id, run the following:
-Get someone with mainnet access to pass u the latest backed up persistence
-`mkdir downloads`
-copy the persistence file into the downloads folder
+   Get someone with mainnet access to pass u the latest backed up persistence
+   `mkdir downloads`
+   copy the persistence file into the downloads folder
 
 ## Launch the Isolated Server
 1) `./local_script/run_isolated_with_persistence.sh <persistence file>`
