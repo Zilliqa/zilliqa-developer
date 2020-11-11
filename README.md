@@ -39,7 +39,7 @@ For normal use case, the provided constants.xml would be sufficient. For any spe
 
 `./local_scripts/rebuild_image.sh`
 
-A image named `zilliqa-isolated-server:1.0` will be created on your local docker registry
+An image named `zilliqa-isolated-server:1.0` will be created on your local docker registry
 
 ## Preparing the Persistence
 1) If you know the mainnet bucket id that you're using, run the following:
