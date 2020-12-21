@@ -81,7 +81,7 @@ Find our your daily mining profitability by making a copy of the [**Reward Calcu
 
 The Zilliqa client is officially supported only on Ubuntu OS. 
 
-Please follow the steps [**HERE**](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 16.04.
+Please follow the steps [**HERE**](https://itsfoss.com/install-ubuntu-1404-dual-boot-mode-windows-8-81-uefi/) if you wish to dual boot Windows and Ubuntu 18.04.
 
 If you wish to mine using mining rigs that operate on Windows OS, please follow the remote mining with docker image guide [**HERE**](#mining-with-docker-remotely).
 
@@ -89,7 +89,7 @@ Both **AMD** (with OpenCL) and **Nvidia** (with OpenCL or CUDA) GPUs are support
 
 The **minimum** requirements for Zilliqa mining nodes are:
 
-- x64 Linux operating system (e.g Ubuntu 16.04.05)
+- x64 Linux operating system (e.g Ubuntu 18.04.5)
 - Recent dual core processor @ 2.2 GHZ. Examples:
    - Intel Core i5 or i7 (Skylake)
    - Intel Xeon (Skylake)
@@ -160,7 +160,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
 
 ## Mining with docker locally (For CPU or Nvidia GPUs only)
 
-1. Install Ubuntu 16.04.5 OS by following instructions [**HERE**](http://releases.ubuntu.com/xenial/).
+1. Install Ubuntu 18.04.5 OS by following instructions [**HERE**](https://releases.ubuntu.com/18.04/).
 
 2. Install Docker CE for Ubuntu by following instructions [**HERE**](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
@@ -192,7 +192,7 @@ Do note that the largest index must correspond to the number of GPUs you have ph
          ```shell
          ./launch_docker.sh
          ```
-    - **(Option 2)** For mining with Nvidia GPUs, please first install the `nvidia-docker` [**HERE**](https://github.com/NVIDIA/nvidia-docker#ubuntu-140416041804-debian-jessiestretch). Then, change the following parameter in the _constants.xml_ file within the _join_ folder to `true`:
+    - **(Option 2)** For mining with Nvidia GPUs, please first install the `nvidia-docker` [**HERE**](https://github.com/NVIDIA/nvidia-docker/blob/master/docker/Dockerfile.ubuntu). Then, change the following parameter in the _constants.xml_ file within the _join_ folder to `true`:
          ```shell
          <CUDA_GPU_MINE>true</CUDA_GPU_MINE>
          ```
@@ -256,7 +256,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 
 ***
 
-1. Create a single local/remote CPU node instance with Ubuntu 16.04 OS installed following instructions [**HERE**](http://releases.ubuntu.com/xenial/).
+1. Create a single local/remote CPU node instance with Ubuntu 18.04 OS installed following instructions [**HERE**](https://releases.ubuntu.com/18.04/).
 
 2. Install Docker CE for Ubuntu on your CPU node instance by following instructions [**HERE**](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
@@ -376,7 +376,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 4. Clone the Scilla repository and change directory to it:
 
       ```shell
-      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.7.0
+      git clone https://github.com/Zilliqa/Scilla.git Scilla && cd Scilla && git checkout v0.9.1
       ```
 
 5. Find out your Scilla directory path and record it down:
@@ -396,7 +396,7 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
 8. Clone the Zilliqa repository and change directory to it:
 
       ```
-      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v6.4.2
+      cd ~/Desktop && git clone https://github.com/Zilliqa/Zilliqa.git Zilliqa && cd Zilliqa && git checkout v7.0.0
       ```
 
 9. Find out your Zilliqa directory path again and write it down:
