@@ -1,6 +1,5 @@
 #FROM 648273915458.dkr.ecr.us-west-2.amazonaws.com/zilliqa:7186a35
-FROM zilliqa/zilliqa:v6.4.2-iso-state
-
+FROM zilliqa/zilliqa:v7.0.0
 ARG SOURCE_DIR=/zilliqa
 
 WORKDIR ${SOURCE_DIR}
