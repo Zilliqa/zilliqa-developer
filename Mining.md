@@ -412,12 +412,20 @@ For hooking up several GPU rigs in the GPU cluster to a single CPU node, you wil
         ```shell
         sudo apt-get update
         sudo apt-get install git libboost-system-dev libboost-filesystem-dev libboost-test-dev \
-        libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev cmake libmicrohttpd-dev \
+        libssl-dev libleveldb-dev libjsoncpp-dev libsnappy-dev libmicrohttpd-dev \
         libjsonrpccpp-dev build-essential pkg-config libevent-dev libminiupnpc-dev \
         libprotobuf-dev protobuf-compiler libcurl4-openssl-dev libboost-program-options-dev \
         libssl-dev python3-dev libboost-python-dev python3-setuptools python3-pip gawk
         ```
-
+    - Run the following to install latest version of cmake.We suggest to install cmake 3.19 or any version >=3.16:
+         ```shell
+         wget https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-x86_64.sh
+         mkdir -p "${HOME}"/.local
+         bash ./cmake-3.19.3-Linux-x86_64.sh --skip-license --prefix="${HOME}"/.local/
+         export PATH=$HOME/.local/bin:$PATH
+         cmake --version
+         rm cmake-3.19.3-Linux-x86_64.sh
+         ```
     - **(Option 1)** Build Zilliqa for CPU mining:
 
        ```shell
