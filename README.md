@@ -45,6 +45,7 @@ Keep the following tags set to these values
 - `<CHAIN_ID>222</CHAIN_ID>`
 - `<ENABLE_SC>true</ENABLE_SC>`
 - `<SCILLA_ROOT>/scilla</SCILLA_ROOT>`
+- `</ENABLE_SCILLA_MULTI_VERSION>`
 
 
 ## To Create the Image
