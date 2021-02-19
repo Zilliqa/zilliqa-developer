@@ -39,24 +39,12 @@ tar -zxvf seed-configuration.tar.gz
 vim constants.xml
 ```
 
-Theres no need to edit the following constants tag and their child tags
-- `<CHAIN_ID>`
-- `<GENESIS_PUBKEY>`
-- `<ARCHIVAL_LOOKUP>`
-- `<REMOTESTORAGE_DB_HOST>`
-- `<REMOTESTORAGE_DB_NAME>`
-- `<REMOTESTORAGE_DB_TLS_FILE>`
-- `<BUCKET_NAME>`
-- `<TXN_PERSISTENCE_NAME>`
-- `<accounts>`
-- `<lookups>`
-- `<multipliers>`
-- `<upper_seed>`
-- `<lower_seed>`
-- `<l2l_data_providers>`
-- `<ds_guard>`
-- `<shard_guard>`
-
+Keep the following tags set to these values
+- `<LOOKUP_NODE_MODE>true</LOOKUP_NODE_MODE>`
+- `<MAX_ENTRIES_FOR_DIAGNOSTIC_DATA>50</MAX_ENTRIES_FOR_DIAGNOSTIC_DATA>`
+- `<CHAIN_ID>222</CHAIN_ID>`
+- `<ENABLE_SC>true</ENABLE_SC>`
+- `<SCILLA_ROOT>/scilla</SCILLA_ROOT>`
 
 
 ## To Create the Image
