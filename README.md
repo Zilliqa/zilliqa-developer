@@ -42,6 +42,7 @@ vim constants.xml
 Theres no need to edit the following constants tag and their child tags
 - `<CHAIN_ID>`
 - `<GENESIS_PUBKEY>`
+- `<ARCHIVAL_LOOKUP>`
 - `<REMOTESTORAGE_DB_HOST>`
 - `<REMOTESTORAGE_DB_NAME>`
 - `<REMOTESTORAGE_DB_TLS_FILE>`
