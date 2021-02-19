@@ -32,7 +32,31 @@ Available APIs
 If you need to run an local instance of isolated server with a loaded state use the following instructions
 
 ## Edit the constants.xml
-For normal use case, the provided constants.xml would be sufficient. For any special requirements, you can edit constants.xml to tailor the isolated server to your specific needs.
+You would need to download the latest constants.xml file that can be found on the mainnet join page
+```
+curl -O https://mainnet-join.zilliqa.com/seed-configuration.tar.gz
+tar -zxvf seed-configuration.tar.gz
+vim constants.xml
+```
+
+Theres no need to edit the following constants tag and their child tags
+- `<CHAIN_ID>`
+- `<GENESIS_PUBKEY>`
+- `<REMOTESTORAGE_DB_HOST>`
+- `<REMOTESTORAGE_DB_NAME>`
+- `<REMOTESTORAGE_DB_TLS_FILE>`
+- `<BUCKET_NAME>`
+- `<TXN_PERSISTENCE_NAME>`
+- `<accounts>`
+- `<lookups>`
+- `<multipliers>`
+- `<upper_seed>`
+- `<lower_seed>`
+- `<l2l_data_providers>`
+- `<ds_guard>`
+- `<shard_guard>`
+
+
 
 ## To Create the Image
 1) run the following:
