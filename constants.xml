@@ -284,7 +284,7 @@
         <EXTLIB_FOLDER>scilla_libs</EXTLIB_FOLDER>
         <ENABLE_SCILLA_MULTI_VERSION>false</ENABLE_SCILLA_MULTI_VERSION>
         <LOG_SC>false</LOG_SC>
-        <DISABLE_SCILLA_LIB>true</DISABLE_SCILLA_LIB>
+        <DISABLE_SCILLA_LIB>false</DISABLE_SCILLA_LIB>
         <SCILLA_SERVER_PENDING_IN_MS>1500</SCILLA_SERVER_PENDING_IN_MS>
         <disambiguate_exclusion_list>
             <entry>
