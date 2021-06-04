@@ -41,12 +41,27 @@ vim constants.xml
 
 Keep the following tags set to these values
 - `<LOOKUP_NODE_MODE>true</LOOKUP_NODE_MODE>`
-- `<MAX_ENTRIES_FOR_DIAGNOSTIC_DATA>50</MAX_ENTRIES_FOR_DIAGNOSTIC_DATA>`
 - `<CHAIN_ID>222</CHAIN_ID>`
-- `<ENABLE_SC>true</ENABLE_SC>`
-- `<SCILLA_ROOT>/scilla</SCILLA_ROOT>`
-- `</ENABLE_SCILLA_MULTI_VERSION>`
+- `<NETWORK_ID>3</NETWORK_ID>
+- `<GENESIS_PUBKEY>03B70CF2ABEAE4E86DAEF1A36243E44CD61138B89055099C0D220B58FB86FF588A</GENESIS_PUBKEY>
+- `<ARCHIVAL_LOOKUP>false</ARCHIVAL_LOOKUP>`
 
+- `<ENABLE_SC>true</ENABLE_SC>`
+- `<SCILLA_ROOT>/scilla/0/</SCILLA_ROOT>`
+- `<INPUT_CODE>input</INPUT_CODE>`
+- `<ENABLE_SCILLA_MULTI_VERSION>false</ENABLE_SCILLA_MULTI_VERSION>`
+
+IGNORE the following sections and their subsections
+- `<remotestorageDB>`
+- `<TXN_PATH/>`
+- `<multipliers>`
+- `<accounts>`
+- `<ds_accounts>`
+- `<lookups>`
+- `<upper_seed>`
+- `<lower_seed>`
+- `<ds_guard>`
+- 
 
 ## To Create the Image
 1) run the following:
