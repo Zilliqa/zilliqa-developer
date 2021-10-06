@@ -17,9 +17,9 @@ registryURL=${accountID}.dkr.ecr.${regionID}.amazonaws.com/$application
 # Uncomment below if we're pulling from zilliqa ecr
 #eval "$(aws ecr get-login --no-include-email --region $regionID --registry-ids $zilliqa_ecr_id)"
 
-docker build -t "zilliqa/$registryURL:$commit" -t "$registryURL:latest" -t "$registryURL:$commit" .
+docker build -t "zilliqa/$application:$commit" -t "$registryURL:latest" -t "$registryURL:$commit" .
 eval "$(aws ecr get-login --no-include-email --region $regionID)"
 docker push "$registryURL"
 
 echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
-docker push "zilliqa/$registryURL:$commit"
+docker push "zilliqa/$application:$commit"
