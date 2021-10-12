@@ -49,6 +49,8 @@ Keep the following tags set to these values
 - `<SCILLA_ROOT>/scilla/0/</SCILLA_ROOT>`
 - `<INPUT_CODE>input</INPUT_CODE>`
 - `<ENABLE_SCILLA_MULTI_VERSION>false</ENABLE_SCILLA_MULTI_VERSION>`
+- `<IGNORE_BLOCKCOSIG_CHECK>true</IGNORE_BLOCKCOSIG_CHECK>`
+- `<exclusion_list>` is empty
 
 IGNORE the following sections and their subsections
 - `<remotestorageDB>`
