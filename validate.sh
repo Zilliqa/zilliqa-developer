@@ -44,15 +44,15 @@ do
     current_date="$(date +%Y%m%d)"
     current_time="$(date +%H%M%S)"
 
-    #if [ $current_time = "160000" ]; then
-    #    validate_persistence
-    #fi
-
-
-    temp_current_time="$(date +%S)"
-    if [ $temp_current_time = "00" ]; then
+    if [ $current_time = "160000" ]; then
         validate_persistence
     fi
+
+
+    i#temp_current_time="$(date +%S)"
+    #if [ $temp_current_time = "00" ]; then
+    #    validate_persistence
+    #fi
 
     sleep 0.5
 done
