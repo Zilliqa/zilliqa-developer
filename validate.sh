@@ -49,7 +49,7 @@ do
     fi
 
 
-    i#temp_current_time="$(date +%S)"
+    #temp_current_time="$(date +%S)"
     #if [ $temp_current_time = "00" ]; then
     #    validate_persistence
     #fi
