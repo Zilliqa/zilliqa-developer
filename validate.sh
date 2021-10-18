@@ -5,10 +5,11 @@
 function validate_persistence () {
     rm -rf validate_persistence
     mkdir validate_persistence
+    rsync -r persistence/* validate_persistence
     # Pause
     curl -d '{"id": "1","jsonrpc": "2.0","method": "TogglePause","params": ["'$UUID'"]}' -H "Content-Type: application/json" -X POST "http://localhost:5555/"
     curl -d '{"id": "1","jsonrpc": "2.0","method": "CheckPause","params": ["'$UUID'"]}' -H "Content-Type: application/json" -X POST "http://localhost:5555/"
-    cp -r persistence validate_persistence
+    rsync -r persistence/* validate_persistence
     # Unpause
     curl -d '{"id": "1","jsonrpc": "2.0","method": "TogglePause","params": ["'$UUID'"]}' -H "Content-Type: application/json" -X POST "http://localhost:5555/"
     curl -d '{"id": "1","jsonrpc": "2.0","method": "CheckPause","params": ["'$UUID'"]}' -H "Content-Type: application/json" -X POST "http://localhost:5555/"
