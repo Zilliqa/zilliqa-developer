@@ -26,7 +26,7 @@ else
             else
                  aws s3 cp "s3://$S3_BUCKET_NAME/persistence/$backup_name" .
                  rm -rf persistence/*
-                 mkdir persistence
+                 mkdir -p persistence
                  tar -zxf $backup_name persistence
                  MODE="load"
             fi
