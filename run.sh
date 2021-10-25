@@ -1,8 +1,15 @@
 #!/bin/bash
 
 
+
 echo $AWS_INFRA_MODE
 echo $VALIDATOR_MODE
+
+"${UUID:=uuid}"
+"${T:=5000}"
+
+echo $T
+echo $UUID
 
 if [ "$VALIDATOR_MODE" == "true" ]; then
     echo "Running in validator mode."
@@ -36,10 +43,10 @@ else
     echo $MODE
     if [ "$MODE" == "load" ]; then
         echo "loading persistence."
-        isolatedServer -l -t 5000 -u "$UUID" | tee /zilliqa/logs/isolated-server.log
+        isolatedServer -l -t "$T" -u "$UUID" | tee /zilliqa/logs/isolated-server.log
     else
         echo "loading from file."
         echo "UUID is: $UUID"
-        isolatedServer -t 5000 -f boot.json -u "$UUID" | tee /zilliqa/logs/isolated-server.log
+        isolatedServer -t "$T" -f boot.json -u "$UUID" | tee /zilliqa/logs/isolated-server.log
     fi
 fi
