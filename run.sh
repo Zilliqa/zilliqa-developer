@@ -5,13 +5,8 @@
 echo $AWS_INFRA_MODE
 echo $VALIDATOR_MODE
 
-if [[ -z "${T}" ]]; then
-    T=5000
-fi
-
-if [[ -z "${UUID}" ]]; then
-    UUID="uuid"
-fi
+"${UUID:=uuid}"
+"${T:=5000}"
 
 echo $T
 echo $UUID
