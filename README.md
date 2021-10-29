@@ -1,20 +1,83 @@
 # Dockerized Zilliqa Isolated Server
 
-Based on https://github.com/Zilliqa/Zilliqa/pull/1879
+## Prerequisites
+### Local Build
+Docker installed, please follow the steps [here](https://docs.docker.com/get-docker/).
 
-`boot.json` contains default accounts
+## Administration
+### Building Isolated Server Container
+#### Local Build
+The isolated server can be built locally via the following command:
+```docker build -t isolated-server:1.0 .```
+there will be an image named isolated-server:1.0 built.
 
-Build image
+---
 
-```docker build --rm -f "Dockerfile" -t isolatedserver:1 "."```
+### Running Isolated Server Container
+#### Local Run
+There are a few methods to configure and run the isolated server, all of them requiring augmentations to the docker run command.
+##### Running the isolated server as is:
+```
+docker run -d -p 5555:5555 \
+  --name isolated-server \
+  isolated-server:1.0
+```
+And the api will be available at ```http://localhost:5555```
+The above command will launch a clean state isolated server with ephermeral storage and seeding all the default accounts via `boot.json`.
 
-Run by 
+---
 
-`docker run -d -p 5555:5555 isolatedserver:1`
+##### Running the isolated server with persistence
+Enabling non-ephermeral persistence can be done by mounting a volume onto the container via the following argument `-v $(pwd)/persistence:/zilliqa/persistence`.
 
-Server will be accessible on `http://localhost:5555`
+Do note however, there is now two different docker run commands. The first one is required on all **first** launch of Isolated Server with persistence storage.
 
-Available APIs
+```
+docker run -d -p 5555:5555 \
+  -v $(pwd)/persistence:/zilliqa/persistence \
+  --name isolated-server \
+  isolated-server:1.0
+```
+The following command must be run on all subsequent Isolated Server container launches. Note the addition of a new argument `--env MODE="load"`. This environment variable forces the Isolated Server to launch while attempting to load persistence from the container directory: `/zilliqa/persistence`.
+```
+docker run -d -p 5555:5555 \
+  -v $(pwd)/persistence:/zilliqa/persistence \
+  --env MODE="load" \
+  --name isolated-server \
+  isolated-server:1.0
+```
+---
+##### Additional Run Arguments
+The Isolated Server run script also supports modifications to the following parameters
+| environment variable | default value | description |
+|---|---|---|
+|$T|5000|The time before progressing each block in Isolated Server.
+|$UUID|uuid|The uuid that's used as a verification for pausing and unpausing the Isolated server.
+
+Docker run command overriding the 2 variables:
+```
+docker run -d -p 5555:5555 \
+  --env T="2000" \
+  --env UUID="randomstring" \
+  --name isolated-server \
+  isolated-server:1.0
+```
+
+---
+
+##### Stopping the Isolated Server
+```
+docker stop isolated-server
+```
+
+##### Removing the Stopped Isolated Server
+```
+docker rm isolated-server
+```
+
+---
+
+##### Available APIs
 
 - `CreateTransaction` : Input a transaction json payload
 - `IncreaseBlocknum` : Increase the blocknum by a given input
@@ -28,63 +91,5 @@ Available APIs
 - `GetSmartContractInit` : get init json for a SC.
 - `GetTransaction `: Get Transaction info by hash
 
-# Local Isolated Server Administration
-If you need to run an local instance of isolated server with a loaded state use the following instructions
-
-## Edit the constants.xml
-You would need to download the latest constants.xml file that can be found on the mainnet join page
-```
-curl -O https://mainnet-join.zilliqa.com/seed-configuration.tar.gz
-tar -zxvf seed-configuration.tar.gz
-vim constants.xml
-```
-
-Keep the following tags set to these values
-- `<LOOKUP_NODE_MODE>true</LOOKUP_NODE_MODE>`
-- `<CHAIN_ID>222</CHAIN_ID>`
-- `<NETWORK_ID>3</NETWORK_ID>`
-- `<GENESIS_PUBKEY>03B70CF2ABEAE4E86DAEF1A36243E44CD61138B89055099C0D220B58FB86FF588A</GENESIS_PUBKEY>`
-- `<ARCHIVAL_LOOKUP>false</ARCHIVAL_LOOKUP>`
-- `<ENABLE_SC>true</ENABLE_SC>`
-- `<SCILLA_ROOT>/scilla/0/</SCILLA_ROOT>`
-- `<INPUT_CODE>input</INPUT_CODE>`
-- `<ENABLE_SCILLA_MULTI_VERSION>false</ENABLE_SCILLA_MULTI_VERSION>`
-- `<IGNORE_BLOCKCOSIG_CHECK>true</IGNORE_BLOCKCOSIG_CHECK>`
-- `<exclusion_list>` is empty
-
-IGNORE the following sections and their subsections
-- `<remotestorageDB>`
-- `<TXN_PATH/>`
-- `<multipliers>`
-- `<accounts>`
-- `<ds_accounts>`
-- `<lookups>`
-- `<upper_seed>`
-- `<lower_seed>`
-- `<ds_guard>`
-
-## To Create the Image
-1) run the following:
-
-`./local_scripts/rebuild_image.sh`
-
-An image named `zilliqa-isolated-server:1.0` will be created on your local docker registry
-
-## Preparing the Persistence
-1) If you know the mainnet bucket id that you're using, run the following:
-
-`export BUCKET_ID=<insert bucket id here> && ./local_script/download_persistence.sh <persistence file>`
-
-2) If you do not have the mainnet bucket id, run the following:
-
-Get someone with mainnet access to pass u the latest backed up persistence
-
-`mkdir downloads`
-
-copy the persistence file into the downloads folder
-
-## Launch the Isolated Server
-1) `./local_script/run_isolated_with_persistence.sh <persistence file>`
-
-## Stop the Isolated Server
-1) `./local_script/stop_isolated.sh`
+- `CheckPause`: Checks if the Isolated Server is paused. Requires UUID
+- `TogglePause`: Toggles the Isolated Server between pause and unpause state. Requires UUID.
