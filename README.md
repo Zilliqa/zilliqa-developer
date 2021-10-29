@@ -7,8 +7,8 @@ Docker installed, please follow the steps [here](https://docs.docker.com/get-doc
 ## Administration
 ### Building Isolated Server Container
 #### Local Build
-The isolated server can be built locally via the following command:
-```docker build -t isolated-server:1.0 .```
+The isolated server can be built locally via the following command: <br />
+```docker build -t isolated-server:1.0 .``` <br />
 there will be an image named isolated-server:1.0 built.
 
 ---
@@ -22,7 +22,7 @@ docker run -d -p 5555:5555 \
   --name isolated-server \
   isolated-server:1.0
 ```
-And the api will be available at ```http://localhost:5555```
+And the api will be available at ```http://localhost:5555``` <br />
 The above command will launch a clean state isolated server with ephermeral storage and seeding all the default accounts via `boot.json`.
 
 ---
