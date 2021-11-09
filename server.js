@@ -13,18 +13,6 @@ const app = express()
 const port = process.env.PORT
 app.use(cors())
 
-const txsraw = fs.readJsonSync('./transactions.json');
-
-const txs = txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
-
-const vb1wraw = fs.readJsonSync('./viewblock-1W.json');
-
-const vb1w = vb1wraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
-
-const vballraw = fs.readJsonSync('./viewblock-2Y.json');
-
-const vball = vballraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
-
 const groupBy = function (xs, key) {
     return xs.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x);
@@ -32,9 +20,19 @@ const groupBy = function (xs, key) {
     }, {});
 };
 
-const grouped = groupBy(txs, 'date_formatted');
+const initServ = async () => {
+    await fs.ensureFileSync('./transactions.json');
+    await fs.ensureFileSync('./viewblock-1W.json');
+    await fs.ensureFileSync('./viewblock-2Y.json');
+}
 
 app.get('/daily-transactions', (req, res) => {
+
+    const txsraw = fs.readJsonSync('./transactions.json');
+    const txs = txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
+
+    const grouped = groupBy(txs, 'date_formatted');
+
     const details = [];
 
     for (const [key, value] of Object.entries(grouped)) {
@@ -45,6 +43,11 @@ app.get('/daily-transactions', (req, res) => {
 })
 
 app.get('/zils-burnt', (req, res) => {
+    const txsraw = fs.readJsonSync('./transactions.json');
+    const txs = txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
+
+    const grouped = groupBy(txs, 'date_formatted');
+
     const details = [];
     for (const [key, value] of Object.entries(grouped)) {
         const zils_burnt = value.reduce((pv, cv) => {
@@ -61,6 +64,10 @@ app.get('/cumulative-value', (req, res) => {
 })
 
 app.get('/total-addresses', (req, res) => {
+    const vballraw = fs.readJsonSync('./viewblock-2Y.json');
+
+    const vball = vballraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
+
     const group = groupBy(vball, 'date_formatted');
 
     const details = [];
@@ -76,6 +83,10 @@ app.get('/total-addresses', (req, res) => {
 })
 
 app.get('/new-addresses', (req, res) => {
+    const vb1wraw = fs.readJsonSync('./viewblock-1W.json');
+
+    const vb1w = vb1wraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
+
     const group = groupBy(vb1w, 'date_formatted');
 
     const details = [];
@@ -91,6 +102,7 @@ app.get('/new-addresses', (req, res) => {
 
 app.listen(port, () => {
     runBackend();
+    initServ();
 
     setInterval(() => {
         runBackend();
