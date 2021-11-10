@@ -100,6 +100,20 @@ app.get('/new-addresses', (req, res) => {
     res.json(details);
 })
 
+app.get('/token/:symbol', (req, res) => {
+    try {
+        const tokenraw = fs.readJsonSync(`./${req.params.symbol}.json`);
+
+        res.json({
+            ...tokenraw,
+            totalSupplyFormatted: (Number(tokenraw.totalSupply) / Math.pow(10, tokenraw.decimals)),
+            totalValue: (Number(tokenraw.totalSupply) / Math.pow(10, tokenraw.decimals)) * tokenraw.coingeckoValue
+        });
+    } catch (error) {
+        res.json({ error: true, message: `There has been an error trying to read ${req.params.symbol} token file.`, rawMessage: error.message })
+    }
+})
+
 app.listen(port, () => {
     runBackend();
     initServ();
