@@ -57,7 +57,9 @@ export const requestApollo = async (page) => {
       return transactions;
     }
   } catch (error) {
-    console.log('something hapened with apollo request:' + error.statusCode)
+    console.log(error);
+    console.log(error.message);
+    console.log('something hapened with apollo request:' + error.statusCode);
   }
 
 }

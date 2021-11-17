@@ -20,84 +20,116 @@ const groupBy = function (xs, key) {
     }, {});
 };
 
-const initServ = async () => {
-    await fs.ensureFileSync('./transactions.json');
-    await fs.ensureFileSync('./viewblock-1W.json');
-    await fs.ensureFileSync('./viewblock-2Y.json');
-}
+class StatsService {
 
-app.get('/daily-transactions', (req, res) => {
-
-    const txsraw = fs.readJsonSync('./transactions.json');
-    const txs = txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
-
-    const grouped = groupBy(txs, 'date_formatted');
-
-    const details = [];
-
-    for (const [key, value] of Object.entries(grouped)) {
-        details.push({ time: key, value: value.length });
+    constructor() {
+        fs.ensureFileSync('./transactions.json');
+        fs.ensureFileSync('./viewblock-1W.json');
+        fs.ensureFileSync('./viewblock-2Y.json');
     }
 
-    res.json(details);
+    syncData = async () => {
+        this.txsraw = fs.readJsonSync('./transactions.json');
+        this.txs = this.txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
+        this.vballraw = fs.readJsonSync('./viewblock-2Y.json');
+        this.vball = this.vballraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
+        this.vb1wraw = fs.readJsonSync('./viewblock-1W.json');
+        this.vb1w = this.vb1wraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
+
+        await this.getDailyTransactions();
+        await this.getNewAddresses();
+        await this.getZilsBurnt();
+        await this.getTotalAddresses();
+        return true;
+    }
+
+    getDailyTransactions = async () => {
+        const grouped = groupBy(this.txs, 'date_formatted');
+
+        const details = [];
+
+        for (const [key, value] of Object.entries(grouped)) {
+            details.push({ time: key, value: value.length });
+        }
+
+        this.dailyTransactions = details;
+        return details;
+    }
+
+    getZilsBurnt = async () => {
+        const grouped = groupBy(this.txs, 'date_formatted');
+
+        const details = [];
+
+        for (const [key, value] of Object.entries(grouped)) {
+            const zils_burnt = value.reduce((pv, cv) => {
+                return pv + (parseInt(cv.gasPrice) * parseInt(cv.receipt.cumulative_gas))
+            }, 0);
+
+            details.push({ time: key, value: units.fromQa(new BN(zils_burnt.toString()), units.Units.Zil) });
+        }
+        this.zilsBurnt = details;
+        return details;
+    }
+
+    getTotalAddresses = async () => {
+        const group = groupBy(this.vball, 'date_formatted');
+
+        const details = [];
+        for (const [key, value] of Object.entries(group)) {
+            const newAddresses = value.reduce((pv, cv) => {
+                return pv + cv.growthCount
+            }, 0);
+
+            details.push({ time: key, value: newAddresses });
+        }
+        const total = details.reduce((pv, cv) => pv + cv.value, 0);
+        this.totalAddresses = total;
+        return total;
+    }
+
+    getNewAddresses = async () => {
+        const group = groupBy(this.vb1w, 'date_formatted');
+
+        const details = [];
+        for (const [key, value] of Object.entries(group)) {
+            const newAddresses = value.reduce((pv, cv) => {
+                return pv + cv.growthCount
+            }, 0);
+
+            details.push({ time: key, value: newAddresses });
+        }
+
+        this.newAddresses = details;
+        return details;
+    }
+}
+
+
+const service = new StatsService();
+
+app.get('/service-raw', (req, res) => {
+    res.json(service);
+})
+
+app.get('/daily-transactions', (req, res) => {
+    res.json(service.dailyTransactions);
 })
 
 app.get('/zils-burnt', (req, res) => {
-    const txsraw = fs.readJsonSync('./transactions.json');
-    const txs = txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
-
-    const grouped = groupBy(txs, 'date_formatted');
-
-    const details = [];
-    for (const [key, value] of Object.entries(grouped)) {
-        const zils_burnt = value.reduce((pv, cv) => {
-            return pv + (parseInt(cv.gasPrice) * parseInt(cv.receipt.cumulative_gas))
-        }, 0);
-
-        details.push({ time: key, value: units.fromQa(new BN(zils_burnt.toString()), units.Units.Zil) });
-    }
-    res.json(details);
+    res.json(service.zilsBurnt);
 })
 
 app.get('/cumulative-value', (req, res) => {
-    res.send('Hello World!')
+    res.json(service.cumulativeValue)
 })
 
 app.get('/total-addresses', (req, res) => {
-    const vballraw = fs.readJsonSync('./viewblock-2Y.json');
-
-    const vball = vballraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
-
-    const group = groupBy(vball, 'date_formatted');
-
-    const details = [];
-    for (const [key, value] of Object.entries(group)) {
-        const newAddresses = value.reduce((pv, cv) => {
-            return pv + cv.growthCount
-        }, 0);
-
-        details.push({ time: key, value: newAddresses });
-    }
-    const total = details.reduce((pv, cv) => pv + cv.value, 0)
-    res.json({ 'address_count': total });
+    res.json({ 'address_count': service.totalAddresses });
 })
 
 app.get('/new-addresses', (req, res) => {
-    const vb1wraw = fs.readJsonSync('./viewblock-1W.json');
-
-    const vb1w = vb1wraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
-
-    const group = groupBy(vb1w, 'date_formatted');
-
-    const details = [];
-    for (const [key, value] of Object.entries(group)) {
-        const newAddresses = value.reduce((pv, cv) => {
-            return pv + cv.growthCount
-        }, 0);
-
-        details.push({ time: key, value: newAddresses });
-    }
-    res.json(details);
+    res.json(service.newAddresses);
 })
 
 app.get('/token/:symbol', (req, res) => {
@@ -116,10 +148,14 @@ app.get('/token/:symbol', (req, res) => {
 
 app.listen(port, () => {
     runBackend();
-    initServ();
+    service.syncData();
 
     setInterval(() => {
         runBackend();
     }, 3_600_000);
+
+    setInterval(() => {
+        service.syncData();
+    }, 3_700_000);
     console.log(`Express app listening at http://localhost:${port}`)
 })
