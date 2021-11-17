@@ -29,6 +29,7 @@ class StatsService {
     }
 
     syncData = async () => {
+        console.log('Started sync...');
         this.txsraw = fs.readJsonSync('./transactions.json');
         this.txs = this.txsraw.transactions.map(item => { return { ...item, date_formatted: dayjs(parseInt(item.timestamp / 1000)).format("YYYY-MM-DD") } });
         this.vballraw = fs.readJsonSync('./viewblock-2Y.json');
@@ -40,6 +41,7 @@ class StatsService {
         await this.getNewAddresses();
         await this.getZilsBurnt();
         await this.getTotalAddresses();
+        console.log('Service data sync successfull.');
         return true;
     }
 
@@ -146,16 +148,14 @@ app.get('/token/:symbol', (req, res) => {
     }
 })
 
-app.listen(port, () => {
-    runBackend();
-    service.syncData();
+app.listen(port, async () => {
+    await runBackend(service);
+    await service.syncData();
 
-    setInterval(() => {
-        runBackend();
+    setInterval(async () => {
+        await runBackend(service);
+        await service.syncData();
     }, 3_600_000);
 
-    setInterval(() => {
-        service.syncData();
-    }, 3_700_000);
     console.log(`Express app listening at http://localhost:${port}`)
 })
