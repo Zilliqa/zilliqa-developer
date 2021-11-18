@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import fs from 'fs-extra'
 import dotenv from 'dotenv'
 import fetch from 'node-fetch';
+import { setTimeout } from 'timers/promises';
 
 dotenv.config()
 
@@ -41,8 +42,7 @@ export const requestApollo = async (page) => {
   try {
     console.log(`requesting page ${page}`);
 
-    const data = await request('https://devex-apollo.zilliqa.com', query, { page, perPage: 50000 });
-
+    const data = await request('https://devex-apollo.zilliqa.com', query, { page, perPage: 20000 });
     const lastItem = data.txPagination.items.at(-1);
 
     console.log(parseInt(lastItem.timestamp / 1000), now);
@@ -50,14 +50,14 @@ export const requestApollo = async (page) => {
 
     if (parseInt(lastItem.timestamp / 1000) > now) {
       transactions.push.apply(transactions, data.txPagination.items);
-      console.log(transactions.length);
-      await requestApollo(page + 1);
+      return await setTimeout(10000, requestApollo(page + 1));
     } else {
       console.log('requests successful for last 7 days.');
       return transactions;
     }
   } catch (error) {
-    console.log('something hapened with apollo request:' + error.statusCode)
+    console.log(error.message);
+    console.log('something hapened with apollo request:' + error.statusCode);
   }
 
 }
@@ -154,7 +154,7 @@ export const requestViewblockTokens = async (symbol, hash, coingeckoId) => {
   console.log(`viewblock token data saved to ${symbol}.json`);
 }
 
-export const runBackend = async () => {
+export const runBackend = async (statsService) => {
   setTimeout(async () => {
     await requestViewblock('2Y');
   }, 5000);
@@ -173,6 +173,7 @@ export const runBackend = async () => {
   setTimeout(async () => {
     await requestViewblockTokens('XCAD', 'zil1z5l74hwy3pc3pr3gdh3nqju4jlyp0dzkhq2f5y', 'xcad-network');
   }, 30000);
+  
   await requestApollo(1);
 
   const filtered = transactions.filter(i => parseInt(i.timestamp / 1000) > now);
@@ -180,4 +181,6 @@ export const runBackend = async () => {
   fs.writeJsonSync('transactions.json', { transactions: filtered });
 
   console.log(`${filtered.length} txs saved to transactions.json`);
+
+  return true;
 }
