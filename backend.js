@@ -173,10 +173,22 @@ export const runBackend = async (statsService) => {
   setTimeout(async () => {
     await requestViewblockTokens('XCAD', 'zil1z5l74hwy3pc3pr3gdh3nqju4jlyp0dzkhq2f5y', 'xcad-network');
   }, 30000);
-  
+
   await requestApollo(1);
 
   const filtered = transactions.filter(i => parseInt(i.timestamp / 1000) > now);
+
+  const cumulative = fs.readJsonSync('cumulative.json');
+  const cfiltered = transactions.filter(i => parseInt(i.timestamp / 1000) > cumulative.timestamp)
+  const sumup = cfiltered.reduce((pv, cv) => {
+    return BigInt(cv.amount) + BigInt(pv)
+  }, BigInt(cumulative.value));
+
+  fs.writeJsonSync('cumulative.json', {
+    timestamp: parseInt(cfiltered.at(-1).timestamp / 1000),
+    value: (BigInt(cumulative.value) + BigInt(sumup)).toString(),
+    tx_count: cfiltered.length + cumulative.tx_count
+  });
 
   fs.writeJsonSync('transactions.json', { transactions: filtered });
 

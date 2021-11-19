@@ -36,6 +36,7 @@ class StatsService {
         this.vball = this.vballraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
         this.vb1wraw = fs.readJsonSync('./viewblock-1W.json');
         this.vb1w = this.vb1wraw.timeData.map(item => { return { ...item, date_formatted: dayjs(item.timestamp).format("YYYY-MM-DD") } });
+        this.cumulativeValue = fs.readJsonSync('./cumulative.json');
 
         await this.getDailyTransactions();
         await this.getNewAddresses();
@@ -123,7 +124,7 @@ app.get('/zils-burnt', (req, res) => {
 })
 
 app.get('/cumulative-value', (req, res) => {
-    res.json(service.cumulativeValue)
+    res.json(service.cumulativeValue);
 })
 
 app.get('/total-addresses', (req, res) => {
@@ -133,6 +134,17 @@ app.get('/total-addresses', (req, res) => {
 app.get('/new-addresses', (req, res) => {
     res.json(service.newAddresses);
 })
+
+app.get('/all-stats', (req, res) => {
+    res.json({
+        'daily_transactions': service.dailyTransactions,
+        'zils_burnt': service.zilsBurnt,
+        'cumulative_value': service.cumulativeValue,
+        'total_addresses': { 'address_count': service.totalAddresses },
+        'new_addresses': service.newAddresses,
+        'cumulative_value': service.cumulativeValue
+    })
+});
 
 app.get('/token/:symbol', (req, res) => {
     try {
