@@ -11,7 +11,6 @@ type RewardsCalculation =
 
 let true = True
 let false = False
-
 let uint32_zero = Uint32 0
 let uint32_one = Uint32 1
 let u256_zero = Uint256 0
@@ -82,7 +81,6 @@ let get_uint128_opt =
     | None => u128_zero
     end
 
-
 let uint128_to_uint256 : Uint128 -> Uint256 =
   fun (x : Uint128) =>
     let ox256 = builtin to_uint256 x in
@@ -114,25 +112,23 @@ let muldiv : Uint128 -> Uint128 -> Uint128 -> Uint128 =
       | Some res128 =>
         res128
       end
+
 (* epoch_per_cycle: *)
 contract Staking(
     init_contract_owner: ByStr20,
     init_staking_token_address: ByStr20,
     init_block_num: Uint256,
     init_cycle: Uint32,
-    epoch_per_cycle: Uint256
+    epoch_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
 )
 
 field contract_owner: ByStr20 = init_contract_owner
-
-
 field last_block_num: Uint256 = init_block_num
 field last_cycle: Uint32 = init_cycle
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
-
-field delegate_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
-field delegate_deposit: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
+field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
+field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 
@@ -142,7 +138,6 @@ procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   current_cycle = builtin add last_cycle_local cycle_to_increase;
   total_stake_per_cycle[current_cycle] := total_stake_local
 end
-
 
 procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
   current_bum <- & BLOCKNUMBER;
@@ -175,17 +170,18 @@ procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
   end
 end
 
-procedure update_delegate_deposit(user: ByStr20, amount: Uint128)
+procedure update_staker_bal(user: ByStr20, amount: Uint128)
   last_cycle_local <- last_cycle;
-  delegate_deposit_opt <- delegate_deposit[user][last_cycle_local];
-  new_amount = match delegate_deposit_opt with
-                   | Some delegate =>
-                     builtin add delegate amount
+  staker_bal_opt <- stakers_bal[user][last_cycle_local];
+  new_amount = match staker_bal_opt with
+                   | Some staker_bal =>
+                     builtin add staker_bal amount
                    | None =>
                      amount
                    end;
-  delegate_deposit[user][last_cycle_local] := new_amount
+  stakers_bal[user][last_cycle_local] := new_amount
 end
+
 
 procedure TransferZRC2ToContract(assetHash: ByStr20, amount: Uint128)
   msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
@@ -203,12 +199,10 @@ procedure TransferZRC2FromContract(toAssetHash: ByStr20, address: ByStr20, amoun
   send msgs
 end
 
-
-
 transition deposit(amount: Uint128)
   TransferZRC2ToContract init_staking_token_address amount;
   update_stake_map_onchange true amount;
-  update_delegate_deposit _sender amount
+  update_staker_bal _sender amount
 end
 
 procedure setup_rewards_distribution(p: RewardsCalculation)
@@ -220,28 +214,28 @@ procedure setup_rewards_distribution(p: RewardsCalculation)
   end
 end
 
-
 procedure calculate_rewards(cycle: Uint32)
   last_reward_cycle = builtin sub cycle uint32_one;
-  last_delegate_opt <- delegate_stake_per_cycle[_sender][last_reward_cycle];
-  last_delegate = get_uint128_opt last_delegate_opt;
-  delete delegate_stake_per_cycle[_sender][last_reward_cycle];
+  last_staker_bal_opt <- stakers_stake_per_cycle[_sender][last_reward_cycle];
+  last_staker_bal = get_uint128_opt last_staker_bal_opt;
+  delete stakers_stake_per_cycle[_sender][last_reward_cycle];
 
-  delegate_deposit_opt <- delegate_deposit[_sender][last_reward_cycle];
-  total_delegate_this_cycle = match delegate_deposit_opt with
-                              | Some delegate =>
-                                builtin add delegate last_delegate
+  staker_bal_opt <- stakers_bal[_sender][last_reward_cycle];
+  total_stake_this_cycle = match staker_bal_opt with
+                              | Some staker_bal =>
+                                builtin add staker_bal last_staker_bal
                               | None =>
-                                last_delegate
+                                last_staker_bal
                               end;
-  delegate_stake_per_cycle[_sender][cycle] := total_delegate_this_cycle;
+
+  stakers_bal[_sender][cycle] := total_stake_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; user_stake_this_cycle: total_delegate_this_cycle };
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake; user_stake_this_cycle: total_stake_this_cycle };
     event e;
-    is_total_delegate_zero = builtin eq u128_zero total_stake;
-    match is_total_delegate_zero with
+    is_total_stake_zero = builtin eq u128_zero total_stake;
+    match is_total_stake_zero with
     | True =>
     | False =>
       rewards_per_cycle_local <- rewards_per_cycle;
@@ -251,7 +245,7 @@ procedure calculate_rewards(cycle: Uint32)
       f = fun (p: Pair ByStr20 Uint128) =>
         match p with
         | Pair token_address amount =>
-          RewardsCalculation token_address amount total_delegate_this_cycle total_stake
+          RewardsCalculation token_address amount total_stake_this_cycle total_stake
         end;
       distribution_list = mapper f rewards_per_cycle_list;
       forall distribution_list setup_rewards_distribution
@@ -260,13 +254,11 @@ procedure calculate_rewards(cycle: Uint32)
   end
 end
 
-
 transition claim()
   update_stake_map_onchange true u128_zero;
 
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
   last_withdraw_cycle = get_last_withdraw_cycle last_withdraw_cycle_opt;
-
   last_cycle_local <- last_cycle;
 
   from_cycle = builtin add last_withdraw_cycle uint32_one;
@@ -276,5 +268,5 @@ transition claim()
   event e;
   forall reward_list calculate_rewards;
   last_withdraw_cycle[_sender] := last_cycle_local
-
+  
 end
