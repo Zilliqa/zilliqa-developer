@@ -221,18 +221,18 @@ procedure calculate_rewards(cycle: Uint32)
   delete stakers_stake_per_cycle[_sender][last_reward_cycle];
 
   staker_bal_opt <- stakers_bal[_sender][last_reward_cycle];
-  total_stake_this_cycle = match staker_bal_opt with
+  user_stake_this_cycle = match staker_bal_opt with
                               | Some staker_bal =>
                                 builtin add staker_bal last_staker_bal
                               | None =>
                                 last_staker_bal
                               end;
 
-  stakers_bal[_sender][cycle] := total_stake_this_cycle;
+  stakers_bal[_sender][cycle] := user_stake_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; user_stake_this_cycle: total_stake_this_cycle };
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake; user_stake_this_cycle: user_stake_this_cycle };
     event e;
     is_total_stake_zero = builtin eq u128_zero total_stake;
     match is_total_stake_zero with
@@ -245,7 +245,7 @@ procedure calculate_rewards(cycle: Uint32)
       f = fun (p: Pair ByStr20 Uint128) =>
         match p with
         | Pair token_address amount =>
-          RewardsCalculation token_address amount total_stake_this_cycle total_stake
+          RewardsCalculation token_address amount user_stake_this_cycle total_stake
         end;
       distribution_list = mapper f rewards_per_cycle_list;
       forall distribution_list setup_rewards_distribution
@@ -268,5 +268,5 @@ transition claim()
   event e;
   forall reward_list calculate_rewards;
   last_withdraw_cycle[_sender] := last_cycle_local
-  
+
 end
