@@ -116,6 +116,7 @@ field last_cycle: Uint32 = init_cycle
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
+field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field cycle_rewards: Uint128 = u128_zero
 
@@ -183,26 +184,31 @@ end
 
 procedure calculate_rewards(cycle: Uint32)
   last_reward_cycle = builtin sub cycle uint32_one;
-  last_staker_bal_opt <- stakers_bal[_sender][last_reward_cycle];
+  last_staker_bal_opt <- stakers_stake_per_cycle[_sender][last_reward_cycle];
   last_staker_bal = get_uint128_opt last_staker_bal_opt;
-  delete stakers_bal[_sender][last_reward_cycle];
+  delete stakers_stake_per_cycle[_sender][last_reward_cycle];
 
-  staker_bal_opt <- stakers_bal[_sender][cycle];
+  staker_bal_opt <- stakers_bal[_sender][last_reward_cycle];
   total_stake_this_cycle = match staker_bal_opt with
                               | Some staker_bal =>
                                 builtin add staker_bal last_staker_bal
                               | None =>
                                 last_staker_bal
                               end;
-  (* todo how to decide this one *)
-  total_rewards = rewards_per_cycle;
+
+  total_stake_per_cycle[_sender][cycle] := total_stake_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: total_rewards; user_stake_this_cycle: total_stake_this_cycle };
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: rewards_per_cycle; user_stake_this_cycle: total_stake_this_cycle };
     event e;
-    reward = muldiv total_rewards total_stake_this_cycle total_stake;
-    increase_rewards reward
+    is_total_stake_zero = builtin eq u128_zero total_stake;
+    match is_total_stake_zero with
+    | True =>
+    | False =>
+      reward = muldiv rewards_per_cycle total_stake_this_cycle total_stake;
+      increase_rewards reward
+    end
   | None =>
   end
 end
