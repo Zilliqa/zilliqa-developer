@@ -114,12 +114,11 @@ let muldiv : Uint128 -> Uint128 -> Uint128 -> Uint128 =
         res128
       end
 
-(* epoch_per_cycle: *)
 contract Staking(
     init_contract_owner: ByStr20,
     init_staking_token_address: ByStr20,
     init_block_num: Uint256,
-    epoch_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
+    blocks_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
 )
 
 field contract_owner: ByStr20 = init_contract_owner
@@ -147,7 +146,7 @@ procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
   last_block_num := current_block_num;
   (* if there are 5 cycles need to be updated, then we need update 4 cycles use procedure duplicate_total_stake_map *)
   (* only update the last one upon the change of the stake *)
-  cycle_to_increase = builtin div block_num_diff epoch_per_cycle;
+  cycle_to_increase = builtin div block_num_diff blocks_per_cycle;
   cycle_to_increase_32 = u256_to_u32 cycle_to_increase;
   (* this will create [1,2,3,4] if cycle_to_increase_u32 is 5 *)
   duplicated_list = iota uint32_one cycle_to_increase_32;
