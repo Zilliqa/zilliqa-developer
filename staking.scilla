@@ -119,6 +119,7 @@ field last_cycle: Uint32 = init_cycle
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 
+field delegate_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field delegate_deposit: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 
@@ -193,26 +194,30 @@ end
 
 procedure calculate_rewards(cycle: Uint32)
   last_reward_cycle = builtin sub cycle uint32_one;
-  last_delegate_opt <- delegate_deposit[_sender][last_reward_cycle];
+  last_delegate_opt <- delegate_stake_per_cycle[_sender][last_reward_cycle];
   last_delegate = get_uint128_opt last_delegate_opt;
-  delete delegate_deposit[_sender][last_reward_cycle];
+  delete delegate_stake_per_cycle[_sender][last_reward_cycle];
 
-  delegate_deposit_opt <- delegate_deposit[_sender][cycle];
+  delegate_deposit_opt <- delegate_deposit[_sender][last_reward_cycle];
   total_delegate_this_cycle = match delegate_deposit_opt with
                               | Some delegate =>
                                 builtin add delegate last_delegate
                               | None =>
                                 last_delegate
                               end;
-  (* todo how to decide this one *)
-  total_rewards = init_rewards_per_cycle;
+  delegate_stake_per_cycle[_sender][cycle] := total_delegate_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: total_rewards; user_stake_this_cycle: total_delegate_this_cycle };
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: init_rewards_per_cycle; user_stake_this_cycle: total_delegate_this_cycle };
     event e;
-    reward = muldiv total_rewards total_delegate_this_cycle total_stake;
-    increase_rewards reward
+    is_total_delegate_zero = builtin eq u128_zero total_stake;
+    match is_total_delegate_zero with
+    | True =>
+    | False =>
+      reward = muldiv init_rewards_per_cycle total_delegate_this_cycle total_stake;
+      increase_rewards reward
+    end
   | None =>
   end
 end
