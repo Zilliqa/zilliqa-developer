@@ -117,12 +117,12 @@ field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field delegate_deposit: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
-field stakers_cycle_rewards: Uint128 = u128_zero
+field cycle_rewards: Uint128 = u128_zero
 
 procedure increase_rewards(reward: Uint128)
-  exist_reward <- stakers_cycle_rewards;
+  exist_reward <- cycle_rewards;
   new_reward = builtin add exist_reward reward;
-  stakers_cycle_rewards := new_reward
+  cycle_rewards := new_reward
 end
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
@@ -163,7 +163,7 @@ procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
   end
 end
 
-procedure update_delegate_deposit(user: ByStr20, amount: Uint128)
+procedure update_staker_bal(user: ByStr20, amount: Uint128)
   last_cycle_local <- last_cycle;
   delegate_deposit_opt <- delegate_deposit[user][last_cycle_local];
   new_amount = match delegate_deposit_opt with
@@ -178,7 +178,7 @@ end
 transition deposit(amount: Uint128)
   (* todo transfer token *)
   update_stake_map_onchange true amount;
-  update_delegate_deposit _sender amount
+  update_staker_bal _sender amount
 end
 
 procedure calculate_rewards(cycle: Uint32)
@@ -212,7 +212,6 @@ transition claim()
 
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
   last_withdraw_cycle = get_last_withdraw_cycle last_withdraw_cycle_opt;
-
   last_cycle_local <- last_cycle;
 
   from_cycle = builtin add last_withdraw_cycle uint32_one;
@@ -220,7 +219,7 @@ transition claim()
   reward_list = iota from_cycle to_cycle;
   e = { _eventname: "claim"; reward_list: reward_list};
   event e;
-  stakers_cycle_rewards := u128_zero;
+  cycle_rewards := u128_zero;
   forall reward_list calculate_rewards;
   last_withdraw_cycle[_sender] := last_cycle_local
   (* transfer out *)
