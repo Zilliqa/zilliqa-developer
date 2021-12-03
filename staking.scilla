@@ -270,3 +270,13 @@ transition claim()
   last_withdraw_cycle[_sender] := last_cycle_local
 
 end
+
+transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
+  e = { _eventname: "RecipientAcceptTransferFrom"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
+  event e
+end
+
+transition TransferFromSuccessCallBack(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
+  e = { _eventname: "TransferFromSuccessCallBack"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
+  event e
+end
