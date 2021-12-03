@@ -262,13 +262,12 @@ transition claim()
 
   (* from_cycle -> last_cycle *)
   from_cycle = builtin add last_withdraw_cycle uint32_one;
-  (* todo check corner case *)
-  (* to_cycle = builtin add last_cycle_local uint32_one; *)
   reward_list = iota from_cycle last_cycle_local;
   e = { _eventname: "claim"; reward_list: reward_list};
   event e;
   forall reward_list calculate_rewards;
-  last_withdraw_cycle[_sender] := last_cycle_local
+  last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
+  last_withdraw_cycle[_sender] := last_withdraw_cycle_local
 
 end
 
