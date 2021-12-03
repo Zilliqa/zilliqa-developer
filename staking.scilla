@@ -115,7 +115,7 @@ field last_block_num: Uint256 = init_block_num
 field last_cycle: Uint32 = init_cycle
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
-field delegate_deposit: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
+field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field cycle_rewards: Uint128 = u128_zero
 
@@ -165,14 +165,14 @@ end
 
 procedure update_staker_bal(user: ByStr20, amount: Uint128)
   last_cycle_local <- last_cycle;
-  delegate_deposit_opt <- delegate_deposit[user][last_cycle_local];
-  new_amount = match delegate_deposit_opt with
-                   | Some delegate =>
-                     builtin add delegate amount
+  staker_bal_opt <- stakers_bal[user][last_cycle_local];
+  new_amount = match staker_bal_opt with
+                   | Some staker_bal =>
+                     builtin add staker_bal amount
                    | None =>
                      amount
                    end;
-  delegate_deposit[user][last_cycle_local] := new_amount
+  stakers_bal[user][last_cycle_local] := new_amount
 end
 
 transition deposit(amount: Uint128)
@@ -183,25 +183,25 @@ end
 
 procedure calculate_rewards(cycle: Uint32)
   last_reward_cycle = builtin sub cycle uint32_one;
-  last_delegate_opt <- delegate_deposit[_sender][last_reward_cycle];
-  last_delegate = get_uint128_opt last_delegate_opt;
-  delete delegate_deposit[_sender][last_reward_cycle];
+  last_staker_bal_opt <- stakers_bal[_sender][last_reward_cycle];
+  last_staker_bal = get_uint128_opt last_staker_bal_opt;
+  delete stakers_bal[_sender][last_reward_cycle];
 
-  delegate_deposit_opt <- delegate_deposit[_sender][cycle];
-  total_delegate_this_cycle = match delegate_deposit_opt with
-                              | Some delegate =>
-                                builtin add delegate last_delegate
+  staker_bal_opt <- stakers_bal[_sender][cycle];
+  total_stake_this_cycle = match staker_bal_opt with
+                              | Some staker_bal =>
+                                builtin add staker_bal last_staker_bal
                               | None =>
-                                last_delegate
+                                last_staker_bal
                               end;
   (* todo how to decide this one *)
   total_rewards = rewards_per_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: total_rewards; user_stake_this_cycle: total_delegate_this_cycle };
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: total_rewards; user_stake_this_cycle: total_stake_this_cycle };
     event e;
-    reward = muldiv total_rewards total_delegate_this_cycle total_stake;
+    reward = muldiv total_rewards total_stake_this_cycle total_stake;
     increase_rewards reward
   | None =>
   end
