@@ -199,12 +199,6 @@ procedure TransferZRC2FromContract(toAssetHash: ByStr20, address: ByStr20, amoun
   send msgs
 end
 
-transition deposit(amount: Uint128)
-  TransferZRC2ToContract init_staking_token_address amount;
-  update_stake_map_onchange true amount;
-  update_staker_bal _sender amount
-end
-
 procedure setup_rewards_distribution(p: RewardsCalculation)
   match p with
   | RewardsCalculation token_address rewarding_amount user_stake total_stake =>
@@ -252,6 +246,12 @@ procedure calculate_rewards(cycle: Uint32)
     end
   | None =>
   end
+end
+
+transition deposit(amount: Uint128)
+  TransferZRC2ToContract init_staking_token_address amount;
+  update_stake_map_onchange true amount;
+  update_staker_bal _sender amount
 end
 
 transition claim()
