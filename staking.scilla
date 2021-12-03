@@ -29,11 +29,6 @@ let u256_to_u32 =
       | None => uint32_zero
       end
 
-let bnum_to_uint256 =
-  fun (b : BNum) =>
-  let zero = BNum 0 in
-  builtin bsub b zero
-
 let i256_to_u256 =
   fun (n: Int256) =>
     let m_opt = builtin to_uint256 n in
@@ -41,6 +36,12 @@ let i256_to_u256 =
       | Some m => m
       | None => u256_zero
       end
+
+let bnum_to_uint256 =
+  fun (b : BNum) =>
+    let zero = BNum 0 in
+    let int256_bnum = builtin bsub b zero in
+      i256_to_u256 int256_bnum
 
 let iota : Uint32 -> Uint32 -> List Uint32 =
   fun (m : Uint32) => fun (n : Uint32) =>
@@ -118,13 +119,12 @@ contract Staking(
     init_contract_owner: ByStr20,
     init_staking_token_address: ByStr20,
     init_block_num: Uint256,
-    init_cycle: Uint32,
     epoch_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
 )
 
 field contract_owner: ByStr20 = init_contract_owner
 field last_block_num: Uint256 = init_block_num
-field last_cycle: Uint32 = init_cycle
+field last_cycle: Uint32 = Uint32 0
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
@@ -140,11 +140,11 @@ procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
 end
 
 procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
-  current_bum <- & BLOCKNUMBER;
-  current_block_num = bnum_to_uint256 current_bum;
-  last_block_num <- last_block_num;
-  current_block_num_256 = i256_to_u256 current_block_num;
-  block_num_diff = builtin sub current_block_num_256 last_block_num;
+  current_bnum <- & BLOCKNUMBER;
+  current_block_num = bnum_to_uint256 current_bnum;
+  last_block_num_l <- last_block_num;
+  block_num_diff = builtin sub current_block_num last_block_num_l;
+  last_block_num := current_block_num;
   (* if there are 5 cycles need to be updated, then we need update 4 cycles use procedure duplicate_total_stake_map *)
   (* only update the last one upon the change of the stake *)
   cycle_to_increase = builtin div block_num_diff epoch_per_cycle;
@@ -269,6 +269,16 @@ transition claim()
   forall reward_list calculate_rewards;
   last_withdraw_cycle[_sender] := last_cycle_local
 
+end
+
+procedure check_unclaimed_rewards()
+end
+
+
+transition withdraw()
+  (* move last_cycle in case user has some unclaimed rewards *)
+  update_stake_map_onchange true u128_zero;
+  check_unclaimed_rewards
 end
 
 transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
