@@ -1,6 +1,13 @@
 scilla_version 0
 
+import ListUtils IntUtils PairUtils
+
+
 library Staking
+
+(* token address, rewarding amount, user stake, total stake *)
+type RewardsCalculation =
+| RewardsCalculation of ByStr20 Uint128 Uint128 Uint128
 
 let true = True
 let false = False
@@ -8,6 +15,11 @@ let uint32_zero = Uint32 0
 let uint32_one = Uint32 1
 let u256_zero = Uint256 0
 let u128_zero = Uint128 0
+
+let one_msg =
+  fun (m : Message) =>
+    let e = Nil {Message} in
+    Cons {Message} m e
 
 let u256_to_u32 =
   fun (n: Uint256) =>
@@ -104,9 +116,9 @@ let muldiv : Uint128 -> Uint128 -> Uint128 -> Uint128 =
 (* epoch_per_cycle: *)
 contract Staking(
     init_contract_owner: ByStr20,
+    init_staking_token_address: ByStr20,
     init_block_num: Uint256,
     init_cycle: Uint32,
-    rewards_per_cycle: Uint128,
     epoch_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
 )
 
@@ -118,13 +130,7 @@ field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
-field cycle_rewards: Uint128 = u128_zero (*scratch field*)
-
-procedure increase_rewards(reward: Uint128)
-  exist_reward <- cycle_rewards;
-  new_reward = builtin add exist_reward reward;
-  cycle_rewards := new_reward
-end
+field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   last_cycle_local <- last_cycle;
@@ -176,10 +182,36 @@ procedure update_staker_bal(user: ByStr20, amount: Uint128)
   stakers_bal[user][last_cycle_local] := new_amount
 end
 
+
+procedure TransferZRC2ToContract(assetHash: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
+                  from: _sender; to: _this_address; amount: amount};
+  msgs = one_msg msg_to_zrc2;
+  send msgs;
+  e = { _eventname: "TransferToContract"; assetHash: assetHash; amount: amount };
+  event e
+end
+
+procedure TransferZRC2FromContract(toAssetHash: ByStr20, address: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "Transfer"; _recipient: toAssetHash; _amount: u128_zero;
+                 to: address; amount: amount};
+  msgs = one_msg msg_to_zrc2;
+  send msgs
+end
+
 transition deposit(amount: Uint128)
-  (* todo transfer token *)
+  TransferZRC2ToContract init_staking_token_address amount;
   update_stake_map_onchange true amount;
   update_staker_bal _sender amount
+end
+
+procedure setup_rewards_distribution(p: RewardsCalculation)
+  match p with
+  | RewardsCalculation token_address rewarding_amount user_stake total_stake =>
+    reward = muldiv rewarding_amount user_stake total_stake;
+    (* todo what if the rewards too small, considering use another map *)
+    TransferZRC2FromContract token_address _sender reward
+  end
 end
 
 procedure calculate_rewards(cycle: Uint32)
@@ -196,18 +228,27 @@ procedure calculate_rewards(cycle: Uint32)
                                 last_staker_bal
                               end;
 
-  total_stake_per_cycle[_sender][cycle] := total_stake_this_cycle;
+  stakers_bal[_sender][cycle] := total_stake_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; total_rewards: rewards_per_cycle; user_stake_this_cycle: total_stake_this_cycle };
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake; user_stake_this_cycle: total_stake_this_cycle };
     event e;
     is_total_stake_zero = builtin eq u128_zero total_stake;
     match is_total_stake_zero with
     | True =>
     | False =>
-      reward = muldiv rewards_per_cycle total_stake_this_cycle total_stake;
-      increase_rewards reward
+      rewards_per_cycle_local <- rewards_per_cycle;
+      (* List (Pair ByStr20 Uint128)*)
+      rewards_per_cycle_list = builtin to_list rewards_per_cycle_local;
+      mapper = @list_map (Pair ByStr20 Uint128) RewardsCalculation;
+      f = fun (p: Pair ByStr20 Uint128) =>
+        match p with
+        | Pair token_address amount =>
+          RewardsCalculation token_address amount total_stake_this_cycle total_stake
+        end;
+      distribution_list = mapper f rewards_per_cycle_list;
+      forall distribution_list setup_rewards_distribution
     end
   | None =>
   end
@@ -225,8 +266,7 @@ transition claim()
   reward_list = iota from_cycle to_cycle;
   e = { _eventname: "claim"; reward_list: reward_list};
   event e;
-  cycle_rewards := u128_zero;
   forall reward_list calculate_rewards;
   last_withdraw_cycle[_sender] := last_cycle_local
-  (* transfer out *)
+  
 end
