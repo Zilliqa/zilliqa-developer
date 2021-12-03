@@ -107,7 +107,7 @@ contract Staking(
     init_block_num: Uint256,
     init_cycle: Uint32,
     rewards_per_cycle: Uint128,
-    epoch_per_cycle: Uint256 
+    epoch_per_cycle: Uint256 (*To set to a roughly a day, use 2500*)
 )
 
 field contract_owner: ByStr20 = init_contract_owner
