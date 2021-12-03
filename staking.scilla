@@ -118,7 +118,7 @@ field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
-field cycle_rewards: Uint128 = u128_zero
+field cycle_rewards: Uint128 = u128_zero (*scratch field*)
 
 procedure increase_rewards(reward: Uint128)
   exist_reward <- cycle_rewards;
