@@ -117,12 +117,12 @@ field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field delegate_deposit: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
-field cycle_rewards_deleg: Uint128 = u128_zero
+field stakers_cycle_rewards: Uint128 = u128_zero
 
 procedure increase_rewards(reward: Uint128)
-  exist_reward <- cycle_rewards_deleg;
+  exist_reward <- stakers_cycle_rewards;
   new_reward = builtin add exist_reward reward;
-  cycle_rewards_deleg := new_reward
+  stakers_cycle_rewards := new_reward
 end
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
@@ -220,7 +220,7 @@ transition claim()
   reward_list = iota from_cycle to_cycle;
   e = { _eventname: "claim"; reward_list: reward_list};
   event e;
-  cycle_rewards_deleg := u128_zero;
+  stakers_cycle_rewards := u128_zero;
   forall reward_list calculate_rewards;
   last_withdraw_cycle[_sender] := last_cycle_local
   (* transfer out *)
