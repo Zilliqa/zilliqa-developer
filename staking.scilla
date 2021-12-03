@@ -72,7 +72,7 @@ let get_last_withdraw_cycle =
   fun (cycle_opt: Option Uint32) =>
     match cycle_opt with
     | Some cycle => cycle
-    | None => uint32_one
+    | None => uint32_zero
     end
 
 let get_uint128_opt =
@@ -260,9 +260,11 @@ transition claim()
   last_withdraw_cycle = get_last_withdraw_cycle last_withdraw_cycle_opt;
   last_cycle_local <- last_cycle;
 
+  (* from_cycle -> last_cycle *)
   from_cycle = builtin add last_withdraw_cycle uint32_one;
-  to_cycle = builtin add last_cycle_local uint32_one;
-  reward_list = iota from_cycle to_cycle;
+  (* todo check corner case *)
+  (* to_cycle = builtin add last_cycle_local uint32_one; *)
+  reward_list = iota from_cycle last_cycle_local;
   e = { _eventname: "claim"; reward_list: reward_list};
   event e;
   forall reward_list calculate_rewards;
@@ -270,14 +272,28 @@ transition claim()
 
 end
 
-procedure check_unclaimed_rewards()
+procedure check_unclaimed_rewards(last_withdraw_cycle: Uint32)
+  last_cycle_local <- last_cycle;
+  (* last_withdraw_cycle + 1 should == last_cycle_local *)
+  last_withdraw_cycle_plus_one = builtin add last_withdraw_cycle uint32_one;
+  is_equal = builtin eq last_withdraw_cycle_plus_one last_cycle_local;
+  match is_equal with
+  | True =>
+  | False => throw
+  end
 end
 
 
 transition withdraw()
   (* move last_cycle in case user has some unclaimed rewards *)
   update_stake_map_onchange true u128_zero;
-  check_unclaimed_rewards
+  last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
+  last_withdraw_cycle = get_last_withdraw_cycle last_withdraw_cycle_opt;
+  check_unclaimed_rewards last_withdraw_cycle;
+  stake_amount_opt <- stakers_stake_per_cycle[_sender][last_withdraw_cycle];
+  stake_amount = get_uint128_opt stake_amount_opt;
+  (* todo check *)
+  TransferZRC2FromContract init_staking_token_address _sender stake_amount
 end
 
 transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
