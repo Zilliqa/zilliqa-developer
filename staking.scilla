@@ -417,7 +417,9 @@ transition withdraw()
   penatly_rate_local <- penatly_rate;
   transfer_amount = match gt_mini_cycle with
   | True => stake_amount
-  | False => muldiv stake_amount penatly_rate_local max_rate
+  | False =>
+    let n = muldiv stake_amount penatly_rate_local max_rate in
+    builtin sub stake_amount n
   end;
 
   (* clean user data *)
