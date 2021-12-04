@@ -15,6 +15,7 @@ let uint32_zero = Uint32 0
 let uint32_one = Uint32 1
 let u256_zero = Uint256 0
 let u128_zero = Uint128 0
+let max_rate = Uint128 100000000
 
 let one_msg =
   fun (m : Message) =>
@@ -68,18 +69,18 @@ let iota : Uint32 -> Uint32 -> List Uint32 =
     | False => Nil {Uint32}
     end
 
-let get_last_withdraw_cycle =
-  fun (cycle_opt: Option Uint32) =>
-    match cycle_opt with
-    | Some cycle => cycle
-    | None => uint32_zero
-    end
-
 let get_uint128_opt =
   fun (value_opt: Option Uint128) =>
     match value_opt with
     | Some value => value
     | None => u128_zero
+    end
+
+let get_uint32_opt =
+  fun (value_opt: Option Uint32) =>
+    match value_opt with
+    | Some value => value
+    | None => uint32_zero
     end
 
 let uint128_to_uint256 : Uint128 -> Uint256 =
@@ -121,15 +122,24 @@ contract Staking(
     blocks_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
 )
 
+(* contract config fields *)
 field contract_owner: ByStr20 = init_contract_owner
+field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
+(* 10 ** 8 means 100%, 10 ** 6 means 1% *)
+field penatly_rate: Uint128 = Uint128 1000000
+field mini_staking_cycle: Uint32 = Uint32 10
+
+(* global fields *)
 field last_block_num: Uint256 = init_block_num
 field last_cycle: Uint32 = Uint32 0
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
+
+(* user info fields *)
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
+field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
-field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   last_cycle_local <- last_cycle;
@@ -151,7 +161,7 @@ procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
   (* this will create [1,2,3,4] if cycle_to_increase_u32 is 5 *)
   duplicated_list = iota uint32_one cycle_to_increase_32;
   forall duplicated_list duplicate_total_stake_map;
-  (* handle the last cycle *)
+  (* handle the last cycle, last cycle is not calculated for rewards *)
   current_total_stake <- total_stake;
   last_cycle_local <- last_cycle;
   the_last_cycle = builtin add last_cycle_local cycle_to_increase_32;
@@ -179,6 +189,12 @@ procedure update_staker_bal(user: ByStr20, amount: Uint128)
                      amount
                    end;
   stakers_bal[user][last_cycle_local] := new_amount
+end
+
+
+procedure update_last_deposit_map(user: ByStr20)
+  last_cycle_local <- last_cycle;
+  last_deposit_cycle[user] := last_cycle_local
 end
 
 
@@ -250,14 +266,15 @@ end
 transition deposit(amount: Uint128)
   TransferZRC2ToContract init_staking_token_address amount;
   update_stake_map_onchange true amount;
-  update_staker_bal _sender amount
+  update_staker_bal _sender amount;
+  update_last_deposit_map _sender
 end
 
 transition claim()
   update_stake_map_onchange true u128_zero;
 
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
-  last_withdraw_cycle = get_last_withdraw_cycle last_withdraw_cycle_opt;
+  last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
   last_cycle_local <- last_cycle;
 
   (* from_cycle -> last_cycle *)
@@ -283,16 +300,43 @@ procedure check_unclaimed_rewards(last_withdraw_cycle: Uint32)
 end
 
 
+procedure clean_user_data(user: ByStr20)
+  delete stakers_bal[user];
+  delete stakers_stake_per_cycle[user];
+  delete last_deposit_cycle[user];
+  delete last_withdraw_cycle[user]
+end
+
 transition withdraw()
   (* move last_cycle in case user has some unclaimed rewards *)
   update_stake_map_onchange true u128_zero;
+
+  (* check unclaimed rewards *)
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
-  last_withdraw_cycle = get_last_withdraw_cycle last_withdraw_cycle_opt;
+  last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
   check_unclaimed_rewards last_withdraw_cycle;
+
+  (* get original stake amount*)
   stake_amount_opt <- stakers_stake_per_cycle[_sender][last_withdraw_cycle];
   stake_amount = get_uint128_opt stake_amount_opt;
-  (* todo check *)
-  TransferZRC2FromContract init_staking_token_address _sender stake_amount
+
+  (* calculate the amount to be transferred  *)
+  last_deposit_cycle_local <- last_deposit_cycle[_sender];
+  last_deposit_cycle_local = get_uint32_opt last_deposit_cycle_local;
+  last_cycle_local <- last_cycle;
+  mini_staking_cycle_local <- mini_staking_cycle;
+  staking_cycle = builtin sub last_cycle_local last_deposit_cycle_local;
+  gt_mini_cycle = builtin lt mini_staking_cycle_local staking_cycle;
+  penatly_rate_local <- penatly_rate;
+  transfer_amount = match gt_mini_cycle with
+  | True => stake_amount
+  | False => muldiv stake_amount penatly_rate_local max_rate
+  end;
+
+  (* clean user data *)
+  clean_user_data _sender;
+
+  TransferZRC2FromContract init_staking_token_address _sender transfer_amount
 end
 
 transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
