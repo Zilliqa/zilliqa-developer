@@ -453,6 +453,11 @@ transition withdraw_penatly()
   TransferZRC2FromContract init_staking_token_address _sender transfer_amount
 end
 
+transition emergency_withdraw(token_address: ByStr20, amount: Uint128)
+  is_owner _sender;
+  TransferZRC2FromContract token_address _sender amount
+end
+
 transition TransferSuccessCallBack(sender: ByStr20, recipient: ByStr20, amount: Uint128)
   e = { _eventname: "TransferSuccessCallBack"; sender: sender; recipient: recipient; amount: amount };
   event e
