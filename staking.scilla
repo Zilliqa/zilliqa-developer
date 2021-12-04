@@ -204,6 +204,26 @@ transition claim_owner()
   end
 end
 
+transition update_token_rewards(token_address: ByStr20, amount_per_cycle: Uint128)
+  is_owner _sender;
+  rewards_per_cycle[token_address] := amount_per_cycle
+end
+
+transition remove_token_rewards(token_address: ByStr20)
+  is_owner _sender;
+  delete rewards_per_cycle[token_address]
+end
+
+transition update_penatly_rate(new_rate: Uint128)
+  is_owner _sender;
+  penatly_rate := new_rate
+end
+
+transition update_mini_staking_cycle(new_mini_staking_cycle: Uint32)
+  is_owner _sender;
+  mini_staking_cycle := new_mini_staking_cycle
+end
+
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   last_cycle_local <- last_cycle;
