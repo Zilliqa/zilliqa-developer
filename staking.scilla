@@ -13,6 +13,8 @@ type Error =
   | SenderIsNotOwner
   | StagingOwnerNotExist
   | StagingAdminValidationFailed
+  | ContractIsNotPaused
+  | ContractIsPaused
 
 let make_error =
   fun (result: Error) =>
@@ -21,6 +23,8 @@ let make_error =
       | SenderIsNotOwner => Int32 -1
       | StagingOwnerNotExist => Int32 -2
       | StagingAdminValidationFailed => Int32 -3
+      | ContractIsNotPaused => Int32 -4
+      | ContractIsPaused => Int32 -5
       end
     in
     { _exception: "Error"; code: result_code }
@@ -139,6 +143,7 @@ contract Staking(
 
 (* contract config fields *)
 field contract_owner: ByStr20 = init_contract_owner
+field paused: Bool = true
 field staging_contract_owner: Option ByStr20 = None {ByStr20}
 (* Maps a reward token address to the amount set for disbursement per cycle *)
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
@@ -174,6 +179,44 @@ procedure is_owner(sender: ByStr20)
     e = SenderIsNotOwner;
     throw_error e
   end
+end
+
+
+procedure is_paused()
+  paused_local <- paused;
+  match paused_local with
+  | True =>
+  | False =>
+    e = ContractIsNotPaused;
+    throw_error e
+  end
+end
+
+procedure is_unpaused()
+  paused_local <- paused;
+  match paused_local with
+  | True =>
+    e = ContractIsPaused;
+    throw_error e
+  | False =>
+  end
+end
+
+
+procedure transfer_zrc2_to_contract(assetHash: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
+                  from: _sender; to: _this_address; amount: amount};
+  msgs = one_msg msg_to_zrc2;
+  send msgs;
+  e = { _eventname: "TransferToContract"; assetHash: assetHash; amount: amount };
+  event e
+end
+
+procedure transfer_zrc2_from_contract(toAssetHash: ByStr20, address: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "Transfer"; _recipient: toAssetHash; _amount: u128_zero;
+                 to: address; amount: amount};
+  msgs = one_msg msg_to_zrc2;
+  send msgs
 end
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
@@ -226,29 +269,12 @@ procedure update_last_deposit_map(user: ByStr20)
   last_deposit_cycle[user] := last_cycle_local
 end
 
-
-procedure TransferZRC2ToContract(assetHash: ByStr20, amount: Uint128)
-  msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
-                  from: _sender; to: _this_address; amount: amount};
-  msgs = one_msg msg_to_zrc2;
-  send msgs;
-  e = { _eventname: "TransferToContract"; assetHash: assetHash; amount: amount };
-  event e
-end
-
-procedure TransferZRC2FromContract(toAssetHash: ByStr20, address: ByStr20, amount: Uint128)
-  msg_to_zrc2 = {_tag: "Transfer"; _recipient: toAssetHash; _amount: u128_zero;
-                 to: address; amount: amount};
-  msgs = one_msg msg_to_zrc2;
-  send msgs
-end
-
 procedure setup_rewards_distribution(p: RewardsCalculation)
   match p with
   | RewardsCalculation token_address rewarding_amount user_stake total_stake =>
     reward = muldiv rewarding_amount user_stake total_stake;
     (* todo what if the rewards too small, considering use another map *)
-    TransferZRC2FromContract token_address _sender reward
+    transfer_zrc2_from_contract token_address _sender reward
   end
 end
 
@@ -361,6 +387,16 @@ transition claim_owner()
   end
 end
 
+transition pause()
+  is_owner _sender;
+  paused := true
+end
+
+transition unpause()
+  is_owner _sender;
+  paused := false
+end
+
 (* The next two transitions allow to initiate the reward pool *)
 (* Should be used carefully, and ideally right after the deployment and before allowing users to interact with this contract. *)
 transition update_token_rewards(token_address: ByStr20, amount_per_cycle: Uint128)
@@ -386,7 +422,7 @@ end
 (* Staking related transitions *)
 
 transition deposit(amount: Uint128)
-  TransferZRC2ToContract init_staking_token_address amount;
+  transfer_zrc2_to_contract init_staking_token_address amount;
   update_stake_map_onchange amount;
   update_staker_bal _sender amount;
   update_last_deposit_map _sender
@@ -411,6 +447,7 @@ transition claim()
 end
 
 transition withdraw()
+  is_unpaused;
   (* move last_cycle in case user has some unclaimed rewards *)
   update_stake_map_onchange u128_zero;
 
@@ -448,19 +485,19 @@ transition withdraw()
   (* update total amount *)
   decrease_stake stake_amount;
 
-  TransferZRC2FromContract init_staking_token_address _sender transfer_amount
+  transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
 
 transition withdraw_penatly()
   is_owner _sender;
   transfer_amount <- aggregated_penalty_amount;
   aggregated_penalty_amount := u128_zero;
-  TransferZRC2FromContract init_staking_token_address _sender transfer_amount
+  transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
 
 transition emergency_withdraw(token_address: ByStr20, amount: Uint128)
   is_owner _sender;
-  TransferZRC2FromContract token_address _sender amount
+  transfer_zrc2_from_contract token_address _sender amount
 end
 
 (* ZRC-2 related callback transitions *)
@@ -483,4 +520,3 @@ transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, reci
   e = { _eventname: "RecipientAcceptTransferFrom"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
   event e
 end
-
