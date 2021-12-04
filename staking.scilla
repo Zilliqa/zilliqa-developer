@@ -176,6 +176,22 @@ procedure is_owner(sender: ByStr20)
   end
 end
 
+procedure TransferZRC2ToContract(assetHash: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
+                  from: _sender; to: _this_address; amount: amount};
+  msgs = one_msg msg_to_zrc2;
+  send msgs;
+  e = { _eventname: "TransferToContract"; assetHash: assetHash; amount: amount };
+  event e
+end
+
+procedure TransferZRC2FromContract(toAssetHash: ByStr20, address: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "Transfer"; _recipient: toAssetHash; _amount: u128_zero;
+                 to: address; amount: amount};
+  msgs = one_msg msg_to_zrc2;
+  send msgs
+end
+
 transition update_owner(new_owner: ByStr20)
   is_owner _sender;
   new_staging_owner = Some {ByStr20} new_owner;
@@ -211,6 +227,9 @@ end
 
 transition remove_token_rewards(token_address: ByStr20)
   is_owner _sender;
+  transfer_amount_opt <- rewards_per_cycle[token_address];
+  transfer_amount = get_uint128_opt transfer_amount_opt;
+  TransferZRC2FromContract init_staking_token_address _sender transfer_amount;
   delete rewards_per_cycle[token_address]
 end
 
@@ -273,23 +292,6 @@ end
 procedure update_last_deposit_map(user: ByStr20)
   last_cycle_local <- last_cycle;
   last_deposit_cycle[user] := last_cycle_local
-end
-
-
-procedure TransferZRC2ToContract(assetHash: ByStr20, amount: Uint128)
-  msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
-                  from: _sender; to: _this_address; amount: amount};
-  msgs = one_msg msg_to_zrc2;
-  send msgs;
-  e = { _eventname: "TransferToContract"; assetHash: assetHash; amount: amount };
-  event e
-end
-
-procedure TransferZRC2FromContract(toAssetHash: ByStr20, address: ByStr20, amount: Uint128)
-  msg_to_zrc2 = {_tag: "Transfer"; _recipient: toAssetHash; _amount: u128_zero;
-                 to: address; amount: amount};
-  msgs = one_msg msg_to_zrc2;
-  send msgs
 end
 
 procedure setup_rewards_distribution(p: RewardsCalculation)
