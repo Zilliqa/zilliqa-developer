@@ -1,11 +1,11 @@
 scilla_version 0
 
-import ListUtils IntUtils PairUtils
+import ListUtils IntUtils
 
 
 library Staking
 
-(* token address, rewarding amount, user stake, total stake *)
+(* token address, reward amount, user's stake, total stake *)
 type RewardsCalculation =
 | RewardsCalculation of ByStr20 Uint128 Uint128 Uint128
 
@@ -145,9 +145,10 @@ contract Staking(
 field contract_owner: ByStr20 = init_contract_owner
 field paused: Bool = true
 field staging_contract_owner: Option ByStr20 = None {ByStr20}
+(* Maps a reward token address to the amount set for disbursement per cycle *)
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 (* 10 ** 8 means 100%, 10 ** 7 means 10% *)
-field penatly_rate: Uint128 = Uint128 10000000
+field penalty_rate: Uint128 = Uint128 10000000
 field mini_staking_cycle: Uint32 = Uint32 10
 
 (* global fields *)
@@ -155,14 +156,13 @@ field last_block_num: Uint256 = bnum_to_uint256 _creation_block
 field last_cycle: Uint32 = Uint32 0
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
-field aggregated_penatly_amount: Uint128 = Uint128 0
+field aggregated_penalty_amount: Uint128 = Uint128 0
 
 (* user info fields *)
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
-
 
 
 procedure throw_error(err: Error)
@@ -180,6 +180,7 @@ procedure is_owner(sender: ByStr20)
     throw_error e
   end
 end
+
 
 procedure is_paused()
   paused_local <- paused;
@@ -216,71 +217,6 @@ procedure transfer_zrc2_from_contract(toAssetHash: ByStr20, address: ByStr20, am
                  to: address; amount: amount};
   msgs = one_msg msg_to_zrc2;
   send msgs
-end
-
-transition update_owner(new_owner: ByStr20)
-  is_owner _sender;
-  new_staging_owner = Some {ByStr20} new_owner;
-  staging_contract_owner := new_staging_owner
-end
-
-transition claim_owner()
-  staging_owner_opt <- staging_contract_owner;
-  match staging_owner_opt with
-  | Some staging_owner =>
-    is_valid = builtin eq _sender staging_owner;
-    match is_valid with
-    | True =>
-      contract_owner := staging_owner;
-      empty_staging_owner = None {ByStr20};
-      staging_contract_owner := empty_staging_owner;
-      e = { _eventname: "claim_owner"; new_owner: staging_owner };
-      event e
-    | False =>
-      e = StagingAdminValidationFailed;
-      throw_error e
-    end
-  | None =>
-    e = StagingOwnerNotExist;
-    throw_error e
-  end
-end
-
-transition update_token_rewards(token_address: ByStr20, amount_per_cycle: Uint128)
-  is_paused;
-  is_owner _sender;
-  rewards_per_cycle[token_address] := amount_per_cycle
-end
-
-transition remove_token_rewards(token_address: ByStr20)
-  is_paused;
-  is_owner _sender;
-  transfer_amount_opt <- rewards_per_cycle[token_address];
-  transfer_amount = get_uint128_opt transfer_amount_opt;
-  transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount;
-  delete rewards_per_cycle[token_address]
-end
-
-transition update_penatly_rate(new_rate: Uint128)
-  is_paused;
-  is_owner _sender;
-  penatly_rate := new_rate
-end
-
-transition update_mini_staking_cycle(new_mini_staking_cycle: Uint32)
-  is_paused;
-  is_owner _sender;
-  mini_staking_cycle := new_mini_staking_cycle
-end
-
-transition pause()
-  is_owner _sender;
-  paused := true
-end
-
-transition unpause()
-  is_owner _sender;
-  paused := false
 end
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
@@ -382,33 +318,6 @@ procedure calculate_rewards(cycle: Uint32)
   end
 end
 
-transition deposit(amount: Uint128)
-  is_unpaused;
-  transfer_zrc2_to_contract init_staking_token_address amount;
-  update_stake_map_onchange amount;
-  update_staker_bal _sender amount;
-  update_last_deposit_map _sender
-end
-
-transition claim()
-  is_unpaused;
-  update_stake_map_onchange u128_zero;
-
-  last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
-  last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
-  last_cycle_local <- last_cycle;
-
-  (* from_cycle -> last_cycle *)
-  from_cycle = builtin add last_withdraw_cycle uint32_one;
-  reward_list = iota from_cycle last_cycle_local;
-  e = { _eventname: "claim"; reward_list: reward_list};
-  event e;
-  forall reward_list calculate_rewards;
-  last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
-  last_withdraw_cycle[_sender] := last_withdraw_cycle_local
-
-end
-
 procedure check_unclaimed_rewards(last_withdraw_cycle: Uint32)
   last_cycle_local <- last_cycle;
   (* last_withdraw_cycle + 1 should == last_cycle_local *)
@@ -419,7 +328,6 @@ procedure check_unclaimed_rewards(last_withdraw_cycle: Uint32)
   | False => throw
   end
 end
-
 
 procedure clean_user_data(user: ByStr20)
   delete stakers_bal[user];
@@ -436,17 +344,107 @@ procedure decrease_stake(amount: Uint128)
   total_stake_per_cycle[last_cycle_local] := new_total_stake_local
 end
 
-procedure increase_aggregated_penatly_amount(amount: Uint128)
+procedure increase_aggregated_penalty_amount(amount: Uint128)
   is_zero = builtin eq amount u128_zero;
   match is_zero with
   | True =>
   | False =>
-    existing_amount <- aggregated_penatly_amount;
+    existing_amount <- aggregated_penalty_amount;
     new_amount = builtin add existing_amount amount;
-    aggregated_penatly_amount := new_amount
+    aggregated_penalty_amount := new_amount
   end
 end
 
+
+
+(* Housekeeping transitions *)
+
+transition update_owner(new_owner: ByStr20)
+  is_owner _sender;
+  new_staging_owner = Some {ByStr20} new_owner;
+  staging_contract_owner := new_staging_owner
+end
+
+transition claim_owner()
+  staging_owner_opt <- staging_contract_owner;
+  match staging_owner_opt with
+  | Some staging_owner =>
+    is_valid = builtin eq _sender staging_owner;
+    match is_valid with
+    | True =>
+      contract_owner := staging_owner;
+      empty_staging_owner = None {ByStr20};
+      staging_contract_owner := empty_staging_owner;
+      e = { _eventname: "claim_owner"; new_owner: staging_owner };
+      event e
+    | False =>
+      e = StagingAdminValidationFailed;
+      throw_error e
+    end
+  | None =>
+    e = StagingOwnerNotExist;
+    throw_error e
+  end
+end
+
+transition pause()
+  is_owner _sender;
+  paused := true
+end
+
+transition unpause()
+  is_owner _sender;
+  paused := false
+end
+
+(* The next two transitions allow to initiate the reward pool *)
+(* Should be used carefully, and ideally right after the deployment and before allowing users to interact with this contract. *)
+transition update_token_rewards(token_address: ByStr20, amount_per_cycle: Uint128)
+  is_owner _sender;
+  rewards_per_cycle[token_address] := amount_per_cycle
+end
+
+transition remove_token_rewards(token_address: ByStr20)
+  is_owner _sender;
+  delete rewards_per_cycle[token_address]
+end
+
+transition update_penalty_rate(new_rate: Uint128)
+  is_owner _sender;
+  penalty_rate := new_rate
+end
+
+transition update_mini_staking_cycle(new_mini_staking_cycle: Uint32)
+  is_owner _sender;
+  mini_staking_cycle := new_mini_staking_cycle
+end
+
+(* Staking related transitions *)
+
+transition deposit(amount: Uint128)
+  transfer_zrc2_to_contract init_staking_token_address amount;
+  update_stake_map_onchange amount;
+  update_staker_bal _sender amount;
+  update_last_deposit_map _sender
+end
+
+transition claim()
+  update_stake_map_onchange u128_zero;
+
+  last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
+  last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
+  last_cycle_local <- last_cycle;
+
+  (* from_cycle -> last_cycle *)
+  from_cycle = builtin add last_withdraw_cycle uint32_one;
+  reward_list = iota from_cycle last_cycle_local;
+  e = { _eventname: "claim"; reward_list: reward_list};
+  event e;
+  forall reward_list calculate_rewards;
+  last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
+  last_withdraw_cycle[_sender] := last_withdraw_cycle_local
+
+end
 
 transition withdraw()
   is_unpaused;
@@ -469,7 +467,7 @@ transition withdraw()
   mini_staking_cycle_local <- mini_staking_cycle;
   staking_cycle = builtin sub last_cycle_local last_deposit_cycle_local;
   gt_mini_cycle = builtin lt mini_staking_cycle_local staking_cycle;
-  penatly_rate_local <- penatly_rate;
+  penatly_rate_local <- penalty_rate;
   transfer_amount = match gt_mini_cycle with
   | True => stake_amount
   | False =>
@@ -479,7 +477,7 @@ transition withdraw()
 
   (* we cannot access field in the above match with expression *)
   penatly_amount = builtin sub stake_amount transfer_amount;
-  increase_aggregated_penatly_amount penatly_amount;
+  increase_aggregated_penalty_amount penatly_amount;
 
   (* clean user data *)
   clean_user_data _sender;
@@ -492,8 +490,8 @@ end
 
 transition withdraw_penatly()
   is_owner _sender;
-  transfer_amount <- aggregated_penatly_amount;
-  aggregated_penatly_amount := u128_zero;
+  transfer_amount <- aggregated_penalty_amount;
+  aggregated_penalty_amount := u128_zero;
   transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
 
@@ -502,6 +500,7 @@ transition emergency_withdraw(token_address: ByStr20, amount: Uint128)
   transfer_zrc2_from_contract token_address _sender amount
 end
 
+(* ZRC-2 related callback transitions *)
 transition TransferSuccessCallBack(sender: ByStr20, recipient: ByStr20, amount: Uint128)
   e = { _eventname: "TransferSuccessCallBack"; sender: sender; recipient: recipient; amount: amount };
   event e
@@ -521,4 +520,3 @@ transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, reci
   e = { _eventname: "RecipientAcceptTransferFrom"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
   event e
 end
-
