@@ -9,6 +9,22 @@ library Staking
 type RewardsCalculation =
 | RewardsCalculation of ByStr20 Uint128 Uint128 Uint128
 
+type Error =
+  | SenderIsNotOwner
+  | StagingOwnerNotExist
+  | StagingAdminValidationFailed
+
+let make_error =
+  fun (result: Error) =>
+    let result_code =
+      match result with
+      | SenderIsNotOwner => Int32 -1
+      | StagingOwnerNotExist => Int32 -2
+      | StagingAdminValidationFailed => Int32 -3
+      end
+    in
+    { _exception: "Error"; code: result_code }
+
 let true = True
 let false = False
 let uint32_zero = Uint32 0
@@ -124,6 +140,7 @@ contract Staking(
 
 (* contract config fields *)
 field contract_owner: ByStr20 = init_contract_owner
+field staging_contract_owner: Option ByStr20 = None {ByStr20}
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 (* 10 ** 8 means 100%, 10 ** 6 means 1% *)
 field penatly_rate: Uint128 = Uint128 1000000
@@ -140,6 +157,53 @@ field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Ui
 field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
+
+
+
+procedure throw_error(err: Error)
+  e = make_error err;
+  throw e
+end
+
+procedure is_owner(sender: ByStr20)
+  owner <- contract_owner;
+  is_owner = builtin eq sender owner;
+  match is_owner with
+  | True =>
+  | False =>
+    e = SenderIsNotOwner;
+    throw_error e
+  end
+end
+
+transition update_owner(new_owner: ByStr20)
+  is_owner _sender;
+  new_staging_owner = Some {ByStr20} new_owner;
+  staging_contract_owner := new_staging_owner
+end
+
+transition claim_owner()
+  staging_owner_opt <- staging_contract_owner;
+  match staging_owner_opt with
+  | Some staging_owner =>
+    is_valid = builtin eq _sender staging_owner;
+    match is_valid with
+    | True =>
+      contract_owner := staging_owner;
+      empty_staging_owner = None {ByStr20};
+      staging_contract_owner := empty_staging_owner;
+      e = { _eventname: "claim_owner"; new_owner: staging_owner };
+      event e
+    | False =>
+      e = StagingAdminValidationFailed;
+      throw_error e
+    end
+  | None =>
+    e = StagingOwnerNotExist;
+    throw_error e
+  end
+end
+
 
 procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   last_cycle_local <- last_cycle;
