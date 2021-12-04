@@ -134,7 +134,6 @@ let muldiv : Uint128 -> Uint128 -> Uint128 -> Uint128 =
 contract Staking(
     init_contract_owner: ByStr20,
     init_staking_token_address: ByStr20,
-    init_block_num: Uint256,
     blocks_per_cycle: Uint256 (*To set to roughly a day, use 2500*)
 )
 
@@ -147,10 +146,11 @@ field penatly_rate: Uint128 = Uint128 10000000
 field mini_staking_cycle: Uint32 = Uint32 10
 
 (* global fields *)
-field last_block_num: Uint256 = init_block_num
+field last_block_num: Uint256 = bnum_to_uint256 _creation_block
 field last_cycle: Uint32 = Uint32 0
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
+field aggregated_penatly_amount: Uint128 = Uint128 0
 
 (* user info fields *)
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
@@ -393,6 +393,17 @@ procedure decrease_stake(amount: Uint128)
   total_stake_per_cycle[last_cycle_local] := new_total_stake_local
 end
 
+procedure increase_aggregated_penatly_amount(amount: Uint128)
+  is_zero = builtin eq amount u128_zero;
+  match is_zero with
+  | True =>
+  | False =>
+    existing_amount <- aggregated_penatly_amount;
+    new_amount = builtin add existing_amount amount;
+    aggregated_penatly_amount := new_amount
+  end
+end
+
 
 transition withdraw()
   (* move last_cycle in case user has some unclaimed rewards *)
@@ -422,12 +433,23 @@ transition withdraw()
     builtin sub stake_amount n
   end;
 
+  (* we cannot access field in the above match with expression *)
+  penatly_amount = builtin sub stake_amount transfer_amount;
+  increase_aggregated_penatly_amount penatly_amount;
+
   (* clean user data *)
   clean_user_data _sender;
 
   (* update total amount *)
   decrease_stake stake_amount;
 
+  TransferZRC2FromContract init_staking_token_address _sender transfer_amount
+end
+
+transition withdraw_penatly()
+  is_owner _sender;
+  transfer_amount <- aggregated_penatly_amount;
+  aggregated_penatly_amount := u128_zero;
   TransferZRC2FromContract init_staking_token_address _sender transfer_amount
 end
 
