@@ -232,7 +232,8 @@ procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   total_stake_per_cycle[current_cycle] := total_stake_local
 end
 
-procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
+
+procedure update_stake_map_onchange(change_amount: Uint128)
   current_bnum <- & BLOCKNUMBER;
   current_block_num = bnum_to_uint256 current_bnum;
   last_block_num_l <- last_block_num;
@@ -249,18 +250,11 @@ procedure update_stake_map_onchange(is_deposit: Bool, change_amount: Uint128)
   current_total_stake <- total_stake;
   last_cycle_local <- last_cycle;
   the_last_cycle = builtin add last_cycle_local cycle_to_increase_32;
-  match is_deposit with
-  | True =>
-    new_total_stake = builtin add current_total_stake change_amount;
-    total_stake := new_total_stake;
-    total_stake_per_cycle[the_last_cycle] := new_total_stake;
-    last_cycle := the_last_cycle
-  | False =>
-    new_total_stake = builtin sub current_total_stake change_amount;
-    total_stake := new_total_stake;
-    total_stake_per_cycle[the_last_cycle] := new_total_stake;
-    last_cycle := the_last_cycle
-  end
+  (* update total stake *)
+  new_total_stake = builtin add current_total_stake change_amount;
+  total_stake := new_total_stake;
+  total_stake_per_cycle[the_last_cycle] := new_total_stake;
+  last_cycle := the_last_cycle
 end
 
 procedure update_staker_bal(user: ByStr20, amount: Uint128)
@@ -349,13 +343,13 @@ end
 
 transition deposit(amount: Uint128)
   TransferZRC2ToContract init_staking_token_address amount;
-  update_stake_map_onchange true amount;
+  update_stake_map_onchange amount;
   update_staker_bal _sender amount;
   update_last_deposit_map _sender
 end
 
 transition claim()
-  update_stake_map_onchange true u128_zero;
+  update_stake_map_onchange u128_zero;
 
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
   last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
@@ -391,9 +385,18 @@ procedure clean_user_data(user: ByStr20)
   delete last_withdraw_cycle[user]
 end
 
+procedure decrease_stake(amount: Uint128)
+  total_stake_local <- total_stake;
+  new_total_stake_local = builtin sub total_stake_local amount;
+  total_stake := new_total_stake_local;
+  last_cycle_local <- last_cycle;
+  total_stake_per_cycle[last_cycle_local] := new_total_stake_local
+end
+
+
 transition withdraw()
   (* move last_cycle in case user has some unclaimed rewards *)
-  update_stake_map_onchange true u128_zero;
+  update_stake_map_onchange u128_zero;
 
   (* check unclaimed rewards *)
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
@@ -420,11 +423,19 @@ transition withdraw()
   (* clean user data *)
   clean_user_data _sender;
 
+  (* update total amount *)
+  decrease_stake stake_amount;
+
   TransferZRC2FromContract init_staking_token_address _sender transfer_amount
 end
 
-transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
-  e = { _eventname: "RecipientAcceptTransferFrom"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
+transition TransferSuccessCallBack(sender: ByStr20, recipient: ByStr20, amount: Uint128)
+  e = { _eventname: "TransferSuccessCallBack"; sender: sender; recipient: recipient; amount: amount };
+  event e
+end
+
+transition RecipientAcceptTransfer(sender: ByStr20, recipient: ByStr20, amount: Uint128)
+  e = { _eventname: "RecipientAcceptTransfer"; sender: sender; recipient: recipient; amount: amount };
   event e
 end
 
@@ -432,3 +443,9 @@ transition TransferFromSuccessCallBack(initiator: ByStr20, sender: ByStr20, reci
   e = { _eventname: "TransferFromSuccessCallBack"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
   event e
 end
+
+transition RecipientAcceptTransferFrom(initiator: ByStr20, sender: ByStr20, recipient: ByStr20, amount: Uint128)
+  e = { _eventname: "RecipientAcceptTransferFrom"; initiator: initiator; sender: sender; recipient: recipient; amount: amount };
+  event e
+end
+
