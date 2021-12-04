@@ -142,8 +142,8 @@ contract Staking(
 field contract_owner: ByStr20 = init_contract_owner
 field staging_contract_owner: Option ByStr20 = None {ByStr20}
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
-(* 10 ** 8 means 100%, 10 ** 6 means 1% *)
-field penatly_rate: Uint128 = Uint128 1000000
+(* 10 ** 8 means 100%, 10 ** 7 means 10% *)
+field penatly_rate: Uint128 = Uint128 10000000
 field mini_staking_cycle: Uint32 = Uint32 10
 
 (* global fields *)
