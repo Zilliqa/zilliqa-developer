@@ -220,8 +220,8 @@ procedure transfer_zrc2_to_contract(assetHash: ByStr20, amount: Uint128)
   event e
 end
 
-procedure transfer_zrc2_from_contract(toAssetHash: ByStr20, address: ByStr20, amount: Uint128)
-  msg_to_zrc2 = {_tag: "Transfer"; _recipient: toAssetHash; _amount: u128_zero;
+procedure transfer_zrc2_from_contract(assetHash: ByStr20, address: ByStr20, amount: Uint128)
+  msg_to_zrc2 = {_tag: "Transfer"; _recipient: assetHash; _amount: u128_zero;
                  to: address; amount: amount};
   msgs = one_msg msg_to_zrc2;
   send msgs
