@@ -500,6 +500,8 @@ transition withdraw_penatly()
   is_owner _sender;
   transfer_amount <- aggregated_penalty_amount;
   aggregated_penalty_amount := u128_zero;
+  e = { _eventname: "Withdraw penalty"; ammount: transfer_amount};
+  event e;
   transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
 
