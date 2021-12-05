@@ -573,7 +573,7 @@ transition withdraw()
   transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
 
-transition withdraw_penatly()
+transition withdraw_penalty()
   is_owner _sender;
   transfer_amount <- aggregated_penalty_amount;
   aggregated_penalty_amount := u128_zero;
