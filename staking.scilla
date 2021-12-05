@@ -583,6 +583,7 @@ transition withdraw_penalty()
 end
 
 transition emergency_withdraw(token_address: ByStr20, amount: Uint128)
+  is_paused();
   is_owner _sender;
   e = { _eventname: "Emergency Withdraw"; token: token_address; amount: amount};
   event e;
