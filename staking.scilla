@@ -166,7 +166,6 @@ field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (M
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 
-
 procedure throw_error(err: Error)
   e = make_error err;
   throw e
@@ -453,7 +452,6 @@ transition claim()
   forall reward_list calculate_rewards;
   last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
   last_withdraw_cycle[_sender] := last_withdraw_cycle_local
-
 end
 
 transition withdraw()
