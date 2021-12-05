@@ -16,6 +16,7 @@ type Error =
   | ContractIsNotPaused
   | ContractIsPaused
   | InvalidPenaltyRate
+  | UserHasUnclaimedReward
 
 let make_error =
   fun (result: Error) =>
@@ -27,6 +28,7 @@ let make_error =
       | ContractIsNotPaused => Int32 -4
       | ContractIsPaused => Int32 -5
       | InvalidPenaltyRate => Int32 -6
+      | UserHasUnclaimedReward => Int32 -7
       end
     in
     { _exception: "Error"; code: result_code }
@@ -323,7 +325,9 @@ procedure check_unclaimed_rewards(last_withdraw_cycle: Uint32)
   is_equal = builtin eq last_withdraw_cycle_plus_one last_cycle_local;
   match is_equal with
   | True =>
-  | False => throw
+  | False =>
+    e = UserHasUnclaimedReward;
+    throw_error e
   end
 end
 
