@@ -417,7 +417,7 @@ transition update_owner(new_owner: ByStr20)
   is_owner _sender;
   new_staging_owner = Some {ByStr20} new_owner;
   staging_contract_owner := new_staging_owner;
-  e = { _eventname: "New staging owner"; new_staging_owner: new_owner };
+  e = { _eventname: "NewStagingOwner"; new_staging_owner: new_owner };
   event e
 end
 
@@ -431,7 +431,7 @@ transition claim_owner()
       contract_owner := staging_owner;
       empty_staging_owner = None {ByStr20};
       staging_contract_owner := empty_staging_owner;
-      e = { _eventname: "claim_owner"; new_owner: staging_owner };
+      e = { _eventname: "ClaimOwner"; new_owner: staging_owner };
       event e
     | False =>
       e = StagingAdminValidationFailed;
@@ -446,14 +446,14 @@ end
 transition pause()
   is_owner _sender;
   paused := true;
-  e = { _eventname: "pause" };
+  e = { _eventname: "Paused" };
   event e
 end
 
 transition unpause()
   is_owner _sender;
   paused := false;
-  e = { _eventname: "unpause" };
+  e = { _eventname: "Unpaused" };
   event e
 end
 
@@ -462,14 +462,14 @@ end
 transition update_token_rewards(token_address: ByStr20, amount_per_cycle: Uint128)
   is_owner _sender;
   rewards_per_cycle[token_address] := amount_per_cycle;
-  e = { _eventname: "Update token rewards"; token: token_address; amount_per_cycle: amount_per_cycle };
+  e = { _eventname: "UpdateTokenRewards"; token: token_address; amount_per_cycle: amount_per_cycle };
   event e
 end
 
 transition remove_token_rewards(token_address: ByStr20)
   is_owner _sender;
   delete rewards_per_cycle[token_address];
-  e = { _eventname: "Remove token rewards"; token: token_address };
+  e = { _eventname: "RemoveTokenRewards"; token: token_address };
   event e
 end
 
@@ -481,7 +481,7 @@ transition update_penalty_rate(new_rate: Uint128)
   match valid_penalty_rate with
   | True =>
     penalty_rate := new_rate;
-    e = { _eventname: "Update peanlty rate"; new_ratet: new_rate};
+    e = { _eventname: "UpdatePenaltyRate"; new_rate: new_rate};
     event e
   | False =>
     e = InvalidPenaltyRate;
