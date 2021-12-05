@@ -171,6 +171,9 @@ field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (M
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 
+(* temp fields for calculating aggregate rewards *)
+field aggregate_rewards_tmp: Map ByStr20 Uint128 = Emp ByStr20 Uint128
+
 procedure throw_error(err: Error)
   e = make_error err;
   throw e
@@ -272,13 +275,67 @@ procedure update_last_deposit_map(user: ByStr20)
   last_deposit_cycle[user] := last_cycle_local
 end
 
+procedure clean_map_procedure(token_addr: ByStr20)
+  delete rewards_per_cycle[token_addr]
+end
+
+procedure clean_rewards_distribution()
+   aggregate_rewards_tmp_local <- aggregate_rewards_tmp;
+   (* List (Pair ByStr20 Uint128)*)
+   aggregate_rewards_tmp_list = builtin to_list aggregate_rewards_tmp_local;
+   mapper = @list_map (Pair ByStr20 Uint128) ByStr20;
+   f = fun (p: Pair ByStr20 Uint128) =>
+     match p with
+     | Pair token_address amount => token_address
+     end;
+   token_list = mapper f aggregate_rewards_tmp_list;
+   forall token_list clean_map_procedure
+end
+
+procedure increase_rewards_tmp(token_address: ByStr20, amount: Uint128)
+  aggregate_rewards_opt <- aggregate_rewards_tmp[token_address];
+  amount_added = match aggregate_rewards_opt with
+                    | Some aggregate_rewards =>
+                      builtin add aggregate_rewards amount
+                    | None => amount
+                    end;
+  aggregate_rewards_tmp[token_address] := amount_added
+end
+
+
 procedure setup_rewards_distribution(p: RewardsCalculation)
   match p with
   | RewardsCalculation token_address rewarding_amount user_stake total_stake_amount =>
     reward = muldiv rewarding_amount user_stake total_stake_amount;
-    (* todo what if the rewards too small, considering use another map *)
-    transfer_zrc2_from_contract token_address _sender reward
+    increase_rewards_tmp token_address reward
   end
+end
+
+procedure send_rewards(pair: Pair ByStr20 Uint128)
+  match pair with
+  | Pair token_address amount =>
+    transfer_zrc2_from_contract token_address _sender amount
+  end
+end
+
+procedure send_rewards_distribution()
+  aggregate_rewards_map <- aggregate_rewards_tmp;
+  aggregate_rewards_list = builtin to_list aggregate_rewards_map;
+  forall aggregate_rewards_list send_rewards
+end
+
+procedure set_rewards_distribution(user_stake_this_cycle: Uint128, total_stake_amount: Uint128)
+  rewards_per_cycle_local <- rewards_per_cycle;
+  (* List (Pair ByStr20 Uint128)*)
+  rewards_per_cycle_list = builtin to_list rewards_per_cycle_local;
+  mapper = @list_map (Pair ByStr20 Uint128) RewardsCalculation;
+  f = fun (p: Pair ByStr20 Uint128) =>
+    match p with
+    | Pair token_address amount =>
+      RewardsCalculation token_address amount user_stake_this_cycle total_stake_amount
+    end;
+  distribution_list = mapper f rewards_per_cycle_list;
+  forall distribution_list setup_rewards_distribution
 end
 
 procedure calculate_rewards(cycle: Uint32)
@@ -305,17 +362,9 @@ procedure calculate_rewards(cycle: Uint32)
     match is_total_stake_zero with
     | True =>
     | False =>
-      rewards_per_cycle_local <- rewards_per_cycle;
-      (* List (Pair ByStr20 Uint128)*)
-      rewards_per_cycle_list = builtin to_list rewards_per_cycle_local;
-      mapper = @list_map (Pair ByStr20 Uint128) RewardsCalculation;
-      f = fun (p: Pair ByStr20 Uint128) =>
-        match p with
-        | Pair token_address amount =>
-          RewardsCalculation token_address amount user_stake_this_cycle total_stake_amount
-        end;
-      distribution_list = mapper f rewards_per_cycle_list;
-      forall distribution_list setup_rewards_distribution
+      clean_rewards_distribution;
+      set_rewards_distribution user_stake_this_cycle total_stake_amount;
+      send_rewards_distribution
     end
   | None =>
   end
