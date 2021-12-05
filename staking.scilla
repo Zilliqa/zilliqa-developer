@@ -362,8 +362,8 @@ procedure calculate_rewards(cycle: Uint32)
     match is_total_stake_zero with
     | True =>
     | False =>
-      set_rewards_distribution user_stake_this_cycle total_stake_amount;
       clean_rewards_tmp;
+      set_rewards_distribution user_stake_this_cycle total_stake_amount;
       send_rewards_distribution
     end
   | None =>
