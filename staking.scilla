@@ -271,8 +271,8 @@ end
 
 procedure setup_rewards_distribution(p: RewardsCalculation)
   match p with
-  | RewardsCalculation token_address rewarding_amount user_stake total_stake =>
-    reward = muldiv rewarding_amount user_stake total_stake;
+  | RewardsCalculation token_address rewarding_amount user_stake total_stake_amount =>
+    reward = muldiv rewarding_amount user_stake total_stake_amount;
     (* todo what if the rewards too small, considering use another map *)
     transfer_zrc2_from_contract token_address _sender reward
   end
@@ -295,10 +295,10 @@ procedure calculate_rewards(cycle: Uint32)
   stakers_bal[_sender][cycle] := user_stake_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
-  | Some total_stake =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake; user_stake_this_cycle: user_stake_this_cycle };
+  | Some total_stake_amount =>
+    e = { _eventname: "calculate_rewards"; total_stake: total_stake_amount; user_stake_this_cycle: user_stake_this_cycle };
     event e;
-    is_total_stake_zero = builtin eq u128_zero total_stake;
+    is_total_stake_zero = builtin eq u128_zero total_stake_amount;
     match is_total_stake_zero with
     | True =>
     | False =>
@@ -309,7 +309,7 @@ procedure calculate_rewards(cycle: Uint32)
       f = fun (p: Pair ByStr20 Uint128) =>
         match p with
         | Pair token_address amount =>
-          RewardsCalculation token_address amount user_stake_this_cycle total_stake
+          RewardsCalculation token_address amount user_stake_this_cycle total_stake_amount
         end;
       distribution_list = mapper f rewards_per_cycle_list;
       forall distribution_list setup_rewards_distribution
@@ -318,10 +318,10 @@ procedure calculate_rewards(cycle: Uint32)
   end
 end
 
-procedure check_unclaimed_rewards(last_withdraw_cycle: Uint32)
+procedure check_unclaimed_rewards(last_withdraw_cycle_int: Uint32)
   last_cycle_local <- last_cycle;
-  (* last_withdraw_cycle + 1 should == last_cycle_local *)
-  last_withdraw_cycle_plus_one = builtin add last_withdraw_cycle uint32_one;
+  (* last_withdraw_cycle_int + 1 should == last_cycle_local *)
+  last_withdraw_cycle_plus_one = builtin add last_withdraw_cycle_int uint32_one;
   is_equal = builtin eq last_withdraw_cycle_plus_one last_cycle_local;
   match is_equal with
   | True =>
@@ -462,11 +462,11 @@ transition claim()
   update_stake_map_onchange u128_zero;
 
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
-  last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
+  last_withdraw_cycle_int = get_uint32_opt last_withdraw_cycle_opt;
   last_cycle_local <- last_cycle;
 
   (* from_cycle -> last_cycle *)
-  from_cycle = builtin add last_withdraw_cycle uint32_one;
+  from_cycle = builtin add last_withdraw_cycle_int uint32_one;
   reward_list = iota from_cycle last_cycle_local;
   e = { _eventname: "claim"; reward_list: reward_list};
   event e;
@@ -482,11 +482,11 @@ transition withdraw()
 
   (* check unclaimed rewards *)
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
-  last_withdraw_cycle = get_uint32_opt last_withdraw_cycle_opt;
-  check_unclaimed_rewards last_withdraw_cycle;
+  last_withdraw_cycle_int = get_uint32_opt last_withdraw_cycle_opt;
+  check_unclaimed_rewards last_withdraw_cycle_int;
 
   (* get original stake amount*)
-  stake_amount_opt <- stakers_stake_per_cycle[_sender][last_withdraw_cycle];
+  stake_amount_opt <- stakers_stake_per_cycle[_sender][last_withdraw_cycle_int];
   stake_amount = get_uint128_opt stake_amount_opt;
 
   (* calculate the amount to be transferred  *)
