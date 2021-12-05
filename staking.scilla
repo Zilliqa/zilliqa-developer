@@ -577,7 +577,7 @@ transition withdraw_penalty()
   is_owner _sender;
   transfer_amount <- aggregated_penalty_amount;
   aggregated_penalty_amount := u128_zero;
-  e = { _eventname: "Withdraw penalty"; amount: transfer_amount};
+  e = { _eventname: "AggregatedPenaltyWithdraw"; amount: transfer_amount};
   event e;
   transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
@@ -585,7 +585,7 @@ end
 transition emergency_withdraw(token_address: ByStr20, amount: Uint128)
   is_paused;
   is_owner _sender;
-  e = { _eventname: "Emergency Withdraw"; token: token_address; amount: amount};
+  e = { _eventname: "EmergencyWithdraw"; token: token_address; amount: amount};
   event e;
   transfer_zrc2_from_contract token_address _sender amount
 end
