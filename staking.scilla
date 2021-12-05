@@ -449,6 +449,7 @@ end
 (***************************************************)
 
 transition deposit(amount: Uint128)
+  is_unpaused;
   transfer_zrc2_to_contract init_staking_token_address amount;
   update_stake_map_onchange amount;
   update_staker_bal _sender amount;
@@ -459,6 +460,7 @@ transition deposit(amount: Uint128)
 end
 
 transition claim()
+  is_unpaused;
   update_stake_map_onchange u128_zero;
 
   last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
