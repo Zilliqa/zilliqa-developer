@@ -279,7 +279,7 @@ procedure clean_map_procedure(token_addr: ByStr20)
   delete rewards_per_cycle[token_addr]
 end
 
-procedure clean_rewards_tmp()
+procedure clean_rewards_distribution()
    aggregate_rewards_tmp_local <- aggregate_rewards_tmp;
    (* List (Pair ByStr20 Uint128)*)
    aggregate_rewards_tmp_list = builtin to_list aggregate_rewards_tmp_local;
@@ -362,7 +362,7 @@ procedure calculate_rewards(cycle: Uint32)
     match is_total_stake_zero with
     | True =>
     | False =>
-      clean_rewards_tmp;
+      clean_rewards_distribution;
       set_rewards_distribution user_stake_this_cycle total_stake_amount;
       send_rewards_distribution
     end
