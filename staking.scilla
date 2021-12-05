@@ -1,6 +1,6 @@
 scilla_version 0
 
-import ListUtils IntUtils
+import ListUtils IntUtils BoolUtils
 
 
 library Staking
@@ -15,6 +15,7 @@ type Error =
   | StagingAdminValidationFailed
   | ContractIsNotPaused
   | ContractIsPaused
+  | InvalidPenaltyRate
 
 let make_error =
   fun (result: Error) =>
@@ -25,6 +26,7 @@ let make_error =
       | StagingAdminValidationFailed => Int32 -3
       | ContractIsNotPaused => Int32 -4
       | ContractIsPaused => Int32 -5
+      | InvalidPenaltyRate => Int32 -6
       end
     in
     { _exception: "Error"; code: result_code }
@@ -408,7 +410,16 @@ end
 
 transition update_penalty_rate(new_rate: Uint128)
   is_owner _sender;
-  penalty_rate := new_rate
+  new_penalty_rate_gt_zero = uint128_gt new_rate u128_zero;
+  new_penalty_rate_le_max = uint128_le new_rate max_rate;
+  valid_penalty_rate = andb new_penalty_rate_gt_zero new_penalty_rate_le_max;
+  match valid_penalty_rate with
+  | True =>
+    penalty_rate := new_rate
+  | False =>
+    e = InvalidPenaltyRate;
+    throw_error e
+  end
 end
 
 transition update_mini_staking_cycle(new_mini_staking_cycle: Uint32)
