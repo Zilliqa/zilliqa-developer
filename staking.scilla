@@ -550,17 +550,17 @@ transition withdraw()
   mini_staking_cycle_local <- mini_staking_cycle;
   staking_cycle = builtin sub last_cycle_local last_deposit_cycle_local;
   gt_mini_cycle = builtin lt mini_staking_cycle_local staking_cycle;
-  penatly_rate_local <- penalty_rate;
+  penalty_rate_local <- penalty_rate;
   transfer_amount = match gt_mini_cycle with
   | True => stake_amount
   | False =>
-    let n = muldiv stake_amount penatly_rate_local max_rate in
+    let n = muldiv stake_amount penalty_rate_local max_rate in
     builtin sub stake_amount n
   end;
 
   (* we cannot access field in the above match with expression *)
-  penatly_amount = builtin sub stake_amount transfer_amount;
-  increase_aggregated_penalty_amount penatly_amount;
+  penalty_amount = builtin sub stake_amount transfer_amount;
+  increase_aggregated_penalty_amount penalty_amount;
 
   (* clean user data *)
   clean_user_data _sender;
