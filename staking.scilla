@@ -156,7 +156,7 @@ field staging_contract_owner: Option ByStr20 = None {ByStr20}
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 (* 10 ** 8 means 100%, 10 ** 7 means 10% *)
 field penalty_rate: Uint128 = Uint128 10000000
-field mini_staking_cycle: Uint32 = Uint32 10
+field lockup_cycle: Uint32 = Uint32 7
 
 (* global fields *)
 field last_block_num: Uint256 = bnum_to_uint256 _creation_block
@@ -489,10 +489,10 @@ transition update_penalty_rate(new_rate: Uint128)
   end
 end
 
-transition update_mini_staking_cycle(new_mini_staking_cycle: Uint32)
+transition update_lockup_cycle(new_lockup_cycle: Uint32)
   is_owner _sender;
-  mini_staking_cycle := new_mini_staking_cycle;
-  e = { _eventname: "Update mini cycle"; new_mini_cycle: new_mini_staking_cycle };
+  lockup_cycle := new_lockup_cycle;
+  e = { _eventname: "UpdateLockup"; new_lockup_cycle: new_lockup_cycle};
   event e
 end
 
@@ -507,7 +507,7 @@ transition deposit(amount: Uint128)
   update_staker_bal _sender amount;
   update_last_deposit_map _sender;
   deposit_cycle <-last_cycle;
-  e = { _eventname: "Deposit stake"; amount: amount; cycle: deposit_cycle };
+  e = { _eventname: "StakeDeposit"; staker : _sender; amount: amount; cycle: deposit_cycle };
   event e
 end
 
@@ -522,7 +522,7 @@ transition claim()
   (* from_cycle -> last_cycle *)
   from_cycle = builtin add last_withdraw_cycle_int uint32_one;
   reward_list = iota from_cycle last_cycle_local;
-  e = { _eventname: "claim"; reward_list: reward_list};
+  e = { _eventname: "RewardClaim"; reward_list: reward_list};
   event e;
   forall reward_list calculate_rewards;
   last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
@@ -547,9 +547,9 @@ transition withdraw()
   last_deposit_cycle_local <- last_deposit_cycle[_sender];
   last_deposit_cycle_local = get_uint32_opt last_deposit_cycle_local;
   last_cycle_local <- last_cycle;
-  mini_staking_cycle_local <- mini_staking_cycle;
+  lockup_cycle_local <- lockup_cycle;
   staking_cycle = builtin sub last_cycle_local last_deposit_cycle_local;
-  gt_mini_cycle = builtin lt mini_staking_cycle_local staking_cycle;
+  gt_mini_cycle = builtin lt lockup_cycle_local staking_cycle;
   penalty_rate_local <- penalty_rate;
   transfer_amount = match gt_mini_cycle with
   | True => stake_amount
@@ -568,7 +568,7 @@ transition withdraw()
   (* update total amount *)
   decrease_stake stake_amount;
 
-  e = { _eventname: "Withdraw stake"; amount: transfer_amount};
+  e = { _eventname: "WithdrawStake"; amount: transfer_amount};
   event e;
   transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end
