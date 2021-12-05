@@ -311,11 +311,31 @@ procedure setup_rewards_distribution(p: RewardsCalculation)
   end
 end
 
-procedure send_rewards_distribution(pair: Pair ByStr20 Uint128)
+procedure send_rewards(pair: Pair ByStr20 Uint128)
   match pair with
   | Pair token_address amount =>
     transfer_zrc2_from_contract token_address _sender amount
   end
+end
+
+procedure send_rewards_distribution()
+  aggregate_rewards_map <- aggregate_rewards_tmp;
+  aggregate_rewards_list = builtin to_list aggregate_rewards_map;
+  forall aggregate_rewards_list send_rewards
+end
+
+procedure set_rewards_distribution(user_stake_this_cycle: Uint128, total_stake_amount: Uint128)
+  rewards_per_cycle_local <- rewards_per_cycle;
+  (* List (Pair ByStr20 Uint128)*)
+  rewards_per_cycle_list = builtin to_list rewards_per_cycle_local;
+  mapper = @list_map (Pair ByStr20 Uint128) RewardsCalculation;
+  f = fun (p: Pair ByStr20 Uint128) =>
+    match p with
+    | Pair token_address amount =>
+      RewardsCalculation token_address amount user_stake_this_cycle total_stake_amount
+    end;
+  distribution_list = mapper f rewards_per_cycle_list;
+  forall distribution_list setup_rewards_distribution
 end
 
 procedure calculate_rewards(cycle: Uint32)
@@ -342,21 +362,9 @@ procedure calculate_rewards(cycle: Uint32)
     match is_total_stake_zero with
     | True =>
     | False =>
-      rewards_per_cycle_local <- rewards_per_cycle;
-      (* List (Pair ByStr20 Uint128)*)
-      rewards_per_cycle_list = builtin to_list rewards_per_cycle_local;
-      mapper = @list_map (Pair ByStr20 Uint128) RewardsCalculation;
-      f = fun (p: Pair ByStr20 Uint128) =>
-        match p with
-        | Pair token_address amount =>
-          RewardsCalculation token_address amount user_stake_this_cycle total_stake_amount
-        end;
-      distribution_list = mapper f rewards_per_cycle_list;
+      set_rewards_distribution user_stake_this_cycle total_stake_amount;
       clean_rewards_tmp;
-      forall distribution_list setup_rewards_distribution;
-      aggregate_rewards_map <- aggregate_rewards_tmp;
-      aggregate_rewards_list = builtin to_list aggregate_rewards_map;
-      forall aggregate_rewards_list send_rewards_distribution
+      send_rewards_distribution
     end
   | None =>
   end
