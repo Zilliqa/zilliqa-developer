@@ -202,7 +202,6 @@ procedure is_unpaused()
   end
 end
 
-
 procedure transfer_zrc2_to_contract(assetHash: ByStr20, amount: Uint128)
   msg_to_zrc2 = {_tag: "TransferFrom"; _recipient: assetHash; _amount: u128_zero;
                   from: _sender; to: _this_address; amount: amount};
@@ -225,7 +224,6 @@ procedure duplicate_total_stake_map(cycle_to_increase: Uint32)
   current_cycle = builtin add last_cycle_local cycle_to_increase;
   total_stake_per_cycle[current_cycle] := total_stake_local
 end
-
 
 procedure update_stake_map_onchange(change_amount: Uint128)
   current_bnum <- & BLOCKNUMBER;
@@ -262,7 +260,6 @@ procedure update_staker_bal(user: ByStr20, amount: Uint128)
                    end;
   stakers_bal[user][last_cycle_local] := new_amount
 end
-
 
 procedure update_last_deposit_map(user: ByStr20)
   last_cycle_local <- last_cycle;
@@ -355,9 +352,9 @@ procedure increase_aggregated_penalty_amount(amount: Uint128)
   end
 end
 
-
-
-(* Housekeeping transitions *)
+(***************************************************)
+(*              Housekeeping transitions           *)
+(***************************************************)
 
 transition update_owner(new_owner: ByStr20)
   is_owner _sender;
@@ -419,7 +416,9 @@ transition update_mini_staking_cycle(new_mini_staking_cycle: Uint32)
   mini_staking_cycle := new_mini_staking_cycle
 end
 
-(* Staking related transitions *)
+(***************************************************)
+(*           Staking related transitions           *)
+(***************************************************)
 
 transition deposit(amount: Uint128)
   transfer_zrc2_to_contract init_staking_token_address amount;
@@ -500,7 +499,10 @@ transition emergency_withdraw(token_address: ByStr20, amount: Uint128)
   transfer_zrc2_from_contract token_address _sender amount
 end
 
-(* ZRC-2 related callback transitions *)
+(***************************************************)
+(*       ZRC-2 related callback transitions        *)
+(***************************************************)
+
 transition TransferSuccessCallBack(sender: ByStr20, recipient: ByStr20, amount: Uint128)
   e = { _eventname: "TransferSuccessCallBack"; sender: sender; recipient: recipient; amount: amount };
   event e
