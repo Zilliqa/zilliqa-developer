@@ -150,7 +150,7 @@ with
 
 (* contract config fields *)
 field contract_owner: ByStr20 = init_contract_owner
-field paused: Bool = true
+field paused: Bool = false
 field staging_contract_owner: Option ByStr20 = None {ByStr20}
 (* Maps a reward token address to the amount set for disbursement per cycle *)
 field rewards_per_cycle: Map ByStr20 Uint128 = Emp ByStr20 Uint128
