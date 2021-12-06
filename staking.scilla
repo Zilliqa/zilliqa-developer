@@ -17,6 +17,7 @@ type Error =
   | ContractIsPaused
   | InvalidPenaltyRate
   | UserHasUnclaimedReward
+  | ShouldStakeAtLeastOneCycle
 
 let make_error =
   fun (result: Error) =>
@@ -29,6 +30,7 @@ let make_error =
       | ContractIsPaused => Int32 -5
       | InvalidPenaltyRate => Int32 -6
       | UserHasUnclaimedReward => Int32 -7
+      | ShouldStakeAtLeastOneCycle => Int32 -8
       end
     in
     { _exception: "Error"; code: result_code }
@@ -167,6 +169,7 @@ field aggregated_penalty_amount: Uint128 = Uint128 0
 
 (* user info fields *)
 field stakers_bal: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
+field stakers_total_bal: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
@@ -262,12 +265,21 @@ procedure update_staker_bal(user: ByStr20, amount: Uint128)
   last_cycle_local <- last_cycle;
   staker_bal_opt <- stakers_bal[user][last_cycle_local];
   new_amount = match staker_bal_opt with
-                   | Some staker_bal =>
-                     builtin add staker_bal amount
-                   | None =>
-                     amount
-                   end;
-  stakers_bal[user][last_cycle_local] := new_amount
+               | Some staker_bal =>
+                 builtin add staker_bal amount
+               | None =>
+                 amount
+               end;
+  stakers_bal[user][last_cycle_local] := new_amount;
+
+  staker_total_bal_opt <- stakers_total_bal[user];
+  new_total_bal = match staker_total_bal_opt with
+                  | Some total_bal =>
+                    builtin add total_bal amount
+                  | None =>
+                    amount
+                  end;
+  stakers_total_bal[user] := new_total_bal
 end
 
 procedure update_last_deposit_map(user: ByStr20)
@@ -387,7 +399,8 @@ procedure clean_user_data(user: ByStr20)
   delete stakers_bal[user];
   delete stakers_stake_per_cycle[user];
   delete last_deposit_cycle[user];
-  delete last_withdraw_cycle[user]
+  delete last_withdraw_cycle[user];
+  delete stakers_total_bal[user]
 end
 
 procedure decrease_stake(amount: Uint128)
@@ -539,8 +552,8 @@ transition withdraw()
   last_withdraw_cycle_int = get_uint32_opt last_withdraw_cycle_opt;
   check_unclaimed_rewards last_withdraw_cycle_int;
 
-  (* get original stake amount*)
-  stake_amount_opt <- stakers_stake_per_cycle[_sender][last_withdraw_cycle_int];
+  (* get original stake amount *)
+  stake_amount_opt <- stakers_total_bal[_sender];
   stake_amount = get_uint128_opt stake_amount_opt;
 
   (* calculate the amount to be transferred  *)
@@ -568,7 +581,7 @@ transition withdraw()
   (* update total amount *)
   decrease_stake stake_amount;
 
-  e = { _eventname: "WithdrawStake"; amount: transfer_amount};
+  e = { _eventname: "WithdrawStake"; stake_amount: stake_amount; transfer_amount: transfer_amount; penalty_amount: penalty_amount};
   event e;
   transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
 end

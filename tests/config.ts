@@ -55,35 +55,9 @@ export const FAUCET_PARAMS = {
   gasLimit: Long.fromNumber(50),
 };
 
-export const FIXED_PRICE_ERROR = {
-  SellOrderNotFoundError: -1,
-  SellOrderFoundError: -2,
-  BuyOrderNotFoundError: -3,
-  BuyOrderFoundError: -4,
-  NotSpenderError: -5,
-  NotTokenOwnerError: -6,
-  ExpiredError: -7,
-  NotMakerError: -8,
-  NotSelfError: -9,
-  NotAllowedPaymentToken: -10,
-};
-
-export const ENG_AUC_ERROR = {
-  SellOrderNotFoundError: -1,
-  SellOrderFoundError: -2,
-  BuyOrderNotFoundError: -3,
-  NotSpenderError: -4,
-  NotTokenOwnerError: -5,
-  NotSelfError: -6,
-  LessThanMinBidError: -7,
-  InsufficientAllowanceError: -8,
-  NotExpiredError: -9,
-  ExpiredError: -10,
-  AccountNotFoundError: -11,
-  InsufficientPaymentTokenError: -12,
-  AssetNotFoundError: -13,
-  NotAllowedToEndError: -14,
-  NotAllowedPaymentToken: -15,
+export const STAKING_ERROR = {
+  UserHasUnclaimedReward: -7,
+  ShouldStakeAtLeastOneCycle: -8,
 };
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
