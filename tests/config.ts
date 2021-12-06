@@ -18,7 +18,7 @@ export const CONTRACTS = {
     name: "token0",
     symbol: "token0",
     decimals: "12",
-    init_supply: "10000000000000000"
+    init_supply: "100000000000000000000"
   },
 
   token1: {
@@ -26,7 +26,7 @@ export const CONTRACTS = {
     name: "token1",
     symbol: "token1",
     decimals: "12",
-    init_supply: "10000000000000000"
+    init_supply: "100000000000000000000"
   },
 
   token2: {
@@ -34,7 +34,7 @@ export const CONTRACTS = {
     name: "token2",
     symbol: "token2",
     decimals: "12",
-    init_supply: "10000000000000000"
+    init_supply: "100000000000000000000"
   }
 };
 
@@ -57,7 +57,6 @@ export const FAUCET_PARAMS = {
 
 export const STAKING_ERROR = {
   UserHasUnclaimedReward: -7,
-  ShouldStakeAtLeastOneCycle: -8,
 };
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

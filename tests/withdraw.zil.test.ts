@@ -4,7 +4,7 @@ import { getAddressFromPrivateKey, schnorr } from "@zilliqa-js/crypto";
 
 import {
   useContractInfo,
-  //increaseBNum
+  increaseBNum
 } from "./testutil";
 
 import {
@@ -15,6 +15,7 @@ import {
   GAS_LIMIT,
   FAUCET_PARAMS,
   asyncNoop,
+  STAKING_ERROR,
 } from "./config";
 
 const JEST_WORKER_ID = Number(process.env["JEST_WORKER_ID"]);
@@ -152,7 +153,7 @@ beforeAll(async () => {
     )(
         "IncreaseAllowance",
         globalStakingContractAddress,
-        Number(100000000000000).toString()
+        Number(10000000000000000).toString()
     );
     if (!tx0.receipt.success) {
       throw new Error();
@@ -165,7 +166,7 @@ beforeAll(async () => {
     )(
       "Transfer",
       globalStakingContractAddress,
-      Number(100000000000000).toString()
+      Number(10000000000000000).toString()
       );
     if (!tx1.receipt.success) {
       throw new Error();
@@ -177,7 +178,7 @@ beforeAll(async () => {
     )(
       "Transfer",
       globalStakingContractAddress,
-      Number(100000000000000).toString()
+      Number(10000000000000000).toString()
     );
     if (!tx2.receipt.success) {
       throw new Error();
@@ -232,6 +233,43 @@ describe("staking contract", () => {
         },
         {
           name: "withdraw on current cycle",
+          transition: "withdraw",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error:
+           undefined,
+        },
+        {
+          name: "deposit once again",
+          transition: "deposit",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({
+            amount: "10"
+          }),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "withdraw with rewards",
+          transition: "withdraw",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: async () => {
+            await increaseBNum(zilliqa, 3650);
+          },
+          error: STAKING_ERROR.UserHasUnclaimedReward,
+        },
+        {
+          name: "claim",
+          transition: "claim",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "withdraw without rewards",
           transition: "withdraw",
           getSender: () => getTestAddr(OWNER),
           getParams: () => ({}),

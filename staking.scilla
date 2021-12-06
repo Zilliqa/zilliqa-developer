@@ -174,7 +174,7 @@ field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (M
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 
-(* temp fields for calculating aggregate rewards *)
+(* temp field for calculating aggregate rewards *)
 field aggregate_rewards_tmp: Map ByStr20 Uint128 = Emp ByStr20 Uint128
 
 procedure throw_error(err: Error)
@@ -319,7 +319,9 @@ procedure setup_rewards_distribution(p: RewardsCalculation)
   match p with
   | RewardsCalculation token_address rewarding_amount user_stake total_stake_amount =>
     reward = muldiv rewarding_amount user_stake total_stake_amount;
-    increase_rewards_tmp token_address reward
+    increase_rewards_tmp token_address reward;
+    e = { _eventname: "setup_rewards_distribution"; token_address: token_address; reward: reward};
+    event e
   end
 end
 
@@ -364,7 +366,7 @@ procedure calculate_rewards(cycle: Uint32)
                                 last_staker_bal
                               end;
 
-  stakers_bal[_sender][cycle] := user_stake_this_cycle;
+  stakers_stake_per_cycle[_sender][cycle] := user_stake_this_cycle;
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake_amount =>
@@ -374,9 +376,7 @@ procedure calculate_rewards(cycle: Uint32)
     match is_total_stake_zero with
     | True =>
     | False =>
-      clean_rewards_distribution;
-      set_rewards_distribution user_stake_this_cycle total_stake_amount;
-      send_rewards_distribution
+      set_rewards_distribution user_stake_this_cycle total_stake_amount
     end
   | None =>
   end
@@ -537,7 +537,9 @@ transition claim()
   reward_list = iota from_cycle last_cycle_local;
   e = { _eventname: "RewardClaim"; reward_list: reward_list};
   event e;
+  clean_rewards_distribution;
   forall reward_list calculate_rewards;
+  send_rewards_distribution;
   last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
   last_withdraw_cycle[_sender] := last_withdraw_cycle_local
 end
