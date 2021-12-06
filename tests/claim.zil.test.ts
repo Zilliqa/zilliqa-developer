@@ -163,7 +163,7 @@ beforeAll(async () => {
       zilliqa.contracts.at(globalToken1ContractAddress),
       TX_PARAMS
     )(
-      "IncreaseAllowance",
+      "Transfer",
       globalStakingContractAddress,
       Number(100000000000000).toString()
       );
@@ -175,11 +175,35 @@ beforeAll(async () => {
       zilliqa.contracts.at(globalToken2ContractAddress),
       TX_PARAMS
     )(
-      "IncreaseAllowance",
+      "Transfer",
       globalStakingContractAddress,
       Number(100000000000000).toString()
     );
     if (!tx2.receipt.success) {
+      throw new Error();
+    }
+
+    const tx3 = await globalStakingContractInfo.callGetter(
+      zilliqa.contracts.at(globalStakingContractAddress),
+      TX_PARAMS
+    )(
+      "update_token_rewards",
+      globalToken1ContractAddress,
+      "10000000000000"
+    )
+    if (!tx3.receipt.success) {
+      throw new Error();
+    }
+
+    const tx4 = await globalStakingContractInfo.callGetter(
+      zilliqa.contracts.at(globalStakingContractAddress),
+      TX_PARAMS
+    )(
+      "update_token_rewards",
+      globalToken2ContractAddress,
+      "10000000000000"
+    )
+    if (!tx4.receipt.success) {
       throw new Error();
     }
 });
@@ -187,14 +211,6 @@ beforeAll(async () => {
 
 describe("staking contract", () => {
     const testCases = [
-        {
-          name: "unpause",
-          transition: "unpause",
-          getSender: () => getTestAddr(OWNER),
-          beforeTransition: asyncNoop,
-          error: undefined,
-          getParams: () => ({}),
-        },
         {
             name: "deposit once",
             transition: "deposit",
@@ -208,74 +224,56 @@ describe("staking contract", () => {
               verifyState: (state) => {
                 return (
                   JSON.stringify(state.total_stake_per_cycle) ===
-                    `{"0":"10"}` &&
+                    `{"1":"10"}` &&
                   JSON.stringify(state.total_stake) === `"10"`
                 )
               }
             }
         },
         {
-            name: "deposit multiple times before next cycle",
-            transition: "deposit",
-            getSender: () => getTestAddr(OWNER),
-            getParams: () => ({
-              amount: "10"
-            }),
-            beforeTransition: async () => {
-              await increaseBNum(zilliqa, 5);
-            },
-            error: undefined,
-            want: {
-              verifyState: (state) => {
-                return (
-                  JSON.stringify(state.total_stake_per_cycle) ===
-                    `{"0":"20"}` &&
-                    JSON.stringify(state.total_stake) === `"20"`
-                )
-              }
+          name: "claim on current cycle",
+          transition: "claim",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+          want: {
+            verifyState: (state) => {
+              return (
+                JSON.stringify(state.total_stake_per_cycle) ===
+                  `{"1":"10"}` &&
+                JSON.stringify(state.total_stake) === `"10"`
+              )
             }
+          }
         },
         {
-          name: "deposit multiple times crross next cycle",
-          transition: "deposit",
+          name: "claim on next cycle",
+          transition: "claim",
           getSender: () => getTestAddr(OWNER),
-          getParams: () => ({
-            amount: "10"
-          }),
+          getParams: () => ({}),
           beforeTransition: async () => {
             await increaseBNum(zilliqa, 10);
           },
           error: undefined,
-          want: {
-            verifyState: (state) => {
-              return (
-                JSON.stringify(state.total_stake_per_cycle) ===
-                  `{"0":"20","1":"30"}` &&
-                  JSON.stringify(state.total_stake) === `"30"`
-              )
-            }
-          },
         },
         {
-          name: "crross multiple cycle",
-          transition: "deposit",
+          name: "claim on next cycle again",
+          transition: "claim",
           getSender: () => getTestAddr(OWNER),
-          getParams: () => ({
-            amount: "10"
-          }),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "claim on next 3 cycle",
+          transition: "claim",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
           beforeTransition: async () => {
-            await increaseBNum(zilliqa, 33);
+            await increaseBNum(zilliqa, 30);
           },
           error: undefined,
-          want: {
-            verifyState: (state) => {
-              return (
-                JSON.stringify(state.total_stake_per_cycle) ===
-                  `{"0":"20","1":"30","2":"30","3":"30","4":"40"}` &&
-                  JSON.stringify(state.total_stake) === `"40"`
-              )
-            }
-          },
         },
     ];
 
@@ -290,6 +288,7 @@ describe("staking contract", () => {
                 TX_PARAMS
             )(testCase.transition, ...Object.values(testCase.getParams()));
 
+            console.log("transaction id = ", tx.id);
             console.log(tx.receipt);
             const state = await zilliqa.contracts
                     .at(globalStakingContractAddress)

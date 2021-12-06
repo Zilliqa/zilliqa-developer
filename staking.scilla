@@ -160,7 +160,7 @@ field lockup_cycle: Uint32 = Uint32 7
 
 (* global fields *)
 field last_block_num: Uint256 = bnum_to_uint256 _creation_block
-field last_cycle: Uint32 = Uint32 0
+field last_cycle: Uint32 = Uint32 1
 field total_stake: Uint128 = u128_zero
 field total_stake_per_cycle: Map Uint32 Uint128 = Emp Uint32 Uint128
 field aggregated_penalty_amount: Uint128 = Uint128 0
@@ -344,7 +344,7 @@ procedure calculate_rewards(cycle: Uint32)
   last_staker_bal = get_uint128_opt last_staker_bal_opt;
   delete stakers_stake_per_cycle[_sender][last_reward_cycle];
 
-  staker_bal_opt <- stakers_bal[_sender][last_reward_cycle];
+  staker_bal_opt <- stakers_bal[_sender][cycle];
   user_stake_this_cycle = match staker_bal_opt with
                               | Some staker_bal =>
                                 builtin add staker_bal last_staker_bal
