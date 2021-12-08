@@ -231,6 +231,23 @@ describe("staking contract", () => {
             }
         },
         {
+          name: "check rewards on current cycle",
+          transition: "check_rewards",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+          want: {
+            verifyState: (state) => {
+              return (
+                JSON.stringify(state.total_stake_per_cycle) ===
+                  `{"1":"10"}` &&
+                JSON.stringify(state.total_stake) === `"10"`
+              )
+            }
+          }
+        },
+        {
           name: "claim on current cycle",
           transition: "claim",
           getSender: () => getTestAddr(OWNER),
@@ -248,13 +265,29 @@ describe("staking contract", () => {
           }
         },
         {
-          name: "claim on next cycle",
-          transition: "claim",
+          name: "check rewards on next cycle",
+          transition: "check_rewards",
           getSender: () => getTestAddr(OWNER),
           getParams: () => ({}),
           beforeTransition: async () => {
             await increaseBNum(zilliqa, 10);
           },
+          error: undefined,
+        },
+        {
+          name: "claim on next cycle",
+          transition: "claim",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "check rewards on next cycle again",
+          transition: "check_rewards",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
           error: undefined,
         },
         {
@@ -266,13 +299,21 @@ describe("staking contract", () => {
           error: undefined,
         },
         {
-          name: "claim on next 3 cycle",
-          transition: "claim",
+          name: "check rewards on next 4 cycle",
+          transition: "check_rewards",
           getSender: () => getTestAddr(OWNER),
           getParams: () => ({}),
           beforeTransition: async () => {
-            await increaseBNum(zilliqa, 30);
+            await increaseBNum(zilliqa, 40);
           },
+          error: undefined,
+        },
+        {
+          name: "claim on next 4 cycle",
+          transition: "claim",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
           error: undefined,
         },
     ];

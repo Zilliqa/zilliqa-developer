@@ -35,6 +35,9 @@ let make_error =
     in
     { _exception: "Error"; code: result_code }
 
+type UserAndCycle =
+| UserAndCycle of ByStr20 Uint32
+
 let true = True
 let false = False
 let uint32_zero = Uint32 0
@@ -174,8 +177,9 @@ field stakers_stake_per_cycle: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (M
 field last_deposit_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 field last_withdraw_cycle: Map ByStr20 Uint32 = Emp ByStr20 Uint32
 
-(* temp field for calculating aggregate rewards *)
+(* temp fields for calculating aggregate rewards *)
 field aggregate_rewards_tmp: Map ByStr20 Uint128 = Emp ByStr20 Uint128
+field stakers_stake_per_cycle_tmp: Map ByStr20 (Map Uint32 Uint128) = Emp ByStr20 (Map Uint32 Uint128)
 
 procedure throw_error(err: Error)
   e = make_error err;
@@ -288,7 +292,7 @@ procedure update_last_deposit_map(user: ByStr20)
 end
 
 procedure clean_map_procedure(token_addr: ByStr20)
-  delete rewards_per_cycle[token_addr]
+  delete aggregate_rewards_tmp[token_addr]
 end
 
 procedure clean_rewards_distribution()
@@ -380,6 +384,77 @@ procedure calculate_rewards(cycle: Uint32)
     end
   | None =>
   end
+end
+
+procedure setup_rewards_distribution_tmp(p: RewardsCalculation)
+  match p with
+  | RewardsCalculation token_address rewarding_amount user_stake total_stake_amount =>
+    reward = muldiv rewarding_amount user_stake total_stake_amount;
+    increase_rewards_tmp token_address reward;
+    e = { _eventname: "setup_rewards_distribution"; token_address: token_address; reward: reward};
+    event e
+  end
+end
+
+procedure set_rewards_distribution_tmp(user_stake_this_cycle: Uint128, total_stake_amount: Uint128)
+  rewards_per_cycle_local <- rewards_per_cycle;
+  (* List (Pair ByStr20 Uint128)*)
+  rewards_per_cycle_list = builtin to_list rewards_per_cycle_local;
+  mapper = @list_map (Pair ByStr20 Uint128) RewardsCalculation;
+  f = fun (p: Pair ByStr20 Uint128) =>
+    match p with
+    | Pair token_address amount =>
+      RewardsCalculation token_address amount user_stake_this_cycle total_stake_amount
+    end;
+  distribution_list = mapper f rewards_per_cycle_list;
+  forall distribution_list setup_rewards_distribution_tmp
+end
+
+procedure calculate_rewards_tmp_inner(user: ByStr20, cycle: Uint32)
+  last_reward_cycle = builtin sub cycle uint32_one;
+  last_staker_bal_opt <- stakers_stake_per_cycle_tmp[user][last_reward_cycle];
+  last_staker_bal = get_uint128_opt last_staker_bal_opt;
+  delete stakers_stake_per_cycle_tmp[_sender][last_reward_cycle];
+
+  staker_bal_opt <- stakers_bal[_sender][cycle];
+  user_stake_this_cycle = match staker_bal_opt with
+                              | Some staker_bal =>
+                                builtin add staker_bal last_staker_bal
+                              | None =>
+                                last_staker_bal
+                              end;
+
+  stakers_stake_per_cycle_tmp[_sender][cycle] := user_stake_this_cycle;
+  total_stake_per_opt <- total_stake_per_cycle[cycle];
+  match total_stake_per_opt with
+  | Some total_stake_amount =>
+    e = { _eventname: "calculate_rewards_tmp_inner"; cycle: cycle; total_stake: total_stake_amount; user_stake_this_cycle: user_stake_this_cycle };
+    event e;
+    is_total_stake_zero = builtin eq u128_zero total_stake_amount;
+    match is_total_stake_zero with
+    | True =>
+    | False =>
+      set_rewards_distribution_tmp user_stake_this_cycle total_stake_amount
+    end
+  | None =>
+  end
+end
+
+procedure calculate_rewards_tmp(arg: UserAndCycle)
+ match arg with
+ | UserAndCycle user cycle =>
+   calculate_rewards_tmp_inner user cycle
+ end
+end
+
+procedure update_stakers_stake_per_cycle_tmp(init_cycle: Uint32, user: ByStr20)
+  amount_opt <- stakers_stake_per_cycle[user][init_cycle];
+  amt = get_uint128_opt amount_opt;
+  stakers_stake_per_cycle_tmp[user][init_cycle] := amt
+end
+
+procedure clean_stakers_stake_per_cycle_tmp(user: ByStr20)
+  delete stakers_stake_per_cycle_tmp[user]
 end
 
 procedure check_unclaimed_rewards(last_withdraw_cycle_int: Uint32)
@@ -542,6 +617,40 @@ transition claim()
   send_rewards_distribution;
   last_withdraw_cycle_local = builtin sub last_cycle_local uint32_one;
   last_withdraw_cycle[_sender] := last_withdraw_cycle_local
+end
+
+transition check_rewards()
+  is_unpaused;
+  update_stake_map_onchange u128_zero;
+  user = _sender;
+
+  last_withdraw_cycle_opt <- last_withdraw_cycle[user];
+  last_withdraw_cycle_int = get_uint32_opt last_withdraw_cycle_opt;
+
+  (* update stakers_stake_per_cycle_tmp *)
+  update_stakers_stake_per_cycle_tmp last_withdraw_cycle_int user;
+
+  last_cycle_local <- last_cycle;
+
+  from_cycle = builtin add last_withdraw_cycle_int uint32_one;
+  reward_list = iota from_cycle last_cycle_local;
+  (* we share aggregate_rewards_tmp with claim, but it is ok as it just a tmp map *)
+  clean_rewards_distribution;
+
+  mapper = @list_map Uint32 UserAndCycle;
+  f = fun (cycle: Uint32) => UserAndCycle user cycle;
+  reward_list_with_user = mapper f reward_list;
+  forall reward_list_with_user calculate_rewards_tmp;
+
+  aggregate_rewards_map <- aggregate_rewards_tmp;
+  aggregate_rewards_list = builtin to_list aggregate_rewards_map;
+  e = { _eventname: "check_rewards"; rewards: aggregate_rewards_list };
+  event e;
+
+  (* clean up stakers_stake_per_cycle_tmp *)
+  clean_stakers_stake_per_cycle_tmp user
+
+  (* don't update anything after this *)
 end
 
 transition withdraw()
