@@ -365,6 +365,34 @@ describe("staking contract", () => {
           },
           error: undefined,
         },
+        {
+          name: "claim from bob after 1",
+          transition: "claim",
+          getSender: () => getTestAddr(Bob),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "withdraw from bob",
+          transition: "withdraw",
+          getSender: () => getTestAddr(Bob),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "check rewards from alice after 1",
+          transition: "check_rewards",
+          getSender: () => getTestAddr(Alice),
+          getParams: () => ({
+            amount: "10"
+          }),
+          beforeTransition: async () => {
+            await increaseBNum(zilliqa, 10);
+          },
+          error: undefined,
+        },
     ];
 
     for (const testCase of testCases) {
