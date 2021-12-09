@@ -393,6 +393,38 @@ describe("staking contract", () => {
           },
           error: undefined,
         },
+        {
+          name: "claim from alice",
+          transition: "claim",
+          getSender: () => getTestAddr(Alice),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "claim from owner",
+          transition: "claim",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "withdraw from alice",
+          transition: "withdraw",
+          getSender: () => getTestAddr(Alice),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
+        {
+          name: "withdraw from owner",
+          transition: "withdraw",
+          getSender: () => getTestAddr(OWNER),
+          getParams: () => ({}),
+          beforeTransition: asyncNoop,
+          error: undefined,
+        },
     ];
 
     for (const testCase of testCases) {
