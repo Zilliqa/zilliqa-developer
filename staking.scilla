@@ -547,6 +547,7 @@ end
 
 (* The next two transitions allow to initiate the reward pool *)
 (* Should be used carefully, and ideally right after the deployment and before allowing users to interact with this contract. *)
+(* amount_per_cycle should use tokens' decimal format *)
 transition update_token_rewards(token_address: ByStr20, amount_per_cycle: Uint128)
   is_owner _sender;
   rewards_per_cycle[token_address] := amount_per_cycle;
