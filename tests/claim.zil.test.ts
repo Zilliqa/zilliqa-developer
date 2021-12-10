@@ -118,7 +118,7 @@ beforeAll(async () => {
       _scilla_version: ["Uint32", 0],
       init_contract_owner: ["ByStr20", getTestAddr(OWNER)],
       init_staking_token_address: ["ByStr20", globalToken0ContractAddress],
-      blocks_per_cycle: ["Uint256", "10"],
+      blocks_per_cycle: ["Uint256", 10],
     });
 
     [, contract] = await zilliqa.contracts
@@ -140,7 +140,7 @@ beforeAll(async () => {
           "IncreaseAllowance",
           getJSONParams({
             spender: ["ByStr20", globalStakingContractAddress],
-            amount: ["Uint128", Number(100000000000000).toString()]
+            amount: ["Uint128", 100000000000000]
           }),
           TX_PARAMS
     );
