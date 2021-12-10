@@ -142,7 +142,7 @@ beforeAll(async () => {
           "IncreaseAllowance",
           getJSONParams({
             spender: ["ByStr20", globalStakingContractAddress],
-            amount: ["Uint128", Number(100000000000000).toString()]
+            amount: ["Uint128", 10000000000000]
           }),
           TX_PARAMS
     );
@@ -157,7 +157,7 @@ beforeAll(async () => {
           "Transfer",
           getJSONParams({
             to: ["ByStr20", globalStakingContractAddress],
-            amount: ["Uint128", Number(100000000000000).toString()]
+            amount: ["Uint128", 10000000000000]
           }),
           TX_PARAMS
     );
@@ -172,7 +172,7 @@ beforeAll(async () => {
       "Transfer",
       getJSONParams({
         to: ["ByStr20", globalStakingContractAddress],
-        amount: ["Uint128", Number(100000000000000).toString()]
+        amount: ["Uint128", 10000000000000]
       }),
       TX_PARAMS
     );
@@ -187,7 +187,7 @@ beforeAll(async () => {
         "update_token_rewards",
         getJSONParams({
           token_address: ["ByStr20", globalToken1ContractAddress],
-          amount_per_cycle: ["Uint128", Number(10000000000000).toString()]
+          amount_per_cycle: ["Uint128", 10000000000000]
         }),
         TX_PARAMS
     );
@@ -202,7 +202,7 @@ beforeAll(async () => {
       "update_token_rewards",
       getJSONParams({
         token_address: ["ByStr20", globalToken2ContractAddress],
-        amount_per_cycle: ["Uint128", Number(10000000000000).toString()]
+        amount_per_cycle: ["Uint128", 10000000000000]
       }),
       TX_PARAMS
     );
@@ -218,7 +218,7 @@ beforeAll(async () => {
      "Transfer",
      getJSONParams({
        to: ["ByStr20", accounts[Alice]!.address],
-       amount: ["Uint128", Number(100000000000000).toString()]
+       amount: ["Uint128", 10000000000000]
      }),
      TX_PARAMS
    );
@@ -233,7 +233,7 @@ beforeAll(async () => {
      "Transfer",
      getJSONParams({
        to: ["ByStr20", accounts[Bob]!.address],
-       amount: ["Uint128", Number(100000000000000).toString()]
+       amount: ["Uint128", 10000000000000]
      }),
      TX_PARAMS
    );
@@ -249,7 +249,7 @@ beforeAll(async () => {
      "IncreaseAllowance",
      getJSONParams({
        spender: ["ByStr20", globalStakingContractAddress],
-       amount: ["Uint128", Number(100000000000000).toString()]
+       amount: ["Uint128", 10000000000000]
      }),
      TX_PARAMS
   );
@@ -265,7 +265,7 @@ beforeAll(async () => {
     "IncreaseAllowance",
     getJSONParams({
       spender: ["ByStr20", globalStakingContractAddress],
-      amount: ["Uint128", Number(100000000000000).toString()]
+      amount: ["Uint128", 10000000000000]
     }),
     TX_PARAMS
   );

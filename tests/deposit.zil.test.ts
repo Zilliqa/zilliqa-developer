@@ -141,7 +141,7 @@ beforeAll(async () => {
           "IncreaseAllowance",
           getJSONParams({
             spender: ["ByStr20", globalStakingContractAddress],
-            amount: ["Uint128", Number(100000000000000).toString()]
+            amount: ["Uint128", 100000000000000]
           }),
           TX_PARAMS
     );
@@ -156,7 +156,7 @@ beforeAll(async () => {
         "IncreaseAllowance",
         getJSONParams({
           spender: ["ByStr20", globalStakingContractAddress],
-          amount: ["Uint128", Number(100000000000000).toString()]
+          amount: ["Uint128", 100000000000000]
         }),
         TX_PARAMS
     );
@@ -171,7 +171,7 @@ beforeAll(async () => {
         "IncreaseAllowance",
         getJSONParams({
           spender: ["ByStr20", globalStakingContractAddress],
-          amount: ["Uint128", Number(100000000000000).toString()]
+          amount: ["Uint128", 100000000000000]
         }),
         TX_PARAMS
     );
