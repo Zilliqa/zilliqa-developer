@@ -3,8 +3,8 @@ import { Long, BN } from "@zilliqa-js/util";
 
 export const CONTAINER = process.env["CONTAINER"];
 
-export const API = `http://localhost:${process.env["PORT"]}`; // Zilliqa Isolated Server
-//export const API = 'https://zilliqa-isolated-server.zilliqa.com/'
+//export const API = `http://localhost:${process.env["PORT"]}`; // Zilliqa Isolated Server
+export const API = 'https://xcad-isolated-server.zilliqa.com/'
 export const CHAIN_ID = 222;
 export const MSG_VERSION = 1;
 export const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
