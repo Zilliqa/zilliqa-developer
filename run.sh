@@ -11,7 +11,9 @@ echo $VALIDATOR_MODE
 echo $T
 echo $UUID
 
-if [ "$VALIDATOR_MODE" == "true" ]; then
+if [ "$MANUAL_MODE" == "true" ]; then
+    isolatedServer -f boot.json -u "$UUID" | tee /zilliqa/logs/isolated-server.log
+elif [ "$VALIDATOR_MODE" == "true" ]; then
     echo "Running in validator mode."
     ./validate.sh
 else
