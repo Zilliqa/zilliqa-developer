@@ -4,7 +4,8 @@ import { getAddressFromPrivateKey, schnorr } from "@zilliqa-js/crypto";
 
 import {
   useContractInfo,
-  increaseBNum
+  increaseBNum,
+  getContractInfo
 } from "./testutil";
 
 import {
@@ -12,7 +13,6 @@ import {
   API,
   TX_PARAMS,
   CONTRACTS,
-  GAS_LIMIT,
   FAUCET_PARAMS,
   asyncNoop,
   STAKING_ERROR,
@@ -83,7 +83,7 @@ beforeAll(async () => {
         CONTRACTS.token0.path,
         CONTRACTS.token1.path,
         CONTRACTS.token2.path,
-    ].map((path) => useContractInfo(CONTAINER, path, GAS_LIMIT));
+    ].map(async (path) => useContractInfo(await getContractInfo(path, { container: CONTAINER })));
 
     [
       globalStakingContractInfo,
