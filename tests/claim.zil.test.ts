@@ -370,7 +370,6 @@ describe("staking contract", () => {
                 throw new Error();
               }
             }
-
             if (testCase.want !== undefined && testCase.want.verifyState !== undefined) {
               const state = await zilliqa.contracts
               .at(globalStakingContractAddress)
