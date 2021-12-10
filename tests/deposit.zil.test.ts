@@ -292,6 +292,11 @@ describe("staking contract", () => {
             );
             console.log("transaction id = ", tx.id);
             console.log(tx.receipt);
+            if (testCase.error === undefined) {
+              if (!tx.receipt.success) {
+                throw new Error();
+              }
+            }
 
             if (testCase.want !== undefined && testCase.want.verifyState !== undefined) {
               const state = await zilliqa.contracts

@@ -157,7 +157,7 @@ beforeAll(async () => {
           "Transfer",
           getJSONParams({
             to: ["ByStr20", globalStakingContractAddress],
-            amount: ["Uint128", 10000000000000]
+            amount: ["Uint128", 100000000000000]
           }),
           TX_PARAMS
     );
@@ -172,7 +172,7 @@ beforeAll(async () => {
       "Transfer",
       getJSONParams({
         to: ["ByStr20", globalStakingContractAddress],
-        amount: ["Uint128", 10000000000000]
+        amount: ["Uint128", 100000000000000]
       }),
       TX_PARAMS
     );
@@ -449,6 +449,11 @@ describe("staking contract", () => {
             );
             console.log("transaction id = ", tx.id);
             console.log(tx.receipt);
+            if (testCase.error === undefined) {
+              if (!tx.receipt.success) {
+                throw new Error();
+              }
+            }
 
             if (testCase.want !== undefined && testCase.want.verifyState !== undefined) {
               const state = await zilliqa.contracts

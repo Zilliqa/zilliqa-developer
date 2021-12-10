@@ -209,6 +209,36 @@ beforeAll(async () => {
     throw new Error();
    }
    console.log(tx4.receipt);
+
+   const tx5: any = await zilliqa.contracts
+   .at(globalToken1ContractAddress)
+   .call(
+     "Transfer",
+     getJSONParams({
+       to: ["ByStr20", globalStakingContractAddress],
+       amount: ["Uint128", 1000000000000000]
+     }),
+     TX_PARAMS
+   );
+   if (!tx5.receipt.success) {
+     throw new Error();
+   }
+  console.log(tx5.receipt);
+
+  const tx6: any = await zilliqa.contracts
+    .at(globalToken2ContractAddress)
+   .call(
+      "Transfer",
+      getJSONParams({
+        to: ["ByStr20", globalStakingContractAddress],
+        amount: ["Uint128", 1000000000000000]
+      }),
+    TX_PARAMS
+  );
+  if (!tx6.receipt.success) {
+    throw new Error();
+  }
+  console.log(tx6.receipt);
 });
 
 
@@ -258,7 +288,7 @@ describe("staking contract", () => {
           getSender: () => getTestAddr(OWNER),
           getParams: () => ({}),
           beforeTransition: async () => {
-            await increaseBNum(zilliqa, 3650);
+            await increaseBNum(zilliqa, 30);
           },
           error: STAKING_ERROR.UserHasUnclaimedReward,
         },
@@ -295,7 +325,11 @@ describe("staking contract", () => {
             );
             console.log("transaction id = ", tx.id);
             console.log(tx.receipt);
-
+            if (testCase.error === undefined) {
+              if (!tx.receipt.success) {
+                throw new Error();
+              }
+            }
             if (testCase.want !== undefined && testCase.want.verifyState !== undefined) {
               const state = await zilliqa.contracts
               .at(globalStakingContractAddress)
