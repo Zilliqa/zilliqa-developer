@@ -47,6 +47,19 @@ docker run -d -p 5555:5555 \
   isolated-server:1.0
 ```
 ---
+##### Running the isolated server with manual block increase
+Enabling manual mode can be done by the following command.
+
+If manual mode is enabled, the following api call is available `IncreaseBlocknum`
+
+Do note however, if you run in manual mode, persistence storage is not supported.
+```
+docker run -d -p 5555:5555 \
+  --env MANUAL_MODE="true" \
+  --name isolated-server \
+  isolated-server:1.0
+```
+---
 ##### Additional Run Arguments
 The Isolated Server run script also supports modifications to the following parameters
 | environment variable | default value | description |
@@ -87,7 +100,7 @@ docker rm isolated-server
 - `SetMinimumGasPrice`: Set the minimum gas price
 - `GetBalance`: Get balance and nonce of a account
 - `GetSmartContracts`: get smart contract for an address
-- `GetNetworkID`
+- `GetNetworkID`: get the network ID of the isolated server
 - `GetSmartContractInit` : get init json for a SC.
 - `GetTransaction `: Get Transaction info by hash
 
