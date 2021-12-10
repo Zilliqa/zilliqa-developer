@@ -93,7 +93,8 @@ docker rm isolated-server
 ##### Available APIs
 
 - `CreateTransaction` : Input a transaction json payload
-- `IncreaseBlocknum` : Increase the blocknum by a given input
+- `GetLatestTxBlock` : Get the information on the latest tx block, not available in manual mode.
+- `IncreaseBlocknum` : Increase the blocknum by a given input, only available in manual mode.
 - `GetSmartContractSubState` : Get the state of a smart contract
 - `GetSmartContractCode` : Get code at a given address
 - `GetMinimumGasPrice` : Get the minimum gas price
