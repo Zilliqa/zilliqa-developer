@@ -18,6 +18,8 @@ type Error =
   | InvalidPenaltyRate
   | UserHasUnclaimedReward
   | ShouldStakeAtLeastOneCycle
+  | StillInLockupPeriod
+  | OutofLockupPeriod
 
 let make_error =
   fun (result: Error) =>
@@ -31,6 +33,8 @@ let make_error =
       | InvalidPenaltyRate => Int32 -6
       | UserHasUnclaimedReward => Int32 -7
       | ShouldStakeAtLeastOneCycle => Int32 -8
+      | StillInLockupPeriod => Int32 -9
+      | OutofLockupPeriod => Int32 -10
       end
     in
     { _exception: "Error"; code: result_code }
@@ -323,9 +327,7 @@ procedure setup_rewards_distribution(p: RewardsCalculation)
   match p with
   | RewardsCalculation token_address rewarding_amount user_stake total_stake_amount =>
     reward = muldiv rewarding_amount user_stake total_stake_amount;
-    increase_rewards_tmp token_address reward;
-    e = { _eventname: "setup_rewards_distribution"; token_address: token_address; reward: reward};
-    event e
+    increase_rewards_tmp token_address reward
   end
 end
 
@@ -374,8 +376,6 @@ procedure calculate_rewards(cycle: Uint32)
   total_stake_per_opt <- total_stake_per_cycle[cycle];
   match total_stake_per_opt with
   | Some total_stake_amount =>
-    e = { _eventname: "calculate_rewards"; total_stake: total_stake_amount; user_stake_this_cycle: user_stake_this_cycle };
-    event e;
     is_total_stake_zero = builtin eq u128_zero total_stake_amount;
     match is_total_stake_zero with
     | True =>
@@ -390,9 +390,7 @@ procedure setup_rewards_distribution_tmp(p: RewardsCalculation)
   match p with
   | RewardsCalculation token_address rewarding_amount user_stake total_stake_amount =>
     reward = muldiv rewarding_amount user_stake total_stake_amount;
-    increase_rewards_tmp token_address reward;
-    e = { _eventname: "setup_rewards_distribution"; token_address: token_address; reward: reward};
-    event e
+    increase_rewards_tmp token_address reward
   end
 end
 
@@ -675,27 +673,59 @@ transition withdraw()
   lockup_cycle_local <- lockup_cycle;
   staking_cycle = builtin sub last_cycle_local last_deposit_cycle_local;
   gt_mini_cycle = builtin lt lockup_cycle_local staking_cycle;
-  penalty_rate_local <- penalty_rate;
-  transfer_amount = match gt_mini_cycle with
-  | True => stake_amount
+  match gt_mini_cycle with
+  | True =>
+    (* clean user data *)
+    clean_user_data _sender;
+    (* update total amount *)
+    decrease_stake stake_amount;
+    e = { _eventname: "WithdrawStake"; stake_amount: stake_amount };
+    event e;
+    transfer_zrc2_from_contract init_staking_token_address _sender stake_amount
   | False =>
-    let n = muldiv stake_amount penalty_rate_local max_rate in
-    builtin sub stake_amount n
-  end;
+    e = StillInLockupPeriod;
+    throw_error e
+  end
 
-  (* we cannot access field in the above match with expression *)
-  penalty_amount = builtin sub stake_amount transfer_amount;
-  increase_aggregated_penalty_amount penalty_amount;
+end
 
-  (* clean user data *)
-  clean_user_data _sender;
+transition withdraw_by_loss()
+  is_unpaused;
+  (* move last_cycle in case user has some unclaimed rewards *)
+  update_stake_map_onchange u128_zero;
 
-  (* update total amount *)
-  decrease_stake stake_amount;
+  (* check unclaimed rewards *)
+  last_withdraw_cycle_opt <- last_withdraw_cycle[_sender];
+  last_withdraw_cycle_int = get_uint32_opt last_withdraw_cycle_opt;
+  check_unclaimed_rewards last_withdraw_cycle_int;
 
-  e = { _eventname: "WithdrawStake"; stake_amount: stake_amount; transfer_amount: transfer_amount; penalty_amount: penalty_amount};
-  event e;
-  transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
+  (* get original stake amount *)
+  stake_amount_opt <- stakers_total_bal[_sender];
+  stake_amount = get_uint128_opt stake_amount_opt;
+
+  (* calculate the amount to be transferred  *)
+  last_deposit_cycle_local <- last_deposit_cycle[_sender];
+  last_deposit_cycle_local = get_uint32_opt last_deposit_cycle_local;
+  last_cycle_local <- last_cycle;
+  lockup_cycle_local <- lockup_cycle;
+  staking_cycle = builtin sub last_cycle_local last_deposit_cycle_local;
+  gt_mini_cycle = builtin lt lockup_cycle_local staking_cycle;
+  penalty_rate_local <- penalty_rate;
+  match gt_mini_cycle with
+  | True =>
+    e = OutofLockupPeriod;
+    throw_error e
+  | False =>
+    penalty_amount = muldiv stake_amount penalty_rate_local max_rate;
+    transfer_amount = builtin sub stake_amount penalty_amount;
+    increase_aggregated_penalty_amount penalty_amount;
+    clean_user_data _sender;
+    decrease_stake stake_amount;
+    e = { _eventname: "WithdrawStakeByLoss"; stake_amount: stake_amount; transfer_amount: transfer_amount; penalty_amount: penalty_amount};
+    event e;
+    transfer_zrc2_from_contract init_staking_token_address _sender transfer_amount
+  end
+
 end
 
 transition withdraw_penalty()

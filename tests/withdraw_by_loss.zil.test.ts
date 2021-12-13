@@ -273,7 +273,7 @@ describe("staking contract", () => {
       getSender: () => getTestAddr(OWNER),
       getParams: () => ({}),
       beforeTransition: async () => {
-        await increaseBNum(zilliqa, 100);
+        await increaseBNum(zilliqa, 30);
       },
       error: STAKING_ERROR.UserHasUnclaimedReward,
       want: {
@@ -303,9 +303,9 @@ describe("staking contract", () => {
         verifyState: (state) => {
           return (
             JSON.stringify(state.total_stake_per_cycle) ===
-              `{"1":"10","2":"10","3":"10","4":"10","5":"10","6":"10","7":"10","8":"10","9":"10","10":"10","11":"10"}` &&
+              `{"1":"10","2":"10","3":"10","4":"10"}` &&
             JSON.stringify(state.total_stake) === `"10"` &&
-            JSON.stringify(state.last_cycle) === `"11"` &&
+            JSON.stringify(state.last_cycle) === `"4"` &&
             JSON.stringify(state.stakers_bal) ===
               `{"${getTestAddr(OWNER).toLocaleLowerCase()}":{"1":"10"}}` &&
             JSON.stringify(state.stakers_total_bal) ===
@@ -317,8 +317,32 @@ describe("staking contract", () => {
       },
     },
     {
-      name: "withdraw",
+      name: "withdraw again",
       transition: "withdraw",
+      getSender: () => getTestAddr(OWNER),
+      getParams: () => ({}),
+      beforeTransition: asyncNoop,
+      error: STAKING_ERROR.StillInLockupPeriod,
+      want: {
+        verifyState: (state) => {
+          return (
+            JSON.stringify(state.total_stake_per_cycle) ===
+              `{"1":"10","2":"10","3":"10","4":"10"}` &&
+            JSON.stringify(state.total_stake) === `"10"` &&
+            JSON.stringify(state.last_cycle) === `"4"` &&
+            JSON.stringify(state.stakers_bal) ===
+              `{"${getTestAddr(OWNER).toLocaleLowerCase()}":{"1":"10"}}` &&
+            JSON.stringify(state.stakers_total_bal) ===
+              `{"${getTestAddr(OWNER).toLocaleLowerCase()}":"10"}` &&
+            JSON.stringify(state.last_deposit_cycle) ===
+              `{"${getTestAddr(OWNER).toLocaleLowerCase()}":"1"}`
+          );
+        },
+      },
+    },
+    {
+      name: "withdraw by loss",
+      transition: "withdraw_by_loss",
       getSender: () => getTestAddr(OWNER),
       getParams: () => ({}),
       beforeTransition: asyncNoop,
@@ -326,11 +350,11 @@ describe("staking contract", () => {
       want: {
         events: [
           {
-            name: "WithdrawStake",
+            name: "WithdrawStakeByLoss",
             getParams: () => ({
               stake_amount: ["Uint128", 10],
-              transfer_amount: ["Uint128", 10],
-              penalty_amount: ["Uint128", 0],
+              transfer_amount: ["Uint128", 9],
+              penalty_amount: ["Uint128", 1],
             }),
           },
           {
@@ -338,7 +362,7 @@ describe("staking contract", () => {
             getParams: () => ({
               sender: ["ByStr20", globalStakingContractAddress],
               recipient: ["ByStr20", getTestAddr(OWNER)],
-              amount: ["Uint128", "10"],
+              amount: ["Uint128", "9"],
             }),
           },
           {
@@ -346,22 +370,67 @@ describe("staking contract", () => {
             getParams: () => ({
               sender: ["ByStr20", globalStakingContractAddress],
               recipient: ["ByStr20", getTestAddr(OWNER)],
-              amount: ["Uint128", "10"],
+              amount: ["Uint128", "9"],
             }),
           },
         ],
         verifyState: (state) => {
           return (
             JSON.stringify(state.total_stake_per_cycle) ===
-              `{"1":"10","2":"10","3":"10","4":"10","5":"10","6":"10","7":"10","8":"10","9":"10","10":"10","11":"0"}` &&
+              `{"1":"10","2":"10","3":"10","4":"0"}` &&
             JSON.stringify(state.total_stake) === `"0"` &&
-            JSON.stringify(state.last_cycle) === `"11"` &&
+            JSON.stringify(state.last_cycle) === `"4"` &&
             JSON.stringify(state.stakers_bal) === `{}` &&
             JSON.stringify(state.stakers_total_bal) === `{}` &&
             JSON.stringify(state.last_deposit_cycle) === `{}`
           );
         },
       },
+    },
+    {
+      name: "deposit again",
+      transition: "deposit",
+      getSender: () => getTestAddr(OWNER),
+      getParams: () => ({
+        amount: ["Uint128", 10],
+      }),
+      beforeTransition: asyncNoop,
+      error: undefined,
+      want: {
+        verifyState: (state) => {
+          return (
+            JSON.stringify(state.total_stake_per_cycle) ===
+              `{"1":"10","2":"10","3":"10","4":"10"}` &&
+            JSON.stringify(state.total_stake) === `"10"` &&
+            JSON.stringify(state.last_cycle) === `"4"` &&
+            JSON.stringify(state.stakers_bal) ===
+              `{"${getTestAddr(OWNER).toLocaleLowerCase()}":{"4":"10"}}` &&
+            JSON.stringify(state.stakers_total_bal) ===
+              `{"${getTestAddr(OWNER).toLocaleLowerCase()}":"10"}` &&
+            JSON.stringify(state.last_deposit_cycle) ===
+              `{"${getTestAddr(OWNER).toLocaleLowerCase()}":"4"}`
+          );
+        },
+      },
+    },
+    {
+      // case tested already, here just for increasing cycles
+      name: "claim after 10 cycles",
+      transition: "claim",
+      getSender: () => getTestAddr(OWNER),
+      getParams: () => ({}),
+      beforeTransition: async () => {
+        await increaseBNum(zilliqa, 100);
+      },
+      error: undefined,
+    },
+    {
+      name: "withdraw by loss should fail",
+      transition: "withdraw_by_loss",
+      getSender: () => getTestAddr(OWNER),
+      getParams: () => ({}),
+      beforeTransition: asyncNoop,
+      error: STAKING_ERROR.OutofLockupPeriod,
     },
   ];
 
