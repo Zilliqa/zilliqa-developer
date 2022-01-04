@@ -40,7 +40,7 @@ const transactions = [];
 
 export const requestApollo = async (page) => {
   try {
-    console.log(`requesting page ${page}`);
+    console.log(`APOLLO: requesting page ${page}`);
 
     const data = await request('https://devex-apollo.zilliqa.com', query, { page, perPage: 20000 });
     const lastItem = data.txPagination.items.at(-1);
@@ -100,7 +100,8 @@ export const requestViewblock = async (ago) => {
     "ago": ago
   });
 
-  fs.writeJsonSync(`viewblock-${ago}.json`, data);
+  fs.removeSync(`viewblock-${ago}.json`);
+  fs.outputJsonSync(`viewblock-${ago}.json`, data);
 
   console.log(`viewblock data saved to viewblock-${ago}.json`);
 }
@@ -149,32 +150,22 @@ export const requestViewblockTokens = async (symbol, hash, coingeckoId) => {
 
   const coingeckoValue = await requestCoingecko(coingeckoId);
 
-  fs.writeJsonSync(`${symbol}.json`, { ...details, coingeckoId, coingeckoValue });
+  fs.removeSync(`${symbol}.json`);
+  fs.outputJsonSync(`${symbol}.json`, { ...details, coingeckoId, coingeckoValue });
 
   console.log(`viewblock token data saved to ${symbol}.json`);
 }
 
 export const runBackend = async (statsService) => {
-  setTimeout(async () => {
-    await requestViewblock('2Y');
-  }, 5000);
-  setTimeout(async () => {
-    await requestViewblock('1W');
-  }, 10000);
-  setTimeout(async () => {
-    await requestViewblockTokens('zETH', 'zil19j33tapjje2xzng7svslnsjjjgge930jx0w09v', 'ethereum');
-  }, 15000);
-  setTimeout(async () => {
-    await requestViewblockTokens('zUSDT', 'zil1sxx29cshups269ahh5qjffyr58mxjv9ft78jqy', 'tether');
-  }, 20000);
-  setTimeout(async () => {
-    await requestViewblockTokens('zWBTC', 'zil1wha8mzaxhm22dpm5cav2tepuldnr8kwkvmqtjq', 'wrapped-bitcoin');
-  }, 25000);
-  setTimeout(async () => {
-    await requestViewblockTokens('XCAD', 'zil1z5l74hwy3pc3pr3gdh3nqju4jlyp0dzkhq2f5y', 'xcad-network');
-  }, 30000);
 
+  await requestViewblock('2Y');
+  await requestViewblock('1W');
   await requestApollo(1);
+
+  await requestViewblockTokens('zETH', 'zil19j33tapjje2xzng7svslnsjjjgge930jx0w09v', 'ethereum');
+  await requestViewblockTokens('zUSDT', 'zil1sxx29cshups269ahh5qjffyr58mxjv9ft78jqy', 'tether');
+  await requestViewblockTokens('zWBTC', 'zil1wha8mzaxhm22dpm5cav2tepuldnr8kwkvmqtjq', 'wrapped-bitcoin');
+  await requestViewblockTokens('XCAD', 'zil1z5l74hwy3pc3pr3gdh3nqju4jlyp0dzkhq2f5y', 'xcad-network');
 
   const filtered = transactions.filter(i => parseInt(i.timestamp / 1000) > now);
 
@@ -184,13 +175,15 @@ export const runBackend = async (statsService) => {
     return BigInt(cv.amount) + BigInt(pv)
   }, BigInt(cumulative.value));
 
-  fs.writeJsonSync('cumulative.json', {
+  fs.removeSync('cumulative.json');
+  fs.outputJsonSync('cumulative.json', {
     timestamp: parseInt(cfiltered.at(-1).timestamp / 1000),
     value: (BigInt(cumulative.value) + BigInt(sumup)).toString(),
     tx_count: cfiltered.length + cumulative.tx_count
   });
 
-  fs.writeJsonSync('transactions.json', { transactions: filtered });
+  fs.removeSync('transactions.json');
+  fs.outputJsonSync('transactions.json', { transactions: filtered });
 
   console.log(`${filtered.length} txs saved to transactions.json`);
 
