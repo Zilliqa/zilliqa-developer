@@ -3,12 +3,9 @@ import dayjs from 'dayjs'
 import fs from 'fs-extra'
 import dotenv from 'dotenv'
 import fetch from 'node-fetch';
+import { setTimeout } from 'timers/promises';
 
 dotenv.config()
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 const query = gql`
   query Transactions($page: Int, $perPage: Int) {
@@ -53,8 +50,7 @@ export const requestApollo = async (page) => {
 
     if (parseInt(lastItem.timestamp / 1000) > now) {
       transactions.push.apply(transactions, data.txPagination.items);
-      sleep(2000)
-      return requestApollo(page + 1);
+      return await setTimeout(10000, requestApollo(page + 1));
     } else {
       console.log('requests successful for last 7 days.');
       return transactions;
@@ -63,6 +59,7 @@ export const requestApollo = async (page) => {
     console.log(error.message);
     console.log('something hapened with apollo request:' + error.statusCode);
   }
+
 }
 
 export const requestViewblock = async (ago) => {
@@ -162,16 +159,12 @@ export const requestViewblockTokens = async (symbol, hash, coingeckoId) => {
 export const runBackend = async (statsService) => {
 
   await requestViewblock('2Y');
-  await sleep(2000);
   await requestViewblock('1W');
   await requestApollo(1);
 
   await requestViewblockTokens('zETH', 'zil19j33tapjje2xzng7svslnsjjjgge930jx0w09v', 'ethereum');
-  await sleep(2000);
   await requestViewblockTokens('zUSDT', 'zil1sxx29cshups269ahh5qjffyr58mxjv9ft78jqy', 'tether');
-  await sleep(2000);
   await requestViewblockTokens('zWBTC', 'zil1wha8mzaxhm22dpm5cav2tepuldnr8kwkvmqtjq', 'wrapped-bitcoin');
-  await sleep(2000);
   await requestViewblockTokens('XCAD', 'zil1z5l74hwy3pc3pr3gdh3nqju4jlyp0dzkhq2f5y', 'xcad-network');
 
   const filtered = transactions.filter(i => parseInt(i.timestamp / 1000) > now);
