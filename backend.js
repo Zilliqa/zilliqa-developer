@@ -37,9 +37,8 @@ const query = gql`
 }
 `
 
-const now = dayjs().startOf('day').subtract(7, 'day').valueOf();
-
-const transactions = [];
+var now = dayjs().startOf('day').subtract(7, 'day').valueOf();
+var transactions = [];
 
 export const requestApollo = async (page) => {
   try {
@@ -160,6 +159,8 @@ export const requestViewblockTokens = async (symbol, hash, coingeckoId) => {
 }
 
 export const runBackend = async (statsService) => {
+  now = dayjs().startOf('day').subtract(7, 'day').valueOf();
+  transactions = [];
 
   await requestViewblock('2Y');
   await sleep(2000);
