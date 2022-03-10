@@ -1,5 +1,7 @@
 # community-contracts
 
+*This project is still working in progess, DO NOT use it for any produduction purpose*
+
 The [contract](./staking.scilla) code in this repository is designed to implement the following specification:
 
 1. The system has two participants namely stakers and admin.
