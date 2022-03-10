@@ -1,6 +1,6 @@
 # community-contracts
 
-*This project is still working in progess, DO NOT use it for any produduction purpose*
+*This project is still working in progess, DO NOT use it for any production purpose*
 
 The [contract](./staking.scilla) code in this repository is designed to implement the following specification:
 
