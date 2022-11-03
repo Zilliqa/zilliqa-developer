@@ -1,57 +1,77 @@
-<!-- markdownlint-disable MD033 MD041 MD002 -->
-[![Build Status](https://travis-ci.com/Zilliqa/dev-docs.svg?token=rdJevspjJvn5HspEtBJU&branch=master)](https://travis-ci.com/Zilliqa/dev-docs)
-<p align="center">
-  <img alt="dev-docs logo" src="https://i.ibb.co/gDtknr3/dev-docs-log.png" height="50px" />
-  <h1 align="center">Zilliqa Developer Documentation</h1>
-</p>
+# Zilliqa Developer Portal
 
-Welcome to Zilliqa Developer Documentation!
+[![Discord chat](https://img.shields.io/discord/370992535725932544.svg)](https://discord.gg/XMRE9tt)
 
-This is a private repository hosting all the docs for developers inside Zilliqa.
+This repository holds the source files for Zilliqa's developer portal website.
 
-Start reading from [index](index.md).
+### Installation
 
-#### Table of Content
+```
+$ yarn
+```
 
-- [Scope](#scope)
-- [Structure](#structure)
-- [Viewing](#viewing)
-- [Searching](#searching)
-- [Contributing](#contributing)
-- [Roadmap](#roadmap)
+### Local Development
 
----
+```
+$ yarn start
+```
 
-## Scope
+This command starts a local development server and open up a browser window. Most changes are reflected live without having to restart the server.
 
-This repository is essentially a knowledge base for all the developers inside Zilliqa. We encourage you to share any knowledge in any perspective about development.
+### Local Deployment via Docker container
 
-> A gentle reminder: Don't forget to remove any sensitive information like password and keys before posting anything here.
+To build the docker container
 
-## Structure
+```
+./build_container.sh
+```
 
-The docs are organized by topics and located in different categories. This keeps the repository clean and tidy. If you have better idea in organizing the docs, please [contribute](#contributing)!
+To run the container
 
-## Viewing
+```
+./run_container.sh
+```
 
-You can read the docs on Github directly or use any markdown rendering engine locally. We suggest using [VSCode](https://github.com/Microsoft/vscode) as both viewing and editing tools for markdown docs.
+You can then access the site via
 
-## Searching
+```
+http://localhost:8080
+```
 
-Github already did the indexing for you. Key in your keywords in the search bar and look for your interested topics.
+To stop and remove the container
 
-## Contributing
+```
+./stop_container.sh
+```
 
-Create an [issue](https://github.com/Zilliqa/dev-docs/issues) when you feel something can be improved.
+### Build
 
-To contribute with new information or make changes to existing documentation, please read the [Contributing Guideline](CONTRIBUTING.md).
+```
+$ yarn build
+```
 
-## Roadmap
+This command generates static content into the `build` directory and can be served using any static contents hosting service.
 
-- [x] Code owners
-- [x] Travis CI
-- [x] Formatting and linting
-- [x] Create contribution guide
-- [ ] Pull request template
-- [ ] Issue template
-- [ ] Make use of the [front matter](https://jekyllrb.com/docs/front-matter/) to provide more metadata about the doc.
+### Deployment
+
+This is done via github actions.
+
+Docusaurus takes its `baseUrl` from the `BASE_URL` environment variable, which is taken from the `BASE_URL` secret for the `github-pages` environment.
+You will need to explicitly whitelist `master` in the allowed branches protection rules for `github-pages`, or deployment will fail with `Invalid deployment branch and no branch protection rules set in the environment`.
+
+If you don't specify a secret, we'll build for the root - suitable for a production deploying with a custom URL, but best to explicitly set a root as `/`, just in case.
+
+The staging site is held in a separate repository; push to it with `-f` and deploy to "ordinary" pages.
+If you do, we'll use that as the base URL - for the staging repo, set the `BASE_URL` secret to `/<reponame>/`.
+
+You can then issue a PR to the production repo against your staging repo with (hopefully!) the security that it will deploy correctly.
+
+
+### Utilities
+
+#### Check all links return HTTP status 200
+
+```
+cd docs
+find */*.md -exec npx markdown-link-check {} \;
+```
