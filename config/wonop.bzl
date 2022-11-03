@@ -1,40 +1,7 @@
-load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
-def wonop_pybind_extension(
-        name,
-        copts = [],
-        features = [],
-        linkopts = [],
-        tags = [],
-        deps = [],
-        **kwargs):
-    coptions = [
-        "-Wall",
-        "-Wextra",
-        "-Wconversion",
-        "-Wpedantic",
-        "-Werror",
-        "-mavx2",
-        "-DWONOP_COMPILE_LOGGING_LEVEL=4",
-        "-DWONOP_ENABLE_BACKTRACE",
-    ]
 
-    if copts:
-        coptions.extend(copts)
-
-    pybind_extension(
-        name = name,
-        copts = coptions,
-        features = features,
-        linkopts = linkopts,
-        tags = tags,
-        deps = deps,
-        visibility = ["//visibility:private"],
-        **kwargs
-    )
-
-def wonop_cc_library(
+def zilliqa_cc_library(
         name,
         srcs = [],
         hdrs = [],
@@ -84,7 +51,7 @@ def wonop_cc_library(
         strip_include_prefix = strip_include_prefix,
     )
 
-def wonop_cc_binary(
+def zilliqa_cc_binary(
         name,
         srcs = [],
         data = [],
@@ -124,7 +91,7 @@ def wonop_cc_binary(
         linkshared = linkshared,
     )
 
-def wonop_cc_test(
+def zilliqa_cc_test(
         name,
         srcs = [],
         data = [],

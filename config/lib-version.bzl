@@ -33,7 +33,6 @@ def _impl(ctx):
     )
 
     if ctx.outputs.output.path.endswith(".py"):
-        print("Generated", ctx.outputs.output.path)
         return [
             PyInfo(
                 transitive_sources = depset([ctx.outputs.output]),
