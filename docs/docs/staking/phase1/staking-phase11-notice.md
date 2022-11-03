@@ -90,4 +90,4 @@ For more information, please refer to [Transfer of stake deposit between account
 
 - [Phase 1.1 staking contracts](https://github.com/Zilliqa/staking-contract)
 - [ZIP-19 - Seed Node Staking Mechanism: Phase 1.1](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-19.md)
-- [Zilliqa Mainnet V8 Upgrade Notice](../../dev-dapp/dev-upgrade-v8)
+- [Zilliqa Mainnet V8 Upgrade Notice](../../dev-dapps/dev-upgrade-v8)

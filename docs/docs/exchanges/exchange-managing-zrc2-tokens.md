@@ -33,11 +33,11 @@ The ZRC-2 standard allows for functionalities like
 
 Before you start any integration with ZRC-2, it is important to check the smart contract to ensure it conforms to the ZRC-2 standard. Non-conformance to the standard may lead to composability issues with other contracts or dApp/exchange integration.
 
-Please check the [ZRC-2 specification](../dev-dapp/dev-keys-zrc2-wallet-support.mdx#zrc-2-specification) subsection in the Developers section of this developer portal.
+Please check the [ZRC-2 specification](../dev-dapps/dev-keys-zrc2-wallet-support.mdx#zrc-2-specification) subsection in the Developers section of this developer portal.
 
 ## Contract Operations
 
-Please check the [Integrating with ZRC-2 Fungible Tokens Contract](../dev-dapp/dev-keys-zrc2-wallet-support.mdx#integrating-with-zrc-2-fungible-tokens-contract) subsection on how to get token balance and transfer tokens.
+Please check the [Integrating with ZRC-2 Fungible Tokens Contract](../dev-dapps/dev-keys-zrc2-wallet-support.mdx#integrating-with-zrc-2-fungible-tokens-contract) subsection on how to get token balance and transfer tokens.
 
 ## Tracking Incoming ZRC-2 Deposit
 

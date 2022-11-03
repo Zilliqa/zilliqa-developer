@@ -18,7 +18,7 @@ It's notable to mention that native wrappers are typically designed to be "trust
 
 ## Motivation for wZIL
 
-![Docusaurus](/img/dev-dapp/wzil/wZIL.png)
+![Docusaurus](/img/dev-dapps/wzil/wZIL.png)
 
 **wZIL** is a wrapped tokenised version of native ZIL. As mentioned above, anyone may interact with the wZIL contract to either be issued wZIL or be returned native ZIL. This is a trustless contract interaction with no approval being needed by a custodian and the tokens being immediately issued to the caller.
 
@@ -68,7 +68,7 @@ Users can interact directly with the wZIL contract from the web interface once t
 
 <b> When logged into the Pillar Protocols wZIL vault, buttons are displayed for converting ZIL/wZIL. </b>
 
-![Docusaurus](/img/dev-dapp/wzil/pillar_wzil.png)
+![Docusaurus](/img/dev-dapps/wzil/pillar_wzil.png)
 
 ### Interacting with Neo-Savant IDE
 
@@ -76,23 +76,23 @@ Users may choose to manually wrap or unwrap ZIL manually from the contract. To w
 
 <b> Open the import contract window and import the wZIL contract. </b>
 
-![Docusaurus](/img/dev-dapp/wzil/import_contract_1.png)
+![Docusaurus](/img/dev-dapps/wzil/import_contract_1.png)
 
 <b> Call Mint with the QA amount of ZIL required to be wrapped. </b>
 
-![Docusaurus(/img/dev-dapp/wzil/mint_wzil_1.png)
+![Docusaurus(/img/dev-dapps/wzil/mint_wzil_1.png)
 
 <b> Successful mint of wZIL in exchange for ZIL. </b>
 
-![Docusaurus](/img/dev-dapp/wzil/mint_wzil_2.png)
+![Docusaurus](/img/dev-dapps/wzil/mint_wzil_2.png)
 
 <b> Having a wZIL token, call burn with the amount as a parameter.</b>
 
-![Docusaurus](/img/dev-dapp/wzil/burn_wzil_1.png)
+![Docusaurus](/img/dev-dapps/wzil/burn_wzil_1.png)
 
 <b> Note the internal transaction returning ZIL from the wrapper in exchange for an equal burn of wZIL.</b>
 
-![Docusaurus](/img/dev-dapp/wzil/burn_wzil_2.png)
+![Docusaurus](/img/dev-dapps/wzil/burn_wzil_2.png)
 
 ### Interacting programmatically
 

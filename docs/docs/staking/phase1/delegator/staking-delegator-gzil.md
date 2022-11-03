@@ -31,4 +31,4 @@ After the 1-year duration, no $gZIL will be minted. Hence, we encourage all user
 It is very possible that all the 722,700 $gZIL may not get minted as the number of $gZIL that get minted depends on the frequency of stake reward withdrawals.
 :::
 
-For integration with $gZIL, please refer to [ZRC-2 integration guide](../../../dev-dapp/dev-keys-zrc2-wallet-support).
+For integration with $gZIL, please refer to [ZRC-2 integration guide](../../../dev-dapps/dev-keys-zrc2-wallet-support).
