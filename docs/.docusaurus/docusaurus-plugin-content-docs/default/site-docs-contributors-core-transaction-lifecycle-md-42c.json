@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/core-transaction-lifecycle",
+  "id": "contributors/core-transaction-lifecycle",
+  "title": "Transaction Lifecycle",
+  "description": "Core protocol design - transaction lifecycle.",
+  "source": "@site/docs/contributors/core-transaction-lifecycle.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-transaction-lifecycle",
+  "permalink": "/docs/contributors/core-transaction-lifecycle",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-transaction-lifecycle.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-transaction-lifecycle",
+    "title": "Transaction Lifecycle",
+    "keywords": [
+      "core",
+      "account"
+    ],
+    "description": "Core protocol design - transaction lifecycle."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Account Management",
+    "permalink": "/docs/contributors/core-accounts"
+  },
+  "next": {
+    "title": "Incremental DB",
+    "permalink": "/docs/contributors/core-incremental-db"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/core-scilla-operation",
+  "id": "contributors/core-scilla-operation",
+  "title": "Scilla Operation",
+  "description": "Core protocol design - Scilla operation.",
+  "source": "@site/docs/contributors/core-scilla-operation.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-scilla-operation",
+  "permalink": "/docs/contributors/core-scilla-operation",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-scilla-operation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-scilla-operation",
+    "title": "Scilla Operation",
+    "keywords": [
+      "core",
+      "account"
+    ],
+    "description": "Core protocol design - Scilla operation."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Incremental DB",
+    "permalink": "/docs/contributors/core-incremental-db"
+  },
+  "next": {
+    "title": "DS MIMO",
+    "permalink": "/docs/contributors/core-ds-mimo"
+  }
+}

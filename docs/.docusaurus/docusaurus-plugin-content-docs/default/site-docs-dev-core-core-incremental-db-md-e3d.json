@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/incremental-db",
+  "id": "dev-core/core/incremental-db",
+  "title": "Incremental DB",
+  "description": "This document describes the purpose behind incremental-db which levereges AWS S3 service and its implementation details.",
+  "source": "@site/docs/dev-core/core/incremental-db.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/incremental-db",
+  "permalink": "/docs/dev-core/core/incremental-db",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/incremental-db.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

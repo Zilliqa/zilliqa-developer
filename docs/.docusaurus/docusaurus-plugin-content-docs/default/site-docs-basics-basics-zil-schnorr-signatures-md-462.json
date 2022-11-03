@@ -1,0 +1,32 @@
+{
+  "unversionedId": "basics/basics-zil-schnorr-signatures",
+  "id": "basics/basics-zil-schnorr-signatures",
+  "title": "Schnorr Signatures",
+  "description": "Schnorr Signatures",
+  "source": "@site/docs/basics/basics-zil-schnorr-signatures.md",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-zil-schnorr-signatures",
+  "permalink": "/docs/basics/basics-zil-schnorr-signatures",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-zil-schnorr-signatures.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-zil-schnorr-signatures",
+    "title": "Schnorr Signatures",
+    "keywords": [
+      "schnorr signatures",
+      "zilliqa"
+    ],
+    "description": "Schnorr Signatures"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Consensus Mechanism",
+    "permalink": "/docs/basics/basics-zil-consensus"
+  },
+  "next": {
+    "title": "Reward Mechanism",
+    "permalink": "/docs/basics/basics-zil-reward"
+  }
+}

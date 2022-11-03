@@ -1,0 +1,34 @@
+{
+  "unversionedId": "exchanges/exchange-account-management",
+  "id": "exchanges/exchange-account-management",
+  "title": "Account Management",
+  "description": "Exchange Account Management",
+  "source": "@site/docs/exchanges/exchange-account-management.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-account-management",
+  "permalink": "/docs/exchanges/exchange-account-management",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-account-management.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-account-management",
+    "title": "Account Management",
+    "keywords": [
+      "generating account",
+      "exporting account",
+      "importing account",
+      "zilliqa"
+    ],
+    "description": "Exchange Account Management"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Key Whitelisting (option 2)",
+    "permalink": "/docs/exchanges/exchange-key-whitelisting-2"
+  },
+  "next": {
+    "title": "Sending Transactions",
+    "permalink": "/docs/exchanges/exchange-sending-transactions"
+  }
+}

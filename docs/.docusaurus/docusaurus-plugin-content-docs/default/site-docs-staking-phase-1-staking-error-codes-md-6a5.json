@@ -1,0 +1,31 @@
+{
+  "unversionedId": "staking/phase1/staking-error-codes",
+  "id": "staking/phase1/staking-error-codes",
+  "title": "Smart Contract Error Codes",
+  "description": "Smart Contract Error Codes",
+  "source": "@site/docs/staking/phase1/staking-error-codes.md",
+  "sourceDirName": "staking/phase1",
+  "slug": "/staking/phase1/staking-error-codes",
+  "permalink": "/docs/staking/phase1/staking-error-codes",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/staking-error-codes.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-error-codes",
+    "title": "Smart Contract Error Codes",
+    "keywords": [
+      "staking",
+      "ssn",
+      "smart contract",
+      "zilliqa",
+      "error codes"
+    ],
+    "description": "Smart Contract Error Codes"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "SSN Upgrading (WIP)",
+    "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-upgrading"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "unversionedId": "dev-dapps/dev-started-env",
+  "id": "dev-dapps/dev-started-env",
+  "title": "Development Environments",
+  "description": "Zilliqa Development Environments - Testnet, Mainnet & Isolated Server",
+  "source": "@site/docs/dev-dapps/dev-started-env.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-started-env",
+  "permalink": "/docs/dev-dapps/dev-started-env",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-started-env.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-started-env",
+    "title": "Development Environments",
+    "keywords": [
+      "development environments",
+      "isolated server",
+      "mainnet",
+      "testnet",
+      "api",
+      "chain id",
+      "websocket endpoint",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Development Environments - Testnet, Mainnet & Isolated Server"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Hello World",
+    "permalink": "/docs/dev-dapps/dev-started-helloworld"
+  },
+  "next": {
+    "title": "v8.0.0 Upgrade Notice",
+    "permalink": "/docs/dev-dapps/dev-upgrade-v8"
+  }
+}

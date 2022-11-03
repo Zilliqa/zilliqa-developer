@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/ds-reputation",
+  "id": "dev-core/core/ds-reputation",
+  "title": "DS Reputation",
+  "description": "This feature is to evaluate the performance of DS nodes. The underperformed DS nodes will be kicked out of DS committee first instead of the oldest DS nodes. It can push node owners to use better hardware and network for the DS nodes, so can improve the stability and the efficiency of the blockchain consensus protocol.",
+  "source": "@site/docs/dev-core/core/ds-reputation.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/ds-reputation",
+  "permalink": "/docs/dev-core/core/ds-reputation",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/ds-reputation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

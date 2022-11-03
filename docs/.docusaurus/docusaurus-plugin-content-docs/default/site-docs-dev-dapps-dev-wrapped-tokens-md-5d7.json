@@ -1,0 +1,33 @@
+{
+  "unversionedId": "dev-dapps/dev-wrapped-zil",
+  "id": "dev-dapps/dev-wrapped-zil",
+  "title": "Wrapped ZIL",
+  "description": "wZIL",
+  "source": "@site/docs/dev-dapps/dev-wrapped-tokens.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-wrapped-zil",
+  "permalink": "/docs/dev-dapps/dev-wrapped-zil",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-wrapped-tokens.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-wrapped-zil",
+    "title": "Wrapped ZIL",
+    "keywords": [
+      "wrapped",
+      "assets",
+      "wzil"
+    ],
+    "description": "wZIL"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Faucet",
+    "permalink": "/docs/dev-dapps/dev-tools-faucet"
+  },
+  "next": {
+    "title": "Signing",
+    "permalink": "/docs/dev-dapps/dev-txn-signing"
+  }
+}

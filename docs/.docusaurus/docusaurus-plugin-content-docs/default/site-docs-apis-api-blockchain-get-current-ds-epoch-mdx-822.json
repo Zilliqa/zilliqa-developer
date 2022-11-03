@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-current-ds-epoch",
+  "id": "apis/api-blockchain-get-current-ds-epoch",
+  "title": "GetCurrentDSEpoch",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-current-ds-epoch.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-current-ds-epoch",
+  "permalink": "/docs/apis/api-blockchain-get-current-ds-epoch",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-current-ds-epoch.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-current-ds-epoch",
+    "title": "GetCurrentDSEpoch"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetBlockchainInfo",
+    "permalink": "/docs/apis/api-blockchain-get-blockchain-info"
+  },
+  "next": {
+    "title": "GetCurrentMiniEpoch",
+    "permalink": "/docs/apis/api-blockchain-get-current-mini-epoch"
+  }
+}

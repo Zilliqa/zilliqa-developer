@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-transaction-get-recent-txs",
+  "id": "apis/api-transaction-get-recent-txs",
+  "title": "GetRecentTransactions",
+  "description": "---",
+  "source": "@site/docs/apis/api-transaction-get-recent-txs.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-transaction-get-recent-txs",
+  "permalink": "/docs/apis/api-transaction-get-recent-txs",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-transaction-get-recent-txs.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-transaction-get-recent-txs",
+    "title": "GetRecentTransactions"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetNumTxnsTxEpoch",
+    "permalink": "/docs/apis/api-transaction-get-num-txns-txepoch"
+  },
+  "next": {
+    "title": "GetTransaction",
+    "permalink": "/docs/apis/api-transaction-get-tx"
+  }
+}

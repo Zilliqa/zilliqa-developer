@@ -1,0 +1,37 @@
+{
+  "unversionedId": "dev-dapps/dev-tools-gozilliqa",
+  "id": "dev-dapps/dev-tools-gozilliqa",
+  "title": "gozilliqa",
+  "description": "gozilliqa",
+  "source": "@site/docs/dev-dapps/dev-tools-gozilliqa.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-tools-gozilliqa",
+  "permalink": "/docs/dev-dapps/dev-tools-gozilliqa",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-tools-gozilliqa.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-tools-gozilliqa",
+    "title": "gozilliqa",
+    "keywords": [
+      "go",
+      "gozilliqa",
+      "sdk",
+      "installation",
+      "apis",
+      "examples",
+      "zilliqa"
+    ],
+    "description": "gozilliqa"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "zilliqa-js",
+    "permalink": "/docs/dev-dapps/dev-tools-zilliqajs"
+  },
+  "next": {
+    "title": "laksaj - java sdk",
+    "permalink": "/docs/dev-dapps/dev-tools-java"
+  }
+}

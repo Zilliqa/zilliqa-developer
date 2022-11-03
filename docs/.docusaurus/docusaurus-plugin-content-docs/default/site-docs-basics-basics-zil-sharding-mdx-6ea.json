@@ -1,0 +1,35 @@
+{
+  "unversionedId": "basics/basics-zil-sharding",
+  "id": "basics/basics-zil-sharding",
+  "title": "Sharding Mechanism",
+  "description": "Zilliqa Sharding Mechanism",
+  "source": "@site/docs/basics/basics-zil-sharding.mdx",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-zil-sharding",
+  "permalink": "/docs/basics/basics-zil-sharding",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-zil-sharding.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-zil-sharding",
+    "title": "Sharding Mechanism",
+    "keywords": [
+      "types of sharding",
+      "network sharding",
+      "transaction sharding",
+      "transaction types",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Sharding Mechanism"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Types of Nodes",
+    "permalink": "/docs/basics/basics-zil-nodes"
+  },
+  "next": {
+    "title": "Consensus Mechanism",
+    "permalink": "/docs/basics/basics-zil-consensus"
+  }
+}

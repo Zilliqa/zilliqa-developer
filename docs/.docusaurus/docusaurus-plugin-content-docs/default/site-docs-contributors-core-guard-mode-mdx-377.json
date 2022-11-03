@@ -1,0 +1,33 @@
+{
+  "unversionedId": "contributors/core-guard-mode",
+  "id": "contributors/core-guard-mode",
+  "title": "Guard Mode",
+  "description": "Core protocol design - guard mode.",
+  "source": "@site/docs/contributors/core-guard-mode.mdx",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-guard-mode",
+  "permalink": "/docs/contributors/core-guard-mode",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-guard-mode.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-guard-mode",
+    "title": "Guard Mode",
+    "keywords": [
+      "core",
+      "guard",
+      "mode"
+    ],
+    "description": "Core protocol design - guard mode."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Global Gas Price",
+    "permalink": "/docs/contributors/core-global-gas-price"
+  },
+  "next": {
+    "title": "Rejoin Mechanism",
+    "permalink": "/docs/contributors/core-rejoin-mechanism"
+  }
+}

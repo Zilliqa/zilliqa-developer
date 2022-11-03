@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/coinbase-rewards",
+  "id": "dev-core/core/coinbase-rewards",
+  "title": "Coinbase / Rewards",
+  "description": "Distribution",
+  "source": "@site/docs/dev-core/core/coinbase-rewards.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/coinbase-rewards",
+  "permalink": "/docs/dev-core/core/coinbase-rewards",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/coinbase-rewards.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-miner-info",
+  "id": "apis/api-blockchain-get-miner-info",
+  "title": "GetMinerInfo",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-miner-info.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-miner-info",
+  "permalink": "/docs/apis/api-blockchain-get-miner-info",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-miner-info.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-miner-info",
+    "title": "GetMinerInfo"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetLatestTxBlock",
+    "permalink": "/docs/apis/api-blockchain-get-latest-tx-block"
+  },
+  "next": {
+    "title": "GetNetworkId",
+    "permalink": "/docs/apis/api-blockchain-get-network-id"
+  }
+}

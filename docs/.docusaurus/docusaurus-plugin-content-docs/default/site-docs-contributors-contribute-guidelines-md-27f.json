@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/contribute-guidelines",
+  "id": "contributors/contribute-guidelines",
+  "title": "Contribution Guidelines",
+  "description": "Development guidelines for contributing to Zilliqa core.",
+  "source": "@site/docs/contributors/contribute-guidelines.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/contribute-guidelines",
+  "permalink": "/docs/contributors/contribute-guidelines",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/contribute-guidelines.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "contribute-guidelines",
+    "title": "Contribution Guidelines",
+    "keywords": [
+      "development",
+      "guidelines"
+    ],
+    "description": "Development guidelines for contributing to Zilliqa core."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Building Zilliqa",
+    "permalink": "/docs/contributors/contribute-buildzil"
+  },
+  "next": {
+    "title": "Protocol Standards",
+    "permalink": "/docs/contributors/contribute-standards"
+  }
+}

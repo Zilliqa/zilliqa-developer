@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/developer-guide/Address-Standard-(Bech32)",
+  "id": "dev-core/developer-guide/Address-Standard-(Bech32)",
+  "title": "Zilliqa Address Standard",
+  "description": "Introduction",
+  "source": "@site/docs/dev-core/developer-guide/Address-Standard-(Bech32).md",
+  "sourceDirName": "dev-core/developer-guide",
+  "slug": "/dev-core/developer-guide/Address-Standard-(Bech32)",
+  "permalink": "/docs/dev-core/developer-guide/Address-Standard-(Bech32)",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/developer-guide/Address-Standard-(Bech32).md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

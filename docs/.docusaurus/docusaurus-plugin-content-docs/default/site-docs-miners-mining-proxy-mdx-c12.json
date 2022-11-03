@@ -1,0 +1,33 @@
+{
+  "unversionedId": "miners/mining-proxy",
+  "id": "miners/mining-proxy",
+  "title": "Proxy Mining",
+  "description": "Proxy Mining",
+  "source": "@site/docs/miners/mining-proxy.mdx",
+  "sourceDirName": "miners",
+  "slug": "/miners/mining-proxy",
+  "permalink": "/docs/miners/mining-proxy",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/miners/mining-proxy.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "mining-proxy",
+    "title": "Proxy Mining",
+    "keywords": [
+      "proxy mining",
+      "proxy mining setup",
+      "zilliqa"
+    ],
+    "description": "Proxy Mining"
+  },
+  "sidebar": "MinersSidebar",
+  "previous": {
+    "title": "Running ZILMiner for Mining Rigs",
+    "permalink": "/docs/miners/mining-zilminer"
+  },
+  "next": {
+    "title": "Additional Information",
+    "permalink": "/docs/miners/mining-additional-info"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "unversionedId": "dev-dapps/dev-keys-ledger",
+  "id": "dev-dapps/dev-keys-ledger",
+  "title": "Ledger",
+  "description": "---",
+  "source": "@site/docs/dev-dapps/dev-keys-ledger.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-keys-ledger",
+  "permalink": "/docs/dev-dapps/dev-keys-ledger",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-keys-ledger.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-keys-ledger",
+    "title": "Ledger"
+  }
+}

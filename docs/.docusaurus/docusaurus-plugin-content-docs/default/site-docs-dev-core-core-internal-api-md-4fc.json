@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/internal-api",
+  "id": "dev-core/core/internal-api",
+  "title": "Internal API",
+  "description": "This API server runs on port 4301 by default on a node locally (i.e., cannot be accessed from outside).",
+  "source": "@site/docs/dev-core/core/internal-api.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/internal-api",
+  "permalink": "/docs/dev-core/core/internal-api",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/internal-api.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

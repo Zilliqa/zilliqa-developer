@@ -1,0 +1,35 @@
+{
+  "unversionedId": "staking/phase1/ssn-operator/staking-ssn-setup",
+  "id": "staking/phase1/ssn-operator/staking-ssn-setup",
+  "title": "Setting up the SSN",
+  "description": "Setting up the SSN",
+  "source": "@site/docs/staking/phase1/ssn-operator/staking-ssn-setup.mdx",
+  "sourceDirName": "staking/phase1/ssn-operator",
+  "slug": "/staking/phase1/ssn-operator/staking-ssn-setup",
+  "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-setup",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/ssn-operator/staking-ssn-setup.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-ssn-setup",
+    "title": "Setting up the SSN",
+    "keywords": [
+      "staking",
+      "getting started",
+      "seed node",
+      "launching node",
+      "zilliqa"
+    ],
+    "description": "Setting up the SSN"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "Before You Start",
+    "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-before-you-start"
+  },
+  "next": {
+    "title": "Enrolment of SSN into Staking Smart Contract",
+    "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-enrollment"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/network-upgrade",
+  "id": "dev-core/devops/network-upgrade",
+  "title": "Network Upgrade",
+  "description": "This doc describes the way to conduct the upgrade entire network. So far we implement the following 2 methods:",
+  "source": "@site/docs/dev-core/devops/network-upgrade.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/network-upgrade",
+  "permalink": "/docs/dev-core/devops/network-upgrade",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/network-upgrade.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

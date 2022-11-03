@@ -1,0 +1,35 @@
+{
+  "unversionedId": "staking/phase1/ssn-operator/staking-ssn-upgrading",
+  "id": "staking/phase1/ssn-operator/staking-ssn-upgrading",
+  "title": "SSN Upgrading (WIP)",
+  "description": "SSN Upgrading",
+  "source": "@site/docs/staking/phase1/ssn-operator/staking-ssn-upgrading.md",
+  "sourceDirName": "staking/phase1/ssn-operator",
+  "slug": "/staking/phase1/ssn-operator/staking-ssn-upgrading",
+  "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-upgrading",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/ssn-operator/staking-ssn-upgrading.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-ssn-upgrading",
+    "title": "SSN Upgrading (WIP)",
+    "keywords": [
+      "staking",
+      "ssn",
+      "resync node",
+      "upgrading node",
+      "zilliqa"
+    ],
+    "description": "SSN Upgrading"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "SSN Maintenance (WIP)",
+    "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-maintenance"
+  },
+  "next": {
+    "title": "Smart Contract Error Codes",
+    "permalink": "/docs/staking/phase1/staking-error-codes"
+  }
+}

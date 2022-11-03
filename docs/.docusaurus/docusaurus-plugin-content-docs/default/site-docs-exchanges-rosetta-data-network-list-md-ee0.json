@@ -1,0 +1,38 @@
+{
+  "unversionedId": "exchanges/rosetta-data-network-list",
+  "id": "exchanges/rosetta-data-network-list",
+  "title": "List",
+  "description": "List",
+  "source": "@site/docs/exchanges/rosetta-data-network-list.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/rosetta-data-network-list",
+  "permalink": "/docs/exchanges/rosetta-data-network-list",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/rosetta-data-network-list.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "rosetta-data-network-list",
+    "title": "List",
+    "keywords": [
+      "rosetta",
+      "middleware",
+      "exchanges",
+      "zilliqa",
+      "API",
+      "data",
+      "network",
+      "list"
+    ],
+    "description": "List"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Setting up Zilliqa Rosetta connecting to public API endpoint",
+    "permalink": "/docs/exchanges/rosetta-setting-up-no-seed-node"
+  },
+  "next": {
+    "title": "Options",
+    "permalink": "/docs/exchanges/rosetta-data-network-options"
+  }
+}

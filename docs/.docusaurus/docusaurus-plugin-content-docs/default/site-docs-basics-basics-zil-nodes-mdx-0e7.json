@@ -1,0 +1,36 @@
+{
+  "unversionedId": "basics/basics-zil-nodes",
+  "id": "basics/basics-zil-nodes",
+  "title": "Types of Nodes",
+  "description": "Zilliqa Types Of Nodes",
+  "source": "@site/docs/basics/basics-zil-nodes.mdx",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-zil-nodes",
+  "permalink": "/docs/basics/basics-zil-nodes",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-zil-nodes.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-zil-nodes",
+    "title": "Types of Nodes",
+    "keywords": [
+      "type of nodes",
+      "shard nodes",
+      "ds nodes",
+      "lookup nodes",
+      "seed nodes",
+      "staked seed nodes"
+    ],
+    "description": "Zilliqa Types Of Nodes"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Gas",
+    "permalink": "/docs/basics/basics-intro-gas"
+  },
+  "next": {
+    "title": "Sharding Mechanism",
+    "permalink": "/docs/basics/basics-zil-sharding"
+  }
+}

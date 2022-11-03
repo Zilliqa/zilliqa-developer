@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-blockchain-info",
+  "id": "apis/api-blockchain-get-blockchain-info",
+  "title": "GetBlockchainInfo",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-blockchain-info.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-blockchain-info",
+  "permalink": "/docs/apis/api-blockchain-get-blockchain-info",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-blockchain-info.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-blockchain-info",
+    "title": "GetBlockchainInfo"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "DSBlockListing",
+    "permalink": "/docs/apis/api-blockchain-ds-block-listing"
+  },
+  "next": {
+    "title": "GetCurrentDSEpoch",
+    "permalink": "/docs/apis/api-blockchain-get-current-ds-epoch"
+  }
+}

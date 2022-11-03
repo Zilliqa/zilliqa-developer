@@ -1,0 +1,36 @@
+{
+  "unversionedId": "staking/phase1/staking-phase1-overview",
+  "id": "staking/phase1/staking-phase1-overview",
+  "title": "Phase 1.1 Overview",
+  "description": "Phase 1.1 Overview",
+  "source": "@site/docs/staking/phase1/overview.md",
+  "sourceDirName": "staking/phase1",
+  "slug": "/staking/phase1/staking-phase1-overview",
+  "permalink": "/docs/staking/phase1/staking-phase1-overview",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/overview.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-phase1-overview",
+    "title": "Phase 1.1 Overview",
+    "keywords": [
+      "staking",
+      "overview",
+      "ssn",
+      "seed node",
+      "phase 1",
+      "zilliqa"
+    ],
+    "description": "Phase 1.1 Overview"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "Phase 1.1 Migration Notice",
+    "permalink": "/docs/staking/phase1/staking-phase11-notice"
+  },
+  "next": {
+    "title": "General Information",
+    "permalink": "/docs/staking/phase1/staking-general-information"
+  }
+}

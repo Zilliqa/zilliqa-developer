@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/ds-mimo",
+  "id": "dev-core/core/ds-mimo",
+  "title": "DS Committee Multiple In Multiple Out (DS MIMO)",
+  "description": "Notice",
+  "source": "@site/docs/dev-core/core/ds-mimo.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/ds-mimo",
+  "permalink": "/docs/dev-core/core/ds-mimo",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/ds-mimo.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

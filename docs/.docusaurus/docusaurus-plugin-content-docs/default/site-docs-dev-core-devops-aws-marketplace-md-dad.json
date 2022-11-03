@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/aws-marketplace",
+  "id": "dev-core/devops/aws-marketplace",
+  "title": "Create AWS Marketplace Product",
+  "description": "1. Launch an aws instance with OS ubuntu 16.04, using ssh to connect to the instance.",
+  "source": "@site/docs/dev-core/devops/aws-marketplace.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/aws-marketplace",
+  "permalink": "/docs/dev-core/devops/aws-marketplace",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/aws-marketplace.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

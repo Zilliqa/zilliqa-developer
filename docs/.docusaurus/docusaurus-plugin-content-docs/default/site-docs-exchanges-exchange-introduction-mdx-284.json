@@ -1,0 +1,31 @@
+{
+  "unversionedId": "exchanges/exchange-getting-started",
+  "id": "exchanges/exchange-getting-started",
+  "title": "Hosting Seed Nodes",
+  "description": "Getting Started For Exchanges",
+  "source": "@site/docs/exchanges/exchange-introduction.mdx",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-getting-started",
+  "permalink": "/docs/exchanges/exchange-getting-started",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-introduction.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-getting-started",
+    "title": "Hosting Seed Nodes",
+    "keywords": [
+      "exchanges",
+      "ip whitelisting",
+      "hardware requirements",
+      "docker setup",
+      "zilliqa"
+    ],
+    "description": "Getting Started For Exchanges"
+  },
+  "sidebar": "ExchangesSidebar",
+  "next": {
+    "title": "IP Whitelisting",
+    "permalink": "/docs/exchanges/exchange-ip-whitelisting"
+  }
+}

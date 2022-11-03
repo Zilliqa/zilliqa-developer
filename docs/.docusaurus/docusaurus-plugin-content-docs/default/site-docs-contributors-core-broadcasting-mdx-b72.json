@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/core-broadcasting",
+  "id": "contributors/core-broadcasting",
+  "title": "Broadcasting",
+  "description": "Core protocol design - broadcasting.",
+  "source": "@site/docs/contributors/core-broadcasting.mdx",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-broadcasting",
+  "permalink": "/docs/contributors/core-broadcasting",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-broadcasting.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-broadcasting",
+    "title": "Broadcasting",
+    "keywords": [
+      "core",
+      "broadcasting"
+    ],
+    "description": "Core protocol design - broadcasting."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Gossip",
+    "permalink": "/docs/contributors/core-gossip"
+  },
+  "next": {
+    "title": "Blacklist",
+    "permalink": "/docs/contributors/core-blacklist"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-ds-block",
+  "id": "apis/api-blockchain-get-ds-block",
+  "title": "GetDsBlock",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-ds-block.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-ds-block",
+  "permalink": "/docs/apis/api-blockchain-get-ds-block",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-ds-block.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-ds-block",
+    "title": "GetDsBlock"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetCurrentMiniEpoch",
+    "permalink": "/docs/apis/api-blockchain-get-current-mini-epoch"
+  },
+  "next": {
+    "title": "GetDSBlockRate",
+    "permalink": "/docs/apis/api-blockchain-get-ds-block-rate"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "unversionedId": "contributors/core-global-gas-price",
+  "id": "contributors/core-global-gas-price",
+  "title": "Global Gas Price",
+  "description": "Core protocol design - computing global gas price.",
+  "source": "@site/docs/contributors/core-gas-computation.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-global-gas-price",
+  "permalink": "/docs/contributors/core-global-gas-price",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-gas-computation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-global-gas-price",
+    "title": "Global Gas Price",
+    "keywords": [
+      "gas",
+      "price",
+      "computation"
+    ],
+    "description": "Core protocol design - computing global gas price."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Coinbase Rewards",
+    "permalink": "/docs/contributors/core-coinbase"
+  },
+  "next": {
+    "title": "Guard Mode",
+    "permalink": "/docs/contributors/core-guard-mode"
+  }
+}

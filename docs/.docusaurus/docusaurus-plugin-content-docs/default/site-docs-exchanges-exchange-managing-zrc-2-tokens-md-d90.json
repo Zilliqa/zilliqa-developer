@@ -1,0 +1,34 @@
+{
+  "unversionedId": "exchanges/exchange-managing-zrc2-tokens",
+  "id": "exchanges/exchange-managing-zrc2-tokens",
+  "title": "Managing Fungible Tokens (ZRC-2)",
+  "description": "Managing Fungible Tokens (ZRC-2)",
+  "source": "@site/docs/exchanges/exchange-managing-zrc2-tokens.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-managing-zrc2-tokens",
+  "permalink": "/docs/exchanges/exchange-managing-zrc2-tokens",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-managing-zrc2-tokens.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-managing-zrc2-tokens",
+    "title": "Managing Fungible Tokens (ZRC-2)",
+    "keywords": [
+      "zrc2",
+      "polling",
+      "exchanges",
+      "zilliqa"
+    ],
+    "description": "Managing Fungible Tokens (ZRC-2)"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Understanding Transaction Receipts",
+    "permalink": "/docs/exchanges/exchange-transaction-receipts"
+  },
+  "next": {
+    "title": "Introduction to Rosetta",
+    "permalink": "/docs/exchanges/rosetta-introduction"
+  }
+}

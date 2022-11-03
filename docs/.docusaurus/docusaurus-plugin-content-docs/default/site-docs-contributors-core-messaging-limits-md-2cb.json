@@ -1,0 +1,33 @@
+{
+  "unversionedId": "contributors/core-messaging-limits",
+  "id": "contributors/core-messaging-limits",
+  "title": "Messaging Limits",
+  "description": "Core protocol design - messaging limits.",
+  "source": "@site/docs/contributors/core-messaging-limits.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-messaging-limits",
+  "permalink": "/docs/contributors/core-messaging-limits",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-messaging-limits.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-messaging-limits",
+    "title": "Messaging Limits",
+    "keywords": [
+      "core",
+      "messaging",
+      "limits"
+    ],
+    "description": "Core protocol design - messaging limits."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Blacklist",
+    "permalink": "/docs/contributors/core-blacklist"
+  },
+  "next": {
+    "title": "Message Dispatch and Processing",
+    "permalink": "/docs/contributors/core-message-dispatch"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "unversionedId": "staking/phase1/ssn-operator/staking-ssn-enrollment",
+  "id": "staking/phase1/ssn-operator/staking-ssn-enrollment",
+  "title": "Enrolment of SSN into Staking Smart Contract",
+  "description": "Enrollment of SSN into staking smart contract",
+  "source": "@site/docs/staking/phase1/ssn-operator/staking-ssn-enrollment.md",
+  "sourceDirName": "staking/phase1/ssn-operator",
+  "slug": "/staking/phase1/ssn-operator/staking-ssn-enrollment",
+  "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-enrollment",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/ssn-operator/staking-ssn-enrollment.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-ssn-enrollment",
+    "title": "Enrolment of SSN into Staking Smart Contract",
+    "keywords": [
+      "staking",
+      "staked seed node",
+      "enrollment",
+      "smart contract",
+      "zilliqa"
+    ],
+    "description": "Enrollment of SSN into staking smart contract"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "Setting up the SSN",
+    "permalink": "/docs/staking/phase1/ssn-operator/staking-ssn-setup"
+  },
+  "next": {
+    "title": "Commission Management",
+    "permalink": "/docs/staking/phase1/ssn-operator/staking-commission-management"
+  }
+}

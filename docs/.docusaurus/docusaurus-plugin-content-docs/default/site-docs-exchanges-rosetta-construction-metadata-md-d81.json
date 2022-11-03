@@ -1,0 +1,37 @@
+{
+  "unversionedId": "exchanges/rosetta-construction-metadata",
+  "id": "exchanges/rosetta-construction-metadata",
+  "title": "Metadata",
+  "description": "Metadata",
+  "source": "@site/docs/exchanges/rosetta-construction-metadata.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/rosetta-construction-metadata",
+  "permalink": "/docs/exchanges/rosetta-construction-metadata",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/rosetta-construction-metadata.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "rosetta-construction-metadata",
+    "title": "Metadata",
+    "keywords": [
+      "rosetta",
+      "middleware",
+      "exchanges",
+      "zilliqa",
+      "API",
+      "contruction",
+      "metadata"
+    ],
+    "description": "Metadata"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Preprocess",
+    "permalink": "/docs/exchanges/rosetta-construction-preprocess"
+  },
+  "next": {
+    "title": "Payloads",
+    "permalink": "/docs/exchanges/rosetta-construction-payloads"
+  }
+}

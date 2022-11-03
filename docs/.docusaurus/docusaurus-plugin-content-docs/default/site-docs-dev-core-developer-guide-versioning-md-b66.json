@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/developer-guide/Versioning",
+  "id": "dev-core/developer-guide/Versioning",
+  "title": "Versioning",
+  "description": "Zilliqa is following Semantic Versioning 2.0.",
+  "source": "@site/docs/dev-core/developer-guide/Versioning.md",
+  "sourceDirName": "dev-core/developer-guide",
+  "slug": "/dev-core/developer-guide/Versioning",
+  "permalink": "/docs/dev-core/developer-guide/Versioning",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/developer-guide/Versioning.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

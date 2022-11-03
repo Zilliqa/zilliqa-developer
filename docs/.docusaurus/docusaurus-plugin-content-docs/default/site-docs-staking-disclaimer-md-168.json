@@ -1,0 +1,33 @@
+{
+  "unversionedId": "staking/staking-disclaimer",
+  "id": "staking/staking-disclaimer",
+  "title": "Disclaimer",
+  "description": "Disclaimer",
+  "source": "@site/docs/staking/disclaimer.md",
+  "sourceDirName": "staking",
+  "slug": "/staking/staking-disclaimer",
+  "permalink": "/docs/staking/staking-disclaimer",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/disclaimer.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-disclaimer",
+    "title": "Disclaimer",
+    "keywords": [
+      "staking",
+      "disclaimer",
+      "zilliqa"
+    ],
+    "description": "Disclaimer"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "Overview",
+    "permalink": "/docs/staking/staking-overview"
+  },
+  "next": {
+    "title": "Phase 1.1 Migration Notice",
+    "permalink": "/docs/staking/phase1/staking-phase11-notice"
+  }
+}

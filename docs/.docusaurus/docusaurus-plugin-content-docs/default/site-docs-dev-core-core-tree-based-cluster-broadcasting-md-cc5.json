@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/tree-based-cluster-broadcasting",
+  "id": "dev-core/core/tree-based-cluster-broadcasting",
+  "title": "Tree Based Cluster Broadcasting",
+  "description": "This document describes the purpose, implementation details and application of Tree-Based-Cluster-Broadcasting.",
+  "source": "@site/docs/dev-core/core/tree-based-cluster-broadcasting.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/tree-based-cluster-broadcasting",
+  "permalink": "/docs/dev-core/core/tree-based-cluster-broadcasting",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/tree-based-cluster-broadcasting.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

@@ -1,0 +1,37 @@
+{
+  "unversionedId": "exchanges/rosetta-unsupported-api",
+  "id": "exchanges/rosetta-unsupported-api",
+  "title": "Unsupported Rosetta API",
+  "description": "Unsupported Rosetta API",
+  "source": "@site/docs/exchanges/rosetta-unsupported-api.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/rosetta-unsupported-api",
+  "permalink": "/docs/exchanges/rosetta-unsupported-api",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/rosetta-unsupported-api.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "rosetta-unsupported-api",
+    "title": "Unsupported Rosetta API",
+    "keywords": [
+      "rosetta",
+      "middleware",
+      "exchanges",
+      "zilliqa",
+      "Rosetta",
+      "Unsupported",
+      "APIs"
+    ],
+    "description": "Unsupported Rosetta API"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Introduction to Rosetta",
+    "permalink": "/docs/exchanges/rosetta-introduction"
+  },
+  "next": {
+    "title": "Setting up Zilliqa Rosetta with Seed node",
+    "permalink": "/docs/exchanges/rosetta-setting-up-seed-node"
+  }
+}

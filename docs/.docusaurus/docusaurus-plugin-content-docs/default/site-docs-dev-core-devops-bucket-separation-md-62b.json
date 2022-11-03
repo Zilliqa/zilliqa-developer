@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/bucket-separation",
+  "id": "dev-core/devops/bucket-separation",
+  "title": "AWS S3 Bucket Configuration",
+  "description": "- Introduction",
+  "source": "@site/docs/dev-core/devops/bucket-separation.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/bucket-separation",
+  "permalink": "/docs/dev-core/devops/bucket-separation",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/bucket-separation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

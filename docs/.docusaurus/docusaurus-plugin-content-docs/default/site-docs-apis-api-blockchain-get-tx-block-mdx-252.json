@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-tx-block",
+  "id": "apis/api-blockchain-get-tx-block",
+  "title": "GetTxBlock",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-tx-block.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-tx-block",
+  "permalink": "/docs/apis/api-blockchain-get-tx-block",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-tx-block.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-tx-block",
+    "title": "GetTxBlock"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetTransactionRate",
+    "permalink": "/docs/apis/api-blockchain-get-tx-rate"
+  },
+  "next": {
+    "title": "GetTxBlockRate",
+    "permalink": "/docs/apis/api-blockchain-get-tx-block-rate"
+  }
+}

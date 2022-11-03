@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/core-gossip",
+  "id": "contributors/core-gossip",
+  "title": "Gossip",
+  "description": "Core protocol design - gossip.",
+  "source": "@site/docs/contributors/core-gossip.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-gossip",
+  "permalink": "/docs/contributors/core-gossip",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-gossip.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-gossip",
+    "title": "Gossip",
+    "keywords": [
+      "core",
+      "gossip"
+    ],
+    "description": "Core protocol design - gossip."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Multisignatures",
+    "permalink": "/docs/contributors/core-multisignatures"
+  },
+  "next": {
+    "title": "Broadcasting",
+    "permalink": "/docs/contributors/core-broadcasting"
+  }
+}

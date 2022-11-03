@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/index",
+  "id": "dev-core/core/index",
+  "title": "Index",
+  "description": "Overview",
+  "source": "@site/docs/dev-core/core/index.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/",
+  "permalink": "/docs/dev-core/core/",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

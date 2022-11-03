@@ -1,0 +1,34 @@
+{
+  "unversionedId": "contributors/core-por",
+  "id": "contributors/core-por",
+  "title": "Proof of Reputation",
+  "description": "Core protocol design - proof of reputation.",
+  "source": "@site/docs/contributors/core-por.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-por",
+  "permalink": "/docs/contributors/core-por",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-por.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-por",
+    "title": "Proof of Reputation",
+    "keywords": [
+      "core",
+      "por",
+      "proof",
+      "reputation"
+    ],
+    "description": "Core protocol design - proof of reputation."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Difficulty Adjustment",
+    "permalink": "/docs/contributors/core-difficulty-adjustment"
+  },
+  "next": {
+    "title": "Coinbase Rewards",
+    "permalink": "/docs/contributors/core-coinbase"
+  }
+}

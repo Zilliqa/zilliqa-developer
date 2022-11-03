@@ -1,0 +1,30 @@
+{
+  "unversionedId": "dev-dapps/dev-started-introduction",
+  "id": "dev-dapps/dev-started-introduction",
+  "title": "Introduction",
+  "description": "Zilliqa developer getting started",
+  "source": "@site/docs/dev-dapps/dev-started-introduction.mdx",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-started-introduction",
+  "permalink": "/docs/dev-dapps/dev-started-introduction",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-started-introduction.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-started-introduction",
+    "title": "Introduction",
+    "keywords": [
+      "getting started",
+      "dapp development",
+      "address formats",
+      "zilliqa"
+    ],
+    "description": "Zilliqa developer getting started"
+  },
+  "sidebar": "DevelopersSidebar",
+  "next": {
+    "title": "Hello World",
+    "permalink": "/docs/dev-dapps/dev-started-helloworld"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-transaction-get-minimum-gas-price",
+  "id": "apis/api-transaction-get-minimum-gas-price",
+  "title": "GetMinimumGasPrice",
+  "description": "---",
+  "source": "@site/docs/apis/api-transaction-get-minimum-gas-price.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-transaction-get-minimum-gas-price",
+  "permalink": "/docs/apis/api-transaction-get-minimum-gas-price",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-transaction-get-minimum-gas-price.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-transaction-get-minimum-gas-price",
+    "title": "GetMinimumGasPrice"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "CreateTransaction",
+    "permalink": "/docs/apis/api-transaction-create-tx"
+  },
+  "next": {
+    "title": "GetNumTxnsDSEpoch",
+    "permalink": "/docs/apis/api-transaction-get-num-txns-dsepoch"
+  }
+}

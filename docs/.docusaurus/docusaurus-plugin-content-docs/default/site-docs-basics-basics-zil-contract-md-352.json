@@ -1,0 +1,35 @@
+{
+  "unversionedId": "basics/basics-zil-contract",
+  "id": "basics/basics-zil-contract",
+  "title": "Smart Contract Layer",
+  "description": "Zilliqa Smart Contracts",
+  "source": "@site/docs/basics/basics-zil-contract.md",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-zil-contract",
+  "permalink": "/docs/basics/basics-zil-contract",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-zil-contract.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-zil-contract",
+    "title": "Smart Contract Layer",
+    "keywords": [
+      "scilla",
+      "smart contract",
+      "pbft",
+      "zilliqa",
+      "scilla interpreter"
+    ],
+    "description": "Zilliqa Smart Contracts"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Reward Mechanism",
+    "permalink": "/docs/basics/basics-zil-reward"
+  },
+  "next": {
+    "title": "Gas Accounting",
+    "permalink": "/docs/basics/basics-zil-gas"
+  }
+}

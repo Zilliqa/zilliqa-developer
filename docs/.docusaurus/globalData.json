@@ -1,0 +1,959 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/docs",
+          "mainDocId": "basics/basics-intro-blockchain",
+          "docs": [
+            {
+              "id": "apis/api-account-get-balance",
+              "path": "/docs/apis/api-account-get-balance",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-ds-block-listing",
+              "path": "/docs/apis/api-blockchain-ds-block-listing",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-blockchain-info",
+              "path": "/docs/apis/api-blockchain-get-blockchain-info",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-current-ds-epoch",
+              "path": "/docs/apis/api-blockchain-get-current-ds-epoch",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-current-mini-epoch",
+              "path": "/docs/apis/api-blockchain-get-current-mini-epoch",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-ds-block",
+              "path": "/docs/apis/api-blockchain-get-ds-block",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-ds-block-rate",
+              "path": "/docs/apis/api-blockchain-get-ds-block-rate",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-latest-ds-block",
+              "path": "/docs/apis/api-blockchain-get-latest-ds-block",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-latest-tx-block",
+              "path": "/docs/apis/api-blockchain-get-latest-tx-block",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-miner-info",
+              "path": "/docs/apis/api-blockchain-get-miner-info",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-network-id",
+              "path": "/docs/apis/api-blockchain-get-network-id",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-num-tx",
+              "path": "/docs/apis/api-blockchain-get-num-tx",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-num-tx-blocks",
+              "path": "/docs/apis/api-blockchain-get-num-tx-blocks",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-prev-difficulty",
+              "path": "/docs/apis/api-blockchain-get-prev-difficulty",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-prev-ds-difficulty",
+              "path": "/docs/apis/api-blockchain-get-prev-ds-difficulty",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-total-coin-supply",
+              "path": "/docs/apis/api-blockchain-get-total-coin-supply",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-tx-block",
+              "path": "/docs/apis/api-blockchain-get-tx-block",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-tx-block-rate",
+              "path": "/docs/apis/api-blockchain-get-tx-block-rate",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-get-tx-rate",
+              "path": "/docs/apis/api-blockchain-get-tx-rate",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-num-ds-blocks",
+              "path": "/docs/apis/api-blockchain-num-ds-blocks",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-blockchain-tx-block-listing",
+              "path": "/docs/apis/api-blockchain-tx-block-listing",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-contractaddress-from-txid",
+              "path": "/docs/apis/api-contract-get-contractaddress-from-txid",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-smartcontract-code",
+              "path": "/docs/apis/api-contract-get-smartcontract-code",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-smartcontract-init",
+              "path": "/docs/apis/api-contract-get-smartcontract-init",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-smartcontract-state",
+              "path": "/docs/apis/api-contract-get-smartcontract-state",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-smartcontract-substate",
+              "path": "/docs/apis/api-contract-get-smartcontract-substate",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-smartcontracts",
+              "path": "/docs/apis/api-contract-get-smartcontracts",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-contract-get-state-proof",
+              "path": "/docs/apis/api-contract-get-state-proof",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-introduction",
+              "path": "/docs/apis/api-introduction",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-create-tx",
+              "path": "/docs/apis/api-transaction-create-tx",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-minimum-gas-price",
+              "path": "/docs/apis/api-transaction-get-minimum-gas-price",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-num-txns-dsepoch",
+              "path": "/docs/apis/api-transaction-get-num-txns-dsepoch",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-num-txns-txepoch",
+              "path": "/docs/apis/api-transaction-get-num-txns-txepoch",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-pending-tx",
+              "path": "/docs/apis/api-transaction-get-pending-tx"
+            },
+            {
+              "id": "apis/api-transaction-get-pending-txs",
+              "path": "/docs/apis/api-transaction-get-pending-txs"
+            },
+            {
+              "id": "apis/api-transaction-get-recent-txs",
+              "path": "/docs/apis/api-transaction-get-recent-txs",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-transaction-status",
+              "path": "/docs/apis/api-transaction-get-transaction-status",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-tx",
+              "path": "/docs/apis/api-transaction-get-tx",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-txbodies-for-txblock",
+              "path": "/docs/apis/api-transaction-get-txbodies-for-txblock",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-txbodies-for-txblock-ex",
+              "path": "/docs/apis/api-transaction-get-txbodies-for-txblock-ex",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-txs-for-txblock",
+              "path": "/docs/apis/api-transaction-get-txs-for-txblock",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "apis/api-transaction-get-txs-for-txblock-ex",
+              "path": "/docs/apis/api-transaction-get-txs-for-txblock-ex",
+              "sidebar": "APIsSideBar"
+            },
+            {
+              "id": "basics/basics-intro-accounts",
+              "path": "/docs/basics/basics-intro-accounts",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-intro-blockchain",
+              "path": "/docs/basics/basics-intro-blockchain",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-intro-consensus",
+              "path": "/docs/basics/basics-intro-consensus",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-intro-gas",
+              "path": "/docs/basics/basics-intro-gas",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-intro-txns",
+              "path": "/docs/basics/basics-intro-txns",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-consensus",
+              "path": "/docs/basics/basics-zil-consensus",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-contract",
+              "path": "/docs/basics/basics-zil-contract",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-gas",
+              "path": "/docs/basics/basics-zil-gas",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-nodes",
+              "path": "/docs/basics/basics-zil-nodes",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-reward",
+              "path": "/docs/basics/basics-zil-reward",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-schnorr-signatures",
+              "path": "/docs/basics/basics-zil-schnorr-signatures",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "basics/basics-zil-sharding",
+              "path": "/docs/basics/basics-zil-sharding",
+              "sidebar": "BasicsSideBar"
+            },
+            {
+              "id": "contributors/contribute-bug-bounty",
+              "path": "/docs/contributors/contribute-bug-bounty",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/contribute-buildzil",
+              "path": "/docs/contributors/contribute-buildzil",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/contribute-guidelines",
+              "path": "/docs/contributors/contribute-guidelines",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/contribute-standards",
+              "path": "/docs/contributors/contribute-standards",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-accounts",
+              "path": "/docs/contributors/core-accounts",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-blacklist",
+              "path": "/docs/contributors/core-blacklist",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-broadcasting",
+              "path": "/docs/contributors/core-broadcasting",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-coinbase",
+              "path": "/docs/contributors/core-coinbase",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-consensus",
+              "path": "/docs/contributors/core-consensus",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-diagnostic-data",
+              "path": "/docs/contributors/core-diagnostic-data",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-difficulty-adjustment",
+              "path": "/docs/contributors/core-difficulty-adjustment",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-ds-mimo",
+              "path": "/docs/contributors/core-ds-mimo",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-ds-reputation",
+              "path": "/docs/contributors/core-ds-reputation",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-global-gas-price",
+              "path": "/docs/contributors/core-global-gas-price",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-gossip",
+              "path": "/docs/contributors/core-gossip",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-guard-mode",
+              "path": "/docs/contributors/core-guard-mode",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-incremental-db",
+              "path": "/docs/contributors/core-incremental-db",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-intro",
+              "path": "/docs/contributors/core-intro"
+            },
+            {
+              "id": "contributors/core-isolated-server",
+              "path": "/docs/contributors/core-isolated-server",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-lookup",
+              "path": "/docs/contributors/core-lookup"
+            },
+            {
+              "id": "contributors/core-message-dispatch",
+              "path": "/docs/contributors/core-message-dispatch",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-message-queues",
+              "path": "/docs/contributors/core-message-queues",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-messaging-limits",
+              "path": "/docs/contributors/core-messaging-limits",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-multipliers",
+              "path": "/docs/contributors/core-multipliers",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-multisignatures",
+              "path": "/docs/contributors/core-multisignatures",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-node-operation",
+              "path": "/docs/contributors/core-node-operation",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-por",
+              "path": "/docs/contributors/core-por",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-pow",
+              "path": "/docs/contributors/core-pow",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-rejoin-mechanism",
+              "path": "/docs/contributors/core-rejoin-mechanism",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-schnorr",
+              "path": "/docs/contributors/core-schnorr"
+            },
+            {
+              "id": "contributors/core-scilla-operation",
+              "path": "/docs/contributors/core-scilla-operation",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-status-server",
+              "path": "/docs/contributors/core-status-server",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-transaction-dispatch",
+              "path": "/docs/contributors/core-transaction-dispatch",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-transaction-lifecycle",
+              "path": "/docs/contributors/core-transaction-lifecycle",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-view-change",
+              "path": "/docs/contributors/core-view-change",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "contributors/core-websocket-server",
+              "path": "/docs/contributors/core-websocket-server",
+              "sidebar": "ContributorsSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-education-videos",
+              "path": "/docs/dev-dapps/dev-education-videos",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-keys-introduction",
+              "path": "/docs/dev-dapps/dev-keys-introduction",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-keys-ledger",
+              "path": "/docs/dev-dapps/dev-keys-ledger"
+            },
+            {
+              "id": "dev-dapps/dev-keys-magic",
+              "path": "/docs/dev-dapps/dev-keys-magic",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-keys-moonlet",
+              "path": "/docs/dev-dapps/dev-keys-moonlet"
+            },
+            {
+              "id": "dev-dapps/dev-keys-pkey",
+              "path": "/docs/dev-dapps/dev-keys-pkey",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-keys-zilpay",
+              "path": "/docs/dev-dapps/dev-keys-zilpay",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-keys-zrc2-wallet-support",
+              "path": "/docs/dev-dapps/dev-keys-zrc2-wallet-support",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-components",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-components",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-contract",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-contract",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-frontend",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-frontend",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-introduction",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-introduction",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-library",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-library",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-modals",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-modals",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-mutable-variables",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-mutable-variables",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-pages",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-pages",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-procedures",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-procedures",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-scripting",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-scripting",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-rentonzilliqa-transitions",
+              "path": "/docs/dev-dapps/dev-rentonzilliqa-transitions",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-section-navigation",
+              "path": "/docs/dev-dapps/dev-section-navigation"
+            },
+            {
+              "id": "dev-dapps/dev-started-env",
+              "path": "/docs/dev-dapps/dev-started-env",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-started-helloworld",
+              "path": "/docs/dev-dapps/dev-started-helloworld",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-started-introduction",
+              "path": "/docs/dev-dapps/dev-started-introduction",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-ceres",
+              "path": "/docs/dev-dapps/dev-tools-ceres",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-cli",
+              "path": "/docs/dev-dapps/dev-tools-cli",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-explorer",
+              "path": "/docs/dev-dapps/dev-tools-explorer",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-faucet",
+              "path": "/docs/dev-dapps/dev-tools-faucet",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-gozilliqa",
+              "path": "/docs/dev-dapps/dev-tools-gozilliqa",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-ide",
+              "path": "/docs/dev-dapps/dev-tools-ide",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-java",
+              "path": "/docs/dev-dapps/dev-tools-java",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-sdks",
+              "path": "/docs/dev-dapps/dev-tools-sdks",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-websockets",
+              "path": "/docs/dev-dapps/dev-tools-websockets",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-tools-zilliqajs",
+              "path": "/docs/dev-dapps/dev-tools-zilliqajs",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-txn-broadcasting",
+              "path": "/docs/dev-dapps/dev-txn-broadcasting",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-txn-confirmation",
+              "path": "/docs/dev-dapps/dev-txn-confirmation",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-txn-polling",
+              "path": "/docs/dev-dapps/dev-txn-polling",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-txn-receipt",
+              "path": "/docs/dev-dapps/dev-txn-receipt",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-txn-signing",
+              "path": "/docs/dev-dapps/dev-txn-signing",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-upgrade-v8",
+              "path": "/docs/dev-dapps/dev-upgrade-v8",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "dev-dapps/dev-wrapped-zil",
+              "path": "/docs/dev-dapps/dev-wrapped-zil",
+              "sidebar": "DevelopersSidebar"
+            },
+            {
+              "id": "exchanges/exchange-account-management",
+              "path": "/docs/exchanges/exchange-account-management",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-getting-started",
+              "path": "/docs/exchanges/exchange-getting-started",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-ip-whitelisting",
+              "path": "/docs/exchanges/exchange-ip-whitelisting",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-key-whitelisting-1",
+              "path": "/docs/exchanges/exchange-key-whitelisting-1",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-key-whitelisting-2",
+              "path": "/docs/exchanges/exchange-key-whitelisting-2",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-managing-zrc2-tokens",
+              "path": "/docs/exchanges/exchange-managing-zrc2-tokens",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-sending-transactions",
+              "path": "/docs/exchanges/exchange-sending-transactions",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-tracking-deposits",
+              "path": "/docs/exchanges/exchange-tracking-deposits",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/exchange-transaction-receipts",
+              "path": "/docs/exchanges/exchange-transaction-receipts",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction",
+              "path": "/docs/exchanges/rosetta-construction",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-combine",
+              "path": "/docs/exchanges/rosetta-construction-combine",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-derive",
+              "path": "/docs/exchanges/rosetta-construction-derive",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-hash",
+              "path": "/docs/exchanges/rosetta-construction-hash",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-mempool-transaction",
+              "path": "/docs/exchanges/rosetta-construction-mempool-transaction"
+            },
+            {
+              "id": "exchanges/rosetta-construction-metadata",
+              "path": "/docs/exchanges/rosetta-construction-metadata",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-parse",
+              "path": "/docs/exchanges/rosetta-construction-parse",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-payloads",
+              "path": "/docs/exchanges/rosetta-construction-payloads",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-preprocess",
+              "path": "/docs/exchanges/rosetta-construction-preprocess",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-construction-submit",
+              "path": "/docs/exchanges/rosetta-construction-submit",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-data-account-balance",
+              "path": "/docs/exchanges/rosetta-data-account-balance",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-data-block",
+              "path": "/docs/exchanges/rosetta-data-block",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-data-block-transaction",
+              "path": "/docs/exchanges/rosetta-data-block-transaction",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-data-network-list",
+              "path": "/docs/exchanges/rosetta-data-network-list",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-data-network-options",
+              "path": "/docs/exchanges/rosetta-data-network-options",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-data-network-status",
+              "path": "/docs/exchanges/rosetta-data-network-status",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-introduction",
+              "path": "/docs/exchanges/rosetta-introduction",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-setting-up-no-seed-node",
+              "path": "/docs/exchanges/rosetta-setting-up-no-seed-node",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-setting-up-seed-node",
+              "path": "/docs/exchanges/rosetta-setting-up-seed-node",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "exchanges/rosetta-unsupported-api",
+              "path": "/docs/exchanges/rosetta-unsupported-api",
+              "sidebar": "ExchangesSidebar"
+            },
+            {
+              "id": "miners/mining-additional-info",
+              "path": "/docs/miners/mining-additional-info",
+              "sidebar": "MinersSidebar"
+            },
+            {
+              "id": "miners/mining-getting-started",
+              "path": "/docs/miners/mining-getting-started",
+              "sidebar": "MinersSidebar"
+            },
+            {
+              "id": "miners/mining-proxy",
+              "path": "/docs/miners/mining-proxy",
+              "sidebar": "MinersSidebar"
+            },
+            {
+              "id": "miners/mining-zilclient",
+              "path": "/docs/miners/mining-zilclient",
+              "sidebar": "MinersSidebar"
+            },
+            {
+              "id": "miners/mining-zilminer",
+              "path": "/docs/miners/mining-zilminer",
+              "sidebar": "MinersSidebar"
+            },
+            {
+              "id": "quickstart/projects-using-zilliqa",
+              "path": "/docs/quickstart/projects-using-zilliqa"
+            },
+            {
+              "id": "staking/phase1/delegator/staking-delegator-gzil",
+              "path": "/docs/staking/phase1/delegator/staking-delegator-gzil",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/delegator/staking-delegator-operations",
+              "path": "/docs/staking/phase1/delegator/staking-delegator-operations",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/delegator/staking-delegator-overview",
+              "path": "/docs/staking/phase1/delegator/staking-delegator-overview",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/delegator/staking-delegator-reading-contract-states",
+              "path": "/docs/staking/phase1/delegator/staking-delegator-reading-contract-states",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/ssn-operator/staking-commission-management",
+              "path": "/docs/staking/phase1/ssn-operator/staking-commission-management",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/ssn-operator/staking-ssn-before-you-start",
+              "path": "/docs/staking/phase1/ssn-operator/staking-ssn-before-you-start",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/ssn-operator/staking-ssn-enrollment",
+              "path": "/docs/staking/phase1/ssn-operator/staking-ssn-enrollment",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/ssn-operator/staking-ssn-maintenance",
+              "path": "/docs/staking/phase1/ssn-operator/staking-ssn-maintenance",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/ssn-operator/staking-ssn-setup",
+              "path": "/docs/staking/phase1/ssn-operator/staking-ssn-setup",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/ssn-operator/staking-ssn-upgrading",
+              "path": "/docs/staking/phase1/ssn-operator/staking-ssn-upgrading",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/staking-error-codes",
+              "path": "/docs/staking/phase1/staking-error-codes",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/staking-general-information",
+              "path": "/docs/staking/phase1/staking-general-information",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/staking-phase1-overview",
+              "path": "/docs/staking/phase1/staking-phase1-overview",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/phase1/staking-phase11-notice",
+              "path": "/docs/staking/phase1/staking-phase11-notice",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/staking-disclaimer",
+              "path": "/docs/staking/staking-disclaimer",
+              "sidebar": "StakingSidebar"
+            },
+            {
+              "id": "staking/staking-overview",
+              "path": "/docs/staking/staking-overview",
+              "sidebar": "StakingSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "BasicsSideBar": {
+              "link": {
+                "path": "/docs/basics/basics-intro-blockchain",
+                "label": "basics/basics-intro-blockchain"
+              }
+            },
+            "APIsSideBar": {
+              "link": {
+                "path": "/docs/apis/api-introduction",
+                "label": "apis/api-introduction"
+              }
+            },
+            "DevelopersSidebar": {
+              "link": {
+                "path": "/docs/dev-dapps/dev-started-introduction",
+                "label": "dev-dapps/dev-started-introduction"
+              }
+            },
+            "MinersSidebar": {
+              "link": {
+                "path": "/docs/miners/mining-getting-started",
+                "label": "miners/mining-getting-started"
+              }
+            },
+            "ExchangesSidebar": {
+              "link": {
+                "path": "/docs/exchanges/exchange-getting-started",
+                "label": "exchanges/exchange-getting-started"
+              }
+            },
+            "StakingSidebar": {
+              "link": {
+                "path": "/docs/staking/staking-overview",
+                "label": "staking/staking-overview"
+              }
+            },
+            "ContributorsSidebar": {
+              "link": {
+                "path": "/docs/contributors/contribute-buildzil",
+                "label": "contributors/contribute-buildzil"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

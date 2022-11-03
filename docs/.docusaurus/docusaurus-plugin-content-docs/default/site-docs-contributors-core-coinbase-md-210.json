@@ -1,0 +1,33 @@
+{
+  "unversionedId": "contributors/core-coinbase",
+  "id": "contributors/core-coinbase",
+  "title": "Coinbase Rewards",
+  "description": "Core protocol design - coinbase rewards.",
+  "source": "@site/docs/contributors/core-coinbase.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-coinbase",
+  "permalink": "/docs/contributors/core-coinbase",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-coinbase.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-coinbase",
+    "title": "Coinbase Rewards",
+    "keywords": [
+      "core",
+      "coinbase",
+      "rewards"
+    ],
+    "description": "Core protocol design - coinbase rewards."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Proof of Reputation",
+    "permalink": "/docs/contributors/core-por"
+  },
+  "next": {
+    "title": "Global Gas Price",
+    "permalink": "/docs/contributors/core-global-gas-price"
+  }
+}

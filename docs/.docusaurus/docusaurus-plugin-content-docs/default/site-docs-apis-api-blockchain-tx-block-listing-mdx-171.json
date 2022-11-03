@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-tx-block-listing",
+  "id": "apis/api-blockchain-tx-block-listing",
+  "title": "TxBlockListing",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-tx-block-listing.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-tx-block-listing",
+  "permalink": "/docs/apis/api-blockchain-tx-block-listing",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-tx-block-listing.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-tx-block-listing",
+    "title": "TxBlockListing"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetTxBlockRate",
+    "permalink": "/docs/apis/api-blockchain-get-tx-block-rate"
+  },
+  "next": {
+    "title": "CreateTransaction",
+    "permalink": "/docs/apis/api-transaction-create-tx"
+  }
+}

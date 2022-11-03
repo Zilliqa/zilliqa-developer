@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/mainnet-monitoring-scripts",
+  "id": "dev-core/devops/mainnet-monitoring-scripts",
+  "title": "Mainnet Monitoring Scripts",
+  "description": "This document lists the different scripts we have deployed for monitoring the health of the mainnet across various aspects of its operation.",
+  "source": "@site/docs/dev-core/devops/mainnet-monitoring-scripts.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/mainnet-monitoring-scripts",
+  "permalink": "/docs/dev-core/devops/mainnet-monitoring-scripts",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/mainnet-monitoring-scripts.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

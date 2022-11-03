@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/core-blacklist",
+  "id": "contributors/core-blacklist",
+  "title": "Blacklist",
+  "description": "Core protocol design - blacklisting.",
+  "source": "@site/docs/contributors/core-blacklist.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-blacklist",
+  "permalink": "/docs/contributors/core-blacklist",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-blacklist.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-blacklist",
+    "title": "Blacklist",
+    "keywords": [
+      "core",
+      "blacklist"
+    ],
+    "description": "Core protocol design - blacklisting."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Broadcasting",
+    "permalink": "/docs/contributors/core-broadcasting"
+  },
+  "next": {
+    "title": "Messaging Limits",
+    "permalink": "/docs/contributors/core-messaging-limits"
+  }
+}

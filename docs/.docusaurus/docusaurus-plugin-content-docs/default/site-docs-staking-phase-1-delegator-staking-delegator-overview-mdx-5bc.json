@@ -1,0 +1,36 @@
+{
+  "unversionedId": "staking/phase1/delegator/staking-delegator-overview",
+  "id": "staking/phase1/delegator/staking-delegator-overview",
+  "title": "Overview",
+  "description": "Overview",
+  "source": "@site/docs/staking/phase1/delegator/staking-delegator-overview.mdx",
+  "sourceDirName": "staking/phase1/delegator",
+  "slug": "/staking/phase1/delegator/staking-delegator-overview",
+  "permalink": "/docs/staking/phase1/delegator/staking-delegator-overview",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/delegator/staking-delegator-overview.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-delegator-overview",
+    "title": "Overview",
+    "keywords": [
+      "staking",
+      "ssn",
+      "smart contract",
+      "zilliqa",
+      "delegator",
+      "overview"
+    ],
+    "description": "Overview"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "General Information",
+    "permalink": "/docs/staking/phase1/staking-general-information"
+  },
+  "next": {
+    "title": "Reading Contract States",
+    "permalink": "/docs/staking/phase1/delegator/staking-delegator-reading-contract-states"
+  }
+}

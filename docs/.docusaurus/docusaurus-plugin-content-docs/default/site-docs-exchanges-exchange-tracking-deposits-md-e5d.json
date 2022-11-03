@@ -1,0 +1,34 @@
+{
+  "unversionedId": "exchanges/exchange-tracking-deposits",
+  "id": "exchanges/exchange-tracking-deposits",
+  "title": "Polling for Deposits",
+  "description": "Track Exchange Deposits",
+  "source": "@site/docs/exchanges/exchange-tracking-deposits.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-tracking-deposits",
+  "permalink": "/docs/exchanges/exchange-tracking-deposits",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-tracking-deposits.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-tracking-deposits",
+    "title": "Polling for Deposits",
+    "keywords": [
+      "track deposits",
+      "exchanges",
+      "cron job",
+      "zilliqa"
+    ],
+    "description": "Track Exchange Deposits"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Sending Transactions",
+    "permalink": "/docs/exchanges/exchange-sending-transactions"
+  },
+  "next": {
+    "title": "Understanding Transaction Receipts",
+    "permalink": "/docs/exchanges/exchange-transaction-receipts"
+  }
+}

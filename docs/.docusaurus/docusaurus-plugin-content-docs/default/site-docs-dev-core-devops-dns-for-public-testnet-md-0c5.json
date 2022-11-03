@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/dns-for-public-testnet",
+  "id": "dev-core/devops/dns-for-public-testnet",
+  "title": "DNS for Public Testnet",
+  "description": "Creating or updating the DNS records is one critical step to turn the testnet into production state.",
+  "source": "@site/docs/dev-core/devops/dns-for-public-testnet.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/dns-for-public-testnet",
+  "permalink": "/docs/dev-core/devops/dns-for-public-testnet",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/dns-for-public-testnet.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

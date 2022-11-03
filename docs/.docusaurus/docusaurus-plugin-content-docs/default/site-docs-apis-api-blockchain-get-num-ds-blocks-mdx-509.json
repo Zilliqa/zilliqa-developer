@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-num-ds-blocks",
+  "id": "apis/api-blockchain-num-ds-blocks",
+  "title": "GetNumDSBlocks",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-num-ds-blocks.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-num-ds-blocks",
+  "permalink": "/docs/apis/api-blockchain-num-ds-blocks",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-num-ds-blocks.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-num-ds-blocks",
+    "title": "GetNumDSBlocks"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetNetworkId",
+    "permalink": "/docs/apis/api-blockchain-get-network-id"
+  },
+  "next": {
+    "title": "GetNumTransactions",
+    "permalink": "/docs/apis/api-blockchain-get-num-tx"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "unversionedId": "dev-dapps/dev-rentonzilliqa-pages",
+  "id": "dev-dapps/dev-rentonzilliqa-pages",
+  "title": "Pages",
+  "description": "Building the Pages for the RentOnZilliqa frontend application",
+  "source": "@site/docs/dev-dapps/dev-rentonzilliqa-pages.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-rentonzilliqa-pages",
+  "permalink": "/docs/dev-dapps/dev-rentonzilliqa-pages",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-rentonzilliqa-pages.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-rentonzilliqa-pages",
+    "title": "Pages",
+    "keywords": [
+      "react",
+      "rentonzilliqa",
+      "pages",
+      "frontend"
+    ],
+    "description": "Building the Pages for the RentOnZilliqa frontend application"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Modals",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-modals"
+  }
+}

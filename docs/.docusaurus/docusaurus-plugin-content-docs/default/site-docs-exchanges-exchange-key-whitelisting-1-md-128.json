@@ -1,0 +1,33 @@
+{
+  "unversionedId": "exchanges/exchange-key-whitelisting-1",
+  "id": "exchanges/exchange-key-whitelisting-1",
+  "title": "Key Whitelisting (option 1)",
+  "description": "Run seed node in key Whitelisting mode (with open inbound port)",
+  "source": "@site/docs/exchanges/exchange-key-whitelisting-1.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-key-whitelisting-1",
+  "permalink": "/docs/exchanges/exchange-key-whitelisting-1",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-key-whitelisting-1.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-key-whitelisting-1",
+    "title": "Key Whitelisting (option 1)",
+    "keywords": [
+      "exchanges",
+      "docker setup",
+      "zilliqa"
+    ],
+    "description": "Run seed node in key Whitelisting mode (with open inbound port)"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "IP Whitelisting",
+    "permalink": "/docs/exchanges/exchange-ip-whitelisting"
+  },
+  "next": {
+    "title": "Key Whitelisting (option 2)",
+    "permalink": "/docs/exchanges/exchange-key-whitelisting-2"
+  }
+}

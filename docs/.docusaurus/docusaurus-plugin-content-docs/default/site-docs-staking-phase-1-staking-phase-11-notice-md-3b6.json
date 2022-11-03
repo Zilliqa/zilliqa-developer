@@ -1,0 +1,36 @@
+{
+  "unversionedId": "staking/phase1/staking-phase11-notice",
+  "id": "staking/phase1/staking-phase11-notice",
+  "title": "Phase 1.1 Migration Notice",
+  "description": "Staking phase 1.1 migration notice",
+  "source": "@site/docs/staking/phase1/staking-phase11-notice.md",
+  "sourceDirName": "staking/phase1",
+  "slug": "/staking/phase1/staking-phase11-notice",
+  "permalink": "/docs/staking/phase1/staking-phase11-notice",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/staking/phase1/staking-phase11-notice.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "staking-phase11-notice",
+    "title": "Phase 1.1 Migration Notice",
+    "keywords": [
+      "staking",
+      "general information",
+      "ssn",
+      "seed node",
+      "zilliqa",
+      "migration"
+    ],
+    "description": "Staking phase 1.1 migration notice"
+  },
+  "sidebar": "StakingSidebar",
+  "previous": {
+    "title": "Disclaimer",
+    "permalink": "/docs/staking/staking-disclaimer"
+  },
+  "next": {
+    "title": "Phase 1.1 Overview",
+    "permalink": "/docs/staking/phase1/staking-phase1-overview"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/diagnostic-data",
+  "id": "dev-core/core/diagnostic-data",
+  "title": "Diagnostic Data",
+  "description": "We store in LevelDB a limited amount of some operational data about the network that is intended for use when diagnosing any issues with the mainnet.",
+  "source": "@site/docs/dev-core/core/diagnostic-data.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/diagnostic-data",
+  "permalink": "/docs/dev-core/core/diagnostic-data",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/diagnostic-data.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

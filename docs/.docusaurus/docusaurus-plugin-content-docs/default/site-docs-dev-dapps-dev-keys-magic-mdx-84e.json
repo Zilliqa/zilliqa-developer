@@ -1,0 +1,35 @@
+{
+  "unversionedId": "dev-dapps/dev-keys-magic",
+  "id": "dev-dapps/dev-keys-magic",
+  "title": "Magic",
+  "description": "Zilliqa Magic Integration Email Login Without Private Key",
+  "source": "@site/docs/dev-dapps/dev-keys-magic.mdx",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-keys-magic",
+  "permalink": "/docs/dev-dapps/dev-keys-magic",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-keys-magic.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-keys-magic",
+    "title": "Magic",
+    "keywords": [
+      "magic",
+      "zilliqa",
+      "email login",
+      "simple singup",
+      "fortmatic"
+    ],
+    "description": "Zilliqa Magic Integration Email Login Without Private Key"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "ZRC-2 Wallet Support",
+    "permalink": "/docs/dev-dapps/dev-keys-zrc2-wallet-support"
+  },
+  "next": {
+    "title": "Ceres",
+    "permalink": "/docs/dev-dapps/dev-tools-ceres"
+  }
+}

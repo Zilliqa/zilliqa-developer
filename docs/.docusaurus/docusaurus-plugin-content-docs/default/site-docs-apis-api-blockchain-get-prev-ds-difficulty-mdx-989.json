@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-prev-ds-difficulty",
+  "id": "apis/api-blockchain-get-prev-ds-difficulty",
+  "title": "GetPrevDSDifficulty",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-prev-ds-difficulty.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-prev-ds-difficulty",
+  "permalink": "/docs/apis/api-blockchain-get-prev-ds-difficulty",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-prev-ds-difficulty.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-prev-ds-difficulty",
+    "title": "GetPrevDSDifficulty"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetPrevDifficulty",
+    "permalink": "/docs/apis/api-blockchain-get-prev-difficulty"
+  },
+  "next": {
+    "title": "GetTotalCoinSupply",
+    "permalink": "/docs/apis/api-blockchain-get-total-coin-supply"
+  }
+}

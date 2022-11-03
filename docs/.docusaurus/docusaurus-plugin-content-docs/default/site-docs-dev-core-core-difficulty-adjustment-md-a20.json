@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/difficulty-adjustment",
+  "id": "dev-core/core/difficulty-adjustment",
+  "title": "Difficulty Adjustment",
+  "description": "Zilliqa has a dynamic adjustment difficulty level mechanism. This goal of this mechanism is to adjust the difficulty level according to the number of PoW submission received.",
+  "source": "@site/docs/dev-core/core/difficulty-adjustment.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/difficulty-adjustment",
+  "permalink": "/docs/dev-core/core/difficulty-adjustment",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/difficulty-adjustment.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

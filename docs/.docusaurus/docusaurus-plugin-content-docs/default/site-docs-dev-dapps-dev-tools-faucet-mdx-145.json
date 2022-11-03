@@ -1,0 +1,34 @@
+{
+  "unversionedId": "dev-dapps/dev-tools-faucet",
+  "id": "dev-dapps/dev-tools-faucet",
+  "title": "Faucet",
+  "description": "Zilliqa Testnet Faucet",
+  "source": "@site/docs/dev-dapps/dev-tools-faucet.mdx",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-tools-faucet",
+  "permalink": "/docs/dev-dapps/dev-tools-faucet",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-tools-faucet.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-tools-faucet",
+    "title": "Faucet",
+    "keywords": [
+      "faucet",
+      "nucleus wallet",
+      "tester",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Testnet Faucet"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Explorers",
+    "permalink": "/docs/dev-dapps/dev-tools-explorer"
+  },
+  "next": {
+    "title": "Wrapped ZIL",
+    "permalink": "/docs/dev-dapps/dev-wrapped-zil"
+  }
+}

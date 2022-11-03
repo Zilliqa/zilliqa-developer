@@ -1,0 +1,28 @@
+{
+  "unversionedId": "contributors/contribute-buildzil",
+  "id": "contributors/contribute-buildzil",
+  "title": "Building Zilliqa",
+  "description": "Contribution guide for Zilliqa core.",
+  "source": "@site/docs/contributors/contribute-buildzil.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/contribute-buildzil",
+  "permalink": "/docs/contributors/contribute-buildzil",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/contribute-buildzil.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "contribute-buildzil",
+    "title": "Building Zilliqa",
+    "keywords": [
+      "contribution",
+      "core"
+    ],
+    "description": "Contribution guide for Zilliqa core."
+  },
+  "sidebar": "ContributorsSidebar",
+  "next": {
+    "title": "Contribution Guidelines",
+    "permalink": "/docs/contributors/contribute-guidelines"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "unversionedId": "dev-dapps/dev-rentonzilliqa-transitions",
+  "id": "dev-dapps/dev-rentonzilliqa-transitions",
+  "title": "Transitions",
+  "description": "The Transitions of the Scilla Contract for the RentOnZilliqa Application",
+  "source": "@site/docs/dev-dapps/dev-rentonzilliqa-transitions.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-rentonzilliqa-transitions",
+  "permalink": "/docs/dev-dapps/dev-rentonzilliqa-transitions",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-rentonzilliqa-transitions.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-rentonzilliqa-transitions",
+    "title": "Transitions",
+    "keywords": [
+      "scilla",
+      "transitions",
+      "rentonzilliqa"
+    ],
+    "description": "The Transitions of the Scilla Contract for the RentOnZilliqa Application"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Procedures",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-procedures"
+  },
+  "next": {
+    "title": "Introduction to the frontend",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-frontend"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "unversionedId": "exchanges/rosetta-construction-hash",
+  "id": "exchanges/rosetta-construction-hash",
+  "title": "Hash",
+  "description": "Hash",
+  "source": "@site/docs/exchanges/rosetta-construction-hash.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/rosetta-construction-hash",
+  "permalink": "/docs/exchanges/rosetta-construction-hash",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/rosetta-construction-hash.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "rosetta-construction-hash",
+    "title": "Hash",
+    "keywords": [
+      "rosetta",
+      "middleware",
+      "exchanges",
+      "zilliqa",
+      "API",
+      "contruction",
+      "hash"
+    ],
+    "description": "Hash"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Combine",
+    "permalink": "/docs/exchanges/rosetta-construction-combine"
+  },
+  "next": {
+    "title": "Submit",
+    "permalink": "/docs/exchanges/rosetta-construction-submit"
+  }
+}

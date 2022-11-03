@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/gossip-protocol",
+  "id": "dev-core/core/gossip-protocol",
+  "title": "Rumor Manager",
+  "description": "This document describes the rumor manager which enforces Gossip protocol for messaging in Zilliqa.",
+  "source": "@site/docs/dev-core/core/gossip-protocol.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/gossip-protocol",
+  "permalink": "/docs/dev-core/core/gossip-protocol",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/gossip-protocol.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

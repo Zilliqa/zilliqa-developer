@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/zilminer",
+  "id": "dev-core/devops/zilminer",
+  "title": "ZILMiner",
+  "description": "Zilliqa miner with OpenCL and CUDA support. It supports both Ubuntu and Windows OS.",
+  "source": "@site/docs/dev-core/devops/zilminer.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/zilminer",
+  "permalink": "/docs/dev-core/devops/zilminer",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/zilminer.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

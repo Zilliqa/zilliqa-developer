@@ -1,0 +1,23 @@
+{
+  "unversionedId": "apis/api-account-get-balance",
+  "id": "apis/api-account-get-balance",
+  "title": "GetBalance",
+  "description": "---",
+  "source": "@site/docs/apis/api-account-get-balance.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-account-get-balance",
+  "permalink": "/docs/apis/api-account-get-balance",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-account-get-balance.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-account-get-balance",
+    "title": "GetBalance"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetStateProof",
+    "permalink": "/docs/apis/api-contract-get-state-proof"
+  }
+}

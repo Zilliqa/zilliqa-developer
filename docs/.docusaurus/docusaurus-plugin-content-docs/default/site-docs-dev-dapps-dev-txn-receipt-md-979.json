@@ -1,0 +1,36 @@
+{
+  "unversionedId": "dev-dapps/dev-txn-receipt",
+  "id": "dev-dapps/dev-txn-receipt",
+  "title": "Receipt",
+  "description": "Zilliqa Transaction Receipt",
+  "source": "@site/docs/dev-dapps/dev-txn-receipt.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-txn-receipt",
+  "permalink": "/docs/dev-dapps/dev-txn-receipt",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-txn-receipt.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-txn-receipt",
+    "title": "Receipt",
+    "keywords": [
+      "receipt",
+      "transitions",
+      "events",
+      "params",
+      "transaction",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Transaction Receipt"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Confirmation",
+    "permalink": "/docs/dev-dapps/dev-txn-confirmation"
+  },
+  "next": {
+    "title": "Zilliqa Development Videos",
+    "permalink": "/docs/dev-dapps/dev-education-videos"
+  }
+}

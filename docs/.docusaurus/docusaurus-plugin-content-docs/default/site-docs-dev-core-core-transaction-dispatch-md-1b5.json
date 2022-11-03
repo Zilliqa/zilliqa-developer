@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/transaction-dispatch",
+  "id": "dev-core/core/transaction-dispatch",
+  "title": "Transaction Dispatch",
+  "description": "Steps",
+  "source": "@site/docs/dev-core/core/transaction-dispatch.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/transaction-dispatch",
+  "permalink": "/docs/dev-core/core/transaction-dispatch",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/transaction-dispatch.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

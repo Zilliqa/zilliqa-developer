@@ -1,0 +1,32 @@
+{
+  "unversionedId": "contributors/core-diagnostic-data",
+  "id": "contributors/core-diagnostic-data",
+  "title": "Diagnostic Data",
+  "description": "Core protocol design - diagnostic data.",
+  "source": "@site/docs/contributors/core-diagnostic-data.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-diagnostic-data",
+  "permalink": "/docs/contributors/core-diagnostic-data",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-diagnostic-data.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-diagnostic-data",
+    "title": "Diagnostic Data",
+    "keywords": [
+      "core",
+      "diagnostic"
+    ],
+    "description": "Core protocol design - diagnostic data."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "View Change",
+    "permalink": "/docs/contributors/core-view-change"
+  },
+  "next": {
+    "title": "Status Server",
+    "permalink": "/docs/contributors/core-status-server"
+  }
+}

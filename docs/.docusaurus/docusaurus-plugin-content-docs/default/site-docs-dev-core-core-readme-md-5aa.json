@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/README",
+  "id": "dev-core/core/README",
+  "title": "Core Protocol",
+  "description": "This category contains the docs for core protocol. The full list can be found in index.",
+  "source": "@site/docs/dev-core/core/README.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/",
+  "permalink": "/docs/dev-core/core/",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/README.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

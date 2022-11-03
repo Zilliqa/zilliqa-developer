@@ -1,0 +1,33 @@
+{
+  "unversionedId": "basics/basics-intro-txns",
+  "id": "basics/basics-intro-txns",
+  "title": "Transactions",
+  "description": "Transaction types",
+  "source": "@site/docs/basics/basics-intro-txns.md",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-intro-txns",
+  "permalink": "/docs/basics/basics-intro-txns",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-intro-txns.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-intro-txns",
+    "title": "Transactions",
+    "keywords": [
+      "transactions",
+      "types",
+      "zilliqa"
+    ],
+    "description": "Transaction types"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Accounts",
+    "permalink": "/docs/basics/basics-intro-accounts"
+  },
+  "next": {
+    "title": "Gas",
+    "permalink": "/docs/basics/basics-intro-gas"
+  }
+}

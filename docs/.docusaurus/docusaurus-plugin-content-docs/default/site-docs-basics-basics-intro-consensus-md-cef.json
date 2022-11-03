@@ -1,0 +1,36 @@
+{
+  "unversionedId": "basics/basics-intro-consensus",
+  "id": "basics/basics-intro-consensus",
+  "title": "Consensus mechanism",
+  "description": "Types of Blockchain consensus mechanisms",
+  "source": "@site/docs/basics/basics-intro-consensus.md",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-intro-consensus",
+  "permalink": "/docs/basics/basics-intro-consensus",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-intro-consensus.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-intro-consensus",
+    "title": "Consensus mechanism",
+    "keywords": [
+      "intro",
+      "conesnsus",
+      "mechanism",
+      "pbft",
+      "proof of work",
+      "proof of stake"
+    ],
+    "description": "Types of Blockchain consensus mechanisms"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Blockchain",
+    "permalink": "/docs/basics/basics-intro-blockchain"
+  },
+  "next": {
+    "title": "Accounts",
+    "permalink": "/docs/basics/basics-intro-accounts"
+  }
+}

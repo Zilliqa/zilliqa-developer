@@ -1,0 +1,36 @@
+{
+  "unversionedId": "dev-dapps/dev-keys-pkey",
+  "id": "dev-dapps/dev-keys-pkey",
+  "title": "Private Key & Keystore File",
+  "description": "Zilliqa Private Key & Keystore File",
+  "source": "@site/docs/dev-dapps/dev-keys-pkey.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-keys-pkey",
+  "permalink": "/docs/dev-dapps/dev-keys-pkey",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-keys-pkey.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-keys-pkey",
+    "title": "Private Key & Keystore File",
+    "keywords": [
+      "key management",
+      "private key",
+      "keystore",
+      "import",
+      "dapp interaction",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Private Key & Keystore File"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "ZilPay",
+    "permalink": "/docs/dev-dapps/dev-keys-zilpay"
+  },
+  "next": {
+    "title": "ZRC-2 Wallet Support",
+    "permalink": "/docs/dev-dapps/dev-keys-zrc2-wallet-support"
+  }
+}

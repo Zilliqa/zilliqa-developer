@@ -1,0 +1,35 @@
+{
+  "unversionedId": "contributors/contribute-standards",
+  "id": "contributors/contribute-standards",
+  "title": "Protocol Standards",
+  "description": "Contribution guide to Zilliqa core protocol standards.",
+  "source": "@site/docs/contributors/contribute-standards.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/contribute-standards",
+  "permalink": "/docs/contributors/contribute-standards",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/contribute-standards.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "contribute-standards",
+    "title": "Protocol Standards",
+    "keywords": [
+      "protocol",
+      "standards",
+      "ZIP",
+      "improvement",
+      "proposals"
+    ],
+    "description": "Contribution guide to Zilliqa core protocol standards."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Contribution Guidelines",
+    "permalink": "/docs/contributors/contribute-guidelines"
+  },
+  "next": {
+    "title": "Bug Bounty Program",
+    "permalink": "/docs/contributors/contribute-bug-bounty"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/join-rejoin",
+  "id": "dev-core/core/join-rejoin",
+  "title": "Rejoin",
+  "description": "This document will walk through joining and rejoining of different types of nodes.",
+  "source": "@site/docs/dev-core/core/join-rejoin.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/join-rejoin",
+  "permalink": "/docs/dev-core/core/join-rejoin",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/join-rejoin.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/guard-mode",
+  "id": "dev-core/core/guard-mode",
+  "title": "Guard Mode",
+  "description": "Description",
+  "source": "@site/docs/dev-core/core/guard-mode.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/guard-mode",
+  "permalink": "/docs/dev-core/core/guard-mode",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/guard-mode.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

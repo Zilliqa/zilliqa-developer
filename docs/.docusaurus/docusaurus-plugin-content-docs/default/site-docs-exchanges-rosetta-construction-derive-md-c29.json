@@ -1,0 +1,37 @@
+{
+  "unversionedId": "exchanges/rosetta-construction-derive",
+  "id": "exchanges/rosetta-construction-derive",
+  "title": "Derive",
+  "description": "Derive",
+  "source": "@site/docs/exchanges/rosetta-construction-derive.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/rosetta-construction-derive",
+  "permalink": "/docs/exchanges/rosetta-construction-derive",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/rosetta-construction-derive.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "rosetta-construction-derive",
+    "title": "Derive",
+    "keywords": [
+      "rosetta",
+      "middleware",
+      "exchanges",
+      "zilliqa",
+      "API",
+      "contruction",
+      "derive"
+    ],
+    "description": "Derive"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/docs/exchanges/rosetta-construction"
+  },
+  "next": {
+    "title": "Preprocess",
+    "permalink": "/docs/exchanges/rosetta-construction-preprocess"
+  }
+}

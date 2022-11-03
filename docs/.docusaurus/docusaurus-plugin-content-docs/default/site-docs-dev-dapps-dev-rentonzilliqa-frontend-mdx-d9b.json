@@ -1,0 +1,33 @@
+{
+  "unversionedId": "dev-dapps/dev-rentonzilliqa-frontend",
+  "id": "dev-dapps/dev-rentonzilliqa-frontend",
+  "title": "Introduction to the frontend",
+  "description": "Creating the RentOnZilliqa frontend application",
+  "source": "@site/docs/dev-dapps/dev-rentonzilliqa-frontend.mdx",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-rentonzilliqa-frontend",
+  "permalink": "/docs/dev-dapps/dev-rentonzilliqa-frontend",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-rentonzilliqa-frontend.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-rentonzilliqa-frontend",
+    "title": "Introduction to the frontend",
+    "keywords": [
+      "react",
+      "rentonzilliqa",
+      "frontend"
+    ],
+    "description": "Creating the RentOnZilliqa frontend application"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Transitions",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-transitions"
+  },
+  "next": {
+    "title": "Components",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-components"
+  }
+}

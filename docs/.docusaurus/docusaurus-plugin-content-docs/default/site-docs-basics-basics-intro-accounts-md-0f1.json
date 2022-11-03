@@ -1,0 +1,34 @@
+{
+  "unversionedId": "basics/basics-intro-accounts",
+  "id": "basics/basics-intro-accounts",
+  "title": "Accounts",
+  "description": "Zilliqa types of accounts",
+  "source": "@site/docs/basics/basics-intro-accounts.md",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-intro-accounts",
+  "permalink": "/docs/basics/basics-intro-accounts",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-intro-accounts.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-intro-accounts",
+    "title": "Accounts",
+    "keywords": [
+      "blockchain",
+      "accounts",
+      "contract account",
+      "user account"
+    ],
+    "description": "Zilliqa types of accounts"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Consensus mechanism",
+    "permalink": "/docs/basics/basics-intro-consensus"
+  },
+  "next": {
+    "title": "Transactions",
+    "permalink": "/docs/basics/basics-intro-txns"
+  }
+}

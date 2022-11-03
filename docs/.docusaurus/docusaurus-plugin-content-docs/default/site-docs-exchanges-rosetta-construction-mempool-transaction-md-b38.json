@@ -1,0 +1,29 @@
+{
+  "unversionedId": "exchanges/rosetta-construction-mempool-transaction",
+  "id": "exchanges/rosetta-construction-mempool-transaction",
+  "title": "transaction",
+  "description": "transaction",
+  "source": "@site/docs/exchanges/rosetta-construction-mempool-transaction.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/rosetta-construction-mempool-transaction",
+  "permalink": "/docs/exchanges/rosetta-construction-mempool-transaction",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/rosetta-construction-mempool-transaction.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "rosetta-construction-mempool-transaction",
+    "title": "transaction",
+    "keywords": [
+      "rosetta",
+      "middleware",
+      "exchanges",
+      "zilliqa",
+      "API",
+      "contruction",
+      "mempool",
+      "transaction"
+    ],
+    "description": "transaction"
+  }
+}

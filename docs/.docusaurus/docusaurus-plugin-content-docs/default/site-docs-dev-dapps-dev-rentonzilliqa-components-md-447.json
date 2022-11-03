@@ -1,0 +1,34 @@
+{
+  "unversionedId": "dev-dapps/dev-rentonzilliqa-components",
+  "id": "dev-dapps/dev-rentonzilliqa-components",
+  "title": "Components",
+  "description": "Creating the React Components for the RentOnZilliqa frontend application",
+  "source": "@site/docs/dev-dapps/dev-rentonzilliqa-components.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-rentonzilliqa-components",
+  "permalink": "/docs/dev-dapps/dev-rentonzilliqa-components",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-rentonzilliqa-components.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-rentonzilliqa-components",
+    "title": "Components",
+    "keywords": [
+      "react",
+      "rentonzilliqa",
+      "components",
+      "frontend"
+    ],
+    "description": "Creating the React Components for the RentOnZilliqa frontend application"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Introduction to the frontend",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-frontend"
+  },
+  "next": {
+    "title": "Scripting",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-scripting"
+  }
+}

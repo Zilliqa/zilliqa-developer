@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/local-storage",
+  "id": "dev-core/core/local-storage",
+  "title": "Local Storage",
+  "description": "Lookup Nodes",
+  "source": "@site/docs/dev-core/core/local-storage.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/local-storage",
+  "permalink": "/docs/dev-core/core/local-storage",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/local-storage.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

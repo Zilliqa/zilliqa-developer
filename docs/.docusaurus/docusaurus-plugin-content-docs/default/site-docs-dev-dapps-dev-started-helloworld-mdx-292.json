@@ -1,0 +1,36 @@
+{
+  "unversionedId": "dev-dapps/dev-started-helloworld",
+  "id": "dev-dapps/dev-started-helloworld",
+  "title": "Hello World",
+  "description": "Zilliqa Hello World Example",
+  "source": "@site/docs/dev-dapps/dev-started-helloworld.mdx",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-started-helloworld",
+  "permalink": "/docs/dev-dapps/dev-started-helloworld",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-started-helloworld.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-started-helloworld",
+    "title": "Hello World",
+    "keywords": [
+      "hello world",
+      "example dapp",
+      "example project",
+      "zilliqajs",
+      "zilpay",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Hello World Example"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/docs/dev-dapps/dev-started-introduction"
+  },
+  "next": {
+    "title": "Development Environments",
+    "permalink": "/docs/dev-dapps/dev-started-env"
+  }
+}

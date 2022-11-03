@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/extseed-join",
+  "id": "dev-core/core/extseed-join",
+  "title": "ExtSeed Join",
+  "description": "This document will explain the workflow for external seed node which opted for syncing via level2lookups instead of multiplier.",
+  "source": "@site/docs/dev-core/core/extseed-join.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/extseed-join",
+  "permalink": "/docs/dev-core/core/extseed-join",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/extseed-join.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

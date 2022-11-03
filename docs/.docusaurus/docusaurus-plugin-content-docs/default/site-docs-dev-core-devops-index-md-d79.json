@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/index",
+  "id": "dev-core/devops/index",
+  "title": "DevOps Documentation Index",
+  "description": "- Mainnet Token Transfer",
+  "source": "@site/docs/dev-core/devops/index.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/",
+  "permalink": "/docs/dev-core/devops/",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

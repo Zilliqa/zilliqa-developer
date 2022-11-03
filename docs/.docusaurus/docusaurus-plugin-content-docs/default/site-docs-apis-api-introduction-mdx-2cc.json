@@ -1,0 +1,28 @@
+{
+  "unversionedId": "apis/api-introduction",
+  "id": "apis/api-introduction",
+  "title": "Introduction",
+  "description": "Zilliqa JSON RPC API",
+  "source": "@site/docs/apis/api-introduction.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-introduction",
+  "permalink": "/docs/apis/api-introduction",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-introduction.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-introduction",
+    "title": "Introduction",
+    "keywords": [
+      "api",
+      "introduction"
+    ],
+    "description": "Zilliqa JSON RPC API"
+  },
+  "sidebar": "APIsSideBar",
+  "next": {
+    "title": "DSBlockListing",
+    "permalink": "/docs/apis/api-blockchain-ds-block-listing"
+  }
+}

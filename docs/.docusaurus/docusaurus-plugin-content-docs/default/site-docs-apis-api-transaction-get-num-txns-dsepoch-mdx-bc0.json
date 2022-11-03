@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-transaction-get-num-txns-dsepoch",
+  "id": "apis/api-transaction-get-num-txns-dsepoch",
+  "title": "GetNumTxnsDSEpoch",
+  "description": "---",
+  "source": "@site/docs/apis/api-transaction-get-num-txns-dsepoch.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-transaction-get-num-txns-dsepoch",
+  "permalink": "/docs/apis/api-transaction-get-num-txns-dsepoch",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-transaction-get-num-txns-dsepoch.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-transaction-get-num-txns-dsepoch",
+    "title": "GetNumTxnsDSEpoch"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetMinimumGasPrice",
+    "permalink": "/docs/apis/api-transaction-get-minimum-gas-price"
+  },
+  "next": {
+    "title": "GetNumTxnsTxEpoch",
+    "permalink": "/docs/apis/api-transaction-get-num-txns-txepoch"
+  }
+}

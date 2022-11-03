@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-transaction-get-txs-for-txblock",
+  "id": "apis/api-transaction-get-txs-for-txblock",
+  "title": "GetTransactionsForTxBlock",
+  "description": "---",
+  "source": "@site/docs/apis/api-transaction-get-txs-for-txblock.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-transaction-get-txs-for-txblock",
+  "permalink": "/docs/apis/api-transaction-get-txs-for-txblock",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-transaction-get-txs-for-txblock.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-transaction-get-txs-for-txblock",
+    "title": "GetTransactionsForTxBlock"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetTransactionStatus",
+    "permalink": "/docs/apis/api-transaction-get-transaction-status"
+  },
+  "next": {
+    "title": "GetTransactionsForTxBlockEx",
+    "permalink": "/docs/apis/api-transaction-get-txs-for-txblock-ex"
+  }
+}

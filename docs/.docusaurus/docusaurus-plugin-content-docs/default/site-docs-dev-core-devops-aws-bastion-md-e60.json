@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/aws-bastion",
+  "id": "dev-core/devops/aws-bastion",
+  "title": "AWS Cloud9 Bastion",
+  "description": "AWS Cloud9 is a browser-based service that offers you a coding environment from any location. We use it as a tool to manage bastion hosts. This has several benefits in terms of security, cost and maintenance effort:",
+  "source": "@site/docs/dev-core/devops/aws-bastion.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/aws-bastion",
+  "permalink": "/docs/dev-core/devops/aws-bastion",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/aws-bastion.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

@@ -1,0 +1,18 @@
+{
+  "unversionedId": "apis/api-transaction-get-pending-txs",
+  "id": "apis/api-transaction-get-pending-txs",
+  "title": "GetPendingTxns",
+  "description": "---",
+  "source": "@site/docs/apis/api-transaction-get-pending-txs.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-transaction-get-pending-txs",
+  "permalink": "/docs/apis/api-transaction-get-pending-txs",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-transaction-get-pending-txs.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-transaction-get-pending-txs",
+    "title": "GetPendingTxns"
+  }
+}

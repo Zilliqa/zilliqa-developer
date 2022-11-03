@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/devops/zilliqa-mining-proxy",
+  "id": "dev-core/devops/zilliqa-mining-proxy",
+  "title": "Zilliqa Mining Proxy",
+  "description": "A mining proxy between Zilliqa CPU nodes and GPU mining rigs. This proxy only runs on a machine with a public IP address. The public IP address is required for both the Zilliqa CPU nodes and GPU mining rigs to connect to it.",
+  "source": "@site/docs/dev-core/devops/zilliqa-mining-proxy.md",
+  "sourceDirName": "dev-core/devops",
+  "slug": "/dev-core/devops/zilliqa-mining-proxy",
+  "permalink": "/docs/dev-core/devops/zilliqa-mining-proxy",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/devops/zilliqa-mining-proxy.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

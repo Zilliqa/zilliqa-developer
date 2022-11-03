@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-blockchain-get-network-id",
+  "id": "apis/api-blockchain-get-network-id",
+  "title": "GetNetworkId",
+  "description": "---",
+  "source": "@site/docs/apis/api-blockchain-get-network-id.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-blockchain-get-network-id",
+  "permalink": "/docs/apis/api-blockchain-get-network-id",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-blockchain-get-network-id.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-blockchain-get-network-id",
+    "title": "GetNetworkId"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetMinerInfo",
+    "permalink": "/docs/apis/api-blockchain-get-miner-info"
+  },
+  "next": {
+    "title": "GetNumDSBlocks",
+    "permalink": "/docs/apis/api-blockchain-num-ds-blocks"
+  }
+}

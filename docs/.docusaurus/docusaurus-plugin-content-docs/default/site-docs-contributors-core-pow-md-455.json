@@ -1,0 +1,35 @@
+{
+  "unversionedId": "contributors/core-pow",
+  "id": "contributors/core-pow",
+  "title": "PoW Algorithm",
+  "description": "Core protocol design - PoW algorithm.",
+  "source": "@site/docs/contributors/core-pow.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-pow",
+  "permalink": "/docs/contributors/core-pow",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-pow.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-pow",
+    "title": "PoW Algorithm",
+    "keywords": [
+      "core",
+      "por",
+      "proof",
+      "work",
+      "algorithm"
+    ],
+    "description": "Core protocol design - PoW algorithm."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Multipliers",
+    "permalink": "/docs/contributors/core-multipliers"
+  },
+  "next": {
+    "title": "Difficulty Adjustment",
+    "permalink": "/docs/contributors/core-difficulty-adjustment"
+  }
+}

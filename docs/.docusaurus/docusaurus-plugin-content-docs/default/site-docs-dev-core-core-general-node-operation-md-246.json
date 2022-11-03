@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/general-node-operation",
+  "id": "dev-core/core/general-node-operation",
+  "title": "General Node Operation",
+  "description": "A Zilliqa node requires the following information during launch:",
+  "source": "@site/docs/dev-core/core/general-node-operation.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/general-node-operation",
+  "permalink": "/docs/dev-core/core/general-node-operation",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/general-node-operation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "apis/api-contract-get-smartcontract-init",
+  "id": "apis/api-contract-get-smartcontract-init",
+  "title": "GetSmartContractInit",
+  "description": "---",
+  "source": "@site/docs/apis/api-contract-get-smartcontract-init.mdx",
+  "sourceDirName": "apis",
+  "slug": "/apis/api-contract-get-smartcontract-init",
+  "permalink": "/docs/apis/api-contract-get-smartcontract-init",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/apis/api-contract-get-smartcontract-init.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "api-contract-get-smartcontract-init",
+    "title": "GetSmartContractInit"
+  },
+  "sidebar": "APIsSideBar",
+  "previous": {
+    "title": "GetSmartContractCode",
+    "permalink": "/docs/apis/api-contract-get-smartcontract-code"
+  },
+  "next": {
+    "title": "GetSmartContracts",
+    "permalink": "/docs/apis/api-contract-get-smartcontracts"
+  }
+}

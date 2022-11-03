@@ -1,0 +1,35 @@
+{
+  "unversionedId": "contributors/core-ds-reputation",
+  "id": "contributors/core-ds-reputation",
+  "title": "DS Reputation",
+  "description": "Core protocol design - DS reputation.",
+  "source": "@site/docs/contributors/core-ds-reputation.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-ds-reputation",
+  "permalink": "/docs/contributors/core-ds-reputation",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-ds-reputation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-ds-reputation",
+    "title": "DS Reputation",
+    "keywords": [
+      "core",
+      "directory",
+      "service",
+      "committee",
+      "reputation"
+    ],
+    "description": "Core protocol design - DS reputation."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "DS MIMO",
+    "permalink": "/docs/contributors/core-ds-mimo"
+  },
+  "next": {
+    "title": "Isolated Server",
+    "permalink": "/docs/contributors/core-isolated-server"
+  }
+}

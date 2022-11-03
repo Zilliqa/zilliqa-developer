@@ -1,0 +1,35 @@
+{
+  "unversionedId": "exchanges/exchange-transaction-receipts",
+  "id": "exchanges/exchange-transaction-receipts",
+  "title": "Understanding Transaction Receipts",
+  "description": "Transaction Receipts Exchanges",
+  "source": "@site/docs/exchanges/exchange-transaction-receipts.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-transaction-receipts",
+  "permalink": "/docs/exchanges/exchange-transaction-receipts",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-transaction-receipts.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-transaction-receipts",
+    "title": "Understanding Transaction Receipts",
+    "keywords": [
+      "transaction receipts",
+      "fields",
+      "polling",
+      "exchanges",
+      "zilliqa"
+    ],
+    "description": "Transaction Receipts Exchanges"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Polling for Deposits",
+    "permalink": "/docs/exchanges/exchange-tracking-deposits"
+  },
+  "next": {
+    "title": "Managing Fungible Tokens (ZRC-2)",
+    "permalink": "/docs/exchanges/exchange-managing-zrc2-tokens"
+  }
+}

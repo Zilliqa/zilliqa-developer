@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/developer-guide/Developer-Tools",
+  "id": "dev-core/developer-guide/Developer-Tools",
+  "title": "Developer-Tools",
+  "description": "- ccache",
+  "source": "@site/docs/dev-core/developer-guide/Developer-Tools.md",
+  "sourceDirName": "dev-core/developer-guide",
+  "slug": "/dev-core/developer-guide/Developer-Tools",
+  "permalink": "/docs/dev-core/developer-guide/Developer-Tools",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/developer-guide/Developer-Tools.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/CONTRIBUTING",
+  "id": "dev-core/CONTRIBUTING",
+  "title": "Contributing Guideline",
+  "description": "Help us to make this a better place for documentaion.",
+  "source": "@site/docs/dev-core/CONTRIBUTING.md",
+  "sourceDirName": "dev-core",
+  "slug": "/dev-core/CONTRIBUTING",
+  "permalink": "/docs/dev-core/CONTRIBUTING",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/CONTRIBUTING.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

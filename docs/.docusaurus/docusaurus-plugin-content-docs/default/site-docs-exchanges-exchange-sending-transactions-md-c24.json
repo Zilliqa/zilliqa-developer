@@ -1,0 +1,34 @@
+{
+  "unversionedId": "exchanges/exchange-sending-transactions",
+  "id": "exchanges/exchange-sending-transactions",
+  "title": "Sending Transactions",
+  "description": "Sending Zilliqa Transactions For Exchanges",
+  "source": "@site/docs/exchanges/exchange-sending-transactions.md",
+  "sourceDirName": "exchanges",
+  "slug": "/exchanges/exchange-sending-transactions",
+  "permalink": "/docs/exchanges/exchange-sending-transactions",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/exchanges/exchange-sending-transactions.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "exchange-sending-transactions",
+    "title": "Sending Transactions",
+    "keywords": [
+      "constructing transaction object",
+      "signing transaction",
+      "sending transaction",
+      "zilliqa"
+    ],
+    "description": "Sending Zilliqa Transactions For Exchanges"
+  },
+  "sidebar": "ExchangesSidebar",
+  "previous": {
+    "title": "Account Management",
+    "permalink": "/docs/exchanges/exchange-account-management"
+  },
+  "next": {
+    "title": "Polling for Deposits",
+    "permalink": "/docs/exchanges/exchange-tracking-deposits"
+  }
+}

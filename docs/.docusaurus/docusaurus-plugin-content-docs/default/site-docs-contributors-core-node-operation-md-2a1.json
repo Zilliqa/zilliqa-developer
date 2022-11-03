@@ -1,0 +1,33 @@
+{
+  "unversionedId": "contributors/core-node-operation",
+  "id": "contributors/core-node-operation",
+  "title": "General Node Operation",
+  "description": "Core protocol design - general node operation.",
+  "source": "@site/docs/contributors/core-node-operation.md",
+  "sourceDirName": "contributors",
+  "slug": "/contributors/core-node-operation",
+  "permalink": "/docs/contributors/core-node-operation",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/contributors/core-node-operation.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "core-node-operation",
+    "title": "General Node Operation",
+    "keywords": [
+      "core",
+      "node",
+      "operation"
+    ],
+    "description": "Core protocol design - general node operation."
+  },
+  "sidebar": "ContributorsSidebar",
+  "previous": {
+    "title": "Bug Bounty Program",
+    "permalink": "/docs/contributors/contribute-bug-bounty"
+  },
+  "next": {
+    "title": "Consensus",
+    "permalink": "/docs/contributors/core-consensus"
+  }
+}

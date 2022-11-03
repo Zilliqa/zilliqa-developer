@@ -1,0 +1,15 @@
+{
+  "unversionedId": "dev-core/core/websocket-server",
+  "id": "dev-core/core/websocket-server",
+  "title": "Zilliqa Web-Socket Service",
+  "description": "This page describes the protocol, between the Zilliqa Websocket Server and the sdk client, for querying subscription and message pushing.",
+  "source": "@site/docs/dev-core/core/websocket-server.md",
+  "sourceDirName": "dev-core/core",
+  "slug": "/dev-core/core/websocket-server",
+  "permalink": "/docs/dev-core/core/websocket-server",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-core/core/websocket-server.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {}
+}

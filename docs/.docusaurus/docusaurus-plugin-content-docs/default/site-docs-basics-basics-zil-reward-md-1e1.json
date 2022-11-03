@@ -1,0 +1,35 @@
+{
+  "unversionedId": "basics/basics-zil-reward",
+  "id": "basics/basics-zil-reward",
+  "title": "Reward Mechanism",
+  "description": "Zilliqa Rewards",
+  "source": "@site/docs/basics/basics-zil-reward.md",
+  "sourceDirName": "basics",
+  "slug": "/basics/basics-zil-reward",
+  "permalink": "/docs/basics/basics-zil-reward",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/basics/basics-zil-reward.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "basics-zil-reward",
+    "title": "Reward Mechanism",
+    "keywords": [
+      "base rewards",
+      "flexible rewards",
+      "coinbase reward",
+      "reward calculator",
+      "zilliqa"
+    ],
+    "description": "Zilliqa Rewards"
+  },
+  "sidebar": "BasicsSideBar",
+  "previous": {
+    "title": "Schnorr Signatures",
+    "permalink": "/docs/basics/basics-zil-schnorr-signatures"
+  },
+  "next": {
+    "title": "Smart Contract Layer",
+    "permalink": "/docs/basics/basics-zil-contract"
+  }
+}

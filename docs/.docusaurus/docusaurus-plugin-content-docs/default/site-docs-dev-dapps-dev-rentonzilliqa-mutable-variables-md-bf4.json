@@ -1,0 +1,34 @@
+{
+  "unversionedId": "dev-dapps/dev-rentonzilliqa-mutable-variables",
+  "id": "dev-dapps/dev-rentonzilliqa-mutable-variables",
+  "title": "Mutable Variables",
+  "description": "The Fields of the Scilla Contract for the RentOnZilliqa Application",
+  "source": "@site/docs/dev-dapps/dev-rentonzilliqa-mutable-variables.md",
+  "sourceDirName": "dev-dapps",
+  "slug": "/dev-dapps/dev-rentonzilliqa-mutable-variables",
+  "permalink": "/docs/dev-dapps/dev-rentonzilliqa-mutable-variables",
+  "draft": false,
+  "editUrl": "https://github.com/Zilliqa/dev-portal/tree/master/docs/dev-dapps/dev-rentonzilliqa-mutable-variables.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "dev-rentonzilliqa-mutable-variables",
+    "title": "Mutable Variables",
+    "keywords": [
+      "scilla",
+      "mutable",
+      "variables",
+      "rentonzilliqa"
+    ],
+    "description": "The Fields of the Scilla Contract for the RentOnZilliqa Application"
+  },
+  "sidebar": "DevelopersSidebar",
+  "previous": {
+    "title": "Library",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-library"
+  },
+  "next": {
+    "title": "Procedures",
+    "permalink": "/docs/dev-dapps/dev-rentonzilliqa-procedures"
+  }
+}
