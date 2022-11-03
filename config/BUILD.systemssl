@@ -1,0 +1,11 @@
+cc_library(
+    name = "ssl",
+    hdrs = glob(["**/include/openssl/*.h"]),
+    srcs = glob([
+        "**/libssl.a",
+        "**/libcrypto.a",
+    ]),
+    strip_include_prefix= "include",
+    includes = ['./include/openssl'],
+    visibility = ["//visibility:public"],
+)

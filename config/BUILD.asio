@@ -1,0 +1,30 @@
+cc_library(
+    name = "asio",
+    srcs = glob(
+        [],
+# Asio is header only
+#       [
+#           "asio/src/*.cpp",
+#           "asio/src/**/*.cpp"       
+#       ],
+        exclude = []
+    ),
+    hdrs = glob([
+        "asio/include/*.hpp",
+        "asio/include/**/*.hpp",
+        "asio/include/*.ipp",
+        "asio/include/**/*.ipp",        
+#        "asio/src/**/*.hpp",
+    ]),
+    includes =[
+        "asio/include",
+    ],
+    copts = [
+        "-Iexternal/asio/asio/include",
+    ],
+    deps = [ 
+      "@openssl//:ssl",
+    ],    
+    linkopts = ["-pthread"],
+    visibility = ["//visibility:public"],
+)
