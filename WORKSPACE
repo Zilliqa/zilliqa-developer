@@ -1,7 +1,9 @@
-workspace(name = "wonop",managed_directories = {"@npm": ["node_modules"]},)
+workspace(name = "zilliqa")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+
 
 http_archive(
     name = "bazel_skylib",
@@ -17,15 +19,6 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
 http_archive(
-    name = "io_bazel_rules_go",
-    sha256 = "7b9bbe3ea1fccb46dcfa6c3f3e29ba7ec740d8733370e21cdc8937467b4a4349",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
-    ],
-)
-
-http_archive(
     name = "bazel_gazelle",
     sha256 = "d8c45ee70ec39a57e7a05e5027c32b1576cc7f16d9dd37135b0eddde45cf1b10",
     urls = [
@@ -34,181 +27,88 @@ http_archive(
     ],
 )
 
-http_archive(
-    name = "rules_rust",
-    sha256 = "531bdd470728b61ce41cf7604dc4f9a115983e455d46ac1d0c1632f613ab9fc3",
-    strip_prefix = "rules_rust-d8238877c0e552639d3e057aadd6bfcf37592408",
-    urls = [
-        # `main` branch as of 2021-08-23
-        "https://github.com/bazelbuild/rules_rust/archive/d8238877c0e552639d3e057aadd6bfcf37592408.tar.gz",
-    ],
+# ================================================================
+# C++ cross-compilation toolchains
+# ================================================================
+register_toolchains(
+    "//toolchain:gcc-linux-x86",
 )
 
-load("@rules_rust//rust:repositories.bzl", "rust_repositories")
-
-rust_repositories()
 
 # ================================================================
-# LLVM
+# Go (needed for cross-compiling Docker)
 # ================================================================
-
-# Replace with the LLVM commit you want to use.
-LLVM_COMMIT = "81d5412439efd0860c0a8dd51b831204f118d485"
-
-# The easiest way to calculate this for a new commit is to set it to empty and
-# then run a bazel build and it will report the digest necessary to cache the
-# archive and make the build reproducible.
-LLVM_SHA256 = "50b3ef31b228ea0c96ae074005bfac087c56e6a4b1c147592dd33f41cad0706b"
-
 http_archive(
-    name = "llvm-raw",
-    build_file_content = "# empty",
-    sha256 = LLVM_SHA256,
-    strip_prefix = "llvm-project-" + LLVM_COMMIT,
-    urls = ["https://github.com/llvm/llvm-project/archive/{commit}.tar.gz".format(commit = LLVM_COMMIT)],
+ name = "io_bazel_rules_go",
+ sha256 = "7b9bbe3ea1fccb46dcfa6c3f3e29ba7ec740d8733370e21cdc8937467b4a4349",
+ urls = [
+     "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
+     "https://github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
+ ],
 )
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
-load("@llvm-raw//utils/bazel:configure.bzl", "llvm_configure", "llvm_disable_optional_support_deps")
+go_rules_dependencies()
 
-llvm_configure(name = "llvm-project")
-
-# Disables optional dependencies for Support like zlib and terminfo. You may
-# instead want to configure them using the macros in the corresponding bzl
-# files.
-llvm_disable_optional_support_deps()
-
-# ================================================================
-# Google
-# ================================================================
-
-http_archive(
-    name = "googletest",
-    build_file = "@//:config/BUILD.googletest",
-    sha256 = "94c634d499558a76fa649edb13721dce6e98fb1e7018dfaeba3cd7a083945e91",
-    strip_prefix = "googletest-release-1.10.0",
-    url = "https://github.com/google/googletest/archive/release-1.10.0.zip",
-)
+go_register_toolchains()
 
 # ================================================================
 # Python and Pip
 # ================================================================
 
-git_repository(
+http_archive(
     name = "rules_python",
-    # NOT VALID: Replace with actual Git commit SHA.
-    commit = "a0fbf98d4e3a232144df4d0d80b577c7a693b570",
-    remote = "https://github.com/bazelbuild/rules_python.git",
+    sha256 = "8c8fe44ef0a9afc256d1e75ad5f448bb59b81aba149b8958f02f7b3a98f5d9b4",
+    strip_prefix = "rules_python-0.13.0",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.13.0.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories")
 
 py_repositories()
 
-# Only needed if using the packaging rules.
-load("@rules_python//python:pip.bzl", "pip_repositories")
 
-pip_repositories()
+load("@rules_python//python:pip.bzl", "pip_parse")
+
+# Create a central repo that knows about the dependencies needed from
+# requirements_lock.txt.
+pip_parse(
+   name = "zilliqa_python_deps",
+   requirements = "//:requirements.txt",
+)
+# Load the starlark macro which will define your dependencies.
+load("@zilliqa_python_deps//:requirements.bzl", "install_deps")
+# Call it to define repos for your requirements.
+install_deps()
 
 # ================================================================
-# PyBind
-# ================================================================
-
-http_archive(
-    name = "pybind11_bazel",
-    sha256 = "fec6281e4109115c5157ca720b8fe20c8f655f773172290b03f57353c11869c2",
-    strip_prefix = "pybind11_bazel-72cbbf1fbc830e487e3012862b7b720001b70672",
-    urls = ["https://github.com/pybind/pybind11_bazel/archive/72cbbf1fbc830e487e3012862b7b720001b70672.zip"],
-)
-
-http_archive(
-    name = "pybind11",
-    build_file = "@pybind11_bazel//:pybind11.BUILD",
-    sha256 = "1859f121837f6c41b0c6223d617b85a63f2f72132bae3135a2aa290582d61520",
-    strip_prefix = "pybind11-2.5.0",
-    urls = ["https://github.com/pybind/pybind11/archive/v2.5.0.zip"],
-)
-
-load("@pybind11_bazel//:python_configure.bzl", "python_configure")
-
-python_configure(name = "local_config_python")
-
-# ================================================================
-# Antlr
-# ================================================================
-
-http_archive(
-    name = "rules_antlr",
-    sha256 = "26e6a83c665cf6c1093b628b3a749071322f0f70305d12ede30909695ed85591",
-    strip_prefix = "rules_antlr-0.5.0",
-    urls = ["https://github.com/marcohu/rules_antlr/archive/0.5.0.tar.gz"],
-)
-
-load("@rules_antlr//antlr:lang.bzl", "CPP", "PYTHON")
-load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
-
-rules_antlr_dependencies("4.8", CPP, PYTHON)
-
-
-
-# Hedron's Compile Commands Extractor for Bazel
-# https://github.com/hedronvision/bazel-compile-commands-extractor
-http_archive(
-    name = "hedron_compile_commands",
-
-    # Replace the commit hash in both places (below) with the latest, rather than using the stale one here.
-    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
-    url = "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/13e135934b0f3bf1b71982e512cbe1cb11f6414f.tar.gz",
-    strip_prefix = "bazel-compile-commands-extractor-13e135934b0f3bf1b71982e512cbe1cb11f6414f",
-    # When you first run this tool, it'll recommend a sha256 hash to put here with a message like: "DEBUG: Rule 'hedron_compile_commands' indicated that a canonical reproducible form can be obtained by modifying arguments sha256 = ..."
-)
-load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
-hedron_compile_commands_setup()
-
-
-# 
 # NodeJS
-#
-# https://enlear.academy/how-to-set-up-bazel-for-a-react-app-c8a6ae6131d5
-# http_archive(
-#     name = "build_bazel_rules_nodejs",
-#     sha256 = "4681ca88d512d57196d064d1441549080d8d17d119174a1229d1717a16a4a489",
-#     urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.0.0-beta.1/rules_nodejs-4.0.0-beta.1.tar.gz"],
-# )
-# 
-# 
-# load("@build_bazel_rules_nodejs//:index.bzl", "yarn_install")
-# 
-# yarn_install(
-#     # Name this npm so that Bazel Label references look like @npm//package
-#     name = "npm",
-#     exports_directories_only = True,
-#     frozen_lockfile = False,
-#     package_json = "//:package.json",
-#     yarn_lock = "//:yarn.lock",
-# )
+# ================================================================
 
-# ===
-# Python
-# ===
-
-load("@rules_python//python:pip.bzl", "pip_repositories", "pip_import")
-
-pip_repositories()
-
-# This rule translates the specified requirements.txt into
-# @wonop_python_deps//:requirements.bzl, which itself exposes a pip_install method.
-pip_import(
-    name = "wonop_python_deps",
-    requirements = "//:requirements.txt",
+http_archive(
+    name = "build_bazel_rules_nodejs",
+    sha256 = "f10a3a12894fc3c9bf578ee5a5691769f6805c4be84359681a785a0c12e8d2b6",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-5.5.3.tar.gz"],
 )
 
-load("@wonop_python_deps//:requirements.bzl", wonop_python_deps_install = "pip_install")
+load("@build_bazel_rules_nodejs//:repositories.bzl", "build_bazel_rules_nodejs_dependencies")
 
-wonop_python_deps_install()
+build_bazel_rules_nodejs_dependencies()
 
-# ======
+load("@build_bazel_rules_nodejs//:index.bzl", "yarn_install")
+
+yarn_install(
+    # Name this npm so that Bazel Label references look like @npm//package
+    name = "npm",
+    exports_directories_only = True,
+    frozen_lockfile = False,    
+    package_json = "//:package.json",
+    yarn_lock = "//:yarn.lock",
+)
+
+# ================================================================
 # Docker
-# ======
+# ================================================================
 http_archive(
     name = "io_bazel_rules_docker",
     sha256 = "4349f2b0b45c860dd2ffe18802e9f79183806af93ce5921fb12cbd6c07ab69a8",
@@ -216,11 +116,11 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.21.0/rules_docker-v0.21.0.tar.gz"],
 )
 
-
 load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
+
 container_repositories()
 
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
@@ -291,9 +191,10 @@ container_pull(
 _cc_image_repos()
 _py_image_repos()
 
-## ===
-## Kubernetes
-## ===
+# ================================================================
+# Kubernetes
+# ================================================================
+
 
 http_archive(
     name = "io_bazel_rules_k8s",
