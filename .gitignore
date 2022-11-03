@@ -34,8 +34,6 @@ tmp-*
 .pytest*/
 .pytest_cache/**
 
-/docs/build
-
 # Merge Outputs
 *.orig
 

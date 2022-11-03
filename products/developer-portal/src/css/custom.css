@@ -33,11 +33,11 @@ svg:not(:root) {
   --cards-icon-color: #18191a;
   --cards-text-font-color: #444444;
   --cover-bg-color: #ffffff;
-  --cover-title-color: #1BDBB4;
+  --cover-title-color: #1bdbb4;
 }
 
 /* for main page cards section */
-[data-theme="dark"] {
+[data-theme='dark'] {
   --cards-bg-color: #18191a;
   --cards-border-color: #cccccc;
   --cards-border-hover-color: #25c2a0;
@@ -61,10 +61,10 @@ svg:not(:root) {
    * a way to fix it - https://github.com/facebook/docusaurus/issues/2365 
    * - rrw 2022-09-09
    */
-  background-image: url("/img/chain_bg.png");
+  /*  background-image: url('/img/chain_bg.png');*/
   background-repeat: no-repeat;
   background-size: 60%;
-  background-position:90% 50%;
+  background-position: 90% 50%;
 }
 
 .cover-image {
@@ -89,7 +89,7 @@ svg:not(:root) {
 
 .cover-title .hero__title {
   font-size: 2.6em;
-  color: var(--cover-title-color)
+  color: var(--cover-title-color);
 }
 
 .cover-title .hero__subtitle {

@@ -1,4 +1,7 @@
-workspace(name = "zilliqa")
+workspace(
+    name = "zilliqa", 
+    managed_directories = {"@npm": ["node_modules"]},
+)
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -27,13 +30,6 @@ http_archive(
     ],
 )
 
-# ================================================================
-# C++ cross-compilation toolchains
-# ================================================================
-register_toolchains(
-    "//toolchain:gcc-linux-x86",
-)
-
 
 # ================================================================
 # Go (needed for cross-compiling Docker)
@@ -51,6 +47,23 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 go_rules_dependencies()
 
 go_register_toolchains()
+
+# ================================================================
+# Packaging
+# ================================================================
+
+http_archive(
+    name = "rules_pkg",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.8.0/rules_pkg-0.8.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.8.0/rules_pkg-0.8.0.tar.gz",
+    ],
+    sha256 = "eea0f59c28a9241156a47d7a8e32db9122f3d50b505fae0f33de6ce4d9b61834",
+)
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+rules_pkg_dependencies()
+
+
 
 # ================================================================
 # Python and Pip
@@ -85,6 +98,7 @@ install_deps()
 # NodeJS
 # ================================================================
 
+# TODO: Upgrade to rules_js: https://github.com/aspect-build/rules_js/tree/main/docs
 http_archive(
     name = "build_bazel_rules_nodejs",
     sha256 = "f10a3a12894fc3c9bf578ee5a5691769f6805c4be84359681a785a0c12e8d2b6",

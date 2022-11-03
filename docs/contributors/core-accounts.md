@@ -12,6 +12,7 @@ description: Core protocol design - account management.
 ## Overview
 
 The Zilliqa blockchain supports two types of accounts:
+
 - **Non-contract** - for balance transfers
 - **Contract** - for both balance transfers and smart contract execution
 
@@ -31,7 +32,7 @@ A transaction that requests a contract **deployment** triggers the generation of
 
 Immutable states are more commonly referred to as the **init data**, and examples of this include `_scilla_version`, `_library`, and `_extlibs`.
 
-Init data is supplied to the node within the transaction body (please refer to the [CreateTransaction](apis/api-transaction-create-tx.mdx) API documentation), although the node will also eventually add more fields into init data (such as `_creation_block` and `_this_address`) during transaction processing. 
+Init data is supplied to the node within the transaction body (please refer to the [CreateTransaction](apis/api-transaction-create-tx.mdx) API documentation), although the node will also eventually add more fields into init data (such as `_creation_block` and `_this_address`) during transaction processing.
 
 Mutable states, on the other hand, are the variables that are manipulated by the Scilla interpreter as it executes a transition on the contract. The Zilliqa node provides the Scilla interpreter access to these states through the Scilla IPC server.
 
@@ -39,19 +40,19 @@ Mutable states, on the other hand, are the variables that are manipulated by the
 
 Storage of accounts in the Zilliqa blockchain can be quite complex to understand due to the fact that account data is spread out across several leveldb databases:
 
-| leveldb Name       | Managed By       | Key                                       | Value       |
-| ------------------ | ---------------- | ----------------------------------------- | ----------- |
-| state              | AccountStoreTrie | Address                                   | AccountBase |
-| contractCode       | ContractStorage  | Address                                   | Code        |
-| contractInitState2 | ContractStorage  | Address                                   | Tx data field + _creation_block + _this_address |
-| contractStateData2 | ContractStorage  | Address.vname<br/>Address._depth.vname<br/>Address._type.vname<br/>Address.vname.index1.index2... | State value |
-| contractTrie       | ContractStorage  | Hash of contractStateData2 key            | State value |
-| stateRoot          | BlockStorage     | LATEST_EPOCH_STATES_UPDATED<br/>STATEROOT | Epoch number<br/>Trie root value |
-| stateDelta         | BlockStorage     | Tx block number                           | List of Account |
+| leveldb Name       | Managed By       | Key                                                                                                 | Value                                             |
+| ------------------ | ---------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| state              | AccountStoreTrie | Address                                                                                             | AccountBase                                       |
+| contractCode       | ContractStorage  | Address                                                                                             | Code                                              |
+| contractInitState2 | ContractStorage  | Address                                                                                             | Tx data field + \_creation_block + \_this_address |
+| contractStateData2 | ContractStorage  | Address.vname<br/>Address.\_depth.vname<br/>Address.\_type.vname<br/>Address.vname.index1.index2... | State value                                       |
+| contractTrie       | ContractStorage  | Hash of contractStateData2 key                                                                      | State value                                       |
+| stateRoot          | BlockStorage     | LATEST_EPOCH_STATES_UPDATED<br/>STATEROOT                                                           | Epoch number<br/>Trie root value                  |
+| stateDelta         | BlockStorage     | Tx block number                                                                                     | List of Account                                   |
 
 ## State Tries
 
-The **state** and **contractTrie** databases are implementations of Ethereum's Merkle Patricia Trie data structure. 
+The **state** and **contractTrie** databases are implementations of Ethereum's Merkle Patricia Trie data structure.
 
 A trie is a key-value data structure with a root hash and hashes along each key-value pair. The root hash is updated every time the structure is updated (e.g., by adding another key-value pair).
 
@@ -70,6 +71,7 @@ Zilliqa uses Ethereum's `GenericTrieDB` library for the trie structure. The `Gen
 ![image02](/img/contributors/core/account-management/image02.png)
 
 The basic usage will involve:
+
 1. Calling `init()` to reset the root to NULL
 1. Calling `insert()` to add nodes to the trie
 1. Calling `at()` to access any of the added nodes
@@ -88,11 +90,13 @@ The diagram below highlights the Zilliqa architecture around account and account
 ![image03](/img/contributors/core/account-management/image03.png)
 
 There are essentially _three_ account store objects in a Zilliqa node:
+
 - `AccountStore` holds the accounts that have been committed to disk (i.e., the blockchain).
 - `AccountStoreTemp` holds the account data that resides in transient memory and that has yet to be validated by the nodes during consensus.
 - `AccountStoreAtomic` also holds account data in transient memory, but only for the current transaction being executed. More precisely, it is used for **contract call** transactions, where multiple accounts may be updated (e.g., a chain call). After the transaction is completely processed, the contents are moved to the `AccountStoreTemp` object.
 
 The rest of the account store hierarchy is composed of abstract classes:
+
 - `AccountStoreBase` contains the map of accounts in transient memory. It also provides an `UpdateAccount()` function for use on non-contract (i.e., payment) transactions.
 - `AccountStoreSC` contains most of the smart contract-related functionality, including an `UpdateAccount()` function for use on contract (deployment and call) transactions.
 - `AccountStoreTrie` contains trie management functions and the `GenericTrieDB` instance for the base account data and its storage in the **state** leveldb database.

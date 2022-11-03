@@ -14,8 +14,6 @@ def zilliqa_cc_library(
         linkstamp = None,
         tags = [],
         linkshared = 1,
-        #        alwayslink = 1,
-        #        linkstatic = True,
         deps = [],
         strip_include_prefix = None,
         textual_hdrs = None):
