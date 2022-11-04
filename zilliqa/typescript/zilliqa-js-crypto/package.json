@@ -1,0 +1,50 @@
+{
+  "name": "@zilliqa-js/crypto",
+  "version": "3.3.4",
+  "description": "Core crypto utilities for signing/verification/hashing Zilliqa transactions.",
+  "maintainers": [
+    "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
+  ],
+  "bugs": {
+    "url": "https://github.com/Zilliqa/zilliqa-js/issues"
+  },
+  "main": "dist/index.js",
+  "node": "dist/index.js",
+  "browser": "dist/index.umd.js",
+  "module": "dist/index.esm.js",
+  "jsnext:main": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "repository": "https://github.com/Zilliqa/zilliqa-js/",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@types/elliptic": "^6.4.13",
+    "@types/uuid": "8.3.1",
+    "@zilliqa-js/util": "^3.3.4",
+    "aes-js": "^3.1.1",
+    "bsert": "^0.0.4",
+    "elliptic": "^6.5.0",
+    "hash.js": "^1.1.5",
+    "hmac-drbg": "^1.0.1",
+    "pbkdf2": "^3.0.16",
+    "scrypt-js": "^3.0.1",
+    "scryptsy": "^2.1.0",
+    "sodium-randbytes": "0.14.0",
+    "tslib": "2.3.1",
+    "uuid": "8.3.2"
+  },
+  "files": [
+    "dist",
+    "node_modules",
+    "package.json",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md"
+  ]
+}
