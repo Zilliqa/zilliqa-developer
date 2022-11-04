@@ -29,6 +29,13 @@
     "zilliqa/typescript/*"
   ],
   "devDependencies": {
+    "@bazel/buildifier": "^5.1.0",
+    "@bazel/ibazel": "^0.16.2",
+    "@bazel/concatjs": "^5.7.1",
+    "@bazel/protractor": "^5.7.1",
+    "@bazel/rollup": "^5.7.1",
+    "@bazel/terser": "^5.7.1",
+    "@bazel/typescript": "^5.7.1",
     "@types/bn.js": "^4.11.3",
     "@types/camelcase": "^4.1.0",
     "@types/fancy-log": "^1.3.0",
@@ -61,5 +68,9 @@
     "webpack": "^4.20.2",
     "webpack-command": "^0.4.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "cross-fetch": "2.2.5",
+    "mitt": "^1.1.3",
+    "tslib": "2.3.1"
+  }
 }

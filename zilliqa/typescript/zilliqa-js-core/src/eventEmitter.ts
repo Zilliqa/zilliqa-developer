@@ -27,7 +27,9 @@ class EventEmitter<T> {
   private handlers?: any = {};
   private emitter: mitt.Emitter;
   constructor() {
-    this.emitter = new mitt(this.handlers);
+    // TODO: As any added to solve
+    // error TS7009: 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
+    this.emitter = new (mitt as any)(this.handlers) as mitt.Emitter;
     this.off = this.emitter.off.bind(this);
     this.emit = this.emitter.emit.bind(this);
     this.promise = new Promise((resolve, reject) => {
