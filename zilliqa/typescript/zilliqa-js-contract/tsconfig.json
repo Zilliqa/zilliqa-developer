@@ -1,10 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist"
   },
-  "include": ["src", "../../typings/**/*.d.ts"],
+  "include": ["src", "../../../typings/**/*.d.ts"],
   "references": [
     { "path": "../zilliqa-js-account" },
     { "path": "../zilliqa-js-core" },

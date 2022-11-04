@@ -33,7 +33,7 @@ import { c, createLogger } from './logger';
 const logBundle = createLogger('bundle');
 
 function getKeys(p) {
-  const packageJsonFile = `${process.cwd()}/packages/${p}/package.json`;
+  const packageJsonFile = `${process.cwd()}/zilliqa/typescript/${p}/package.json`;
   const data = fs.readFileSync(packageJsonFile, 'utf-8');
   const { dependencies } = JSON.parse(data);
   return dependencies ? Object.keys(dependencies) : [];

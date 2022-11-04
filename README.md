@@ -25,14 +25,14 @@ want to use it for.
 
 | Package                                                                         | Version                                                                                                                               | Description                                                                                                                                                               | Dependencies                                                  |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| [`@zilliqa-js/core`](./packages/zilliqa-js-core)                                | [![npm](https://img.shields.io/npm/v/@zilliqa-js/core.svg)](https://www.npmjs.com/package/@zilliqa-js/core)                           | Core abstractions and base classes, such as `HTTPProvider` and network logic for interfacing with the Zilliqa JSON-RPC.                                                   |                                                               |
-| [`@zilliqa-js/util`](./packages/zilliqa-js-util)                                | [![npm](https://img.shields.io/npm/v/@zilliqa-js/util.svg)](https://www.npmjs.com/package/@zilliqa-js/util)                           | Miscellaneous functions that take care of serialisation/deserialisation and validation.                                                                                   |                                                               |
-| [`@zilliqa-js/crypto`](./packages/zilliqa-js-crypto)                            | [![npm](https://img.shields.io/npm/v/@zilliqa-js/crypto.svg)](https://www.npmjs.com/package/@zilliqa-js/crypto)                       | Exposes several loosely-coupled cryptographic convenience functions for working with the Zilliqa blockchain and its cryptographic primitives, such as Schnorr signatures. | `@zilliqa-js/util`                                            |
-| [`@zilliqa-js/proto`](./packages/zilliqa-js-proto)                              | [![npm](https://img.shields.io/npm/v/@zilliqa-js/proto.svg)](https://www.npmjs.com/package/@zilliqa-js/proto)                         | Protobuf source files and corresponding generated JS modules.                                                                                                             |                                                               |
-| [`@zilliqa-js/account`](./packages/zilliqa-js-account)                          | [![npm](https://img.shields.io/npm/v/@zilliqa-js/account.svg)](https://www.npmjs.com/package/@zilliqa-js/account)                     | `Wallet`, `Account` and `Transaction` abstractions.                                                                                                                       | `@zilliqa-js/core`, `@zilliqa-js/crypto`, `@zilliqa-js/proto` |
-| [`@zilliqa-js/blockchain`](./packages/zilliqa-js-blockchain)                    | [![npm](https://img.shields.io/npm/v/@zilliqa-js/blockchain.svg)](https://www.npmjs.com/package/@zilliqa-js/blockchain)               | Main interface to the Zilliqa `JSON-RPC`.                                                                                                                                 | `@zilliqa-js/account`                                         |
-| [`@zilliqa-js/contract`](./packages/zilliqa-js-contract)                        | [![npm](https://img.shields.io/npm/v/@zilliqa-js/contract.svg)](https://www.npmjs.com/package/@zilliqa-js/contract)                   | Exposes a `Contracts` module that takes care of smart contract deployment and interaction.                                                                                | `@zilliqa-js/blockchain`                                      |
-| [`@zilliqa-js/subscriptions`](./packages/zilliqa-js-util)                       | [![npm](https://img.shields.io/npm/v/@zilliqa-js/subscriptions.svg)](https://www.npmjs.com/package/@zilliqa-js/subscriptions)         | Classes to interact with the websocket API of Zilliqa node.                                                                                                               |                                                               |
+| [`@zilliqa-js/core`](./zilliqa/typescript/zilliqa-js-core)                      | [![npm](https://img.shields.io/npm/v/@zilliqa-js/core.svg)](https://www.npmjs.com/package/@zilliqa-js/core)                           | Core abstractions and base classes, such as `HTTPProvider` and network logic for interfacing with the Zilliqa JSON-RPC.                                                   |                                                               |
+| [`@zilliqa-js/util`](./zilliqa/typescript/zilliqa-js-util)                      | [![npm](https://img.shields.io/npm/v/@zilliqa-js/util.svg)](https://www.npmjs.com/package/@zilliqa-js/util)                           | Miscellaneous functions that take care of serialisation/deserialisation and validation.                                                                                   |                                                               |
+| [`@zilliqa-js/crypto`](./zilliqa/typescript/zilliqa-js-crypto)                  | [![npm](https://img.shields.io/npm/v/@zilliqa-js/crypto.svg)](https://www.npmjs.com/package/@zilliqa-js/crypto)                       | Exposes several loosely-coupled cryptographic convenience functions for working with the Zilliqa blockchain and its cryptographic primitives, such as Schnorr signatures. | `@zilliqa-js/util`                                            |
+| [`@zilliqa-js/proto`](./zilliqa/typescript/zilliqa-js-proto)                    | [![npm](https://img.shields.io/npm/v/@zilliqa-js/proto.svg)](https://www.npmjs.com/package/@zilliqa-js/proto)                         | Protobuf source files and corresponding generated JS modules.                                                                                                             |                                                               |
+| [`@zilliqa-js/account`](./zilliqa/typescript/zilliqa-js-account)                | [![npm](https://img.shields.io/npm/v/@zilliqa-js/account.svg)](https://www.npmjs.com/package/@zilliqa-js/account)                     | `Wallet`, `Account` and `Transaction` abstractions.                                                                                                                       | `@zilliqa-js/core`, `@zilliqa-js/crypto`, `@zilliqa-js/proto` |
+| [`@zilliqa-js/blockchain`](./zilliqa/typescript/zilliqa-js-blockchain)          | [![npm](https://img.shields.io/npm/v/@zilliqa-js/blockchain.svg)](https://www.npmjs.com/package/@zilliqa-js/blockchain)               | Main interface to the Zilliqa `JSON-RPC`.                                                                                                                                 | `@zilliqa-js/account`                                         |
+| [`@zilliqa-js/contract`](./zilliqa/typescript/zilliqa-js-contract)              | [![npm](https://img.shields.io/npm/v/@zilliqa-js/contract.svg)](https://www.npmjs.com/package/@zilliqa-js/contract)                   | Exposes a `Contracts` module that takes care of smart contract deployment and interaction.                                                                                | `@zilliqa-js/blockchain`                                      |
+| [`@zilliqa-js/subscriptions`](./zilliqa/typescript/zilliqa-js-util)             | [![npm](https://img.shields.io/npm/v/@zilliqa-js/subscriptions.svg)](https://www.npmjs.com/package/@zilliqa-js/subscriptions)         | Classes to interact with the websocket API of Zilliqa node.                                                                                                               |                                                               |
 | [`@zilliqa-js/scilla-json-utils`](https://github.com/Zilliqa/scilla-json-utils) | [![npm](https://img.shields.io/npm/v/@zilliqa-js/scilla-json-utils.svg)](https://www.npmjs.com/package/@zilliqa-js/scilla-json-utils) | Simplifies the way you construct the Scilla JSON data.                                                                                                                    |                                                               |
 | [`@zilliqa-js/viewblock`](https://github.com/Ashlar/zilliqa-js-viewblock)       | [![npm](https://img.shields.io/npm/v/@zilliqa-js/viewblock.svg)](https://www.npmjs.com/package/@zilliqa-js/viewblock)                 | Library interfacing with ViewBlock's APIs. This package is maintained by [Ashlar](https://github.com/Ashlar)                                                              | `@zilliqa-js/crypto`                                          |
 
@@ -335,13 +335,13 @@ For more examples, visit this [repository](https://github.com/Zilliqa/zilliqa-js
 
 Each package contains API documentation. For convenience, these are links to the respective `README` documents.
 
-- [`account`](./packages/zilliqa-js-account/README.md)
-- [`blockchain`](./packages/zilliqa-js-blockchain/README.md)
-- [`contract`](./packages/zilliqa-js-contract/README.md)
-- [`core`](./packages/zilliqa-js-core/README.md)
-- [`crypto`](./packages/zilliqa-js-crypto/README.md)
-- [`proto`](./packages/zilliqa-js-proto/README.md)
-- [`util`](./packages/zilliqa-js-util/README.md)
+- [`account`](./zilliqa/typescript/zilliqa-js-account/README.md)
+- [`blockchain`](./zilliqa/typescript/zilliqa-js-blockchain/README.md)
+- [`contract`](./zilliqa/typescript/zilliqa-js-contract/README.md)
+- [`core`](./zilliqa/typescript/zilliqa-js-core/README.md)
+- [`crypto`](./zilliqa/typescript/zilliqa-js-crypto/README.md)
+- [`proto`](./zilliqa/typescript/zilliqa-js-proto/README.md)
+- [`util`](./zilliqa/typescript/zilliqa-js-util/README.md)
 
 Also, you can use [viewblock library](https://github.com/Ashlar/zilliqa-js-viewblock) to interface with ViewBlock's APIs.
 
@@ -369,7 +369,7 @@ yarn build:ts -w
 
 ### Unit Tests
 
-Tests for each package reside in `packages/src/*/tests`, and are run using
+Tests for each package reside in `zilliqa/typescript/src/*/tests`, and are run using
 `jest`.
 
 ### E2E Tests
@@ -381,7 +381,7 @@ We can easily simulate a publish using [Verdaccio](https://verdaccio.org/) which
 #### rollup
 
 `zilliqa-js` is bundled using `rollup`. To build the distributable bundles, simple run `yarn bundle`.
-This will output two bundles, `*.umd.js` and `*.esm.js`, to `packages/*/dist`. Node.js clients
+This will output two bundles, `*.umd.js` and `*.esm.js`, to `zilliqa/typescript/*/dist`. Node.js clients
 are pointed to the `umd` bundle, and bundlers are pointed to `esm`.
 
 _NOTE: these bundles are *not* minified._

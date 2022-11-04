@@ -16,7 +16,7 @@ module.exports = {
 
   // entry files
   entry: {
-    zilliqa: path.resolve(__dirname, 'packages/zilliqa/src/index.ts'),
+    zilliqa: path.resolve(__dirname, 'zilliqa/typescript/zilliqa/src/index.ts'),
   },
 
   // output bundles (location)
@@ -33,27 +33,27 @@ module.exports = {
     alias: {
       '@zilliqa-js/core': path.resolve(
         __dirname,
-        'packages/zilliqa-js-core/src/index.ts',
+        'zilliqa/typescript/zilliqa-js-core/src/index.ts',
       ),
       '@zilliqa-js/account': path.resolve(
         __dirname,
-        'packages/zilliqa-js-account/src/index.ts',
+        'zilliqa/typescript/zilliqa-js-account/src/index.ts',
       ),
       '@zilliqa-js/blockchain': path.resolve(
         __dirname,
-        'packages/zilliqa-js-blockchain/src/index.ts',
+        'zilliqa/typescript/zilliqa-js-blockchain/src/index.ts',
       ),
       '@zilliqa-js/contract': path.resolve(
         __dirname,
-        'packages/zilliqa-js-contract/src/index.ts',
+        'zilliqa/typescript/zilliqa-js-contract/src/index.ts',
       ),
       '@zilliqa-js/subscriptions': path.resolve(
         __dirname,
-        'packages/zilliqa-js-subscriptions/src/index.ts',
+        'zilliqa/typescript/zilliqa-js-subscriptions/src/index.ts',
       ),
       '@zilliqa-js/crypto': path.resolve(
         __dirname,
-        'packages/zilliqa-js-crypto/src/index.ts',
+        'zilliqa/typescript/zilliqa-js-crypto/src/index.ts',
       ),
     },
     modules: ['node_modules'],

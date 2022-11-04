@@ -18,18 +18,20 @@ const config = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  testMatch: ['<rootDir>/packages/**/test/?(*.)+(spec|test).ts'],
+  testMatch: ['<rootDir>/zilliqa/typescript/**/test/?(*.)+(spec|test).ts'],
   moduleDirectories: [
-    'packages/*/src',
+    'zilliqa/typescript/*/src',
     '<rootDir>/includes',
     '<rootDir>/node_modules',
     '<rootDir>/*/node_modules',
   ],
   moduleFileExtensions: ['js', 'ts', 'node', 'json'],
   moduleNameMapper: {
-    '^@zilliqa-js/zilliqa': '<rootDir>/packages/zilliqa/src/index.ts',
-    '^@zilliqa-js/proto$': '<rootDir>/packages/zilliqa-js-proto/dist/index.js',
-    '^@zilliqa-js/(.*)$': '<rootDir>/packages/zilliqa-js-$1/src/index.ts',
+    '^@zilliqa-js/zilliqa': '<rootDir>/zilliqa/typescript/zilliqa/src/index.ts',
+    '^@zilliqa-js/proto$':
+      '<rootDir>/zilliqa/typescript/zilliqa-js-proto/dist/index.js',
+    '^@zilliqa-js/(.*)$':
+      '<rootDir>/zilliqa/typescript/zilliqa-js-$1/src/index.ts',
   },
   globals: {
     'ts-jest': {
@@ -39,7 +41,7 @@ const config = {
   testURL: 'http://localhost',
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/packages/*/src/**/*.{ts,js}',
+    '<rootDir>/zilliqa/typescript/*/src/**/*.{ts,js}',
     '!**/node_modules/**',
   ],
   testEnvironment: 'jsdom',

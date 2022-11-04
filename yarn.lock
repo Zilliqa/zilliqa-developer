@@ -947,7 +947,7 @@
 
 "@lerna/filter-packages@4.0.0":
   version "4.0.0"
-  resolved "https://registry.npmjs.org/@lerna/filter-packages/-/filter-packages-4.0.0.tgz#b1f70d70e1de9cdd36a4e50caa0ac501f8d012f2"
+  resolved "https://registry.npmjs.org/@lerna/filter-zilliqa/typescript/-/filter-packages-4.0.0.tgz#b1f70d70e1de9cdd36a4e50caa0ac501f8d012f2"
   integrity sha512-+4AJIkK7iIiOaqCiVTYJxh/I9qikk4XjNQLhE3kixaqgMuHl1NQ99qXRR0OZqAWB9mh8Z1HA9bM5K1HZLBTOqA==
   dependencies:
     "@lerna/validation-error" "4.0.0"

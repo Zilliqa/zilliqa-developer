@@ -25,7 +25,9 @@
     "lint": "eslint . --ext .ts -c .eslintrc.js",
     "validate": "yarn lint && yarn prettier -- --list-different && yarn bootstrap && yarn test"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "zilliqa/typescript/*"
+  ],
   "devDependencies": {
     "@types/bn.js": "^4.11.3",
     "@types/camelcase": "^4.1.0",

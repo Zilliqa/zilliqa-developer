@@ -1,6 +1,6 @@
 {
   "packages": [
-    "packages/*"
+    "zilliqa/typescript/*"
   ],
   "version": "3.3.4",
   "npmClient": "yarn",
