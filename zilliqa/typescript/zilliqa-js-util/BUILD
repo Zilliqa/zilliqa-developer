@@ -4,10 +4,9 @@ load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
 ts_project(
    name = "core_ts",
    srcs = [
+   	"tsconfig.base.json",
    	"//zilliqa/typescript:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
-   extends = "//:tsconfig.base.json",
-   tsconfig = "tsconfig.json",
    out_dir = "build",
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
@@ -33,11 +32,3 @@ ts_project(
 	declaration=1,
 	incremental=1,
 )
-
-# TODO:
-# pkg_npm(
-#    name = "core",
-#    package_name = "@zilliqa-js/core",
-#    srcs = ["package.json"],
-#    deps = [":core_ts"],
-# )
