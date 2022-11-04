@@ -2,18 +2,20 @@ load("@npm//@bazel/typescript:index.bzl", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
 
 ts_project(
-   name = "core_ts",
+   name = "util_ts",
    srcs = [
-   	"tsconfig.base.json",
    	"//zilliqa/typescript:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
+   extends = "//:tsconfig.base.json",
+   tsconfig = "tsconfig.json",
    out_dir = "build",
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
-        "@npm//cross-fetch",
-        "@npm//mitt",
-        "@npm//tslib",
+	    "@npm//@types/long",
+	    "@npm//bn.js",
+	    "@npm//long",
+	    "@npm//tslib",
 
 	    "@npm//@types/bn.js",
 	    "@npm//@types/camelcase",
@@ -32,3 +34,11 @@ ts_project(
 	declaration=1,
 	incremental=1,
 )
+
+# TODO:
+# pkg_npm(
+#    name = "core",
+#    package_name = "@zilliqa-js/core",
+#    srcs = ["package.json"],
+#    deps = [":core_ts"],
+# )
