@@ -1,9 +1,8 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 ts_project(
-   name = "util_js_src",
+   name = "util_ts",
    srcs = [
    	"//zilliqa/typescript:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
@@ -18,7 +17,6 @@ ts_project(
 	    "@npm//long",
 	    "@npm//tslib",
 
-		"@npm//hash.js", # TODO: Not needed - fix typings and remove
 	    "@npm//@types/bn.js",
 	    "@npm//@types/camelcase",
 	    "@npm//@types/fancy-log",
@@ -28,30 +26,19 @@ ts_project(
 	    "@npm//@typescript-eslint/eslint-plugin",
 	    "@npm//@typescript-eslint/parser",
    ],
-   
-	declaration_map = True,
-	resolve_json_module = True,
-	source_map = True,
-	composite = True,
-	declaration = True,
-	incremental = True,
- 	visibility = ["//visibility:public"]    
+
+	declaration_map=1,
+	resolve_json_module=1,
+	source_map=1,
+	composite=1,
+	declaration=1,
+	incremental=1,
 )
 
-js_library(
-    name = "util",
-    package_name = "@zilliqa-js/util",
-    deps = [
-        ":util_js_src",
-    ],
- 	visibility = ["//visibility:public"]    
-
-)
-
-pkg_npm(
-    name = "package",
-    package_name = "@zilliqa-js/util",
-    srcs = ["package.json"],
-    deps = [":util"],
- 	 visibility = ["//visibility:public"]    
-)
+# TODO:
+# pkg_npm(
+#    name = "core",
+#    package_name = "@zilliqa-js/core",
+#    srcs = ["package.json"],
+#    deps = [":core_ts"],
+# )

@@ -17,11 +17,24 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "paths": {
-      "*": ["zilliqa/typescript/typings/*", "includes/*"]
+      "*": ["zilliqa/typescript/typings/*", "includes/*"],
+      "@zilliqa-js/util": ["zilliqa/typescript/zilliqa-js-util"]
     },
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "strict": true,
-    "target": "es5"
+    "target": "es5",
+    "rootDirs": [
+      ".",
+      "./zilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/host/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/darwin-fastbuild/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/k8-fastbuild/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/x64_windows-fastbuild/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/darwin-dbg/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/k8-dbg/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/x64_windows-dbg/binzilliqa/typescript/zilliqa-js-util",
+      "./bazel-out/darwin_arm64-fastbuild/bin/zilliqa/typescript/zilliqa-js-util/"
+    ]
   }
 }
