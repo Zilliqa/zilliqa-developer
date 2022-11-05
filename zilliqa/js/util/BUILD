@@ -3,7 +3,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 ts_project(
-   name = "util_js_src",
+   name = "src_js",
    srcs = [
    	"//zilliqa/js:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
@@ -42,7 +42,7 @@ js_library(
     name = "lib",
     package_name = "@zilliqa-js/util",
     deps = [
-        ":util_js_src",
+        ":src_js",
     ],
  	visibility = ["//visibility:public"],
     srcs = ["package.json"],
@@ -52,6 +52,6 @@ pkg_npm(
     name = "package",
     package_name = "@zilliqa-js/util",
     srcs = ["package.json"],
-    deps = [":util"],
+    deps = [":src_js"],
  	 visibility = ["//visibility:public"]    
 )

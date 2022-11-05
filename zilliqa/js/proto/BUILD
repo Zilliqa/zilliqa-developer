@@ -1,44 +1,28 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_project")
+load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load(":defs.bzl", "protobufjs_library")
 
-ts_project(
-   name = "proto_ts",
-   srcs = [
-   	"//zilliqa/typescript:typings"
-   ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
-   extends = "//:tsconfig.base.json",
-   tsconfig = "tsconfig.json",
-   out_dir = "dist",
-   root_dir = "src",
-   tsc = "@npm//typescript/bin:tsc",
-   deps = [
-    	"@npm//@types/websocket",
-    	"@npm//mitt",
-    	"@npm//tslib",
-    	"@npm//websocket",
-
-	    "@npm//@types/bn.js",
-	    "@npm//@types/camelcase",
-	    "@npm//@types/fancy-log",
-	    "@npm//@types/jest",
-	    "@npm//@types/node",
-	    "@npm//@types/webpack",
-	    "@npm//@typescript-eslint/eslint-plugin",
-	    "@npm//@typescript-eslint/parser",
-   ],
-
-	declaration_map=1,
-	resolve_json_module=1,
-	source_map=1,
-	composite=1,
-	declaration=1,
-	incremental=1,
+proto_library(
+    name = "src_js",
+    srcs = [
+        "src/messages.proto",
+    ],
 )
 
-# TODO:
-# pkg_npm(
-#    name = "core",
-#    package_name = "@zilliqa-js/core",
-#    srcs = ["package.json"],
-#    deps = [":core_ts"],
-# )
+protobufjs_library(
+    name = "lib",
+    proto = "src_js",
+    srcs = ["package.json"],
+     visibility = ["//visibility:public"]    
+
+)
+
+
+pkg_npm(
+    name = "package",
+    package_name = "@zilliqa-js/proto",
+    srcs = ["package.json"],
+    deps = [":src_js"],
+ 	 visibility = ["//visibility:public"]    
+)

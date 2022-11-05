@@ -74,7 +74,9 @@ export class WebSocketProvider {
   constructor(url: string, options?: SubscriptionOption) {
     this.url = url;
     this.options = options;
-    this.emitter = new mitt(this.handlers);
+    // TODO: type cast to prevent:
+    // zilliqa/js/subscriptions/src/ws.ts(77,20): error TS7009: 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
+    this.emitter = new (mitt as any)(this.handlers) as mitt.Emitter;
     this.websocket = WebSocketProvider.NewWebSocket(url, options);
     this.subscriptions = {};
     this.registerEventListeners();

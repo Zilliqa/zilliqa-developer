@@ -1,10 +1,11 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 ts_project(
-   name = "util_ts",
+   name = "src_js",
    srcs = [
-   	"//zilliqa/typescript:typings"
+   	"//zilliqa/js:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
    extends = "//:tsconfig.base.json",
    tsconfig = "tsconfig.json",
@@ -12,10 +13,10 @@ ts_project(
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
-	    "@npm//@types/long",
-	    "@npm//bn.js",
-	    "@npm//long",
-	    "@npm//tslib",
+
+    "@npm//hash.js",
+    "@npm//tslib",
+    "@npm//utility-types",
 
 	    "@npm//@types/bn.js",
 	    "@npm//@types/camelcase",
@@ -25,20 +26,37 @@ ts_project(
 	    "@npm//@types/webpack",
 	    "@npm//@typescript-eslint/eslint-plugin",
 	    "@npm//@typescript-eslint/parser",
-   ],
 
-	declaration_map=1,
-	resolve_json_module=1,
-	source_map=1,
-	composite=1,
-	declaration=1,
-	incremental=1,
+    "//zilliqa/js/account:lib",
+    "//zilliqa/js/blockchain:lib",
+    "//zilliqa/js/core:lib",
+    "//zilliqa/js/crypto:lib",
+    "//zilliqa/js/util:lib",
+   ],
+   
+	declaration_map = True,
+	resolve_json_module = True,
+	source_map = True,
+	composite = True,
+	declaration = True,
+	incremental = True,
+ 	visibility = ["//visibility:public"]    
 )
 
-# TODO:
-# pkg_npm(
-#    name = "core",
-#    package_name = "@zilliqa-js/core",
-#    srcs = ["package.json"],
-#    deps = [":core_ts"],
-# )
+js_library(
+    name = "lib",
+    package_name = "@zilliqa-js/contract",
+    deps = [
+        ":src_js",
+    ],
+ 	visibility = ["//visibility:public"],
+    srcs = ["package.json"],
+)
+
+pkg_npm(
+    name = "package",
+    package_name = "@zilliqa-js/contract",
+    srcs = ["package.json"],
+    deps = [":src_js"],
+ 	 visibility = ["//visibility:public"]    
+)

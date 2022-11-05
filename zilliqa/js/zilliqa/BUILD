@@ -13,13 +13,7 @@ ts_project(
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
-
-    "@npm//@types/bip39",
-    "@npm//@types/hdkey",
-    "@npm//bip39",
-    "@npm//hdkey",
     "@npm//tslib",
-
 
 	    "@npm//@types/bn.js",
 	    "@npm//@types/camelcase",
@@ -29,13 +23,16 @@ ts_project(
 	    "@npm//@types/webpack",
 	    "@npm//@typescript-eslint/eslint-plugin",
 	    "@npm//@typescript-eslint/parser",
+        "@npm//hash.js", # TODO: Not needed - fix typings and remove
 
+    "//zilliqa/js/account:lib",
+    "//zilliqa/js/blockchain:lib",
+    "//zilliqa/js/contract:lib",
     "//zilliqa/js/core:lib",
     "//zilliqa/js/crypto:lib",
-    "//zilliqa/js/proto:lib",
-    "//zilliqa/js/util:lib",
-
-   ],
+    "//zilliqa/js/subscriptions:lib",
+    "//zilliqa/js/util:lib",   
+    ],
    
 	declaration_map = True,
 	resolve_json_module = True,
@@ -48,7 +45,7 @@ ts_project(
 
 js_library(
     name = "lib",
-    package_name = "@zilliqa-js/account",
+    package_name = "@zilliqa-js/zilliqa",
     deps = [
         ":src_js",
     ],
@@ -58,7 +55,7 @@ js_library(
 
 pkg_npm(
     name = "package",
-    package_name = "@zilliqa-js/account",
+    package_name = "@zilliqa-js/zilliqa",
     srcs = ["package.json"],
     deps = [":src_js"],
  	 visibility = ["//visibility:public"]    

@@ -1,9 +1,9 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_project")
-
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 ts_project(
-   name = "crypto_ts",
+   name = "src_js",
    srcs = [
    	"//zilliqa/js:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
@@ -13,44 +13,58 @@ ts_project(
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
-	    "@npm//@types/long",
-	    "@npm//bn.js",
-	    "@npm//long",
-	    "@npm//tslib",
+    "@npm//aes-js",
+    "@npm//bsert",
+    "@npm//elliptic",
+    "@npm//hash.js",
+    "@npm//hmac-drbg",
+    "@npm//pbkdf2",
+    "@npm//scrypt-js",
+    "@npm//scryptsy",
+    "@npm//sodium-randbytes",
+    "@npm//tslib",
+    "@npm//uuid",
 
-		"@npm//hash.js",
-		"@npm//elliptic",		
-		"@npm//scrypt-js",
-		"@npm//uuid",
-		"@npm//sodium-randbytes",
-		"@npm//hmac-drbg",
 
-		"@npm//@types/elliptic",
-		"@npm//@types/uuid",
-	   "@npm//@types/bn.js",
-	   "@npm//@types/camelcase",
-	   "@npm//@types/fancy-log",
-	   "@npm//@types/jest",
-	   "@npm//@types/node",
-	   "@npm//@types/webpack",
-	   "@npm//@typescript-eslint/eslint-plugin",
-	   "@npm//@typescript-eslint/parser",
-	   "//zilliqa/js/util:lib",
+	    "@npm//@types/bn.js",
+	    "@npm//@types/camelcase",
+	    "@npm//@types/fancy-log",
+	    "@npm//@types/jest",
+	    "@npm//@types/node",
+	    "@npm//@types/webpack",
+        "@npm//@types/elliptic",
+        "@npm//@types/uuid",
+
+	    "@npm//@typescript-eslint/eslint-plugin",
+	    "@npm//@typescript-eslint/parser",
+
+    "//zilliqa/js/util:lib",
+
    ],
-   validate=False,
-	declaration_map=1,
-	resolve_json_module=1,
-	source_map=1,
-	composite=1,
-	declaration=1,
-	incremental=1,
-	visibility = ["//visibility:public"]		
+   
+	declaration_map = True,
+	resolve_json_module = True,
+	source_map = True,
+	composite = True,
+	declaration = True,
+	incremental = True,
+ 	visibility = ["//visibility:public"]    
 )
 
-# TODO:
-# pkg_npm(
-#    name = "core",
-#    package_name = "@zilliqa-js/core",
-#    srcs = ["package.json"],
-#    deps = [":core_ts"],
-# )
+js_library(
+    name = "lib",
+    package_name = "@zilliqa-js/crypto",
+    deps = [
+        ":src_js",
+    ],
+ 	visibility = ["//visibility:public"],
+    srcs = ["package.json"],
+)
+
+pkg_npm(
+    name = "package",
+    package_name = "@zilliqa-js/crypto",
+    srcs = ["package.json"],
+    deps = [":src_js"],
+ 	 visibility = ["//visibility:public"]    
+)

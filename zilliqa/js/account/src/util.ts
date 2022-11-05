@@ -19,11 +19,12 @@ import { ReqMiddlewareFn, RPCMethod } from '@zilliqa-js/core';
 import { bytes, validation } from '@zilliqa-js/util';
 import { ZilliqaMessage } from '@zilliqa-js/proto';
 import { TxReceipt, TxParams } from './types';
+import Long from 'long';
 
 export const encodeTransactionProto = (tx: TxParams): Buffer => {
   const msg = {
     version: tx.version,
-    nonce: tx.nonce || 0,
+    nonce: new Long(0, tx.nonce || 0), // TODO: TxParams uses number but protobuf uses long
     // core protocol Schnorr expects lowercase, non-prefixed address.
     toaddr: bytes.hexToByteArray(tx.toAddr.replace('0x', '').toLowerCase()),
     senderpubkey: ZilliqaMessage.ByteArray.create({
