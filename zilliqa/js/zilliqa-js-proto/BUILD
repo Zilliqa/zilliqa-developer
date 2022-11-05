@@ -2,20 +2,20 @@ load("@npm//@bazel/typescript:index.bzl", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
 
 ts_project(
-   name = "util_ts",
+   name = "proto_ts",
    srcs = [
    	"//zilliqa/typescript:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
    extends = "//:tsconfig.base.json",
    tsconfig = "tsconfig.json",
-   out_dir = "build",
+   out_dir = "dist",
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
-	    "@npm//@types/long",
-	    "@npm//bn.js",
-	    "@npm//long",
-	    "@npm//tslib",
+    	"@npm//@types/websocket",
+    	"@npm//mitt",
+    	"@npm//tslib",
+    	"@npm//websocket",
 
 	    "@npm//@types/bn.js",
 	    "@npm//@types/camelcase",

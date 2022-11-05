@@ -1,14 +1,15 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_project")
+
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
 
 ts_project(
-   name = "util_ts",
+   name = "crypto_ts",
    srcs = [
-   	"//zilliqa/typescript:typings"
+   	"//zilliqa/js:typings"
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
    extends = "//:tsconfig.base.json",
    tsconfig = "tsconfig.json",
-   out_dir = "build",
+   out_dir = "dist",
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
@@ -17,22 +18,33 @@ ts_project(
 	    "@npm//long",
 	    "@npm//tslib",
 
-	    "@npm//@types/bn.js",
-	    "@npm//@types/camelcase",
-	    "@npm//@types/fancy-log",
-	    "@npm//@types/jest",
-	    "@npm//@types/node",
-	    "@npm//@types/webpack",
-	    "@npm//@typescript-eslint/eslint-plugin",
-	    "@npm//@typescript-eslint/parser",
-   ],
+		"@npm//hash.js",
+		"@npm//elliptic",		
+		"@npm//scrypt-js",
+		"@npm//uuid",
+		"@npm//sodium-randbytes",
+		"@npm//hmac-drbg",
 
+		"@npm//@types/elliptic",
+		"@npm//@types/uuid",
+	   "@npm//@types/bn.js",
+	   "@npm//@types/camelcase",
+	   "@npm//@types/fancy-log",
+	   "@npm//@types/jest",
+	   "@npm//@types/node",
+	   "@npm//@types/webpack",
+	   "@npm//@typescript-eslint/eslint-plugin",
+	   "@npm//@typescript-eslint/parser",
+	   "//zilliqa/js/util:lib",
+   ],
+   validate=False,
 	declaration_map=1,
 	resolve_json_module=1,
 	source_map=1,
 	composite=1,
 	declaration=1,
 	incremental=1,
+	visibility = ["//visibility:public"]		
 )
 
 # TODO:

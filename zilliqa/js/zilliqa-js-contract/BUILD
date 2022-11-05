@@ -8,7 +8,7 @@ ts_project(
    ] + glob(["src/*.ts", "src/**/*.ts"], exclude = ["src/**/*.spec.ts"]),
    extends = "//:tsconfig.base.json",
    tsconfig = "tsconfig.json",
-   out_dir = "build",
+   out_dir = "dist",
    root_dir = "src",
    tsc = "@npm//typescript/bin:tsc",
    deps = [
