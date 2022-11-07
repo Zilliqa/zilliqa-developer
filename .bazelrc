@@ -1,5 +1,11 @@
 build --workspace_status_command "python config/workspace-status.py"
 
+# For now we only support Apple silicon through emulated x86 behaviour. This may 
+# change in the future if ARM becomes a priority
+
+build:apple-m1 --apple_platform_type=macos --cpu=x86_64 --host_cpu=x86_64
+
+
 # Tries to import additional config
 try-import %workspace%/.bazelrc.configure
 try-import %workspace%/.bazelrc.user

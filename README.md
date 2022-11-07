@@ -22,6 +22,33 @@ The idea with keeping it all in one repository is as follows:
 - All document repositories combined in `docs/`
 - Framework for building static webpage separated into `products/developer-portal` to allow clean `docs/` layout that is usable from Github.
 
+## Notes on Apple M1
+
+You can force the toolchain to Apple silicon by adding
+
+```
+--apple_platform_type=macos --cpu=darwin_arm64 --host_cpu=darwin_arm64
+```
+
+but `nodejs` does not have support for it:
+
+```
+FAILED: Build did NOT complete successfully (6 packages loaded, 0 targets configured)
+    currently loading: @nodejs_darwin_arm64//
+```
+
+For now, you will need to use simulated `x86`:
+
+```
+--apple_platform_type=macos --cpu=darwin_x86_64 --host_cpu=darwin_x86_64
+```
+
+We have added a shorthand configuration for this:
+
+```
+--config apple-m1
+```
+
 ## Encountering Bazel Issues
 
 To get verbose error messages add `--verbose_failures`.

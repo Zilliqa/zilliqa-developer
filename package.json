@@ -30,7 +30,6 @@
   ],
   "devDependencies": {
     "@bazel/buildifier": "^5.1.0",
-    "@bazel/concatjs": "^5.7.1",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/protractor": "^5.7.1",
     "@bazel/rollup": "^5.7.1",
