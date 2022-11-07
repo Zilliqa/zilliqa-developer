@@ -12,6 +12,7 @@ proto_library(
 
 protobufjs_library(
     name = "lib",
+    package_name = "@zilliqa-js/proto",    
     proto = "src_js",
     srcs = ["package.json"],
      visibility = ["//visibility:public"]    

@@ -5,14 +5,14 @@ load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
 load("@npm//tailwindcss:index.bzl", "tailwindcss")
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@io_bazel_rules_docker//container:container.bzl",  "container_image")
-
+load("@build_bazel_rules_nodejs//:index.bzl", "copy_to_bin")
 
 ts_project(
     name = "ts_source",    
     srcs = glob(["src/**/*", "src/*"], exclude=["src/**/*.spec.*", "src/*.spec.*","src/**/*.test.*", "src/*.test.*"]),
     extends = "//:tsconfig.base.json",
     tsconfig = "tsconfig.json",
-    out_dir = "dist",
+     out_dir = "src", # // TODO: This is not clean    "outDir": "dist",
     root_dir = "src",
     tsc = "@npm//typescript/bin:tsc",
     deps = [
@@ -50,12 +50,13 @@ ts_project(
 
         "//zilliqa/js/zilliqa:lib"
     ],
-    data = [],
+    data = glob(["src/**/*.css", "src/*.css"]),
+
+    declaration_map=False,
+    source_map=False,    
 
  	allow_js=True,
- 	declaration_map=True,
  	resolve_json_module=True,
- 	source_map=True,
  	composite=True,
  	declaration=True,
  	incremental=True,
@@ -67,6 +68,10 @@ ts_project(
 #    out_dir = "ts_source",
 )
 
+copy_to_bin(
+ name = "styles",
+ srcs = glob(["src/**/*.css", "src/*.css"])
+)
 
 filegroup(
     name = "ts_source.js",
@@ -88,13 +93,11 @@ webpack(
         "$@",
     ],
     data = [
-        ":dist/index.js",
-#        ":dist/styles.css",
+        ":src/index.js",
         "webpack.config.js",
         ":ts_source",
-
+        ":styles",
         "@npm//:node_modules",
-        "//zilliqa/js/zilliqa:lib"        
     ]
 )
 
