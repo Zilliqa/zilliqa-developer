@@ -10,11 +10,11 @@ load("@io_bazel_rules_docker//container:container.bzl",  "container_image")
 ts_project(
     name = "ts_source",    
     srcs = glob(["src/**/*", "src/*"], exclude=["src/**/*.spec.*", "src/*.spec.*","src/**/*.test.*", "src/*.test.*"]),
-   extends = "//:tsconfig.base.json",
-   tsconfig = "tsconfig.json",
-   out_dir = "dist",
-   root_dir = "src",
-   tsc = "@npm//typescript/bin:tsc",
+    extends = "//:tsconfig.base.json",
+    tsconfig = "tsconfig.json",
+    out_dir = "dist",
+    root_dir = "src",
+    tsc = "@npm//typescript/bin:tsc",
     deps = [
 	    "@npm//@testing-library/jest-dom",
 	    "@npm//@testing-library/react",
@@ -88,11 +88,42 @@ webpack(
         "$@",
     ],
     data = [
-        ":index.js",
-        ":styles.css",
-        ":tailwind.css",
+        ":dist/index.js",
+#        ":dist/styles.css",
         "webpack.config.js",
+        ":ts_source",
+
         "@npm//:node_modules",
-        ":ts_source"
-    ],
+        "//zilliqa/js/zilliqa:lib"        
+    ]
+)
+
+
+pkg_tar(
+    name="wallet-content",
+    package_dir="/usr/share/nginx/html/",
+    srcs=[":bundle",
+        "index.html",
+        ":index.js",
+#        ":styles.css",
+        ":tailwind.css",],
+    mode="0755",
+    deps=[]
+)
+
+pkg_tar(
+    name="wallet-config",
+    package_dir="/etc/nginx/conf.d/",
+    srcs=glob(["nginx/default.conf"]),
+    mode="0755",
+    deps=[]
+)
+
+# Add --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+# or --platforms=@//:linux-x86
+container_image(
+    name="image",
+    base="@nginx//image",
+    tars=[":wallet-config", ":wallet-content"],
+    ports=["80"],
 )

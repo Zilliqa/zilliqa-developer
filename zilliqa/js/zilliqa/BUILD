@@ -29,6 +29,7 @@ ts_project(
     "//zilliqa/js/blockchain:lib",
     "//zilliqa/js/contract:lib",
     "//zilliqa/js/core:lib",
+    "//zilliqa/js/proto:lib",    
     "//zilliqa/js/crypto:lib",
     "//zilliqa/js/subscriptions:lib",
     "//zilliqa/js/util:lib",   

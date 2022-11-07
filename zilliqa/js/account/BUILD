@@ -20,15 +20,14 @@ ts_project(
     "@npm//hdkey",
     "@npm//tslib",
 
-
-	    "@npm//@types/bn.js",
-	    "@npm//@types/camelcase",
-	    "@npm//@types/fancy-log",
-	    "@npm//@types/jest",
-	    "@npm//@types/node",
-	    "@npm//@types/webpack",
-	    "@npm//@typescript-eslint/eslint-plugin",
-	    "@npm//@typescript-eslint/parser",
+    "@npm//@types/bn.js",
+    "@npm//@types/camelcase",
+    "@npm//@types/fancy-log",
+    "@npm//@types/jest",
+    "@npm//@types/node",
+    "@npm//@types/webpack",
+    "@npm//@typescript-eslint/eslint-plugin",
+    "@npm//@typescript-eslint/parser",
 
     "//zilliqa/js/core:lib",
     "//zilliqa/js/crypto:lib",
