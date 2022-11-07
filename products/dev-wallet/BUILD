@@ -9,7 +9,7 @@ load("@io_bazel_rules_docker//container:container.bzl",  "container_image")
 
 ts_project(
     name = "ts_source",    
-    srcs = glob(["src/**/*", "src/*"], exclude=["src/**/*.spec.*", "src/*.spec.*"]),
+    srcs = glob(["src/**/*", "src/*"], exclude=["src/**/*.spec.*", "src/*.spec.*","src/**/*.test.*", "src/*.test.*"]),
    extends = "//:tsconfig.base.json",
    tsconfig = "tsconfig.json",
    out_dir = "dist",
@@ -23,7 +23,6 @@ ts_project(
 	    "@npm//@types/node",
 	    "@npm//@types/react",
 	    "@npm//@types/react-dom",
-	    "@npm//@types/reactstrap",
 	    "@npm//bootstrap",
 	    "@npm//husky",
 	    "@npm//prettier",
