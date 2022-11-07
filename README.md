@@ -1,5 +1,22 @@
 # Zilliqa Developer Tools & Documnentation
 
+# # Organisation
+
+This reposository is organised as follows:
+
+- `docs/`: Pure documentation in `md` or `mdx` format.
+- `exmaples/`: Reference material.
+- `zilliqa/`: APIs and libraries (JS API, GO API, etc/)
+- `products/`: Software products(`ceres`, `devex`, `neosavant`, `oil` etc.)
+
+The idea with keeping it all in one repository is as follows:
+
+1. When someone would make a breaking change to the JS Api which would break `ceres`, `devex` and two API examples this would be caught before the change makes it into `main`, and whoever responsbile for the change would also be responsible for updating all broken products as part of that update.
+
+2. The documentation and examples are kept closer to the source code hence making it possible to request an update of docs during the review of a new code piece (as opposed to create a ticket on the backlog, which is under the danger of never being addressed)
+
+3. For our different components, it would be substantially easier to make sure that all are using the same version of a given library. For instance, if the JS API is depending on `BN.js` version 4.11.8 but the `devex` product uses version 5.2.1, this possibly leads to incompatibility between `devex` and the API component. By keeping the two together, we can ensure that releases are done simultaneously and that they rely on the same library version to avoid tedious bugs that are hard to find.
+
 ## Change log
 
 - All document repositories combined in `docs/`
@@ -14,6 +31,7 @@ If you experience issues with Bazel determining relevant toolchain for C++, try 
 If you experience that it is difficult to understand what folder structure Bazel builds, add `--sandbox_debug`
 
 Sometimes while debugging it is helpful to clean all to aviod artefacts from previous builds: `bazel clean --expunge`
+
 <div align="center">
   <h1>
   zilliqa-js
