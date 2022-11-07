@@ -1,22 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-
-// TODO: import 'bootstrap/dist/css/bootstrap.min.css';
-// TODO: import 'rc-steps/assets/index.css';
-// TODO: import './index.css';
-
-import { RouterNode } from './routes';
-
-import reportWebVitals from './reportWebVitals';
+import * as ReactDOM from 'react-dom';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <RouterNode />
-  </React.StrictMode>,
+  <h1 className="text-xl bg-blue-500">Hello Wonop React App!</h1>,
   document.getElementById('root'),
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

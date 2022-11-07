@@ -6,13 +6,14 @@ load("@npm//tailwindcss:index.bzl", "tailwindcss")
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@io_bazel_rules_docker//container:container.bzl",  "container_image")
 load("@build_bazel_rules_nodejs//:index.bzl", "copy_to_bin")
+load(":differential_loading.bzl", "differential_loading")
 
 ts_project(
     name = "ts_source",    
     srcs = glob(["src/**/*", "src/*"], exclude=["src/**/*.spec.*", "src/*.spec.*","src/**/*.test.*", "src/*.test.*"]),
     extends = "//:tsconfig.base.json",
     tsconfig = "tsconfig.json",
-     out_dir = "src", # // TODO: This is not clean    "outDir": "dist",
+    out_dir = "src", # // TODO: This is not clean - outdir should be "dist"
     root_dir = "src",
     tsc = "@npm//typescript/bin:tsc",
     deps = [
@@ -60,13 +61,22 @@ ts_project(
  	composite=True,
  	declaration=True,
  	incremental=True,
-    # Experimental: Start a tsc daemon to watch for changes to make recompiles faster.
-    # supports_workers = True,
-    # If activated TSC stops working
-#    source_map = True,  
-#    preserve_jsx = True,
-#    out_dir = "ts_source",
 )
+
+
+differential_loading(
+    name = "app",
+    srcs =glob(["src/**/*", "src/*"], exclude=["src/**/*.spec.*", "src/*.spec.*","src/**/*.test.*", "src/*.test.*"]),
+    entry_point = "src/index.js",
+    deps =[":ts_source"],
+)
+
+http_server(
+    name = "server",
+    data = [":app"],
+    templated_args = ["app"],
+)
+
 
 copy_to_bin(
  name = "styles",
@@ -122,11 +132,24 @@ pkg_tar(
     deps=[]
 )
 
-# Add --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
-# or --platforms=@//:linux-x86
+
 container_image(
     name="image",
     base="@nginx//image",
     tars=[":wallet-config", ":wallet-content"],
     ports=["80"],
+)
+
+http_server(
+    name = "serve",
+    chdir = package_name(),
+    data = [
+        ":app.bundle.js",
+        ":index.html",
+        ":config.json",
+
+    ],
+    templated_args = [
+        "."
+    ],
 )

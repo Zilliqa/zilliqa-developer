@@ -63,7 +63,6 @@
     "mock-socket": "^9.0.2",
     "prettier": "^2.3.2",
     "rimraf": "^2.6.2",
-    "rollup": "0.66.6",
     "rollup-plugin-alias": "^1.4.0",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-json": "^3.1.0",
@@ -143,6 +142,14 @@
     "style-loader": "^1.0.0",
     "tailwindcss": "^3.1.8",
     "css-loader": "^3.2.0",
-    "csstype": "^2.2.0"
+    "csstype": "^2.2.0",
+    "@babel/cli": "^7.6.0",
+    "@babel/core": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
+    "mocha": "^6.2.1",
+    "protractor": "^5.4.2",
+    "rollup": "2.3.0",
+    "source-map": "^0.7.3",
+    "terser": "^4.3.1"
   }
 }
