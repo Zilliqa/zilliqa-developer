@@ -4,6 +4,8 @@ Debug/
 **/~
 **/*~
 **/node_modules
+._BUILD
+**/._BUILD
 
 .docusaurus/node_modules
 .DS_STORE
