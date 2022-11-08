@@ -130,6 +130,7 @@
     "webpack-command": "^0.4.1",
     "websocket": "^1.0.28",
     "whatwg-fetch": "^3.0.0",
-    "worker-plugin": "^5.0.1"
+    "worker-plugin": "^5.0.1",
+    "tslib": "2.3.1"
   }
 }

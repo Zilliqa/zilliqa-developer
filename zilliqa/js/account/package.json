@@ -26,13 +26,13 @@
   "dependencies": {
     "@types/bip39": "^2.4.0",
     "@types/hdkey": "^0.7.0",
+    "bip39": "^2.5.0",
+    "hdkey": "^1.1.0",
+    "tslib": "2.3.1",
     "@zilliqa-js/core": "^3.3.4",
     "@zilliqa-js/crypto": "^3.3.4",
     "@zilliqa-js/proto": "^3.3.4",
-    "@zilliqa-js/util": "^3.3.4",
-    "bip39": "^2.5.0",
-    "hdkey": "^1.1.0",
-    "tslib": "2.3.1"
+    "@zilliqa-js/util": "^3.3.4"
   },
   "files": [
     "dist",
