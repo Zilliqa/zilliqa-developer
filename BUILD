@@ -1,5 +1,5 @@
 exports_files(["package.json", "tsconfig.base.json"])
-
+exports_files(["docs"])
 
 # Compiler settings
 config_setting(
