@@ -1,8 +1,0 @@
-
-# Development folders and files #
-#################################
-.tmp/
-node_modules/
-dist
-coverage
-lerna.json
