@@ -1,0 +1,45 @@
+{
+  "name": "@zilliqa-js/zilliqa",
+  "version": "3.3.4",
+  "description": "Main entry point to the Zilliqa JS client.",
+  "maintainers": [
+    "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
+  ],
+  "main": "dist/index.js",
+  "node": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "repository": "https://www.github.com/Zilliqa/zilliqa-js",
+  "bugs": {
+    "url": "https://github.com/Zilliqa/zilliqa-js/issues"
+  },
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@zilliqa-js/account": "^3.3.4",
+    "@zilliqa-js/blockchain": "^3.3.4",
+    "@zilliqa-js/contract": "^3.3.4",
+    "@zilliqa-js/proto": "^3.3.4",
+    "@zilliqa-js/core": "^3.3.4",
+    "@zilliqa-js/crypto": "^3.3.4",
+    "@zilliqa-js/subscriptions": "^3.3.4",
+    "@zilliqa-js/util": "^3.3.4",
+    "tslib": "2.3.1"
+  },
+  "files": [
+    "dist",
+    "node_modules",
+    "package.json",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=12.0.0 <17"
+  }
+}

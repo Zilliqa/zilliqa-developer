@@ -1,0 +1,7 @@
+vendor/utfcpp/extern/gtest/googletest
+vendor/utfcpp/extern/gtest/googlemock
+vendor/utfcpp/extern/gtest
+vendor/benchmark/
+vendor/googletest/
+pixy
+.cache/
