@@ -14,12 +14,25 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
-import { Navbar, Nav, NavItem, NavLink, NavbarBrand, Collapse, NavbarToggler } from 'reactstrap';
+import { useState } from 'react';
+import {
+  Navbar,
+  Nav,
+  NavItem,
+  NavLink,
+  NavbarBrand,
+  Collapse,
+  NavbarToggler,
+} from 'reactstrap';
 import './style.css';
 import { Link } from 'react-router-dom';
 import { paths } from '../../routes';
-import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import {
+  ButtonDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from 'reactstrap';
 import { NETWORK } from '../../contexts/zil-context';
 
 const Header = ({ curNetwork, isAuth, clearAuth, switchNetwork }) => {
@@ -72,8 +85,12 @@ const Header = ({ curNetwork, isAuth, clearAuth, switchNetwork }) => {
                 </span>
               </DropdownToggle>
               <DropdownMenu>
-                <DropdownItem onClick={() => switchNetwork(NETWORK.TestNet)}>Testnet</DropdownItem>
-                <DropdownItem onClick={() => switchNetwork(NETWORK.IsolatedServer)}>
+                <DropdownItem onClick={() => switchNetwork(NETWORK.TestNet)}>
+                  Testnet
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => switchNetwork(NETWORK.IsolatedServer)}
+                >
                   Isolated Server
                 </DropdownItem>
               </DropdownMenu>
