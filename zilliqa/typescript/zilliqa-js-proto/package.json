@@ -1,0 +1,43 @@
+{
+  "name": "@zilliqa-js/proto",
+  "version": "3.3.4",
+  "description": "Protobuf dependencies for message serialization",
+  "maintainers": [
+    "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
+  ],
+  "bugs": {
+    "url": "https://github.com/Zilliqa/zilliqa-js/issues"
+  },
+  "main": "dist/index.js",
+  "node": "dist/index.js",
+  "browser": "dist/index.js",
+  "module": "dist/index.js",
+  "jsnext:main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "repository": "https://github.com/Zilliqa/zilliqa-js",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "yarn clean && mkdir dist && yarn gen:js && yarn gen:ts",
+    "gen:js": "pbjs --target static-module --wrap commonjs --out ./dist/index.js ./src/messages.proto",
+    "gen:ts": "pbts --out ./dist/index.d.ts --name zproto ./dist/index.js",
+    "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "protobufjs": "^6.8.8"
+  },
+  "files": [
+    "dist",
+    "node_modules",
+    "package.json",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=12.0.0 <17"
+  }
+}

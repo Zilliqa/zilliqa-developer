@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "include": ["./typings/**/*.d.ts"],
+  "references": [
+    { "path": "zilliqa/typescript/zilliqa-js" },
+    { "path": "zilliqa/typescript/zilliqa-js-account" },
+    { "path": "zilliqa/typescript/zilliqa-js-blockchain" },
+    { "path": "zilliqa/typescript/zilliqa-js-contract" },
+    { "path": "zilliqa/typescript/zilliqa-js-core" },
+    { "path": "zilliqa/typescript/zilliqa-js-crypto" },
+    { "path": "zilliqa/typescript/zilliqa-js-util" }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "name": "@zilliqa-js/blockchain",
+  "version": "3.3.4",
+  "description": "Class(es) for interacting with the Zilliqa blockchain.",
+  "main": "dist/index.js",
+  "node": "dist/index.js",
+  "browser": "dist/index.umd.js",
+  "module": "dist/index.esm.js",
+  "jsnext:main": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "repository": "https://github.com/Zilliqa/zilliqa-js",
+  "maintainers": [
+    "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
+  ],
+  "bugs": {
+    "url": "https://github.com/Zilliqa/zilliqa-js/issues"
+  },
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@zilliqa-js/account": "^3.3.4",
+    "@zilliqa-js/core": "^3.3.4",
+    "@zilliqa-js/crypto": "^3.3.4",
+    "@zilliqa-js/util": "^3.3.4",
+    "tslib": "2.3.1",
+    "utility-types": "^3.4.1"
+  },
+  "files": [
+    "dist",
+    "node_modules",
+    "package.json",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=12.0.0 <17"
+  }
+}

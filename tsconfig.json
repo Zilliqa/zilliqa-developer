@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "zilliqa/typescript/zilliqa" },
+    { "path": "zilliqa/typescript/zilliqa-js-account" },
+    { "path": "zilliqa/typescript/zilliqa-js-blockchain" },
+    { "path": "zilliqa/typescript/zilliqa-js-contract" },
+    { "path": "zilliqa/typescript/zilliqa-js-core" },
+    { "path": "zilliqa/typescript/zilliqa-js-crypto" },
+    { "path": "zilliqa/typescript/zilliqa-js-util" },
+    { "path": "zilliqa/typescript/zilliqa-js-subscriptions" }
+  ]
+}
