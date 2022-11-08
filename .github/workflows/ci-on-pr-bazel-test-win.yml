@@ -20,7 +20,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-2019", arch: "amd64", target: "default", env: {} }
           - { os: "windows-2019", arch: "x86", target: "default", env: {} }
     steps:
       - name: Get Timestamp
