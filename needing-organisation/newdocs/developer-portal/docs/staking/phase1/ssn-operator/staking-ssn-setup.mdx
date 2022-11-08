@@ -12,8 +12,8 @@ description: Setting up the SSN
 
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 :::info
 The Mainnet has been upgraded to support staking phase 1.1. You can now start to run a staked seed node on the Mainnet.
@@ -32,9 +32,9 @@ Before preparing to host an SSN, please note that these are the ports that **mus
 
 Additionally, there are ports that **may** be enabled in the SSN:
 
-| Type     | Default  | Purpose                                                  |
-| -------- | -------- | -------------------------------------------------------- |
-| Inbound  | 4401     | [WebSocket service](../../../dev/dev-tools-websockets)   |
+| Type    | Default | Purpose                                                |
+| ------- | ------- | ------------------------------------------------------ |
+| Inbound | 4401    | [WebSocket service](../../../dev/dev-tools-websockets) |
 
 ## Preparing the Node
 
@@ -50,6 +50,7 @@ Step 2 above includes generating a key pair for launching the seed node. We high
 ### Configuring Domain Name
 
 Once your seed node is fully set up, it is time to configure your domain name to point to the address of your seed node.
+
 - If your seed node is not behind a load balancer, you can set an `A record` in your domain registrar to point your domain/subdomain to your seed node’s IP address.
 - If your seed node is behind a load balancer, you can set a `CNAME record` in your domain registrar to point your domain/subdomain to the hostname of your load balancer.
 

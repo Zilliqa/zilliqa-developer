@@ -20,7 +20,7 @@ In this section, we will build all the components that will be used on the front
 We start with a basic Button component in [`/src/components/componentButton.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentButton.tsx) with a bunch of options for modifying it based on the usage.
 
 ```tsx
-import React from 'react';
+import React from "react";
 
 type props = {
   text: string;
@@ -42,16 +42,16 @@ const Button: React.FC<props> = (props) => {
     alert = false,
   } = props;
   const colours = white
-    ? 'text-gray-900 bg-white'
+    ? "text-gray-900 bg-white"
     : alert
-    ? 'text-white bg-red-600'
-    : 'text-white bg-gray-900';
+    ? "text-white bg-red-600"
+    : "text-white bg-gray-900";
 
   return (
     <button
       className={`font-medium py-3 text-sm lg:text-base rounded-button shadow-button ${colours} ${
-        modal ? 'w-full lg:text-base' : 'px-3 lg:px-6'
-      } ${padding ? 'mb-10' : ''}`}
+        modal ? "w-full lg:text-base" : "px-3 lg:px-6"
+      } ${padding ? "mb-10" : ""}`}
       {...{ onClick }}
     >
       {text}
@@ -71,9 +71,9 @@ export default Button;
 We then create a Header component in [`/src/components/componentHeader.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentHeader.tsx) to be used on all pages.
 
 ```tsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Button from './componentButton';
+import React from "react";
+import { Link } from "react-router-dom";
+import Button from "./componentButton";
 
 type props = {
   setShowSignUp(showSignUp: boolean): void;
@@ -92,7 +92,7 @@ const Header: React.FC<props> = (props) => {
           RentOnZilliqa
         </Link>
         <Button
-          text={'Create Account'}
+          text={"Create Account"}
           onClick={() => setShowSignUp(true)}
           white
           header
@@ -120,8 +120,8 @@ The `children` passed to this component are the content in the modal.
 The `onClick` function will be called when the main button is clicked.
 
 ```tsx
-import React, { useEffect } from 'react';
-import Button from './componentButton';
+import React, { useEffect } from "react";
+import Button from "./componentButton";
 
 type props = {
   title: string;
@@ -137,7 +137,7 @@ const Modal: React.FC<props> = (props) => {
 
   useEffect(() => {
     document.onkeydown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter') {
+      if (event.key === "Enter") {
         event.preventDefault();
         onClick();
       }
@@ -147,19 +147,19 @@ const Modal: React.FC<props> = (props) => {
   return (
     <div
       className={
-        'w-screen h-screen bg-black bg-opacity-25 fixed top-0 left-0 z-20 transition-all'
+        "w-screen h-screen bg-black bg-opacity-25 fixed top-0 left-0 z-20 transition-all"
       }
       style={
         visible
           ? {
               opacity: 1,
-              visibility: 'visible',
-              transform: 'translateY(0)',
+              visibility: "visible",
+              transform: "translateY(0)",
             }
           : {
               opacity: 0,
-              visibility: 'hidden',
-              transform: 'translateY(30px)',
+              visibility: "hidden",
+              transform: "translateY(30px)",
             }
       }
       onClick={() => setVisible(false)}
@@ -223,7 +223,7 @@ export default Modal;
 We create a ListingCard component at [`/src/components/componentListingCard.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentListingCard.tsx). This component creates the listing card used on the listings page.
 
 ```tsx
-import React from 'react';
+import React from "react";
 
 type props = {
   id: string;
@@ -248,7 +248,7 @@ const ListingCard: React.FC<props> = (props) => {
         className="w-full h-48 rounded-lg mb-4 bg-gray-100 flex justify-end items-start p-2"
         style={{
           backgroundImage: `url(${image})`,
-          backgroundSize: 'cover',
+          backgroundSize: "cover",
         }}
       >
         {rented && (
@@ -261,11 +261,11 @@ const ListingCard: React.FC<props> = (props) => {
       </div>
       <div className="flex items-center text-base font-light text-gray-600">
         <p>
-          {rooms} Room{rooms > 1 ? 's' : ''}
+          {rooms} Room{rooms > 1 ? "s" : ""}
         </p>
         <div className="w-1 h-1 bg-gray-500 rounded-full mx-2"></div>
         <p>
-          {bathrooms} Bathroom{bathrooms > 1 ? 's' : ''}
+          {bathrooms} Bathroom{bathrooms > 1 ? "s" : ""}
         </p>
       </div>
       <h3 className="text-gray-900 text-xl">{name}</h3>
@@ -291,7 +291,7 @@ export default ListingCard;
 We create an Input component at [`/src/components/componentInput.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentInput.tsx). This works with state variables which will be created with the `useState` hook in its Parent Component. We accept the `name` for the input field. The input `type` and `unit` are also accepted as optional props.
 
 ```tsx
-import React from 'react';
+import React from "react";
 
 type props = {
   name: string;
@@ -302,7 +302,7 @@ type props = {
 };
 
 const Input: React.FC<props> = (props) => {
-  const { name, unit = '', value = '', setValue, type = 'text' } = props;
+  const { name, unit = "", value = "", setValue, type = "text" } = props;
 
   return (
     <div className="">
@@ -313,9 +313,9 @@ const Input: React.FC<props> = (props) => {
       <input
         className="w-full mb-6 border-2 border-gray-300 focus:border-gray-900 rounded-button outline-none text-gray-900 lg:text-lg px-4 py-3"
         placeholder={name}
-        type={'text'}
-        inputMode={type === 'number' ? 'decimal' : 'text'}
-        min={type === 'number' ? 1 : undefined}
+        type={"text"}
+        inputMode={type === "number" ? "decimal" : "text"}
+        min={type === "number" ? 1 : undefined}
         value={value}
         onChange={(e) => setValue(e.target.value)}
       ></input>
@@ -335,8 +335,8 @@ export default Input;
 We create a CheckBox component at [`/src/components/componentCheckBox.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentCheckBox.tsx). This component is used within the modals. The CreateAccount modal uses it for user role selection. It is also used for selecting amenities in the CreateListing and ManageListing Modals.
 
 ```tsx
-import React from 'react';
-import Tick from './componentTick';
+import React from "react";
+import Tick from "./componentTick";
 
 type props = {
   checked: boolean;
@@ -359,12 +359,12 @@ const CheckBox: React.FC<props> = (props) => {
         </div>
         <div
           className={`p-1 bg-gray-200 rounded-lg w-8 h-8 hover:scale-95 transform transition-all ${
-            checked ? '' : 'hover:bg-gray-300'
+            checked ? "" : "hover:bg-gray-300"
           }`}
         >
           <div
             className={`w-full h-full rounded transition-colors text-transparent ${
-              checked ? 'bg-gray-900 text-white' : ''
+              checked ? "bg-gray-900 text-white" : ""
             }`}
           >
             {checked && <Tick />}
@@ -387,15 +387,15 @@ export default CheckBox;
 We create an AmenitiesInput component at [`/src/components/componentAmenitiesInput.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentAmenitiesInput.tsx). It groups multiple checkboxes for collecting the amenities' availability in the CreateListing and ManageListing modals. We create this component to clean up the code.
 
 ```tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   HvacIcon,
   KitchenIcon,
   LaundryIcon,
   TvIcon,
   WifiIcon,
-} from './componentListingIcons';
-import CheckBox from './componentCheckBox';
+} from "./componentListingIcons";
+import CheckBox from "./componentCheckBox";
 
 type props = {
   wifi: boolean;
@@ -445,7 +445,7 @@ const AmenitiesInput: React.FC<props> = (props) => {
           className="font-medium text-gray-400 cursor-pointer hover:text-gray-500 transition-colors"
           onClick={() => setAll(selectAll)}
         >
-          {selectAll ? 'Select All' : 'Select None'}
+          {selectAll ? "Select All" : "Select None"}
         </p>
       </div>
       <CheckBox name="WiFi" checked={wifi} setChecked={setWifi}>
@@ -481,7 +481,7 @@ export default AmenitiesInput;
 This Tick component at [`/src/components/componentTick.tsx`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/components/componentTick.tsx) is used to make the SVG easily available for the [CheckBox](#checkbox) component.
 
 ```tsx
-import React from 'react';
+import React from "react";
 
 const Tick: React.FC = () => {
   return (

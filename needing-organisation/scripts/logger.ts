@@ -15,10 +15,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as l from 'fancy-log';
-const log = <typeof import('fancy-log')>(<any>(<any>l).default || l);
-import * as c from 'chalk';
-const chalk = <import('chalk').Chalk>(c.default || c);
+import * as l from "fancy-log";
+const log = <typeof import("fancy-log")>(<any>(<any>l).default || l);
+import * as c from "chalk";
+const chalk = <import("chalk").Chalk>(c.default || c);
 
 export function createLogger(name: string): typeof log {
   const prefix = `> ${chalk.green(name)} `;

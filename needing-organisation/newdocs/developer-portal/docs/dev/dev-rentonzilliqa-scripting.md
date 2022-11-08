@@ -32,8 +32,8 @@ We create a bunch of helper functions to facilitate the contract connection. We 
 We use [`unstated-next`](https://github.com/jamiebuilds/unstated-next) to create a Context Provider for the application. We use this to make some objects available across all the components of the application. We will see how this is used in the coming sections.
 
 ```ts
-import { useState } from 'react';
-import { createContainer } from 'unstated-next';
+import { useState } from "react";
+import { createContainer } from "unstated-next";
 
 const useContext = () => {
   const [zilPay, setZilPay] = useState<any | undefined>(undefined);
@@ -80,7 +80,7 @@ An optional `amountValue` argument can be used when sending messages with a non-
 The values are converted to the appropriate units using [`zilPay.utils`](https://zilpay.github.io/zilpay-docs/zilliqa-api-utils/#window-zilpay-utils).
 
 ```ts
-const getCallParameters = (zilPay: any, amountValue: string = '0') => {
+const getCallParameters = (zilPay: any, amountValue: string = "0") => {
   const { units, bytes } = zilPay.utils;
 
   const CHAIN_ID = 333;
@@ -112,7 +112,7 @@ const getCurrentUser = (contractState: any, zilPay: any) => {
   const currentUser = zilPay.wallet.defaultAccount.base16;
   const address = currentUser.toLowerCase();
   const name = contractState.user_name[address];
-  const role = contractState.user_role?.[address] === '1' ? 'host' : 'renter';
+  const role = contractState.user_role?.[address] === "1" ? "host" : "renter";
   return { address, name, role };
 };
 
@@ -191,11 +191,11 @@ const formatListings = (
         rented: parseInt(listing_rented_till[key]) >= currentEpochNumber,
         user_is_host: listing_host[0] === currentUser.toLowerCase(),
         amenities: {
-          wifi: listing_wifi[key] === 'yes',
-          kitchen: listing_kitchen[key] === 'yes',
-          tv: listing_tv[key] === 'yes',
-          laundry: listing_laundry[key] === 'yes',
-          hvac: listing_hvac[key] === 'yes',
+          wifi: listing_wifi[key] === "yes",
+          kitchen: listing_kitchen[key] === "yes",
+          tv: listing_tv[key] === "yes",
+          laundry: listing_laundry[key] === "yes",
+          hvac: listing_hvac[key] === "yes",
         },
       };
     }
@@ -220,8 +220,8 @@ It updates toast with the status of the transaction and shows a message as per t
 Note that in this function, we use another helper function, `decodeMessage`, to get a human-readable message from the message code. This function is quite basic and hence not included here. You can take a look at [`/src/functions/decodeMessage.ts`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/decodeMessage.ts). It also includes a `decodeZilPayError` function that we will use in the coming sections.
 
 ```ts
-import toast from 'react-hot-toast';
-import decodeMessage from './decodeMessage';
+import toast from "react-hot-toast";
+import decodeMessage from "./decodeMessage";
 
 const transitionMessageAlert = (
   zilPay: any,
@@ -237,10 +237,10 @@ const transitionMessageAlert = (
           const Tx = await zilPay.blockchain.getTransaction(hash[0]);
           const code = Tx.receipt.transitions[0].msg.params[0].value;
           const message = decodeMessage(code);
-          if (message.type === 'success') success(message.alert);
+          if (message.type === "success") success(message.alert);
           error(message.alert);
         } catch (err) {
-          error('Transaction error');
+          error("Transaction error");
         }
       });
   });
@@ -264,8 +264,8 @@ We finally come to the Transition Functions that simply call the contract transi
 
 The following functions are created at [`/src/functions/`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/) for calling their respective transitions.
 
-| Function                                                                                                                          | Transition                                                       |
-| --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Function                                                                                                                          | Transition                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | [`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts)       | [`create_user`](dev-rentonzilliqa-transitions.md#create_user)       |
 | [`createListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createListingTransition.ts) | [`create_listing`](dev-rentonzilliqa-transitions.md#create_listing) |
 | [`updateListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/updateListingTransition.ts) | [`update_listing`](dev-rentonzilliqa-transitions.md#update_listing) |
@@ -276,10 +276,10 @@ The following functions are created at [`/src/functions/`](https://github.com/Qu
 Let us see the [`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts) function as an example. We use the [`decodeZilPayError`](#transitionmessagealert) we defined earlier.
 
 ```ts
-import getCallParameters from './getCallParameters';
-import toast from 'react-hot-toast';
-import transitionMessageAlert from './transitionMessageAlert';
-import { decodeZilPayError } from './decodeMessage';
+import getCallParameters from "./getCallParameters";
+import toast from "react-hot-toast";
+import transitionMessageAlert from "./transitionMessageAlert";
+import { decodeZilPayError } from "./decodeMessage";
 
 const createUserTransition = async (
   contract: any,
@@ -289,22 +289,22 @@ const createUserTransition = async (
 ) => {
   try {
     const callTransition = await contract.call(
-      'create_user',
+      "create_user",
       [
         {
-          vname: 'name',
-          type: 'String',
+          vname: "name",
+          type: "String",
           value: name,
         },
         {
-          vname: 'role',
-          type: 'Uint32',
+          vname: "role",
+          type: "Uint32",
           value: role,
         },
       ],
       getCallParameters(zilPay)
     );
-    transitionMessageAlert(zilPay, callTransition.ID, 'Creating user');
+    transitionMessageAlert(zilPay, callTransition.ID, "Creating user");
   } catch (error) {
     toast.error(decodeZilPayError(error));
   }

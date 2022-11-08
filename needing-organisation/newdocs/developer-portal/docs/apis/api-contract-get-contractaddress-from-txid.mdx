@@ -11,8 +11,8 @@ Returns a smart contract address of 20 bytes. This is represented as a `String`.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -42,7 +42,7 @@ curl -d '{
 ```js
 const contractAddress =
   await zilliqa.blockchain.getContractAddressFromTransactionID(
-    'AAF3089596437A7C6984FA2627B6F38B5F5B80FAEAAC6993C2E82C6A8EE2615E'
+    "AAF3089596437A7C6984FA2627B6F38B5F5B80FAEAAC6993C2E82C6A8EE2615E"
   );
 console.log(contractAddress.result);
 ```

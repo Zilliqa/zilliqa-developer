@@ -92,6 +92,7 @@ NAT IP is not supported. Kindly use the public IP address during the launch step
      <OPENCL_GPU_MINE>false</OPENCL_GPU_MINE>
      <REMOTE_MINE>false</REMOTE_MINE>
      ```
+
 7. Install the python dependencies:
 
    ```shell

@@ -1,24 +1,24 @@
-import * as fs from 'fs';
-import pify from 'pify';
-import pMap from 'p-map';
-import {flatten, range} from 'lodash';
-import {util} from '@zilliqa-js/account';
-import {isValidChecksumAddress, sign} from '@zilliqa-js/crypto';
-import {BN, Long, units, bytes} from '@zilliqa-js/util';
-import {Zilliqa} from '@zilliqa-js/zilliqa';
+import * as fs from "fs";
+import pify from "pify";
+import pMap from "p-map";
+import { flatten, range } from "lodash";
+import { util } from "@zilliqa-js/account";
+import { isValidChecksumAddress, sign } from "@zilliqa-js/crypto";
+import { BN, Long, units, bytes } from "@zilliqa-js/util";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 
 export class ZilliqaService {
   accounts: string[] = [];
   zil: Zilliqa;
 
-  constructor(api: string, mnemonics: {[mnemonic: string]: number}) {
+  constructor(api: string, mnemonics: { [mnemonic: string]: number }) {
     const zilliqa = new Zilliqa(api);
     this.zil = zilliqa;
 
     // you can use one or more mnemonics to manage/generate a large number of accounts
     for (let m in mnemonics) {
       const num = mnemonics[m];
-      range(num).forEach(i => {
+      range(num).forEach((i) => {
         const address = this.zil.wallet.addByMnemonic(m, i);
         this.accounts.push(address);
       });
@@ -64,14 +64,14 @@ export class ZilliqaService {
     }
 
     // if there is no error, result will definitely exist.
-    const transactions = await pMap(flatten(res.result), tx =>
-      this.zil.blockchain.getTransaction(tx),
+    const transactions = await pMap(flatten(res.result), (tx) =>
+      this.zil.blockchain.getTransaction(tx)
     );
 
     // filter out everything that isn't in the list of deposit addresses we
     // are interested in.
     return transactions.filter(
-      tx => addresses.indexOf(tx.txParams.toAddr.toLowerCase()) !== -1,
+      (tx) => addresses.indexOf(tx.txParams.toAddr.toLowerCase()) !== -1
     );
   }
 
@@ -101,19 +101,19 @@ export class ZilliqaService {
           toAddr: to, // toAddr is self-explanatory
           pubKey: fromPubKey, // this determines which account is used to send the tx
         }),
-        from,
+        from
       );
 
       const res = await this.zil.provider.send(
-        'CreateTransaction',
-        tx.txParams,
+        "CreateTransaction",
+        tx.txParams
       );
 
       if (res.error) {
         throw res.error;
       }
 
-      tx.confirm(res.result.TranID, 33, 1000).then(tx => {
+      tx.confirm(res.result.TranID, 33, 1000).then((tx) => {
         // at this point, the tx has been confirmed
         // we don't wait for the confirmation before resonding to the request,
         // but we can use the final result to update the database, etc.
@@ -122,7 +122,7 @@ export class ZilliqaService {
         if (tx.isRejected()) {
           // you may not wish to throw. instead, you may wish to log this
           // failed confirmation to some database, or retry.
-          throw new Error('Transaction was rejected');
+          throw new Error("Transaction was rejected");
         }
       });
 

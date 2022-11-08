@@ -18,6 +18,7 @@ In early releases of Zilliqa, the `scilla-runner` program was launched on every 
 To avoid this overhead, a perpetually-running **Scilla server** (aka `scilla-server`) program was added. The Zilliqa node sends `scilla-runner` requests (in the same format as in pre-server releases) to the `scilla-server` through socket "check" or "run" messages. The `scilla-server` then takes care of execution of the request and sends back the execution output result through the same socket connection.
 
 Relevant documentation on operating the Scilla interpreter and server can be found here:
+
 - Scilla interpreter [Read the Docs](https://scilla.readthedocs.io/en/latest/interface.html) page
 - Scilla server [Github Wiki](https://github.com/Zilliqa/scilla/wiki/Scilla-Server-API) page
 
@@ -30,6 +31,7 @@ In the diagram below, transaction processing is handled by `UpdateAccounts()` in
 ## Scilla Operation Steps
 
 The diagram below details the steps related to Scilla server execution for both contract deployment and contract call transactions. Note the following:
+
 1. A contract deployment requires running initial checks on the contract using the Scilla server before the actual deployment call.
 1. The first steps in the diagram involve preparation of the input files needed by the Scilla interpreter.
    1. For contract deployment, we may actually be deploying either a contract or a library.

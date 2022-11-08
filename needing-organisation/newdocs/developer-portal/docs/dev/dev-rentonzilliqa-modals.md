@@ -23,13 +23,13 @@ It uses [`CheckBox`](dev-rentonzilliqa-components.md#checkbox) for selecting the
 The [`createAccountTransition`](#createaccounttransition) function is used.
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import ContextContainer from '../functions/contextContainer';
-import createUserTransition from '../functions/createUserTransition';
-import Button from './componentButton';
-import Input from './componentInput';
-import Modal from './componentModal';
-import Tick from './componentTick';
+import React, { useEffect, useState } from "react";
+import ContextContainer from "../functions/contextContainer";
+import createUserTransition from "../functions/createUserTransition";
+import Button from "./componentButton";
+import Input from "./componentInput";
+import Modal from "./componentModal";
+import Tick from "./componentTick";
 
 type props = {
   showSignUp: boolean;
@@ -39,11 +39,11 @@ type props = {
 const CreateAccountModal: React.FC<props> = (props) => {
   const { showSignUp, setShowSignUp } = props;
   const [name, setName] = useState<string | undefined>(undefined);
-  const [userRole, setUserRole] = useState<string | undefined>('host');
+  const [userRole, setUserRole] = useState<string | undefined>("host");
   const { zilPay, contract } = ContextContainer.useContainer();
 
   const createUser = async () => {
-    const role = userRole === 'host' ? '1' : '0';
+    const role = userRole === "host" ? "1" : "0";
     createUserTransition(contract, zilPay, name, role);
   };
 
@@ -54,7 +54,7 @@ const CreateAccountModal: React.FC<props> = (props) => {
 
   useEffect(() => {
     setName(undefined);
-    setUserRole('host');
+    setUserRole("host");
   }, [setShowSignUp]);
 
   return (
@@ -62,7 +62,7 @@ const CreateAccountModal: React.FC<props> = (props) => {
       title="Create Account"
       visible={showSignUp}
       setVisible={setShowSignUp}
-      buttonText={'Create Account'}
+      buttonText={"Create Account"}
       onClick={createUser}
     >
       <>
@@ -72,7 +72,7 @@ const CreateAccountModal: React.FC<props> = (props) => {
               ZilPay
             </h4>
             <Button
-              text={'Connect ZilPay'}
+              text={"Connect ZilPay"}
               padding
               onClick={connectZilPay}
               modal
@@ -86,39 +86,39 @@ const CreateAccountModal: React.FC<props> = (props) => {
         <div className="flex gap-12 mb-8">
           <div
             className="flex justify-center items-center cursor-pointer"
-            onClick={() => setUserRole('host')}
+            onClick={() => setUserRole("host")}
           >
             <p className="text-lg text-gray-800 pr-4">Host</p>
             <div
               className={`p-1 bg-gray-200 rounded-lg w-8 h-8 hover:scale-95 transform transition-all ${
-                userRole === 'host' ? '' : 'hover:bg-gray-300'
+                userRole === "host" ? "" : "hover:bg-gray-300"
               }`}
             >
               <div
                 className={`w-full h-full rounded transition-colors text-transparent ${
-                  userRole === 'host' ? 'bg-gray-900 text-gray-200' : ''
+                  userRole === "host" ? "bg-gray-900 text-gray-200" : ""
                 }`}
               >
-                {userRole === 'host' && <Tick />}
+                {userRole === "host" && <Tick />}
               </div>
             </div>
           </div>
           <div
             className="flex justify-center items-center cursor-pointer"
-            onClick={() => setUserRole('renter')}
+            onClick={() => setUserRole("renter")}
           >
             <p className="text-lg text-gray-800 pr-4">Rent</p>
             <div
               className={`p-1 bg-gray-200 rounded-lg w-8 h-8 hover:scale-95 transform transition-all ${
-                userRole !== 'host' ? '' : 'hover:bg-gray-300'
+                userRole !== "host" ? "" : "hover:bg-gray-300"
               }`}
             >
               <div
                 className={`w-full h-full rounded transition-colors text-transparent ${
-                  userRole !== 'host' ? 'bg-gray-900 text-gray-200' : ''
+                  userRole !== "host" ? "bg-gray-900 text-gray-200" : ""
                 }`}
               >
-                {userRole !== 'host' && <Tick />}
+                {userRole !== "host" && <Tick />}
               </div>
             </div>
           </div>
@@ -145,12 +145,12 @@ It uses [`AmenitiesInput`](dev-rentonzilliqa-components.md#amenitiesinput) for s
 The [`createListingTransition`](#createlistingtransition) function is used.
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import ContextContainer from '../functions/contextContainer';
-import createListingTransition from '../functions/createListingTransition';
-import AmenitiesInput from './componentAmenitiesInput';
-import Input from './componentInput';
-import Modal from './componentModal';
+import React, { useEffect, useState } from "react";
+import ContextContainer from "../functions/contextContainer";
+import createListingTransition from "../functions/createListingTransition";
+import AmenitiesInput from "./componentAmenitiesInput";
+import Input from "./componentInput";
+import Modal from "./componentModal";
 
 type props = {
   showCreateListing: boolean;
@@ -225,7 +225,7 @@ const CreateListingModal: React.FC<props> = (props) => {
       title="Create Listing"
       visible={showCreateListing}
       setVisible={setShowCreateListing}
-      buttonText={'Create'}
+      buttonText={"Create"}
       onClick={createListing}
     >
       <Input name="Name" value={name} setValue={setName} />
@@ -286,15 +286,15 @@ It uses [`AmenitiesInput`](dev-rentonzilliqa-components.md#amenitiesinput) for s
 The [`deleteListingTransition`](#createlistingtransition), [`updateListingTransition`](#updatelistingtransition), and [`claimRentTransition`](#claimrenttransition) functions are called as required.
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import claimRentTransition from '../functions/claimRentTransition';
-import ContextContainer from '../functions/contextContainer';
-import deleteListingTransition from '../functions/deleteListingTransition';
-import updateListingTransition from '../functions/updateListingTransition';
-import AmenitiesInput from './componentAmenitiesInput';
-import Button from './componentButton';
-import Input from './componentInput';
-import Modal from './componentModal';
+import React, { useEffect, useState } from "react";
+import claimRentTransition from "../functions/claimRentTransition";
+import ContextContainer from "../functions/contextContainer";
+import deleteListingTransition from "../functions/deleteListingTransition";
+import updateListingTransition from "../functions/updateListingTransition";
+import AmenitiesInput from "./componentAmenitiesInput";
+import Button from "./componentButton";
+import Input from "./componentInput";
+import Modal from "./componentModal";
 
 type props = {
   modalListing: any;
@@ -382,7 +382,7 @@ const ManageListingModal: React.FC<props> = (props) => {
       title="Manage Listing"
       visible={showManageListing}
       setVisible={setShowManageListing}
-      buttonText={'Update Listing'}
+      buttonText={"Update Listing"}
       onClick={updateListing}
     >
       <>
@@ -391,7 +391,7 @@ const ManageListingModal: React.FC<props> = (props) => {
         </h4>
         <div className="flex justify-between items-center pb-8">
           <p className="text-2xl ">{accumulated_rent}</p>
-          <Button text={'Claim Rent'} onClick={claimRent} />
+          <Button text={"Claim Rent"} onClick={claimRent} />
         </div>
       </>
       <>
@@ -399,7 +399,7 @@ const ManageListingModal: React.FC<props> = (props) => {
           Delete Listing
         </h4>
         <Button
-          text={'Delete Listing'}
+          text={"Delete Listing"}
           onClick={deleteListing}
           alert
           padding

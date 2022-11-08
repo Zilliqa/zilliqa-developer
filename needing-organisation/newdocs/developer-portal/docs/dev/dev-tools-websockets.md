@@ -478,33 +478,33 @@ Our [zilliqa-js](https://github.com/Zilliqa/zilliqa-js) provides an easier way t
 ### Subscribe New Block
 
 ```js
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
 const {
   SocketConnect,
   StatusType,
   MessageType,
-} = require('@zilliqa-js/subscriptions');
+} = require("@zilliqa-js/subscriptions");
 
 async function test() {
-  const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+  const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
   const subscriber = zilliqa.subscriptionBuilder.buildNewBlockSubscriptions(
-    'wss://dev-ws.zilliqa.com'
+    "wss://dev-ws.zilliqa.com"
   );
 
   // if subscribe success, it will echo the subscription info
   subscriber.emitter.on(StatusType.SUBSCRIBE_NEW_BLOCK, (event) => {
-    console.log('get SubscribeNewBlock echo: ', event);
+    console.log("get SubscribeNewBlock echo: ", event);
   });
 
   subscriber.emitter.on(MessageType.NEW_BLOCK, (event) => {
     // doing what you want with new block
-    console.log('get new block: ', event.value.TxBlock.header);
+    console.log("get new block: ", event.value.TxBlock.header);
   });
 
   //if unsubscribe success, it will echo the unsubscription info
   subscriber.emitter.on(MessageType.UNSUBSCRIBE, (event) => {
-    console.log('get unsubscribe event: ', event);
+    console.log("get unsubscribe event: ", event);
   });
 
   await subscriber.start();
@@ -516,35 +516,35 @@ test();
 ### Subscribe Event Log
 
 ```js
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const { StatusType, MessageType } = require('@zilliqa-js/subscriptions');
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
+const { StatusType, MessageType } = require("@zilliqa-js/subscriptions");
 
 async function test() {
-  const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+  const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
   const subscriber = zilliqa.subscriptionBuilder.buildEventLogSubscriptions(
-    'wss://dev-ws.zilliqa.com',
+    "wss://dev-ws.zilliqa.com",
     {
       // smart contract address you want to listen on
       addresses: [
-        '0x2ce491a0fd9e318b39172258101b7c836da7449b',
-        '0x167e3980e04eab1e89ff84523ae8c77e008932dc',
+        "0x2ce491a0fd9e318b39172258101b7c836da7449b",
+        "0x167e3980e04eab1e89ff84523ae8c77e008932dc",
       ],
     }
   );
 
   subscriber.emitter.on(StatusType.SUBSCRIBE_EVENT_LOG, (event) => {
     // if subscribe success, it will echo the subscription info
-    console.log('get SubscribeEventLog echo: ', event);
+    console.log("get SubscribeEventLog echo: ", event);
   });
 
   subscriber.emitter.on(MessageType.EVENT_LOG, (event) => {
     // do what you want with new event log
-    console.log('get new event log: ', JSON.stringify(event));
+    console.log("get new event log: ", JSON.stringify(event));
   });
 
   subscriber.emitter.on(MessageType.UNSUBSCRIBE, (event) => {
     //if unsubscribe success, it will echo the unsubscription info
-    console.log('get unsubscribe event: ', event);
+    console.log("get unsubscribe event: ", event);
   });
 
   await subscriber.start();

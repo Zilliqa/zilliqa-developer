@@ -16,8 +16,8 @@ After sending the transaction object, there will be a `transaction id`. We can i
 
 Example of transaction polling:
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="js"
@@ -31,7 +31,7 @@ import TabItem from '@theme/TabItem';
 
 ```js
 const txn = await zilliqa.blockchain.getTransaction(
-  '1899b381d644a4892ca5ba5d8d60bbcc7bd121d511d55e438a8ddbdcc53272c4'
+  "1899b381d644a4892ca5ba5d8d60bbcc7bd121d511d55e438a8ddbdcc53272c4"
 );
 console.log(JSON.stringify(txn));
 ```

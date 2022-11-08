@@ -9,8 +9,8 @@ Returns the details of a specified Transaction.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -39,7 +39,7 @@ curl -d '{
 
 ```js
 const txn = await zilliqa.blockchain.getTransaction(
-  'cd8727674bc05e0ede405597a218164e1c13c7103b9d0ba43586785f3d8cede5'
+  "cd8727674bc05e0ede405597a218164e1c13c7103b9d0ba43586785f3d8cede5"
 );
 console.log(txn.result);
 ```

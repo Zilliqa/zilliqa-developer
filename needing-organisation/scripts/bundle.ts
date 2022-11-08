@@ -15,35 +15,35 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
-import * as rollup from 'rollup';
-import alias from 'rollup-plugin-alias';
-import commonjs from 'rollup-plugin-commonjs';
-import json from 'rollup-plugin-json';
-import globals from 'rollup-plugin-node-globals';
-import resolve from 'rollup-plugin-node-resolve';
-import typescript2 from 'rollup-plugin-typescript2';
-import ts from 'typescript';
+import * as rollup from "rollup";
+import alias from "rollup-plugin-alias";
+import commonjs from "rollup-plugin-commonjs";
+import json from "rollup-plugin-json";
+import globals from "rollup-plugin-node-globals";
+import resolve from "rollup-plugin-node-resolve";
+import typescript2 from "rollup-plugin-typescript2";
+import ts from "typescript";
 
-import project from './project';
-import { c, createLogger } from './logger';
+import project from "./project";
+import { c, createLogger } from "./logger";
 
-const logBundle = createLogger('bundle');
+const logBundle = createLogger("bundle");
 
 function getKeys(p) {
   const packageJsonFile = `${process.cwd()}/zilliqa/typescript/${p}/package.json`;
-  const data = fs.readFileSync(packageJsonFile, 'utf-8');
+  const data = fs.readFileSync(packageJsonFile, "utf-8");
   const { dependencies } = JSON.parse(data);
   return dependencies ? Object.keys(dependencies) : [];
 }
 
 async function bundle() {
   try {
-    const outputs = process.argv.slice(2)[0].split(',');
+    const outputs = process.argv.slice(2)[0].split(",");
     const packages = project.packages.filter(
-      ({ name }) => name !== 'zilliqa-js-proto',
+      ({ name }) => name !== "zilliqa-js-proto"
     );
 
     const count = packages.length;
@@ -59,10 +59,10 @@ async function bundle() {
       logBundle(`externals: ${externals}`);
 
       const bundle = await rollup.rollup({
-        input: path.join(pkg.src, 'index.ts'),
+        input: path.join(pkg.src, "index.ts"),
         plugins: [
           alias({
-            proto: path.resolve(__dirname, '../', 'includes/proto/index.js'),
+            proto: path.resolve(__dirname, "../", "includes/proto/index.js"),
           }),
           resolve({
             browser: true,
@@ -71,18 +71,18 @@ async function bundle() {
           }),
           commonjs({
             namedExports: {
-              [path.resolve(__dirname, '../', 'includes/proto/index.js')]: [
-                'ZilliqaMessage',
+              [path.resolve(__dirname, "../", "includes/proto/index.js")]: [
+                "ZilliqaMessage",
               ],
             },
           }),
           globals(),
           json(),
           typescript2({
-            tsconfig: path.join(pkg.path, 'tsconfig.json'),
+            tsconfig: path.join(pkg.path, "tsconfig.json"),
             typescript: ts, // ensure we're using the same typescript (3.x) for rollup as for regular builds etc
             tsconfigOverride: {
-              module: 'esnext',
+              module: "esnext",
               stripInternal: true,
               emitDeclarationOnly: false,
               composite: false,
@@ -101,7 +101,7 @@ async function bundle() {
       });
 
       // 'amd' | 'cjs' | 'system' | 'es' | 'esm' | 'iife' | 'umd'
-      if (outputs.indexOf('esm') === -1) {
+      if (outputs.indexOf("esm") === -1) {
         logBundle(`${logPrefix} skipping esm`);
       } else {
         logBundle(`${logPrefix} writing esm - ${pkg.esm}`);
@@ -109,19 +109,19 @@ async function bundle() {
         await bundle.write({
           file: pkg.esm,
           name: pkg.globalName,
-          format: 'esm',
+          format: "esm",
           sourcemap: true,
         });
       }
 
-      if (outputs.indexOf('umd') === -1) {
+      if (outputs.indexOf("umd") === -1) {
         logBundle(`${logPrefix} skipping umd`);
       } else {
         logBundle(`${logPrefix} writing umd - ${pkg.umd}`);
 
         await bundle.write({
           file: pkg.umd,
-          exports: 'named',
+          exports: "named",
           name: pkg.globalName,
           globals: {
             ...getKeys(pkg.name).reduce((g, packages) => {
@@ -133,13 +133,13 @@ async function bundle() {
               return g;
             }, {}),
           },
-          format: 'umd',
+          format: "umd",
           sourcemap: true,
         });
       }
     }
   } catch (err) {
-    logBundle('Failed to bundle:');
+    logBundle("Failed to bundle:");
     logBundle(err);
     process.exit(1);
   }

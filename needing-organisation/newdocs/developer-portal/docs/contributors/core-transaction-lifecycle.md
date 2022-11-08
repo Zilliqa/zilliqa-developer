@@ -12,6 +12,7 @@ description: Core protocol design - transaction lifecycle.
 The diagram below illustrates how transactions flow within the Zilliqa network from user creation to Tx block generation.
 
 Contributors may also be interested to review these related documents:
+
 - [Types of Nodes](../basics/basics-zil-nodes) under the Basics section (for understanding the roles of nodes in the network)
 - [Transaction Lifecycle](../dev/dev-txn-signing) under the Developers section (for handling transactions at user level)
 - [Account Management](core-accounts#state-deltas) under the Contributors section (for the meaning of state deltas)

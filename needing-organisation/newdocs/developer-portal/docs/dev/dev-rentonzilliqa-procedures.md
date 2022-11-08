@@ -31,9 +31,9 @@ Since we will send messages on multiple occasions in the contract, we create the
 
 This procedure creates a message with the passed arguments. It uses the `one_msg` library function to create a list of messages and then proceeds to send it. Note that the `_recipient` is always the implicit variable `_sender`.
 
-| Arguments | Description                                                                             | Type      |
-| --------- | --------------------------------------------------------------------------------------- | --------- |
-| `amount`  | The amount to be sent with the message                                                  | `Uint128` |
+| Arguments | Description                                                                                | Type      |
+| --------- | ------------------------------------------------------------------------------------------ | --------- |
+| `amount`  | The amount to be sent with the message                                                     | `Uint128` |
 | `code`    | The [message code](dev-rentonzilliqa-library.md#message-codes) to be sent with the message | `Int32`   |
 
 ```ocaml

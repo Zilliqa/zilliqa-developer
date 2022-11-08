@@ -24,17 +24,17 @@ using the transaction factory that is on the umbrella Zilliqa object, like
 so:
 
 ```js
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const { getPubKeyFromPrivateKey } = require('@zilliqa-js/crypto');
-const { BN, Long, bytes, units } = require('@zilliqa-js/util');
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
+const { getPubKeyFromPrivateKey } = require("@zilliqa-js/crypto");
+const { BN, Long, bytes, units } = require("@zilliqa-js/util");
 
-const api = 'https://dev-api.zilliqa.com';
+const api = "https://dev-api.zilliqa.com";
 const chainId = 333; // Testnet
 const msgVersion = 1;
 const zilliqa = new Zilliqa(api);
 
-const toAddress = 'BENCH32_ADDRESS';
-const fromPrivateKey = 'SENDER_PRIVATE_KEY';
+const toAddress = "BENCH32_ADDRESS";
+const fromPrivateKey = "SENDER_PRIVATE_KEY";
 const fromPublicKey = getPubKeyFromPrivateKey(fromPrivateKey);
 const fromAddress = getAddressFromPrivateKey(fromPrivateKey);
 const amountToSendInZil = 0.17;
@@ -92,7 +92,7 @@ We demonstrate a lower-level way to broadcast a transaction using the built-in
 `HTTPProvider`, as follows:
 
 ```js
-const res = await zilliqa.provider.send('CreateTransaction', signedTx.txParams);
+const res = await zilliqa.provider.send("CreateTransaction", signedTx.txParams);
 ```
 
 This returns a `Promise` that, if successful, will contain your transaction

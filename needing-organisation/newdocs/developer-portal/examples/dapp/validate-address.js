@@ -2,7 +2,7 @@ const { Zilliqa } = require("@zilliqa-js/zilliqa");
 
 const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
-const isContract = async contractAddress => {
+const isContract = async (contractAddress) => {
   const address = contractAddress.replace("0x", ""); // RPC server does not accept 0x prefix
   const init = await zilliqa.blockchain.getSmartContractInit(address);
   const result = init.result ? true : false;

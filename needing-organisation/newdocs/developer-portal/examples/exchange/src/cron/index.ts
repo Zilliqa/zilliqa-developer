@@ -1,2 +1,1 @@
-export { DepositCron } from './deposit';
-
+export { DepositCron } from "./deposit";

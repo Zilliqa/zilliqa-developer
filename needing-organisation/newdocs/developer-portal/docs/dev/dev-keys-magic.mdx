@@ -32,8 +32,8 @@ You can skip straight to our reference example:
 
 Magic interacts with the Zilliqa blockchain via Magic's extension NPM package @magic-ext/zilliqa. The Zilliqa extension also lets you interact with the blockchain using methods from Zilliqa's Javascript SDK.
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="npm"
@@ -76,13 +76,13 @@ You would need to specify your API Key for Magic, which you'll get by signing up
 <TabItem value="js">
 
 ```js
-import { Magic } from 'magic-sdk';
-import { ZilliqaExtension } from '@magic-ext/zilliqa';
+import { Magic } from "magic-sdk";
+import { ZilliqaExtension } from "@magic-ext/zilliqa";
 
-const magic = new Magic('YOUR_API_KEY', {
+const magic = new Magic("YOUR_API_KEY", {
   extensions: [
     new ZilliqaExtension({
-      rpcUrl: 'Zilliqa_RPC_NODE_URL',
+      rpcUrl: "Zilliqa_RPC_NODE_URL",
     }),
   ],
 });
@@ -108,20 +108,20 @@ Using getWallet function to get a Zilliqa wallet for the current user.
 <TabItem value="js">
 
 ```js
-import { Magic } from 'magic-sdk';
-import { ZilliqaExtension } from '@magic-ext/zilliqa';
+import { Magic } from "magic-sdk";
+import { ZilliqaExtension } from "@magic-ext/zilliqa";
 
-const magic = new Magic('YOUR_API_KEY', {
+const magic = new Magic("YOUR_API_KEY", {
   extensions: [
     new ZilliqaExtension({
-      rpcUrl: 'Zilliqa_RPC_NODE_URL',
+      rpcUrl: "Zilliqa_RPC_NODE_URL",
     }),
   ],
 });
 
 // Get user's Zilliqa wallet info
 const wallet = await magic.zilliqa.getWallet();
-console.log('Zilliqa wallet: ', wallet);
+console.log("Zilliqa wallet: ", wallet);
 ```
 
 </TabItem>
@@ -156,14 +156,14 @@ To send a standard Zilliqa blockchain transaction, you can call the magic.zil.se
 <TabItem value="js">
 
 ```js
-import { Magic } from 'magic-sdk';
-import { ZilliqaExtension } from '@magic-ext/zilliqa';
-const { BN, Long, bytes, units } = require('@zilliqa-js/util');
+import { Magic } from "magic-sdk";
+import { ZilliqaExtension } from "@magic-ext/zilliqa";
+const { BN, Long, bytes, units } = require("@zilliqa-js/util");
 
-const magic = new Magic('YOUR_API_KEY', {
+const magic = new Magic("YOUR_API_KEY", {
   extensions: [
     new ZilliqaExtension({
-      rpcUrl: 'Zilliqa_RPC_NODE_URL',
+      rpcUrl: "Zilliqa_RPC_NODE_URL",
     }),
   ],
 });
@@ -172,19 +172,19 @@ const chainId = 333; // chainId of the developer testnet
 const msgVersion = 1; // current msgVersion
 const VERSION = bytes.pack(chainId, msgVersion);
 
-const myGasPrice = units.toQa('1000', units.Units.Li);
+const myGasPrice = units.toQa("1000", units.Units.Li);
 
 const params = {
   version: VERSION,
-  toAddr: 'zil14vut0rh7q78ydc0g7yt7e5zkfyrmmps00lk6r7',
-  amount: new BN(units.toQa('0.5', units.Units.Zil)),
+  toAddr: "zil14vut0rh7q78ydc0g7yt7e5zkfyrmmps00lk6r7",
+  amount: new BN(units.toQa("0.5", units.Units.Zil)),
   gasPrice: myGasPrice,
   gasLimit: Long.fromNumber(1),
 };
 
 // Send a transaction
 const tx = await magic.zil.sendTransaction(params, false);
-console.log('send transaction', tx);
+console.log("send transaction", tx);
 ```
 
 </TabItem>
@@ -219,14 +219,14 @@ To deploy a smart contract, you can call the magic.zilliqa.deployContract method
 <TabItem value="js">
 
 ```js
-import { Magic } from 'magic-sdk';
-import { ZilliqaExtension } from '@magic-ext/zilliqa';
-const { BN, Long, bytes, units } = require('@zilliqa-js/util');
+import { Magic } from "magic-sdk";
+import { ZilliqaExtension } from "@magic-ext/zilliqa";
+const { BN, Long, bytes, units } = require("@zilliqa-js/util");
 
-const magic = new Magic('YOUR_API_KEY', {
+const magic = new Magic("YOUR_API_KEY", {
   extensions: [
     new ZilliqaExtension({
-      rpcUrl: 'Zilliqa_RPC_NODE_URL',
+      rpcUrl: "Zilliqa_RPC_NODE_URL",
     }),
   ],
 });
@@ -281,13 +281,13 @@ const code = `scilla_version 0
 const init = [
   // this parameter is mandatory for all init arrays
   {
-    vname: '_scilla_version',
-    type: 'Uint32',
-    value: '0',
+    vname: "_scilla_version",
+    type: "Uint32",
+    value: "0",
   },
   {
-    vname: 'owner',
-    type: 'ByStr20',
+    vname: "owner",
+    type: "ByStr20",
     value: `${address}`,
   },
 ];
@@ -296,7 +296,7 @@ const chainId = 333; // chainId of the developer testnet
 const msgVersion = 1; // current msgVersion
 const VERSION = bytes.pack(chainId, msgVersion);
 
-const myGasPrice = units.toQa('1000', units.Units.Li);
+const myGasPrice = units.toQa("1000", units.Units.Li);
 
 const params = {
   version: VERSION,
@@ -313,7 +313,7 @@ const result = await magic.zil.deployContract(
   false
 );
 
-console.log('deploy contract', result);
+console.log("deploy contract", result);
 ```
 
 </TabItem>

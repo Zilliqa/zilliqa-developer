@@ -9,8 +9,8 @@ Returns the state (mutable) variables of a smart contract address, represented i
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -39,7 +39,7 @@ curl -d '{
 
 ```js
 const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  'fe001824823b12b58708bf24edd94d8b5e1cfcf7'
+  "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
 );
 console.log(smartContractState.result);
 ```

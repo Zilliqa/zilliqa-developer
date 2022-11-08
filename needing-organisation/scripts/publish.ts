@@ -15,21 +15,21 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lerna from 'lerna';
+import lerna from "lerna";
 
-import project from './project';
-import { createLogger } from './logger';
+import project from "./project";
+import { createLogger } from "./logger";
 
-const DIST_TAG = 'next';
+const DIST_TAG = "next";
 
-const log = createLogger('publish');
+const log = createLogger("publish");
 
 const getVersion = async () => {
   const re = /(\d+)\.(\d+)\.(\d+)($|\-)/;
   const match = project.lerna.version.match(re);
 
   if (match === null) {
-    throw new Error('Lerna version is malformed.');
+    throw new Error("Lerna version is malformed.");
   }
 
   const [, major, minor, patch] = match;
@@ -38,10 +38,10 @@ const getVersion = async () => {
 };
 
 const getDate = (sep?: string): string => {
-  const s = sep === undefined ? '' : sep;
+  const s = sep === undefined ? "" : sep;
   const raw = new Date()
     .toISOString()
-    .replace(/:|T|\.|-/g, '')
+    .replace(/:|T|\.|-/g, "")
     .slice(0, 8);
   const y = raw.slice(0, 4);
   const m = raw.slice(4, 6);
@@ -50,7 +50,7 @@ const getDate = (sep?: string): string => {
 };
 
 const publish = async () => {
-  if (process.env.CI && process.env.TRAVIS_BRANCH !== 'master') {
+  if (process.env.CI && process.env.TRAVIS_BRANCH !== "master") {
     return;
   }
 
@@ -59,16 +59,16 @@ const publish = async () => {
     const version = `${major}.${minor}.${patch}-${DIST_TAG}.${getDate()}`;
 
     lerna([
-      'publish',
+      "publish",
       version,
-      '--npm-tag',
+      "--npm-tag",
       DIST_TAG,
-      '--exact',
-      '--no-git-tag-version',
-      '--no-push',
-      '--no-verify-access',
-      '--no-verify-registry',
-      '-y',
+      "--exact",
+      "--no-git-tag-version",
+      "--no-push",
+      "--no-verify-access",
+      "--no-verify-registry",
+      "-y",
     ]);
 
     return version;

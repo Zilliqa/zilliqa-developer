@@ -9,8 +9,8 @@ Returns the validated transactions (in verbose form) included within a specified
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -38,7 +38,7 @@ curl -d '{
 <TabItem value="node.js">
 
 ```js
-const txns = await zilliqa.blockchain.getTxnBodiesForTxBlock('2');
+const txns = await zilliqa.blockchain.getTxnBodiesForTxBlock("2");
 console.log(txns.result);
 ```
 

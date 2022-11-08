@@ -16,8 +16,8 @@ Signing is done against the Protobuf-serialised version of the transaction's con
 
 Example of providing a private key:
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="js"
@@ -30,12 +30,12 @@ import TabItem from '@theme/TabItem';
 <TabItem value="js">
 
 ```js
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const { getAddressFromPrivateKey } = require('@zilliqa-js/crypto');
-const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
+const { getAddressFromPrivateKey } = require("@zilliqa-js/crypto");
+const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
 const PRIVATE_KEY =
-  '9afc1a1dab96127e902daaaec1a56c30346f007523c787c3bb62371c0e5a1be7';
+  "9afc1a1dab96127e902daaaec1a56c30346f007523c787c3bb62371c0e5a1be7";
 
 zilliqa.wallet.addByPrivateKey(PRIVATE_KEY);
 ```

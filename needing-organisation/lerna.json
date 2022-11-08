@@ -1,15 +1,11 @@
 {
-  "packages": [
-    "zilliqa/typescript/*"
-  ],
+  "packages": ["zilliqa/typescript/*"],
   "version": "3.3.4",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "command": {
     "publish": {
-      "allowBranch": [
-        "main"
-      ],
+      "allowBranch": ["main"],
       "message": "chore(release): publish %v"
     }
   }

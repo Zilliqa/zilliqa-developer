@@ -1,5 +1,5 @@
-import {TxParams} from '@zilliqa-js/account';
-import PouchDB from 'pouchdb';
+import { TxParams } from "@zilliqa-js/account";
+import PouchDB from "pouchdb";
 
 export class DepositRepository {
   db: PouchDB.Database;
@@ -43,7 +43,7 @@ export class DepositRepository {
    */
   findOne(txHash: string) {
     return this.db.find({
-      selector: {txHash},
+      selector: { txHash },
     });
   }
 }

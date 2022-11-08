@@ -1,14 +1,14 @@
-import BN from 'bn.js';
-import {getAddressFromPrivateKey} from '@zilliqa-js/crypto';
-import {Request, Response} from 'express';
-import {config} from '../config';
-import {ZilliqaService} from '../services/zilliqa';
+import BN from "bn.js";
+import { getAddressFromPrivateKey } from "@zilliqa-js/crypto";
+import { Request, Response } from "express";
+import { config } from "../config";
+import { ZilliqaService } from "../services/zilliqa";
 
 // in reality, you should of course, never do this.
-const HOT_WALLET_PASSPHRASE = 'stronk_passphrase';
+const HOT_WALLET_PASSPHRASE = "stronk_passphrase";
 
 export class WithdrawalController {
-  address: string = '';
+  address: string = "";
   zsvc: ZilliqaService;
 
   // DI the service in.
@@ -19,8 +19,8 @@ export class WithdrawalController {
 
   async init() {
     const address = await this.zsvc.addKeystoreFile(
-      config.get('keystore'),
-      HOT_WALLET_PASSPHRASE,
+      config.get("keystore"),
+      HOT_WALLET_PASSPHRASE
     );
     this.address = address;
   }

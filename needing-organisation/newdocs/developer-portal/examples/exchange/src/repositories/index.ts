@@ -1,1 +1,1 @@
-export { DepositRepository } from './deposit';
+export { DepositRepository } from "./deposit";

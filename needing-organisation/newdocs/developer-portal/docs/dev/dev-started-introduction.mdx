@@ -11,7 +11,7 @@ description: Zilliqa developer getting started
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 ## Getting Started with dApp Development
 
@@ -25,7 +25,7 @@ Decentralised Apps ("dApps") are applications that interact with smart contracts
 
 An application can have a user-facing components ("client"), which could be a web application or mobile app. These applications can interact with smart contracts on the Zilliqa blockchain.
 
-<img alt="Overview" src={useBaseUrl('img/dev/dapps-overview.png')} />
+<img alt="Overview" src={useBaseUrl("img/dev/dapps-overview.png")} />
 
 The entry to Zilliqa blockchain lies on the RPC interface. SDKs are not compulsory for you to interact with the blockchain, but they do make your life easier.
 
@@ -43,10 +43,10 @@ Zilliqa currently supports two address formats.
 The reason behind this design is to prevent confusion with Ethereum addresses. For more detailed explanation on the address, refer to [this post](https://blog.zilliqa.com/zilliqa-migrates-to-new-address-format-bf1fa6d7e41d)
 
 ```javascript
-const { toBech32Address, toChecksumAddress } = require('@zilliqa-js/crypto');
+const { toBech32Address, toChecksumAddress } = require("@zilliqa-js/crypto");
 
 // not checksummed address (will not be accepted by blockchain)
-const address = '573EC96638C8BB1C386394602E1460634F02ADDA';
+const address = "573EC96638C8BB1C386394602E1460634F02ADDA";
 
 // checksummed ByStr20
 const checksummedAddresses = toChecksumAddress(address);
@@ -65,11 +65,11 @@ How do you know if an address is a smart contract or an account? One way to go a
 In Javascript, you can do the following:
 
 ```javascript
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
 
 (async () => {
-  const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
-  const address = '573EC96638C8BB1C386394602E1460634F02ADDA';
+  const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
+  const address = "573EC96638C8BB1C386394602E1460634F02ADDA";
 
   const res = await zilliqa.blockchain.getSmartContractInit(address);
   const isContract = !!res.result;

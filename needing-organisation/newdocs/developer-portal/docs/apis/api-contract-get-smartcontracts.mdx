@@ -9,8 +9,8 @@ Returns the list of smart contract addresses created by an User's account.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -38,7 +38,7 @@ curl -d '{
 
 ```js
 const smartContracts = await zilliqa.blockchain.getSmartContracts(
-  '1eefc4f453539e5ee732b49eb4792b268c2f3908'
+  "1eefc4f453539e5ee732b49eb4792b268c2f3908"
 );
 console.log(smartContracts.result);
 ```
@@ -78,10 +78,10 @@ print(chain.active_chain.api.GetSmartContracts("fe001824823b12b58708bf24edd94d8b
   "jsonrpc": "2.0",
   "result": [
     {
-      "address": "6b3070b0abf4371b2b3b26e23f11f4c073b636e5",
+      "address": "6b3070b0abf4371b2b3b26e23f11f4c073b636e5"
     },
     {
-      "address": "13cf0f8c1ea003779df0b7fa08a97903bc760e80",
+      "address": "13cf0f8c1ea003779df0b7fa08a97903bc760e80"
     }
   ]
 }

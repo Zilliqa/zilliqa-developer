@@ -48,8 +48,8 @@ yarn add bn.js
 
 The following table provides a description of each module of zilliqa-js and what you may want to use it for. Visit the relevant link of each module to find the detailed description about the methods and apis supported by that module.
 
-| package                                                                                                                   | description                                                                                                                                                               | dependencies                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| package                                                                                                   | description                                                                                                                                                               | dependencies                                                                            |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | [`@zilliqa-js/core`](https://github.com/Zilliqa/zilliqa-js/tree/dev/packages/zilliqa-js-core)             | Core abstractions and base classes, such as `HTTPProvider` and network logic for interfacing with the Zilliqa JSON-RPC.                                                   | none                                                                                    |
 | [`@zilliqa-js/account`](https://github.com/Zilliqa/zilliqa-js/tree/dev/packages/zilliqa-js-account)       | `Wallet`, `Account` and `Transaction` abstractions live in this package.                                                                                                  | `@zilliqa-js/core`, `@zilliqa-js/crypto`, `@zilliqa-js/util`, `@zilliqa-js/proto`       |
 | [`@zilliqa-js/blockchain`](https://github.com/Zilliqa/zilliqa-js/tree/dev/packages/zilliqa-js-blockchain) | Main interface to the Zilliqa `JSON-RPC`.                                                                                                                                 | none                                                                                    |
@@ -57,7 +57,7 @@ The following table provides a description of each module of zilliqa-js and what
 | [`@zilliqa-js/crypto`](https://github.com/Zilliqa/zilliqa-js/tree/dev/packages/zilliqa-js-crypto)         | Exposes several loosely-coupled cryptographic convenience functions for working with the Zilliqa blockchain and its cryptographic primitives, such as Schnorr signatures. | `@zilliqa-js/util`                                                                      |
 | [`@zilliqa-js/proto`](https://github.com/Zilliqa/zilliqa-js/tree/dev/packages/zilliqa-js-proto)           | Protobuf source files and corresponding generated JS modules.                                                                                                             | none                                                                                    |
 | [`@zilliqa-js/util`](https://github.com/Zilliqa/zilliqa-js/tree/dev/packages/zilliqa-js-util)             | Miscellaneous functions that take care of serialisation/deserialisation and validation.                                                                                   | none                                                                                    |
-| [`@zilliqa-js/viewblock`](https://github.com/Ashlar/zilliqa-js-viewblock)                                                 | Library interfacing with ViewBlock's APIs                                                                                                                                 | `@zilliqa-js/crypto`                                                                    |
+| [`@zilliqa-js/viewblock`](https://github.com/Ashlar/zilliqa-js-viewblock)                                 | Library interfacing with ViewBlock's APIs                                                                                                                                 | `@zilliqa-js/crypto`                                                                    |
 
 ## Demo - ZRC-2 Wallet
 
@@ -70,7 +70,7 @@ The full code can be found at [ZRC-2 Wallet Repository](https://github.com/arnav
 import {
   decryptPrivateKey,
   getAddressFromPrivateKey,
-} from '@zilliqa-js/crypto';
+} from "@zilliqa-js/crypto";
 let keystore = JSON.parse(this.state.encryptedWallet);
 const pk = await decryptPrivateKey(this.state.passphrase, keystore);
 const address = getAddressFromPrivateKey(pk);
@@ -79,8 +79,8 @@ const address = getAddressFromPrivateKey(pk);
 #### Getting User's $ZIL Balance
 
 ```javascript
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
+const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 let balanceState = await zilliqa.blockchain.getBalance(userAddress);
 if (balanceState) {
   let balance = balanceState.result.balance;
@@ -91,9 +91,9 @@ if (balanceState) {
 #### Getting User's Token Balance
 
 ```javascript
-let userAddress = localStorage.getItem('userAddress'); //userAddress is retrieved from localStorage in this example
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+let userAddress = localStorage.getItem("userAddress"); //userAddress is retrieved from localStorage in this example
+const { Zilliqa } = require("@zilliqa-js/zilliqa");
+const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
 let smartContractState = await zilliqa.blockchain.getSmartContractState(
   tokenContractAddress
@@ -109,16 +109,16 @@ if (smartContractState) {
 
 ```javascript
 sendTransaction = async () => {
-  const { Zilliqa } = require('@zilliqa-js/zilliqa');
-  const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
-  const { BN, Long, bytes, units } = require('@zilliqa-js/util');
-  const { toBech32Address, fromBech32Address } = require('@zilliqa-js/crypto');
+  const { Zilliqa } = require("@zilliqa-js/zilliqa");
+  const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
+  const { BN, Long, bytes, units } = require("@zilliqa-js/util");
+  const { toBech32Address, fromBech32Address } = require("@zilliqa-js/crypto");
 
   //You can set the value of the following variables according to your liking
-  let contractAddress = localStorage.getItem('token_contract_address');
+  let contractAddress = localStorage.getItem("token_contract_address");
   let recipientAddress = this.state.sendingAddress;
   let sendingAmount = this.state.sendingAmount;
-  let privkey = localStorage.getItem('private_key');
+  let privkey = localStorage.getItem("private_key");
 
   zilliqa.wallet.addByPrivateKey(privkey);
 
@@ -126,23 +126,23 @@ sendTransaction = async () => {
   const MSG_VERSION = 1;
   const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-  const myGasPrice = units.toQa('2000', units.Units.Li); // Gas Price that will be used by all transactions
+  const myGasPrice = units.toQa("2000", units.Units.Li); // Gas Price that will be used by all transactions
   contractAddress = contractAddress.substring(2);
   recipientAddress = fromBech32Address(recipientAddress); //converting to ByStr20 format
   const ftAddr = toBech32Address(contractAddress);
   try {
     const contract = zilliqa.contracts.at(ftAddr);
     const callTx = await contract.call(
-      'Transfer',
+      "Transfer",
       [
         {
-          vname: 'to',
-          type: 'ByStr20',
+          vname: "to",
+          type: "ByStr20",
           value: recipientAddress,
         },
         {
-          vname: 'amount',
-          type: 'Uint128',
+          vname: "amount",
+          type: "Uint128",
           value: sendingAmount,
         },
       ],

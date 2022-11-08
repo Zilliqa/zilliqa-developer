@@ -16,38 +16,38 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 const config = {
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    "^.+\\.ts$": "ts-jest",
   },
-  testMatch: ['<rootDir>/zilliqa/typescript/**/test/?(*.)+(spec|test).ts'],
+  testMatch: ["<rootDir>/zilliqa/typescript/**/test/?(*.)+(spec|test).ts"],
   moduleDirectories: [
-    'zilliqa/typescript/*/src',
-    '<rootDir>/includes',
-    '<rootDir>/node_modules',
-    '<rootDir>/*/node_modules',
+    "zilliqa/typescript/*/src",
+    "<rootDir>/includes",
+    "<rootDir>/node_modules",
+    "<rootDir>/*/node_modules",
   ],
-  moduleFileExtensions: ['js', 'ts', 'node', 'json'],
+  moduleFileExtensions: ["js", "ts", "node", "json"],
   moduleNameMapper: {
-    '^@zilliqa-js/zilliqa': '<rootDir>/zilliqa/typescript/zilliqa/src/index.ts',
-    '^@zilliqa-js/proto$':
-      '<rootDir>/zilliqa/typescript/zilliqa-js-proto/dist/index.js',
-    '^@zilliqa-js/(.*)$':
-      '<rootDir>/zilliqa/typescript/zilliqa-js-$1/src/index.ts',
+    "^@zilliqa-js/zilliqa": "<rootDir>/zilliqa/typescript/zilliqa/src/index.ts",
+    "^@zilliqa-js/proto$":
+      "<rootDir>/zilliqa/typescript/zilliqa-js-proto/dist/index.js",
+    "^@zilliqa-js/(.*)$":
+      "<rootDir>/zilliqa/typescript/zilliqa-js-$1/src/index.ts",
   },
   globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.test.json',
+    "ts-jest": {
+      tsconfig: "./tsconfig.test.json",
     },
   },
-  testURL: 'http://localhost',
+  testURL: "http://localhost",
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/zilliqa/typescript/*/src/**/*.{ts,js}',
-    '!**/node_modules/**',
+    "<rootDir>/zilliqa/typescript/*/src/**/*.{ts,js}",
+    "!**/node_modules/**",
   ],
-  testEnvironment: 'jsdom',
+  testEnvironment: "jsdom",
   automock: false,
   resetMocks: false,
-  setupFiles: ['<rootDir>/jest-setup.js'],
+  setupFiles: ["<rootDir>/jest-setup.js"],
 };
 
 module.exports = config;

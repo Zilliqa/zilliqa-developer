@@ -25,7 +25,7 @@ jobs:
         - 16
 branches:
   except:
-  - /^v[0-9]/
+    - /^v[0-9]/
 install:
   - npm install --global yarn
   - yarn install
@@ -44,4 +44,4 @@ after_success:
   - ./codecov -t ${CODECOV_TOKEN} -f coverage/coverage-final.json -Z
 cache:
   directories:
-  - "$HOME/.yarn-cache"
+    - "$HOME/.yarn-cache"

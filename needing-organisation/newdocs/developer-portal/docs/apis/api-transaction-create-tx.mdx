@@ -9,8 +9,8 @@ Create a new Transaction object and send it to the network to be processed. <br/
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -52,9 +52,9 @@ curl -d '{
 ```js
 let tx = zilliqa.transactions.new({
   version: 65537,
-  toAddr: '0x4BAF5faDA8e5Db92C3d3242618c5B47133AE003C',
-  amount: units.toQa('1', units.Units.Zil),
-  gasPrice: units.toQa('2000', units.Units.Li),
+  toAddr: "0x4BAF5faDA8e5Db92C3d3242618c5B47133AE003C",
+  amount: units.toQa("1", units.Units.Zil),
+  gasPrice: units.toQa("2000", units.Units.Li),
   gasLimit: Long.fromNumber(50),
 });
 

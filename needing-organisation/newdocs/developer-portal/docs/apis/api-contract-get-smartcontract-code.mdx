@@ -9,8 +9,8 @@ Returns the Scilla code associated with a smart contract address. This is repres
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -39,7 +39,7 @@ curl -d '{
 
 ```js
 const smartContractCode = await zilliqa.blockchain.getSmartContractCode(
-  'fe001824823b12b58708bf24edd94d8b5e1cfcf7'
+  "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
 );
 console.log(smartContractCode.result);
 ```

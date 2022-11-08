@@ -159,7 +159,7 @@ $ ./launch.sh
 ```
 
 You will be asked a series of questions.
-When asked to enter the private key, please enter the value you provided to us 
+When asked to enter the private key, please enter the value you provided to us
 This is crucial, as your node **will not work** with anything else.
 
 Sample instructions to be followed for launch are provided below.

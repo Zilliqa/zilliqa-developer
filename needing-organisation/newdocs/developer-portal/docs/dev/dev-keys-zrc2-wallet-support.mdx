@@ -106,8 +106,8 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
 #### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs
   defaultValue="cURL"
@@ -136,7 +136,7 @@ curl -d '{
 
 ```js
 const smartContractInit = await zilliqa.blockchain.getSmartContractInit(
-  '173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5'
+  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
 );
 console.log(smartContractInit.result);
 ```
@@ -256,10 +256,10 @@ for (let i = 0; i < smartContractInit.result.length; i++) {
 }
 //check if the immutable variables: name, symbol, decimals & init_supply exist in the vName array.
 let isZRC2 =
-  vNameArray.includes('name') &&
-  vNameArray.includes('symbol') &&
-  vNameArray.includes('decimals') &&
-  vNameArray.includes('init_supply');
+  vNameArray.includes("name") &&
+  vNameArray.includes("symbol") &&
+  vNameArray.includes("decimals") &&
+  vNameArray.includes("init_supply");
 
 console.log(isZRC2);
 ```
@@ -298,7 +298,7 @@ curl -d '{
 
 ```js
 const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  '173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5'
+  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
 );
 console.log(smartContractState.result);
 ```
@@ -385,9 +385,9 @@ for (let i = 0; i < smartContractState.result.length; i++) {
 }
 //check if the mutable variables: total_supply, balances & allowances exist in the vName array.
 let isZRC2 =
-  vNameArray.includes('total_supply') &&
-  vNameArray.includes('balances') &&
-  vNameArray.includes('allowances');
+  vNameArray.includes("total_supply") &&
+  vNameArray.includes("balances") &&
+  vNameArray.includes("allowances");
 
 console.log(isZRC2);
 ```
@@ -433,7 +433,7 @@ curl -d '{
 
 ```js
 const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  '173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5'
+  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
 );
 console.log(smartContractState.result);
 ```
@@ -481,11 +481,11 @@ func GetSmartContractState() {
 
 ```json
 {
-  "id":"1",
-  "jsonrpc":"2.0",
-  "result":{
-    "balances":{
-      "0x00034c431f642dfca0129694061263d72049a909":"1033606"
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": {
+    "balances": {
+      "0x00034c431f642dfca0129694061263d72049a909": "1033606"
     }
   }
 }
@@ -535,7 +535,7 @@ curl -d '{
 
 ```js
 const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  '173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5'
+  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
 );
 console.log(smartContractState.result);
 ```
@@ -607,7 +607,6 @@ func GetSmartContractState() {
 }
 ```
 
-
 ### Fetch Token Balance For A Single Key
 
 If the need to fetch a single token value from the `balances` map arises. Instead of requesting the whole map state over the network, using `getSmartContractSubState` is the most efficent method to use when you don't need to fetch the whole map. It returns one value per key, instead of the entire map. Allowing for quicker response times when only certain key values are required to be fetched.
@@ -638,9 +637,9 @@ curl -d '{
 
 ```js
 const smartContractState = await zilliqa.blockchain.getSmartContractSubState(
-  '173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5',
-  'balances',
-  ['0x8c3de413a9d8d602a1757210ab539853103e08d8, ...']
+  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5",
+  "balances",
+  ["0x8c3de413a9d8d602a1757210ab539853103e08d8, ..."]
 );
 console.log(smartContractState.result);
 ```
@@ -686,20 +685,20 @@ zilliqa.wallet.addByPrivateKey(privateKey);
 const CHAIN_ID = 1;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
-const myGasPrice = units.toQa('1000', units.Units.Li); // Gas Price that will be used by all transactions
+const myGasPrice = units.toQa("1000", units.Units.Li); // Gas Price that will be used by all transactions
 try {
   const contract = zilliqa.contracts.at(contractAddress);
   const callTx = await contract.call(
-    'Transfer',
+    "Transfer",
     [
       {
-        vname: 'to',
-        type: 'ByStr20',
+        vname: "to",
+        type: "ByStr20",
         value: recipientAddress,
       },
       {
-        vname: 'amount',
-        type: 'Uint128',
+        vname: "amount",
+        type: "Uint128",
         value: sendingAmount,
       },
     ],
@@ -798,7 +797,7 @@ let increaseAllowance = async function (contractAddress, spenderAddress) {
   const CHAIN_ID = 333;
   const MSG_VERSION = 1;
   const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
-  const myGasPrice = units.toQa('2000', units.Units.Li);
+  const myGasPrice = units.toQa("2000", units.Units.Li);
 
   let smartContractState = await zilliqa.blockchain.getSmartContractState(
     contractAddress
@@ -808,16 +807,16 @@ let increaseAllowance = async function (contractAddress, spenderAddress) {
   try {
     const contract = zilliqa.contracts.at(contractAddress);
     const callTx = await contract.call(
-      'IncreaseAllowance',
+      "IncreaseAllowance",
       [
         {
-          vname: 'spender',
-          type: 'ByStr20',
+          vname: "spender",
+          type: "ByStr20",
           value: spenderAddress,
         },
         {
-          vname: 'amount',
-          type: 'Uint128',
+          vname: "amount",
+          type: "Uint128",
           value: totalSupply,
         },
       ],
@@ -865,27 +864,27 @@ let transferFrom = async function (
   const CHAIN_ID = 333;
   const MSG_VERSION = 1;
   const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
-  const myGasPrice = units.toQa('2000', units.Units.Li);
+  const myGasPrice = units.toQa("2000", units.Units.Li);
 
   try {
     const contract = zilliqa.contracts.at(contractAddress);
     const callTx = await contract.call(
-      'TransferFrom',
+      "TransferFrom",
       [
         {
-          vname: 'from',
-          type: 'ByStr20',
+          vname: "from",
+          type: "ByStr20",
           value: userAddress,
         },
         {
-          vname: 'to',
-          type: 'ByStr20',
+          vname: "to",
+          type: "ByStr20",
           value: receiverAddress,
         },
         {
-          vname: 'amount',
-          type: 'Uint128',
-          value: '1000',
+          vname: "amount",
+          type: "Uint128",
+          value: "1000",
         },
       ],
       {

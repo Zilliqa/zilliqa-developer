@@ -6,7 +6,7 @@ name: Deploy dev-portal to GitHub Pages
 on:
   push:
     branches:
-    - master
+      - master
 
 permissions:
   contents: read
@@ -21,28 +21,27 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: 16.x
-        cache: yarn
-    - name: Build website
-      env:
-        BASE_URL: ${{secrets.BASE_URL}}
-      working-directory: docs
-      run: |
-        rm -rf node_modules && yarn cache clean
-        yarn install --frozen-lockfile
-        yarn build
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: yarn
+      - name: Build website
+        env:
+          BASE_URL: ${{secrets.BASE_URL}}
+        working-directory: docs
+        run: |
+          rm -rf node_modules && yarn cache clean
+          yarn install --frozen-lockfile
+          yarn build
 
-    # Use github actions to deploy to github pages
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
-      with:
-        path: './build'
-    - name: Deploy to gh pages
-      id: deployment
-      uses: actions/deploy-pages@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-
+      # Use github actions to deploy to github pages
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: "./build"
+      - name: Deploy to gh pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-import {DepositRepository} from '../repositories';
+import { DepositRepository } from "../repositories";
 
 export class DepositController {
   repository: DepositRepository;
