@@ -1,15 +1,13 @@
 load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
-#    package_name = "@zilliqa-js/util",
 stamped_package_json(
     name = "package",
-    # This key is defined by /workspace_status.sh
-    stamp_var = "STABLE_BUILD_VERSION",
+    stamp_var = "STABLE_JS_API_BUILD_VERSION",
 )
 
 ts_project(
-    name = "src_js",
+    name = "lib",
     srcs = [
         "//zilliqa/js:aes-js.d",
     ] + glob(
@@ -20,11 +18,15 @@ ts_project(
         exclude = ["src/**/*.spec.ts"],
     ),
     composite = True,
+    data = [
+        "//:node_modules/bn.js",
+        "//:node_modules/long",
+        "//:node_modules/tslib",
+    ],
     declaration = True,
     declaration_map = True,
     extends = "//:tsconfig.base",
     incremental = True,
-    out_dir = "dist",
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
@@ -45,7 +47,7 @@ ts_project(
 
 npm_package(
     name = "pkg",
-    srcs = [":src_js"],
+    srcs = [":lib"],
     package = "@zilliqa-js/util",
     # The package name does not need to be specified in this target since the name
     # that this package is linked as is set by the pnpm lockfile. If it is
