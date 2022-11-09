@@ -5,3 +5,5 @@ vendor/benchmark/
 vendor/googletest/
 pixy
 .cache/
+node_modules/
+**/node_modules/
