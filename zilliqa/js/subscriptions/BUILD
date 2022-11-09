@@ -9,7 +9,7 @@ stamped_package_json(
 ts_project(
     name = "lib",
     srcs = [
-        "//zilliqa/js:typings",
+        "//zilliqa/js:aes-js.d",
     ] + glob(
         [
             "src/*.ts",
