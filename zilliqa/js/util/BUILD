@@ -38,7 +38,6 @@ ts_project(
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
         "//:node_modules/bn.js",
-        "//:node_modules/hash.js",  # TODO: Not needed - fix typings and remove
         "//:node_modules/long",
         "//:node_modules/tslib",
     ],
