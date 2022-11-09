@@ -5,6 +5,47 @@ load("@npm//:defs.bzl", "npm_link_all_packages")
 package(default_visibility = ["//visibility:public"])
 
 # This macro expands to a link_npm_package for each third-party package in package.json
+npm_link_package(
+    name = "node_modules/@zilliqa-js/account",
+    src = "//zilliqa/js/account:pkg",
+    visibility = ["//visibility:public"],
+)
+
+npm_link_package(
+    name = "node_modules/@zilliqa-js/blockchain",
+    src = "//zilliqa/js/blockchain:pkg",
+    visibility = ["//visibility:public"],
+)
+
+npm_link_package(
+    name = "node_modules/@zilliqa-js/contract",
+    src = "//zilliqa/js/contract:pkg",
+    visibility = ["//visibility:public"],
+)
+
+npm_link_package(
+    name = "node_modules/@zilliqa-js/core",
+    src = "//zilliqa/js/core:pkg",
+    visibility = ["//visibility:public"],
+)
+
+npm_link_package(
+    name = "node_modules/@zilliqa-js/crypto",
+    src = "//zilliqa/js/crypto:pkg",
+    visibility = ["//visibility:public"],
+)
+
+npm_link_package(
+    name = "node_modules/@zilliqa-js/proto",
+    src = "//zilliqa/js/proto:pkg",
+    visibility = ["//visibility:public"],
+)
+
+npm_link_package(
+    name = "node_modules/@zilliqa-js/subscriptions",
+    src = "//zilliqa/js/subscriptions:pkg",
+    visibility = ["//visibility:public"],
+)
 
 npm_link_package(
     name = "node_modules/@zilliqa-js/util",

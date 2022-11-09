@@ -1,8 +1,13 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("@npm//@bazel/typescript:index.bzl", "ts_project")
+load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+
+stamped_package_json(
+    name = "package",
+    stamp_var = "STABLE_JS_API_BUILD_VERSION",
+)
 
 ts_project(
-    name = "src_js",
+    name = "lib",
     srcs = [
         "//zilliqa/js:typings",
     ] + glob(
@@ -15,47 +20,34 @@ ts_project(
     composite = True,
     declaration = True,
     declaration_map = True,
-    extends = "//:tsconfig.base.json",
+    extends = "//:tsconfig.base",
     incremental = True,
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
-    tsc = "@npm//typescript/bin:tsc",
     tsconfig = "tsconfig.json",
     visibility = ["//visibility:public"],
     deps = [
-        "//zilliqa/js/account:lib",
-        "//zilliqa/js/blockchain:lib",
-        "//zilliqa/js/contract:lib",
-        "//zilliqa/js/core:lib",
-        "//zilliqa/js/crypto:lib",
-        "//zilliqa/js/proto:lib",
-        "//zilliqa/js/subscriptions:lib",
-        "//zilliqa/js/util:lib",
-        "@npm//@types/bn.js",
-        "@npm//@types/camelcase",
-        "@npm//@types/jest",
-        "@npm//@types/node",
-        "@npm//@typescript-eslint/eslint-plugin",
-        "@npm//@typescript-eslint/parser",
-        "@npm//hash.js",  # TODO: Not needed - fix typings and remove
+        "//:node_modules/@types/bn.js",
+        "//:node_modules/@types/camelcase",
+        "//:node_modules/@types/node",
+        "//:node_modules/@typescript-eslint/eslint-plugin",
+        "//:node_modules/@typescript-eslint/parser",
+        "//:node_modules/@zilliqa-js/account",
+        "//:node_modules/@zilliqa-js/blockchain",
+        "//:node_modules/@zilliqa-js/contract",
+        "//:node_modules/@zilliqa-js/core",
+        "//:node_modules/@zilliqa-js/crypto",
+        "//:node_modules/@zilliqa-js/proto",
+        "//:node_modules/@zilliqa-js/subscriptions",
+        "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/hash.js",  # TODO: Not needed - fix typings and remove
     ],
 )
 
-js_library(
-    name = "lib",
-    package_name = "@zilliqa-js/zilliqa",
-    srcs = ["package.json"],
+npm_package(
+    name = "pkg",
+    srcs = [":lib"],
+    package = "@zilliqa-js/zilliqa",
     visibility = ["//visibility:public"],
-    deps = [
-        ":src_js",
-    ],
-)
-
-pkg_npm(
-    name = "package",
-    package_name = "@zilliqa-js/zilliqa",
-    srcs = ["package.json"],
-    visibility = ["//visibility:public"],
-    deps = [":src_js"],
 )

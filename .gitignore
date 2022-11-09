@@ -22,3 +22,5 @@ devTestOnly/
 @zilliqa-js*
 bazel-*
 .husky
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo

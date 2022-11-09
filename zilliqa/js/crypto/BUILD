@@ -20,6 +20,18 @@ ts_project(
         exclude = ["src/**/*.spec.ts"],
     ),
     composite = True,
+    data = [
+        "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/aes-js",
+        "//:node_modules/elliptic",
+        "//:node_modules/hash.js",
+        "//:node_modules/hmac-drbg",
+        "//:node_modules/pbkdf2",
+        "//:node_modules/scrypt-js",
+        "//:node_modules/sodium-randbytes",
+        "//:node_modules/tslib",
+        "//:node_modules/uuid",
+    ],
     declaration = True,
     declaration_map = True,
     extends = "//:tsconfig.base",
@@ -55,9 +67,5 @@ npm_package(
     name = "pkg",
     srcs = [":lib"],
     package = "@zilliqa-js/crypto",
-    # The package name does not need to be specified in this target since the name
-    # that this package is linked as is set by the pnpm lockfile. If it is
-    # specified here then it won't be load bearing since the value in the pnpm
-    # lockfile will take precendence.
     visibility = ["//visibility:public"],
 )

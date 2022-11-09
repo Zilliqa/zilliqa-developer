@@ -1,29 +1,25 @@
+load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load(":defs.bzl", "protobufjs_library")
+load(":defs.bzl", "ts_proto_library")
+
+stamped_package_json(
+    name = "package",
+    stamp_var = "STABLE_JS_API_BUILD_VERSION",
+)
 
 proto_library(
-    name = "src_js",
-    srcs = [
-        "src/messages.proto",
-    ],
+    name = "proto_lib",
+    srcs = ["src/messages.proto"],
 )
 
-protobufjs_library(
+ts_proto_library(
     name = "lib",
-    package_name = "@zilliqa-js/proto",    
-    proto = "src_js",
-    srcs = ["package.json"],
-     visibility = ["//visibility:public"]    
-
+    proto = ":proto_lib",
 )
 
-
-pkg_npm(
-    name = "package",
-    package_name = "@zilliqa-js/proto",
-    srcs = ["package.json"],
-    deps = [":src_js"],
- 	 visibility = ["//visibility:public"]    
+npm_package(
+    name = "pkg",
+    srcs = [":lib"],
+    package = "@zilliqa-js/proto",
+    visibility = ["//visibility:public"],
 )

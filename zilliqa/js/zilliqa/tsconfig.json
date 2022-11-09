@@ -1,7 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "target": "ES2022",
+    "module": "CommonJS",
+    "declaration": true
   },
   "include": ["src", "../typings/**/*.d.ts"]
 }
