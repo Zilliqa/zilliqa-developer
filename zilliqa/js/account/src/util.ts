@@ -16,14 +16,14 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ReqMiddlewareFn, RPCMethod } from "@zilliqa-js/core";
-import { bytes, validation } from "@zilliqa-js/util";
+import { bytes, validation, Long } from "@zilliqa-js/util";
 import { ZilliqaMessage } from "@zilliqa-js/proto";
 import { TxReceipt, TxParams } from "./types";
 
 export const encodeTransactionProto = (tx: TxParams): Buffer => {
   const msg = {
     version: tx.version,
-    nonce: tx.nonce || 0,
+    nonce: new Long(tx.nonce || 0, 0),
     // core protocol Schnorr expects lowercase, non-prefixed address.
     toaddr: bytes.hexToByteArray(tx.toAddr.replace("0x", "").toLowerCase()),
     senderpubkey: ZilliqaMessage.ByteArray.create({
