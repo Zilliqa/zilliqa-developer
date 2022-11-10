@@ -114,6 +114,13 @@ http_archive(
     url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.6.6.tar.gz",
 )
 
+http_archive(
+    name = "aspect_rules_jest",
+    sha256 = "6d6303372879579cff3c615d0f53ec1cea8a919ed457ffcd375ef5ac2aaaa0b4",
+    strip_prefix = "rules_jest-0.11.1",
+    url = "https://github.com/aspect-build/rules_jest/archive/refs/tags/v0.11.1.tar.gz",
+)
+
 load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
 
 rules_js_dependencies()
@@ -124,6 +131,19 @@ nodejs_register_toolchains(
     name = "nodejs",
     node_version = DEFAULT_NODE_VERSION,
 )
+
+load("@aspect_rules_jest//jest:dependencies.bzl", "rules_jest_dependencies")
+
+rules_jest_dependencies()
+
+# Fetches the npm packages for jest-cli.
+load("@aspect_rules_jest//jest:repositories.bzl", "jest_repositories")
+
+jest_repositories(name = "jest")
+
+load("@jest//:npm_repositories.bzl", jest_npm_repositories = "npm_repositories")
+
+jest_npm_repositories()
 
 load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
 

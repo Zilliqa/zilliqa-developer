@@ -1,4 +1,5 @@
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@aspect_rules_js//npm:defs.bzl", "npm_link_package")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 
@@ -58,6 +59,7 @@ npm_link_all_packages(name = "node_modules")
 exports_files([
     "package.json",
     "tsconfig.base.json",
+    "tsconfig.test.json",
 ])
 
 exports_files(["docs"])
@@ -70,5 +72,26 @@ copy_to_bin(
 copy_to_bin(
     name = "tsconfig.base",
     srcs = ["tsconfig.base.json"],
+    visibility = ["//visibility:public"],
+)
+
+copy_to_bin(
+    name = "tsconfig.test",
+    srcs = [
+        "tsconfig.base.json",
+        "tsconfig.test.json",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+copy_to_bin(
+    name = "jest-setup",
+    srcs = ["jest-setup.js"],
+    visibility = ["//zilliqa/js/util:__subpackages__"],
+)
+
+js_library(
+    name = "jest_config",
+    srcs = ["jest.config.js"],
     visibility = ["//visibility:public"],
 )
