@@ -50,6 +50,6 @@ jobs:
           path: ~/.cache/bazel/
           key: ${{ runner.os }}-bazel-debug
 
-      - name: "Running debug unit tests with address sanitation"
+      - name: "Running tests"
         run: |
           bazelisk test --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //...
