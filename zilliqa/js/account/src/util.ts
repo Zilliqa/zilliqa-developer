@@ -15,20 +15,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ReqMiddlewareFn, RPCMethod } from '@zilliqa-js/core';
-import { bytes, validation } from '@zilliqa-js/util';
-import { ZilliqaMessage } from '@zilliqa-js/proto';
-import { TxReceipt, TxParams } from './types';
-import Long from 'long';
+import { ReqMiddlewareFn, RPCMethod } from "@zilliqa-js/core";
+import { bytes, validation } from "@zilliqa-js/util";
+import { ZilliqaMessage } from "@zilliqa-js/proto";
+import { TxReceipt, TxParams } from "./types";
+import Long from "long";
 
 export const encodeTransactionProto = (tx: TxParams): Buffer => {
   const msg = {
     version: tx.version,
-    nonce: new Long(0, tx.nonce || 0), // TODO: TxParams uses number but protobuf uses long
+    nonce: new Long(0, tx.nonce || 0),
     // core protocol Schnorr expects lowercase, non-prefixed address.
-    toaddr: bytes.hexToByteArray(tx.toAddr.replace('0x', '').toLowerCase()),
+    toaddr: bytes.hexToByteArray(tx.toAddr.replace("0x", "").toLowerCase()),
     senderpubkey: ZilliqaMessage.ByteArray.create({
-      data: bytes.hexToByteArray(tx.pubKey || '00'),
+      data: bytes.hexToByteArray(tx.pubKey || "00"),
     }),
     amount: ZilliqaMessage.ByteArray.create({
       data: Uint8Array.from(tx.amount.toArrayLike(Buffer, undefined, 16)),
@@ -50,7 +50,7 @@ export const encodeTransactionProto = (tx: TxParams): Buffer => {
   const serialised = ZilliqaMessage.ProtoTransactionCoreInfo.create(msg);
 
   return Buffer.from(
-    ZilliqaMessage.ProtoTransactionCoreInfo.encode(serialised).finish(),
+    ZilliqaMessage.ProtoTransactionCoreInfo.encode(serialised).finish()
   );
 };
 
