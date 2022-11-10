@@ -59,7 +59,8 @@ def ts_proto_library(name, proto, deps = [], srcs = [], out_dir = "dist", **kwar
         args = [
             "--target=static-module",
             "--wrap=default",
-            "--strict-long",  # Force usage of Long type with int64 fields
+            # TODO:
+            # "--strict-long",  # Force usage of Long type with int64 fields
             "--out=$@",
             "$(execpaths %s)" % proto_target,
         ],
