@@ -40,6 +40,7 @@ ts_project(
     deps = [
         "//:node_modules/@types/bn.js",
         "//:node_modules/@types/camelcase",
+        "//:node_modules/@types/long",
         "//:node_modules/@types/node",
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
@@ -49,6 +50,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/crypto",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/hash.js",
+        "//:node_modules/tslib",
         "//:node_modules/utility-types",
     ],
 )

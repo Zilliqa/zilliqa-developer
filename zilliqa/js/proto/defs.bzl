@@ -14,7 +14,7 @@ _proto_sources = rule(
     attrs = {"proto": attr.label(providers = [ProtoInfo])},
 )
 
-def ts_proto_library(name, proto, deps = [], **kwargs):
+def ts_proto_library(name, proto, deps = [], srcs = [], out_dir = "dist", **kwargs):
     """Minimal wrapper macro around pbjs/pbts tooling
 
     Args:
@@ -22,9 +22,12 @@ def ts_proto_library(name, proto, deps = [], **kwargs):
         proto: label of a single proto_library target to generate for
         **kwargs: passed through to the js_library
     """
+    js_out = ""
+    if out_dir:
+        js_out = out_dir + "/"
 
-    js_out = name + ".js"
-    ts_out = name + ".d.ts"
+    js_out = js_out + "index.js"
+    ts_out = js_out.replace(".js", ".d.ts")
 
     # Generate some target names, based on the provided name
     # (so that they are unique if the macro is called several times in one package)
@@ -48,9 +51,10 @@ def ts_proto_library(name, proto, deps = [], **kwargs):
         # https://github.com/protobufjs/protobuf.js/tree/6.8.8#pbjs-for-javascript
         args = [
             "--target=static-module",
-            "--root=%s" % name,
+            "--wrap=default",
+            "--strict-long",  # Force usage of Long type with int64 fields
             "--out=$@",
-            "$(locations %s)" % proto_target,
+            "$(execpaths %s)" % proto_target,
         ],
         outs = [js_out],
     )
@@ -71,13 +75,22 @@ def ts_proto_library(name, proto, deps = [], **kwargs):
     )
 
     # Expose the results as js_library which provides DeclarationInfo for interop with other rules
+
     js_library(
         name = name,
-        srcs = [
+        srcs = srcs + [
             js_target,
             ts_target,
+            js_out,
+            ts_out,
         ],
         deps = deps + [
+            "//:node_modules/long",
+            "//:node_modules/@types/long",
+            "//:node_modules/protobufjs",
+            "//:node_modules/@types/protobufjs",
+        ],
+        data = [
             "//:node_modules/long",
             "//:node_modules/@types/long",
             "//:node_modules/protobufjs",

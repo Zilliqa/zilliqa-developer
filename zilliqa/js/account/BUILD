@@ -55,6 +55,7 @@ ts_project(
         "//:node_modules/bip39",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
+        "//:node_modules/protobufjs",  # TODO: This one should come automatically from proto
         "//:node_modules/tslib",
     ],
 )

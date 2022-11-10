@@ -9,6 +9,7 @@ stamped_package_json(
 ts_project(
     name = "lib",
     srcs = [
+        ":package",
         "//zilliqa/js:aes-js.d",
     ] + glob(
         [
@@ -49,9 +50,5 @@ npm_package(
     name = "pkg",
     srcs = [":lib"],
     package = "@zilliqa-js/util",
-    # The package name does not need to be specified in this target since the name
-    # that this package is linked as is set by the pnpm lockfile. If it is
-    # specified here then it won't be load bearing since the value in the pnpm
-    # lockfile will take precendence.
     visibility = ["//visibility:public"],
 )

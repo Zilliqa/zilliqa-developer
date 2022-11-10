@@ -30,7 +30,9 @@ ts_project(
     deps = [
         "//:node_modules/@types/bn.js",
         "//:node_modules/@types/camelcase",
+        "//:node_modules/@types/long",
         "//:node_modules/@types/node",
+        "//:node_modules/@types/websocket",
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
         "//:node_modules/@zilliqa-js/account",
@@ -41,7 +43,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/subscriptions",
         "//:node_modules/@zilliqa-js/util",
-        "//:node_modules/hash.js",  # TODO: Not needed - fix typings and remove
+        "//:node_modules/tslib",
     ],
 )
 

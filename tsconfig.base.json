@@ -19,6 +19,31 @@
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "strict": true,
-    "target": "es5"
+    "target": "es5",
+    "paths": {
+      "@zilliqa-js/*": [
+        "./zilliqa/js/*",
+
+        "./bazel-out/host/bin/zilliqa/js/*",
+        "./bazel-out/darwin-fastbuild/bin/zilliqa/js/*",
+        "./bazel-out/darwin_arm64-fastbuild/bin/zilliqa/js/*",
+        "./bazel-out/k8-fastbuild/bin/zilliqa/js/*",
+        "./bazel-out/x64_windows-fastbuild/bin/zilliqa/js/*",
+        "./bazel-out/darwin-dbg/bin/zilliqa/js/*",
+        "./bazel-out/k8-dbg/bin/zilliqa/js/*",
+        "./bazel-out/x64_windows-dbg/bin/zilliqa/js/*"
+      ]
+    },
+    "rootDirs": [
+      ".",
+      "./bazel-out/host/bin/zilliqa",
+      "./bazel-out/darwin-fastbuild/bin/zilliqa",
+      "./bazel-out/darwin_arm64-fastbuild/bin/zilliqa",
+      "./bazel-out/k8-fastbuild/bin/zilliqa",
+      "./bazel-out/x64_windows-fastbuild/bin/zilliqa",
+      "./bazel-out/darwin-dbg/bin/zilliqa",
+      "./bazel-out/k8-dbg/bin/zilliqa",
+      "./bazel-out/x64_windows-dbg/bin/zilliqa"
+    ]
   }
 }

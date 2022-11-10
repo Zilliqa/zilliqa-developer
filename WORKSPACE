@@ -137,6 +137,13 @@ load("@npm//:repositories.bzl", "npm_repositories")
 
 npm_repositories()
 
+# JQ toolchain
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "register_jq_toolchains")
+
+aspect_bazel_lib_dependencies(override_local_config_platform = True)
+
+register_jq_toolchains()
+
 # ================================================================
 # Protobuf
 # ================================================================
