@@ -5,10 +5,10 @@ and products used to develop solutions based on the Zilliqa ecosystem.
 
 This reposository is organised as follows:
 
--   `docs/`: Pure documentation in `md` or `mdx` format.
--   `examples/`: Reference material.
--   `zilliqa/`: APIs and libraries (JS SDK, Python SDK, etc/)
--   `products/`: Software products(`ceres`, `devex`, `neosavant`, `oil` etc.)
+- `docs/`: Pure documentation in `md` or `mdx` format.
+- `examples/`: Reference material.
+- `zilliqa/`: APIs and libraries (JS SDK, Python SDK, etc/)
+- `products/`: Software products(`ceres`, `devex`, `neosavant`, `oil` etc.)
 
 Detailed documentation of the Zilliqa ecosystem is found in [docs/](docs/).
 
@@ -30,10 +30,10 @@ This repository is based on the [Bazel build tool](https://bazel.build/). Bazel
 builds are mostly self-contained because Bazel downloads dependencies and
 arrange them in you workspace. The only external tools we rely on is
 
--   Bazelisk, ibazel or Bazel 5.2
--   Pnpm / Npm / Yarn
--   Python 3.6 or newer
--   Trunk 1.0 or newer
+- Bazelisk, ibazel or Bazel 5.2
+- Pnpm / Npm / Yarn
+- Python 3.6 or newer
+- Trunk 1.0 or newer
 
 While the repository can be built directly with Bazel, we recommend that you
 either use Bazelisk or ibazel as these will manage the Bazel version used. The
@@ -178,10 +178,10 @@ previous builds: `bazel clean --expunge`
 
 This reposository is organised as follows:
 
--   `docs/`: Pure documentation in `md` or `mdx` format.
--   `exmaples/`: Reference material.
--   `zilliqa/`: APIs and libraries (JS API, GO API, etc/)
--   `products/`: Software products(`ceres`, `devex`, `neosavant`, `oil` etc.)
+- `docs/`: Pure documentation in `md` or `mdx` format.
+- `exmaples/`: Reference material.
+- `zilliqa/`: APIs and libraries (JS API, GO API, etc/)
+- `products/`: Software products(`ceres`, `devex`, `neosavant`, `oil` etc.)
 
 The idea with keeping it all in one repository is as follows:
 
