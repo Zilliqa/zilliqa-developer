@@ -1,9 +1,9 @@
 {
-  "extends": "../../tsconfig.test.json",
+  "extends": "../../../tsconfig.test.json",
   "include": ["src", "test", "../typings/**/*.d.ts"],
   "references": [
-    { "path": "../zilliqa-js-account" },
-    { "path": "../zilliqa-js-contract" },
-    { "path": "../zilliqa-js-core" }
+    { "path": "../account" },
+    { "path": "../contract" },
+    { "path": "../core" }
   ]
 }

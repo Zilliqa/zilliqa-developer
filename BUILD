@@ -87,7 +87,7 @@ copy_to_bin(
 copy_to_bin(
     name = "jest-setup",
     srcs = ["jest-setup.js"],
-    visibility = ["//zilliqa/js/util:__subpackages__"],
+    visibility = ["//visibility:public"],
 )
 
 js_library(
