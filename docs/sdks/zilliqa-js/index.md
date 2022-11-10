@@ -1,6 +1,6 @@
-# Zilliqa Developer Tools & Documnentation
+# Zilliqa JS SDK
 
-# Introduction
+## Introduction
 
 `zilliqa-js` is structured as a Lerna monorepo. Each package roughly corresponds
 to a discrete `ZilliqaModule`, most of which can be used independently.
@@ -58,8 +58,9 @@ npm install --global --production windows-build-tools # from an elevated PowerSh
 npm config set msvs_version 2015 # 2015 is more compatible; though 2017 may work too
 ```
 
-Refer to https://github.com/nodejs/node-gyp#installation for more information
-about `node-gyp` installation on Windows.
+Refer to
+[the installation guide](https://github.com/nodejs/node-gyp#installation) for
+more information about `node-gyp` installation on Windows.
 
 ## Installation
 
@@ -284,8 +285,8 @@ testBlockchain();
 The account balance is an object with two fields, `balance` and `nonce`.
 
 `balance` is the account balance in Qa, which is the lowest denomination in
-Zilliqa. For more information about gas accounting, please refer to here:
-https://forum.zilliqa.com/t/gas-accounting-in-zilliqa/199
+Zilliqa. For more information about gas accounting,
+[please refer to here](https://forum.zilliqa.com/t/gas-accounting-in-zilliqa/199)
 
 `nonce` is a counter that keeps track of how many transactions are sent from a
 given address. In Zilliqa, every transaction sent from an address must have a
@@ -391,7 +392,7 @@ simple run `yarn bundle`. This will output two bundles, `*.umd.js` and
 `*.esm.js`, to `zilliqa/typescript/*/dist`. Node.js clients are pointed to the
 `umd` bundle, and bundlers are pointed to `esm`.
 
-_NOTE: these bundles are *not* minified._
+NOTE: these bundles are _not_ minified.
 
 #### webpack
 

@@ -16,7 +16,7 @@ description: Zilliqa Websockets
 
 ---
 
-# Zilliqa Websockets
+## Zilliqa Websockets
 
 [zilliqa-js](https://github.com/Zilliqa/zilliqa-js) is a Javascript library that
 allows you to interact with the Zilliqa network nodes - create wallets, deploy
@@ -74,6 +74,8 @@ standard for fungible tokens on Zilliqa. The full code can be found at
 [ZRC-2 Wallet Repository](https://github.com/arnavvohra/dev-portal-examples/tree/master/zrc-2-wallet).
 This repository is written in React but the zilliqa-js methods & APIs can be
 used with any javascript framework.
+
+### Details
 
 #### Generating Private Key and Address from Encrypted Wallet and a Passphrase
 
