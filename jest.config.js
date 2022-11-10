@@ -14,8 +14,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 const config = {
   testMatch: ["<rootDir>/zilliqa/js/**/test/?(*.)+(spec|test).(ts|js)"],
+  setupFiles: ["<rootDir>/jest-setup.js"],
 };
 
 module.exports = config;
