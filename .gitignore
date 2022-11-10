@@ -25,3 +25,4 @@ bazel-*
 tsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfotsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
+.trunk/

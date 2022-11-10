@@ -147,7 +147,7 @@ pkg_tar(
 
 pkg_tar(
     name = "wallet-config",
-    srcs = glob(["nginx/default.conf"]),
+    srcs = ["nginx/default.conf"],
     mode = "0755",
     package_dir = "/etc/nginx/conf.d/",
     deps = [],
