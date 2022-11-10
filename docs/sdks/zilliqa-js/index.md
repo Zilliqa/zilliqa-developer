@@ -1,88 +1,16 @@
 # Zilliqa Developer Tools & Documnentation
 
-# # Organisation
+# Introduction
 
-This reposository is organised as follows:
+`zilliqa-js` is structured as a Lerna monorepo. Each package roughly corresponds
+to a discrete `ZilliqaModule`, most of which can be used independently.
 
-- `docs/`: Pure documentation in `md` or `mdx` format.
-- `exmaples/`: Reference material.
-- `zilliqa/`: APIs and libraries (JS API, GO API, etc/)
-- `products/`: Software products(`ceres`, `devex`, `neosavant`, `oil` etc.)
+The only required package is `@zilliqa-js/core`, which contains the default
+`HTTPProvider`, and other core abstractions that are necessary for other modules
+to function.
 
-The idea with keeping it all in one repository is as follows:
-
-1. When someone would make a breaking change to the JS Api which would break `ceres`, `devex` and two API examples this would be caught before the change makes it into `main`, and whoever responsbile for the change would also be responsible for updating all broken products as part of that update.
-
-2. The documentation and examples are kept closer to the source code hence making it possible to request an update of docs during the review of a new code piece (as opposed to create a ticket on the backlog, which is under the danger of never being addressed)
-
-3. For our different components, it would be substantially easier to make sure that all are using the same version of a given library. For instance, if the JS API is depending on `BN.js` version 4.11.8 but the `devex` product uses version 5.2.1, this possibly leads to incompatibility between `devex` and the API component. By keeping the two together, we can ensure that releases are done simultaneously and that they rely on the same library version to avoid tedious bugs that are hard to find.
-
-## Change log
-
-- All document repositories combined in `docs/`
-- Framework for building static webpage separated into `products/developer-portal` to allow clean `docs/` layout that is usable from Github.
-
-## Notes on Apple M1
-
-You can force the toolchain to Apple silicon by adding
-
-```
---apple_platform_type=macos --cpu=darwin_arm64 --host_cpu=darwin_arm64
-```
-
-but `nodejs` does not have support for it:
-
-```
-FAILED: Build did NOT complete successfully (6 packages loaded, 0 targets configured)
-    currently loading: @nodejs_darwin_arm64//
-```
-
-For now, you will need to use simulated `x86`:
-
-```
---apple_platform_type=macos --cpu=darwin_x86_64 --host_cpu=darwin_x86_64
-```
-
-We have added a shorthand configuration for this:
-
-```
---config apple-m1
-```
-
-## Encountering Bazel Issues
-
-To get verbose error messages add `--verbose_failures`.
-
-If you experience issues with Bazel determining relevant toolchain for C++, try adding the argument `--toolchain_resolution_debug=@bazel_tools//tools/cpp:toolchain_type` to help debug.
-
-If you experience that it is difficult to understand what folder structure Bazel builds, add `--sandbox_debug`
-
-Sometimes while debugging it is helpful to clean all to aviod artefacts from previous builds: `bazel clean --expunge`
-
-<div align="center">
-  <h1>
-  zilliqa-js
-  </h1>
-  <strong>
-  Allows you to interact with the Zilliqa network nodes
-  </strong>
-</div>
-<hr/>
-
-[![Build Status](https://travis-ci.com/Zilliqa/zilliqa-js.svg?branch=main)](https://app.travis-ci.com/github/Zilliqa/zilliqa-js) [![codecov](https://codecov.io/gh/Zilliqa/zilliqa-js/branch/main/graph/badge.svg?token=3EupxbfA4Q)](https://codecov.io/gh/Zilliqa/zilliqa-js) [![Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/XMRE9tt) [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
-
-## Introduction
-
-`zilliqa-js` is structured as a Lerna monorepo. Each package roughly
-corresponds to a discrete `ZilliqaModule`, most of which can be used
-independently.
-
-The only required package is `@zilliqa-js/core`, which contains
-the default `HTTPProvider`, and other core abstractions that are necessary for
-other modules to function.
-
-The following table provides a description of each module and what you may
-want to use it for.
+The following table provides a description of each module and what you may want
+to use it for.
 
 | Package                                                                         | Version                                                                                                                               | Description                                                                                                                                                               | Dependencies                                                  |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -117,8 +45,10 @@ want to use it for.
 
 ## Pre-Requisite (Windows Users)
 
-`zilliqa-js` uses [`scrypt`](https://www.npmjs.com/package/scrypt) library which depends on `node-gyp` in order to compile the binaries from source on Windows.
-`node-gyp` on Windows requires users to install additional Visual Studio Build tools.
+`zilliqa-js` uses [`scrypt`](https://www.npmjs.com/package/scrypt) library which
+depends on `node-gyp` in order to compile the binaries from source on Windows.
+`node-gyp` on Windows requires users to install additional Visual Studio Build
+tools.
 
 To install the required Visual Studio Build tools:
 
@@ -128,13 +58,14 @@ npm install --global --production windows-build-tools # from an elevated PowerSh
 npm config set msvs_version 2015 # 2015 is more compatible; though 2017 may work too
 ```
 
-Refer to https://github.com/nodejs/node-gyp#installation for more information about `node-gyp` installation on Windows.
+Refer to https://github.com/nodejs/node-gyp#installation for more information
+about `node-gyp` installation on Windows.
 
 ## Installation
 
-It is recommended that developers install the JavaScript client by making use
-of the umbrella package `@zilliqa-js/zilliqa`. This takes care of bootstrapping the various modules, which are then accessible as members of the
-`Zilliqa` class.
+It is recommended that developers install the JavaScript client by making use of
+the umbrella package `@zilliqa-js/zilliqa`. This takes care of bootstrapping the
+various modules, which are then accessible as members of the `Zilliqa` class.
 
 ```shell
 npm i @zilliqa-js/zilliqa
@@ -144,7 +75,9 @@ yarn add @zilliqa-js/zilliqa
 
 ## Quick Start
 
-You can create a test account by using [Zilliqa Dev Wallet](https://github.com/Zilliqa/dev-wallet) and request funds by using [ZIL Faucet service](https://dev-wallet.zilliqa.com/faucet).
+You can create a test account by using
+[Zilliqa Dev Wallet](https://github.com/Zilliqa/dev-wallet) and request funds by
+using [ZIL Faucet service](https://dev-wallet.zilliqa.com/faucet).
 
 ```javascript
 const { BN, Long, bytes, units } = require("@zilliqa-js/util");
@@ -350,10 +283,13 @@ testBlockchain();
 
 The account balance is an object with two fields, `balance` and `nonce`.
 
-`balance` is the account balance in Qa, which is the lowest denomination in Zilliqa.
-For more information about gas accounting, please refer to here: https://forum.zilliqa.com/t/gas-accounting-in-zilliqa/199
+`balance` is the account balance in Qa, which is the lowest denomination in
+Zilliqa. For more information about gas accounting, please refer to here:
+https://forum.zilliqa.com/t/gas-accounting-in-zilliqa/199
 
-`nonce` is a counter that keeps track of how many transactions are sent from a given address. In Zilliqa, every transaction sent from an address must have a unique nonce.
+`nonce` is a counter that keeps track of how many transactions are sent from a
+given address. In Zilliqa, every transaction sent from an address must have a
+unique nonce.
 
 ```json
 { "balance": "296505000000000", "nonce": "3" }
@@ -384,17 +320,22 @@ An example of a transaction receipt is this:
 }
 ```
 
-`event_logs` comprises of all the events emitted in the transaction. For example, if your transaction calls a transition which emits 3 events, it will be an array of three events. The `address` is the contract address of the contract which emits the event.
+`event_logs` comprises of all the events emitted in the transaction. For
+example, if your transaction calls a transition which emits 3 events, it will be
+an array of three events. The `address` is the contract address of the contract
+which emits the event.
 
 `success` indicates if the transaction is successful.
 
 ## Examples
 
-For more examples, visit this [repository](https://github.com/Zilliqa/zilliqa-js-Examples).
+For more examples, visit this
+[repository](https://github.com/Zilliqa/zilliqa-js-Examples).
 
 ## API Documentation
 
-Each package contains API documentation. For convenience, these are links to the respective `README` documents.
+Each package contains API documentation. For convenience, these are links to the
+respective `README` documents.
 
 - [`account`](./zilliqa/typescript/zilliqa-js-account/README.md)
 - [`blockchain`](./zilliqa/typescript/zilliqa-js-blockchain/README.md)
@@ -404,18 +345,20 @@ Each package contains API documentation. For convenience, these are links to the
 - [`proto`](./zilliqa/typescript/zilliqa-js-proto/README.md)
 - [`util`](./zilliqa/typescript/zilliqa-js-util/README.md)
 
-Also, you can use [viewblock library](https://github.com/Ashlar/zilliqa-js-viewblock) to interface with ViewBlock's APIs.
+Also, you can use
+[viewblock library](https://github.com/Ashlar/zilliqa-js-viewblock) to interface
+with ViewBlock's APIs.
 
 ## Development
 
-This repository makes use of several technologies to provide a better and
-faster development experience for contributors, and has to be bootstrapped
-before one can do productive work.
+This repository makes use of several technologies to provide a better and faster
+development experience for contributors, and has to be bootstrapped before one
+can do productive work.
 
 ### Bootstrapping
 
-`zilliqa-js` leverages Project References, which is available in TypeScript
-from version `3.x`. As such, the build process is slightly different.
+`zilliqa-js` leverages Project References, which is available in TypeScript from
+version `3.x`. As such, the build process is slightly different.
 
 ```shell
 # install all dependencies and shared devDependencies
@@ -430,29 +373,36 @@ yarn build:ts -w
 
 ### Unit Tests
 
-Tests for each package reside in `zilliqa/typescript/src/*/tests`, and are run using
-`jest`.
+Tests for each package reside in `zilliqa/typescript/src/*/tests`, and are run
+using `jest`.
 
 ### E2E Tests
 
-We can easily simulate a publish using [Verdaccio](https://verdaccio.org/) which is a private npm proxy registry. For more details check [tasks/local-registry.sh](tasks/local-registry.sh)
+We can easily simulate a publish using [Verdaccio](https://verdaccio.org/) which
+is a private npm proxy registry. For more details check
+[tasks/local-registry.sh](tasks/local-registry.sh)
 
 ### Bundling
 
 #### rollup
 
-`zilliqa-js` is bundled using `rollup`. To build the distributable bundles, simple run `yarn bundle`.
-This will output two bundles, `*.umd.js` and `*.esm.js`, to `zilliqa/typescript/*/dist`. Node.js clients
-are pointed to the `umd` bundle, and bundlers are pointed to `esm`.
+`zilliqa-js` is bundled using `rollup`. To build the distributable bundles,
+simple run `yarn bundle`. This will output two bundles, `*.umd.js` and
+`*.esm.js`, to `zilliqa/typescript/*/dist`. Node.js clients are pointed to the
+`umd` bundle, and bundlers are pointed to `esm`.
 
 _NOTE: these bundles are *not* minified._
 
 #### webpack
 
-To build an all-in-one static js file, first install `webpack` globally using `yarn global add webpack`. Then run `yarn build:web`.
-This will generate a `dist` folder in the current path, which contains a file called `zilliqa.min.js`. It can be used in normal html file. (A more specific example please refer to `example/webpack`)
+To build an all-in-one static js file, first install `webpack` globally using
+`yarn global add webpack`. Then run `yarn build:web`. This will generate a
+`dist` folder in the current path, which contains a file called
+`zilliqa.min.js`. It can be used in normal html file. (A more specific example
+please refer to `example/webpack`)
 
-_NOTE: there may be some issue to install webpack with npm, thus using yarn is a recommended way_
+_NOTE: there may be some issue to install webpack with npm, thus using yarn is a
+recommended way_
 
 ## Licence
 
