@@ -121,7 +121,6 @@ ts_project(
     ],
 )
 
-# TODO:
 jest_test(
     name = "test",
     config = "//:jest_config",
