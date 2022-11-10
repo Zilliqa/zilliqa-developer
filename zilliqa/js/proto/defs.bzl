@@ -1,3 +1,7 @@
+"""
+Helper library to create Prototype JS library.
+"""
+
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@npm//:protobufjs/package_json.bzl", "bin")
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
@@ -20,6 +24,9 @@ def ts_proto_library(name, proto, deps = [], srcs = [], out_dir = "dist", **kwar
     Args:
         name: name of generated js_library target, also used to name the .js/.d.ts outputs
         proto: label of a single proto_library target to generate for
+        srcs: sources used by the librar
+        out_dir: the target directory for created library
+        deps: list of dependencies
         **kwargs: passed through to the js_library
     """
     js_out = ""
