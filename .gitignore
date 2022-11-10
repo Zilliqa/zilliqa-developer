@@ -23,4 +23,5 @@ devTestOnly/
 bazel-*
 .husky
 tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfotsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
