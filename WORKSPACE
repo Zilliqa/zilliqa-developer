@@ -1,22 +1,21 @@
 workspace(
-    name = "zilliqa", 
+    name = "zilliqa",
     managed_directories = {"@npm": ["node_modules"]},
 )
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-
 
 http_archive(
     name = "bazel_skylib",
+    sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
         "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
     ],
-    sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
 )
+
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
 bazel_skylib_workspace()
 
 http_archive(
@@ -28,18 +27,18 @@ http_archive(
     ],
 )
 
-
 # ================================================================
 # Go (needed for cross-compiling Docker)
 # ================================================================
 http_archive(
- name = "io_bazel_rules_go",
- sha256 = "7b9bbe3ea1fccb46dcfa6c3f3e29ba7ec740d8733370e21cdc8937467b4a4349",
- urls = [
-     "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
-     "https://github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
- ],
+    name = "io_bazel_rules_go",
+    sha256 = "7b9bbe3ea1fccb46dcfa6c3f3e29ba7ec740d8733370e21cdc8937467b4a4349",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.22.4/rules_go-v0.22.4.tar.gz",
+    ],
 )
+
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
@@ -49,9 +48,6 @@ go_register_toolchains()
 # ================================================================
 # Web Testing
 # ================================================================
-
-
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "io_bazel_rules_webtesting",
@@ -71,16 +67,16 @@ web_test_repositories()
 
 http_archive(
     name = "rules_pkg",
+    sha256 = "eea0f59c28a9241156a47d7a8e32db9122f3d50b505fae0f33de6ce4d9b61834",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.8.0/rules_pkg-0.8.0.tar.gz",
         "https://github.com/bazelbuild/rules_pkg/releases/download/0.8.0/rules_pkg-0.8.0.tar.gz",
     ],
-    sha256 = "eea0f59c28a9241156a47d7a8e32db9122f3d50b505fae0f33de6ce4d9b61834",
 )
+
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
 rules_pkg_dependencies()
-
-
 
 # ================================================================
 # Python and Pip
@@ -93,32 +89,73 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.13.0.tar.gz",
 )
 
-
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 # Create a central repo that knows about the dependencies needed from
 # requirements_lock.txt.
 pip_parse(
-   name = "zilliqa_python_deps",
-   requirements = "//:requirements.txt",
+    name = "zilliqa_python_deps",
+    requirements = "//:requirements.txt",
 )
+
 # Load the starlark macro which will define your dependencies.
 load("@zilliqa_python_deps//:requirements.bzl", "install_deps")
+
 # Call it to define repos for your requirements.
 install_deps()
+
+# ================================================================
+# Rules JS
+# ================================================================
+http_archive(
+    name = "aspect_rules_js",
+    sha256 = "c3b5fd40ec19f3260094321380169abe86dd89e3506c4e44a515a50c1626629b",
+    strip_prefix = "rules_js-1.6.6",
+    url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.6.6.tar.gz",
+)
+
+load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
+
+rules_js_dependencies()
+
+load("@rules_nodejs//nodejs:repositories.bzl", "DEFAULT_NODE_VERSION", "nodejs_register_toolchains")
+
+nodejs_register_toolchains(
+    name = "nodejs",
+    node_version = DEFAULT_NODE_VERSION,
+)
+
+load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
+
+npm_translate_lock(
+    name = "npm",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+
+load("@npm//:repositories.bzl", "npm_repositories")
+
+npm_repositories()
+
+# JQ toolchain
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "register_jq_toolchains")
+
+aspect_bazel_lib_dependencies(override_local_config_platform = True)
+
+register_jq_toolchains()
 
 # ================================================================
 # Protobuf
 # ================================================================
 http_archive(
     name = "rules_proto",
-    sha256 = "66bfdf8782796239d3875d37e7de19b1d94301e8972b3cbd2446b332429b4df1",
-    strip_prefix = "rules_proto-4.0.0",
+    sha256 = "e017528fd1c91c5a33f15493e3a398181a9e821a804eb7ff5acdd1d2d6c2b18d",
+    strip_prefix = "rules_proto-4.0.0-3.20.0",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.tar.gz",
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0-3.20.0.tar.gz",
     ],
 )
+
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 
 rules_proto_dependencies()
@@ -126,36 +163,18 @@ rules_proto_dependencies()
 rules_proto_toolchains()
 
 # ================================================================
-# NodeJS
+# Rules TS
 # ================================================================
-
-# TODO: Upgrade to rules_js: https://github.com/aspect-build/rules_js/tree/main/docs
 http_archive(
-    name = "build_bazel_rules_nodejs",
-    sha256 = "f10a3a12894fc3c9bf578ee5a5691769f6805c4be84359681a785a0c12e8d2b6",
-    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-5.5.3.tar.gz"],
+    name = "aspect_rules_ts",
+    sha256 = "1149d4cf7f210de67e0fc5cd3e8f624de3ee976ac05af4f1484e57a74c12f2dc",
+    strip_prefix = "rules_ts-1.0.0-rc5",
+    url = "https://github.com/aspect-build/rules_ts/archive/refs/tags/v1.0.0-rc5.tar.gz",
 )
 
-load("@build_bazel_rules_nodejs//:repositories.bzl", "build_bazel_rules_nodejs_dependencies")
+load("@aspect_rules_ts//ts:repositories.bzl", "LATEST_VERSION", "rules_ts_dependencies")
 
-build_bazel_rules_nodejs_dependencies()
-
-
-load("@build_bazel_rules_nodejs//:index.bzl", "yarn_install")
-
-yarn_install(
-    # Name this npm so that Bazel Label references look like @npm//package
-    name = "npm",
-    exports_directories_only = True,
-    frozen_lockfile = False,    
-    package_json = "//:package.json",
-    yarn_lock = "//:yarn.lock",
-)
-
-
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
-
+rules_ts_dependencies(ts_version = LATEST_VERSION)
 
 # ================================================================
 # Docker
@@ -183,27 +202,15 @@ load(
     "container_pull",
 )
 
-
-load(
-    "@io_bazel_rules_docker//repositories:repositories.bzl",
-    container_repositories = "repositories",
-)
-
 container_repositories()
-
-load(
-    "@io_bazel_rules_docker//python3:image.bzl",
-    _py_image_repos = "repositories",
-)
 
 load(
     "@io_bazel_rules_docker//cc:image.bzl",
     _cc_image_repos = "repositories",
 )
-
 load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
+    "@io_bazel_rules_docker//python3:image.bzl",
+    _py_image_repos = "repositories",
 )
 
 # container_pull(
@@ -216,10 +223,10 @@ load(
 
 container_pull(
     name = "ubuntu",
+    digest = "sha256:bace9fb0d5923a675c894d5c815da75ffe35e24970166a48a4460a48ae6e0d19",
     registry = "index.docker.io",
     repository = "library/ubuntu",
     tag = "jammy-20220531",
-    digest = "sha256:bace9fb0d5923a675c894d5c815da75ffe35e24970166a48a4460a48ae6e0d19"
 )
 
 container_pull(
@@ -232,26 +239,26 @@ container_pull(
 )
 
 container_pull(
-    name="nginx",
-    registry="index.docker.io",
-    repository="library/nginx",
-    digest="sha256:186c79dc14ab93e43d315143ee4b0774506dc4fd952388c20e35d3d37058ab8d",
-    tag="1.23.1"
+    name = "nginx",
+    digest = "sha256:186c79dc14ab93e43d315143ee4b0774506dc4fd952388c20e35d3d37058ab8d",
+    registry = "index.docker.io",
+    repository = "library/nginx",
+    tag = "1.23.1",
 )
 
 _cc_image_repos()
+
 _py_image_repos()
 
 # ================================================================
 # Kubernetes
 # ================================================================
 
-
 http_archive(
     name = "io_bazel_rules_k8s",
+    sha256 = "773aa45f2421a66c8aa651b8cecb8ea51db91799a405bd7b913d77052ac7261a",
     strip_prefix = "rules_k8s-0.5",
     urls = ["https://github.com/bazelbuild/rules_k8s/archive/v0.5.tar.gz"],
-    sha256 = "773aa45f2421a66c8aa651b8cecb8ea51db91799a405bd7b913d77052ac7261a",
 )
 
 load("@io_bazel_rules_k8s//k8s:k8s.bzl", "k8s_repositories")

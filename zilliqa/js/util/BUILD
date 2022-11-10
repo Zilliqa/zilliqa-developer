@@ -1,10 +1,16 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("@npm//@bazel/typescript:index.bzl", "ts_project")
+load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+
+stamped_package_json(
+    name = "package",
+    stamp_var = "STABLE_JS_API_BUILD_VERSION",
+)
 
 ts_project(
-    name = "src_js",
+    name = "lib",
     srcs = [
-        "//zilliqa/js:typings",
+        ":package",
+        "//zilliqa/js:aes-js.d",
     ] + glob(
         [
             "src/*.ts",
@@ -13,46 +19,36 @@ ts_project(
         exclude = ["src/**/*.spec.ts"],
     ),
     composite = True,
+    data = [
+        "//:node_modules/bn.js",
+        "//:node_modules/long",
+        "//:node_modules/tslib",
+    ],
     declaration = True,
     declaration_map = True,
-    extends = "//:tsconfig.base.json",
+    extends = "//:tsconfig.base",
     incremental = True,
-    out_dir = "dist",
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
-    tsc = "@npm//typescript/bin:tsc",
     tsconfig = "tsconfig.json",
     visibility = ["//visibility:public"],
     deps = [
-        "@npm//@types/bn.js",
-        "@npm//@types/camelcase",
-        "@npm//@types/jest",
-        "@npm//@types/long",
-        "@npm//@types/node",
-        "@npm//@typescript-eslint/eslint-plugin",
-        "@npm//@typescript-eslint/parser",
-        "@npm//bn.js",
-        "@npm//hash.js",  # TODO: Not needed - fix typings and remove
-        "@npm//long",
-        "@npm//tslib",
+        "//:node_modules/@types/bn.js",
+        "//:node_modules/@types/camelcase",
+        "//:node_modules/@types/long",
+        "//:node_modules/@types/node",
+        "//:node_modules/@typescript-eslint/eslint-plugin",
+        "//:node_modules/@typescript-eslint/parser",
+        "//:node_modules/bn.js",
+        "//:node_modules/long",
+        "//:node_modules/tslib",
     ],
 )
 
-js_library(
-    name = "lib",
-    package_name = "@zilliqa-js/util",
-    srcs = ["package.json"],
+npm_package(
+    name = "pkg",
+    srcs = [":lib"],
+    package = "@zilliqa-js/util",
     visibility = ["//visibility:public"],
-    deps = [
-        ":src_js",
-    ],
-)
-
-pkg_npm(
-    name = "package",
-    package_name = "@zilliqa-js/util",
-    srcs = ["package.json"],
-    visibility = ["//visibility:public"],
-    deps = [":src_js"],
 )
