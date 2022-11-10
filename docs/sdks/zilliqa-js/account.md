@@ -59,7 +59,8 @@ Class for managing an account (i.e., a private/public keypair).
 
 ### `static fromFile(file: string, passphrase: string): Promise<Account>`
 
-Generates an account from any JSON-encoded string that complies with the [Web3 Secret Storage definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
+Generates an account from any JSON-encoded string that complies with the
+[Web3 Secret Storage definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
 
 **Parameters**
 
@@ -75,7 +76,8 @@ Generates an account from any JSON-encoded string that complies with the [Web3 S
 
 ### `toFile(passphrase: string, kdf: 'pbkdf2' |'scrypt' = 'scrypt'): Promise<Account>`
 
-Encrypts and JSON-encodes the account. Complies with the [Web3 Secret Storage definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
+Encrypts and JSON-encodes the account. Complies with the
+[Web3 Secret Storage definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
 
 **Parameters**
 
@@ -89,8 +91,7 @@ Encrypts and JSON-encodes the account. Complies with the [Web3 Secret Storage de
 
 ### `signTransaction(bytes: Buffer): string`
 
-Signs arbitrary bytes (most often transactions) using a Schnorr signing
-scheme.
+Signs arbitrary bytes (most often transactions) using a Schnorr signing scheme.
 
 **Parameters**
 
@@ -109,8 +110,8 @@ Class for managing multiple accounts.
 
 **Parameters**
 
-- `provider`: `Provider` - a Provider instance (see
-  `@zilliqa-js/core`). Required for signing.
+- `provider`: `Provider` - a Provider instance (see `@zilliqa-js/core`).
+  Required for signing.
 - `accounts`: `Account[]` (optional) - an array of `Account` instances to
   pre-populate the wallet with.
 
@@ -134,7 +135,8 @@ is set to the `0`-indexed account when a `Wallet` instance is constructed.
 
 ### `create(): void`
 
-Creates a new keypair with a randomly-generated private key. The new account is accessible by address. This method mutates the `Wallet` instance.
+Creates a new keypair with a randomly-generated private key. The new account is
+accessible by address. This method mutates the `Wallet` instance.
 
 **Parameters**
 
@@ -158,7 +160,8 @@ Adds an `Account` to the `Wallet`.
 
 ### `addByKeystore(keystore: string, passphrase: string): Promise<string>`
 
-Adds an account by keystore. This method is asynchronous and returns a `Promise<string>`, in order not to block on the underlying decryption operation.
+Adds an account by keystore. This method is asynchronous and returns a
+`Promise<string>`, in order not to block on the underlying decryption operation.
 
 **Parameters**
 
@@ -222,16 +225,20 @@ Sets the default account to sign with.
 
 ### `sign(transaction: Transaction, offlineSign?: boolean): Promise<Transaction>`
 
-Sign a `Transaction` with the default `Account`. This method is asynchronous
-as it will attempt to obtain the `nonce` from the `Provider`.
-There is an offline mode that can be activated manually by setting the optional `offlineSign` parameter.
+Sign a `Transaction` with the default `Account`. This method is asynchronous as
+it will attempt to obtain the `nonce` from the `Provider`. There is an offline
+mode that can be activated manually by setting the optional `offlineSign`
+parameter.
 
 **Parameters**
 
 - `transaction`: `Transaction` - a `Transaction` instance.
-- `offlineSign`: `boolean` (optional) - toggles offline signing on/off. Defaults to `false` if the field is not set. If explicitly set to `true`, offline mode is used and does not require internet connection to sign a transaction.
+- `offlineSign`: `boolean` (optional) - toggles offline signing on/off. Defaults
+  to `false` if the field is not set. If explicitly set to `true`, offline mode
+  is used and does not require internet connection to sign a transaction.
 
-**Note**: In offline mode, the nonce must be explicitly set in the Transaction object.
+**Note**: In offline mode, the nonce must be explicitly set in the Transaction
+object.
 
 **Returns**
 
@@ -239,17 +246,21 @@ There is an offline mode that can be activated manually by setting the optional 
 
 ### `signWith(transaction: Transaction, address: string, offlineSign?: boolean): Promise<Transaction>`
 
-Sign a `Transaction` with the chosen `Account`. This method is asynchronous
-as it will attempt to obtain the `nonce` from the `Provider`.
-There is an offline mode that can be activated manually by setting the optional `offlineSign` parameter.
+Sign a `Transaction` with the chosen `Account`. This method is asynchronous as
+it will attempt to obtain the `nonce` from the `Provider`. There is an offline
+mode that can be activated manually by setting the optional `offlineSign`
+parameter.
 
 **Parameters**
 
 - `transaction`: `Transaction` - a `Transaction` instance.
 - `address`: `string` - the address of the `Account` to be used for signing.
-- `offlineSign`: `boolean` (optional) - toggles offline signing on/off. Defaults to `false` if the field is not set. If explicitly set to `true`, offline mode is used and does not require internet connection to sign a transaction.
+- `offlineSign`: `boolean` (optional) - toggles offline signing on/off. Defaults
+  to `false` if the field is not set. If explicitly set to `true`, offline mode
+  is used and does not require internet connection to sign a transaction.
 
-**Note**: In offline mode, the nonce must be explicitly set in the Transaction object.
+**Note**: In offline mode, the nonce must be explicitly set in the Transaction
+object.
 
 **Returns**
 
@@ -257,8 +268,8 @@ There is an offline mode that can be activated manually by setting the optional 
 
 ### `signBatch(txList: Transaction[]): Promise<Transaction[]>`
 
-Sign a list of `Transaction` with the default `Account`. This method is asynchronous
-as it will attempt to obtain the `nonce` from the `Provider`.
+Sign a list of `Transaction` with the default `Account`. This method is
+asynchronous as it will attempt to obtain the `nonce` from the `Provider`.
 
 **Parameters**
 
@@ -302,14 +313,16 @@ for (const signedTx of batchResult) {
 
 ## `Transaction`
 
-A class that represents a single `Transaction` on the Zilliqa network. It is a functor. Its purpose is to encode the possible states a Transaction can be in: Confirmed, Rejected, Pending, or Initialised (i.e., not broadcasted).
+A class that represents a single `Transaction` on the Zilliqa network. It is a
+functor. Its purpose is to encode the possible states a Transaction can be in:
+Confirmed, Rejected, Pending, or Initialised (i.e., not broadcasted).
 
 ## Members
 
 ### `bytes: Buffer`
 
-A getter `protobuf` that returns a `Buffer` of `protobuf`-encoded bytes. This
-is a convenience member that allows a `Transaction` to be signed easily.
+A getter `protobuf` that returns a `Buffer` of `protobuf`-encoded bytes. This is
+a convenience member that allows a `Transaction` to be signed easily.
 
 ### `senderAddress: string`
 
@@ -388,9 +401,9 @@ expect(tx.isRejected()).toBeTruthy();
 ### `confirm(txHash: string, maxAttempts: number = 33, interval: number = 1000): Promise<Transaction>`
 
 Checks whether the `Transaction` is confirmed on the blockchain, by verifying
-the its `receipt` status (`boolean`). This method uses an exponential backoff
-to poll the lookup node. By default, the number of attempts made is 33, with
-a starting interval of 1000ms.
+the its `receipt` status (`boolean`). This method uses an exponential backoff to
+poll the lookup node. By default, the number of attempts made is 33, with a
+starting interval of 1000ms.
 
 **Parameters**
 
@@ -422,8 +435,11 @@ tx.confirm(some_hash)
 ### `blockConfirm(txHash: string, maxblockCount: number = 4, interval: number = 1000): Promise<Transaction>`
 
 Checks whether the `Transaction` is confirmed on the blockchain, by verifying
-the its `receipt` status (`boolean`). This method uses latest blockNumber to get the transaction receipt, which is more frendily to remote lookup node. By default, the number of blockCount is 4, with
-a starting interval of 1000ms. The member `Transaction.blockConfirmation` will count the block numbers during the process.
+the its `receipt` status (`boolean`). This method uses latest blockNumber to get
+the transaction receipt, which is more frendily to remote lookup node. By
+default, the number of blockCount is 4, with a starting interval of 1000ms. The
+member `Transaction.blockConfirmation` will count the block numbers during the
+process.
 
 **Parameters**
 
@@ -461,8 +477,8 @@ transaction. The object returned is merged into the target `Transaction`.
 
 **Parameters**
 
-- `fn`: `(prev: TxParams) => TxParams)` - the transaction hash to use for polling.
-  exponentially between attempts.
+- `fn`: `(prev: TxParams) => TxParams)` - the transaction hash to use for
+  polling. exponentially between attempts.
 
 **Returns**
 

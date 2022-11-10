@@ -16,7 +16,7 @@ description: Zilliqa Websockets
 
 ---
 
-## Introduction
+# Zilliqa Websockets
 
 [zilliqa-js](https://github.com/Zilliqa/zilliqa-js) is a Javascript library that
 allows you to interact with the Zilliqa network nodes - create wallets, deploy
