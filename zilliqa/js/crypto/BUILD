@@ -73,7 +73,11 @@ npm_package(
 
 ts_project(
     name = "test_src",
-    srcs = glob(
+    srcs = [
+        "//zilliqa/js:aes-js.d",
+        "//zilliqa/js:hmac-drbg.d",
+        "//zilliqa/js:pbkdf2.d",
+    ] + glob(
         [
             "src/*.ts",
             "src/**/*.ts",
@@ -98,25 +102,35 @@ ts_project(
         "//:node_modules/@testing-library/react",
         "//:node_modules/@types/bn.js",
         "//:node_modules/@types/camelcase",
+        "//:node_modules/@types/elliptic",
         "//:node_modules/@types/jest",
         "//:node_modules/@types/long",
         "//:node_modules/@types/node",
+        "//:node_modules/@types/uuid",
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
+        "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/aes-js",
         "//:node_modules/ansi-styles",
         "//:node_modules/bn.js",
         "//:node_modules/buffer-from",
         "//:node_modules/cross-fetch",
+        "//:node_modules/elliptic",
         "//:node_modules/expect",
+        "//:node_modules/hash.js",
+        "//:node_modules/hmac-drbg",
         "//:node_modules/jest-diff",
         "//:node_modules/jest-fetch-mock",
         "//:node_modules/jest-get-type",
         "//:node_modules/jest-matcher-utils",
-        "//:node_modules/long",
         "//:node_modules/node-fetch",
+        "//:node_modules/pbkdf2",
         "//:node_modules/pretty-format",
+        "//:node_modules/scrypt-js",
+        "//:node_modules/sodium-randbytes",
         "//:node_modules/source-map",
         "//:node_modules/tslib",
+        "//:node_modules/uuid",
     ],
 )
 
