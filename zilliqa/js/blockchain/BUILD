@@ -63,8 +63,6 @@ ts_project(
     name = "test_src",
     srcs = [
         "//zilliqa/js:aes-js.d",
-        "//zilliqa/js:hmac-drbg.d",
-        "//zilliqa/js:pbkdf2.d",
     ] + glob(
         [
             "src/*.ts",

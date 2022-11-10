@@ -1,5 +1,6 @@
 load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@jest//:defs.bzl", "jest_test")
 
 stamped_package_json(
     name = "package",
@@ -94,8 +95,10 @@ ts_project(
         "//:node_modules/@jest/expect-utils",
         "//:node_modules/@testing-library/jest-dom",
         "//:node_modules/@testing-library/react",
+        "//:node_modules/@types/bip39",
         "//:node_modules/@types/bn.js",
         "//:node_modules/@types/camelcase",
+        "//:node_modules/@types/hdkey",
         "//:node_modules/@types/jest",
         "//:node_modules/@types/long",
         "//:node_modules/@types/node",
@@ -111,6 +114,7 @@ ts_project(
         "//:node_modules/buffer-from",
         "//:node_modules/cross-fetch",
         "//:node_modules/expect",
+        "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/jest-fetch-mock",
         "//:node_modules/tslib",
@@ -118,13 +122,14 @@ ts_project(
 )
 
 # TODO:
-# jest_test(
-#     name = "test",
-#     config = "//:jest_config",
-#     data = [
-#         ":test_src",
-#         "//:jest-setup",
-#         "//:node_modules/jest-environment-jsdom",
-#         "//:node_modules/jest-fetch-mock",
-#     ],
-# )
+jest_test(
+    name = "test",
+    config = "//:jest_config",
+    data = [
+        ":test_src",
+        "//:jest-setup",
+        "//:node_modules/@types/long",
+        "//:node_modules/jest-environment-jsdom",
+        "//:node_modules/jest-fetch-mock",
+    ],
+)

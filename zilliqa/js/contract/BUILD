@@ -66,8 +66,6 @@ ts_project(
     name = "test_src",
     srcs = [
         "//zilliqa/js:aes-js.d",
-        "//zilliqa/js:hmac-drbg.d",
-        "//zilliqa/js:pbkdf2.d",
     ] + glob(
         [
             "src/*.ts",
@@ -108,6 +106,7 @@ ts_project(
         "//:node_modules/buffer-from",
         "//:node_modules/cross-fetch",
         "//:node_modules/expect",
+        "//:node_modules/hash.js",
         "//:node_modules/jest-diff",
         "//:node_modules/jest-fetch-mock",
         "//:node_modules/jest-get-type",
