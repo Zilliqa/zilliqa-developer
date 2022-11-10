@@ -1,6 +1,5 @@
 load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
-load("@jest//:defs.bzl", "jest_test")
 
 stamped_package_json(
     name = "package",
@@ -70,7 +69,9 @@ npm_package(
 
 ts_project(
     name = "test_src",
-    srcs = glob(
+    srcs = [
+        "//zilliqa/js:aes-js.d",
+    ] + glob(
         [
             "src/*.ts",
             "src/**/*.ts",
@@ -110,27 +111,20 @@ ts_project(
         "//:node_modules/buffer-from",
         "//:node_modules/cross-fetch",
         "//:node_modules/expect",
-        "//:node_modules/hash.js",
         "//:node_modules/hdkey",
-        "//:node_modules/jest-diff",
         "//:node_modules/jest-fetch-mock",
-        "//:node_modules/jest-get-type",
-        "//:node_modules/jest-matcher-utils",
-        "//:node_modules/long",
-        "//:node_modules/node-fetch",
-        "//:node_modules/pretty-format",
-        "//:node_modules/source-map",
         "//:node_modules/tslib",
     ],
 )
 
-jest_test(
-    name = "test",
-    config = "//:jest_config",
-    data = [
-        ":test_src",
-        "//:jest-setup",
-        "//:node_modules/jest-environment-jsdom",
-        "//:node_modules/jest-fetch-mock",
-    ],
-)
+# TODO:
+# jest_test(
+#     name = "test",
+#     config = "//:jest_config",
+#     data = [
+#         ":test_src",
+#         "//:jest-setup",
+#         "//:node_modules/jest-environment-jsdom",
+#         "//:node_modules/jest-fetch-mock",
+#     ],
+# )

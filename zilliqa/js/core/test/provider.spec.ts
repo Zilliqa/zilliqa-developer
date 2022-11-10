@@ -15,119 +15,118 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import fetch, { MockParams } from 'jest-fetch-mock';
-import { RPCMethod } from '../src/net';
-import { HTTPProvider } from '../src/providers/http';
+import fetch, { MockParams } from "jest-fetch-mock";
+import { RPCMethod } from "../src/net";
+import { HTTPProvider } from "../src/providers/http";
+import { mockReqMiddleware, mockResMiddleware } from "./mockMiddleware";
 
-import { mockReqMiddleware, mockResMiddleware } from './mockMiddleware';
+const http = new HTTPProvider("https://mock-provider.com");
 
-const http = new HTTPProvider('https://mock-provider.com');
-
-describe('HTTPProvider', () => {
+describe("HTTPProvider", () => {
   beforeEach(() => fetch.resetMocks());
 
-  it('should send payload in the right jsonrpc format', async () => {
-    fetch.once(JSON.stringify({ data: 'something' }));
+  it("should send payload in the right jsonrpc format", async () => {
+    fetch.once(JSON.stringify({ data: "something" }));
 
-    await http.send(RPCMethod.CreateTransaction, 'MyParam');
+    await http.send(RPCMethod.CreateTransaction, "MyParam");
     const body = fetch.mock.calls[0][1]?.body as string;
     const payload = JSON.parse(body);
 
     expect(fetch).toHaveBeenCalled();
     expect(payload).toMatchObject({
       id: 1,
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       method: RPCMethod.CreateTransaction,
-      params: ['MyParam'],
+      params: ["MyParam"],
     });
   });
 
-  it('should throw an error if subscribe/unsubscribe are called', () => {
+  it("should throw an error if subscribe/unsubscribe are called", () => {
     const spy = jest.fn();
     expect(http.subscribe).toThrow;
     expect(http.unsubscribe).toThrow;
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('should use middleware to transform outgoing requests', async () => {
-    const withMiddleware = new HTTPProvider('https://mock-provider.com');
+  it("should use middleware to transform outgoing requests", async () => {
+    const withMiddleware = new HTTPProvider("https://mock-provider.com");
     withMiddleware.middleware.request.use(mockReqMiddleware);
 
-    fetch.mockResponseOnce(JSON.stringify({ data: 'something' }));
-    await withMiddleware.send(RPCMethod.CreateTransaction, 'first param');
+    fetch.mockResponseOnce(JSON.stringify({ data: "something" }));
+    await withMiddleware.send(RPCMethod.CreateTransaction, "first param");
 
     const body = fetch.mock.calls[0][1]?.body as string;
     const payload = JSON.parse(body);
     expect(payload).toMatchObject({
       id: 1,
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       method: RPCMethod.CreateTransaction,
-      params: ['first param', 'I am a test'],
+      params: ["first param", "I am a test"],
     });
   });
 
-  it('should use middleware to transform incoming responses', async () => {
-    const withMiddleware = new HTTPProvider('https://mock-provider.com');
+  it("should use middleware to transform incoming responses", async () => {
+    const withMiddleware = new HTTPProvider("https://mock-provider.com");
     withMiddleware.middleware.response.use(mockResMiddleware);
 
     fetch.mockResponseOnce(
       JSON.stringify({
-        jsonrpc: '2.0',
-        id: '1',
-        result: 'something',
-      }),
+        jsonrpc: "2.0",
+        id: "1",
+        result: "something",
+      })
     );
     const res = await withMiddleware.send(
       RPCMethod.CreateTransaction,
-      'some param',
+      "some param"
     );
 
-    expect(res.result).toEqual('SOMETHING');
+    expect(res.result).toEqual("SOMETHING");
   });
 
-  it('should select only matching middleware', async () => {
+  it("should select only matching middleware", async () => {
     const spyReqMiddleware = jest.fn((x) => x);
     const spyResMiddleware = jest.fn((x) => x);
     const spyAllReq = jest.fn((x) => x);
     const spyAllRes = jest.fn((x) => x);
 
-    const withMiddleware = new HTTPProvider('https://mock-provider.com');
+    const withMiddleware = new HTTPProvider("https://mock-provider.com");
     withMiddleware.middleware.request.use(
       spyReqMiddleware,
-      RPCMethod.GetTransaction,
+      RPCMethod.GetTransaction
     );
     withMiddleware.middleware.response.use(
       spyResMiddleware,
-      RPCMethod.GetBalance,
+      RPCMethod.GetBalance
     );
 
-    withMiddleware.middleware.request.use(spyAllReq, '*');
-    withMiddleware.middleware.response.use(spyAllRes, '*');
+    withMiddleware.middleware.request.use(spyAllReq, "*");
+    withMiddleware.middleware.response.use(spyAllRes, "*");
 
     const responses = [
       {
         id: 1,
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         result: {
-          ID: 'some_hash',
+          ID: "some_hash",
           receipt: { success: true },
         },
       },
       {
         id: 1,
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         result: {
           balance: 888,
           nonce: 1,
         },
       },
     ].map(
-      (res) => [JSON.stringify(res), { status: 200 }] as [string, MockParams],
+      (res) => [JSON.stringify(res), { status: 200 }] as [string, MockParams]
     );
 
     fetch.mockResponses(...responses);
-    await withMiddleware.send(RPCMethod.GetTransaction, 'some_hash');
-    await withMiddleware.send(RPCMethod.GetBalance, 'some_hash');
+    await withMiddleware.send(RPCMethod.GetTransaction, "some_hash");
+    await withMiddleware.send(RPCMethod.GetBalance, "some_hash");
 
     expect(spyReqMiddleware).toHaveBeenCalledTimes(1);
     expect(spyResMiddleware).toHaveBeenCalledTimes(1);

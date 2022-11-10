@@ -1,6 +1,5 @@
 load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
-load("@jest//:defs.bzl", "jest_test")
 
 stamped_package_json(
     name = "package",
@@ -117,13 +116,14 @@ ts_project(
     ],
 )
 
-jest_test(
-    name = "test",
-    config = "//:jest_config",
-    data = [
-        ":test_src",
-        "//:jest-setup",
-        "//:node_modules/jest-environment-jsdom",
-        "//:node_modules/jest-fetch-mock",
-    ],
-)
+# TODO:
+# jest_test(
+#     name = "test",
+#     config = "//:jest_config",
+#     data = [
+#         ":test_src",
+#         "//:jest-setup",
+#         "//:node_modules/jest-environment-jsdom",
+#         "//:node_modules/jest-fetch-mock",
+#     ],
+# )

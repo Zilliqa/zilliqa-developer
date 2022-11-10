@@ -86,6 +86,7 @@ ts_project(
         "//:node_modules/@types/node",
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
+        "//:node_modules/@zilliqa-js/util",
         "//:node_modules/ansi-styles",
         "//:node_modules/bn.js",
         "//:node_modules/buffer-from",
