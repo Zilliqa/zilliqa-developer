@@ -65,7 +65,11 @@ npm_package(
 
 ts_project(
     name = "test_src",
-    srcs = glob(
+    srcs = [
+        "//zilliqa/js:aes-js.d",
+        "//zilliqa/js:hmac-drbg.d",
+        "//zilliqa/js:pbkdf2.d",
+    ] + glob(
         [
             "src/*.ts",
             "src/**/*.ts",
@@ -95,6 +99,11 @@ ts_project(
         "//:node_modules/@types/node",
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
+        "//:node_modules/@zilliqa-js/account",
+        "//:node_modules/@zilliqa-js/blockchain",
+        "//:node_modules/@zilliqa-js/core",
+        "//:node_modules/@zilliqa-js/crypto",
+        "//:node_modules/@zilliqa-js/util",
         "//:node_modules/ansi-styles",
         "//:node_modules/bn.js",
         "//:node_modules/buffer-from",
@@ -109,6 +118,7 @@ ts_project(
         "//:node_modules/pretty-format",
         "//:node_modules/source-map",
         "//:node_modules/tslib",
+        "//:node_modules/utility-types",
     ],
 )
 

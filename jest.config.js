@@ -17,6 +17,14 @@
 
 const config = {
   testMatch: ["<rootDir>/zilliqa/js/**/test/?(*.)+(spec|test).(ts|js)"],
+  testURL: "http://localhost",
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "<rootDir>/packages/*/src/**/*.{ts,js}",
+    "!**/node_modules/**",
+  ],
+  automock: false,
+  resetMocks: false,
   setupFiles: ["<rootDir>/jest-setup.js"],
 };
 

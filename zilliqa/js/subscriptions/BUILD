@@ -57,7 +57,9 @@ npm_package(
 
 ts_project(
     name = "test_src",
-    srcs = glob(
+    srcs = [
+        "//zilliqa/js:aes-js.d",
+    ] + glob(
         [
             "src/*.ts",
             "src/**/*.ts",
@@ -85,6 +87,7 @@ ts_project(
         "//:node_modules/@types/jest",
         "//:node_modules/@types/long",
         "//:node_modules/@types/node",
+        "//:node_modules/@types/websocket",
         "//:node_modules/@typescript-eslint/eslint-plugin",
         "//:node_modules/@typescript-eslint/parser",
         "//:node_modules/ansi-styles",
@@ -97,10 +100,13 @@ ts_project(
         "//:node_modules/jest-get-type",
         "//:node_modules/jest-matcher-utils",
         "//:node_modules/long",
+        "//:node_modules/mitt",
+        "//:node_modules/mock-socket",
         "//:node_modules/node-fetch",
         "//:node_modules/pretty-format",
         "//:node_modules/source-map",
         "//:node_modules/tslib",
+        "//:node_modules/websocket",
     ],
 )
 
