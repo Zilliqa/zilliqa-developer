@@ -24,7 +24,7 @@ pkg_tar(
 
 container_image(
     name = "image",
-    base = "@zilliqa-docer-x86//image",
+    base = "@zilliqa-docker-x86//image",
     compression = "gzip",
     compression_options = ["--fast"],
     entrypoint = [
