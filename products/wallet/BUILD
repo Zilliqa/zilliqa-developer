@@ -1,0 +1,115 @@
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
+load("@aspect_rules_js//js:defs.bzl", "js_test")
+load("@npm//:react-scripts/package_json.bzl", cra_bin = "bin")
+
+# Filename conventions described at
+# https://create-react-app.dev/docs/running-tests#filename-conventions
+_TESTS = [
+    "src/**/*.test.js*",
+    "src/**/*.test.ts*",
+    "src/**/*.spec.js*",
+    "src/**/*.spec.ts*",
+    "src/**/__tests__/**/*.js*",
+    "src/**/__tests__/**/*.ts*",
+]
+
+copy_to_bin(
+    name = "static_files",
+    srcs = glob(
+        [
+            "public/*",
+            "src/**/*",
+        ],
+        exclude = _TESTS,
+    ) + [
+        "package.json",
+        "tsconfig.json",
+    ],
+)
+
+_RUNTIME_DEPS = [
+    ":static_files",
+    "//:node_modules/react",
+    "//:node_modules/react-dom",
+]
+
+cra_bin.react_scripts(
+    # Note: If you want to change the name make sure you update BUILD_PATH below accordingly
+    # https://create-react-app.dev/docs/advanced-configuration/
+    name = "build",
+    srcs = _RUNTIME_DEPS + [
+        "//:node_modules/react-scripts",
+        "//:node_modules/typescript",
+        "//:node_modules/web-vitals",
+    ],
+    args = ["build"],
+    chdir = package_name(),
+    env = {
+        "BUILD_PATH": "./build",
+    },
+    out_dirs = ["build"],
+)
+
+js_test(
+    name = "build_smoke_test",
+    data = ["build"],
+    entry_point = "build_smoke_test.js",
+)
+
+copy_to_bin(
+    name = "copy_test_files",
+    srcs = glob(_TESTS),
+)
+
+cra_bin.react_scripts_test(
+    name = "test",
+    args = [
+        "test",
+        # ibazel is the watch mode for Bazel when running tests
+        # Because Bazel is really a CI system that runs locally
+        "--watchAll=false",
+        # https://jestjs.io/docs/cli#--cache. Whether to use the cache. Defaults to true. Disable
+        # the cache using --no-cache. Caching is Bazel's job, we don't want non-hermeticity
+        "--no-cache",
+        # https://jestjs.io/docs/cli#--watchman. Whether to use watchman for file crawling. Defaults
+        # to true. Disable using --no-watchman. Watching is ibazel's job
+        "--no-watchman",
+        # https://jestjs.io/docs/cli#--ci. When this option is provided, Jest will assume it is
+        # running in a CI environment. This changes the behavior when a new snapshot is encountered.
+        # Instead of the regular behavior of storing a new snapshot automatically, it will fail the
+        # test and require Jest to be run with --updateSnapshot.
+        "--ci",
+        # Needed for Jest to walk the filesystem to find inputs.
+        # See https://github.com/facebook/jest/pull/9351
+        "--haste",
+        "{\\\"enableSymlinks\\\":\\ true}",
+    ],
+    chdir = package_name(),
+    data = _RUNTIME_DEPS + [
+        "copy_test_files",
+        "//:node_modules/@testing-library/jest-dom",
+        "//:node_modules/@testing-library/react",
+        "//:node_modules/@testing-library/user-event",
+        "//:node_modules/typescript",
+        "//:node_modules/jest-watch-typeahead",
+    ],
+)
+
+cra_bin.react_scripts_binary(
+    name = "start",
+    args = [
+        "start",
+    ],
+    chdir = package_name(),
+    data = _RUNTIME_DEPS + [
+        "//:node_modules/react-scripts",
+        "//:node_modules/typescript",
+        "//:node_modules/web-vitals",
+    ],
+    tags = [
+        # This tag instructs ibazel to pipe into stdin a event describing actions.
+        # ibazel send EOF to stdin by default and `react-scripts start` will stop when getting EOF in stdin.
+        # So use this to prevent EOF.
+        "ibazel_notify_changes",
+    ],
+)
