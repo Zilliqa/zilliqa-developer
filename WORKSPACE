@@ -165,11 +165,14 @@ go_register_toolchains()
 # ================================================================
 # Docker
 # ================================================================
+
+# Seee https://github.com/bazelbuild/rules_docker/blob/master/testing/examples/WORKSPACE
+# It contains an example on including custom Dockerfiles which may be handy for the isolated server
+
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "4349f2b0b45c860dd2ffe18802e9f79183806af93ce5921fb12cbd6c07ab69a8",
-    strip_prefix = "rules_docker-0.21.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.21.0/rules_docker-v0.21.0.tar.gz"],
+    sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
 )
 
 load(
@@ -179,59 +182,13 @@ load(
 
 container_repositories()
 
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps()
-
 load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
+    "@io_bazel_rules_docker//repositories:go_repositories.bzl",
+    container_go_deps = "go_deps",
 )
 
-container_repositories()
+container_go_deps()
 
-load(
-    "@io_bazel_rules_docker//cc:image.bzl",
-    _cc_image_repos = "repositories",
-)
-load(
-    "@io_bazel_rules_docker//python3:image.bzl",
-    _py_image_repos = "repositories",
-)
+load("@io_bazel_rules_docker//java:image.bzl", _java_image_repos = "repositories")
 
-# container_pull(
-#     name = "py3_base",
-#     registry = "index.docker.io",
-#     repository = "library/python",
-#     tag = "alpine3.15",
-#     digest = "sha256:fbee5312e64b18cf6a91f93e26286f706dd7182cbb5842fdb54ddeeadce37f68"
-# )
-
-container_pull(
-    name = "ubuntu",
-    digest = "sha256:bace9fb0d5923a675c894d5c815da75ffe35e24970166a48a4460a48ae6e0d19",
-    registry = "index.docker.io",
-    repository = "library/ubuntu",
-    tag = "jammy-20220531",
-)
-
-container_pull(
-    name = "alpine_linux_amd64",
-    digest = "sha256:954b378c375d852eb3c63ab88978f640b4348b01c1b3456a024a81536dafbbf4",
-    registry = "index.docker.io",
-    repository = "library/alpine",
-    # tag field is ignored since digest is set
-    tag = "3.8",
-)
-
-container_pull(
-    name = "nginx",
-    digest = "sha256:186c79dc14ab93e43d315143ee4b0774506dc4fd952388c20e35d3d37058ab8d",
-    registry = "index.docker.io",
-    repository = "library/nginx",
-    tag = "1.23.1",
-)
-
-_cc_image_repos()
-
-_py_image_repos()
+_java_image_repos()
