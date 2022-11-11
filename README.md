@@ -91,6 +91,37 @@ or you can pick out a specific target as
 bazelisk build //zilliqa/js/util:pkg
 ```
 
+#### Building libraries
+
+#### Building and running Docker images
+
+For the purpose of building Docker images, you do not need Docker installed
+whereas if you wish to run the generated image, you do need Docker.
+
+To build the image execute:
+
+```sh
+bazelisk build //products/isolated-server:latest
+```
+
+To populate the image to the local Docker registry:
+
+```sh
+bazelisk run //products/isolated-server:latest
+```
+
+You can now verify that the image is in your local registry by running:
+
+```sh
+docker images | grep products/isolated-server:latest
+```
+
+To run the image, you need Docker installed
+
+```sh
+docker run -it bazel/products/isolated-server:latest
+```
+
 ### Running executable targets
 
 Bazel can run an executable target directly from the build tool. This is done as
