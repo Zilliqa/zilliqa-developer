@@ -24,7 +24,7 @@ else
 	if [ -f "$(pwd)/downloads/$1.tar.gz" ]; then
 		echo "$1.tar.gz exists, skipping download."
 	else
-		aws s3 cp s3://$BUCKET_ID/persistence/"$1.tar.gz" "$(pwd)/downloads/"
+		aws s3 cp s3://"$BUCKET_ID"/persistence/"$1.tar.gz" "$(pwd)/downloads/"
 		if [ $? -eq 0 ]; then
 			echo "Copy successful!"
 		else

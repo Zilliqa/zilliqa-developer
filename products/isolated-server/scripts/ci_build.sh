@@ -5,8 +5,8 @@ echo $(pwd)
 docker --version
 aws --version
 
-echo $TRAVIS_COMMIT
-commit=$(git rev-parse --short=7 $TRAVIS_COMMIT)
+echo "$TRAVIS_COMMIT"
+commit=$(git rev-parse --short=7 "$TRAVIS_COMMIT")
 
 accountID=$(aws sts get-caller-identity --output text --query 'Account')
 regionID=us-west-2
