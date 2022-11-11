@@ -119,7 +119,7 @@ docker images | grep products/isolated-server:latest
 To run the image, you need Docker installed
 
 ```sh
-docker run -it products/isolated-server:latest
+docker run -it bazel/products/isolated-server:latest
 ```
 
 ### Running executable targets
