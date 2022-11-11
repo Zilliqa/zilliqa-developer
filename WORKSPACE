@@ -198,7 +198,7 @@ _java_image_repos()
 # https://hub.docker.com/layers/zilliqa/zilliqa/v8.3.0-deps/images/sha256-35725f3b6799a359416fd7228815753b54a604b34f7bd3147807934dda49c2e5?context=explore
 # https://hub.docker.com/layers/library/mediawiki/latest/images/sha256-b2fede20876f681b6b32dfe1ba49c93ba2e3507d8fe104bb41286e31e3a25861?context=explore
 container_pull(
-    name = "zilliqa-docer-x86",
+    name = "zilliqa-docker-x86",
     registry = "index.docker.io",
     repository = "zilliqa/zilliqa",
     # tag field is ignored since digest is set
