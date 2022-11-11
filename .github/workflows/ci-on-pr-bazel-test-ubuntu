@@ -1,4 +1,4 @@
-name: "macOS CI"
+name: "Ubuntu 22 CI"
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   build-debug:
-    runs-on: macos-12
+    runs-on: ubuntu-22.04
     name: "Bazel Debug Build"
     steps:
       - name: Checkout code
@@ -36,3 +36,4 @@ jobs:
       - name: "Running tests"
         run: |
           bazelisk test --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //...
+
