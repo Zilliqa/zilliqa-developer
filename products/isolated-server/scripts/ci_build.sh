@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo $(pwd)
+pwd
 
 docker --version
 aws --version

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-function print_help {
+function print_help() {
 	echo "Please input a mainnet-persistence WITHOUT the .tar.gz extension (eg: mainnet-istana-830788)"
 	echo
 	echo
 	echo
 }
 
-function print_help2 {
+function print_help2() {
 	echo "Please make sure that $(pwd)/downloads/$1.tar.gz exists in $(pwd)/downloads folder."
 	echo
 	echo
@@ -20,7 +20,7 @@ else
 	echo "pwd is :$(pwd)"
 	echo "Checking if $(pwd).tar.gz exists"
 	if [ ! -f "$(pwd)/downloads/$1.tar.gz" ]; then
-		print_help2
+		print_help2 "$1"
 		exit
 	else
 		echo "It's ok for errors to appear between the 2 arrows."

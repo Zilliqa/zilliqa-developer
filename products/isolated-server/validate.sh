@@ -16,7 +16,6 @@ function validate_persistence() {
 
 	backup_name="persistence_$current_date""_""$current_time.tar.gz"
 	echo "$backup_name"
-	s3_bucket_name="$S3_BUCKET_NAME"
 
 	base_dir=$(pwd)
 	cd validate_persistence || exit
@@ -26,8 +25,8 @@ function validate_persistence() {
 		# zip persistence upload to s3
 		echo "$backup_name" >latest_backup.txt
 		tar -zcf "$backup_name" persistence
-		aws s3 cp "$backup_name" "s3://$s3_bucket_name/persistence/$backup_name"
-		aws s3 cp "latest_backup.txt" "s3://$s3_bucket_name"
+		aws s3 cp "$backup_name" "s3://$S3_BUCKET_NAME/persistence/$backup_name"
+		aws s3 cp "latest_backup.txt" "s3://$S3_BUCKET_NAME"
 	else
 		echo "validation failed."
 	fi
@@ -36,7 +35,7 @@ function validate_persistence() {
 	sleep 1
 }
 
-while [ true ]; do
+while true; do
 	current_date="$(date +%Y%m%d)"
 	current_time="$(date +%H%M%S)"
 

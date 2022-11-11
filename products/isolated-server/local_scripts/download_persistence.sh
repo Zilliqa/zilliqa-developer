@@ -3,7 +3,7 @@
 function print_help {
 	echo "Please input a mainnet-persistence WITHOUT the .tar.gz extension (eg: mainnet-istana-830788)"
 	echo "If you need to add access to the mainnet s3 persistence, add the following canonical id:"
-	echo $(aws s3api list-buckets --query Owner.ID --output text)
+	aws s3api list-buckets --query Owner.ID --output text
 	echo "to the persistence on mainnet s3, then run the command again"
 	echo
 	echo
@@ -24,8 +24,7 @@ else
 	if [ -f "$(pwd)/downloads/$1.tar.gz" ]; then
 		echo "$1.tar.gz exists, skipping download."
 	else
-		aws s3 cp s3://"$BUCKET_ID"/persistence/"$1.tar.gz" "$(pwd)/downloads/"
-		if [ $? -eq 0 ]; then
+		if aws s3 cp "s3://$BUCKET_ID/persistence/$1.tar.gz" "$(pwd)/downloads/"; then
 			echo "Copy successful!"
 		else
 			print_help

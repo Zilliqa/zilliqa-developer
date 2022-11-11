@@ -1,8 +1,9 @@
-## Edit the constants.xml
+# Edit the constants.xml
 
-You would need to download the latest constants.xml file that can be found on the mainnet join page
+You would need to download the latest constants.xml file that can be found on
+the mainnet join page
 
-```
+```sh
 curl -O https://mainnet-join.zilliqa.com/seed-configuration.tar.gz
 tar -zxvf seed-configuration.tar.gz
 vim constants.xml
