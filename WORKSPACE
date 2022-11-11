@@ -201,17 +201,7 @@ container_pull(
     name = "zilliqa-docer-x86",
     registry = "index.docker.io",
     repository = "zilliqa/zilliqa",
-    # tag field is ignored since digest is set
     tag = "v8.2.0rc2",
-)
-
-container_pull(
-    name = "alpine_linux_amd64",
-    digest = "sha256:954b378c375d852eb3c63ab88978f640b4348b01c1b3456a024a81536dafbbf4",
-    registry = "index.docker.io",
-    repository = "library/alpine",
-    # tag field is ignored since digest is set
-    tag = "3.8",
 )
 
 # ================================================================
