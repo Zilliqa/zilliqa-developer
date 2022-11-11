@@ -36,4 +36,3 @@ jobs:
       - name: "Running tests"
         run: |
           bazelisk test --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //...
-
