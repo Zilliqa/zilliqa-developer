@@ -159,7 +159,7 @@ To find the dependencies of at target
 bazelisk query "deps(//zilliqa/js/util:pkg)"
 ```
 
-## Encountering Bazel Issues
+## Useful notes on Bazel
 
 To get verbose error messages add `--verbose_failures`.
 
@@ -173,6 +173,8 @@ builds, add `--sandbox_debug`
 
 Sometimes while debugging it is helpful to clean all to aviod artefacts from
 previous builds: `bazel clean --expunge`
+
+To get information about your current Bazel setup run `bazelisk info`.
 
 ## Reasoning Behind Repository Organisation
 
