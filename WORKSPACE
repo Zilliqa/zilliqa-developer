@@ -145,6 +145,25 @@ load("@aspect_rules_ts//ts:repositories.bzl", "LATEST_VERSION", "rules_ts_depend
 rules_ts_dependencies(ts_version = LATEST_VERSION)
 
 # ================================================================
+# Pkg Tar
+# ================================================================
+
+http_archive(
+    name = "rules_pkg",
+    sha256 = "451e08a4d78988c06fa3f9306ec813b836b1d076d0f055595444ba4ff22b867f",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.7.1/rules_pkg-0.7.1.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.7.1/rules_pkg-0.7.1.tar.gz",
+    ],
+)
+
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
+rules_pkg_dependencies()
+
+#    strip_prefix = "rules_pkg-0.8.0",
+
+# ================================================================
 # Docker
 # ================================================================
 
@@ -171,9 +190,29 @@ load(
 
 container_go_deps()
 
+load("@io_bazel_rules_docker//container:pull.bzl", "container_pull")
 load("@io_bazel_rules_docker//java:image.bzl", _java_image_repos = "repositories")
 
 _java_image_repos()
+
+# https://hub.docker.com/layers/zilliqa/zilliqa/v8.3.0-deps/images/sha256-35725f3b6799a359416fd7228815753b54a604b34f7bd3147807934dda49c2e5?context=explore
+# https://hub.docker.com/layers/library/mediawiki/latest/images/sha256-b2fede20876f681b6b32dfe1ba49c93ba2e3507d8fe104bb41286e31e3a25861?context=explore
+container_pull(
+    name = "zilliqa-docer-x86",
+    registry = "index.docker.io",
+    repository = "zilliqa/zilliqa",
+    # tag field is ignored since digest is set
+    tag = "v8.2.0rc2",
+)
+
+container_pull(
+    name = "alpine_linux_amd64",
+    digest = "sha256:954b378c375d852eb3c63ab88978f640b4348b01c1b3456a024a81536dafbbf4",
+    registry = "index.docker.io",
+    repository = "library/alpine",
+    # tag field is ignored since digest is set
+    tag = "3.8",
+)
 
 # ================================================================
 # Kubernetes
