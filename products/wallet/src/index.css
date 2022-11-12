@@ -1,13 +1,259 @@
+/**
+ * Copyright (c) 2018 - present Zilliqa Research Pte. Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+:root {
+  --white: #fff;
+  --black: #001;
+  --gray100: #f9f9fd;
+  --gray200: #e9e9f4;
+  --gray300: #c5c5d3;
+  --gray400: #a0a1b2;
+  --gray500: #7c7d8c;
+  --gray600: #525360;
+  --gray700: #343546;
+  --gray800: #112;
+  --success: #12a378;
+  --danger: coral;
+}
+
+.neon {
+  color: #fff;
+  /* text-shadow: 0 0 2px #fff, 0 0 16px var(--success), 0 0 32px var(--success),
+    0 0 64px var(--success); */
+
+  animation: GlowEffect 5s linear infinite;
+}
+
+@keyframes GlowEffect {
+  0% {
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success);
+  }
+
+  50% {
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success), 0 0 72px royalblue;
+  }
+
+  100% {
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success);
+  }
+}
+
+.font-monospace {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+code {
+  color: var(--gray300);
+}
+
 body {
+  color: var(--gray100);
+  background-color: var(--black);
   margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: scroll;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+.bg-dark {
+  background-color: var(--black) !important;
+}
+
+.text-primary {
+  color: var(--white) !important;
+}
+
+.text-secondary {
+  color: var(--gray300) !important;
+}
+
+.valid-feedback,
+.text-success {
+  color: var(--success) !important;
+}
+
+.form-control.is-valid {
+  border-color: var(--success) !important;
+  background-image: none;
+  padding-right: 0;
+}
+
+.invalid-feedback,
+.text-danger {
+  color: var(--danger) !important;
+}
+
+.card {
+  background-color: var(--gray800);
+}
+
+.form-container a.nav-link {
+  background-color: var(--gray100);
+  border-bottom: 1px solid var(--gray300);
+  border-radius: 0;
+  font-weight: bold;
+}
+
+.form-container li.nav-item {
+  width: 50%;
+  text-align: center;
+  color: var(--gray500);
+}
+
+.form-control.is-invalid {
+  border-color: var(--danger) !important;
+  background-image: none;
+  padding-right: 0;
+}
+
+.form-check-label {
+  margin-bottom: 0.5rem;
+}
+
+form input.form-control-file {
+  display: none;
+}
+
+form input.form-control {
+  color: var(--gray100);
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--gray500);
+  padding: 0;
+  transition: border-width 0.1s linear, border-color 0.3s linear;
+  position: relative;
+  outline: 0;
+  background-color: transparent;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: transparent;
+  color: var(--gray100);
+  border-bottom: 1px solid var(--gray00);
+  cursor: not-allowed;
+}
+
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form input[type="tel"]:focus {
+  color: var(--gray100);
+  background-color: transparent;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0) !important;
+  border: none;
+  border-bottom: 1px solid var(--white);
+}
+
+form input[type="text"]::placeholder,
+form input[type="password"]::placeholder,
+form input[type="tel"]::placeholder {
+  color: var(--gray100);
+}
+
+.release-text {
+  color: var(--gray300);
+  padding-left: 5px;
+  font-size: 10px;
+}
+
+.text-fade-in {
+  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein 1s; /* Firefox < 16 */
+  animation: fadein 1s;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.rc-steps-small .rc-steps-item-title {
+  color: var(--white);
+}
+
+.rc-steps-item-wait .rc-steps-item-icon {
+  border-color: var(--gray500);
+  background-color: var(--gray500);
+}
+
+.rc-steps-item-wait .rc-steps-item-icon > .rc-steps-icon {
+  color: var(--white);
+}
+
+.rc-steps-item-process .rc-steps-item-icon {
+  font-weight: bold;
+  color: var(--white);
+  background-color: var(--gray500);
+  border-color: var(--gray500);
+}
+
+.rc-steps-item-finish .rc-steps-item-icon {
+  border-color: var(--gray500);
+  background-color: var(--gray500);
+  font-weight: bold;
+}
+
+.rc-steps-item-process .rc-steps-item-title::after {
+  background-color: var(--gray500);
+}
+
+.rc-steps-item-finish .rc-steps-item-title::after {
+  background-color: var(--success);
+}
+
+div.recaptcha {
+  margin: 0 auto;
+  width: 304px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
