@@ -13,19 +13,19 @@ var AnimEvent = (function (n) {
       t.o(n, e) || Object.defineProperty(n, e, { enumerable: !0, get: r });
     }),
     (t.r = function (n) {
-      "undefined" != typeof Symbol &&
+      "undefined" !== typeof Symbol &&
         Symbol.toStringTag &&
         Object.defineProperty(n, Symbol.toStringTag, { value: "Module" }),
         Object.defineProperty(n, "__esModule", { value: !0 });
     }),
     (t.t = function (n, e) {
       if ((1 & e && (n = t(n)), 8 & e)) return n;
-      if (4 & e && "object" == typeof n && n && n.__esModule) return n;
+      if (4 & e && "object" === typeof n && n && n.__esModule) return n;
       var r = Object.create(null);
       if (
         (t.r(r),
         Object.defineProperty(r, "default", { enumerable: !0, value: n }),
-        2 & e && "string" != typeof n)
+        2 & e && "string" !== typeof n)
       )
         for (var o in n)
           t.d(

@@ -5,8 +5,8 @@ echo $(pwd)
 docker --version
 aws --version
 
-echo $TRAVIS_COMMIT
-commit=$(git rev-parse --short=7 $TRAVIS_COMMIT)
+echo "$TRAVIS_COMMIT"
+commit=$(git rev-parse --short=7 "$TRAVIS_COMMIT")
 
 accountID=$(aws sts get-caller-identity --output text --query 'Account')
 regionID=us-west-2
@@ -31,16 +31,16 @@ docker cp extractprd:/usr/share/nginx/html/. $(pwd)/devex-artifact/prd/
 docker rm extractprd
 docker push "$registryURL"
 
-cd devex-artifact
-cd stg
-echo $commit >devex-artifact-commit.txt
+cd devex-artifact || exit
+cd stg || exit
+echo "$commit" >devex-artifact-commit.txt
 #tar -czvf devex-artifact-stg.gz .
 zip -r devex-artifact-stg.zip .
 aws s3 sync . s3://devex-static-artifact --exclude='*' --include='devex-artifact-stg.zip'
 
 cd ..
-cd prd
-echo $commit >devex-artifact-commit.txt
+cd prd || exit
+echo "$commit" >devex-artifact-commit.txt
 #tar -czvf devex-artifact-prd.gz .
 zip -r devex-artifact-prd.zip .
 aws s3 sync . s3://devex-static-artifact --exclude='*' --include='devex-artifact-prd.zip'
