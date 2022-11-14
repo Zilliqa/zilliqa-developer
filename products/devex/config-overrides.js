@@ -4,7 +4,6 @@
 const webpack = require("webpack");
 
 module.exports = function override(config) {
-  /*
   config.resolve.fallback = {
     url: require.resolve("url"),
     assert: require.resolve("assert"),
@@ -17,7 +16,6 @@ module.exports = function override(config) {
     string_decoder: require.resolve("string_decoder"),
     events: require.resolve("events"),
   };
-  */
 
   config.plugins.push(
     new webpack.ProvidePlugin({

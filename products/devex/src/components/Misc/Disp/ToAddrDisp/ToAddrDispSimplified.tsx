@@ -23,7 +23,6 @@ interface IProps {
 const ToAddrDispSimplified: any = ({ toAddr, fromAddr, txType, addr }: any) => {
   const hexAddr = stripHexPrefix(zilAddrToHexAddr(addr));
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let type: any;
 
   if (fromAddr.toLowerCase() === toAddr.toLowerCase()) {
