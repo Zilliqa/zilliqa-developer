@@ -62,8 +62,6 @@ const ViewAllTable: React.FC<
 
   useEffect(() => {
     fetchDataDebounce({ pageIndex });
-    // fetchDataDebounce changes when fetchData function changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, fetchData]);
 
   const generatePagination = useCallback(
