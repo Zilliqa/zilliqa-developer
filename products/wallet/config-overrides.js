@@ -2,7 +2,7 @@ const WorkerPlugin = require("worker-plugin");
 const webpack = require("webpack");
 
 module.exports = function override(config, env) {
-  config.plugins.push(new WorkerPlugin());
+  // config.plugins.push(new WorkerPlugin());
   /*
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -52,6 +52,6 @@ module.exports = function override(config, env) {
         Buffer: ["buffer", "Buffer"],
       })
     );
-  */
+    */
   return config;
 };
