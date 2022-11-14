@@ -194,8 +194,10 @@ const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
                       <Col>
                         <div className="subtext text-small">Token Info</div>
                         <div>
-                          {fungibleToken.name.value} <br />
-                          {fungibleToken.symbol.value}
+                          <>
+                            {fungibleToken.name.value} <br />
+                            {fungibleToken.symbol.value}
+                          </>
                         </div>
                       </Col>
                       <Col>
@@ -210,7 +212,11 @@ const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
                       </Col>
                       <Col>
                         <div className="subtext text-small">Token Supply</div>
-                        <div>{fungibleToken.init_supply.value}</div>
+                        <div>
+                          {typeof (fungibleToken.init_supply.value === "string")
+                            ? fungibleToken.init_supply.value
+                            : "N/A"}
+                        </div>
                       </Col>
                     </>
                   ) : null}

@@ -30,8 +30,15 @@ const AddressDetailsPage: React.FC = () => {
         setIsContract(isContractRes);
       } catch (e) {
         console.log(e);
-        if (isValidAddr(addr)) setIsContract(false);
-        else setError(e);
+        if (isValidAddr(addr)) {
+          setIsContract(false);
+        } else {
+          // TODO: Type of error is unknown and not necessarily compatible
+          // with strings
+          setError("Error occurred - please see console");
+          console.error(e);
+          //          setError(e);
+        }
       } finally {
         setIsLoading(false);
       }

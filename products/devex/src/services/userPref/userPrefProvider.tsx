@@ -23,7 +23,7 @@ export const UserPrefContext = React.createContext<UserPrefState | undefined>(
   undefined
 );
 
-export const UserPrefProvider: React.FC = (props) => {
+export const UserPrefProvider = (props: { children: any }) => {
   const [state, setState] = useState<UserPrefState>({
     networkMap: localStorage.getItem("networkMap")
       ? new Map(JSON.parse(localStorage.getItem("networkMap")!))

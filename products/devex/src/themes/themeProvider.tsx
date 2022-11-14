@@ -7,7 +7,7 @@ type ThemeState = {
 
 export const ThemeContext = React.createContext<ThemeState | null>(null);
 
-export const ThemeProvider: React.FC = (props) => {
+export const ThemeProvider = (props: { children: any }) => {
   const [state, setState] = useState<ThemeState>({
     theme: localStorage.getItem("theme") || "dark", // dark is default
     toggle: () => {

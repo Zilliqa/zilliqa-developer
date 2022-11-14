@@ -93,7 +93,7 @@ export const useApolloServerAddress = (): string => {
 
 export const NetworkContext = React.createContext<NetworkState | null>(null);
 
-export const NetworkProvider: React.FC = (props) => {
+export const NetworkProvider = (props: { children: any }) => {
   const userPrefContext = useContext(UserPrefContext);
   const { networkMap, setNetworkMap } = userPrefContext!;
 
