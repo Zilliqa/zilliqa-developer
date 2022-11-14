@@ -78,6 +78,7 @@ _RUNTIME_DEPS = [
     "//:node_modules/bip39",
     "//:node_modules/hash.js",
     "//:node_modules/hdkey",
+    "//:node_modules/process",
 ]
 
 cra_bin.react_app_rewired(
