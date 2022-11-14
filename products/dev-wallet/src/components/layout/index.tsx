@@ -14,10 +14,10 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Sidebar from '../sidebar';
-import Header from '../header';
-import Footer from '../footer';
-import './style.css';
+import Sidebar from "../sidebar";
+import Header from "../header";
+import Footer from "../footer";
+import "./style.css";
 
 const Layout = ({ zilContext, children }) => {
   const { isAuth, clearAuth, curNetwork, switchNetwork } = zilContext;
@@ -30,7 +30,7 @@ const Layout = ({ zilContext, children }) => {
         switchNetwork={switchNetwork}
       />
       <div className="layout">
-        <Sidebar curNetwork={curNetwork} />
+        <Sidebar />
         <div className="content-section">
           {children}
           <Footer year={new Date().getFullYear()} />

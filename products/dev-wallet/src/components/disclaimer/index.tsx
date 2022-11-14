@@ -15,9 +15,10 @@
  */
 
 const Disclaimer = () => (
-  <small data-testid="disclaimer" style={{ color: 'coral' }}>
-    This is Zilliqa <b>Dev Wallet</b>. Do not send any interim ERC-20 ZIL tokens or Mainnet tokens
-    to this wallet. You are solely responsible for your account funds.
+  <small data-testid="disclaimer" style={{ color: "coral" }}>
+    This is Zilliqa <b>Dev Wallet</b>. Do not send any interim ERC-20 ZIL tokens
+    or Mainnet tokens to this wallet. You are solely responsible for your
+    account funds.
   </small>
 );
 

@@ -1,3 +1,4 @@
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package", "stamped_package_json")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@jest//:defs.bzl", "jest_test")
@@ -7,21 +8,30 @@ stamped_package_json(
     stamp_var = "STABLE_JS_API_BUILD_VERSION",
 )
 
+_SRCS = [
+    ":package",
+    "//zilliqa/js:aes-js.d",
+    "//zilliqa/js:pbkdf2.d",
+    "//zilliqa/js:hmac-drbg.d",
+] + glob(
+    [
+        "src/*.ts",
+        "src/**/*.ts",
+    ],
+    exclude = ["src/**/*.spec.ts"],
+)
+
+copy_to_bin(
+    name = "sources",
+    srcs = _SRCS,
+)
+
 ts_project(
     name = "lib",
-    srcs = [
-        "//zilliqa/js:aes-js.d",
-        "//zilliqa/js:pbkdf2.d",
-        "//zilliqa/js:hmac-drbg.d",
-    ] + glob(
-        [
-            "src/*.ts",
-            "src/**/*.ts",
-        ],
-        exclude = ["src/**/*.spec.ts"],
-    ),
+    srcs = _SRCS,
     composite = True,
     data = [
+        ":sources",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/aes-js",
         "//:node_modules/elliptic",
@@ -53,6 +63,7 @@ ts_project(
         "//:node_modules/@typescript-eslint/parser",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/aes-js",
+        "//:node_modules/buffer",
         "//:node_modules/elliptic",
         "//:node_modules/hash.js",
         "//:node_modules/hmac-drbg",

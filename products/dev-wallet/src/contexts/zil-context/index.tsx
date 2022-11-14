@@ -14,21 +14,22 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React from "react";
+
 import {
   getAddressFromPrivateKey,
   getPubKeyFromPrivateKey,
   fromBech32Address,
-} from '@zilliqa-js/crypto';
-import { Long, units, BN, validation } from '@zilliqa-js/util';
-import { Transaction } from '@zilliqa-js/account';
+} from "@zilliqa-js/crypto";
+import { Long, units, BN, validation } from "@zilliqa-js/util";
+import { Transaction } from "@zilliqa-js/account";
 
-import { bytes, Zilliqa } from '@zilliqa-js/zilliqa';
-import { HTTPProvider, RPCMethod } from '@zilliqa-js/core';
+import { bytes, Zilliqa } from "@zilliqa-js/zilliqa";
+import { HTTPProvider, RPCMethod } from "@zilliqa-js/core";
 
 export enum NETWORK {
-  IsolatedServer = 'isolated_server',
-  TestNet = 'testnet',
+  IsolatedServer = "isolated_server",
+  TestNet = "testnet",
 }
 
 const initialState = {
@@ -44,14 +45,28 @@ const initialState = {
   publicKey: undefined as string | undefined,
   privateKey: undefined as string | undefined,
 };
+type IState = {
+  config: any;
+
+  curNetwork: any;
+  zilliqa?: Zilliqa;
+  version?: number;
+  provider?: HTTPProvider;
+
+  isAuth?: boolean;
+  address?: string;
+  publicKey?: string;
+  privateKey?: string;
+};
+
 export const ZilContext = React.createContext(initialState);
 
-export class ZilProvider extends React.Component {
+export class ZilProvider extends React.Component<{ children: any }, IState> {
   public readonly state = initialState;
   async componentDidMount() {
-    const res = await fetch('config.json');
+    const res = await fetch("config.json");
     const config = await res.json();
-    console.log('config', config);
+    console.log("config", config);
     this.setState({ config }, () => this.initState());
   }
 
@@ -60,7 +75,7 @@ export class ZilProvider extends React.Component {
 
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
-    const networkParam = params['network'];
+    const networkParam = params["network"];
     const isValidNetwork = [NETWORK.IsolatedServer, NETWORK.TestNet].includes(
       networkParam as NETWORK
     );
@@ -70,17 +85,19 @@ export class ZilProvider extends React.Component {
 
     if (networkParam === undefined || !isValidNetwork) {
       const urlSearchParams = new URLSearchParams(window.location.search);
-      urlSearchParams.set('network', curNetworkKey);
+      urlSearchParams.set("network", curNetworkKey);
       window.history.replaceState(
         null,
-        '',
+        "",
         `${window.location.pathname}?${urlSearchParams.toString()}`
       );
     }
     const { config } = this.state;
 
     const curNetwork =
-      curNetworkKey === NETWORK.TestNet ? config[NETWORK.TestNet] : config[NETWORK.IsolatedServer];
+      curNetworkKey === NETWORK.TestNet
+        ? config[NETWORK.TestNet]
+        : config[NETWORK.IsolatedServer];
 
     const provider = new HTTPProvider(curNetwork.nodeUrl);
     const zilliqa = new Zilliqa(curNetwork.nodeUrl, provider);
@@ -122,7 +139,7 @@ export class ZilProvider extends React.Component {
     const zilliqa = this.state.zilliqa as Zilliqa;
     const version = this.state.version as number;
     const response = await zilliqa.blockchain.getMinimumGasPrice();
-    const gasPrice: string = response.result || '';
+    const gasPrice: string = response.result || "";
 
     const amountInQa = units.toQa(amountInZil, units.Units.Zil);
     return {
@@ -138,7 +155,10 @@ export class ZilProvider extends React.Component {
     const { amount, toAddress } = args;
     const zilliqa = this.state.zilliqa as Zilliqa;
     const provider = this.state.provider as HTTPProvider;
-    const tx = new Transaction(await this.getParams(toAddress, amount), provider);
+    const tx = new Transaction(
+      await this.getParams(toAddress, amount),
+      provider
+    );
     const signedTx = await zilliqa.wallet.sign(tx);
     const { txParams } = signedTx;
     // Send a transaction to the network
@@ -151,19 +171,19 @@ export class ZilProvider extends React.Component {
     const zilliqa = this.state.zilliqa as Zilliqa;
     const address = this.state.address as string;
 
-    if (typeof address !== 'string') {
-      return '0';
+    if (typeof address !== "string") {
+      return "0";
     }
     const res = await zilliqa.blockchain.getBalance(address);
-    if (res.error !== undefined) return '0';
-    return res.result ? res.result.balance : '0';
+    if (res.error !== undefined) return "0";
+    return res.result ? res.result.balance : "0";
   };
 
   public getMinGasPrice = async (): Promise<string> => {
     const zilliqa = this.state.zilliqa as Zilliqa;
     const res = await zilliqa.blockchain.getMinimumGasPrice();
     if (res.error !== undefined) throw new Error(res.error.message);
-    return res.result ? res.result : '0';
+    return res.result ? res.result : "0";
   };
 
   public faucet = async ({ args, signal }): Promise<string | void> => {
@@ -189,14 +209,16 @@ export class ZilProvider extends React.Component {
     const { curNetwork } = this.state;
     const res = await fetch(curNetwork.faucetUrl, {
       signal,
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body,
     });
     if (!res.ok) {
-      throw new Error('Failed to run faucet, you may have reached maximum request limit.');
+      throw new Error(
+        "Failed to run faucet, you may have reached maximum request limit."
+      );
     }
     const data = await res.json();
     return data ? data.txId : undefined;
@@ -209,10 +231,10 @@ export class ZilProvider extends React.Component {
 
   public switchNetwork = (key) => {
     const urlSearchParams = new URLSearchParams(window.location.search);
-    urlSearchParams.set('network', key);
+    urlSearchParams.set("network", key);
     window.history.replaceState(
       null,
-      '',
+      "",
       `${window.location.pathname}?${urlSearchParams.toString()}`
     );
     this.initState(key);

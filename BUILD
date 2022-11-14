@@ -54,6 +54,12 @@ npm_link_package(
     visibility = ["//visibility:public"],
 )
 
+npm_link_package(
+    name = "node_modules/@zilliqa-js/zilliqa",
+    src = "//zilliqa/js/zilliqa:pkg",
+    visibility = ["//visibility:public"],
+)
+
 npm_link_all_packages(name = "node_modules")
 
 exports_files([

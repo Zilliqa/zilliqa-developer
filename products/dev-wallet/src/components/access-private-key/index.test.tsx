@@ -14,12 +14,14 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import AccessPrivateKey from '.';
+import React from "react";
+import { render } from "@testing-library/react";
+import AccessPrivateKey from ".";
 
-test('matches the snapshot when loading', () => {
+test("matches the snapshot when loading", () => {
   const accessWallet = jest.fn();
-  const { container } = render(<AccessPrivateKey accessWallet={accessWallet} />);
+  const { container } = render(
+    <AccessPrivateKey accessWallet={accessWallet} />
+  );
   expect(container.firstChild).toMatchSnapshot();
 });

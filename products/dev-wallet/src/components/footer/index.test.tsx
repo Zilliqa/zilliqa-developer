@@ -14,11 +14,11 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import Footer from '.';
+import React from "react";
+import { render } from "@testing-library/react";
+import Footer from ".";
 
-test('matches the snapshot', () => {
+test("matches the snapshot", () => {
   const { container } = render(<Footer year={1} />);
   expect(container.firstChild).toMatchSnapshot();
 });

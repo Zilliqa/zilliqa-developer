@@ -16,6 +16,7 @@ ts_proto_library(
     name = "lib",
     srcs = [":package"],
     proto = ":proto_lib",
+    visibility = ["//visibility:public"],
 )
 
 npm_package(

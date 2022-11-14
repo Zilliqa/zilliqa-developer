@@ -14,7 +14,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Navbar,
   Nav,
@@ -23,17 +23,17 @@ import {
   NavbarBrand,
   Collapse,
   NavbarToggler,
-} from 'reactstrap';
-import './style.css';
-import { Link } from 'react-router-dom';
-import { paths } from '../../routes';
+} from "reactstrap";
+import "./style.css";
+import { Link } from "react-router-dom";
+import { paths } from "../../routes";
 import {
   ButtonDropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
-} from 'reactstrap';
-import { NETWORK } from '../../contexts/zil-context';
+} from "reactstrap";
+import { NETWORK } from "../../contexts/zil-context";
 
 const Header = ({ curNetwork, isAuth, clearAuth, switchNetwork }) => {
   const [isOpen, setOpen] = useState(false);
@@ -42,8 +42,8 @@ const Header = ({ curNetwork, isAuth, clearAuth, switchNetwork }) => {
 
   return (
     <div>
-      <Navbar fixed={'top'} dark={true} color="dark" expand="sm">
-        <NavbarBrand href="/">{'Dev Wallet'}</NavbarBrand>
+      <Navbar fixed={"top"} dark={true} color="dark" expand="sm">
+        <NavbarBrand href="/">{"Dev Wallet"}</NavbarBrand>
 
         <NavbarToggler onClick={() => setOpen(!isOpen)} aria-label="toggler" />
 
@@ -51,27 +51,27 @@ const Header = ({ curNetwork, isAuth, clearAuth, switchNetwork }) => {
           <Nav className="ml-auto" navbar={true}>
             <NavItem className="sidebar-link">
               <Link to={paths.home} className={`nav-link`}>
-                {'Home'}
+                {"Home"}
               </Link>
             </NavItem>
             <NavItem className="sidebar-link">
               <Link to={paths.generate} className={`nav-link`}>
-                {'Create New Wallet'}
+                {"Create New Wallet"}
               </Link>
             </NavItem>
             <NavItem className="sidebar-link">
               <Link to={paths.send} className={`nav-link`}>
-                {'Send ZIL'}
+                {"Send ZIL"}
               </Link>
             </NavItem>
             <NavItem className="sidebar-link">
               <Link to={paths.faucet} className={`nav-link`}>
-                {'ZIL Faucet'}
+                {"ZIL Faucet"}
               </Link>
             </NavItem>
             {isAuth ? (
               <NavLink className="pr-4 cursor-pointer" onClick={clearAuth}>
-                {'Sign Out'}
+                {"Sign Out"}
               </NavLink>
             ) : null}
 
@@ -79,9 +79,9 @@ const Header = ({ curNetwork, isAuth, clearAuth, switchNetwork }) => {
               <DropdownToggle className="network-button" color="secondary">
                 <span className="network">
                   {curNetwork.name
-                    .split('_')
+                    .split("_")
                     .map((cur) => cur.slice(0, 1).toUpperCase() + cur.slice(1))
-                    .join(' ')}
+                    .join(" ")}
                 </span>
               </DropdownToggle>
               <DropdownMenu>

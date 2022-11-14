@@ -14,28 +14,34 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
-import Button from '../button';
-import CopyToClipboard from '../copy-to-clipboard';
-import { MdRefresh } from 'react-icons/md';
-import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
-import { units, BN } from '@zilliqa-js/util';
-import { useAsyncFn } from '../../use-async-fn';
+import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+import Button from "../button";
+import CopyToClipboard from "../copy-to-clipboard";
+import { MdRefresh } from "react-icons/md";
+import { toBech32Address, fromBech32Address } from "@zilliqa-js/crypto";
+import { units, BN } from "@zilliqa-js/util";
+import { useAsyncFn } from "../../use-async-fn";
 
-const AccountInfo = ({ privateKey, publicKey, address, getBalance, curNetwork }) => {
+const AccountInfo = ({
+  privateKey,
+  publicKey,
+  address,
+  getBalance,
+  curNetwork,
+}) => {
   const bech32Address = toBech32Address(address);
   const { data, error, isPending, run } = useAsyncFn({ fn: getBalance });
   const getAddressExplorerURL = (bechAddress) => {
-    return `${curNetwork.explorerUrl}/address/${bechAddress}?network=${encodeURIComponent(
-      curNetwork.nodeUrl
-    )}`;
+    return `${
+      curNetwork.explorerUrl
+    }/address/${bechAddress}?network=${encodeURIComponent(curNetwork.nodeUrl)}`;
   };
 
   return (
     <div>
       <div className="px-4">
         <h5>
-          <b>{'Account Info'}</b>
+          <b>{"Account Info"}</b>
         </h5>
         <div className="d-flex">
           <div className="py-2">
@@ -47,30 +53,32 @@ const AccountInfo = ({ privateKey, publicKey, address, getBalance, curNetwork })
             ) : null}
           </div>
           <div className="px-4 text-left text-secondary">
-            <b>{'Address'}</b>
+            <b>{"Address"}</b>
             <p className="pt-1 font-monospace">
               <a
                 target="_blank"
                 href={getAddressExplorerURL(bech32Address)}
                 rel="noopener noreferrer"
-              >{`${bech32Address}`}</a>{' '}
+              >{`${bech32Address}`}</a>{" "}
               <CopyToClipboard data={bech32Address} />
               <br />
               <small>{`(ByStr20: ${address})`}</small>
             </p>
-            <b>{'Public Key'}</b>
+            <b>{"Public Key"}</b>
             <p>
-              <code>{publicKey.slice(0, 16)}...</code> <CopyToClipboard data={publicKey} />
+              <code>{publicKey.slice(0, 16)}...</code>{" "}
+              <CopyToClipboard data={publicKey} />
             </p>
-            <b>{'Private Key'}</b>
+            <b>{"Private Key"}</b>
             <p>
-              <code>{privateKey.slice(0, 16)}...</code> <CopyToClipboard data={privateKey} />
+              <code>{privateKey.slice(0, 16)}...</code>{" "}
+              <CopyToClipboard data={privateKey} />
             </p>
             <b>
-              {'Balance'}
+              {"Balance"}
               <Button
                 level="tertiary"
-                text={''}
+                text={""}
                 before={<MdRefresh />}
                 onClick={run}
                 disabled={isPending}
@@ -85,7 +93,10 @@ const AccountInfo = ({ privateKey, publicKey, address, getBalance, curNetwork })
               <div data-testid="container-error">{`Something went wrong: ${error.message}`}</div>
             ) : data ? (
               <div data-testid="container-data">
-                <small>{`${units.fromQa(new BN(data as string), units.Units.Zil)} ZIL`}</small>
+                <small>{`${units.fromQa(
+                  new BN(data as string),
+                  units.Units.Zil
+                )} ZIL`}</small>
               </div>
             ) : (
               <div data-testid="container-no-data">No data</div>
