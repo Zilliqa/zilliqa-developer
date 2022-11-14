@@ -15,10 +15,10 @@
  */
 
 export enum requestStatus {
-  INITIAL = 'INITIAL',
-  PENDING = 'PENDING',
-  FAILED = 'FAILED',
-  SUCCEEDED = 'SUCCEEDED',
+  INITIAL = "INITIAL",
+  PENDING = "PENDING",
+  FAILED = "FAILED",
+  SUCCEEDED = "SUCCEEDED",
 }
 
-export const SITE_KEY: string = '6LcC7DYcAAAAAA10VKIpA0sK44zrqn6rFIbxqYxd';
+export const SITE_KEY: string = "6LcC7DYcAAAAAA10VKIpA0sK44zrqn6rFIbxqYxd";

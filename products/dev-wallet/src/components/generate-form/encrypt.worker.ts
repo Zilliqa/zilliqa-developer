@@ -14,13 +14,17 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { schnorr, encryptPrivateKey } from '@zilliqa-js/crypto';
+import { schnorr, encryptPrivateKey } from "@zilliqa-js/crypto";
 
 const encrypt = async (event) => {
   try {
     const { passphrase } = event.data;
     const privateKey = schnorr.generatePrivateKey();
-    const keystoreJSON = await encryptPrivateKey('pbkdf2', privateKey, passphrase);
+    const keystoreJSON = await encryptPrivateKey(
+      "pbkdf2",
+      privateKey,
+      passphrase
+    );
     // @ts-ignore
     // eslint-disable-next-line
     self.postMessage({ keystoreJSON, privateKey });
@@ -37,4 +41,4 @@ const encrypt = async (event) => {
 const ctx: Worker = self as any;
 
 // Respond to message from parent thread
-ctx.addEventListener('message', (event) => encrypt(event).catch(console.log));
+ctx.addEventListener("message", (event) => encrypt(event).catch(console.log));

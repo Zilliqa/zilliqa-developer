@@ -14,13 +14,13 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
-import { Label, Input, FormGroup, Form, FormFeedback } from 'reactstrap';
-import Spinner from '../spinner';
-import Button from '../button';
+import React, { useState } from "react";
+import { Label, Input, FormGroup, Form, FormFeedback } from "reactstrap";
+import Spinner from "../spinner";
+import Button from "../button";
 
-import { getInputValidationState } from '../../utils';
-import Disclaimer from '../disclaimer';
+import { getInputValidationState } from "../../utils";
+import Disclaimer from "../disclaimer";
 
 interface IProps {
   accessWallet: (privateKey: string) => void;
@@ -41,17 +41,23 @@ const initialState: IState = {
   isDisclaimerChecked: false,
   prevAuthStatus: undefined,
   isAccessing: false,
-  privateKey: '',
+  privateKey: "",
   privateKeyValid: false,
   privateKeyInvalid: false,
 };
 
 const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
-  const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(initialState.isDisclaimerChecked);
+  const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(
+    initialState.isDisclaimerChecked
+  );
   const [isAccessing, setIsAccessing] = useState(initialState.isAccessing);
   const [privateKey, setPrivateKey] = useState(initialState.privateKey);
-  const [privateKeyValid, setPrivateKeyValid] = useState(initialState.privateKeyValid);
-  const [privateKeyInvalid, setPrivateKeyInvalid] = useState(initialState.privateKeyInvalid);
+  const [privateKeyValid, setPrivateKeyValid] = useState(
+    initialState.privateKeyValid
+  );
+  const [privateKeyInvalid, setPrivateKeyInvalid] = useState(
+    initialState.privateKeyInvalid
+  );
 
   const handleCheck = () => {
     setIsDisclaimerChecked(!isDisclaimerChecked);
@@ -60,8 +66,12 @@ const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
   const changePrivateKey = (e: React.ChangeEvent<HTMLInputElement>): void => {
     e.preventDefault();
     const value = e.target.value;
-    const key = 'privateKey';
-    const validationResult: any = getInputValidationState(key, value, /^[a-fA-F0-9]{64}$/g);
+    const key = "privateKey";
+    const validationResult: any = getInputValidationState(
+      key,
+      value,
+      /^[a-fA-F0-9]{64}$/g
+    );
     setPrivateKeyValid(validationResult.privateKeyValid);
     setPrivateKeyInvalid(validationResult.privateKeyInvalid);
     setPrivateKey(value);
@@ -73,9 +83,10 @@ const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
     return props.accessWallet(privateKey);
   };
 
-  const isSubmitButtonDisabled = !privateKeyValid || isAccessing || !isDisclaimerChecked;
-  const submitButtonText = isAccessing ? 'Accessing' : 'Access';
-  const description = 'You can access your wallet with private key.';
+  const isSubmitButtonDisabled =
+    !privateKeyValid || isAccessing || !isDisclaimerChecked;
+  const submitButtonText = isAccessing ? "Accessing" : "Access";
+  const description = "You can access your wallet with private key.";
 
   return (
     <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
@@ -83,7 +94,7 @@ const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
         <p className="text-secondary pb-3">{description}</p>
         <Label for="privateKey">
           <small>
-            <b>{'Private Key'}</b>
+            <b>{"Private Key"}</b>
           </small>
         </Label>
         <Input
@@ -100,8 +111,8 @@ const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
           placeholder="Enter the private key"
           maxLength={64}
         />
-        <FormFeedback>{'invalid private key'}</FormFeedback>
-        <FormFeedback valid={true}>{'valid private key'}</FormFeedback>
+        <FormFeedback>{"invalid private key"}</FormFeedback>
+        <FormFeedback valid={true}>{"valid private key"}</FormFeedback>
       </FormGroup>
 
       <br />

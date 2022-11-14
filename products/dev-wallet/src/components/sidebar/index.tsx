@@ -22,8 +22,8 @@ import "./style.css";
 import { FaHome, FaPlusSquare, FaTint, FaPaperPlane } from "react-icons/fa";
 
 const Sidebar = (props) => {
-  const { pathname } = useLocation();
-
+  // const { pathname } = useLocation();
+  const pathname = "";
   const renderLink = (path, name, icon) => (
     <Link
       to={path + window.location.search}

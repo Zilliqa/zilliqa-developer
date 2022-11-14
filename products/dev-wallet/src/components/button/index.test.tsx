@@ -14,17 +14,17 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { render, cleanup } from '@testing-library/react';
-import Button from '.';
+import { render, cleanup } from "@testing-library/react";
+import Button from ".";
 
 // automatically unmount and cleanup DOM after the test is finished.
 afterEach(cleanup);
 
-const levelArray = ['primary', 'secondary', 'tertiary'];
-const sizeArray = ['small', 'medium', 'large'];
+const levelArray = ["primary", "secondary", "tertiary"];
+const sizeArray = ["small", "medium", "large"];
 const disabledArray = [true, false];
 const snapshot = (level) => (size) => (disabled) => {
-  test('matches the snapshot', () => {
+  test("matches the snapshot", () => {
     const onClick = jest.fn();
     const { container } = render(
       <Button
@@ -41,31 +41,33 @@ const snapshot = (level) => (size) => (disabled) => {
 };
 
 levelArray.forEach((level) =>
-  sizeArray.forEach((size) => disabledArray.forEach((disabled) => snapshot(level)(size)(disabled)))
+  sizeArray.forEach((size) =>
+    disabledArray.forEach((disabled) => snapshot(level)(size)(disabled))
+  )
 );
 
-test('matches the snapshot', () => {
+test("matches the snapshot", () => {
   const onClick = jest.fn();
   const { container } = render(
     <Button
-      text={'before'}
+      text={"before"}
       before={<span>Pre</span>}
-      level={'primary'}
-      data-testid={'button-before'}
+      level={"primary"}
+      data-testid={"button-before"}
       onClick={onClick}
     />
   );
   expect(container.firstChild).toMatchSnapshot();
 });
 
-test('matches the snapshot', () => {
+test("matches the snapshot", () => {
   const onClick = jest.fn();
   const { container } = render(
     <Button
-      text={'before'}
+      text={"before"}
       after={<span>Post</span>}
-      level={'primary'}
-      data-testid={'button-before'}
+      level={"primary"}
+      data-testid={"button-before"}
       onClick={onClick}
     />
   );

@@ -14,11 +14,11 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import styled from 'styled-components';
-import { colors } from '../../colors';
+import * as React from "react";
+import styled from "styled-components";
+import { colors } from "../../colors";
 
-type SizeType = 'large' | 'medium' | 'small';
+type SizeType = "large" | "medium" | "small";
 
 interface IProps {
   readonly size?: SizeType;
@@ -38,12 +38,12 @@ const StyledSpinner = styled.div`
   border-radius: 50%;
 
   ${({ size }) =>
-    size === 'large'
+    size === "large"
       ? `&{
         width: ${LARGE}px;
         height: ${LARGE}px;
       }`
-      : size === 'small'
+      : size === "small"
       ? `&{
         width: ${SMALL}px;
         height: ${SMALL}px;

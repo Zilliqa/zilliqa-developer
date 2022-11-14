@@ -14,8 +14,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Layout from '../../components/layout';
-import GenerateForm from '../../components/generate-form';
+import Layout from "../../components/layout";
+import GenerateForm from "../../components/generate-form";
 
 const CreateContainer = ({ zilContext }) => {
   return (

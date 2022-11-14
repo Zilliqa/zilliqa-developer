@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+
 import {
   getAddressFromPrivateKey,
   getPubKeyFromPrivateKey,
@@ -44,9 +45,23 @@ const initialState = {
   publicKey: undefined as string | undefined,
   privateKey: undefined as string | undefined,
 };
+type IState = {
+  config: any;
+
+  curNetwork: any;
+  zilliqa?: Zilliqa;
+  version?: number;
+  provider?: HTTPProvider;
+
+  isAuth?: boolean;
+  address?: string;
+  publicKey?: string;
+  privateKey?: string;
+};
+
 export const ZilContext = React.createContext(initialState);
 
-export class ZilProvider extends React.Component {
+export class ZilProvider extends React.Component<{ children: any }, IState> {
   public readonly state = initialState;
   async componentDidMount() {
     const res = await fetch("config.json");
