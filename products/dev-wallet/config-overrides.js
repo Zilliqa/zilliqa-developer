@@ -1,33 +1,9 @@
+/* eslint-disable */
 const WorkerPlugin = require("worker-plugin");
+/* eslint-disable */
 const webpack = require("webpack");
 
-module.exports = function override(config, env) {
-  //  config.plugins.push(new WorkerPlugin());
-  /*
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      stream: require.resolve("stream-browserify"),
-      buffer: require.resolve("buffer"),
-    };
-
-    config.resolve.extensions = [
-      ...config.resolve.extensions,
-      ".ts",
-      ".js",
-      ".tsx",
-      ".jsx",
-    ];
-    config.plugins = [
-      ...config.plugins,
-      new webpack.ProvidePlugin({
-        Buffer: ["buffer", "Buffer"],
-      }),
-      new webpack.ProvidePlugin({
-        process: "process/browser",
-      }),
-    ];
-  */
-
+module.exports = function override(config) {
   config.resolve.fallback = {
     url: require.resolve("url"),
     assert: require.resolve("assert"),

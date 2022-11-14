@@ -14,14 +14,15 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLocation } from "react-router";
+// TODO: useLocation is broken
+// import { useLocation } from "react-router";
 import { NavItem } from "reactstrap";
 import { Link } from "react-router-dom";
 import { paths } from "../../routes";
 import "./style.css";
 import { FaHome, FaPlusSquare, FaTint, FaPaperPlane } from "react-icons/fa";
 
-const Sidebar = (props) => {
+const Sidebar = () => {
   // const { pathname } = useLocation();
   const pathname = "";
   const renderLink = (path, name, icon) => (

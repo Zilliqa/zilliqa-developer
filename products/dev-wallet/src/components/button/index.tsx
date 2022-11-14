@@ -158,7 +158,6 @@ const Button: React.FunctionComponent<IProps> = ({
   after,
   style,
   level,
-  testId,
   ...rest
 }) => (
   <StyledButton

@@ -33,7 +33,7 @@ const curNetwork = {
 };
 test("matches the snapshot when loaded", async () => {
   const getBalance = jest.fn().mockResolvedValue("100000");
-  const { container, getByTestId } = render(
+  const { container } = render(
     <AccountInfo
       privateKey={privateKey}
       publicKey={publicKey}

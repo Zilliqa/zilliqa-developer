@@ -1,4 +1,6 @@
+/* eslint-disable */
 const assert = require("assert");
+/* eslint-disable */
 const fs = require("fs");
 
 // Make sure there's a file like build/static/js/main.12345678.js
