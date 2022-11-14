@@ -1,6 +1,5 @@
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@aspect_rules_js//js:defs.bzl", "js_test")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
@@ -127,15 +126,16 @@ pkg_tar(
     deps = [],
 )
 
-container_image(
-    name = "image",
-    base = "@nginx//image",
-    ports = ["80"],
-    tars = [
-        ":html-folder",
-        ":nignx-conf",
-    ],
-)
+# TODO: To be made a later point
+# container_image(
+#     name = "image",
+#     base = "@nginx//image",
+#     ports = ["80"],
+#     tars = [
+#         ":html-folder",
+#         ":nignx-conf",
+#     ],
+# )
 
 cra_bin.react_app_rewired_test(
     name = "test",
