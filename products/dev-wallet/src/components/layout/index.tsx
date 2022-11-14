@@ -30,7 +30,7 @@ const Layout = ({ zilContext, children }) => {
         switchNetwork={switchNetwork}
       />
       <div className="layout">
-        <Sidebar curNetwork={curNetwork} />
+        <Sidebar />
         <div className="content-section">
           {children}
           <Footer year={new Date().getFullYear()} />

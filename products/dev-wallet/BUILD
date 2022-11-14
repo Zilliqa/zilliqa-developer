@@ -1,5 +1,4 @@
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
-load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
@@ -97,12 +96,6 @@ cra_bin.react_app_rewired(
         "BUILD_PATH": "./build",
     },
     out_dirs = ["build"],
-)
-
-js_test(
-    name = "build_smoke_test",
-    data = ["build"],
-    entry_point = "build_smoke_test.js",
 )
 
 copy_to_bin(
