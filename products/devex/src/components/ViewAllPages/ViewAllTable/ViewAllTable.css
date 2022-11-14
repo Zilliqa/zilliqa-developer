@@ -1,0 +1,110 @@
+.viewall-table {
+  white-space: nowrap;
+  font-size: 15px;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-table-bg);
+  color: var(--color-text);
+  min-height: 500px;
+  position: relative;
+}
+
+.viewall-table table * {
+  border-color: var(--color-border) !important;
+}
+
+.viewall-table table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.viewall-table thead th {
+  padding: 1rem 0.75rem;
+  border-top: 0;
+  font-weight: 500;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+}
+
+.viewall-table td {
+  padding: 0.8rem;
+}
+
+.viewall-table [role=cell] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hardcoded Widths (May require tweaks) */
+
+/* DS-Block Page */
+
+.viewall-table #height-col {
+  width: 100px;
+}
+
+.viewall-table #difficulty-col {
+  width: 90px;
+}
+
+.viewall-table #ds-difficulty-col {
+  width: 110px;
+}
+
+.viewall-table #ds-leader-col {
+  width: 380px;
+}
+
+.viewall-table #age-col {
+  width: 160px;
+  text-align: end;
+}
+
+/* Tx-Block Page */
+
+.viewall-table #numTxns-col {
+  width: 60px;
+  text-align: center;
+}
+
+.viewall-table #mbs-count-col {
+  width: 90px;
+  text-align: center;
+}
+
+.viewall-table #total-txn-fees-col {
+  width: 120px;
+  text-align: right;
+  padding-right: 1rem;
+}
+
+.viewall-table #rewards-col {
+  width: 120px;
+  text-align: right;
+  padding-right: 1rem;
+}
+
+/* Transactions Page */
+
+.viewall-table #from-col {
+  width: 170px;
+}
+
+.viewall-table #to-col {
+  width: 170px;
+}
+
+.viewall-table #hash-col {
+  width: 600px;
+  padding-left: 2rem;
+}
+
+.viewall-table #fee-col {
+  width: 100px;
+  text-align: center;
+}
+
+.viewall-table #amount-col {
+  width: 165px;
+  text-align: right;
+}

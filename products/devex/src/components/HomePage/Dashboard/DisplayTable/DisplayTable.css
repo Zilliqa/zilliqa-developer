@@ -1,0 +1,161 @@
+.display-table table {
+  white-space: nowrap;
+  font-size: 15px;
+  width: 100%;
+  table-layout: fixed !important;
+  border-collapse: separate;
+}
+
+.txblock-card .display-table tr td:first-child,
+.txblock-card .display-table tr th:first-child {
+  padding-left: 20px;
+}
+
+.txblock-card .display-table tr td:last-child,
+.txblock-card .display-table tr th:last-child {
+  padding-right: 20px;
+}
+
+.dsblock-card .display-table tr td:first-child,
+.dsblock-card .display-table tr th:first-child {
+  padding-left: 20px;
+}
+
+.dsblock-card .display-table tr td:last-child,
+.dsblock-card .display-table tr th:last-child {
+  padding-right: 20px;
+}
+
+.display-table th {
+  padding: 0.5rem;
+  color: var(--color-subtext);
+}
+
+.display-table td {
+  padding: 0.35rem 0.5rem;
+}
+.display-table td.type-cell {
+  width: 30px;
+}
+
+.display-table [role="cell"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hardcoded Widths (May require tweaks) */
+
+/* DS-Block List */
+
+.display-table #dsheight-col {
+  width: 50px;
+}
+
+.display-table #difficulty-col {
+  width: 55px;
+  text-align: center;
+}
+
+.display-table #ds-difficulty-col {
+  width: 75px;
+  text-align: center;
+}
+
+.display-table #age-col {
+  padding-right: 25px;
+  width: 90px;
+  text-align: end;
+}
+
+/* Tx-Block List */
+
+.display-table #txheight-col {
+  width: 60px;
+}
+
+.display-table #mbs-count-col {
+  width: 90px;
+  text-align: center;
+}
+
+.display-table #numTxns-col {
+  width: 50px;
+  text-align: center;
+}
+
+.display-table #total-txn-fees-col {
+  width: 50px;
+  text-align: end;
+}
+
+.display-table #rewards-col {
+  width: 50px;
+  text-align: end;
+}
+
+.display-table #ds-block-col {
+  width: 50px;
+  text-align: center;
+}
+
+/* Validated Transactions List */
+
+.display-table #from-col {
+  width: 85px;
+}
+
+.display-table #to-col {
+  width: 85px;
+}
+
+.display-table #hash-col {
+  padding-left: 26px;
+  width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.display-table #amount-col {
+  text-align: right;
+  width: 95px;
+}
+
+.display-table #fee-col {
+  width: 45px;
+  text-align: center;
+}
+
+/* Pending Transactions List */
+
+.display-table #pend-hash-col {
+  width: 360px;
+}
+
+.display-table #code-col {
+  text-align: center;
+  width: 45px;
+}
+
+.display-table #status-col {
+  width: 60px;
+  text-align: center;
+}
+
+.display-table #description-col {
+  width: 300px;
+}
+
+.display-table #type-col {
+  width: 30px;
+  text-align: center;
+}
+
+.display-table #alert-col {
+  width: 70px;
+  text-align: center;
+}
+
+.display-table #timestamp-col {
+  width: 70px;
+}

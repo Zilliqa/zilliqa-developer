@@ -1,0 +1,22 @@
+/* Header */
+
+.transaction-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Card */
+
+.txn-details-card {
+  width: 100%;
+  margin: 1rem 0;
+  white-space: nowrap;
+}
+
+.txn-detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
