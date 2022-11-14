@@ -32,7 +32,7 @@ import LabelStar from "../Misc/LabelComponent/LabelStar";
 import "./DSBlockDetailsPage.css";
 
 const DSBlockDetailsPage: React.FC = () => {
-  const { blockNum } = useParams();
+  const { blockNum } = useParams<{ blockNum: string }>();
   const networkContext = useContext(NetworkContext);
   const { dataService } = networkContext!;
 
@@ -54,7 +54,8 @@ const DSBlockDetailsPage: React.FC = () => {
     let minerInfo: MinerInfo;
     const getData = async () => {
       try {
-        if (isNaN(blockNum)) throw new Error("Not a valid block number");
+        if (isNaN(parseInt(blockNum)))
+          throw new Error("Not a valid block number");
         receivedData = await dataService.getDSBlockDetails(blockNum);
         latestDSBlockNum = await dataService.getNumDSBlocks();
         try {
@@ -67,8 +68,9 @@ const DSBlockDetailsPage: React.FC = () => {
         if (latestDSBlockNum) setLatestDSBlockNum(latestDSBlockNum);
         if (minerInfo) setMinerInfo(minerInfo);
       } catch (e) {
-        console.log(e);
-        setError(e);
+        console.error(e);
+        // TODO: Get the structure of the error and extract the message
+        setError("An error occurred - please see the console.");
       } finally {
         setIsLoading(false);
       }

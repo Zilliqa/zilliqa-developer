@@ -135,8 +135,6 @@ export const NetworkProvider = (props: { children: any }) => {
       }
     };
     loadNetworks();
-    // Only called once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

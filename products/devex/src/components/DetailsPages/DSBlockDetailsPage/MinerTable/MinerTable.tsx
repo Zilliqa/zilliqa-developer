@@ -42,7 +42,10 @@ const MinerTable: React.FC<IMinerTableParams> = ({ addresses }) => {
     []
   );
 
-  const columns = useMemo(
+  const columns: Array<Column<IMinerObj>> = [];
+  // TODO: work out why this assignment no longer works
+  /*
+  = useMemo(
     () => [
       {
         id: "address-col",
@@ -63,7 +66,7 @@ const MinerTable: React.FC<IMinerTableParams> = ({ addresses }) => {
     ],
     []
   ) as Array<Column<IMinerObj>>;
-
+  */
   const data = useMemo(
     () => addresses.map((x) => ({ address: x })) as IMinerObj[],
     [addresses]

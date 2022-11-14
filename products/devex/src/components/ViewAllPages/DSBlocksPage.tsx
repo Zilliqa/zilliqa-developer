@@ -82,7 +82,7 @@ const DSBlocksPage: React.FC = () => {
   );
 
   const fetchData = useCallback(
-    ({ pageIndex }) => {
+    ({ pageIndex }: { pageIndex: number }) => {
       if (!dataService) return;
 
       const fetchId = ++fetchIdRef.current;

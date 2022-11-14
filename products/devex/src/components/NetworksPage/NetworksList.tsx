@@ -46,8 +46,6 @@ const NetworksList: React.FC = () => {
       setNetworkMap(serialiseNetworks(cards));
       cardsRef.current = cards;
     }
-    // Ignored to avoid multiple calls
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards]);
 
   useEffect(() => {

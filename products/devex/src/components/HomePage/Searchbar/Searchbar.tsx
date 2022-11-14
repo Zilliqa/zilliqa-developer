@@ -69,7 +69,7 @@ const Searchbar: React.FC<IProps> = ({ isHeaderSearchbar, isISSearchbar }) => {
           id={isHeaderSearchbar ? "header-searchbar-ig" : "searchbar-ig"}
         >
           {isISSearchbar ? (
-            <InputGroup.Prepend>
+            <InputGroup>
               <DropdownButton id="searchbar-dropdown" title={searchType}>
                 <Dropdown.Item onClick={() => setSearchType("Txn/Addr")}>
                   Txn/Addr
@@ -78,9 +78,9 @@ const Searchbar: React.FC<IProps> = ({ isHeaderSearchbar, isISSearchbar }) => {
                   Tx Block
                 </Dropdown.Item>
               </DropdownButton>
-            </InputGroup.Prepend>
+            </InputGroup>
           ) : (
-            <InputGroup.Prepend>
+            <InputGroup>
               <DropdownButton id="searchbar-dropdown" title={searchType}>
                 <Dropdown.Item onClick={() => setSearchType("Txn/Addr")}>
                   Txn/Addr
@@ -92,7 +92,7 @@ const Searchbar: React.FC<IProps> = ({ isHeaderSearchbar, isISSearchbar }) => {
                   DS Block
                 </Dropdown.Item>
               </DropdownButton>
-            </InputGroup.Prepend>
+            </InputGroup>
           )}
           <Form.Control
             type="text"
@@ -107,7 +107,7 @@ const Searchbar: React.FC<IProps> = ({ isHeaderSearchbar, isISSearchbar }) => {
             }
             onChange={handleChange}
           />
-          <InputGroup.Append>
+          <InputGroup>
             <Button type="submit">
               {isHeaderSearchbar ? (
                 <FontAwesomeIcon icon={faSearch} />
@@ -115,7 +115,7 @@ const Searchbar: React.FC<IProps> = ({ isHeaderSearchbar, isISSearchbar }) => {
                 <div>Search</div>
               )}
             </Button>
-          </InputGroup.Append>
+          </InputGroup>
         </InputGroup>
       </Form>
     </>

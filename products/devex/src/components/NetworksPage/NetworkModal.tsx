@@ -72,9 +72,7 @@ const NetworkModal: React.FC<IProps> = ({ show, handleCloseModal, cb }) => {
             </div>
           </Form.Group>
           <div>
-            <Button block type="submit">
-              Save
-            </Button>
+            <Button type="submit">Save</Button>
           </div>
         </Form>
       </Modal.Body>

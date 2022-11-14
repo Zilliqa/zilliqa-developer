@@ -3522,7 +3522,7 @@ packages:
   /@types/eslint/8.4.10:
     resolution: {integrity: sha512-Sl/HOqN8NKPmhWo2VBEPm0nvHnu2LL3v9vKo8MEq0EtbJ4eVzGPl41VNPvn5E1i5poMk4/XD8UriLHpJvEP/Nw==}
     dependencies:
-      '@types/estree': 0.0.51
+      '@types/estree': 1.0.0
       '@types/json-schema': 7.0.11
     dev: false
 
@@ -3532,6 +3532,10 @@ packages:
 
   /@types/estree/0.0.51:
     resolution: {integrity: sha512-CuPgU6f3eT/XgKKPqKd/gLZV1Xmvf1a2R5POBOGQa6uv82xpls89HU5zKeVoyR8XzHd1RGNOlQlvUe3CFkjWNQ==}
+    dev: false
+
+  /@types/estree/1.0.0:
+    resolution: {integrity: sha512-WulqXMDUTYAXCjZnk6JtIHPigp55cVtDgDrO2gHRwhyJto21+1zbVCtOYB2L1F9w4qCQ0rOGWBnBe0FNTiEJIQ==}
     dev: false
 
   /@types/express-serve-static-core/4.17.31:
@@ -13188,7 +13192,7 @@ packages:
       yaml: 1.10.2
     dev: false
 
-  /postcss-loader/6.2.1_fftoi3rcfs7yub2oso6sthrr2e:
+  /postcss-loader/6.2.1_mkaa5s7ze4cl36dwdiarxhmudi:
     resolution: {integrity: sha512-WbbYpmAaKcux/P66bZ40bpWsBucjx/TTgVVzRZ9yUO8yQfVBlameJ0ZGVaPfH64hNSBh63a+ICP5nqOpBA0w+Q==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
@@ -13203,7 +13207,7 @@ packages:
       postcss: 8.4.19
       postcss-flexbugs-fixes: 5.0.2_postcss@8.4.19
       postcss-normalize: 10.0.1_o3gvceo4mmkmipwqbduijhv2ui
-      postcss-preset-env: 7.8.2_postcss@8.4.19
+      postcss-preset-env: 7.8.3_postcss@8.4.19
       semver: 7.3.8
       webpack: 5.75.0_webpack-cli@3.3.12
     dev: false
@@ -13505,8 +13509,8 @@ packages:
       postcss-value-parser: 4.2.0
     dev: false
 
-  /postcss-preset-env/7.8.2_postcss@8.4.19:
-    resolution: {integrity: sha512-rSMUEaOCnovKnwc5LvBDHUDzpGP+nrUeWZGWt9M72fBvckCi45JmnJigUr4QG4zZeOHmOCNCZnd2LKDvP++ZuQ==}
+  /postcss-preset-env/7.8.3_postcss@8.4.19:
+    resolution: {integrity: sha512-T1LgRm5uEVFSEF83vHZJV2z19lHg4yJuZ6gXZZkqVsqv63nlr6zabMH3l4Pc01FQCyfWVrh2GaUeCVy9Po+Aag==}
     engines: {node: ^12 || ^14 || >=16}
     peerDependencies:
       postcss: ^8.2
@@ -14472,9 +14476,9 @@ packages:
       mini-css-extract-plugin: 2.6.1_webpack@5.75.0
       postcss: 8.4.19
       postcss-flexbugs-fixes: 5.0.2_postcss@8.4.19
-      postcss-loader: 6.2.1_fftoi3rcfs7yub2oso6sthrr2e
+      postcss-loader: 6.2.1_mkaa5s7ze4cl36dwdiarxhmudi
       postcss-normalize: 10.0.1_o3gvceo4mmkmipwqbduijhv2ui
-      postcss-preset-env: 7.8.2_postcss@8.4.19
+      postcss-preset-env: 7.8.3_postcss@8.4.19
       prompts: 2.4.2
       react: 18.2.0
       react-app-polyfill: 3.0.0

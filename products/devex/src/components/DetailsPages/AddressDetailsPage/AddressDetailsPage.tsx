@@ -10,7 +10,7 @@ import ContractDetailsPage from "./ContractDetailsPage/ContractDetailsPage";
 import NotFoundPage from "../../ErrorPages/NotFoundPage";
 
 const AddressDetailsPage: React.FC = () => {
-  const { addr } = useParams();
+  const { addr } = useParams<{ addr: string }>();
   const networkContext = useContext(NetworkContext);
   const { dataService } = networkContext!;
 

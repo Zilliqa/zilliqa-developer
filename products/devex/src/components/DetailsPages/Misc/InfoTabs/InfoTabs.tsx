@@ -91,7 +91,7 @@ const InfoTabs: React.FC<IProps> = ({ tabs }) => {
             <Tabs
               id="info-tabs"
               activeKey={currTab}
-              onSelect={(k: string) => setCurrTab(k)}
+              onSelect={(k: string | null) => k && setCurrTab(k)}
             >
               {tabHeaders.map((tabHeader: string, index: number) => (
                 <Tab

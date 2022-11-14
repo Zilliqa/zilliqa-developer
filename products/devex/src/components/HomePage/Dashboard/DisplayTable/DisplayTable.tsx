@@ -11,7 +11,8 @@ import {
 import "./DisplayTable.css";
 
 interface IDisplayTableParams<T extends object> {
-  columns: Column<T>[];
+  // TODO: Work out the correct type to put here
+  columns: any; // Column<T>[];
   data: T[];
 }
 

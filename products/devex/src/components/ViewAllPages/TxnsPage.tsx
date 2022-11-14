@@ -110,7 +110,7 @@ const TxnsPage: React.FC = () => {
   );
 
   const fetchData = useCallback(
-    ({ pageIndex }) => {
+    ({ pageIndex }: { pageIndex: number }) => {
       if (!dataService) return;
 
       const fetchId = ++fetchIdRef.current;
@@ -147,8 +147,6 @@ const TxnsPage: React.FC = () => {
       };
 
       if (fetchId === fetchIdRef.current) getData();
-      // Recent transaction hashes is not changed after the initial fetch, until the user refreshes/re-render the component
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     [dataService]
   );

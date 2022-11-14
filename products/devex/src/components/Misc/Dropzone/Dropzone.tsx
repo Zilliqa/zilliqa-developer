@@ -26,7 +26,10 @@ const Dropzone: React.FC<IProps> = ({ dropCb, fromJson }) => {
   );
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: "application/json",
+    accept: {
+      // https://stackoverflow.com/questions/72187039/react-dropzone-accepted-files-mime-type-error
+      "application/*": [".json"],
+    },
     onDrop,
   });
 

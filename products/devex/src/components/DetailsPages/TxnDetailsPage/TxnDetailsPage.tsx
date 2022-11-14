@@ -26,7 +26,7 @@ import TransactionFlow from "./TransactionFlowNew";
 import "./TxnDetailsPage.css";
 
 const TxnDetailsPage: React.FC = () => {
-  const { txnHash } = useParams();
+  const { txnHash } = useParams<{ txnHash: string }>();
   const networkContext = useContext(NetworkContext);
   const { dataService, networkUrl } = networkContext!;
 
@@ -47,8 +47,9 @@ const TxnDetailsPage: React.FC = () => {
           setData(receivedData);
         }
       } catch (e) {
-        console.log(e);
-        setError(e);
+        console.error(e);
+        setError("An error occurred - please see console for details");
+        // TODO: Extract the correct error infomation from the exception and use it
       } finally {
         setIsLoading(false);
       }

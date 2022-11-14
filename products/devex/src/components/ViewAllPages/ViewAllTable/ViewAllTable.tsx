@@ -16,7 +16,8 @@ import { DsBlockObj, TxBlockObj } from "@zilliqa-js/core/src/types";
 import "./ViewAllTable.css";
 
 interface IViewAllTableParams<T extends object> {
-  columns: Array<Column<T>>;
+  // TODO: Work out the correct type to put here
+  columns: any; //Array<Column<T>>;
   data: T[];
   isLoading: boolean;
   fetchData: ({ pageIndex }: { pageIndex: number }) => void;

@@ -51,7 +51,7 @@ import NotFoundPage from "../../ErrorPages/NotFoundPage";
 import "./TxBlockDetailsPage.css";
 
 const TxBlockDetailsPage: React.FC = () => {
-  const { blockNum } = useParams();
+  const { blockNum } = useParams<{ blockNum: string }>();
   const networkContext = useContext(NetworkContext);
   const { dataService, isIsolatedServer } = networkContext!;
 
@@ -75,7 +75,8 @@ const TxBlockDetailsPage: React.FC = () => {
     let txBlockTxns: string[];
     const getData = async () => {
       try {
-        if (isNaN(blockNum)) throw new Error("Not a valid block number");
+        if (isNaN(parseInt(blockNum)))
+          throw new Error("Not a valid block number");
         if (isIsolatedServer) {
           txBlockTxns = await dataService.getISTransactionsForTxBlock(
             parseInt(blockNum)
@@ -96,8 +97,10 @@ const TxBlockDetailsPage: React.FC = () => {
         if (txBlockTxns) setTxBlockTxns(txBlockTxns);
         if (latestTxBlockNum) setLatestTxBlockNum(latestTxBlockNum);
       } catch (e) {
-        console.log(e);
-        setError(e);
+        console.error(e);
+        setError("An error occurred - please see console");
+        // TODO: Extract error and set error message
+        // setError(e);
       } finally {
         setIsLoading(false);
       }
@@ -188,7 +191,7 @@ const TxBlockDetailsPage: React.FC = () => {
     []
   );
   const fetchData = useCallback(
-    ({ pageIndex }) => {
+    ({ pageIndex }: { pageIndex: number }) => {
       if (!txBlockTxns || !dataService) return;
 
       let receivedData: TransactionDetails[];

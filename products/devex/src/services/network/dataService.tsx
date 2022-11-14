@@ -326,8 +326,10 @@ export class DataService {
 
   async getLatest5PendingTransactions(): Promise<TransactionStatus[]> {
     console.log("getting 5 pending tx");
-    const pendingTxns = await this.zilliqa.blockchain.getPendingTxns();
-    return pendingTxns.Txns as TransactionStatus[];
+    // TODO: Fix the API call
+    //const pendingTxns = await this.zilliqa.blockchain.getPendingTxns();
+    //return pendingTxns.Txns as TransactionStatus[];
+    return [] as TransactionStatus[];
   }
 
   //================================================================================

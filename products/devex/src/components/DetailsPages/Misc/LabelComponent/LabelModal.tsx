@@ -54,9 +54,7 @@ const LabelModal: React.FC<IProps> = ({ show, handleCloseModal, addLabel }) => {
             />
           </div>
           <div>
-            <Button block type="submit">
-              Save
-            </Button>
+            <Button type="submit">Save</Button>
           </div>
         </Form>
         <div className="modal-footer">
