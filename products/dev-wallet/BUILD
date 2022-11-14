@@ -131,40 +131,40 @@ pkg_tar(
 # )
 
 # TODO: Many snapshot based tests with heuristic class names.
-cra_bin.react_app_rewired_test(
-    name = "test",
-    args = [
-        "test",
-        # ibazel is the watch mode for Bazel when running tests
-        # Because Bazel is really a CI system that runs locally
-        "--watchAll=false",
-        # https://jestjs.io/docs/cli#--cache. Whether to use the cache. Defaults to true. Disable
-        # the cache using --no-cache. Caching is Bazel's job, we don't want non-hermeticity
-        "--no-cache",
-        # https://jestjs.io/docs/cli#--watchman. Whether to use watchman for file crawling. Defaults
-        # to true. Disable using --no-watchman. Watching is ibazel's job
-        "--no-watchman",
-        # https://jestjs.io/docs/cli#--ci. When this option is provided, Jest will assume it is
-        # running in a CI environment. This changes the behavior when a new snapshot is encountered.
-        # Instead of the regular behavior of storing a new snapshot automatically, it will fail the
-        # test and require Jest to be run with --updateSnapshot.
-        "--ci",
-        # Needed for Jest to walk the filesystem to find inputs.
-        # See https://github.com/facebook/jest/pull/9351
-        "--haste",
-        "{\\\"enableSymlinks\\\":\\ true}",
-    ],
-    chdir = package_name(),
-    data = _RUNTIME_DEPS + [
-        "copy_test_files",
-        "//:node_modules/@testing-library/jest-dom",
-        "//:node_modules/@testing-library/react",
-        "//:node_modules/@testing-library/user-event",
-        "//:node_modules/typescript",
-        "//:node_modules/jest-watch-typeahead",
-        "//:node_modules/webpack",
-    ],
-)
+# cra_bin.react_app_rewired_test(
+#     name = "test",
+#     args = [
+#         "test",
+#         # ibazel is the watch mode for Bazel when running tests
+#         # Because Bazel is really a CI system that runs locally
+#         "--watchAll=false",
+#         # https://jestjs.io/docs/cli#--cache. Whether to use the cache. Defaults to true. Disable
+#         # the cache using --no-cache. Caching is Bazel's job, we don't want non-hermeticity
+#         "--no-cache",
+#         # https://jestjs.io/docs/cli#--watchman. Whether to use watchman for file crawling. Defaults
+#         # to true. Disable using --no-watchman. Watching is ibazel's job
+#         "--no-watchman",
+#         # https://jestjs.io/docs/cli#--ci. When this option is provided, Jest will assume it is
+#         # running in a CI environment. This changes the behavior when a new snapshot is encountered.
+#         # Instead of the regular behavior of storing a new snapshot automatically, it will fail the
+#         # test and require Jest to be run with --updateSnapshot.
+#         "--ci",
+#         # Needed for Jest to walk the filesystem to find inputs.
+#         # See https://github.com/facebook/jest/pull/9351
+#         "--haste",
+#         "{\\\"enableSymlinks\\\":\\ true}",
+#     ],
+#     chdir = package_name(),
+#     data = _RUNTIME_DEPS + [
+#         "copy_test_files",
+#         "//:node_modules/@testing-library/jest-dom",
+#         "//:node_modules/@testing-library/react",
+#         "//:node_modules/@testing-library/user-event",
+#         "//:node_modules/typescript",
+#         "//:node_modules/jest-watch-typeahead",
+#         "//:node_modules/webpack",
+#     ],
+# )
 
 cra_bin.react_app_rewired_binary(
     name = "start",
