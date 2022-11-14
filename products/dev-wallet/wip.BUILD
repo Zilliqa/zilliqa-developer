@@ -1,9 +1,9 @@
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@build_bazel_rules_nodejs//:index.bzl", "copy_to_bin")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@npm//@bazel/typescript:index.bzl", "ts_project")
 load("@npm//http-server:index.bzl", "http_server")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load(":differential_loading.bzl", "differential_loading")
 
 ts_project(

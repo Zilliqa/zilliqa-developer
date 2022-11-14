@@ -8,7 +8,13 @@ import "./index.css";
 import { RouterNode } from "./routes";
 
 import reportWebVitals from "./reportWebVitals";
+import { Buffer } from "buffer";
 
+// @ts-ignore
+(window as any).global = window;
+// @ts-ignore
+(window as any).global.Buffer = Buffer;
+console.log("Hello world!!");
 ReactDOM.render(
   <React.StrictMode>
     <RouterNode />

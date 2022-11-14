@@ -27,21 +27,26 @@ specifiers:
   '@typescript-eslint/parser': ^4.31.1
   aes-js: ^3.1.1
   ansi-styles: ^6.2.1
+  assert: ^2.0.0
   bip39: ^2.5.0
   bn.js: ^4.11.8
   bootstrap: ^5.2.2
+  buffer: ^6.0.3
   buffer-from: ^1.1.2
   camelcase: ^5.0.0
   classnames: ^2.3.2
   clsx: ^1.2.1
   cross-fetch: 2.2.5
+  crypto-browserify: ^3.12.0
   csstype: ^3.1.1
   elliptic: ^6.5.0
   eslint: ^7.32.0
+  events: ^3.3.0
   expect: ^29.3.1
   hash.js: ^1.1.5
   hdkey: ^1.1.0
   hmac-drbg: ^1.0.1
+  https-browserify: ^1.0.0
   jest: '=26.6.0'
   jest-diff: ^29.3.1
   jest-environment-jsdom: ^29.3.1
@@ -52,6 +57,7 @@ specifiers:
   mitt: ^1.1.3
   mock-socket: ^9.1.5
   node-fetch: ^3.2.10
+  os-browserify: ^0.3.0
   pbkdf2: ^3.0.16
   pretty-format: ^29.3.1
   prism-react-renderer: ^1.3.5
@@ -59,7 +65,7 @@ specifiers:
   rc-steps: ^3.3.1
   react: 18.2.0
   react-app-polyfill: ^2.0.0
-  react-app-rewired: ^2.1.8
+  react-app-rewired: ^2.2.1
   react-dev-utils: ^11.0.3
   react-dom: 18.2.0
   react-google-recaptcha: ^1.0.5
@@ -67,6 +73,7 @@ specifiers:
   react-icons: ^3.3.0
   react-jazzicon: ^0.1.3
   react-refresh: ^0.8.3
+  react-router: ^6.4.3
   react-router-dom: ^5.2.0
   react-scripts: 5.0.1
   reactstrap: ^8.0.0
@@ -82,6 +89,9 @@ specifiers:
   sodium-randbytes: 0.14.0
   source-map: ^0.7.4
   source-map-support: ^0.5.21
+  stream-browserify: ^3.0.0
+  stream-http: ^3.2.0
+  string_decoder: ^1.3.0
   style-loader: ^1.0.0
   styled-components: ^4.3.2
   tailwindcss: ^3.1.8
@@ -90,10 +100,11 @@ specifiers:
   ts-loader: 8.0.4
   tslib: 2.3.1
   typescript: ^4.1.2
+  url: ^0.11.0
   utility-types: ^2.1.0
   uuid: ^8.3.2
   web-vitals: 2.1.4
-  webpack: '=4.44.2'
+  webpack: ^4.44.2
   webpack-cli: ^3.3.9
   webpack-command: ^0.4.1
   websocket: ^1.0.28
@@ -124,21 +135,26 @@ dependencies:
   '@typescript-eslint/parser': 4.33.0_3rubbgt5ekhqrcgx4uwls3neim
   aes-js: 3.1.2
   ansi-styles: 6.2.1
+  assert: 2.0.0
   bip39: 2.6.0
   bn.js: 4.12.0
   bootstrap: 5.2.2
+  buffer: 6.0.3
   buffer-from: 1.1.2
   camelcase: 5.3.1
   classnames: 2.3.2
   clsx: 1.2.1
   cross-fetch: 2.2.5
+  crypto-browserify: 3.12.0
   csstype: 3.1.1
   elliptic: 6.5.4
   eslint: 7.32.0
+  events: 3.3.0
   expect: 29.3.1
   hash.js: 1.1.7
   hdkey: 1.1.2
   hmac-drbg: 1.0.1
+  https-browserify: 1.0.0
   jest: 26.6.0
   jest-diff: 29.3.1
   jest-environment-jsdom: 29.3.1
@@ -149,6 +165,7 @@ dependencies:
   mitt: 1.2.0
   mock-socket: 9.1.5
   node-fetch: 3.3.0
+  os-browserify: 0.3.0
   pbkdf2: 3.1.2
   pretty-format: 29.3.1
   prism-react-renderer: 1.3.5_react@18.2.0
@@ -164,6 +181,7 @@ dependencies:
   react-icons: 3.11.0_react@18.2.0
   react-jazzicon: 0.1.3_react@18.2.0
   react-refresh: 0.8.3
+  react-router: 6.4.3_react@18.2.0
   react-router-dom: 5.3.4_react@18.2.0
   react-scripts: 5.0.1_dwiw3y2to3blb3rxpy44vs7fbu
   reactstrap: 8.10.1_biqbaboplfbrettd7655fr4n2y
@@ -179,6 +197,9 @@ dependencies:
   sodium-randbytes: 0.14.0
   source-map: 0.7.4
   source-map-support: 0.5.21
+  stream-browserify: 3.0.0
+  stream-http: 3.2.0
+  string_decoder: 1.3.0
   style-loader: 1.3.0_webpack@4.44.2
   styled-components: 4.4.1_biqbaboplfbrettd7655fr4n2y
   tailwindcss: 3.2.4
@@ -187,6 +208,7 @@ dependencies:
   ts-loader: 8.0.4_typescript@4.8.4
   tslib: 2.3.1
   typescript: 4.8.4
+  url: 0.11.0
   utility-types: 2.1.0
   uuid: 8.3.2
   web-vitals: 2.1.4
@@ -2506,6 +2528,11 @@ packages:
   /@protobufjs/utf8/1.1.0:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
+  /@remix-run/router/1.0.3:
+    resolution: {integrity: sha512-ceuyTSs7PZ/tQqi19YZNBc5X7kj1f8p+4DIyrcIYFY9h+hd1OKm4RqtiWldR9eGEvIiJfsqwM4BsuCtRIuEw6Q==}
+    engines: {node: '>=14'}
+    dev: false
+
   /@rollup/plugin-babel/5.3.1_rw3hudt2pmn5afxog7l3b6qtze:
     resolution: {integrity: sha512-WFfdLWU/xVWKeRQnKmIAQULUI7Il0gZnBIH/ZFO069wYIfPu+8zrfp/KMW0atmELoRDq8FbiP3VCss9MhCut7Q==}
     engines: {node: '>= 10.0.0'}
@@ -4077,6 +4104,15 @@ packages:
       util: 0.10.3
     dev: false
 
+  /assert/2.0.0:
+    resolution: {integrity: sha512-se5Cd+js9dXJnu6Ag2JFc00t+HmHOen+8Q+L7O9zI0PqQXr20uk2J0XQqMxZEeo5U50o8Nvmmx7dZrl+Ufr35A==}
+    dependencies:
+      es6-object-assign: 1.1.0
+      is-nan: 1.3.2
+      object-is: 1.1.5
+      util: 0.12.5
+    dev: false
+
   /assign-symbols/1.0.0:
     resolution: {integrity: sha512-Q+JC7Whu8HhmTdBph/Tq59IoRtoy6KAm5zzPv00WdujX82lbAL8K7WVjne7vdCsAmbF4AYaDOPyO3k0kl8qIrw==}
     engines: {node: '>=0.10.0'}
@@ -4705,6 +4741,13 @@ packages:
       base64-js: 1.5.1
       ieee754: 1.2.1
       isarray: 1.0.0
+    dev: false
+
+  /buffer/6.0.3:
+    resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
+    dependencies:
+      base64-js: 1.5.1
+      ieee754: 1.2.1
     dev: false
 
   /bufferutil/4.0.7:
@@ -6380,6 +6423,10 @@ packages:
       d: 1.0.1
       es5-ext: 0.10.62
       es6-symbol: 3.1.3
+    dev: false
+
+  /es6-object-assign/1.1.0:
+    resolution: {integrity: sha512-MEl9uirslVwqQU369iHNWZXsI8yaZYGg/D65aOgZkeyFJwHYSxilf7rQzXKI7DdDuBPrBXbfk3sl9hJhmd5AUw==}
     dev: false
 
   /es6-symbol/3.1.3:
@@ -8454,6 +8501,13 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
+  /is-generator-function/1.0.10:
+    resolution: {integrity: sha512-jsEjy9l3yiXEQ+PsXdmBwEPcOxaXWLspKdplFUVI9vq1iZgIekeC0L167qeu86czQaxed3q/Uzuw0swL0irL8A==}
+    engines: {node: '>= 0.4'}
+    dependencies:
+      has-tostringtag: 1.0.0
+    dev: false
+
   /is-glob/2.0.1:
     resolution: {integrity: sha512-a1dBeB19NXsf/E0+FHqkagizel/LQw2DjSQpvQrj3zT+jYPpaUCryPnrQajXKFLCMuf4I6FhRpaGtw4lPrG6Eg==}
     engines: {node: '>=0.10.0'}
@@ -8490,6 +8544,14 @@ packages:
 
   /is-module/1.0.0:
     resolution: {integrity: sha512-51ypPSPCoTEIN9dy5Oy+h4pShgJmPCygKfyRCISBI+JoWT/2oJvK8QPxmwv7b/p239jXrm9M1mlQbyKJ5A152g==}
+    dev: false
+
+  /is-nan/1.3.2:
+    resolution: {integrity: sha512-E+zBKpQ2t6MEo1VsonYmluk9NxGrbzpeeLC2xIViuO2EjU2xsXsBPwTr3Ykv9l08UYEVEdWeRZNouaZqF6RN0w==}
+    engines: {node: '>= 0.4'}
+    dependencies:
+      call-bind: 1.0.2
+      define-properties: 1.1.4
     dev: false
 
   /is-negative-zero/2.0.2:
@@ -12972,6 +13034,16 @@ packages:
       tiny-warning: 1.0.3
     dev: false
 
+  /react-router/6.4.3_react@18.2.0:
+    resolution: {integrity: sha512-BT6DoGn6aV1FVP5yfODMOiieakp3z46P1Fk0RNzJMACzE7C339sFuHebfvWtnB4pzBvXXkHP2vscJzWRuUjTtA==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.0.3
+      react: 18.2.0
+    dev: false
+
   /react-scripts/5.0.1_dwiw3y2to3blb3rxpy44vs7fbu:
     resolution: {integrity: sha512-8VAmEm/ZAwQzJ+GOMLbBsTdDKOpuZh7RPs0UymvBR2vRk4iZWCskjbFnxqjrzoIvlNNRZ3QJFx6/qDSi6zSnaQ==}
     engines: {node: '>=14.0.0'}
@@ -14224,6 +14296,13 @@ packages:
       readable-stream: 2.3.7
     dev: false
 
+  /stream-browserify/3.0.0:
+    resolution: {integrity: sha512-H73RAHsVBapbim0tU2JwwOiXUj+fikfiaoYAKHF3VJfA0pe2BCzkhAHBlLG6REzE+2WNZcxOXjK7lkso+9euLA==}
+    dependencies:
+      inherits: 2.0.4
+      readable-stream: 3.6.0
+    dev: false
+
   /stream-each/1.2.3:
     resolution: {integrity: sha512-vlMC2f8I2u/bZGqkdfLQW/13Zihpej/7PmSiMQsbYddxuTsJp8vRe2x2FvVExZg7FaOds43ROAuFJwPR4MTZLw==}
     dependencies:
@@ -14238,6 +14317,15 @@ packages:
       inherits: 2.0.4
       readable-stream: 2.3.7
       to-arraybuffer: 1.0.1
+      xtend: 4.0.2
+    dev: false
+
+  /stream-http/3.2.0:
+    resolution: {integrity: sha512-Oq1bLqisTyK3TSCXpPbT4sdeYNdmyZJv1LxpEm2vu1ZhK89kSE5YXwZc3cWk0MagGaKriBh9mCFbVGtO+vY29A==}
+    dependencies:
+      builtin-status-codes: 3.0.0
+      inherits: 2.0.4
+      readable-stream: 3.6.0
       xtend: 4.0.2
     dev: false
 
@@ -15267,6 +15355,16 @@ packages:
     resolution: {integrity: sha512-HShAsny+zS2TZfaXxD9tYj4HQGlBezXZMZuM/S5PKLLoZkShZiGk9o5CzukI1LVHZvjdvZ2Sj1aW/Ndn2NB/HQ==}
     dependencies:
       inherits: 2.0.3
+    dev: false
+
+  /util/0.12.5:
+    resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
+    dependencies:
+      inherits: 2.0.4
+      is-arguments: 1.1.1
+      is-generator-function: 1.0.10
+      is-typed-array: 1.1.10
+      which-typed-array: 1.1.9
     dev: false
 
   /utila/0.4.0:

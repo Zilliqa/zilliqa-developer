@@ -1,6 +1,8 @@
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@aspect_rules_js//js:defs.bzl", "js_test")
-load("@npm//:react-scripts/package_json.bzl", cra_bin = "bin")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 # Filename conventions described at
 # https://create-react-app.dev/docs/running-tests#filename-conventions
@@ -24,6 +26,7 @@ copy_to_bin(
     ) + [
         "package.json",
         "tsconfig.json",
+        "config-overrides.js",
     ],
 )
 
@@ -44,6 +47,7 @@ _RUNTIME_DEPS = [
     "//:node_modules/react-icons",
     "//:node_modules/react-jazzicon",
     "//:node_modules/react-router-dom",
+    "//:node_modules/react-router",
     "//:node_modules/reactstrap",
     "//:node_modules/styled-components",
     "//:node_modules/ts-jest",
@@ -59,16 +63,33 @@ _RUNTIME_DEPS = [
     "//:node_modules/@zilliqa-js/subscriptions",
     "//:node_modules/@zilliqa-js/util",
     "//:node_modules/@zilliqa-js/zilliqa",
+    "//:node_modules/url",
+    "//:node_modules/assert",
+    "//:node_modules/crypto-browserify",
+    "//:node_modules/stream-http",
+    "//:node_modules/https-browserify",
+    "//:node_modules/os-browserify",
+    "//:node_modules/buffer",
+    "//:node_modules/stream-browserify",
+    "//:node_modules/string_decoder",
+    "//:node_modules/events",
+    "//:node_modules/classnames",
+    "//:node_modules/tslib",
+    "//:node_modules/bip39",
+    "//:node_modules/hash.js",
+    "//:node_modules/hdkey",
 ]
 
-cra_bin.react_scripts(
+cra_bin.react_app_rewired(
     # Note: If you want to change the name make sure you update BUILD_PATH below accordingly
     # https://create-react-app.dev/docs/advanced-configuration/
     name = "build",
     srcs = _RUNTIME_DEPS + [
+        "//:node_modules/react-app-rewired",
         "//:node_modules/react-scripts",
         "//:node_modules/typescript",
         "//:node_modules/web-vitals",
+        "//:node_modules/webpack",
     ],
     args = ["build"],
     chdir = package_name(),
@@ -89,7 +110,33 @@ copy_to_bin(
     srcs = glob(_TESTS),
 )
 
-cra_bin.react_scripts_test(
+pkg_tar(
+    name = "html-folder",
+    srcs = [":build"],
+    mode = "0755",
+    package_dir = "/usr/share/nginx/html/",
+    strip_prefix = "build",
+)
+
+pkg_tar(
+    name = "nignx-conf",
+    srcs = ["nginx/default.conf"],
+    mode = "0755",
+    package_dir = "/etc/nginx/conf.d/",
+    deps = [],
+)
+
+container_image(
+    name = "image",
+    base = "@nginx//image",
+    ports = ["80"],
+    tars = [
+        ":html-folder",
+        ":nignx-conf",
+    ],
+)
+
+cra_bin.react_app_rewired_test(
     name = "test",
     args = [
         "test",
@@ -120,20 +167,23 @@ cra_bin.react_scripts_test(
         "//:node_modules/@testing-library/user-event",
         "//:node_modules/typescript",
         "//:node_modules/jest-watch-typeahead",
+        "//:node_modules/webpack",
     ],
 )
 
-cra_bin.react_scripts_binary(
+cra_bin.react_app_rewired_binary(
     name = "start",
     args = [
         "start",
     ],
     chdir = package_name(),
     data = _RUNTIME_DEPS + [
+        "//:node_modules/react-app-rewired",
         "//:node_modules/react-scripts",
         "//:node_modules/typescript",
         "//:node_modules/web-vitals",
         "//:tsconfig.base",
+        "//:node_modules/webpack",
     ],
     tags = [
         # This tag instructs ibazel to pipe into stdin a event describing actions.

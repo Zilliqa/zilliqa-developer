@@ -109,9 +109,7 @@ const PassphraseStep = ({ passphrase, setPassphrase, setCurrentStep }) => {
         <h2 className="pt-5">
           <b>{"Set Passphrase for your Keystore File"}</b>
         </h2>
-        <p className="text-secondary py-3">
-          {`Please set the password for the keystore file for your new wallet.`}
-        </p>
+        <p className="text-secondary py-3">{`Please set the password for the keystore file for your new wallet.`}</p>
       </div>
       <div>
         <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
@@ -192,7 +190,8 @@ const KeystoreStep = ({
 
   useEffect(() => {
     if (worker === undefined) {
-      const myWorker = new Worker("./encrypt.worker", { type: "module" });
+      const name: string = "./encrypt.worker";
+      const myWorker = new Worker(name, { type: "module" });
 
       myWorker.onmessage = (event) => {
         const { data } = event;

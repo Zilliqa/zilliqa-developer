@@ -79,7 +79,9 @@ const AccessKeystore: React.FunctionComponent<IProps> = (props) => {
 
   useEffect(() => {
     if (worker === undefined) {
-      const myWorker = new Worker("./decrypt.worker", { type: "module" });
+      // String cannot be inlined. See https://github.com/angular/angular-cli/issues/14776#issuecomment-516998921
+      const name: string = "./decrypt.worker";
+      const myWorker = new Worker(name, { type: "module" });
 
       myWorker.onmessage = (event) => {
         const { data } = event;

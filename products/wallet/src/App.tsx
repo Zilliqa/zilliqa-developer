@@ -1,7 +1,10 @@
 import logo from "./logo.svg";
 import "./App.css";
+import { Buffer } from "buffer";
+//window.Buffer = window.Buffer || Buffer;
 
 function App() {
+  console.log(Buffer.from("anything", "base64"));
   return (
     <div className="App">
       <header className="App-header">
