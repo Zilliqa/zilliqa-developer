@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useContext
-} from "react";
-
+import React, { useState, useCallback, useContext } from "react";
 
 import { Value } from "@zilliqa-js/contract/src/types";
 import { NetworkContext } from "src/services/network/networkProvider";
@@ -58,50 +53,50 @@ const ContractTransactionsTab: React.FC<IProps> = ({
   );
 
   const ACCOUNT_TRANSACTIONS = gql`
-  query GetTransactions($addr: String!, $page: Int) {
-    txPagination(
-      page: $page
-      filter: {
-        OR: [
-          { fromAddr: $addr }
-          { toAddr: $addr }
-          { receipt: { transitions: { addr: $addr } } }
-          { receipt: { transitions: { msg: { _recipient: $addr } } } }
-        ]
-      }
-      sort: TIMESTAMP_DESC
-    ) {
-      count
-      items {
-        ID
-        receipt {
-          success
-          cumulative_gas
-          transitions {
-            addr
-            msg {
-              _recipient
+    query GetTransactions($addr: String!, $page: Int) {
+      txPagination(
+        page: $page
+        filter: {
+          OR: [
+            { fromAddr: $addr }
+            { toAddr: $addr }
+            { receipt: { transitions: { addr: $addr } } }
+            { receipt: { transitions: { msg: { _recipient: $addr } } } }
+          ]
+        }
+        sort: TIMESTAMP_DESC
+      ) {
+        count
+        items {
+          ID
+          receipt {
+            success
+            cumulative_gas
+            transitions {
+              addr
+              msg {
+                _recipient
+              }
             }
           }
+          gasPrice
+          gasLimit
+          fromAddr
+          toAddr
+          amount
+          timestamp
+          type
         }
-        gasPrice
-        gasLimit
-        fromAddr
-        toAddr
-        amount
-        timestamp
-        type
-      }
-      pageInfo {
-        currentPage
-        perPage
-        pageCount
-        itemCount
-        hasNextPage
-        hasPreviousPage
+        pageInfo {
+          currentPage
+          perPage
+          pageCount
+          itemCount
+          hasNextPage
+          hasPreviousPage
+        }
       }
     }
-  }
   `;
 
   const hexAddr = zilAddrToHexAddr(contractAddr);

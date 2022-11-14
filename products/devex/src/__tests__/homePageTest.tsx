@@ -1,46 +1,40 @@
-import * as React from 'react'
-import { shallow } from 'enzyme'
-import HomePage from 'src/components/HomePage/HomePage'
-import toJson from 'enzyme-to-json'
+import * as React from "react";
+import { shallow } from "enzyme";
+import HomePage from "src/components/HomePage/HomePage";
+import toJson from "enzyme-to-json";
 
-describe('<HomePage /> without knowing isIsolatedServer', () => {
+describe("<HomePage /> without knowing isIsolatedServer", () => {
+  jest.spyOn(React, "useContext").mockImplementation(() => ({
+    isIsolatedServer: null,
+  }));
 
-  jest.spyOn(React, 'useContext').mockImplementation(() => ({
-    isIsolatedServer: null
-  }))
+  const homePage = shallow(<HomePage />);
 
-  const homePage = shallow(<HomePage />)
+  it("matches snapshot", () => {
+    expect(toJson(homePage)).toMatchSnapshot();
+  });
+});
 
-  it('matches snapshot', () => {
-    expect(toJson(homePage)).toMatchSnapshot()
-  })
+describe("Isolated Server's <HomePage />", () => {
+  jest.spyOn(React, "useContext").mockImplementation(() => ({
+    isIsolatedServer: true,
+  }));
 
-})
+  const homePage = shallow(<HomePage />);
 
-describe('Isolated Server\'s <HomePage />', () => {
+  it("matches snapshot", () => {
+    expect(toJson(homePage)).toMatchSnapshot();
+  });
+});
 
-  jest.spyOn(React, 'useContext').mockImplementation(() => ({
-    isIsolatedServer: true
-  }))
+describe("Non-Isolated Server <HomePage />", () => {
+  jest.spyOn(React, "useContext").mockImplementation(() => ({
+    isIsolatedServer: false,
+  }));
 
-  const homePage = shallow(<HomePage />)
+  const homePage = shallow(<HomePage />);
 
-  it('matches snapshot', () => {
-    expect(toJson(homePage)).toMatchSnapshot()
-  })
-
-})
-
-describe('Non-Isolated Server <HomePage />', () => {
-
-  jest.spyOn(React, 'useContext').mockImplementation(() => ({
-    isIsolatedServer: false
-  }))
-
-  const homePage = shallow(<HomePage />)
-
-  it('matches snapshot', () => {
-    expect(toJson(homePage)).toMatchSnapshot()
-  })
-
-})
+  it("matches snapshot", () => {
+    expect(toJson(homePage)).toMatchSnapshot();
+  });
+});

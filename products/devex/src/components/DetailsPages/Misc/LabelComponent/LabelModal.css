@@ -42,6 +42,6 @@
   justify-content: start;
 }
 
-.modal-footer>* {
+.modal-footer > * {
   margin: 0;
 }

@@ -4,13 +4,11 @@ import AddressDisp from "src/components/Misc/Disp/AddressDisp/AddressDisp";
 import { qaToZil, hexAddrToZilAddr, isValidAddr } from "src/utils/Utils";
 import { TransitionEntry } from "@zilliqa-js/core/src/types";
 
-
 interface IProps {
   transitions: TransitionEntry[];
 }
 
 const TransitionsTab: React.FC<IProps> = ({ transitions }) => {
-
   return (
     <div className="row">
       <div className="col-12">

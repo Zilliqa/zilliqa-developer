@@ -28,7 +28,8 @@
   background: none !important;
 }
 
-.tabs-card-header .nav-tabs, .tabs-card-header .nav-link {
+.tabs-card-header .nav-tabs,
+.tabs-card-header .nav-link {
   border: 0;
   border-bottom: 2px solid transparent;
 }
@@ -42,7 +43,8 @@
   width: 100%;
 }
 
-.receipt-table tr td:first-child, .receipt-table tr th:first-child {
+.receipt-table tr td:first-child,
+.receipt-table tr th:first-child {
   width: 200px;
 }
 

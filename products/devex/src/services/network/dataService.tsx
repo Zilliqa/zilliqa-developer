@@ -50,15 +50,28 @@
 // Staging Isolated Server: https://stg-zilliqa-isolated-server.zilliqa.com
 // Seeds: https://stat.zilliqa.com/api/seeds
 
-import { Zilliqa } from '@zilliqa-js/zilliqa'
-import { ContractObj } from '@zilliqa-js/contract/src/types'
-import { BlockchainInfo, DsBlockObj, TxBlockObj, TxList, MinerInfo, TransactionObj,TransactionStatus } from '@zilliqa-js/core/src/types'
+import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { ContractObj } from "@zilliqa-js/contract/src/types";
+import {
+  BlockchainInfo,
+  DsBlockObj,
+  TxBlockObj,
+  TxList,
+  MinerInfo,
+  TransactionObj,
+  TransactionStatus,
+} from "@zilliqa-js/core/src/types";
 
 import {
-  DsBlockObjWithHashListing, TxBlockObjListing, TransactionDetails, ContractData,
-  AccData, DsBlockObjWithHash, IISInfo
-} from 'src/typings/api'
-import { hexAddrToZilAddr, stripHexPrefix } from 'src/utils/Utils'
+  DsBlockObjWithHashListing,
+  TxBlockObjListing,
+  TransactionDetails,
+  ContractData,
+  AccData,
+  DsBlockObjWithHash,
+  IISInfo,
+} from "src/typings/api";
+import { hexAddrToZilAddr, stripHexPrefix } from "src/utils/Utils";
 
 export class DataService {
   zilliqa: Zilliqa;
@@ -312,9 +325,9 @@ export class DataService {
   }
 
   async getLatest5PendingTransactions(): Promise<TransactionStatus[]> {
-    console.log("getting 5 pending tx")
-    const pendingTxns = await this.zilliqa.blockchain.getPendingTxns()
-    return pendingTxns.Txns as TransactionStatus[]
+    console.log("getting 5 pending tx");
+    const pendingTxns = await this.zilliqa.blockchain.getPendingTxns();
+    return pendingTxns.Txns as TransactionStatus[];
   }
 
   //================================================================================
@@ -427,9 +440,10 @@ export class DataService {
 
   async getContractAddrFromTransaction(txnHash: string): Promise<string> {
     console.log("getting smart contracts addr");
-    const response = await this.zilliqa.blockchain.getContractAddressFromTransactionID(
-      txnHash
-    );
+    const response =
+      await this.zilliqa.blockchain.getContractAddressFromTransactionID(
+        txnHash
+      );
     if (response.error !== undefined) throw new Error(response.error.message);
     return response.result as string;
   }

@@ -15,7 +15,8 @@
   font-weight: 600;
 }
 
-.init-params-table td, .init-params-table th {
+.init-params-table td,
+.init-params-table th {
   padding: 0.4rem;
 }
 

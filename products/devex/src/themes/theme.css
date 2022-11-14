@@ -8,14 +8,14 @@
 
 .light-theme {
   /* Common */
-  --color-app-bg: rgba(0, 0, 0, .05);
+  --color-app-bg: rgba(0, 0, 0, 0.05);
   --color-text: black;
   --color-subtext: rgb(93, 106, 133);
   --color-zil-green: #019c99;
   --color-spinner: #6c757d;
-  --color-border: rgba(0, 0, 0, .125);
+  --color-border: rgba(0, 0, 0, 0.125);
   --color-icon: darkslategray;
-  --color-highlight: hsla(0, 0%, 80%, .1);
+  --color-highlight: hsla(0, 0%, 80%, 0.1);
   --color-btn: white;
   --color-btn-hover: white;
   /* Card */
@@ -40,7 +40,7 @@
   --color-spinner: var(--color-dark-text);
   --color-border: #035992;
   --color-icon: var(--color-dark-text);
-  --color-highlight: hsla(0, 0%, 10%, .1);
+  --color-highlight: hsla(0, 0%, 10%, 0.1);
   --color-btn: var(--color-palette-2);
   --color-btn-hover: #035992;
   /* Card */

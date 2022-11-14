@@ -36,23 +36,21 @@ const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [transactionsCount, setTransactionsCount] = useState<number>(0);
 
-    const isFungibleToken = (contractData: ContractData) => {
-      const symbol = contractData.initParams.find(
-        (item) => item.vname === "symbol"
-      );
-      const name = contractData.initParams.find(
-        (item) => item.vname === "name"
-      );
-      const init_supply = contractData.initParams.find(
-        (item) => item.vname === "init_supply"
-      );
-      const decimals = contractData.initParams.find(
-        (item) => item.vname === "decimals"
-      );
+  const isFungibleToken = (contractData: ContractData) => {
+    const symbol = contractData.initParams.find(
+      (item) => item.vname === "symbol"
+    );
+    const name = contractData.initParams.find((item) => item.vname === "name");
+    const init_supply = contractData.initParams.find(
+      (item) => item.vname === "init_supply"
+    );
+    const decimals = contractData.initParams.find(
+      (item) => item.vname === "decimals"
+    );
 
-      if (symbol && name && init_supply && decimals) {
-        const holders = Object.keys(contractData.state.balances).length;
-        /* const holds = Object.values(contractData.state.balances);
+    if (symbol && name && init_supply && decimals) {
+      const holders = Object.keys(contractData.state.balances).length;
+      /* const holds = Object.values(contractData.state.balances);
 
       const init_value = typeof (init_supply.value === "string")
         ? parseFloat(init_supply.value)
@@ -68,19 +66,18 @@ const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
             )
           : 0); */
 
-        return {
-          symbol,
-          name,
-          init_supply,
-          decimals,
-          holders,
-        };
-      }
-      return false;
-    };
+      return {
+        symbol,
+        name,
+        init_supply,
+        decimals,
+        holders,
+      };
+    }
+    return false;
+  };
 
-    const fungibleToken = contractData ? isFungibleToken(contractData) : false;
-
+  const fungibleToken = contractData ? isFungibleToken(contractData) : false;
 
   // Fetch data
   useEffect(() => {

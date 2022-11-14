@@ -1,40 +1,44 @@
 /* Fonts */
 
 @font-face {
-  font-family: 'Jura';
-  src: local('Jura'), url(./fonts/Jura-VariableFont_wght.ttf) format('truetype');
+  font-family: "Jura";
+  src: local("Jura"), url(./fonts/Jura-VariableFont_wght.ttf) format("truetype");
 }
 
 @font-face {
-  font-family: 'OpenSans';
-  src: local('OpenSans'), url(./fonts/OpenSans-Regular.ttf) format('truetype');
+  font-family: "OpenSans";
+  src: local("OpenSans"), url(./fonts/OpenSans-Regular.ttf) format("truetype");
 }
 
 @font-face {
-  font-family: 'RobotoMono';
-  src: local('RobotoMono'), url(./fonts/RobotoMono-Regular.ttf) format('truetype');
+  font-family: "RobotoMono";
+  src: local("RobotoMono"),
+    url(./fonts/RobotoMono-Regular.ttf) format("truetype");
 }
 
 @font-face {
-  font-family: 'Muli';
-  src: local('Muli'), url(./fonts/Muli-VariableFont_wght.ttf) format('truetype');
+  font-family: "Muli";
+  src: local("Muli"), url(./fonts/Muli-VariableFont_wght.ttf) format("truetype");
 }
 
 @font-face {
-  font-family: 'Nunito';
-  src: local('Nunito'), url(./fonts/Nunito-Regular.ttf) format('truetype');
+  font-family: "Nunito";
+  src: local("Nunito"), url(./fonts/Nunito-Regular.ttf) format("truetype");
 }
 
 /* Common CSS */
 
 body {
   margin: 0;
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h3, h6 {
+h3,
+h6 {
   margin: 0;
 }
 
@@ -157,7 +161,7 @@ hr {
 }
 
 .dropdown-divider {
-  border-color: var(--color-border)
+  border-color: var(--color-border);
 }
 
 .dropdown-item {
@@ -211,7 +215,9 @@ hr {
   background-color: var(--color-btn-hover);
 }
 
-.btn:focus, .btn:active, .btn:focus:active {
+.btn:focus,
+.btn:active,
+.btn:focus:active {
   color: var(--color-subtext) !important;
   background-color: var(--color-btn) !important;
   border: 1px solid var(--color-border) !important;

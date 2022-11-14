@@ -33,18 +33,18 @@ docker push "$registryURL"
 
 cd devex-artifact
 cd stg
-echo $commit > devex-artifact-commit.txt
+echo $commit >devex-artifact-commit.txt
 #tar -czvf devex-artifact-stg.gz .
 zip -r devex-artifact-stg.zip .
 aws s3 sync . s3://devex-static-artifact --exclude='*' --include='devex-artifact-stg.zip'
 
 cd ..
 cd prd
-echo $commit > devex-artifact-commit.txt
+echo $commit >devex-artifact-commit.txt
 #tar -czvf devex-artifact-prd.gz .
 zip -r devex-artifact-prd.zip .
 aws s3 sync . s3://devex-static-artifact --exclude='*' --include='devex-artifact-prd.zip'
 
 cd ..
-echo $(date) > date_created.txt
+echo $(date) >date_created.txt
 aws s3 sync . s3://devex-static-artifact --exclude='*' --include='date_created.txt'
