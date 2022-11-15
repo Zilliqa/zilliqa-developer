@@ -1,6 +1,7 @@
 {
   "name": "protobufjs-project",
   "dependencies": {
+    "@docusaurus/core": "^2.2.0",
     "@jest/expect": "^29.3.1",
     "@jest/expect-utils": "^29.3.1",
     "@testing-library/jest-dom": "^5.11.4",

@@ -5,7 +5,7 @@ DocusaurusInfo = provider(
     fields = ["open_uri"],
 )
 
-def _docusaurus_html_impl(ctx):
+def _docusaurus_pkg_impl(ctx):
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
     output_dir = ctx.actions.declare_directory(ctx.label.name + "_html")
 
@@ -14,34 +14,61 @@ def _docusaurus_html_impl(ctx):
     # Docusaurus expects the config and index files to be in the root directory with the canonical
     # names.  This possibly renames and relocates the config and index files in the sandbox.
     shell_cmds = [
-        "mkdir -p {}".format(root_dir),
-        "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "conf.py")),
-        "cp {} {}".format(ctx.file.index.path, paths.join(root_dir, "index.rst")),
+        "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "docusaurus.config.js")),
+        "cp {} {}".format(ctx.file.sidebars.path, paths.join(root_dir, "sidebars.js")),
     ]
 
+    folders = [root_dir]
+    strip_srcs = ctx.attr.srcs_strip  #  "products/developer-portal"
     for f in ctx.files.srcs:
-        dest = paths.join(sandbox.path, f.short_path)
-        shell_cmds.append("mkdir -p {}; cp {} {}".format(paths.dirname(dest), f.path, dest))
+        short_path = f.short_path
+
+        if short_path.startswith(strip_srcs):
+            short_path = short_path[len(strip_srcs):]
+            if short_path[0] == "/":
+                short_path = short_path[1:]
+
+        dest = paths.join(sandbox.path, short_path)
+        folders.append(paths.dirname(dest))
+        shell_cmds.append("cp {} {}".format(f.path, dest))
+
+    print(ctx.files.docs)
+
+    for f in ctx.files.docs:
+        short_path = f.short_path
+        dest = paths.join(sandbox.path, short_path)
+        folders.append(paths.dirname(dest))
+        shell_cmds.append("cp {} {}".format(f.path, dest))
+
+    shell_cmds_prepend = []
+    for f in folders:
+        cmd = "mkdir -p {}".format(f)
+        if cmd not in shell_cmds_prepend:
+            shell_cmds_prepend.append(cmd)
+
+    shell_cmds = shell_cmds_prepend + shell_cmds
+
+    print("STRIPPING {}".format(strip_srcs))
+    for s in shell_cmds:
+        print("CMD: {}".format(s))
 
     ctx.actions.run_shell(
         outputs = [sandbox],
-        inputs = ctx.files.config + ctx.files.index + ctx.files.srcs,
+        inputs = ctx.files.config + ctx.files.sidebars + ctx.files.srcs,
         mnemonic = "DocusaurusCollect",
         command = "; ".join(shell_cmds),
         progress_message = "Collecting Docusaurus source documents for {}.".format(ctx.label.name),
     )
 
     args = ctx.actions.args()
-    args.add("-b", "html")
-    args.add("-q")
-    args.add_all(ctx.attr.args)
-    args.add(root_dir)
-    args.add(output_dir.path)
+    args.add("build")
+    args.add("--config")
+    args.add("docusaurus.config.js")
 
     ctx.actions.run(
         outputs = [output_dir],
         inputs = [sandbox],
-        executable = ctx.executable._docusaurus_build,
+        executable = "npx docusaurus",  #ctx.executable.binary,
         arguments = [args],
         mnemonic = "DocusaurusBuild",
         progress_message = "Building Docusaurus HTML documentation for {}.".format(ctx.label.name),
@@ -52,8 +79,8 @@ def _docusaurus_html_impl(ctx):
         DocusaurusInfo(open_uri = paths.join(output_dir.short_path, "index.html")),
     ]
 
-docusaurus_html_gen = rule(
-    implementation = _docusaurus_html_impl,
+docusaurus_pkg_gen = rule(
+    implementation = _docusaurus_pkg_impl,
     doc = "Docusaurus HTML documentation.",
     attrs = {
         "args": attr.string_list(
@@ -70,8 +97,8 @@ docusaurus_html_gen = rule(
             mandatory = True,
             allow_empty = False,
         ),
-        "index": attr.label(
-            doc = "Docusaurus project index.",
+        "sidebars": attr.label(
+            doc = "Docusaurus sidebars.",
             allow_single_file = True,
             mandatory = True,
         ),
@@ -81,12 +108,17 @@ docusaurus_html_gen = rule(
             mandatory = True,
             allow_empty = False,
         ),
-        "_docusaurus_build": attr.label(
-            doc = "docusaurus-build wrapper.",
-            default = Label("@rules_docusaurus//docusaurus/tools:docusaurus_build_wrapper"),
-            executable = True,
-            cfg = "exec",
+        "srcs_strip": attr.string(
+            doc = "Path to strip from srcs.",
+            default = "",
+            mandatory = False,
         ),
+        #        "binary": attr.label(
+        #            doc = "docusaurus-build executable.",
+        #            executable = True,
+        #            mandatory = True,
+        #            cfg = "exec",
+        #        ),
     },
 )
 
@@ -117,11 +149,11 @@ docusaurus_view = rule(
     executable = True,
 )
 
-def docusaurus_html(name, **kwargs):
+def docusaurus_pkg(name, **kwargs):
     view_args = {"generator": ":" + name}
     if "open_cmd" in kwargs:
         view_args["open_cmd"] = kwargs.pop("open_cmd")
 
     print(kwargs)
-    #docusaurus_html_gen(name = name, **kwargs)
+    docusaurus_pkg_gen(name = name, **kwargs)
     #docusaurus_view(name = name + ".view", **view_args)

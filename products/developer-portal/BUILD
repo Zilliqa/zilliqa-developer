@@ -1,6 +1,7 @@
-load("//:config/docusaurus.bzl", "docusaurus_html")
+load("//:config/docusaurus.bzl", "docusaurus_pkg")
 
-docusaurus_html(
+# load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
+docusaurus_pkg(
     name = "test_docs",
     srcs = glob(
         include = [
@@ -10,6 +11,8 @@ docusaurus_html(
     config = "docusaurus.config.js",
     docs = ["//docs:files"],
     sidebars = "sidebars.js",
+    srcs_strip = package_name(),
+    #    binary = docusaurus_bin,
 )
 
 # docusaurus(
