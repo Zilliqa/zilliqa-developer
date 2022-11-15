@@ -1,5 +1,11 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
-import { Nav, NavDropdown, Tooltip, OverlayTrigger } from "react-bootstrap";
+import {
+  Nav,
+  NavDropdown,
+  Tooltip,
+  OverlayTrigger,
+  Spinner,
+} from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 
 import {
@@ -19,7 +25,14 @@ const NetworkSwitcher: React.FC = () => {
   const networkUrl = useNetworkUrl();
 
   const userPrefContext = useContext(UserPrefContext);
-  const { networkMap } = userPrefContext!;
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { networkMap } = userPrefContext;
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentNetwork, setCurrentNetwork] = useState(networkName);

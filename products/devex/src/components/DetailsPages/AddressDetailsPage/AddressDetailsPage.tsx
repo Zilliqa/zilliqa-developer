@@ -12,7 +12,14 @@ import NotFoundPage from "../../ErrorPages/NotFoundPage";
 const AddressDetailsPage: React.FC = () => {
   const { addr } = useParams<{ addr: string }>();
   const networkContext = useContext(NetworkContext);
-  const { dataService } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { dataService } = networkContext;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

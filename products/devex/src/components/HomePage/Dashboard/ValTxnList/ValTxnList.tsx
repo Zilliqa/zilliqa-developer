@@ -21,7 +21,15 @@ import "./ValTxnList.css";
 
 const ValTxnList: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { dataService, networkUrl } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, networkUrl } = networkContext;
 
   useEffect(() => {
     setData(null);
@@ -88,9 +96,12 @@ const ValTxnList: React.FC = () => {
         Header: "Fee",
         accessor: "txn",
         Cell: ({ value }: { value: Transaction }) => {
-          const fee =
-            Number(value.txParams.gasPrice) *
-            value.txParams.receipt!.cumulative_gas;
+          let fee = 0;
+          if (value.txParams.receipt) {
+            fee =
+              Number(value.txParams.gasPrice) *
+              value.txParams.receipt.cumulative_gas;
+          }
           return (
             <OverlayTrigger
               placement="top"

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import AceEditor from "react-ace";
 
 import { ThemeContext } from "src/themes/themeProvider";
+import { Spinner } from "react-bootstrap";
 
 import "ace-builds/src-noconflict/mode-ocaml";
 import "ace-builds/src-noconflict/theme-textmate";
@@ -13,7 +14,14 @@ interface IProps {
 
 const CodeTab: React.FC<IProps> = ({ code }) => {
   const themeContext = useContext(ThemeContext);
-  const { theme } = themeContext!;
+  if (!themeContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { theme } = themeContext;
 
   return (
     <>

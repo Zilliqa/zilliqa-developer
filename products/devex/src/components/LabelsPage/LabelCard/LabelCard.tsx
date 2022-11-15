@@ -2,6 +2,7 @@ import React, { useState, useRef, useContext, useEffect } from "react";
 import { Card } from "react-bootstrap";
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
 import { Link } from "react-router-dom";
+import { Spinner } from "react-bootstrap";
 
 import {
   UserPrefContext,
@@ -24,7 +25,15 @@ interface IProps {
 
 const LabelCard: React.FC<IProps> = ({ k, v }) => {
   const userPrefContext = useContext(UserPrefContext);
-  const { labelMap, setLabelMap } = userPrefContext!;
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { labelMap, setLabelMap } = userPrefContext;
 
   const text = useRef(v.name);
   const [isEditing, setEditing] = useState(false);

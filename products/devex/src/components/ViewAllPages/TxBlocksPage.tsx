@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useContext,
 } from "react";
-import { Tooltip, OverlayTrigger } from "react-bootstrap";
+import { Tooltip, OverlayTrigger, Spinner } from "react-bootstrap";
 
 import { QueryPreservingLink } from "src/services/network/networkProvider";
 import ViewAllTable from "src/components/ViewAllPages/ViewAllTable/ViewAllTable";
@@ -16,7 +16,16 @@ import { TxBlockObj } from "@zilliqa-js/core/src/types";
 
 const TxBlocksPage: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { dataService } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService } = networkContext;
 
   const fetchIdRef = useRef(0);
   const [isLoading, setIsLoading] = useState(false);

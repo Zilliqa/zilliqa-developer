@@ -20,7 +20,15 @@ import "./App.css";
 
 const App: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { inTransition, isValidUrl } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { inTransition, isValidUrl } = networkContext;
 
   return (
     <div className="app-container">

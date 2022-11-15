@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useContext } from "react";
 import { useLocation, Redirect } from "react-router-dom";
+import { Spinner } from "react-bootstrap";
 
 import {
   useSearchParams,
@@ -24,7 +25,15 @@ const RedirectToDefaultNetwork = ({
   const networkUrl = useNetworkUrl();
 
   const userPrefContext = useContext(UserPrefContext);
-  const { networkMap } = userPrefContext!;
+
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { networkMap } = userPrefContext;
 
   if (networkUrl === "") {
     return (
@@ -61,7 +70,14 @@ const ScrollToTop = ({ children }: { children: React.ReactNode }) => {
 
 const Layout: React.FC = () => {
   const themeContext = useContext(ThemeContext);
-  const { theme } = themeContext!;
+  if (!themeContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { theme } = themeContext;
 
   return (
     <>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { Spinner } from "react-bootstrap";
 
 import { DataService } from "./dataService";
 import { UserPrefContext, NetworkMap } from "../userPref/userPrefProvider";
@@ -52,7 +53,11 @@ export const useNetworkUrl = (): string => {
 export const useNetworkName = (): string => {
   const networkUrl = useNetworkUrl();
   const userPrefContext = useContext(UserPrefContext);
-  const { networkMap } = userPrefContext!;
+
+  if (!userPrefContext) {
+    return "Loading ...";
+  }
+  const { networkMap } = userPrefContext;
 
   return (
     networkMap.get(networkUrl) || defaultNetworks.get(networkUrl) || networkUrl
@@ -95,7 +100,14 @@ export const NetworkContext = React.createContext<NetworkState | null>(null);
 
 export const NetworkProvider = (props: { children: any }) => {
   const userPrefContext = useContext(UserPrefContext);
-  const { networkMap, setNetworkMap } = userPrefContext!;
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { networkMap, setNetworkMap } = userPrefContext;
 
   const network = useNetworkUrl();
   const apolloServer = useApolloServerAddress();

@@ -1,7 +1,6 @@
 import React from "react";
 
 import { QueryPreservingLink } from "src/services/network/networkProvider";
-import { TransactionDetails } from "src/typings/api";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 import {
@@ -10,31 +9,11 @@ import {
   stripHexPrefix,
 } from "src/utils/Utils";
 
-import { ReactComponent as LeftArrow } from "src/assets/images/left-arrow.svg";
-import { ReactComponent as RightArrow } from "src/assets/images/right-arrow.svg";
-import { ReactComponent as BothArrow } from "src/assets/images/both-arrow.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileContract } from "@fortawesome/free-solid-svg-icons";
 
-interface IProps {
-  txnDetails: TransactionDetails;
-}
-
-const ToAddrDispSimplified: any = ({ toAddr, fromAddr, txType, addr }: any) => {
+const ToAddrDispSimplified: any = ({ toAddr, txType, addr }: any) => {
   const hexAddr = stripHexPrefix(zilAddrToHexAddr(addr));
-
-  let type: any;
-
-  if (fromAddr.toLowerCase() === toAddr.toLowerCase()) {
-    type = <BothArrow width="20px" height="14px" fill="gray" />;
-  } else {
-    type =
-      fromAddr.toLowerCase() === hexAddr ? (
-        <RightArrow width="20px" height="14px" fill="red" />
-      ) : (
-        <LeftArrow width="20px" height="14px" fill="green" />
-      );
-  }
 
   let txTypeIcon: any = undefined;
 

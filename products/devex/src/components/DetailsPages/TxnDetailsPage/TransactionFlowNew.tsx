@@ -29,7 +29,16 @@ const TransactionFlow: React.FC<IProps> = ({ hash, txn }) => {
   const [links, setLinks] = useState([]);
 
   const networkContext = useContext(NetworkContext);
-  const { dataService, isIsolatedServer, apolloUrl } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, isIsolatedServer, apolloUrl } = networkContext;
 
   const ref: any = useRef<SVGElement | null>();
 
@@ -286,7 +295,7 @@ const TransactionFlow: React.FC<IProps> = ({ hash, txn }) => {
         .append("textPath")
         .attr("class", "linkText")
         .attr("transform", "translate(56,0)")
-        .text(function (d: any, i) {
+        .text(function (d: any) {
           if (d.index === 0) {
             return d.index + 1;
           }
@@ -405,11 +414,11 @@ const TransactionFlow: React.FC<IProps> = ({ hash, txn }) => {
             return d.y + nodeHeight / 2 + 5;
           });
 
-        linkTextContainer.attr("dx", function (d: any) {
+        linkTextContainer.attr("dx", function () {
           return 50;
         });
 
-        linkTextContainer.attr("dy", function (d: any) {
+        linkTextContainer.attr("dy", function () {
           return -5;
         });
 

@@ -23,7 +23,14 @@ const ContractTransactionsTab: React.FC<IProps> = ({
   const [transactionsCount, setTransactionsCount] = useState<number>(0);
 
   const networkContext = useContext(NetworkContext);
-  const { apolloUrl } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { apolloUrl } = networkContext;
 
   const generatePagination = useCallback(
     (currentPage: number, pageCount: number, delta = 2) => {

@@ -28,7 +28,15 @@ import "./TxnDetailsPage.css";
 const TxnDetailsPage: React.FC = () => {
   const { txnHash } = useParams<{ txnHash: string }>();
   const networkContext = useContext(NetworkContext);
-  const { dataService, networkUrl } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, networkUrl } = networkContext;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -191,10 +199,12 @@ const TxnDetailsPage: React.FC = () => {
                       <div className="txn-detail">
                         <span>Transaction Fee:</span>
                         <span>
-                          {qaToZil(
-                            Number(data.txn.txParams.gasPrice) *
-                              data.txn.txParams.receipt!.cumulative_gas
-                          )}
+                          {data.txn.txParams.receipt
+                            ? qaToZil(
+                                Number(data.txn.txParams.gasPrice) *
+                                  data.txn.txParams.receipt.cumulative_gas
+                              )
+                            : "N/A"}
                         </span>
                       </div>
                     </Col>

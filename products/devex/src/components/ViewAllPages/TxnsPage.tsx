@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useContext,
 } from "react";
-import { Tooltip, OverlayTrigger } from "react-bootstrap";
+import { Tooltip, OverlayTrigger, Spinner } from "react-bootstrap";
 import { Row } from "react-table";
 
 import ToAddrDisp from "src/components/Misc/Disp/ToAddrDisp/ToAddrDisp";
@@ -24,7 +24,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const TxnsPage: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { dataService } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { dataService } = networkContext;
 
   const fetchIdRef = useRef(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,9 +100,13 @@ const TxnsPage: React.FC = () => {
         Header: "Fee",
         accessor: "txn",
         Cell: ({ value }: { value: Transaction }) => {
-          const fee =
-            Number(value.txParams.gasPrice) *
-            value.txParams.receipt!.cumulative_gas;
+          let fee = 0;
+
+          if (value.txParams.receipt) {
+            fee =
+              Number(value.txParams.gasPrice) *
+              value.txParams.receipt.cumulative_gas;
+          }
           return (
             <OverlayTrigger
               placement="top"

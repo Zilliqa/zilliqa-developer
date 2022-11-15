@@ -3,7 +3,7 @@ import { Pagination, Row as BRow, Col as BCol, Spinner } from "react-bootstrap";
 import {
   useTable,
   HeaderGroup,
-  Column,
+  //  Column,
   Row,
   Cell,
   usePagination,

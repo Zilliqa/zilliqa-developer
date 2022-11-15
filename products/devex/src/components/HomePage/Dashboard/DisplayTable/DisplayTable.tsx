@@ -1,5 +1,5 @@
 import React from "react";
-import { useTable, HeaderGroup, Column, Row, Cell } from "react-table";
+import { useTable, HeaderGroup, Row, Cell } from "react-table";
 
 import { TransactionDetails } from "src/typings/api";
 import {

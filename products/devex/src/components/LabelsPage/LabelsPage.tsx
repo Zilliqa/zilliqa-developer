@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Container, Col, Row, Dropdown, Form } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 
 import { defaultNetworks } from "src/services/network/networkProvider";
 import { UserPrefContext } from "src/services/userPref/userPrefProvider";
@@ -12,7 +13,15 @@ import "./LabelsPage.css";
 
 const LabelsPage: React.FC = () => {
   const userPrefContext = useContext(UserPrefContext);
-  const { labelMap, networkMap, setLabelMap } = userPrefContext!;
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { labelMap, networkMap, setLabelMap } = userPrefContext;
 
   const [searchFilter, setSearchFilter] = useState("");
   const [typefilter, setTypefilter] = useState("All");

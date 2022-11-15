@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { qaToZil } from "src/utils/Utils";
 import AddressDisp from "src/components/Misc/Disp/AddressDisp/AddressDisp";
 import { isValidAddr } from "src/utils/Utils";
 
 import "./TransactionFlowDetails.css";
-import TxBlock from "./TxBlock";
 
 interface IProps {
   links: {
@@ -72,9 +71,8 @@ const TransactionFlowDetails: React.FC<IProps> = ({ links, txn }) => {
   if (txn.data !== "") {
     txData = JSON.parse(txn.data);
   }
-  const [loading, setLoading] = useState(false);
 
-  return loading ? null : (
+  return (
     <div className="transaction-flow-details mt-4">
       <h3 className="mb-4">Transaction flow</h3>
       {links &&

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 
 import {
   qaToZil,
@@ -63,7 +63,7 @@ const TxBlock: React.FC<IProps> = ({ link, parent, noDetails }) => {
 
       const scrollableBox = document.querySelector(".transaction-flow");
 
-      const ns = document.querySelector(".leader-line:last-of-type");
+      // const ns = document.querySelector(".leader-line:last-of-type");
       /* @ts-ignore */
       //scrollableBox.appendChild(ns);
 

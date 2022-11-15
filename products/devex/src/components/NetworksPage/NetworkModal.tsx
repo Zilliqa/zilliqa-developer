@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Spinner } from "react-bootstrap";
 
 import { ThemeContext } from "src/themes/themeProvider";
 
@@ -16,7 +16,15 @@ interface IProps {
 
 const NetworkModal: React.FC<IProps> = ({ show, handleCloseModal, cb }) => {
   const themeContext = useContext(ThemeContext);
-  const { theme } = themeContext!;
+
+  if (!themeContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { theme } = themeContext;
   const [networkUrlInput, setNetworkUrlInput] = useState("");
   const [networkNameInput, setNetworkNameInput] = useState("");
 

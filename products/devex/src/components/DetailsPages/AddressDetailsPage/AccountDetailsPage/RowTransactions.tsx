@@ -1,20 +1,6 @@
-import React, {
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  MutableRefObject,
-} from "react";
+import React from "react";
 
-import {
-  Card,
-  Container,
-  Row,
-  Col,
-  Pagination,
-  Spinner,
-} from "react-bootstrap";
+import { Row, Col, Spinner } from "react-bootstrap";
 
 import { gql, useQuery } from "@apollo/client";
 
@@ -33,7 +19,7 @@ const RowTransactions: React.FC<IProps> = ({ addr }) => {
     }
   `;
 
-  const { loading, error, data } = useQuery(ACCOUNT_TRANSACTIONS, {
+  const { loading, data } = useQuery(ACCOUNT_TRANSACTIONS, {
     variables: { addr },
   });
 

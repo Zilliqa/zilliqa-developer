@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Container, Row, Button } from "react-bootstrap";
+import { Container, Row, Button, Spinner } from "react-bootstrap";
 
 import { defaultNetworks } from "src/services/network/networkProvider";
 import {
@@ -13,7 +13,14 @@ import NetworkModal from "./NetworkModal";
 
 const NetworksPage: React.FC = () => {
   const userPrefContext = useContext(UserPrefContext);
-  const { networkMap, setNetworkMap } = userPrefContext!;
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { networkMap, setNetworkMap } = userPrefContext;
   const [show, setShow] = useState(false);
 
   const handleCloseModal = () => setShow(false);

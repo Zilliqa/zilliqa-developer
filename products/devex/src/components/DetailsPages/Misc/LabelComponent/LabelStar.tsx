@@ -16,6 +16,7 @@ import {
   LabelInfo,
 } from "src/services/userPref/userPrefProvider";
 
+import { Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
 import { faStar as faStarFilled } from "@fortawesome/free-solid-svg-icons";
@@ -34,7 +35,15 @@ const LabelStar: React.FC<IProps> = ({ type }) => {
   const networkName = useNetworkName();
 
   const userPrefContext = useContext(UserPrefContext);
-  const { labelMap, setLabelMap } = userPrefContext!;
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { labelMap, setLabelMap } = userPrefContext;
 
   const currPath = useMemo(
     () => location.pathname + location.search,

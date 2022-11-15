@@ -37,7 +37,15 @@ const defaultBCInfoState = {
 
 const BCInfo: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { dataService, networkUrl } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, networkUrl } = networkContext;
 
   const [data, setData] = useState<BlockchainInfo | null>(null);
   const [state, setState] = useState<BCInfoState>(defaultBCInfoState);

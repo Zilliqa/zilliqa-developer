@@ -18,9 +18,14 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 const siteWidth = 1200;
 const scale = window.screen.width / siteWidth;
 
-document
-  .querySelector('meta[name="viewport"]')!
-  .setAttribute("content", `width=${siteWidth}, initial-scale=${scale}`);
+const viewPort = document.querySelector('meta[name="viewport"]');
+
+if (viewPort) {
+  viewPort.setAttribute(
+    "content",
+    `width=${siteWidth}, initial-scale=${scale}`
+  );
+}
 
 const client = new ApolloClient({
   uri: "http://localhost:5000",

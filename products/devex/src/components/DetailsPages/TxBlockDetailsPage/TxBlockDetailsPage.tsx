@@ -53,7 +53,16 @@ import "./TxBlockDetailsPage.css";
 const TxBlockDetailsPage: React.FC = () => {
   const { blockNum } = useParams<{ blockNum: string }>();
   const networkContext = useContext(NetworkContext);
-  const { dataService, isIsolatedServer } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, isIsolatedServer } = networkContext;
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -174,9 +183,12 @@ const TxBlockDetailsPage: React.FC = () => {
         Header: "Fee",
         accessor: "txn",
         Cell: ({ value }: { value: Transaction }) => {
-          const fee =
-            Number(value.txParams.gasPrice) *
-            value.txParams.receipt!.cumulative_gas;
+          let fee = 0;
+          if (value.txParams.receipt) {
+            fee =
+              Number(value.txParams.gasPrice) *
+              value.txParams.receipt.cumulative_gas;
+          }
           return (
             <OverlayTrigger
               placement="top"

@@ -24,10 +24,9 @@ export const UserPrefContext = React.createContext<UserPrefState | undefined>(
 );
 
 export const UserPrefProvider = (props: { children: any }) => {
+  const item = localStorage.getItem("networkMap");
   const [state, setState] = useState<UserPrefState>({
-    networkMap: localStorage.getItem("networkMap")
-      ? new Map(JSON.parse(localStorage.getItem("networkMap")!))
-      : new Map(),
+    networkMap: item ? new Map(JSON.parse(item)) : new Map(),
     setNetworkMap: (newNetworkMap) => {
       localStorage.setItem(
         "networkMap",
@@ -35,9 +34,7 @@ export const UserPrefProvider = (props: { children: any }) => {
       );
       setState((prevState) => ({ ...prevState, networkMap: newNetworkMap }));
     },
-    labelMap: localStorage.getItem("labelMap")
-      ? JSON.parse(localStorage.getItem("labelMap")!)
-      : {},
+    labelMap: item ? JSON.parse(item) : {},
     setLabelMap: (newLabelMap) => {
       localStorage.setItem("labelMap", JSON.stringify(newLabelMap));
       setState((prevState) => ({ ...prevState, labelMap: newLabelMap }));

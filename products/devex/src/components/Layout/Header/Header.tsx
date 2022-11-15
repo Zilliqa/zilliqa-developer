@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Navbar, Nav } from "react-bootstrap";
+import { Navbar, Nav, Spinner } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 import ZilLogo from "src/assets/images/ZilLogo.png";
@@ -8,7 +8,6 @@ import {
   NetworkContext,
   QueryPreservingLink,
 } from "src/services/network/networkProvider";
-
 import NetworkSwitcher from "./NetworkSwitcher";
 
 import "./Header.css";
@@ -16,7 +15,16 @@ import "./Header.css";
 const Header: React.FC = () => {
   const location = useLocation();
   const networkContext = useContext(NetworkContext);
-  const { isIsolatedServer } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { isIsolatedServer } = networkContext;
 
   const [showSearchbar, setShowSearchbar] = useState(false);
 
@@ -54,7 +62,7 @@ const Header: React.FC = () => {
         {showSearchbar ? (
           <div className="header-searchbar">
             <Searchbar
-              isISSearchbar={isIsolatedServer!}
+              isISSearchbar={!!isIsolatedServer}
               isHeaderSearchbar={true}
             />
           </div>

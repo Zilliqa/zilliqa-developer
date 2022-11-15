@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 
 import { NetworkContext } from "src/services/network/networkProvider";
+import { Spinner } from "react-bootstrap";
 
 import BCInfo from "./BCInfo/BCInfo";
 import DSBlockList from "./DSBlockList/DSBlockList";
@@ -26,7 +27,15 @@ import ISInfo from "./ISInfo/ISInfo";
 */
 const Dashboard: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { isIsolatedServer } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { isIsolatedServer } = networkContext;
 
   return (
     <div>

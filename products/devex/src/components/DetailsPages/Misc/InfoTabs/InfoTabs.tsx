@@ -36,14 +36,18 @@ export const generateTabsFromTxnDetails = (
 
   if (receipt.success === undefined || data.contractAddr) {
     if (data.txn.txParams.data) {
-      tabs.tabHeaders.push("params");
-      tabs.tabTitles.push(`Params`);
-      tabs.tabContents.push(<OverviewTab data={data.txn.txParams.data!} />);
+      if (data.txn.txParams.data) {
+        tabs.tabHeaders.push("params");
+        tabs.tabTitles.push(`Params`);
+        tabs.tabContents.push(<OverviewTab data={data.txn.txParams.data} />);
+      }
     }
     if (data.txn.txParams.code) {
-      tabs.tabHeaders.push("code");
-      tabs.tabTitles.push(`Code`);
-      tabs.tabContents.push(<CodeTab code={data.txn.txParams.code!} />);
+      if (data.txn.txParams.code) {
+        tabs.tabHeaders.push("code");
+        tabs.tabTitles.push(`Code`);
+        tabs.tabContents.push(<CodeTab code={data.txn.txParams.code} />);
+      }
     }
   } else {
     if (data.txn.txParams.data) {

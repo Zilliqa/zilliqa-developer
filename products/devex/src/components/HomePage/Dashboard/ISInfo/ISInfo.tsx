@@ -9,7 +9,16 @@ import "./ISInfo.css";
 
 const ISInfo: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { dataService } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService } = networkContext;
 
   const [data, setData] = useState<IISInfo | null>(null);
 

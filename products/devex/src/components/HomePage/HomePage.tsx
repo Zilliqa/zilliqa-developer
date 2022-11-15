@@ -20,7 +20,15 @@ import Searchbar from "./Searchbar/Searchbar";
 */
 const HomePage: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { isIsolatedServer } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { isIsolatedServer } = networkContext;
 
   return (
     <>

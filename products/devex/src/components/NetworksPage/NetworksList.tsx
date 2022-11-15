@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
+import { Spinner } from "react-bootstrap";
 
 import {
   UserPrefContext,
@@ -23,7 +24,15 @@ const unserialiseNetworks = (networkMap: NetworkMap): NetworkItem[] => {
 
 const NetworksList: React.FC = () => {
   const userPrefContext = useContext(UserPrefContext);
-  const { networkMap, setNetworkMap } = userPrefContext!;
+
+  if (!userPrefContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { networkMap, setNetworkMap } = userPrefContext;
   const [cards, setCards] = useState<NetworkItem[]>(
     unserialiseNetworks(networkMap)
   );

@@ -1,5 +1,12 @@
 import React, { useContext } from "react";
-import { Row, Col, Container, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Row,
+  Col,
+  Container,
+  OverlayTrigger,
+  Tooltip,
+  Spinner,
+} from "react-bootstrap";
 import Switch from "rc-switch";
 
 import { ThemeContext } from "src/themes/themeProvider";
@@ -19,7 +26,15 @@ import "./Footer.css";
 
 const Footer: React.FC = () => {
   const themeContext = useContext(ThemeContext);
-  const { theme, toggle } = themeContext!;
+  if (!themeContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { theme, toggle } = themeContext;
 
   return (
     <div className="custom-footer">

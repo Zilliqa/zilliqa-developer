@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Row, Col, Container, Spinner, Collapse } from "react-bootstrap";
+import { Card, Row, Col, Container, Collapse, Spinner } from "react-bootstrap";
 
 import { QueryPreservingLink } from "src/services/network/networkProvider";
 import { NetworkContext } from "src/services/network/networkProvider";
@@ -34,7 +34,14 @@ import "./DSBlockDetailsPage.css";
 const DSBlockDetailsPage: React.FC = () => {
   const { blockNum } = useParams<{ blockNum: string }>();
   const networkContext = useContext(NetworkContext);
-  const { dataService } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+  const { dataService } = networkContext;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

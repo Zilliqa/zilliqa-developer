@@ -13,7 +13,16 @@ import "./DSBlockList.css";
 
 const DSBlockList: React.FC = () => {
   const networkContext = useContext(NetworkContext);
-  const { dataService, networkUrl } = networkContext!;
+
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, networkUrl } = networkContext;
 
   useEffect(() => {
     setData(null);

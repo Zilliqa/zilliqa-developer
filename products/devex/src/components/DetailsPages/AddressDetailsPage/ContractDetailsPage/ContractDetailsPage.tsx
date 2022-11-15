@@ -26,12 +26,19 @@ interface IProps {
 
 const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
   const networkContext = useContext(NetworkContext);
-  const { dataService, isIsolatedServer, networkUrl } = networkContext!;
+  if (!networkContext) {
+    return (
+      <div className="center-spinner">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
+  const { dataService, isIsolatedServer, networkUrl } = networkContext;
 
   const addrRef = useRef(addr);
   const [contractData, setContractData] = useState<ContractData | null>(null);
   const [creationTxnHash, setCreationTxnHash] = useState<string | null>(null);
-  const [owner, setOwner] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [transactionsCount, setTransactionsCount] = useState<number>(0);
 
@@ -85,7 +92,7 @@ const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
 
     let contractData: ContractData;
     let creationTxnHash: string;
-    let owner: string;
+
     const getData = async () => {
       try {
         if (isIsolatedServer) {
@@ -95,11 +102,9 @@ const ContractDetailsPage: React.FC<IProps> = ({ addr }) => {
           creationTxnHash = await dataService.getTxnIdFromContractData(
             contractData
           );
-          owner = await dataService.getTransactionOwner(creationTxnHash);
         }
         if (contractData) setContractData(contractData);
         if (creationTxnHash) setCreationTxnHash(creationTxnHash);
-        if (owner) setOwner(owner);
       } catch (e) {
         console.log(e);
       } finally {
