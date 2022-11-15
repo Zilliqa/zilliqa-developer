@@ -19,7 +19,7 @@ def _docusaurus_pkg_impl(ctx):
     ]
 
     folders = [root_dir]
-    strip_srcs = ctx.attr.srcs_strip  #  "products/developer-portal"
+    strip_srcs = ctx.attr.strip_path
     for f in ctx.files.srcs:
         short_path = f.short_path
 
@@ -32,14 +32,6 @@ def _docusaurus_pkg_impl(ctx):
         folders.append(paths.dirname(dest))
         shell_cmds.append("cp {} {}".format(f.path, dest))
 
-    print(ctx.files.docs)
-
-    for f in ctx.files.docs:
-        short_path = f.short_path
-        dest = paths.join(sandbox.path, short_path)
-        folders.append(paths.dirname(dest))
-        shell_cmds.append("cp {} {}".format(f.path, dest))
-
     shell_cmds_prepend = []
     for f in folders:
         cmd = "mkdir -p {}".format(f)
@@ -47,10 +39,6 @@ def _docusaurus_pkg_impl(ctx):
             shell_cmds_prepend.append(cmd)
 
     shell_cmds = shell_cmds_prepend + shell_cmds
-
-    print("STRIPPING {}".format(strip_srcs))
-    for s in shell_cmds:
-        print("CMD: {}".format(s))
 
     ctx.actions.run_shell(
         outputs = [sandbox],
@@ -68,7 +56,7 @@ def _docusaurus_pkg_impl(ctx):
     ctx.actions.run(
         outputs = [output_dir],
         inputs = [sandbox],
-        executable = "npx docusaurus",  #ctx.executable.binary,
+        executable = "docusaurus",  #ctx.executable.binary,
         arguments = [args],
         mnemonic = "DocusaurusBuild",
         progress_message = "Building Docusaurus HTML documentation for {}.".format(ctx.label.name),
@@ -91,12 +79,6 @@ docusaurus_pkg_gen = rule(
             allow_single_file = True,
             mandatory = True,
         ),
-        "docs": attr.label_list(
-            doc = "Docusaurus docsfiles.",
-            allow_files = True,
-            mandatory = True,
-            allow_empty = False,
-        ),
         "sidebars": attr.label(
             doc = "Docusaurus sidebars.",
             allow_single_file = True,
@@ -108,7 +90,7 @@ docusaurus_pkg_gen = rule(
             mandatory = True,
             allow_empty = False,
         ),
-        "srcs_strip": attr.string(
+        "strip_path": attr.string(
             doc = "Path to strip from srcs.",
             default = "",
             mandatory = False,
