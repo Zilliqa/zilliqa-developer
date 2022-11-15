@@ -29,6 +29,7 @@ const client = new ApolloClient({
 
 ReactDOM.render(
   <>
+    <div>Important announcement</div>
     <ApolloProvider client={client}>
       <React.StrictMode>
         <Router>
