@@ -1,4 +1,6 @@
 /* eslint-disable */
+// const WorkerPlugin = require("worker-plugin");
+/* eslint-disable */
 const webpack = require("webpack");
 
 module.exports = function override(config) {
@@ -26,5 +28,13 @@ module.exports = function override(config) {
     })
   );
 
+  // Due to REACT 18 + WEBPACK 5: Error: Can't resolve 'process/browser'
+  // Patch according to https://github.com/react-dnd/react-dnd/issues/3425
+  config.module.rules.unshift({
+    test: /\.m?js$/,
+    resolve: {
+      fullySpecified: false, // disable the behavior
+    },
+  });
   return config;
 };

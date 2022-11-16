@@ -1,0 +1,15 @@
+.label-card {
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.04);
+  border-radius: 0.375rem;
+}
+
+.label-card-div {
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: solid 1px var(--color-border);
+  display: flex;
+}
+
+.label-name-editable {
+  outline: none;
+}

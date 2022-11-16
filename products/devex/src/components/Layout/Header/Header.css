@@ -1,0 +1,37 @@
+.custom-navbar {
+  background-color: #092532;
+  color: hsla(var(--color-subtext), 0.85);
+  padding: 0.5rem 10% !important;
+  position: sticky;
+  height: 70px;
+  justify-content: space-between;
+}
+
+.custom-navbar-brand {
+  cursor: pointer;
+}
+
+.app-name {
+  color: white;
+  font-family: Jura;
+  font-size: 20px;
+}
+
+.navbar-link {
+  margin: 0 0.5rem;
+  align-self: center;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-link:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.header-searchbar {
+  width: 100%;
+  max-width: 550px;
+}
+
+.header-searchbar .searchbar-ig {
+  margin-bottom: 0;
+}
