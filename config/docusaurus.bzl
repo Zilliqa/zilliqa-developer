@@ -9,7 +9,7 @@ def _docusaurus_pkg_impl(ctx):
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
     output_dir = ctx.actions.declare_directory(ctx.label.name + "_html")
 
-    root_dir = paths.dirname(paths.join(sandbox.path, ctx.file.config.short_path))
+    root_dir = sandbox.path
 
     # Docusaurus expects the config and index files to be in the root directory with the canonical
     # names.  This possibly renames and relocates the config and index files in the sandbox.
@@ -51,12 +51,15 @@ def _docusaurus_pkg_impl(ctx):
     args = ctx.actions.args()
     args.add("build")
     args.add("--config")
-    args.add("docusaurus.config.js")
+    args.add(paths.join(root_dir, "docusaurus.config.js"))
 
     ctx.actions.run(
         outputs = [output_dir],
         inputs = [sandbox],
-        executable = "docusaurus",  #ctx.executable.binary,
+        env = {
+            "BAZEL_BINDIR": ctx.bin_dir.path,
+        },
+        executable = ctx.executable.binary,
         arguments = [args],
         mnemonic = "DocusaurusBuild",
         progress_message = "Building Docusaurus HTML documentation for {}.".format(ctx.label.name),
@@ -73,6 +76,12 @@ docusaurus_pkg_gen = rule(
     attrs = {
         "args": attr.string_list(
             doc = "docusaurus-build argument list.",
+        ),
+        "binary": attr.label(
+            doc = "docusaurus-build executable.",
+            executable = True,
+            mandatory = True,
+            cfg = "exec",
         ),
         "config": attr.label(
             doc = "Docusaurus project config file.",
@@ -95,12 +104,6 @@ docusaurus_pkg_gen = rule(
             default = "",
             mandatory = False,
         ),
-        #        "binary": attr.label(
-        #            doc = "docusaurus-build executable.",
-        #            executable = True,
-        #            mandatory = True,
-        #            cfg = "exec",
-        #        ),
     },
 )
 
