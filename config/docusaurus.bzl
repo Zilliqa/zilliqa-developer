@@ -5,11 +5,15 @@ DocusaurusInfo = provider(
     fields = ["open_uri"],
 )
 
-def _docusaurus_pkg_impl(ctx):
+def _docusaurus_pkg_impl(ctx):    
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
     output_dir = ctx.actions.declare_directory(ctx.label.name + "_html")
 
     root_dir = sandbox.path
+#    package_json = ctx.actions.declare_file(paths.join(root_dir, "package.json"))
+#    ctx.actions.symlink(
+#        output = package_json, 
+#        target_file = ctx.files.package[0])
 
     # Docusaurus expects the config and index files to be in the root directory with the canonical
     # names.  This possibly renames and relocates the config and index files in the sandbox.
@@ -39,23 +43,25 @@ def _docusaurus_pkg_impl(ctx):
             shell_cmds_prepend.append(cmd)
 
     shell_cmds = shell_cmds_prepend + shell_cmds
-
+    print("SCRIPT: {}".format(";\n".join(shell_cmds)))
     ctx.actions.run_shell(
         outputs = [sandbox],
         inputs = ctx.files.config + ctx.files.sidebars + ctx.files.srcs,
         mnemonic = "DocusaurusCollect",
-        command = "; ".join(shell_cmds),
+        command = "; ".join(shell_cmds) + "; echo \"CURRENT DIR: $(pwd)\"",
         progress_message = "Collecting Docusaurus source documents for {}.".format(ctx.label.name),
     )
 
     args = ctx.actions.args()
     args.add("build")
     args.add("--config")
-    args.add(paths.join(root_dir, "docusaurus.config.js"))
+    # See https://docs.aspect.build/aspect-build/rules_js/v0.9.1/docs/migrate.html
+    # for explanation on the "../../../" needed in the executable
+    args.add(paths.join("../../.." , root_dir, "docusaurus.config.js"))
 
     ctx.actions.run(
         outputs = [output_dir],
-        inputs = [sandbox],
+        inputs = [sandbox, "//:package", "//:node_modules"],
         env = {
             "BAZEL_BINDIR": ctx.bin_dir.path,
         },
@@ -88,6 +94,16 @@ docusaurus_pkg_gen = rule(
             allow_single_file = True,
             mandatory = True,
         ),
+        "package": attr.label(
+            doc = "Docusaurus package file.",
+            allow_single_file = True,
+            mandatory = True,
+        ),
+#        "node_modules": attr.label(
+#            doc = "Docusaurus package file.",
+#            allow_single_file = True,
+#            mandatory = True,
+#        ),        
         "sidebars": attr.label(
             doc = "Docusaurus sidebars.",
             allow_single_file = True,
