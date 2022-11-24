@@ -1,0 +1,10 @@
+.valtxlist-card {
+  width: 100%;
+}
+
+.valtxlist-card-header {
+  height: 30px;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}

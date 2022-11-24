@@ -14,10 +14,10 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AccessTabs from '../../components/access-tabs';
-import Layout from '../../components/layout';
-import SendForm from '../../components/send-form';
-import AccountInfo from '../../components/account-info';
+import AccessTabs from "../../components/access-tabs";
+import Layout from "../../components/layout";
+import SendForm from "../../components/send-form";
+import AccountInfo from "../../components/account-info";
 
 const SendContainer = (props) => {
   const { zilContext } = props;

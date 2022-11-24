@@ -39,21 +39,24 @@
 
 @keyframes GlowEffect {
   0% {
-    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success), 0 0 64px var(--success);
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success);
   }
 
   50% {
-    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success), 0 0 64px var(--success),
-      0 0 72px royalblue;
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success), 0 0 72px royalblue;
   }
 
   100% {
-    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success), 0 0 64px var(--success);
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success);
   }
 }
 
 .font-monospace {
-  font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 code {
@@ -65,8 +68,9 @@ body {
   background-color: var(--black);
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: scroll;
@@ -151,9 +155,9 @@ form input.form-control {
   cursor: not-allowed;
 }
 
-form input[type='text']:focus,
-form input[type='password']:focus,
-form input[type='tel']:focus {
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form input[type="tel"]:focus {
   color: var(--gray100);
   background-color: transparent;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0) !important;
@@ -161,9 +165,9 @@ form input[type='tel']:focus {
   border-bottom: 1px solid var(--white);
 }
 
-form input[type='text']::placeholder,
-form input[type='password']::placeholder,
-form input[type='tel']::placeholder {
+form input[type="text"]::placeholder,
+form input[type="password"]::placeholder,
+form input[type="tel"]::placeholder {
   color: var(--gray100);
 }
 

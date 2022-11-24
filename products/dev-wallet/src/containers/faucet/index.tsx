@@ -14,13 +14,22 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
-import { Card, FormGroup, Label, Input, FormFeedback, Row, Col, Form } from 'reactstrap';
-import Layout from '../../components/layout';
-import FaucetRequest from '../../components/faucet-request';
+import React, { useState } from "react";
+import {
+  Card,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Row,
+  Col,
+  Form,
+} from "reactstrap";
+import Layout from "../../components/layout";
+import FaucetRequest from "../../components/faucet-request";
 
-import { getInputValidationState } from '../../utils';
-import { validation } from '@zilliqa-js/util';
+import { getInputValidationState } from "../../utils";
+import { validation } from "@zilliqa-js/util";
 const { isAddress, isBech32 } = validation;
 
 const FaucetContainer = ({ zilContext }) => {
@@ -28,11 +37,12 @@ const FaucetContainer = ({ zilContext }) => {
 
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
-  const initialAddress = params['address'];
+  const initialAddress = params["address"];
 
   let isInitialAddressValid = false;
   if (initialAddress !== undefined) {
-    isInitialAddressValid = isBech32(initialAddress) || isAddress(initialAddress);
+    isInitialAddressValid =
+      isBech32(initialAddress) || isAddress(initialAddress);
   }
 
   const [toAddress, setToAddress] = useState(initialAddress);
@@ -44,18 +54,22 @@ const FaucetContainer = ({ zilContext }) => {
   const changeToAddress = (e: React.ChangeEvent<HTMLInputElement>): void => {
     e.preventDefault();
     const value = e.target.value;
-    const key = 'toAddress';
+    const key = "toAddress";
 
     const validate = (value) => isBech32(value) || isAddress(value);
 
-    const validationResult: any = getInputValidationState(key, value, validate(value));
+    const validationResult: any = getInputValidationState(
+      key,
+      value,
+      validate(value)
+    );
     setToAddress(value);
     setToAddressValid(validationResult.toAddressValid);
     setToAddressInvalid(validationResult.toAddressInvalid);
   };
 
   const reset = () => {
-    setToAddress('');
+    setToAddress("");
     setToAddressValid(false);
     setToAddressInvalid(false);
   };
@@ -66,10 +80,12 @@ const FaucetContainer = ({ zilContext }) => {
         <div className="py-5">
           <div className="px-4 text-center">
             <h2 className="pb-2">
-              <b>{'ZIL Faucet'}</b>
+              <b>{"ZIL Faucet"}</b>
             </h2>
             <p className="text-secondary">
-              {'Please run the faucet to receive a small amount of Zil for testing.'}
+              {
+                "Please run the faucet to receive a small amount of Zil for testing."
+              }
             </p>
             <Row>
               <Col xs={12} sm={12} md={12} lg={8} className="mr-auto ml-auto">
@@ -77,7 +93,7 @@ const FaucetContainer = ({ zilContext }) => {
                   <FormGroup>
                     <Label for="Address">
                       <small>
-                        <b>{'To Address'}</b>
+                        <b>{"To Address"}</b>
                       </small>
                     </Label>
                     <Input
@@ -92,14 +108,18 @@ const FaucetContainer = ({ zilContext }) => {
                       placeholder="Enter Your Test Net Account Address"
                       maxLength={42}
                     />
-                    <FormFeedback>{'invalid address'}</FormFeedback>
-                    <FormFeedback valid={true}>{'valid address'}</FormFeedback>
+                    <FormFeedback>{"invalid address"}</FormFeedback>
+                    <FormFeedback valid={true}>{"valid address"}</FormFeedback>
                   </FormGroup>
                 </Form>
               </Col>
             </Row>
             {toAddressValid ? (
-              <FaucetRequest faucet={faucet} toAddress={toAddress} reset={reset} />
+              <FaucetRequest
+                faucet={faucet}
+                toAddress={toAddress}
+                reset={reset}
+              />
             ) : null}
           </div>
         </div>

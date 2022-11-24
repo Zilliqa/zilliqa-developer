@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { BN, units } from '@zilliqa-js/util';
+import { BN, units } from "@zilliqa-js/util";
 
 export const setValIfWholeNum =
   (fn) =>
@@ -21,14 +21,19 @@ export const setValIfWholeNum =
     e.preventDefault();
     const value = e.target.value;
     const isWholeNumber = /^\d*\.?\d*$/.test(value) && !isNaN(Number(value));
-    const isEmptyString = value === '';
+    const isEmptyString = value === "";
     return isEmptyString || isWholeNumber ? fn(value) : undefined;
   };
 
-export const getInputValidationState = (key: string, value: string, testVal: RegExp | boolean) => {
-  const isInvalid: boolean = typeof testVal === 'boolean' ? testVal : testVal.test(value);
-  const keyValid = key + 'Valid';
-  const keyInvalid = key + 'Invalid';
+export const getInputValidationState = (
+  key: string,
+  value: string,
+  testVal: RegExp | boolean
+) => {
+  const isInvalid: boolean =
+    typeof testVal === "boolean" ? testVal : testVal.test(value);
+  const keyValid = key + "Valid";
+  const keyInvalid = key + "Invalid";
   const state = {};
   if (!value) {
     state[keyValid] = false;
@@ -47,10 +52,12 @@ export const getInputValidationState = (key: string, value: string, testVal: Reg
 };
 
 export const downloadObjectAsJson = (exportObj, exportName) => {
-  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
-  const downloadAnchorNode = document.createElement('a');
-  downloadAnchorNode.setAttribute('href', dataStr);
-  downloadAnchorNode.setAttribute('download', exportName + '.json');
+  const dataStr =
+    "data:text/json;charset=utf-8," +
+    encodeURIComponent(JSON.stringify(exportObj));
+  const downloadAnchorNode = document.createElement("a");
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", exportName + ".json");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();

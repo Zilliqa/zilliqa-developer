@@ -1,0 +1,25 @@
+#header-network-dropdown {
+  margin: 0 0.5rem;
+  border-radius: 4px;
+}
+
+.info-icon {
+  align-self: center;
+  color: darkgrey;
+}
+
+.custom-navbar .dropdown-menu {
+  min-width: 200px;
+}
+
+.node-div {
+  height: 32px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.node-item {
+  padding: 0.25rem 1.5rem 0.25rem 1.5rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

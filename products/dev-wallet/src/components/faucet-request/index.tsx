@@ -14,14 +14,14 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import SpinnerWithCheckMark from '../spinner-with-check-mark';
-import Button from '../button';
-import FaucetPending from '../faucet-pending';
+import { useState } from "react";
+import SpinnerWithCheckMark from "../spinner-with-check-mark";
+import Button from "../button";
+import FaucetPending from "../faucet-pending";
 
-import { SITE_KEY } from '../../constants';
-import ReCAPTCHA from 'react-google-recaptcha';
-import { useAsyncFn } from '../../use-async-fn';
+import { SITE_KEY } from "../../constants";
+import ReCAPTCHA from "react-google-recaptcha";
+import { useAsyncFn } from "../../use-async-fn";
 
 const FaucetRequest = ({ faucet, toAddress, reset }) => {
   const { error, isPending, isFulfilled, run } = useAsyncFn({
@@ -43,7 +43,7 @@ const FaucetRequest = ({ faucet, toAddress, reset }) => {
             <small className="text-danger text-fade-in">
               {error.message}
               <br />
-              {'Google reCAPTCHA might not work for some country.'}
+              {"Google reCAPTCHA might not work for some country."}
             </small>
           </p>
           <br />
@@ -54,12 +54,14 @@ const FaucetRequest = ({ faucet, toAddress, reset }) => {
           <SpinnerWithCheckMark loading={false} />
           <div data-testid="faucet-complete">
             <p className="pt-4 text-secondary">
-              <span className="text-primary">{'Transaction In Process'}</span>
+              <span className="text-primary">{"Transaction In Process"}</span>
               <br />
               <br />
-              <small>{'Your transaction is pending blockchain confirmation.'}</small>
+              <small>
+                {"Your transaction is pending blockchain confirmation."}
+              </small>
               <br />
-              <small>{'Please check after a few minutes.'}</small>
+              <small>{"Please check after a few minutes."}</small>
             </p>
           </div>
           <br />

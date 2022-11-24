@@ -1,0 +1,33 @@
+#searchbar-dropdown {
+  height: 50px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-searchbar);
+  color: var(--color-subtext);
+  box-shadow: none !important;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.searchbar-ig .dropdown-menu.show {
+  min-width: fit-content;
+}
+
+.searchbar-ig {
+  margin-bottom: 0.5rem;
+}
+
+.searchbar-ig input {
+  height: 50px !important;
+  margin-left: 1px;
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+
+/* Header Searchbar */
+#header-searchbar-ig #searchbar-dropdown {
+  height: 45px;
+}
+
+#header-searchbar-ig input {
+  height: 45px !important;
+}

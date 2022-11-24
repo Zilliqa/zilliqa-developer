@@ -14,15 +14,15 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import Button from '../button';
-import { FaCopy, FaCheck, FaTimes } from 'react-icons/fa';
+import { useState } from "react";
+import Button from "../button";
+import { FaCopy, FaCheck, FaTimes } from "react-icons/fa";
 
 enum ASYNC_STATUS {
-  Idle = 'Idle',
-  Pending = 'Pending',
-  Fulfilled = 'Fulfilled',
-  Rejected = 'Rejected',
+  Idle = "Idle",
+  Pending = "Pending",
+  Fulfilled = "Fulfilled",
+  Rejected = "Rejected",
 }
 
 const CopyToClipboard = ({ data, copyToClipboard }) => {
@@ -42,7 +42,7 @@ const CopyToClipboard = ({ data, copyToClipboard }) => {
     <Button
       data-testid="button-copy"
       className="p-0"
-      style={{ verticalAlign: 'top' }}
+      style={{ verticalAlign: "top" }}
       level="tertiary"
       size="small"
       before={
@@ -72,7 +72,9 @@ const Copy = (props) => (
     copyToClipboard={
       props.copyToClipboard
         ? props.copyToClipboard
-        : window.navigator && window.navigator.clipboard && window.navigator.clipboard.writeText
+        : window.navigator &&
+          window.navigator.clipboard &&
+          window.navigator.clipboard.writeText
         ? (text) => window.navigator.clipboard.writeText(text)
         : undefined
     }

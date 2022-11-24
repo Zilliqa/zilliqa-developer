@@ -1,0 +1,7 @@
+.vb-link-div {
+  background-color: white;
+  border-radius: 5px;
+  display: flex;
+  cursor: pointer;
+  border: solid 1px rgba(0, 0, 0, 0.125);
+}

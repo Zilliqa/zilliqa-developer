@@ -14,21 +14,21 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useReducer, useRef, useCallback } from 'react';
+import { useEffect, useReducer, useRef, useCallback } from "react";
 
 export enum statusTypes {
-  Initial = 'Initial',
-  Pending = 'Pending',
-  Fulfilled = 'Fulfilled',
-  Rejected = 'Rejected',
+  Initial = "Initial",
+  Pending = "Pending",
+  Fulfilled = "Fulfilled",
+  Rejected = "Rejected",
 }
 
 enum actionTypes {
-  Init = 'Init',
-  Run = 'Run',
-  Abort = 'Abort',
-  Fulfill = 'Fulfill',
-  Reject = 'Reject',
+  Init = "Init",
+  Run = "Run",
+  Abort = "Abort",
+  Fulfill = "Fulfill",
+  Reject = "Reject",
 }
 
 interface Args {
@@ -96,7 +96,8 @@ export const useAsyncFn: UseAsyncFn = ({ fn, deferred = false, ...args }) => {
   const abortControllerRef = useRef<AbortController>();
   const argsRef = useRef(args);
   const init = (): void => {
-    isMountedRef.current && dispatch({ type: actionTypes.Init, payload: undefined });
+    isMountedRef.current &&
+      dispatch({ type: actionTypes.Init, payload: undefined });
   };
 
   const run = useCallback(
@@ -107,15 +108,19 @@ export const useAsyncFn: UseAsyncFn = ({ fn, deferred = false, ...args }) => {
 
       abortControllerRef.current = new AbortController();
 
-      isMountedRef.current && dispatch({ type: actionTypes.Run, payload: undefined });
+      isMountedRef.current &&
+        dispatch({ type: actionTypes.Run, payload: undefined });
       try {
         const signal: AbortSignal | undefined =
           abortControllerRef.current && abortControllerRef.current.signal;
         const payload = await asyncFn({ args: argsRef.current, signal });
-        isMountedRef.current && dispatch({ type: actionTypes.Fulfill, payload });
+        isMountedRef.current &&
+          dispatch({ type: actionTypes.Fulfill, payload });
       } catch (error: any) {
         const curType =
-          error && error.name === 'AbortError' ? actionTypes.Abort : actionTypes.Reject;
+          error && error.name === "AbortError"
+            ? actionTypes.Abort
+            : actionTypes.Reject;
 
         isMountedRef.current && dispatch({ type: curType, payload: error });
       }

@@ -204,6 +204,14 @@ container_pull(
     tag = "v8.2.0rc2",
 )
 
+container_pull(
+    name = "nginx",
+    digest = "sha256:186c79dc14ab93e43d315143ee4b0774506dc4fd952388c20e35d3d37058ab8d",
+    registry = "index.docker.io",
+    repository = "library/nginx",
+    tag = "1.23.1",
+)
+
 # ================================================================
 # Kubernetes
 # ================================================================

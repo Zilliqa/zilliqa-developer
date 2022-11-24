@@ -14,7 +14,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { decryptPrivateKey } from '@zilliqa-js/crypto';
+import { decryptPrivateKey } from "@zilliqa-js/crypto";
 
 const decrypt = async (event) => {
   try {
@@ -36,4 +36,4 @@ const decrypt = async (event) => {
 const ctx: Worker = self as any;
 
 // Respond to message from parent thread
-ctx.addEventListener('message', (event) => decrypt(event).catch(console.log));
+ctx.addEventListener("message", (event) => decrypt(event).catch(console.log));
