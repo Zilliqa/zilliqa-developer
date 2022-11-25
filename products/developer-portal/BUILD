@@ -17,7 +17,7 @@ docusaurus_bin.docusaurus_binary(
 )
 
 docusaurus_pkg(
-    name = "test_docs",
+    name = "docs_pkg",
     srcs = ["//docs:files"] + glob(
         include = [
             "src/**/*",
@@ -29,4 +29,22 @@ docusaurus_pkg(
     config = "docusaurus.config.js",
     sidebars = "sidebars.js",
     strip_path = package_name(),
+)
+
+
+docusaurus_bin.docusaurus(
+    name = "test",
+    args = [
+        "build",
+        "$(execpath :docs_pkg)"
+    ],
+    chdir="../../..",
+    srcs=[
+        ":docs_pkg",
+        "//:package",
+        "//:node_modules",
+        "//:node_modules/@docusaurus/preset-classic",
+        "//:node_modules/@docusaurus/theme-common",
+    ],    
+    out_dirs=["build"]
 )

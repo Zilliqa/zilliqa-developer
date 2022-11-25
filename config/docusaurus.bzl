@@ -7,7 +7,7 @@ DocusaurusInfo = provider(
 
 def _docusaurus_pkg_impl(ctx):    
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
-    output_dir = ctx.actions.declare_directory(ctx.label.name + "_html")
+#    output_dir = ctx.actions.declare_directory(ctx.label.name + "_html")
 
     root_dir = sandbox.path
 #    package_json = ctx.actions.declare_file(paths.join(root_dir, "package.json"))
@@ -52,28 +52,28 @@ def _docusaurus_pkg_impl(ctx):
         progress_message = "Collecting Docusaurus source documents for {}.".format(ctx.label.name),
     )
 
-    args = ctx.actions.args()
-    args.add("build")
-    args.add("--config")
-    # See https://docs.aspect.build/aspect-build/rules_js/v0.9.1/docs/migrate.html
-    # for explanation on the "../../../" needed in the executable
-    args.add(paths.join("../../.." , root_dir, "docusaurus.config.js"))
-
-    ctx.actions.run(
-        outputs = [output_dir],
-        inputs = [sandbox, "//:package", "//:node_modules"],
-        env = {
-            "BAZEL_BINDIR": ctx.bin_dir.path,
-        },
-        executable = ctx.executable.binary,
-        arguments = [args],
-        mnemonic = "DocusaurusBuild",
-        progress_message = "Building Docusaurus HTML documentation for {}.".format(ctx.label.name),
-    )
+    # args = ctx.actions.args()
+    # args.add("build")
+    # args.add("--config")
+    # # See https://docs.aspect.build/aspect-build/rules_js/v0.9.1/docs/migrate.html
+    # # for explanation on the "../../../" needed in the executable
+    # args.add(paths.join("../../../../.." , root_dir, "docusaurus.config.js"))
+    # 
+    # ctx.actions.run(
+    #     outputs = [output_dir],
+    #     inputs = [sandbox],
+    #     env = {
+    #         "BAZEL_BINDIR": ctx.bin_dir.path,
+    #     },
+    #     executable = ctx.executable.binary,
+    #     arguments = [args],
+    #     mnemonic = "DocusaurusBuild",
+    #     progress_message = "Building Docusaurus HTML documentation for {}.".format(ctx.label.name),
+    # )
 
     return [
-        DefaultInfo(files = depset([output_dir])),
-        DocusaurusInfo(open_uri = paths.join(output_dir.short_path, "index.html")),
+        DefaultInfo(files = depset([sandbox])),
+#        DocusaurusInfo(open_uri = paths.join(sandbox.short_path, "index.html")),
     ]
 
 docusaurus_pkg_gen = rule(
@@ -120,6 +120,7 @@ docusaurus_pkg_gen = rule(
             default = "",
             mandatory = False,
         ),
+         "files": attr.output(),
     },
 )
 

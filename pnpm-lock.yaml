@@ -6,6 +6,7 @@ specifiers:
   '@apollo/client': ^3.7.1
   '@docusaurus/core': ^2.2.0
   '@docusaurus/preset-classic': ^2.2.0
+  '@docusaurus/theme-common': ^2.2.0
   '@fortawesome/fontawesome-svg-core': ^6.2.0
   '@fortawesome/free-brands-svg-icons': ^6.2.0
   '@fortawesome/free-regular-svg-icons': ^6.2.0
@@ -158,6 +159,7 @@ dependencies:
   '@apollo/client': 3.7.1_gdcq4dv6opitr3wbfwyjmanyra
   '@docusaurus/core': 2.2.0_wp77j576zuzer3dousjkck4gdu
   '@docusaurus/preset-classic': 2.2.0_hvzks7tkfbostckf53jr6tqr54
+  '@docusaurus/theme-common': 2.2.0_wp77j576zuzer3dousjkck4gdu
   '@fortawesome/fontawesome-svg-core': 6.2.1
   '@fortawesome/free-brands-svg-icons': 6.2.1
   '@fortawesome/free-regular-svg-icons': 6.2.1
@@ -2618,7 +2620,7 @@ packages:
       '@docusaurus/react-loadable': 5.5.2_react@18.2.0
       '@docusaurus/types': 2.2.0_elhwamslj4bgtjdngr3xwp2fba
       '@types/history': 4.7.11
-      '@types/react': 18.0.25
+      '@types/react': 17.0.2
       '@types/react-router-config': 5.0.6
       '@types/react-router-dom': 5.3.3
       react: 18.2.0
@@ -2997,6 +2999,51 @@ packages:
       tslib: 2.4.1
       utility-types: 3.10.0
     transitivePeerDependencies:
+      - '@parcel/css'
+      - '@swc/core'
+      - '@swc/css'
+      - bufferutil
+      - csso
+      - debug
+      - esbuild
+      - eslint
+      - lightningcss
+      - postcss-flexbugs-fixes
+      - postcss-normalize
+      - postcss-preset-env
+      - supports-color
+      - typescript
+      - uglify-js
+      - utf-8-validate
+      - vue-template-compiler
+      - webpack-cli
+    dev: false
+
+  /@docusaurus/theme-common/2.2.0_wp77j576zuzer3dousjkck4gdu:
+    resolution: {integrity: sha512-R8BnDjYoN90DCL75gP7qYQfSjyitXuP9TdzgsKDmSFPNyrdE3twtPNa2dIN+h+p/pr+PagfxwWbd6dn722A1Dw==}
+    engines: {node: '>=16.14'}
+    peerDependencies:
+      react: ^16.8.4 || ^17.0.0
+      react-dom: ^16.8.4 || ^17.0.0
+    dependencies:
+      '@docusaurus/mdx-loader': 2.2.0_elhwamslj4bgtjdngr3xwp2fba
+      '@docusaurus/module-type-aliases': 2.2.0_elhwamslj4bgtjdngr3xwp2fba
+      '@docusaurus/plugin-content-blog': 2.2.0_wp77j576zuzer3dousjkck4gdu
+      '@docusaurus/plugin-content-docs': 2.2.0_wp77j576zuzer3dousjkck4gdu
+      '@docusaurus/plugin-content-pages': 2.2.0_wp77j576zuzer3dousjkck4gdu
+      '@docusaurus/utils': 2.2.0_webpack-cli@3.3.12
+      '@types/history': 4.7.11
+      '@types/react': 18.0.25
+      '@types/react-router-config': 5.0.6
+      clsx: 1.2.1
+      parse-numeric-range: 1.3.0
+      prism-react-renderer: 1.3.5_react@18.2.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      tslib: 2.4.1
+      utility-types: 3.10.0
+    transitivePeerDependencies:
+      - '@docusaurus/types'
       - '@parcel/css'
       - '@swc/core'
       - '@swc/css'
