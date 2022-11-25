@@ -1,18 +1,20 @@
-import React from 'react';
-import Head from '@docusaurus/Head';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import useBaseUrl from '@docusaurus/useBaseUrl';
-import { PageMetadata, useThemeConfig } from '@docusaurus/theme-common';
+import Head from "@docusaurus/Head";
+import { useLocation } from "@docusaurus/router";
+import { PageMetadata, useThemeConfig } from "@docusaurus/theme-common";
 import {
   DEFAULT_SEARCH_TAG,
-  useAlternatePageUtils,
   keyboardFocusedClassName,
-} from '@docusaurus/theme-common/internal';
-import { useLocation } from '@docusaurus/router';
-import SearchMetadata from '@theme/SearchMetadata';
+  useAlternatePageUtils,
+} from "@docusaurus/theme-common/internal";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+// import SearchMetadata from "@theme/SearchMetadata";
+import React from "react";
+
 // TODO move to SiteMetadataDefaults or theme-common ?
 // Useful for i18n/SEO
-// See https://developers.google.com/search/docs/advanced/crawling/localized-versions
+// See
+// https://developers.google.com/search/docs/advanced/crawling/localized-versions
 // See https://github.com/facebook/docusaurus/issues/3317
 function AlternateLangHeaders() {
   const {
@@ -45,7 +47,7 @@ function AlternateLangHeaders() {
     </Head>
   );
 }
-// Default canonical url inferred from current page location pathname
+/* Default canonical url inferred from current page location pathname*/
 function useDefaultCanonicalUrl() {
   const {
     siteConfig: { url: siteUrl },
@@ -91,7 +93,7 @@ export default function SiteMetadata() {
 
       {/* <AlternateLangHeaders /> */}
 
-      <SearchMetadata tag={DEFAULT_SEARCH_TAG} locale={currentLocale} />
+      {/*<SearchMetadata tag={DEFAULT_SEARCH_TAG} locale={currentLocale} />*/}
 
       {/*
           It's important to have an additional <Head> element here, as it allows

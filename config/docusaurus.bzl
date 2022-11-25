@@ -7,16 +7,8 @@ DocusaurusInfo = provider(
 
 def _docusaurus_pkg_impl(ctx):    
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
-#    output_dir = ctx.actions.declare_directory(ctx.label.name + "_html")
 
     root_dir = sandbox.path
-#    package_json = ctx.actions.declare_file(paths.join(root_dir, "package.json"))
-#    ctx.actions.symlink(
-#        output = package_json, 
-#        target_file = ctx.files.package[0])
-
-    # Docusaurus expects the config and index files to be in the root directory with the canonical
-    # names.  This possibly renames and relocates the config and index files in the sandbox.
     shell_cmds = [
         "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "docusaurus.config.js")),
         "cp {} {}".format(ctx.file.sidebars.path, paths.join(root_dir, "sidebars.js")),
@@ -43,7 +35,6 @@ def _docusaurus_pkg_impl(ctx):
             shell_cmds_prepend.append(cmd)
 
     shell_cmds = shell_cmds_prepend + shell_cmds
-    print("SCRIPT: {}".format(";\n".join(shell_cmds)))
     ctx.actions.run_shell(
         outputs = [sandbox],
         inputs = ctx.files.config + ctx.files.sidebars + ctx.files.srcs,
@@ -52,28 +43,10 @@ def _docusaurus_pkg_impl(ctx):
         progress_message = "Collecting Docusaurus source documents for {}.".format(ctx.label.name),
     )
 
-    # args = ctx.actions.args()
-    # args.add("build")
-    # args.add("--config")
-    # # See https://docs.aspect.build/aspect-build/rules_js/v0.9.1/docs/migrate.html
-    # # for explanation on the "../../../" needed in the executable
-    # args.add(paths.join("../../../../.." , root_dir, "docusaurus.config.js"))
-    # 
-    # ctx.actions.run(
-    #     outputs = [output_dir],
-    #     inputs = [sandbox],
-    #     env = {
-    #         "BAZEL_BINDIR": ctx.bin_dir.path,
-    #     },
-    #     executable = ctx.executable.binary,
-    #     arguments = [args],
-    #     mnemonic = "DocusaurusBuild",
-    #     progress_message = "Building Docusaurus HTML documentation for {}.".format(ctx.label.name),
-    # )
+    print("OUTPUT IN: ", sandbox.path)
 
     return [
         DefaultInfo(files = depset([sandbox])),
-#        DocusaurusInfo(open_uri = paths.join(sandbox.short_path, "index.html")),
     ]
 
 docusaurus_pkg_gen = rule(
@@ -83,27 +56,12 @@ docusaurus_pkg_gen = rule(
         "args": attr.string_list(
             doc = "docusaurus-build argument list.",
         ),
-        "binary": attr.label(
-            doc = "docusaurus-build executable.",
-            executable = True,
-            mandatory = True,
-            cfg = "exec",
-        ),
         "config": attr.label(
             doc = "Docusaurus project config file.",
             allow_single_file = True,
             mandatory = True,
         ),
-        "package": attr.label(
-            doc = "Docusaurus package file.",
-            allow_single_file = True,
-            mandatory = True,
-        ),
-#        "node_modules": attr.label(
-#            doc = "Docusaurus package file.",
-#            allow_single_file = True,
-#            mandatory = True,
-#        ),        
+
         "sidebars": attr.label(
             doc = "Docusaurus sidebars.",
             allow_single_file = True,
@@ -156,6 +114,5 @@ def docusaurus_pkg(name, **kwargs):
     if "open_cmd" in kwargs:
         view_args["open_cmd"] = kwargs.pop("open_cmd")
 
-    print(kwargs)
     docusaurus_pkg_gen(name = name, **kwargs)
     #docusaurus_view(name = name + ".view", **view_args)
