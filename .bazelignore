@@ -7,3 +7,4 @@ pixy
 .cache/
 node_modules
 **/node_modules
+products/developer-portal/node_modules

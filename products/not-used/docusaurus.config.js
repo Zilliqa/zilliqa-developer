@@ -8,7 +8,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "My Site",
   tagline: "Dinosaurs are cool",
-  staticDirectories: ["static", "docs/static"],
+  //  staticDirectories: ["static", "docs/static"],
   url: "https://your-docusaurus-test-site.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -35,7 +35,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          // sidebarPath: require.resolve("./sidebars.js"),
+          sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl:

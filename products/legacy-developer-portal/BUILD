@@ -30,11 +30,21 @@ docusaurus_bin.docusaurus(
         ":package",
         ":collected_sources",
         "//:node_modules",
+        "//:node_modules/@docusaurus/core",
         "//:node_modules/@docusaurus/preset-classic",
         "//:node_modules/@docusaurus/theme-common",
+        "//:node_modules/@mdx-js/react",
+        "//:node_modules/react",
+        "//:node_modules/clsx",
+        "//:node_modules/prism-react-renderer",
+        "//:node_modules/react-dom",
     ],    
     chdir = "../../../$(execpath :collected_sources)",
     silent_on_success=False,
     log_level = "info",
-    out_dirs=["build"]
+    out_dirs=["build"],
+    env = {
+        "JS_BINARY__PATCH_NODE_FS": "0"
+
+    }    
 )

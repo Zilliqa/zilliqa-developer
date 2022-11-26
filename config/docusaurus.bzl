@@ -9,10 +9,12 @@ def _docusaurus_pkg_impl(ctx):
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
 
     root_dir = sandbox.path
+    print("A")
     shell_cmds = [
         "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "docusaurus.config.js")),
         "cp {} {}".format(ctx.file.sidebars.path, paths.join(root_dir, "sidebars.js")),
     ]
+    print("B")
 
     folders = [root_dir]
     strip_srcs = ctx.attr.strip_path
@@ -26,13 +28,16 @@ def _docusaurus_pkg_impl(ctx):
 
         dest = paths.join(sandbox.path, short_path)
         folders.append(paths.dirname(dest))
-        shell_cmds.append("cp {} {}".format(f.path, dest))
+        shell_cmds.append("cp  {} {}".format(f.path, dest))
+
+    print("C")
 
     shell_cmds_prepend = []
     for f in folders:
         cmd = "mkdir -p {}".format(f)
         if cmd not in shell_cmds_prepend:
             shell_cmds_prepend.append(cmd)
+    print("D")
 
     shell_cmds = shell_cmds_prepend + shell_cmds
     ctx.actions.run_shell(

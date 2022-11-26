@@ -1,5 +1,5 @@
-load("@npm//:vuepress/package_json.bzl", vuepress_bin = "bin")
-load(":defs.bzl", "collect")
+load("@npm//:@docusaurus/core/package_json.bzl", docusaurus_bin = "bin")
+load("//:config/docusaurus.bzl", "docusaurus_pkg")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
@@ -13,19 +13,21 @@ copy_to_bin(
     srcs = ["package.json"],
 )
 
-collect(
-    name = "src",
-    srcs = ["//docs:files"] + glob(
+
+docusaurus_pkg(
+    name = "collected_sources",
+    srcs = ["//docs:files","package.json","tsconfig.json"] + glob(
         include = [
-            ".vuepress/*",
-            ".vuepress/**/*",
+            "src/**/*",
         ],
     ),
+    config = "docusaurus.config.js",
+    sidebars = "sidebars.js",
     strip_path = package_name(),
 )
 
 
-vuepress_bin.vuepress(
+docusaurus_bin.docusaurus(
     name = "build",
     args = [
         "build",
@@ -37,14 +39,21 @@ vuepress_bin.vuepress(
         ":package",
         ":collected_sources",
         ":node_modules",
-#        ":node_modules/vuepress",
+        ":node_modules/@docusaurus/core",
+        ":node_modules/@docusaurus/preset-classic",
+        ":node_modules/@docusaurus/theme-common",
+        ":node_modules/@mdx-js/react",
+        ":node_modules/react",
+        ":node_modules/clsx",
+        ":node_modules/prism-react-renderer",
+        ":node_modules/react-dom",
     ],    
     chdir = "../../../$(execpath :collected_sources)",
     log_level ="debug",
     silent_on_success = False,
     out_dirs=["build"],
     env = {
-    "JS_BINARY__PATCH_NODE_FS": "0"
+		"JS_BINARY__PATCH_NODE_FS": "0"
     }
 )
 
@@ -78,3 +87,24 @@ container_image(
     ],
 )
 
+# # TODO: Not working yet
+# docusaurus_bin.docusaurus_binary(
+#     name = "start",
+#     args = [
+#         "start"
+#     ],
+#     data=[
+#         ":package",
+#         ":collected_sources",
+#         "//:node_modules",
+#         "//:node_modules/@docusaurus/preset-classic",
+#         "//:node_modules/@docusaurus/theme-common",
+#     ],    
+#     chdir = "../../../$(execpath :collected_sources)",
+#     tags = [
+#         # This tag instructs ibazel to pipe into stdin a event describing actions.
+#         # ibazel send EOF to stdin by default and `react-scripts start` will stop when getting EOF in stdin.
+#         # So use this to prevent EOF.
+#         "ibazel_notify_changes",
+#     ],    
+# )
