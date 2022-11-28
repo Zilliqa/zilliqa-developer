@@ -12,6 +12,7 @@ def _collect_pkg_impl(ctx):
 
     folders = [root_dir]
     strip_srcs = ctx.attr.strip_path
+    shell_cmds = []
     for f in ctx.files.srcs:
         short_path = f.short_path
 
@@ -36,7 +37,7 @@ def _collect_pkg_impl(ctx):
     shell_cmds = shell_cmds_prepend + shell_cmds
     ctx.actions.run_shell(
         outputs=[sandbox],
-        inputs=ctx.files.config + ctx.files.sidebars + ctx.files.srcs,
+        inputs=ctx.files.srcs,
         mnemonic="VuePressCollect",
         command="; ".join(shell_cmds) + "; echo \"CURRENT DIR: $(pwd)\"",
         progress_message="Collecting VuePress source documents for {}.".format(ctx.label.name),

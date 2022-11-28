@@ -14,7 +14,7 @@ copy_to_bin(
 )
 
 collect(
-    name = "src",
+    name = "collected_sources",
     srcs = ["//docs:files"] + glob(
         include = [
             ".vuepress/*",
@@ -29,23 +29,23 @@ vuepress_bin.vuepress(
     name = "build",
     args = [
         "build",
-        # Add .. to build dir as we have collected all in a sandbox
-        "--out-dir",
-        "../build"
     ],
     srcs=[
         ":package",
         ":collected_sources",
+        "//:node_modules",        
         ":node_modules",
-#        ":node_modules/vuepress",
+        ":node_modules/@vuepress/core",
+        ":node_modules/@vuepress/shared-utils",
     ],    
-    chdir = "../../../$(execpath :collected_sources)",
+   chdir = "../../../$(execpath :collected_sources)",
     log_level ="debug",
     silent_on_success = False,
+    include_npm = True,
+    include_npm_linked_packages = True,
+    include_transitive_sources = True,
     out_dirs=["build"],
-    env = {
-    "JS_BINARY__PATCH_NODE_FS": "0"
-    }
+    patch_node_fs = True,
 )
 
 

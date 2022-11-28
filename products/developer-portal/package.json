@@ -14,6 +14,10 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "vuepress": "^1.5.3"
+    "vuepress": "^1.9.7"
+  },
+  "dependencies": {
+    "@vuepress/core": "^1.9.7",
+    "@vuepress/shared-utils": "^1.9.7"
   }
 }
