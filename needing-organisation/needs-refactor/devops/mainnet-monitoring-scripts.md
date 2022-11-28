@@ -12,13 +12,13 @@ All scripts are usually launched with a Slack webhook URL as an input parameter.
 
 As of Zilliqa v4.8.0, we have the following scripts deployed:
 
-| Script                | Machine                     | Location                                    | Run Parameters |
-|-----------------------|-----------------------------|---------------------------------------------|----------------|
-| ds-ip-check.py        | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup ./ds-ip-check.py --context \<somerset\> --dscount 420 --frequency 720 --testnet mainnet-somerset --webhook \<stall-alert URL\> & |
-| lookup_autorecover.py | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup ./lookup_autorecover.py --context \<somerset\> --frequency 5 --liveness 100 --testnet mainnet-somerset --webhookalert \<stall-alert URL\> --webhookalive \<status URL\> & |
-| persistence-check.py  | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset              | nohup python3.4 ./persistence-check.py --apiurl `https://api.zilliqa.com` --concurrent 2 --context \<somerset\> --frequency 12 --testnet mainnet-somerset --webhook \<status URL\> &
-| monitor_blockchain.py | MonitoringBastion (DevOps)  | ~/environment/monitors_mainnet/monitor_blockchain | nohup stdbuf -oL ./monitor_blockchain.py `https://api.zilliqa.com` -w \<ZilliqaDevelopment stall-alert URL\> \<Zilliqa stall-alert URL\> > nohup.out & |
-| txn-sanity-check.py   | Currently not deployed | |
+| Script                | Machine                     | Location                                          | Run Parameters                                                                                                                                                                       |
+| --------------------- | --------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ds-ip-check.py        | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset                    | nohup ./ds-ip-check.py --context \<somerset\> --dscount 420 --frequency 720 --testnet mainnet-somerset --webhook \<stall-alert URL\> &                                               |
+| lookup_autorecover.py | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset                    | nohup ./lookup_autorecover.py --context \<somerset\> --frequency 5 --liveness 100 --testnet mainnet-somerset --webhookalert \<stall-alert URL\> --webhookalive \<status URL\> &      |
+| persistence-check.py  | MonitoringBastion (Mainnet) | ~/environment/mainnet_somerset                    | nohup python3.4 ./persistence-check.py --apiurl `https://api.zilliqa.com` --concurrent 2 --context \<somerset\> --frequency 12 --testnet mainnet-somerset --webhook \<status URL\> & |
+| monitor_blockchain.py | MonitoringBastion (DevOps)  | ~/environment/monitors_mainnet/monitor_blockchain | nohup stdbuf -oL ./monitor_blockchain.py `https://api.zilliqa.com` -w \<ZilliqaDevelopment stall-alert URL\> \<Zilliqa stall-alert URL\> > nohup.out &                               |
+| txn-sanity-check.py   | Currently not deployed      |                                                   |
 
 ## DS guard IP address consistency check (ds-ip-check.py)
 

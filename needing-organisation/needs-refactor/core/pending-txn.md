@@ -6,30 +6,30 @@ As of Zilliqa version `6.3.0`, the pending Txn API contains added the transactio
 
 The error codes corresponding to it are:
 
-| Error Code | Status | Description |
-|:------------:|:------------------------------:|:-----------:|
-| 0 |  Confirmed | Txn was already processed and confirmed |
-| 1 | Pending | Txn has higher nonce than expected |
-| 2 | Pending | Txn Pending because the microblock exceeded gas limit |
-| 3 | Pending | Txn Pending due to consensus failure in network |
-| 4 | Error | Txn could not be found inside the pool |
-| 10 | Dropped | Txn caused math underflow or overflow |
-| 11 | Dropped | Failure in invocation of scilla libraries |
-| 12 | Dropped | Failure in contract account initialisation |
-| 13 | Dropped | The account from which the transaction is sent is invalid |
-| 14 | Dropped | The gas limit of the txn is higher than the DS or shard microblock gas limit |
-| 15 | Dropped | The txn type could not be classified as payment, contract deploy or contract call  |
-| 16 | Dropped | The txn is not sharded to the correct shard |
-| 17 | Dropped | The sender account and the contract being called is not in the same shard |
-| 18 | Dropped | Size of the `code` field within the contract txn is higher than the prescribed limit |
-| 19 | Dropped | Verification of txn failed (Signature, chain id or version check failure) |
-| 20 | Dropped | Insufficient txn gas limitt |
-| 21 | Dropped | The account has insufficient balance |
-| 22 | Dropped | The txn has insufficient gas to invoke the Scilla checker |
-| 23 | Dropped | Duplicated txn. The current txn was already present |
-| 24 | Dropped | There is/are txn(s) with same nonce with a higher gas price was present|
-| 25 | Dropped | The to address of the txn is invalid due to 1) Sending of payment transaction to contract address. 2) A contract call txn is being sent to a non-existent account  |
-| 26 | Dropped | Failed to add the contract account to the state |
+| Error Code |  Status   |                                                                            Description                                                                            |
+| :--------: | :-------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|     0      | Confirmed |                                                              Txn was already processed and confirmed                                                              |
+|     1      |  Pending  |                                                                Txn has higher nonce than expected                                                                 |
+|     2      |  Pending  |                                                       Txn Pending because the microblock exceeded gas limit                                                       |
+|     3      |  Pending  |                                                          Txn Pending due to consensus failure in network                                                          |
+|     4      |   Error   |                                                              Txn could not be found inside the pool                                                               |
+|     10     |  Dropped  |                                                               Txn caused math underflow or overflow                                                               |
+|     11     |  Dropped  |                                                             Failure in invocation of scilla libraries                                                             |
+|     12     |  Dropped  |                                                            Failure in contract account initialisation                                                             |
+|     13     |  Dropped  |                                                     The account from which the transaction is sent is invalid                                                     |
+|     14     |  Dropped  |                                           The gas limit of the txn is higher than the DS or shard microblock gas limit                                            |
+|     15     |  Dropped  |                                         The txn type could not be classified as payment, contract deploy or contract call                                         |
+|     16     |  Dropped  |                                                            The txn is not sharded to the correct shard                                                            |
+|     17     |  Dropped  |                                             The sender account and the contract being called is not in the same shard                                             |
+|     18     |  Dropped  |                                       Size of the `code` field within the contract txn is higher than the prescribed limit                                        |
+|     19     |  Dropped  |                                             Verification of txn failed (Signature, chain id or version check failure)                                             |
+|     20     |  Dropped  |                                                                    Insufficient txn gas limitt                                                                    |
+|     21     |  Dropped  |                                                               The account has insufficient balance                                                                |
+|     22     |  Dropped  |                                                     The txn has insufficient gas to invoke the Scilla checker                                                     |
+|     23     |  Dropped  |                                                        Duplicated txn. The current txn was already present                                                        |
+|     24     |  Dropped  |                                              There is/are txn(s) with same nonce with a higher gas price was present                                              |
+|     25     |  Dropped  | The to address of the txn is invalid due to 1) Sending of payment transaction to contract address. 2) A contract call txn is being sent to a non-existent account |
+|     26     |  Dropped  |                                                          Failed to add the contract account to the state                                                          |
 
 ## Pending Transaction Lifecycle
 

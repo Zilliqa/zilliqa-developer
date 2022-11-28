@@ -5,8 +5,9 @@ Every message that is read from a socket by P2PComm then gets sent to `Zilliqa::
 
 When Zilliqa starts to process a message, it will call `Zilliqa::ProcessMessage`.
 The first byte of any message defines the **message type**.
+
 > **Note:** The “first byte” here refers to the payload part of a socket message.
-At the P2PComm level, each socket message consists of a predefined header plus the payload.
+> At the P2PComm level, each socket message consists of a predefined header plus the payload.
 
 Depending on the type, `Zilliqa::ProcessMessage` will forward the message to the appropriate handler for it.
 The list of message types can be found in `enum MessageType` inside `src/common/Messages.h`.

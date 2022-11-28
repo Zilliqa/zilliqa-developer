@@ -7,7 +7,7 @@ But in Zilliqa, the PoW is used as a threshold shard node need to meet to join t
 ## Why need PoW
 
 The main benefits are the anti-DoS attacks defense and low impact of stake on mining possibilities.  
-Defense from DoS attacks.  PoW imposes some limits on actions in the network. They need a lot of efforts to be executed. Efficient attack requires a lot of computational power and a lot of time to do the calculations. Therefore, the attack is possible but kind of useless since the costs are too high.  
+Defense from DoS attacks. PoW imposes some limits on actions in the network. They need a lot of efforts to be executed. Efficient attack requires a lot of computational power and a lot of time to do the calculations. Therefore, the attack is possible but kind of useless since the costs are too high.  
 Mining possibilities. It doesn’t matter how much money you have in your wallet. What matters is to have large computational power to solve the puzzles and form new blocks. Thus, the holders of huge amounts of money are not in charge of making decisions for the entire network.
 
 ## Ethash algorithm

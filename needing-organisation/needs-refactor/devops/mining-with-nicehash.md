@@ -2,7 +2,7 @@
 
 ## NiceHash
 
-NiceHash is a hash power broker with integrated marketplace that connects sellers of hashing power (miners) with buyers of hashing power using the sharing economy approach.  
+NiceHash is a hash power broker with integrated marketplace that connects sellers of hashing power (miners) with buyers of hashing power using the sharing economy approach.
 
 Buyers rent computing (hashing) power through NiceHash's online platform. Sellers provide hashing power by connecting to the NiceHash marketplace with NiceHash's own mining software.
 

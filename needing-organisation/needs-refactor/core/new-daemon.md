@@ -10,8 +10,8 @@ Use Zilliqa daemon as the control point of all kinds of nodes. It will take the 
 1. After daemon started, it will check if Zilliqa process started, if not, it will start the Zilliqa process. The old behavior is if the Zilliqa process is not started, it waits for Zilliqa process to start.
 1. Save the launch parameters into log file so can check later.
 1. Following scripts should be launched after zilliqa process launched:  
-    (1). scripts/uplaodIncrDB.py (only in lookup-0)  
-    (2). scripts/auto_back_up.py (only in lookup-0)
+   (1). scripts/uplaodIncrDB.py (only in lookup-0)  
+   (2). scripts/auto_back_up.py (only in lookup-0)
 
 ## Testnet Repo Change
 

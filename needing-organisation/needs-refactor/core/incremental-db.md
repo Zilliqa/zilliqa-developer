@@ -26,21 +26,23 @@ This script `uploadIncrDB.py` runs on one of the lookup node. It performs follow
 
 - Perform sync between local `persistence` on lookup node and `incremental\peristence` on S3 every TxEpoch. However, syncing criterias differs based on TxEpoch number.
   Following are possibilities:
-  
+
   - Script startup
+
     - Clean both buckets i.e. `incremental` and `statedelta`
     - Sync entire persistence to S3 bucket - `incremental` (including `state, stateroot, txBlocks, txnBodies, txnBodiesTmp, microblock, etc` ( every thing that exists in persistence folder ) at every 10th vacuous epoch.
     - Clean all statedeltas from S3 bucket - `statedelta`
 
   - Every 10th DS Epoch (first txEpoch from 10th DS epoch)
+
     - Sync entire persistence to S3 bucket - `incremental` (including `state, stateroot, txBlocks, txnBodies, txnBodiesTmp, microblock, etc` ( every thing that exists in persistence folder ).
     - Clean all statedeltas from S3 bucket - `statedelta`
 
   - Any other txEpoch
     - Sync entire persistence to S3 bucket - `incremental` (excluding `state, stateroot, contractCode, contractStateData, contractStateIndex`) every txEpoch.
     - If `current txBlkNum == vacuous epoch + 1`
-     (i.e. first txBlock in current DS epoch e.g 100, 200, 300, ... ), we don't need to upload statedelta diff here. Instead complete stateDelta db is uploaded to S3 bucket - `statedelta` ( e.g. `stateDelta_100.tar.gz` ).
-    Else upload the statedelta diff to S3 bucket - `statedelta` (e.g. `stateDelta_101.tar.gz, stateDelta_101.tar.gz, .... stateDelta_199.tar.gz`).
+      (i.e. first txBlock in current DS epoch e.g 100, 200, 300, ... ), we don't need to upload statedelta diff here. Instead complete stateDelta db is uploaded to S3 bucket - `statedelta` ( e.g. `stateDelta_100.tar.gz` ).
+      Else upload the statedelta diff to S3 bucket - `statedelta` (e.g. `stateDelta_101.tar.gz, stateDelta_101.tar.gz, .... stateDelta_199.tar.gz`).
 
 - Remove Lock file from S3 - `incremental`.
 
@@ -61,6 +63,6 @@ This script `downloadIncrDB.py` is first ran by every miner node or seed node to
 
 - Node uses the `downloadIncrDB.py` to download the `peristence` from S3 bucket `incrementalDB` and all the state-deltas from S3 bucket `statedelta` to `StateDeltasFromS3`.
 - Node startsup with downloaded `peristence` and starts syncup. After this, node has **base state** `say X`.
-- Node then recreates latest state using state-deltas from `StateDeltasFromS3` (i.e.  `stateDelta_101.tar.gz, stateDelta_101.tar.gz, .... stateDelta_199.tar.gz, stateDelta_200.tar.gz, stateDelta_201.tar.gz, stateDelta_201.tar.gz, .... stateDelta_299.tar.gz` ).
+- Node then recreates latest state using state-deltas from `StateDeltasFromS3` (i.e. `stateDelta_101.tar.gz, stateDelta_101.tar.gz, .... stateDelta_199.tar.gz, stateDelta_200.tar.gz, stateDelta_201.tar.gz, stateDelta_201.tar.gz, .... stateDelta_299.tar.gz` ).
 
-  Final State `Y = X + x1 + x2  +  ... +  x99 + x100 + x101 + x102 + ...`
+  Final State `Y = X + x1 + x2 + ... + x99 + x100 + x101 + x102 + ...`

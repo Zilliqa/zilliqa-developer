@@ -149,7 +149,7 @@ The script `profile.sh` is simple, change it for your need.
 If you see things like `[unknown]` in the profiling result or the stack simply does not make sense, try the following fixes:
 
 1. Re-compile Zilliqa and its dependency (e.g. `g3log`, `libjsoncpp`) with this gcc flag `-fno-omit-frame-pointer`.
-2. Add debug symbols to both Zilliqa (e.g. inserting `-g` complier flag  or using Debug build) and Scilla (see this [tip](https://github.com/Zilliqa/scilla/wiki/Profiling-Scilla-:-Tips)).
+2. Add debug symbols to both Zilliqa (e.g. inserting `-g` complier flag or using Debug build) and Scilla (see this [tip](https://github.com/Zilliqa/scilla/wiki/Profiling-Scilla-:-Tips)).
 3. Switch OCaml compiler to the version with frame pointer enabled as per [this doc](https://ocaml.org/learn/tutorials/performance_and_profiling.html#Using-perf-on-Linux).
 
 ## References

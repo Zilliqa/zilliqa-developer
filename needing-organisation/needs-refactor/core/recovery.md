@@ -1,4 +1,3 @@
-
 # Recovery
 
 `Recovery` enables zilliqa controlled nodes to be recovered if they go out of sync with network.
@@ -20,7 +19,7 @@ Above script will download persistence from the specified `UPLOAD_TYPE` node and
 
 Refer [how to recover](https://github.com/Zilliqa/dev-docs/blob/master/devops/mainnet-maintenance.md#how-to-recover-a-node) for details.
 
-Based on the type of node being recovered and its existing state in current network, it will be recovered as  detailed out below.
+Based on the type of node being recovered and its existing state in current network, it will be recovered as detailed out below.
 
 ## DS Guard Node Recovery
 
@@ -30,10 +29,10 @@ Based on the type of node being recovered and its existing state in current netw
 4. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script in step (2).
 5. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
 6. Checks if node is part of current ds committee, (which will always be the case for dsguards)
-    a) Save coin base in memory (not saved to persistence) for final block and all microblocks, from last DS epoch to current TX epoch .
-    b) Send request to upper seeds `level2lookup 10- 14` to remove node IP from their relaxed blacklist, if any.
-    c) If any of the coinbase is missing for any epoch or any shard, request cosigs for them from a random upper seed.
-    d) Set `m_shardID` and `m_consensusMyID`.
+   a) Save coin base in memory (not saved to persistence) for final block and all microblocks, from last DS epoch to current TX epoch .
+   b) Send request to upper seeds `level2lookup 10- 14` to remove node IP from their relaxed blacklist, if any.
+   c) If any of the coinbase is missing for any epoch or any shard, request cosigs for them from a random upper seed.
+   d) Set `m_shardID` and `m_consensusMyID`.
 7. Invokes `WakeupAtTxEpoch` which will start with `FinalBlockConsensus`.
 
 There are two possibilities hereafter:
@@ -56,7 +55,7 @@ There are two possibilities hereafter:
 4. Zilliqa process retrieves Persistence Storage downloaded earlier by testnet script in step (2).
 5. syncType is not `NO_SYNC`. So it blocks some messages that will be received as a healthy node.
 6. Checks if node is part of sharding structure,
-    a) Set `m_shardID` and `m_consensusMyID`.
+   a) Set `m_shardID` and `m_consensusMyID`.
 7. Invokes `WakeupAtTxEpoch` which will start with state on `WAITING_FINALBLOCK`.
 8. Send request to upper seeds and his peers to remove node IP from their relaxed blacklist, if any.
 
@@ -69,7 +68,7 @@ There are two possibilities hereafter:
 
 1. On instance or Pod deletion of dsguard, new pod is assigned to that dsguard and zilliqa process is launced with `syncType = RECOVER_ALL_SYNC`.
 2. Node don't receive any messages from peers because of IP change and is stuck.
-3. We can recover such node in next ds epoch, after which it will not be part of any shard and will trigger `RejoinAsNormal`**. Refer [Rejoin](join-rejoin.md###`Node::RejoinAsNormal`)
+3. We can recover such node in next ds epoch, after which it will not be part of any shard and will trigger `RejoinAsNormal`\*\*. Refer [Rejoin](join-rejoin.md###`Node::RejoinAsNormal`)
 
 ## Other Node (Not part of ds committe or any shard)
 
@@ -93,7 +92,7 @@ There are two possibilities hereafter:
 
 - Receives next final block and joined back.
 - We missed new final block during recovery process in which case **it will trigger `RejoinAsNewlookup`**.
-Based on number of final blocks missed over period of recovery, Rejoin will be either based out of incremental db or it will continue syncing the missing blocks from lookup. For details refer [Rejoin](join-rejoin.md###`Lookup::RejoinAsNewlookup`)
+  Based on number of final blocks missed over period of recovery, Rejoin will be either based out of incremental db or it will continue syncing the missing blocks from lookup. For details refer [Rejoin](join-rejoin.md###`Lookup::RejoinAsNewlookup`)
 
 ## Lookup Node Recovery
 

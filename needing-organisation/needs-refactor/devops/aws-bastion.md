@@ -31,7 +31,7 @@ In your browser, most of the threats may arise from the extensions you install a
 To acheive the separation, you may choose either one of these options:
 
 - Use a separate browser for AWS services. For example, you are using Chrome for daily work but you can use a vanilla (i.e., no extesions) Firefox for AWS services
-- Create a separate browser profile with no extensions for AWS services. For example, in Chrome you can have [multiple profiles  (or persons)](https://support.google.com/chrome/answer/2364824?co=GENIE.Platform%3DDesktop&hl=en) for different purpose. This works well if you even want to access multiple AWS accounts at the same time.
+- Create a separate browser profile with no extensions for AWS services. For example, in Chrome you can have [multiple profiles (or persons)](https://support.google.com/chrome/answer/2364824?co=GENIE.Platform%3DDesktop&hl=en) for different purpose. This works well if you even want to access multiple AWS accounts at the same time.
 
 ## Creation of bastion
 

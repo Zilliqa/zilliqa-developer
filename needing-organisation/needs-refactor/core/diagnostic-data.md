@@ -6,10 +6,10 @@ Globally, the amount of data stored is controlled by the constant `MAX_ENTRIES_F
 
 This is the current data stored for diagnostic purposes:
 
-|LevelDB location           |Data stored                     |Storage timing     |Tool for data extraction|
-|---------------------------|--------------------------------|-------------------|------------------------|
-|persistence/diagnosticNodes|DS and shard peers              |Every vacuous epoch|getnetworkhistory       |
-|persistence/diagnosticCoinb|Coinbase values and distribution|Every DS block     |getrewardhistory        |
+| LevelDB location            | Data stored                      | Storage timing      | Tool for data extraction |
+| --------------------------- | -------------------------------- | ------------------- | ------------------------ |
+| persistence/diagnosticNodes | DS and shard peers               | Every vacuous epoch | getnetworkhistory        |
+| persistence/diagnosticCoinb | Coinbase values and distribution | Every DS block      | getrewardhistory         |
 
 To use the diagnostic tools:
 

@@ -28,7 +28,7 @@ Guard mode is a special operating mode in Zilliqa. Guard mode is a safety featur
 DS guard is designed to be statically placed in the DS committee. The first `n` nodes in the DS committee will be designated as DS guards. These do not change or shift during each DS consensus or view change while in guard mode.
 
 | 1...n = DS guards (controlled by Zilliqa Research) | n+1...m = non-guard nodes |
-|----------------------------------------------------|---------------------------|
+| -------------------------------------------------- | ------------------------- |
 
 DS Leader is selected from DS guards, by doing `mod n` rather than `mod m`.
 
@@ -123,12 +123,12 @@ Using a simple local run as an example:
 - DS MIMO: 2
 
 | 10 DS Node (8 guards) | Shard 1: 5 Nodes (4 guards) | Shard 2: 5 Nodes (4 guards) |
-|-----------------------|-----------------------------|-----------------------------|
+| --------------------- | --------------------------- | --------------------------- |
 
 In such a case, when the network is reduced from 2 shards to 1 shard (due to some reason), the injection phase will inject more nodes than the shard limit. There is no good solution around it. Hence, `ValidateRunTimeEnvironment()` checks for such a condition and logs fatal if it happens.
 
 | 10 DS Node (8 guards) | Shard 1: 6 Nodes (4 guards) | No longer exists |
-|-----------------------|-----------------------------|------------------|
+| --------------------- | --------------------------- | ---------------- |
 
 ## Changing network information of DS guard node
 
@@ -161,6 +161,7 @@ As such, we have devised a simple protocol for the DS guard to rejoin and update
    - kill -9 [pid]
 1. Relaunch DS guard node 2 using `./tests/Node/test_node_rejoindsguardnode2`
 1. Check that DS committee, lookup and shard nodes are aware of the DS guard's updated network information
+
    - DS committee:
 
    ```console
@@ -175,28 +176,29 @@ As such, we have devised a simple protocol for the DS guard to rejoin and update
    ```
 
    - Lookup:
-      - Received network info:
 
-        ```console
-        [update ds guard] DS guard to be updated is at index
-        [indexOfDSGuard] [old network info] [new network info]
-        ```
+     - Received network info:
 
-      - Add to in-memory data structure:
+       ```console
+       [update ds guard] DS guard to be updated is at index
+       [indexOfDSGuard] [old network info] [new network info]
+       ```
 
-        ```console
-        [update ds guard] No existing record found for dsEpochNumber [ds epoch number]. Adding a new record
+     - Add to in-memory data structure:
 
-        Or
+       ```console
+       [update ds guard] No existing record found for dsEpochNumber [ds epoch number]. Adding a new record
 
-        [update ds guard] Adding new record for dsEpochNumber [ds epoch number]
-        ```
+       Or
 
-      - Send to shard node:
+       [update ds guard] Adding new record for dsEpochNumber [ds epoch number]
+       ```
 
-        ```console
-        [update ds guard] Sending guard node update info to [requesting node]
-        ```
+     - Send to shard node:
+
+       ```console
+       [update ds guard] Sending guard node update info to [requesting node]
+       ```
 
 ### Sequence Diagram
 

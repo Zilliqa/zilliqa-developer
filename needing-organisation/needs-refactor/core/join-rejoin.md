@@ -2,7 +2,7 @@
 
 This document will walk through joining and rejoining of different types of nodes.
 
-## New node joining  / Existing shard node joining(Miner node was relaunched/restarted via launcher script)
+## New node joining / Existing shard node joining(Miner node was relaunched/restarted via launcher script)
 
 1. launch_docker.sh / launch.sh / start.sh download persistence from AWS S3 incremental db using `download_incr_db.py`. It skips downloading microbBlocks and txBodies. More details of download_incr_db.py can be found [here](incremental-db.md).
 2. Above launcher script later starts the zilliqa process with `syncType = NEW_SYNC`.
@@ -18,25 +18,27 @@ This document will walk through joining and rejoining of different types of node
 3. Fetch Latest DSBlocks and Latest TxBlocks from a random upper seed.
 4. On receiving new TxBlock, fetch the corresponding state-deltas and calculate current state. Check whether it is a vacuous block, if so, after calculating state will move the state update to disk.
 5. If not vacuous epoch,
-    a) Fetch the latest Sharding Structure from a random upper seed and identify if already part of any shard.
-    b) If it's not part of any shard, then it's indeed a new miner then go back to step (4).
-    c) **Otherwise, already part of one of shard**. Set my shard members and shardId. Set `sycType = NO_SYNC` and send request to shard peers to remove IP from their relaxed blacklist.
+   a) Fetch the latest Sharding Structure from a random upper seed and identify if already part of any shard.
+   b) If it's not part of any shard, then it's indeed a new miner then go back to step (4).
+   c) **Otherwise, already part of one of shard**. Set my shard members and shardId. Set `sycType = NO_SYNC` and send request to shard peers to remove IP from their relaxed blacklist.
 
-    ---
-    **NOTE:**
-    If connection to node fails with error `EHOSTDOWN` or `ECONNREFUSED`, it's blacklisted in `relaxed` category. Otherwise in strict category.
+   ***
 
-    ---
+   **NOTE:**
+   If connection to node fails with error `EHOSTDOWN` or `ECONNREFUSED`, it's blacklisted in `relaxed` category. Otherwise in strict category.
 
-    d) Start next Tx epoch where it initializes node variables like m_consensusID, m_consensusLeaderID, etc. Identify being BACKUP or leader, initializes Rumor Manager and starts with MicroBlockConsensus.
-    The normal node now successfully joined the network as Shard Node.
+   ***
+
+   d) Start next Tx epoch where it initializes node variables like m_consensusID, m_consensusLeaderID, etc. Identify being BACKUP or leader, initializes Rumor Manager and starts with MicroBlockConsensus.
+   The normal node now successfully joined the network as Shard Node.
+
 6. If vacuous epoch, fetch Latest DS Committee Info and send request to a random upper seed to let him know when to start pow.
 7. On receiving notification message from seed, start Init Mining and submit PoW.
 8. If received DSBlock within timeout and finds himself in sharding information, change `syncType = NO_SYNC`. Stop blocking messages. **The normal node now successfully joined the network as Shard Node** .
 9. If timedout,
-    a) Try to fetch latest DSBlock from random seed. If successfully got new DSBlock means lost pow this time.
-    It will continue syncing until next vacuous epoch as above by invoking `Node::StartSynchronization`.
-    b) If failed to get new DSBlock, set `syncType = NORMAL_SYNC` and triggers `Node::RejoinAsNormal`.
+   a) Try to fetch latest DSBlock from random seed. If successfully got new DSBlock means lost pow this time.
+   It will continue syncing until next vacuous epoch as above by invoking `Node::StartSynchronization`.
+   b) If failed to get new DSBlock, set `syncType = NORMAL_SYNC` and triggers `Node::RejoinAsNormal`.
 
 ### `Node::RejoinAsNormal`
 
@@ -60,10 +62,10 @@ This document will walk through joining and rejoining of different types of node
 4. syncType is not `NO_SYNC`. so it blocks some messages that will be received as a healthy normal node.
 5. It regenerates the current state using base state and state-deltas already fetched from incremental db.
 6. Check if node is part of current ds committee, If so
-    a) Save coin base for final block and all microblocks, from last DS epoch to current TX epoch.
-    b) Send request to upper seeds (level2lookup 10- 14) so as to remove node IP from their relaxed blacklist, if any.
-    c) If any of the coinbase is missing for any epoch or any shard, request cosigs for them from a random upper seed.
-    d) Set `syncType = DS_SYNC`.
+   a) Save coin base for final block and all microblocks, from last DS epoch to current TX epoch.
+   b) Send request to upper seeds (level2lookup 10- 14) so as to remove node IP from their relaxed blacklist, if any.
+   c) If any of the coinbase is missing for any epoch or any shard, request cosigs for them from a random upper seed.
+   d) Set `syncType = DS_SYNC`.
 7. It starts synchronization with `DirectoryService::StartSynchronization`.
 
 ### `DirectoryService::StartSynchronization`

@@ -23,7 +23,7 @@ Table of Content
 ## Versioning
 
 | Release Stage     | Version Example (Incremental Order)    |
-|-------------------|----------------------------------------|
+| ----------------- | -------------------------------------- |
 | Alpha pre-release | `4.3.0-alpha.0`, `4.3.0-alpha.1`, `..` |
 | Beta pre-release  | `4.3.0-beta.0`, `4.3.0-beta.1`, `...`  |
 | Release           | `4.3.0`, `4.3.1`, `...`                |

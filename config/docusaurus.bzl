@@ -5,7 +5,7 @@ DocusaurusInfo = provider(
     fields = ["open_uri"],
 )
 
-def _docusaurus_pkg_impl(ctx):    
+def _docusaurus_pkg_impl(ctx):
     sandbox = ctx.actions.declare_directory(ctx.label.name + "_sandbox")
 
     root_dir = sandbox.path
@@ -66,7 +66,7 @@ docusaurus_pkg_gen = rule(
             allow_single_file = True,
             mandatory = True,
         ),
-
+        "files": attr.output(),
         "sidebars": attr.label(
             doc = "Docusaurus sidebars.",
             allow_single_file = True,
@@ -83,7 +83,6 @@ docusaurus_pkg_gen = rule(
             default = "",
             mandatory = False,
         ),
-         "files": attr.output(),
     },
 )
 

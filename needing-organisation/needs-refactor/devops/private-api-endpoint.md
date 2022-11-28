@@ -85,7 +85,7 @@ The migration happens when a new mainnet `mainnet-new-born` will replace the old
 Assume we have the following private API endpoints to migrate.
 
 | Customer | ID           | URL                                  |
-|----------|--------------|--------------------------------------|
+| -------- | ------------ | ------------------------------------ |
 | `apple`  | `aaaaa00001` | `aaaaa00001.mainnet.aws.zilliqa.com` |
 | `banana` | `bbbbb00001` | `bbbbb00001.mainnet.aws.zilliqa.com` |
 

@@ -10,10 +10,10 @@
 
 Zilliqa network uses AWS Simple Storage Service (S3) to achieve high-volume data transfer, distribution and persistence for blockchain-related data that includes persistence data, snapshot, state deltas, logs and release package.
 
-The following tables shows the storage locations for different objects and their permissions for our nodes running on AWS (through *authenticated access*) or unlimited access from any nodes (through *unauthenticated access*). More details can be found in this doc.
+The following tables shows the storage locations for different objects and their permissions for our nodes running on AWS (through _authenticated access_) or unlimited access from any nodes (through _unauthenticated access_). More details can be found in this doc.
 
 | Location Pattern                                  | Authenticated Access | Unauthenticated Access | Usage                                                               |
-|---------------------------------------------------|----------------------|------------------------|---------------------------------------------------------------------|
+| ------------------------------------------------- | -------------------- | ---------------------- | ------------------------------------------------------------------- |
 | `s3://<bucket_name>/incremental/<network_name>/*` | R/W                  | R/-                    | persistence snapshot per 10 ds epoch, for joining/rejoining purpose |
 | `s3://<bucket_name>/statedelta/<network_name>/*`  | R/W                  | R/-                    | state deltas for constructing the state                             |
 | `s3://<bucket_name>/persistence/*`                | R/W                  | -/-                    | persistence tarballs used for recovery/back-up                      |
@@ -71,32 +71,29 @@ The unauthenticated access, or public access, is configured manually [using AWS 
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:ListBucket",
-            "Condition": {
-                "StringLike": {
-                    "s3:prefix": [
-                        "incremental/*",
-                        "statedelta/*"
-                    ]
-                }
-            },
-            "Resource": "arn:aws:s3:::301978b4-****-****-****-3a2f63c5182c"
-        },
-        {
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": [
-                "arn:aws:s3:::301978b4-****-****-****-3a2f63c5182c/incremental/*",
-                "arn:aws:s3:::301978b4-****-****-****-3a2f63c5182c/statedelta/*"
-            ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": ["incremental/*", "statedelta/*"]
         }
-    ]
+      },
+      "Resource": "arn:aws:s3:::301978b4-****-****-****-3a2f63c5182c"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::301978b4-****-****-****-3a2f63c5182c/incremental/*",
+        "arn:aws:s3:::301978b4-****-****-****-3a2f63c5182c/statedelta/*"
+      ]
+    }
+  ]
 }
 ```
 

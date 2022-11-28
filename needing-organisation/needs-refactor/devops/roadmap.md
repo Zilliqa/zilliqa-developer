@@ -42,11 +42,11 @@ The boostrap tools in the testnet repository <https://github.com/Zilliqa/testnet
 
 ### Challenges and Solutions
 
-| # | Challenges                                                                                     | Solutions                                                                                   |
-|---|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
-| 1 | IP whitelisting of allowed users is troublesome                                                | [Use Cloud9 bastion](https://github.com/Zilliqa/dev-docs/blob/master/devops/aws-bastion.md) |
-| 2 | [Using same bucket across networks is not good](https://github.com/Zilliqa/testnet/issues/512) | make the bucket location configurable                                                       |
-| 3 | Isolation between dev/test/prod is missing                                                     | Run different networks in different AWS account                                             |
+| #   | Challenges                                                                                     | Solutions                                                                                   |
+| --- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1   | IP whitelisting of allowed users is troublesome                                                | [Use Cloud9 bastion](https://github.com/Zilliqa/dev-docs/blob/master/devops/aws-bastion.md) |
+| 2   | [Using same bucket across networks is not good](https://github.com/Zilliqa/testnet/issues/512) | make the bucket location configurable                                                       |
+| 3   | Isolation between dev/test/prod is missing                                                     | Run different networks in different AWS account                                             |
 
 ## Goals
 
@@ -59,7 +59,7 @@ The boostrap tools in the testnet repository <https://github.com/Zilliqa/testnet
 There will be three categories of the network in the future: devnet, testnet, and mainnet. Their main differences are summarized below.
 
 |                     | Devnet               | Testnet                 | Mainnet                 |
-|---------------------|----------------------|-------------------------|-------------------------|
+| ------------------- | -------------------- | ----------------------- | ----------------------- |
 | Definition          | Development network  | Testing network         | Main network            |
 | Quantity            | Many                 | Many                    | One                     |
 | Public/Private      | Private              | Public / Private        | Public                  |
@@ -88,7 +88,7 @@ These testnets are important as it contains user data and sometime has to satisf
 Each testnet needs to run in different AWS accounts with Cloud9 bastion used. However for the existing ones, we will not touch them until a clean migration is ready.
 
 | Network           | Users/Partners | Bastion | Migration Status |
-|-------------------|----------------|---------|------------------|
+| ----------------- | -------------- | ------- | ---------------- |
 | community testnet | community      | Cloud9  | done             |
 | blue testnet      | mindshare      | Cloud9  | done             |
 
@@ -98,16 +98,16 @@ The mainnet will still run in the current infrastructure and will be managed thr
 
 ## Cheatsheet
 
-| Use case             | Bastion                                             | Bootstrap HTTPS options              |
-|----------------------|-----------------------------------------------------|--------------------------------------|
-| new devnet cluster*  | Cloud9 bastion in devnet AWS account                | See README.md in side Cloud9 bastion |
-| new devnet*          | Any user-owned Cloud9 bastion in devnet AWS account | See README.md in side Cloud9 bastion |
-| new testnet cluster* | Cloud9 bastion in a dedicated testnet AWS account   | See README.md in side Cloud9 bastion |
-| new testnet*         | Same Cloud9 bastion where the cluster is launched   | See README.md in side Cloud9 bastion |
-| mainnet cluster      | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`            |
-| mainnet              | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`            |
+| Use case              | Bastion                                             | Bootstrap HTTPS options              |
+| --------------------- | --------------------------------------------------- | ------------------------------------ |
+| new devnet cluster\*  | Cloud9 bastion in devnet AWS account                | See README.md in side Cloud9 bastion |
+| new devnet\*          | Any user-owned Cloud9 bastion in devnet AWS account | See README.md in side Cloud9 bastion |
+| new testnet cluster\* | Cloud9 bastion in a dedicated testnet AWS account   | See README.md in side Cloud9 bastion |
+| new testnet\*         | Same Cloud9 bastion where the cluster is launched   | See README.md in side Cloud9 bastion |
+| mainnet cluster       | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`            |
+| mainnet               | [`mkops.z7a.xyz` bastion](#mkopsz7axyz)             | `--https=aws.zilliqa.com`            |
 
-> *: for any S3 related features, please specify the bucket with --bucket and make sure policies are coherent. See **[Bucket Policies](https://github.com/Zilliqa/dev-docs/blob/master/devops/bucket-separation.md)** for more.
+> \*: for any S3 related features, please specify the bucket with --bucket and make sure policies are coherent. See **[Bucket Policies](https://github.com/Zilliqa/dev-docs/blob/master/devops/bucket-separation.md)** for more.
 
 ## References
 

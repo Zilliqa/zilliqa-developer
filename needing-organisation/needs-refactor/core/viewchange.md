@@ -64,17 +64,17 @@ Allows election of a new leader when the network cannot reach an agreement of th
 7. All nodes calculate the new candidate leader index using `CalculateNewLeaderIndex()`
 8. `CalculateNewLeaderIndex()` calculates candidate leader index using
 
-    ```text
-    H(finalblock or vc block hash, vc counter) % size (or num of DS guard)
+   ```text
+   H(finalblock or vc block hash, vc counter) % size (or num of DS guard)
 
-    If a previous vc block (for current consensus) exists, use vc block hash. Else use final block hash. If new candidate leader index is current faulty leader, re-calculate using
-    H(H(finalblock or vc block hash, vc counter)) repeatedly till an index is not the current faulty leader.
-    ```
+   If a previous vc block (for current consensus) exists, use vc block hash. Else use final block hash. If new candidate leader index is current faulty leader, re-calculate using
+   H(H(finalblock or vc block hash, vc counter)) repeatedly till an index is not the current faulty leader.
+   ```
 
 9. Candidate leader leads the consensus round
 10. Backups validate leader announcement
 11. View change consensus completed/stalled
-a. If stalled, wait for timeout and re-run view change consensus with a new candidate leader
+    a. If stalled, wait for timeout and re-run view change consensus with a new candidate leader
 12. Remove faulty leaders (found in Faulty leader vector) from DS Committee
 13. Add faulty leaders (found in Faulty leader vector) to the back DS Committee (if not in guard mode)
 14. Recalculate `m_consensusMyID` by searching for own node inside the DS committee
@@ -94,15 +94,15 @@ A total of 6 general view change tests is built into the codebase as macro. To p
 1. Remove the build folder
 2. For a single test scenario
 
-    ```bash
-    ./build.sh vc<1-6>
-    ```
+   ```bash
+   ./build.sh vc<1-6>
+   ```
 
 3. For multiple test scenario
 
-    ```bash
-    ./build.sh vc<1-6> vc<1-6>
-    ```
+   ```bash
+   ./build.sh vc<1-6> vc<1-6>
+   ```
 
 4. Build twice as the `ccache` may be hindering the macros
 

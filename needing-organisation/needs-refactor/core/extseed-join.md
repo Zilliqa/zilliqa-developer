@@ -35,11 +35,11 @@ However, there will be additional options to be provided if its willing to use t
     [Key in your IP address as found in step 5 OR NAT if you chose Option 1b during Network setup]
     Enter your listening port (default: 33133):
     [Press Enter to skip if using default]
-  
+
     Use IP whitelisting registration approach (default: Y):
     [Press Enter to skip if using default else provide N]
 
-    Enter the private key (32-byte hex string) to be used by this node and whitelisted by upper seeds: 
+    Enter the private key (32-byte hex string) to be used by this node and whitelisted by upper seeds:
 
 User will be not be prompted for entering private key if he opted for default setting i.e. `Use IP whitelisting registration approach : Y`.
 
@@ -77,14 +77,10 @@ Level2lookup will check if there is requested ds block. If so, it will send the 
 2. Level2lookup will store the data received from multiplier in raw format in local memory store.
 3. For every request received from extseed, it fetches the raw message from local store and send it back.
 
-Following are type of messages stored:
--`VCDSBlock` message: After receiving and successfully processing this message, it stores it in `m_vcDSBlockStore` against `txblock` number.
--`VCBlock` message: After receiving and successfully processing this message, it stores it in `m_vcBlockStore`
--`VCFinalBlock` message: After receiving and successfully processing `Finalblock` message, it checks if there is any VC blocks in `m_vcBlockStore` and recreate new raw message of type `VCFINALBLOCK` (encapsulate vcblocks and final block together) and stores it in `m_vcFinalBlockStore` against `txblock` number.
--`MBnForwardTxn` message: After receiving and successfully processing this message, it stores it in `m_mbnForwardedTxnStore` against `txblock` number and `shardId`.
--`PendingTxn` message: After receiving and successfully processing this message, it stores it in `m_pendingTxnStore` against `txblock` number and `shardId`.
+Following are type of messages stored: -`VCDSBlock` message: After receiving and successfully processing this message, it stores it in `m_vcDSBlockStore` against `txblock` number. -`VCBlock` message: After receiving and successfully processing this message, it stores it in `m_vcBlockStore` -`VCFinalBlock` message: After receiving and successfully processing `Finalblock` message, it checks if there is any VC blocks in `m_vcBlockStore` and recreate new raw message of type `VCFINALBLOCK` (encapsulate vcblocks and final block together) and stores it in `m_vcFinalBlockStore` against `txblock` number. -`MBnForwardTxn` message: After receiving and successfully processing this message, it stores it in `m_mbnForwardedTxnStore` against `txblock` number and `shardId`. -`PendingTxn` message: After receiving and successfully processing this message, it stores it in `m_pendingTxnStore` against `txblock` number and `shardId`.
 
 ---
+
 Note:
 
 - `VCBlock` message represents one view change block for given txepoch.

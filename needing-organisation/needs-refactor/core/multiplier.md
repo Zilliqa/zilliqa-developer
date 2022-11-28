@@ -4,7 +4,7 @@ This document describes the purpose of multiplier and some implementation detail
 
 ## Purpose
 
-- Node types `newlookup` and `level2lookup`  need new blocks data every time new txBlock is mined in order to be synced with progressing network.
+- Node types `newlookup` and `level2lookup` need new blocks data every time new txBlock is mined in order to be synced with progressing network.
 - This new block data include `DSBlock`, `FinalBlock`, `Microblocks` and `Transactions` for new epoch.
 - Multiplier plays a role of receiving above messages from network and forwarding them to `newlookup` and/or `level2lookup`.
 

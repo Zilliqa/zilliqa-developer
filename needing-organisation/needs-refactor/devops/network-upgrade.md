@@ -9,13 +9,13 @@ See the [link](https://drive.google.com/drive/u/1/folders/1r6xz0zhj-QJr_EEVgKPcY
 
 Here is a comparison table between these 2 methods, and meanwhile, the methods would be applied in different scenarios.
 
-|                   |Upgrade on Separated Network|Rolling Upgrade           |
-|-------------------|----------------------------|--------------------------|
-|Speed              |Fast (2 hrs)                |Slow (2 days)             |
-|User Experience    |Sense time-shifting         |Seamless and Ethereum adopt [this](https://blog.ethereum.org/2019/02/22/ethereum-constantinople-st-petersburg-upgrade-announcement/)|
-|Changes Take Effect|Immediately                 |Delayed by specified epoch|
-|Transaction History|Drop                        |Keep                      |
-|Once Failed        |Try again                   |Target testnet destroyed  |
+|                     | Upgrade on Separated Network | Rolling Upgrade                                                                                                                      |
+| ------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Speed               | Fast (2 hrs)                 | Slow (2 days)                                                                                                                        |
+| User Experience     | Sense time-shifting          | Seamless and Ethereum adopt [this](https://blog.ethereum.org/2019/02/22/ethereum-constantinople-st-petersburg-upgrade-announcement/) |
+| Changes Take Effect | Immediately                  | Delayed by specified epoch                                                                                                           |
+| Transaction History | Drop                         | Keep                                                                                                                                 |
+| Once Failed         | Try again                    | Target testnet destroyed                                                                                                             |
 
 Following is detailed steps of how to apply these 2 upgrade procedures on the entire network.
 
@@ -70,14 +70,14 @@ Following is detailed steps of how to apply these 2 upgrade procedures on the en
 
 - Go to AWS webpage for updating `Bucket Policy` of [S3://zilliqa-incremental](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-incremental/?region=ap-southeast-1&tab=permissions), and [S3://zilliqa-statedelta](https://s3.console.aws.amazon.com/s3/buckets/zilliqa-statedelta/?region=ap-southeast-1&tab=permissions); by adding `<new_cluster>` information:
 
-    ```bash
-    "Statement": [
-        {
-            ...
-            "Principal": {
-                "AWS": [
-                    "arn:aws:iam::648273915458:role/nodes.<new_cluster>"
-    ```
+  ```bash
+  "Statement": [
+      {
+          ...
+          "Principal": {
+              "AWS": [
+                  "arn:aws:iam::648273915458:role/nodes.<new_cluster>"
+  ```
 
 - Manually confirm the correctness of constant file inside `configmap/constants.xml`.
 

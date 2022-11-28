@@ -73,27 +73,28 @@ The lists below will be updated over time as adoption of `bech32` checksummed fo
 
 | Wallet                                                           | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
 | ---------------------------------------------------------------- | :------------------------------------: | :-----------------------------------------: |
-| [Moonlet](https://moonlet.xyz/)                                  |          :heavy_check_mark:                     |             :heavy_check_mark:              |
-| [ZilPay](https://zilpay.xyz/)                                    |                   :heavy_check_mark:                    |             :heavy_check_mark:              |
-| [Zillet](https://zillet.io/)                                     |           :heavy_check_mark:                    |             :heavy_check_mark:              |
+| [Moonlet](https://moonlet.xyz/)                                  |           :heavy_check_mark:           |             :heavy_check_mark:              |
+| [ZilPay](https://zilpay.xyz/)                                    |           :heavy_check_mark:           |             :heavy_check_mark:              |
+| [Zillet](https://zillet.io/)                                     |           :heavy_check_mark:           |             :heavy_check_mark:              |
 | [Trust Wallet](https://trustwallet.com/)                         |           :heavy_check_mark:           |                      -                      |
-| [Math Wallet](https://www.mathwallet.org/en/)                    |                   :heavy_check_mark:                    |             -              |
-| [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) |                   :heavy_check_mark:                    |                           |
-| [xZIL](https://tinyurl.com/y2lzmfl6)                             |                   :heavy_check_mark:                    |             -              |
+| [Math Wallet](https://www.mathwallet.org/en/)                    |           :heavy_check_mark:           |                      -                      |
+| [ZHIP](https://itunes.apple.com/app/zhip/id1455248315?l=en&mt=8) |           :heavy_check_mark:           |                                             |
+| [xZIL](https://tinyurl.com/y2lzmfl6)                             |           :heavy_check_mark:           |                      -                      |
 
 ### For Exchanges
 
 | Exchanges                             | Support `bech32` checksummed addresses | Support legacy `base16` checksummed address |
 | ------------------------------------- | :------------------------------------: | :-----------------------------------------: |
-| [Binance](https://www.binance.com/)   |           :heavy_check_mark:           |             -              |
+| [Binance](https://www.binance.com/)   |           :heavy_check_mark:           |                      -                      |
 | [Kucoin](https://www.kucoin.com/)     |           :heavy_check_mark:           |                      -                      |
-| [Upbit](https://upbit.com/)           |                   :heavy_check_mark:                    |                      -                      |
+| [Upbit](https://upbit.com/)           |           :heavy_check_mark:           |                      -                      |
 | [Coinhako](https://www.coinhako.com/) |           :heavy_check_mark:           |             :heavy_check_mark:              |
-| [Coinone](https://coinone.co.kr/)     |                   :heavy_check_mark:                    |             -              |
-| [Huobi](https://www.huobi.com/)       |                   :heavy_check_mark:                    |                      -                      |
-| [OKEx](https://www.okex.com/)         |                   :heavy_check_mark:                    |                      -                      |
-| [Gate.io](https://www.gate.io/)         |                   :heavy_check_mark:                    |                      -                      |
-| [CoinEx](https://www.coinex.com/)         |                   :heavy_check_mark:                    |                      -   
+| [Coinone](https://coinone.co.kr/)     |           :heavy_check_mark:           |                      -                      |
+| [Huobi](https://www.huobi.com/)       |           :heavy_check_mark:           |                      -                      |
+| [OKEx](https://www.okex.com/)         |           :heavy_check_mark:           |                      -                      |
+| [Gate.io](https://www.gate.io/)       |           :heavy_check_mark:           |                      -                      |
+| [CoinEx](https://www.coinex.com/)     |           :heavy_check_mark:           |                      -                      |
+
 ### For Explorers
 
 [Viewblock explorer](https://viewblock.io/zilliqa) will be supporting both the new `bech32` and legacy `base16` checksummed in the search bar in order to ease the transition to `bech32` checksummed addresses for all Users. A tooltip will also be available for Users to convert between the two address formats temporarily.

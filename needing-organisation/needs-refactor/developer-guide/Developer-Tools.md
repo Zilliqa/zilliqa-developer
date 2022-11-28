@@ -1,4 +1,3 @@
-
 - [ccache](#ccache)
 - [clang-format and clang-tidy](#clang-format-and-clang-tidy)
 - [git-extras](#git-extras)
@@ -22,6 +21,7 @@ No configuring needed as CMake will find it and adopt it. It even accelerates bu
 
 Two options needed to be appended to `ccache` config file `$HOME/.ccache/ccache.conf`.
 If the config file or the directory does not exist, you need to create them.
+
 ```
 hash_dir = false
 base_dir = COMMON_ABSOLUTE_PATH
@@ -38,27 +38,30 @@ See `man ccache` to select either `ccache --clear` or `ccache --cleanup`.
 ## Installation
 
 The version (7.0.0+) is required:
-- MacOS: 
-    ```
-    brew install llvm@7
-    ```
+
+- MacOS:
+  ```
+  brew install llvm@7
+  ```
 - Ubuntu 16.04 (as in http://apt.llvm.org/):
 
-    Create file `/etc/apt/sources.list.d/llvm-7.list` with the following content
-    ```
-    deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
-    deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
-    ```
-    Then run
-    ```bash
-    curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    sudo apt-get update
-    sudo apt-get install clang-format-7 clang-tidy-7 -y
-    ```
+  Create file `/etc/apt/sources.list.d/llvm-7.list` with the following content
 
+  ```
+  deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
+  deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main
+  ```
+
+  Then run
+
+  ```bash
+  curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+  sudo apt-get update
+  sudo apt-get install clang-format-7 clang-tidy-7 -y
+  ```
 
 Also, `pyyaml` is required: `pip install pyyaml`
- 
+
 ## Usage
 
 Use `./build.sh style` or add `-DLLVM_EXTRA_TOOLS=ON` flag to cmake

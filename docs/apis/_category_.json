@@ -1,8 +1,8 @@
 {
-	"label": "APIs",
-	"position": 2,
-	"link": {
-		"type": "generated-index",
-		"description": "Zilliqa APIs."
-	}
+  "label": "APIs",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Zilliqa APIs."
+  }
 }

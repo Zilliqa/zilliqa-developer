@@ -1,5 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 MD002 -->
+
 [![Build Status](https://travis-ci.com/Zilliqa/dev-docs.svg?token=rdJevspjJvn5HspEtBJU&branch=master)](https://travis-ci.com/Zilliqa/dev-docs)
+
 <p align="center">
   <img alt="dev-docs logo" src="https://i.ibb.co/gDtknr3/dev-docs-log.png" height="50px" />
   <h1 align="center">Zilliqa Developer Documentation</h1>

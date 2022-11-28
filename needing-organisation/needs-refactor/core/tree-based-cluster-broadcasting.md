@@ -16,12 +16,12 @@ Thus, we should leverage multicast to broadcast the DS block to the nodes within
 
 ## Design
 
-1. Assume that we have `X` nodes in a shard, each cluster has `Y` nodes, a cluster has `Z` children clusters, and every node has its sequence number `n` starting from `0`. `X / Y`  represents `[_X / Y_]`, e.g., `2/10 = 0, 11/10 = 1`.
+1. Assume that we have `X` nodes in a shard, each cluster has `Y` nodes, a cluster has `Z` children clusters, and every node has its sequence number `n` starting from `0`. `X / Y` represents `[_X / Y_]`, e.g., `2/10 = 0, 11/10 = 1`.
 
 2. Therefore, we have `X / Y` clusters , say `0 .. X/Y-1`. For a node `n`, it belongs to cluster `n / Y` and it’s at level `log_z(n/Y)`.
 
 3. Then the node will multicast the message to the node `(n/Y * Z + 1)*Y` ~ `((n/Y * Z + Z + 1)* Y - 1)`.
-    Bound checks on node index are needed to be done before multicasting. If check fails don’t broadcast.
+   Bound checks on node index are needed to be done before multicasting. If check fails don’t broadcast.
 
 ![image01](images/features/tree-based-cluster-broadcasting/image01.jpg)
 

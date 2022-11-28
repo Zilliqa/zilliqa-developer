@@ -9,8 +9,8 @@ This doc show what are the steps to coordinate the change on testnet and your se
 
 1. [Listing down the DNS CNAME mapping](#listing-down-the-dns-cname-mapping)
 2. [Updating the testnet ingress](#updating-the-testnet-ingress)
-    1. [Checking the existing ingress rules](#checking-the-existing-ingress-rules)
-    2. [Updating the ingress rules](#updating-the-ingress-rules)
+   1. [Checking the existing ingress rules](#checking-the-existing-ingress-rules)
+   2. [Updating the ingress rules](#updating-the-ingress-rules)
 3. [Updating DNS records in the provider](#updating-dns-records-in-the-provider)
 4. [Verifying new DNS records](#verifying-new-dns-records)
 
@@ -21,7 +21,7 @@ This doc show what are the steps to coordinate the change on testnet and your se
 First, understand what change you will be making and list them down in a table.
 
 | No. | Private URL                         | Public URL                 |
-|-----|-------------------------------------|----------------------------|
+| --- | ----------------------------------- | -------------------------- |
 | 1   | `community441-api.aws.z7a.xyz`      | `dev-api.zilliqa.com`      |
 | 2   | `community441-explorer.aws.z7a.xyz` | `dev-explorer.zilliqa.com` |
 
@@ -46,12 +46,12 @@ Run `./testnet.sh url edit community441-api` and check the `.spec.rules` section
 ```yaml
 spec:
   rules:
-  - host: community441-api.aws.z7a.xyz  # The private DNS name
-    http:
-      paths:
-      - backend:
-          serviceName: community441-api # The service name
-          servicePort: 80
+    - host: community441-api.aws.z7a.xyz # The private DNS name
+      http:
+        paths:
+          - backend:
+              serviceName: community441-api # The service name
+              servicePort: 80
 ```
 
 There is one rule currently, which establishes a mapping from the private DNS name to the service name.
@@ -63,19 +63,19 @@ Now, we add a new rule for `dev-api.zilliqa.com` in the editor.
 ```yaml
 spec:
   rules:
-  - host: community441-api.aws.z7a.xyz  # The private DNS name
-    http:
-      paths:
-      - backend:
-          serviceName: community441-api # The service name
-          servicePort: 80
-  # This is the new rule we inserted. Make sure the indentation is correct
-  - host: dev-api.zilliqa.com  # The public DNS name
-    http:
-      paths:
-      - backend:
-          serviceName: community441-api # The service name
-          servicePort: 80
+    - host: community441-api.aws.z7a.xyz # The private DNS name
+      http:
+        paths:
+          - backend:
+              serviceName: community441-api # The service name
+              servicePort: 80
+    # This is the new rule we inserted. Make sure the indentation is correct
+    - host: dev-api.zilliqa.com # The public DNS name
+      http:
+        paths:
+          - backend:
+              serviceName: community441-api # The service name
+              servicePort: 80
 ```
 
 Save the change and exit the editor. You will see a message indicating the change.
