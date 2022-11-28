@@ -1,9 +1,6 @@
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@npm//:defs.bzl", "npm_link_all_packages")
-load("@npm//products/developer-portal:@docusaurus/core/package_json.bzl", docusaurus_bin = "bin")
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("//:config/docusaurus.bzl", "docusaurus_pkg")
+load("defs.bzl", "collect_files")
 
 npm_link_all_packages(name = "node_modules")
 
@@ -12,11 +9,13 @@ copy_to_bin(
     srcs = ["package.json"],
 )
 
-docusaurus_pkg(
+collect_files(
     name = "collected_sources",
     srcs = [
         "//docs:files",
         "//assets:files",
+        "docusaurus.config.js",
+        "sidebars.js",
         "babel.config.js",
         "package.json",
         "tsconfig.json",
@@ -25,72 +24,72 @@ docusaurus_pkg(
             "src/**/*",
         ],
     ),
-    config = "docusaurus.config.js",
-    sidebars = "sidebars.js",
     strip_path = package_name(),
 )
 
-docusaurus_bin.docusaurus(
-    name = "build",
-    srcs = [
-        ":collected_sources",
-        ":node_modules",
-        ":node_modules/@docusaurus/core",
-        ":node_modules/@docusaurus/preset-classic",
-        ":node_modules/@docusaurus/theme-common",
-        ":node_modules/@mdx-js/react",
-        ":node_modules/clsx",
-        ":node_modules/prism-react-renderer",
-        ":node_modules/react",
-        ":node_modules/react-dom",
-        ":package",
-    ],
-    args = [
-        "build",
-        # Add .. to build dir as we have collected all in a sandbox
-        "--out-dir",
-        "../build",
-    ],
-    chdir = "../../../$(execpath :collected_sources)",
-    env = {
-        "JS_BINARY__PATCH_NODE_FS": "0",
-    },
-    log_level = "debug",
-    out_dirs = ["build"],
-    silent_on_success = False,
-)
-
-pkg_tar(
-    name = "html-folder",
-    srcs = [":build"],
-    mode = "0755",
-    package_dir = "/usr/share/nginx/html/",
-    strip_prefix = "build",
-)
-
-pkg_tar(
-    name = "nignx-conf",
-    srcs = ["nginx/default.conf"],
-    mode = "0755",
-    package_dir = "/etc/nginx/conf.d/",
-    deps = [],
-)
-
-container_image(
-    name = "image",
-    base = "@nginx//image",
-
-    # Disabling legacy run behaviour to allow run from the command line
-    legacy_run_behavior = False,
-    ports = ["80"],
-    tars = [
-        ":html-folder",
-        ":nignx-conf",
-    ],
-)
-
-# # TODO: Not working yet
-# docusaurus_bin.docusaurus_binary(
+# TODO (issue US-157):
+# Docusaurus cannot deal with symbolic links
+# docusaurus_bin.docusaurus(
+#     name = "build",
+#     srcs = [
+#         ":collected_sources",
+#         ":node_modules",
+#         ":node_modules/@docusaurus/core",
+#         ":node_modules/@docusaurus/preset-classic",
+#         ":node_modules/@docusaurus/theme-common",
+#         ":node_modules/@mdx-js/react",
+#         ":node_modules/clsx",
+#         ":node_modules/prism-react-renderer",
+#         ":node_modules/react",
+#         ":node_modules/react-dom",
+#         ":package",
+#     ],
+#     args = [
+#         "build",
+#         # Add .. to build dir as we have collected all in a sandbox
+#         "--out-dir",
+#         "../build",
+#     ],
+#     chdir = "../../../$(execpath :collected_sources)",
+#     env = {
+#         "JS_BINARY__PATCH_NODE_FS": "0",
+#     },
+#     log_level = "debug",
+#     out_dirs = ["build"],
+#     silent_on_success = False,
+# )
+#
+# pkg_tar(
+#     name = "html-folder",
+#     srcs = [":build"],
+#     mode = "0755",
+#     package_dir = "/usr/share/nginx/html/",
+#     strip_prefix = "build",
+# )
+#
+# pkg_tar(
+#     name = "nignx-conf",
+#     srcs = ["nginx/default.conf"],
+#     mode = "0755",
+#     package_dir = "/etc/nginx/conf.d/",
+#     deps = [],
+# )
+#
+# container_image(
+#     name = "image",
+#     base = "@nginx//image",
+#
+#     # Disabling legacy run behaviour to allow run from the command line
+#     legacy_run_behavior = False,
+#     ports = ["80"],
+#     tars = [
+#         ":html-folder",
+#         ":nignx-conf",
+#     ],
+# )
+#
+# # # TODO: Not working yet
+# # docusaurus_bin.docusaurus_binary(
 #     name = "start",
 #     args = [
 #         "start"
