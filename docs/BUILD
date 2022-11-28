@@ -2,13 +2,12 @@ filegroup(
     name = "files",
     srcs = glob(
         [
-            "*",        
             "**/*.md",
             "**/*.mdx",
             "**/*.png",
             "**/*.jpg",
         ],
-        exclude_directories = 1,
+        exclude_directories = 0,
     ),
     visibility = [
         "//visibility:public",

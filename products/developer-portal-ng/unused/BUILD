@@ -7,7 +7,7 @@ filegroup(
             "**/*.png",
             "**/*.jpg",
         ],
-        exclude_directories = 0,
+        exclude_directories = 1,
     ),
     visibility = [
         "//visibility:public",
