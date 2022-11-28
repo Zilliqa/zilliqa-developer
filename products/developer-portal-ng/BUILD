@@ -17,7 +17,7 @@ copy_to_bin(
 
 docusaurus_pkg(
     name = "collected_sources",
-    srcs = ["//docs:files","//assets:files","package.json","tsconfig.json"] + glob(
+    srcs = ["//docs:files","//assets:files", "babel.config.js", "package.json","tsconfig.json"] + glob(
         include = [
             "src/**/*",
         ],
