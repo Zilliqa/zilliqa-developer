@@ -70,12 +70,6 @@ const config = {
         },
         items: [
           {
-            type: "doc",
-            docId: "intro",
-            position: "left",
-            label: "Tutorial",
-          },
-          {
             to: "docs/basics/basics-intro-blockchain",
             activeBasePath: "docs/basics",
             label: "Basics",
@@ -159,11 +153,11 @@ const config = {
             title: "More",
             items: [
               /*
-                                {
-                                  label: "Blog",
-                                  to: "/blog",
-                                },
-                                */
+                                        {
+                                          label: "Blog",
+                                          to: "/blog",
+                                        },
+                                        */
               {
                 label: "GitHub",
                 href: "https://github.com/facebook/docusaurus",
