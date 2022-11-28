@@ -1,6 +1,6 @@
 load("@npm//:defs.bzl", "npm_link_all_packages")
 
-load("@npm//products/developer-portal-ng:@docusaurus/core/package_json.bzl", docusaurus_bin = "bin")
+load("@npm//products/developer-portal:@docusaurus/core/package_json.bzl", docusaurus_bin = "bin")
 load("//:config/docusaurus.bzl", "docusaurus_pkg")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")

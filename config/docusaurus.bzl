@@ -11,8 +11,8 @@ def _docusaurus_pkg_impl(ctx):
     root_dir = sandbox.path
     print("A")
     shell_cmds = [
-        "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "docusaurus.config.js")),
-        "cp {} {}".format(ctx.file.sidebars.path, paths.join(root_dir, "sidebars.js")),
+        "cp -L {} {}".format(ctx.file.config.path, paths.join(root_dir, "docusaurus.config.js")),
+        "cp -L {} {}".format(ctx.file.sidebars.path, paths.join(root_dir, "sidebars.js")),
     ]
     print("B")
 
@@ -26,9 +26,9 @@ def _docusaurus_pkg_impl(ctx):
             if short_path[0] == "/":
                 short_path = short_path[1:]
 
-        dest = paths.join(sandbox.path, short_path)
+        dest = paths.join(root_dir, short_path)
         folders.append(paths.dirname(dest))
-        shell_cmds.append("cp  {} {}".format(f.path, dest))
+        shell_cmds.append("cp -L {} {}".format(f.path, dest))
 
     print("C")
 
