@@ -11,6 +11,7 @@ def _collect_files_impl(ctx):
     root_dir = sandbox.path
     folders = [root_dir]
     strip_srcs = ctx.attr.strip_path
+    shell_cmds = []
     for f in ctx.files.srcs:
         short_path = f.short_path
 
