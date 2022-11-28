@@ -71,6 +71,11 @@ exports_files([
 exports_files(["docs"])
 
 copy_to_bin(
+    name = "package",
+    srcs = ["package.json"],
+)
+
+copy_to_bin(
     name = "tsconfig",
     srcs = ["tsconfig.json"],
 )
