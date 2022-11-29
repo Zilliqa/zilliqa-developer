@@ -17,32 +17,37 @@ In this section, we will build the pages for the frontend application.
 
 We start with the `App` component.
 
-We create the routes for our pages using [`react-router-dom`](https://www.npmjs.com/package/react-router-dom).
+We create the routes for our pages using
+[`react-router-dom`](https://www.npmjs.com/package/react-router-dom).
 
 We setup the `Toaster` from [`react-hot-toast`](https://react-hot-toast.com).
 
 With the `useEffect` hook, we set up the following:
 
-- We check if ZilPay is available on the browser and store it in context using `setZilPay`. If ZilPay is not available, an error is conveyed.
+- We check if ZilPay is available on the browser and store it in context using
+  `setZilPay`. If ZilPay is not available, an error is conveyed.
 - We fetch the state of the contract and store it in context using `setContract`
 - Subscriptions are set up which allow us to
-  - Update the contract state and block number when there is a block update using [`zilPay.wallet.observableBlock`](https://zilpay.github.io/zilpay-docs/zilliqa-provider/#methods)
-  - Update the ZilPay account when it is changed using [`zilPay.wallet.observableAccount`](https://zilpay.github.io/zilpay-docs/zilliqa-provider/#methods)
+  - Update the contract state and block number when there is a block update
+    using
+    [`zilPay.wallet.observableBlock`](https://zilpay.github.io/zilpay-docs/zilliqa-provider/#methods)
+  - Update the ZilPay account when it is changed using
+    [`zilPay.wallet.observableAccount`](https://zilpay.github.io/zilpay-docs/zilliqa-provider/#methods)
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import Header from './components/componentHeader';
-import Listing from './components/componentListing';
-import Listings from './components/componentListings';
-import CreateAccountModal from './components/componentCreateAccountModal';
-import ContextContainer from './functions/contextContainer';
-import { Toaster } from 'react-hot-toast';
+import React, { useEffect, useState } from "react";
+import Header from "./components/componentHeader";
+import Listing from "./components/componentListing";
+import Listings from "./components/componentListings";
+import CreateAccountModal from "./components/componentCreateAccountModal";
+import ContextContainer from "./functions/contextContainer";
+import { Toaster } from "react-hot-toast";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
-} from 'react-router-dom';
+} from "react-router-dom";
 
 const App: React.FC = () => {
   const [showSignUp, setShowSignUp] = useState<boolean>(false);
@@ -117,7 +122,7 @@ const App: React.FC = () => {
         <main>
           <Switch>
             <Route path="/" exact>
-              <Redirect to={'/listings'} />
+              <Redirect to={"/listings"} />
             </Route>
             <Route path="/listings">
               <Listings />
@@ -125,7 +130,7 @@ const App: React.FC = () => {
             <Route path="/listing/:id">
               <Listing />
             </Route>
-            <Redirect to={'/listings'} />
+            <Redirect to={"/listings"} />
           </Switch>
           <CreateAccountModal {...{ showSignUp, setShowSignUp }} />
         </main>
@@ -154,16 +159,18 @@ export default App;
 
 ## `index.tsx`
 
-Next, we wrap the [`App`](#app) component with the [`ContextContainer`](dev-rentonzilliqa-scripting.md#contextcontainer) that we created earlier.
+Next, we wrap the [`App`](#app) component with the
+[`ContextContainer`](dev-rentonzilliqa-scripting.md#contextcontainer) that we
+created earlier.
 
 ```tsx
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import './tailwind.output.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import ContextContainer from './functions/contextContainer';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import "./tailwind.output.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import ContextContainer from "./functions/contextContainer";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -171,7 +178,7 @@ ReactDOM.render(
       <App />
     </ContextContainer.Provider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 reportWebVitals();
@@ -181,28 +188,38 @@ reportWebVitals();
 
 ## Listings Page
 
-Now we get to the [Listings Page](dev-rentonzilliqa-frontend.mdx).
+Now we get to the [Listings Page](dev-rentonzilliqa-frontend.md).
 
-When there is a change in the `contractState` or `blockNumber`, using the `useEffect` hook, we update the `listings` displayed on the page. We create a `hostedListings` object that filters out the listings that are hosted by the current user.
+When there is a change in the `contractState` or `blockNumber`, using the
+`useEffect` hook, we update the `listings` displayed on the page. We create a
+`hostedListings` object that filters out the listings that are hosted by the
+current user.
 
-The listings are presented using the [`ListingCard`](dev-rentonzilliqa-components.md#listingcard) component.
+The listings are presented using the
+[`ListingCard`](dev-rentonzilliqa-components.md#listingcard) component.
 
-Using the `useState` hook, we create `boolean` state variables for showing and hiding the modals as required. The modals are conditionally mounted based on these variables. To trigger the modals, we set up `onClick` listeners as follows:
+Using the `useState` hook, we create `boolean` state variables for showing and
+hiding the modals as required. The modals are conditionally mounted based on
+these variables. To trigger the modals, we set up `onClick` listeners as
+follows:
 
-- On a "New Listing" [`Button`](dev-rentonzilliqa-components.md#button), which triggers the [`CreateListing`](dev-rentonzilliqa-modals.md#create-listing-modal) Modal
-- On each Listing Card, which triggers the [`ManageListing`](dev-rentonzilliqa-modals.md#manage-listing-modal) Modal
+- On a "New Listing" [`Button`](dev-rentonzilliqa-components.md#button), which
+  triggers the
+  [`CreateListing`](dev-rentonzilliqa-modals.md#create-listing-modal) Modal
+- On each Listing Card, which triggers the
+  [`ManageListing`](dev-rentonzilliqa-modals.md#manage-listing-modal) Modal
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
-import ContextContainer from '../functions/contextContainer';
-import formatListings from '../functions/formatListings';
-import getCurrentEpochNumber from '../functions/getCurrentEpochNumber';
-import getCurrentUser from '../functions/getCurretUser';
-import Button from './componentButton';
-import CreateListingModal from './componentCreateListingModal';
-import ListingCard from './componentListingCard';
-import ManageListingModal from './componentManageListingModal';
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router";
+import ContextContainer from "../functions/contextContainer";
+import formatListings from "../functions/formatListings";
+import getCurrentEpochNumber from "../functions/getCurrentEpochNumber";
+import getCurrentUser from "../functions/getCurretUser";
+import Button from "./componentButton";
+import CreateListingModal from "./componentCreateListingModal";
+import ListingCard from "./componentListingCard";
+import ManageListingModal from "./componentManageListingModal";
 
 const Listings: React.FC = () => {
   const [showCreateListing, setShowCreateListing] = useState<boolean>(false);
@@ -261,12 +278,12 @@ const Listings: React.FC = () => {
           ) : (
             <p className="text-xl text-center">No listings</p>
           )}
-          {currentUser?.role === 'host' && (
+          {currentUser?.role === "host" && (
             <>
               <div className="pt-32 pb-10 flex justify-between items-center">
                 <h1 className="text-gray-900 text-2xl font-medium">Hosted</h1>
                 <Button
-                  text={'New Listing'}
+                  text={"New Listing"}
                   onClick={() => setShowCreateListing(true)}
                 />
               </div>
@@ -318,23 +335,31 @@ export default Listings;
 
 ## Individual Listing Page
 
-This component presents a detailed view of the individual listing on the [Listing Page](dev-rentonzilliqa-frontend.mdx#listing-page).
+This component presents a detailed view of the individual listing on the
+[Listing Page](dev-rentonzilliqa-frontend.md#listing-page).
 
-The description, rooms, amenities, map, and description are presented in a detailed manner. The [`ListingIcons`](dev-rentonzilliqa-components.md#listing-icons) are used to provide a clear view of the Rooms and Amenities sections.
+The description, rooms, amenities, map, and description are presented in a
+detailed manner. The
+[`ListingIcons`](dev-rentonzilliqa-components.md#listing-icons) are used to
+provide a clear view of the Rooms and Amenities sections.
 
-Users can book the listing within this component, which uses the [`bookListingTransition`](dev-rentonzilliqa-scripting.md#booklistingtransition) function.
+Users can book the listing within this component, which uses the
+[`bookListingTransition`](dev-rentonzilliqa-scripting.md#booklistingtransition)
+function.
 
-The embed url for the Map is built using the [Google Maps Plus Code](https://maps.google.com/pluscodes/) and the [Google Maps API Key](https://developers.google.com/maps/documentation/javascript/get-api-key?hl=en).
+The embed url for the Map is built using the
+[Google Maps Plus Code](https://maps.google.com/pluscodes/) and the
+[Google Maps API Key](https://developers.google.com/maps/documentation/javascript/get-api-key?hl=en).
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import ContextContainer from '../functions/contextContainer';
-import formatListings from '../functions/formatListings';
-import getCurrentEpochNumber from '../functions/getCurrentEpochNumber';
-import getCurrentUser from '../functions/getCurretUser';
-import Button from './componentButton';
-import { useHistory, useParams } from 'react-router-dom';
-import bookListingTransition from '../functions/bookListingTransition';
+import React, { useEffect, useState } from "react";
+import ContextContainer from "../functions/contextContainer";
+import formatListings from "../functions/formatListings";
+import getCurrentEpochNumber from "../functions/getCurrentEpochNumber";
+import getCurrentUser from "../functions/getCurretUser";
+import Button from "./componentButton";
+import { useHistory, useParams } from "react-router-dom";
+import bookListingTransition from "../functions/bookListingTransition";
 import {
   BathroomIcon,
   BedroomIcon,
@@ -343,7 +368,7 @@ import {
   LaundryIcon,
   TvIcon,
   WifiIcon,
-} from './componentListingIcons';
+} from "./componentListingIcons";
 
 const Listing: React.FC = () => {
   const [listing, setListing] = useState<any | undefined>(undefined);
@@ -358,7 +383,7 @@ const Listing: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
 
-  const plusCode = listing?.location.replace(' ', '+').replace('+', '%2B');
+  const plusCode = listing?.location.replace(" ", "+").replace("+", "%2B");
   const mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${process.env.REACT_APP_MAPS_API_KEY}&q=${plusCode}&zoom=18`;
 
   useEffect(() => {
@@ -375,7 +400,7 @@ const Listing: React.FC = () => {
       ).filter((listing) => {
         return listing.id === id;
       })?.[0];
-      if (!listing) history.push('/listings');
+      if (!listing) history.push("/listings");
       setListing(listing);
     })();
   }, [contractState, currentBlockNumber]);
@@ -412,14 +437,14 @@ const Listing: React.FC = () => {
                     <BedroomIcon />
                     <p className="text-lg text-gray-900 pt-1">
                       {listing.rooms} Bedroom
-                      {listing.rooms > 1 ? 's' : ''}
+                      {listing.rooms > 1 ? "s" : ""}
                     </p>
                   </div>
                   <div className="border p-6 rounded-lg">
                     <BathroomIcon />
                     <p className="text-lg text-gray-900 pt-1">
                       {listing.bathrooms} Bathroom
-                      {listing.bathrooms > 1 ? 's' : ''}
+                      {listing.bathrooms > 1 ? "s" : ""}
                     </p>
                   </div>
                 </div>

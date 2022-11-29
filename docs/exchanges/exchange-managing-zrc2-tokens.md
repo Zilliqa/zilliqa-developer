@@ -13,7 +13,9 @@ description: Managing Fungible Tokens (ZRC-2)
 
 ## Introduction to ZRC-2
 
-[ZRC-2](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md) is the formal standard for Fungible Token in Zilliqa. It is an open standard for creating currencies on the Zilliqa blockchain.
+[ZRC-2](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md) is the formal
+standard for Fungible Token in Zilliqa. It is an open standard for creating
+currencies on the Zilliqa blockchain.
 
 The ZRC-2 standard allows for functionalities like
 
@@ -26,36 +28,55 @@ The ZRC-2 standard allows for functionalities like
 
 ## Examples of ZRC-2
 
-- [XSGD](https://www.xfers.com) - the first Singapore dollar-pegged stablecoin built by Xfers
-- [gZIL](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-11.md#governance-tokens-aka-gzil) - Governance ZIL token earned through Zilliqa Seed Node Staking Program
+- [XSGD](https://www.xfers.com) - the first Singapore dollar-pegged stablecoin
+  built by Xfers
+- [gZIL](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-11.md#governance-tokens-aka-gzil) -
+  Governance ZIL token earned through Zilliqa Seed Node Staking Program
 
 ## Checking Whether a Contract is ZRC-2 Compliant
 
-Before you start any integration with ZRC-2, it is important to check the smart contract to ensure it conforms to the ZRC-2 standard. Non-conformance to the standard may lead to composability issues with other contracts or dApp/exchange integration.
+Before you start any integration with ZRC-2, it is important to check the smart
+contract to ensure it conforms to the ZRC-2 standard. Non-conformance to the
+standard may lead to composability issues with other contracts or dApp/exchange
+integration.
 
-Please check the [ZRC-2 specification](../dev-dapps/dev-keys-zrc2-wallet-support.mdx#zrc-2-specification) subsection in the Developers section of this developer portal.
+Please check the
+[ZRC-2 specification](../dev-dapps/dev-keys-zrc2-wallet-support.md#zrc-2-specification)
+subsection in the Developers section of this developer portal.
 
 ## Contract Operations
 
-Please check the [Integrating with ZRC-2 Fungible Tokens Contract](../dev-dapps/dev-keys-zrc2-wallet-support.mdx#integrating-with-zrc-2-fungible-tokens-contract) subsection on how to get token balance and transfer tokens.
+Please check the
+[Integrating with ZRC-2 Fungible Tokens Contract](../dev-dapps/dev-keys-zrc2-wallet-support.md#integrating-with-zrc-2-fungible-tokens-contract)
+subsection on how to get token balance and transfer tokens.
 
 ## Tracking Incoming ZRC-2 Deposit
 
 To track any new **incoming deposit** of a specific ZRC-2 token:
 
-1. Poll the blockchain block by block using API [`GetTxnBodiesForTxBlock`](../apis/api-transaction-get-txbodies-for-txblock.mdx) API and process each transactions
+1. Poll the blockchain block by block using API
+   [`GetTxnBodiesForTxBlock`](../apis/api-transaction-get-txbodies-for-txblock.md)
+   API and process each transactions
 2. For each transaction in the TxBlock, perform the following:
-   - Check whether `toAddr` matches the corresponding ZRC-2 token contract address. For example, contract address [a845c1034cd077bd8d32be0447239c7e4be6cb21](https://viewblock.io/zilliqa/address/0xa845c1034cd077bd8d32be0447239c7e4be6cb21) for gZIL ZRC-2 token.
-   - Check that the **success** field is set to `true`. If it is `false`, it means that this transaction was not accepted by the network.
-   - Under `data`, look for `Transfer` or `TransferFrom` tag. Check the `value` to see whether it matches the base16 address format of your deposit address.
-   - If it matches, `value` represents the amount of tokens that are being transferred from the sender to your deposit address.
+   - Check whether `toAddr` matches the corresponding ZRC-2 token contract
+     address. For example, contract address
+     [a845c1034cd077bd8d32be0447239c7e4be6cb21](https://viewblock.io/zilliqa/address/0xa845c1034cd077bd8d32be0447239c7e4be6cb21)
+     for gZIL ZRC-2 token.
+   - Check that the **success** field is set to `true`. If it is `false`, it
+     means that this transaction was not accepted by the network.
+   - Under `data`, look for `Transfer` or `TransferFrom` tag. Check the `value`
+     to see whether it matches the base16 address format of your deposit
+     address.
+   - If it matches, `value` represents the amount of tokens that are being
+     transferred from the sender to your deposit address.
 
-:::note
-When handling `value`, please note the number of decimal places used by the smart contract.
-:::
+:::note When handling `value`, please note the number of decimal places used by
+the smart contract. :::
 
-3. **[Optional checks]** You can also check `event_logs` and ensure the following:
-   - `_eventname` matches `TransferSuccess` and `address` matches your deposit address
+3. **[Optional checks]** You can also check `event_logs` and ensure the
+   following:
+   - `_eventname` matches `TransferSuccess` and `address` matches your deposit
+     address
    - Under `params` map:
      - vname `sender` refers to the sender of the transactions
      - vname `recipient` refers your deposit address

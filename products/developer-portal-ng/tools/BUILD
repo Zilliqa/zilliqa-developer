@@ -20,5 +20,6 @@ py_binary(
         requirement("pyyaml_env_tag"),
         requirement("six"),
         requirement("watchdog"),
+        requirement("pymdown-extensions"),
     ],
 )

@@ -9,6 +9,9 @@ extra_css:
   - css/quantum-colors.css
 markdown_extensions:
   - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 
 plugins:
   - search
@@ -60,6 +63,10 @@ theme:
     - cpp
     - python
     - llvm
+    - json
+    - javascript
+    - go
+    - rust
 
   hljs_style: "monokai-sublime"
 

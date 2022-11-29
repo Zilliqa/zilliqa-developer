@@ -3,7 +3,7 @@ filegroup(
     srcs = glob(
         [
             "**/*.md",
-            "**/*.mdx",
+            "**/*.md",
             "**/*.png",
             "**/*.jpg",
         ],
@@ -18,7 +18,7 @@ filegroup(
 # 	name = "raw-tar",
 # 	strip_prefix=".",
 # 	srcs=glob(
-# 	    ["**/*.md","**/*.mdx", "**/*.png", "**/*.jpg"],
+# 	    ["**/*.md","**/*.md", "**/*.png", "**/*.jpg"],
 # 	    exclude_directories=0
 # 	),
 #     mode="0755",
