@@ -21,5 +21,6 @@ py_binary(
         requirement("six"),
         requirement("watchdog"),
         requirement("pymdown-extensions"),
+        requirement("mkdocs-material"),
     ],
 )

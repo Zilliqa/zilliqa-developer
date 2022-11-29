@@ -17,6 +17,7 @@ plugins:
   - search
 
 theme:
+  name: "material"
   language: en
   palette:
     primary: "teal"
@@ -42,10 +43,9 @@ theme:
     - toc.follow
     # - toc.integrate
   favicon: assets/images/favicon.png
-  name: null
   icon: null
-  custom_dir: "tailwind_theme/"
-  theme_dir: "tailwind_theme/"
+  #  custom_dir: "tailwind_theme/"
+  #  theme_dir: "tailwind_theme/"
   static_templates:
     - 404.html
   font:
