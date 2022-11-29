@@ -31,8 +31,8 @@ lint:
       - node_modules/**
       - "**/node_modules/**"
       - develop_env/**
-      - "tailwind_theme/css/**"
-      - "**/tailwind_theme/css/**"
+      - "tailwind_theme/**"
+      - "**/tailwind_theme/**"
       - "**/develop_env/**"
       - "bazel-*/**"
       - "**/static/css/*"
