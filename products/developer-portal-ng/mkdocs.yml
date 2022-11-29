@@ -1,0 +1,59 @@
+site_name: Zilliqa Developer Portal
+site_url: https://docs.zilliqa.com
+base_url: /
+docs_dir: docs
+site_description: Zilliqa blockhain
+site_author: Zilliqa
+extra_css:
+  - css/quantum-colors.css
+markdown_extensions:
+  - admonition
+
+plugins:
+  - search
+
+theme:
+  name: null
+  custom_dir: "tailwind_theme/"
+  theme_dir: "tailwind_theme/"
+  static_templates:
+    - 404.html
+
+  include_search_page: false
+  search_index_only: false
+
+  highlightjs: true
+  hljs_languages:
+    - bash
+    - cpp
+    - python
+    - llvm
+
+  hljs_style: "monokai-sublime"
+
+  navigation_depth: 2
+  nav_style: primary
+
+  shortcuts:
+    help: 191 # ?
+    next: 78 # n
+    previous: 80 # p
+    search: 83 # s
+
+nav:
+  - Basics:
+      #    - Blockchain Basics:
+      - Blockchain: "basics/basics-intro-blockchain"
+      - Consensus: "basics/basics-intro-consensus"
+      - Accounts: "basics/basics-intro-accounts"
+      - Transactions: "basics/basics-intro-txns"
+      - Gas: "basics/basics-intro-gas"
+
+      #    - Zilliqa Architecture:
+      - Nodes: "basics/basics-zil-nodes"
+      - Sharding: "basics/basics-zil-sharding"
+      - Consensus: "basics/basics-zil-consensus"
+      - Signatures: "basics/basics-zil-schnorr-signatures"
+      - Reward: "basics/basics-zil-reward"
+      - Contract: "basics/basics-zil-contract"
+      - Gas: "basics/basics-zil-gas"

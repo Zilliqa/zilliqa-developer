@@ -35,7 +35,7 @@ def _collect_files_impl(ctx):
         outputs = [sandbox],
         inputs = ctx.files.srcs,
         mnemonic = "CollectedFilesCollect",
-        command = "; ".join(shell_cmds) + "; echo \"CURRENT DIR: $(pwd)\"",
+        command = "; ".join(shell_cmds),
         progress_message = "Collecting CollectedFiles source documents for {}.".format(ctx.label.name),
     )
 

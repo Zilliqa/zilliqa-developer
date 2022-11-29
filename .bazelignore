@@ -8,3 +8,4 @@ pixy
 node_modules
 **/node_modules
 products/developer-portal/node_modules
+products/developer-portal-nng/apps/alpha/node_modules
