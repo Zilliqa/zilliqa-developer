@@ -64,7 +64,7 @@ def _mkdocs_html_impl(ctx):
         MkDocsInfo(open_uri = paths.join(output_dir.short_path, "index.html")),
     ]
 
-mkdocs_html_gen = rule(
+_mkdocs_html = rule(
     implementation = _mkdocs_html_impl,
     doc = "MkDocs HTML documentation.",
     attrs = {
@@ -96,37 +96,5 @@ mkdocs_html_gen = rule(
     },
 )
 
-def _mkdocs_view_impl(ctx):
-    shell_cmd = ctx.attr.open_cmd.format(ctx.attr.generator[MkDocsInfo].open_uri)
-
-    script = ctx.actions.declare_file("{}.sh".format(ctx.label.name))
-    ctx.actions.write(script, shell_cmd, is_executable = True)
-
-    runfiles = ctx.runfiles(files = ctx.files.generator)
-
-    return [DefaultInfo(executable = script, runfiles = runfiles)]
-
-mkdocs_view = rule(
-    implementation = _mkdocs_view_impl,
-    doc = "View MkDocs documentation.",
-    attrs = {
-        "generator": attr.label(
-            doc = "MkDocs documentation generation target.",
-            mandatory = True,
-            providers = [MkDocsInfo],
-        ),
-        "open_cmd": attr.string(
-            doc = "Shell open command for MkDocs URI.",
-            default = "xdg-open {} 1> /dev/null",
-        ),
-    },
-    executable = True,
-)
-
 def mkdocs_html(name, **kwargs):
-    view_args = {"generator": ":" + name}
-    if "open_cmd" in kwargs:
-        view_args["open_cmd"] = kwargs.pop("open_cmd")
-
-    mkdocs_html_gen(name = name, **kwargs)
-    mkdocs_view(name = name + ".view", **view_args)
+    _mkdocs_html(name = name, **kwargs)
