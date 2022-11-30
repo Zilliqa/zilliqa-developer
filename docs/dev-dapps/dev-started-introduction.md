@@ -25,7 +25,7 @@ Decentralised Apps ("dApps") are applications that interact with smart contracts
 
 An application can have a user-facing components ("client"), which could be a web application or mobile app. These applications can interact with smart contracts on the Zilliqa blockchain.
 
-<img alt="Overview" src={useBaseUrl('img/dev-dapps/dapps-overview.png')} />
+!["Overview"](/assets/img/dev-dapps/dapps-overview.png)
 
 The entry to Zilliqa blockchain lies on the RPC interface. SDKs are not compulsory for you to interact with the blockchain, but they do make your life easier.
 
@@ -41,38 +41,3 @@ Zilliqa currently supports two address formats.
 - `bech32`: A [bech32](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-1.md) with a human-readable prefix of `zil` (e.g. `zil12ulvje3ceza3cwrrj3szu9rqvd8s9tw69c978p`)
 
 The reason behind this design is to prevent confusion with Ethereum addresses. For more detailed explanation on the address, refer to [this post](https://blog.zilliqa.com/zilliqa-migrates-to-new-address-format-bf1fa6d7e41d)
-
-```javascript
-const { toBech32Address, toChecksumAddress } = require("@zilliqa-js/crypto");
-
-// not checksummed address (will not be accepted by blockchain)
-const address = "573EC96638C8BB1C386394602E1460634F02ADDA";
-
-// checksummed ByStr20
-const checksummedAddresses = toChecksumAddress(address);
-// returns '0x573EC96638C8bB1c386394602E1460634F02aDdA'
-
-const bech32_address = toBech32Address(address);
-// returns zil12ulvje3ceza3cwrrj3szu9rqvd8s9tw69c978p
-```
-
-We **strongly recommend** that developers use `bech32` formatted addresses for token transfers. This prevents users from mistaking Zilliqa addresses from Ethereum addresses. All wallets and exchanges that deal with token transfers currently use the `bech32` standard for security purposes.
-
-`ByStr20` checksummed addresses are supported by [RPC](https://apidocs.zilliqa.com), SDKs and `scilla` contracts.
-
-How do you know if an address is a smart contract or an account? One way to go about it is to send a [`GetSmartContractInit`](https://apidocs.zilliqa.com/#getsmartcontractcode) POST request to check.
-
-In Javascript, you can do the following:
-
-```javascript
-const { Zilliqa } = require("@zilliqa-js/zilliqa");
-
-(async () => {
-  const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
-  const address = "573EC96638C8BB1C386394602E1460634F02ADDA";
-
-  const res = await zilliqa.blockchain.getSmartContractInit(address);
-  const isContract = !!res.result;
-  // returns false
-})();
-```

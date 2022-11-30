@@ -63,10 +63,7 @@ To start the isolated server, you need to click on “Isolated server” from th
 “Download and install”. After downloading is finished, you need to click on to Start Service - you have now successfully started
 the isolated server and faucet.
 
-<img
-alt="Isolated Server"
-src={useBaseUrl('img/dev-dapps/tools/isolatedStartService.png')}
-/>
+!["Isolated Server"](/assets/img/dev-dapps/tools/isolatedStartService.png)
 
 #### Using Isolated server during dApp development
 
@@ -89,10 +86,7 @@ To start the explorer, you need to click on “Network explorer” from the Cere
 “Download and install”. After downloading is finished, you need to click on to Start Service -
 you have now successfully started the network explorer.
 
-<img
-alt="Devex"
-src={useBaseUrl('img/dev-dapps/tools/explorerStartService.png')}
-/>
+!["Devex"](/assets/img/dev-dapps/tools/explorerStartService.png)
 
 ### Scilla Server
 
@@ -106,10 +100,7 @@ Scilla Server runs on port 4000. You can call it's API on http://localhost:4000.
 To start the server, you need to click on “Scilla” from the Ceres’ home screen and then click on “Download and install”.
 After downloading is finished, you need to click on to Start Service - you have now successfully started the Scilla server.
 
-<img
-alt="Scilla Server"
-src={useBaseUrl('img/dev-dapps/tools/scillaStartService.png')}
-/>
+!["Scilla Server"](/assets/img/dev-dapps/tools/scillaStartService.png)
 
 ## Using Ceres with a dApp
 
@@ -127,10 +118,7 @@ Alternatively, you can choose one of the already available contracts from the le
 Step 2 : Go to the networks tab and click on “Add Network” to add your local blockchain network to the IDE by filling in
 details of your network.
 
-<img
-alt="Add Custom Network"
-src={useBaseUrl('img/dev-dapps/tools/customNetworkDetails.png')}
-/>
+!["Add Custom Network"](/assets/img/dev-dapps/tools/customNetworkDetails.png)
 
 !!! note
 
@@ -141,25 +129,16 @@ Step 3: Select an account that you will eventually use to deploy the contract. I
 
 Step 4 : Paste your account address and request funds from the faucet available on Ceres.
 
-<img
-alt="Faucet Request"
-src={useBaseUrl('img/dev-dapps/tools/faucetRequest.png')}
-/>
+!["Faucet Request"](/assets/img/dev-dapps/tools/faucetRequest.png)
 
 Step 5: Click on “Deploy”, enter the initialization params and finally deploy the contract!
 
-<img
-alt="Deploy Contract"
-src={useBaseUrl('img/dev-dapps/tools/deployContract.png')}
-/>
+!["Deploy Contract"](/assets/img/dev-dapps/tools/deployContract.png)
 
-<img
-alt="Deploy Success"
-src={useBaseUrl('img/dev-dapps/tools/deploySuccess.png')}
-/>
+!["Deploy Success"](/assets/img/dev-dapps/tools/deploySuccess.png)
 
 Step 6: You can click on the transaction ID link and you will be redirected to Devex page, alternatively you can also visit http://localhost:5557 (local network explorer) and you will find your contract creation transaction there as well.
 
-<img alt="Devex" src={useBaseUrl('img/dev-dapps/tools/deployDevex.png')} />
+!["Devex"](/assets/img/dev-dapps/tools/deployDevex.png)
 
 Voila! Your contract is now deployed on the local network and can be accessed under the "Contracts" tab on the left side of the IDE.

@@ -15,10 +15,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 ## Testnet Faucet via Nucleus Wallet
 
-<img
-alt="Nucleus Wallet Faucet"
-src={useBaseUrl('img/dev-dapps/getting-started/nucleus-faucet.png')}
-/>
+!["Nucleus Wallet Faucet"](/assets/img/dev-dapps/getting-started/nucleus-faucet.png)
 
 In order to deploy a contract to Zilliqa's testnet and send transactions, you will need testnet $ZIL in your account.
 

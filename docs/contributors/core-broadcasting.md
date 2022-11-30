@@ -25,27 +25,8 @@ Thus, we leverage clustered multicasting in order to broadcast the DS block to a
 1. Therefore, we should have a total of `X/Y` clusters, indexed from `0` to `X/Y-1`. A node `n` belonging to cluster `n/Y` is at level `log_Z(n/Y)`.
 1. A node multicasts messages to nodes within the range `(n/Y * Z + 1)*Y` ~ `((n/Y * Z + Z + 1)* Y - 1)`. Bound checks on node index need to be done before multicasting. If the checks fail, we don’t broadcast.
 
-<img
-alt="Broadcasting Image 1"
-src={useBaseUrl(
-'img/contributors/core/tree-based-cluster-broadcasting/broadcast.png'
-)}
-/>
+!["Broadcasting Image 1"](/assets/img/contributors/core/tree-based-cluster-broadcasting/broadcast.png)
 
 ## Application
 
 These are the parameters that control the broadcasting of DS blocks from DS committee nodes to shard nodes according to the design above.
-
-```xml
-<data_sharing>
-  <BROADCAST_TREEBASED_CLUSTER_MODE>true</BROADCAST_TREEBASED_CLUSTER_MODE>
-  <NUM_FORWARDED_BLOCK_RECEIVERS_PER_SHARD>3</NUM_FORWARDED_BLOCK_RECEIVERS_PER_SHARD>
-  <MULTICAST_CLUSTER_SIZE>10</MULTICAST_CLUSTER_SIZE>
-  <NUM_OF_TREEBASED_CHILD_CLUSTERS>3</NUM_OF_TREEBASED_CHILD_CLUSTERS>
-</data_sharing>
-```
-
-- `BROADCAST_TREEBASED_CLUSTER_MODE`: Toggles between tree-based cluster broadcasting or pure multicasting.
-- `NUM_FORWARDED_BLOCK_RECEIVERS_PER_SHARD`: The number of shard nodes to initially receive the DS block from DS committee nodes.
-- `MULTICAST_CLUSTER_SIZE`: The number of nodes in each cluster.
-- `NUM_OF_TREEBASED_CHILD_CLUSTERS`: The number of child clusters for a given cluster.

@@ -19,7 +19,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 ## Neo-Savant @ [https://ide.zilliqa.com](https://ide.zilliqa.com/)
 
-<img alt="Faucet" src={useBaseUrl('img/dev-dapps/tools/neosavant.png')} />
+!["Faucet"](/assets/img/dev-dapps/tools/neosavant.png)
 
 A fully-fledged IDE used for writing, testing and deploying Scilla smart contracts painlessly. It can be tried out at https://ide.zilliqa.com/.
 
@@ -43,37 +43,3 @@ Neo-Savant helps Scilla developers to create and deploy Smart Contracts using an
 
 - Launch VS Code Quick Open (Ctrl+P),
 - Use the following command
-
-```
-ext install as1ndu.scilla
-```
-
-**Method 2:** Manual install using VS Code extension package
-
-- Download the `.visx` file from the [releases tab](https://github.com/as1ndu/scilla/releases)
-- Using the Install from VSIX command in the Extensions view command drop-down,: Install from VSIX command in the Command Palette, point to the `.vsix` file.
-
-### Features
-
-- Syntax highlighting
-- Code Snippets
-- Debugging (Error & Warnings)
-- Cash Flow Analysis (`ctrl + P` then `>` type `scilla` then select `Scilla: Cashflow Analyser`)
-- Gas Usage Reports (Enable it in extension settings)
-- Type info for variables (Hover over dotted lines to see they type information of a variable)
-- Configuration via Vscode's UI
-
-## Emacs
-
-An emacs major mode for editing Scilla contracts is [provided](https://github.com/Zilliqa/scilla/blob/master/misc/emacs-mode/scilla-mode.el).
-Add the following line to your `.emacs` file to load this mode for files ending with `.scilla` and `.scillib`.
-For enabling flycheck mode for Scilla (see [INSTALL.md](https://github.com/Zilliqa/scilla/blob/master/INSTALL.md)). When `scilla-checker` is available,
-type reporting is also supported. The key binding `C-c C-t` will print the type of the variable on which
-the cursor currently is.
-
-```
-;; For enabling flycheck mode for Scilla.
-(setq scilla-root "/path/to/scilla/root")
-;; Scilla mode
-(load-file "/path/to/scilla-mode.el")
-```

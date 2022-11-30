@@ -75,10 +75,6 @@ In the coming sections, we will build the frontend in the following stages:
 
 ## Built by Quinence
 
-<img
-alt="Quinence Logo"
-src={'https://quinence.com/favicon-196x196.png'}
-width="60"
-/>
+!["Quinence Logo"](/assets/https://quinence.com/favicon-196x196.png)
 
 [Quinence - Digital product specialists from Singapore](https://quinence.com).
