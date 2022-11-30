@@ -93,5 +93,4 @@ def get_version(path):
 
 
 if __name__ == "__main__":
-    print("STABLE_DUMMY A")
     main()
