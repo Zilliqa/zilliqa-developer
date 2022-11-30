@@ -85,5 +85,5 @@ container_push(
     image = ":image",
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
     repository = "zilliqa-devportal",
-    tag = "test",
+    tag = "{STABLE_GIT_SHORT_HASH}",
 )
