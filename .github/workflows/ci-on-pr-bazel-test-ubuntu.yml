@@ -49,6 +49,13 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
+      - name: Setting Github hash
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Check outputs
+        run: echo ${{ steps.vars.outputs.sha_short }}
+
       - name: Bazel cache
         id: cache-bazel-debug
         uses: actions/cache@v3.0.4
@@ -70,3 +77,14 @@ jobs:
       - name: "Build and push Docker"
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
+
+      - name: "Creating Devops repo update"
+        run: |
+          git clone git@github.com:Zilliqa/devops.git .infra
+          cd .infra && git checkout -b feature/preview-developer-${{ steps.vars.outputs.sha_short }}
+          echo "DO NOT MERGE" >> cd/applications/devportal/overlays/preview/kustomization.yaml
+          git add . -A
+          git commit -m "Preparing preview for commit: ${{ github.sha }}
+          git push
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

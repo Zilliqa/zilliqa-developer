@@ -86,10 +86,7 @@ container_push(
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
     repository = "zilliqa-devportal",
 
-    # Tagging from commandline (add --define=TAG=foo_tag)
-    # tag = "$(TAG)",
-
-    # Tagging from workspace status (not working, TODO)
+    # Tagging from workspace status - requires --stamp as build args
     tag = "{STABLE_GIT_SHORT_HASH}",
 
     # Static

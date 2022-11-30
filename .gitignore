@@ -39,3 +39,7 @@ secret/*
 **/.secret.*
 **/secret.*
 **/secret/*
+
+.infra/
+.infra/*
+.infra/**
