@@ -5,6 +5,7 @@ filegroup(
             "**/*.md",
             "**/*.md",
             "**/*.png",
+            "**/*.svg",
             "**/*.jpg",
         ],
         exclude_directories = 0,
