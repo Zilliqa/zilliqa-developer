@@ -1,3 +1,1 @@
-# Zilliqa Frontpage
-
-## Overview
+# Zilliqa Developer Portal

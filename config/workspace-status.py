@@ -37,8 +37,6 @@ def main():
     print("STABLE_GIT_PATCH {patch}".format(**version))
     print("STABLE_FULL_VERSION {full_version}".format(**version))
 
-    print("STABLE_DUMMY A")
-
 
 def get_git_hash(path):
     p = subprocess.Popen(["git", "rev-parse", "HEAD"], cwd=path, stdout=subprocess.PIPE)
@@ -95,4 +93,5 @@ def get_version(path):
 
 
 if __name__ == "__main__":
+    print("STABLE_DUMMY A")
     main()

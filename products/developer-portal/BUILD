@@ -79,11 +79,36 @@ container_image(
     ],
 )
 
+genrule(
+    name = "create_tag_file",
+    srcs = [
+        "image.json.sha256",
+    ],
+    stamp = True,
+    outs = [ "tag_file" ],
+    cmd = "cat $(location image.json.sha256) > $@ && cat bazel-out/stable-status.txt | grep STABLE_GIT_SHORT_HASH | awk '{print $2}' >> $@",
+)
+
+container_push(
+    <same as before>
+    tag_file = ":my_tag_file",
+)
 container_push(
     name = "push_image",
     format = "Docker",
     image = ":image",
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
     repository = "zilliqa-devportal",
-    tag_tpl = "{STABLE_GIT_SHORT_HASH}",
+
+    tag_file = ":tag_file"
+
+    # Tagging from commandline (add --define=TAG=foo_tag)
+    # tag = "$(TAG)",
+
+    # Tagging from workspace status (not working, TODO)
+    # tag = "{STABLE_DUMMY}"
+
+    # Static
+    # tag = "test"
+
 )
