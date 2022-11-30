@@ -1,17 +1,108 @@
 site_name: Zilliqa Developer Portal
 
 site_url: https://docs.zilliqa.com
-base_url: /
 docs_dir: docs
 site_description: Zilliqa blockhain
 site_author: Zilliqa
 extra_css:
   - css/zilliqa-colors.css
+
 markdown_extensions:
-  - admonition
-  - pymdownx.superfences
+  - markdown.extensions.toc:
+      slugify:
+        !!python/object/apply:pymdownx.slugs.slugify { kwds: { case: lower } }
+      permalink: ""
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.md_in_html:
+  - pymdownx.superfences:
+      preserve_tabs: true
+      custom_fences:
+        # Mermaid diagrams
+        - name: diagram
+          class: diagram
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: math
+          class: arithmatex
+          format:
+            !!python/object/apply:pymdownx.arithmatex.arithmatex_fenced_format {
+              kwds: { mode: generic, tag: pre },
+            }
+  # TODO: See https://github.com/facelessuser/pymdown-extensions
+  #        - name: md-render
+  #          class: md-render
+  #          format: !!python/name:tools.pymdownx_md_render.md_sub_render
+  - pymdownx.highlight:
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+        - name: pycon3
+          lang: pycon
+          options:
+            python3: true
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite:
+      custom_inline:
+        - name: math
+          class: arithmatex
+          format:
+            !!python/object/apply:pymdownx.arithmatex.arithmatex_inline_format {
+              kwds: { mode: generic },
+            }
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shorthand: true
+      social_url_shortener: true
+      user: facelessuser
+      repo: pymdown-extensions
+      normalize_issue_symbols: true
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.progressbar:
+  - pymdownx.arithmatex:
+      generic: true
+      block_tag: "pre"
+  - pymdownx.mark:
+  - pymdownx.striphtml:
+  - pymdownx.snippets:
+      base_path:
+        - docs/.snippets
+        - LICENSE.md
+      #      auto_append:
+      #      - refs.md
+      check_paths: true
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.saneheaders:
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/facelessuser
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/TWs8Tgr
 
 plugins:
   - search
@@ -19,18 +110,36 @@ plugins:
 theme:
   name: "material"
   language: en
+  logo: assets/img/logo.png
   palette:
-    primary: "teal"
-    accent: "indigo"
+    # Palette toggle for light mode
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  pymdownx:
+    sponsor: "https://github.com/sponsors/facelessuser"
   features:
     # - announce.dismiss
     - content.code.annotate
-    # - content.tabs.link
+    - content.tabs.link
     - content.tooltips
     # - header.autohide
     # - navigation.expand
     - navigation.indexes
-    # - navigation.instant
+    - navigation.instant
     # - navigation.prune
     - navigation.sections
     - navigation.tabs

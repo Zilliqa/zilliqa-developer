@@ -7,80 +7,60 @@ title: GetBlockchainInfo
 
 Returns the current network statistics for the specified network.
 
-**NOTE:** `CHAIN_ID` from `2` to `9` are reserved for Zilliqa Core use.
+!!! note
+
+    `CHAIN_ID` from `2` to `9` are reserved for Zilliqa Core use.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetBlockchainInfo",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetBlockchainInfo",
-    "params": [""]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const blockChainInfo = await zilliqa.blockchain.getBlockChainInfo();
+    console.log(blockChainInfo.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "java"
 
-```js
-const blockChainInfo = await zilliqa.blockchain.getBlockChainInfo();
-console.log(blockChainInfo.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-        Rep<BlockchainInfo> blockchainInfo = client.getBlockchainInfo();
-        System.out.println(new Gson().toJson(blockchainInfo));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+            Rep<BlockchainInfo> blockchainInfo = client.getBlockchainInfo();
+            System.out.println(new Gson().toJson(blockchainInfo));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "python"
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetBlockchainInfo())
-```
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetBlockchainInfo())
+    ```
 
-</TabItem>
+=== "go"
 
-<TabItem value="go">
-
-```go
-func GetBlockchainInfo() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetBlockchainInfo()
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetBlockchainInfo() {
+      provider := NewProvider("https://api.zilliqa.com/")
+      response := provider.GetBlockchainInfo()
+      result, _ := json.Marshal(response)
+      fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

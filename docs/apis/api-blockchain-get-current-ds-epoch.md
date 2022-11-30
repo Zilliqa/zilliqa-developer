@@ -5,80 +5,61 @@ title: GetCurrentDSEpoch
 
 ---
 
-Returns the current number of DS blocks in the network. This is represented as a `String`.
+Returns the current number of DS blocks in the network. This is represented as a
+`String`.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetCurrentDSEpoch",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetCurrentDSEpoch",
-    "params": [""]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+=== "node.js"
 
-</TabItem>
-<TabItem value="node.js">
+    ```js
+    const currentDSEpoch = await zilliqa.blockchain.getCurrentDSEpoch();
+    console.log(currentDSEpoch.result);
+    ```
 
-```js
-const currentDSEpoch = await zilliqa.blockchain.getCurrentDSEpoch();
-console.log(currentDSEpoch.result);
-```
+=== "java"
 
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-        Rep<String> currentDSEpoch = client.getCurrentDSEpoch();
-        System.out.println(new Gson().toJson(currentDSEpoch));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+            Rep<String> currentDSEpoch = client.getCurrentDSEpoch();
+            System.out.println(new Gson().toJson(currentDSEpoch));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "python"
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetCurrentDSEpoch())
-```
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetCurrentDSEpoch())
+    ```
 
-</TabItem>
+=== "go"
 
-<TabItem value="go">
-
-```go
-func GetCurrentDSEpoch() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetCurrentDSEpoch()
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetCurrentDSEpoch() {
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetCurrentDSEpoch()
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
+    }
+    ```
 
 ### Example response
 

@@ -3,82 +3,58 @@ id: api-blockchain-ds-block-listing
 title: DSBlockListing
 ---
 
----
+Returns a paginated list of up to **10** Directory Service (DS) blocks and their
+block hashes for a specified page. The `maxPages` variable that specifies the
+maximum number of pages available is also returned.
 
-Returns a paginated list of up to **10** Directory Service (DS) blocks and their block hashes for a specified page. The `maxPages` variable that specifies the maximum number of pages available is also returned.
+=== "cURL"
 
-### Example Request
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "DSBlockListing",
+        "params": [1]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "node.js"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```js
+    const dsBlockListing = await zilliqa.blockchain.getDSBlockListing(1);
+    console.log(dsBlockListing.result);
+    ```
 
-<TabItem value="cURL">
+=== "java"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "DSBlockListing",
-    "params": [1]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
-
-</TabItem>
-<TabItem value="node.js">
-
-```js
-const dsBlockListing = await zilliqa.blockchain.getDSBlockListing(1);
-console.log(dsBlockListing.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-        Rep<BlockList> blockListing = client.getDSBlockListing(1);
-        System.out.println(new Gson().toJson(blockListing));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+            Rep<BlockList> blockListing = client.getDSBlockListing(1);
+            System.out.println(new Gson().toJson(blockListing));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "Python"
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.DSBlockListing(1))
-```
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.DSBlockListing(1))
+    ```
 
-</TabItem>
+=== "Go"
 
-<TabItem value="go">
-
-```go
-func DSBlockListing() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.DSBlockListing(1)
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func DSBlockListing() {
+      provider := NewProvider("https://api.zilliqa.com/")
+      response := provider.DSBlockListing(1)
+      result, _ := json.Marshal(response)
+      fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 
