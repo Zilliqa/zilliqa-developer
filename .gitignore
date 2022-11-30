@@ -27,3 +27,15 @@ tsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
 .trunk/
 
+.secrets.*
+secrets.*
+secrets/*
+**/.secrets.*
+**/secrets.*
+**/secrets/*
+.secret.*
+secret.*
+secret/*
+**/.secret.*
+**/secret.*
+**/secret/*

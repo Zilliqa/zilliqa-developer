@@ -36,3 +36,35 @@ jobs:
       - name: "Running tests"
         run: |
           bazelisk test --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //...
+
+  build-docker:
+    runs-on: ubuntu-22.04
+    name: "Docker Build"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Bazel cache
+        id: cache-bazel-debug
+        uses: actions/cache@v3.0.4
+        with:
+          path: ~/.cache/bazel/
+          key: ${{ runner.os }}-bazel-debug
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: "Build and push Docker"
+        run: |
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image

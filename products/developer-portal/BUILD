@@ -78,3 +78,12 @@ container_image(
         ":nignx-conf",
     ],
 )
+
+container_push(
+    name = "push_image",
+    format = "Docker",
+    image = ":image",
+    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com/",
+    repository = "zilliqa-devportal/dev-portal",
+    tag = "test",
+)
