@@ -40,6 +40,8 @@ jobs:
   build-docker:
     runs-on: ubuntu-22.04
     name: "Docker Build"
+    env:
+      AWS_REGION: us-west-2
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
