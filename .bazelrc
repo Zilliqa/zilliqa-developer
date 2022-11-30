@@ -1,6 +1,9 @@
 build --workspace_status_command "python config/workspace-status.py"
 build --disk_cache=~/.cache/bazel/
 
+build --stamp
+run --stamp
+
 ###
 # Performance fixes
 ###
