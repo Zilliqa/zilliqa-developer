@@ -191,19 +191,19 @@ theme:
 nav:
   - Basics:
       - Blockchain Basics:
-          - Basics Intro Blockchain: basics/basics-intro-blockchain.md
-          - Basics Intro Consensus: basics/basics-intro-consensus.md
-          - Basics Intro Accounts: basics/basics-intro-accounts.md
-          - Basics Intro Txns: basics/basics-intro-txns.md
-          - Basics Intro Gas: basics/basics-intro-gas.md
+          - Blockchain: basics/basics-intro-blockchain.md
+          - Consensus: basics/basics-intro-consensus.md
+          - Accounts: basics/basics-intro-accounts.md
+          - Transactions: basics/basics-intro-txns.md
+          - Gas: basics/basics-intro-gas.md
       - Zilliqa Architecture:
-          - Basics Zil Nodes: basics/basics-zil-nodes.md
-          - Basics Zil Sharding: basics/basics-zil-sharding.md
-          - Basics Zil Consensus: basics/basics-zil-consensus.md
-          - Basics Zil Schnorr Signatures: basics/basics-zil-schnorr-signatures.md
-          - Basics Zil Reward: basics/basics-zil-reward.md
-          - Basics Zil Contract: basics/basics-zil-contract.md
-          - Basics Zil Gas: basics/basics-zil-gas.md
+          - Nodes: basics/basics-zil-nodes.md
+          - Sharding: basics/basics-zil-sharding.md
+          - Consensus: basics/basics-zil-consensus.md
+          - Schnorr Signatures: basics/basics-zil-schnorr-signatures.md
+          - Reward: basics/basics-zil-reward.md
+          - Contract: basics/basics-zil-contract.md
+          - Gas: basics/basics-zil-gas.md
   - API:
       - Introduction:
           - Api Introduction: apis/api-introduction.md
@@ -252,161 +252,161 @@ nav:
           - Get Balance: apis/api-account-get-balance.md
   - Developers:
       - Getting Started:
-          - Dev Started Introduction: dev-dapps/dev-started-introduction.md
-          - Dev Started Helloworld: dev-dapps/dev-started-helloworld.md
-          - Dev Started Env: dev-dapps/dev-started-env.md
+          - Introduction: dev-dapps/dev-started-introduction.md
+          - Helloworld: dev-dapps/dev-started-helloworld.md
+          - Environment: dev-dapps/dev-started-env.md
       - Upgrade Notices:
-          - Dev Upgrade V8: dev-dapps/dev-upgrade-v8.md
+          - Upgrade to v. 8: dev-dapps/dev-upgrade-v8.md
       - User Key Management:
-          - Dev Keys Introduction: dev-dapps/dev-keys-introduction.md
-          - Dev Keys Zilpay: dev-dapps/dev-keys-zilpay.md
-          - Dev Keys Pkey: dev-dapps/dev-keys-pkey.md
-          - Dev Keys Zrc2 Wallet Support: dev-dapps/dev-keys-zrc2-wallet-support.md
-          - Dev Keys Magic: dev-dapps/dev-keys-magic.md
+          - Introduction: dev-dapps/dev-keys-introduction.md
+          - Zilpay: dev-dapps/dev-keys-zilpay.md
+          - Pkey: dev-dapps/dev-keys-pkey.md
+          - Zrc2 Wallet Support: dev-dapps/dev-keys-zrc2-wallet-support.md
+          - Magic: dev-dapps/dev-keys-magic.md
       - Developer Toolings:
-          - Dev Tools Ceres: dev-dapps/dev-tools-ceres.md
+          - Ceres: dev-dapps/dev-tools-ceres.md
           - SDKs:
-              - Dev Tools Zilliqajs: dev-dapps/dev-tools-zilliqajs.md
-              - Dev Tools Gozilliqa: dev-dapps/dev-tools-gozilliqa.md
-              - Dev Tools Java: dev-dapps/dev-tools-java.md
-              - Dev Tools Sdks: dev-dapps/dev-tools-sdks.md
-          - Dev Tools Websockets: dev-dapps/dev-tools-websockets.md
-          - Dev Tools Cli: dev-dapps/dev-tools-cli.md
-          - Dev Tools Ide: dev-dapps/dev-tools-ide.md
-          - Dev Tools Explorer: dev-dapps/dev-tools-explorer.md
-          - Dev Tools Faucet: dev-dapps/dev-tools-faucet.md
+              - Zilliqajs: dev-dapps/dev-tools-zilliqajs.md
+              - Gozilliqa: dev-dapps/dev-tools-gozilliqa.md
+              - Java: dev-dapps/dev-tools-java.md
+              - Sdks: dev-dapps/dev-tools-sdks.md
+          - Websockets: dev-dapps/dev-tools-websockets.md
+          - Cli: dev-dapps/dev-tools-cli.md
+          - Ide: dev-dapps/dev-tools-ide.md
+          - Explorer: dev-dapps/dev-tools-explorer.md
+          - Faucet: dev-dapps/dev-tools-faucet.md
       - Other Developer Information:
           - Dev Wrapped Zil: dev-dapps/dev-wrapped-zil.md
       - Transaction Lifecycle:
-          - Dev Txn Signing: dev-dapps/dev-txn-signing.md
-          - Dev Txn Broadcasting: dev-dapps/dev-txn-broadcasting.md
-          - Dev Txn Polling: dev-dapps/dev-txn-polling.md
-          - Dev Txn Confirmation: dev-dapps/dev-txn-confirmation.md
-          - Dev Txn Receipt: dev-dapps/dev-txn-receipt.md
+          - Signing: dev-dapps/dev-txn-signing.md
+          - Broadcasting: dev-dapps/dev-txn-broadcasting.md
+          - Polling: dev-dapps/dev-txn-polling.md
+          - Confirmation: dev-dapps/dev-txn-confirmation.md
+          - Receipt: dev-dapps/dev-txn-receipt.md
       - Educational Resources:
-          - Dev Education Videos: dev-dapps/dev-education-videos.md
+          - Videos: dev-dapps/dev-education-videos.md
           - Sample app – RentOnZilliqa:
-              - Dev Rentonzilliqa Introduction: dev-dapps/dev-rentonzilliqa-introduction.md
+              - Introduction: dev-dapps/dev-rentonzilliqa-introduction.md
               - Scilla Contract:
-                  - Dev Rentonzilliqa Contract: dev-dapps/dev-rentonzilliqa-contract.md
-                  - Dev Rentonzilliqa Library: dev-dapps/dev-rentonzilliqa-library.md
-                  - Dev Rentonzilliqa Mutable Variables: dev-dapps/dev-rentonzilliqa-mutable-variables.md
-                  - Dev Rentonzilliqa Procedures: dev-dapps/dev-rentonzilliqa-procedures.md
-                  - Dev Rentonzilliqa Transitions: dev-dapps/dev-rentonzilliqa-transitions.md
+                  - Contract: dev-dapps/dev-rentonzilliqa-contract.md
+                  - Library: dev-dapps/dev-rentonzilliqa-library.md
+                  - Mutable Variables: dev-dapps/dev-rentonzilliqa-mutable-variables.md
+                  - Procedures: dev-dapps/dev-rentonzilliqa-procedures.md
+                  - Transitions: dev-dapps/dev-rentonzilliqa-transitions.md
               - Frontend Application:
-                  - Dev Rentonzilliqa Frontend: dev-dapps/dev-rentonzilliqa-frontend.md
-                  - Dev Rentonzilliqa Components: dev-dapps/dev-rentonzilliqa-components.md
-                  - Dev Rentonzilliqa Scripting: dev-dapps/dev-rentonzilliqa-scripting.md
-                  - Dev Rentonzilliqa Modals: dev-dapps/dev-rentonzilliqa-modals.md
-                  - Dev Rentonzilliqa Pages: dev-dapps/dev-rentonzilliqa-pages.md
+                  - Frontend: dev-dapps/dev-rentonzilliqa-frontend.md
+                  - Components: dev-dapps/dev-rentonzilliqa-components.md
+                  - Scripting: dev-dapps/dev-rentonzilliqa-scripting.md
+                  - Modals: dev-dapps/dev-rentonzilliqa-modals.md
+                  - Pages: dev-dapps/dev-rentonzilliqa-pages.md
   - Miners:
-      - Miners:
-          - Mining Getting Started: miners/mining-getting-started.md
-          - Mining Zilclient: miners/mining-zilclient.md
-          - Mining Zilminer: miners/mining-zilminer.md
-          - Mining Proxy: miners/mining-proxy.md
-          - Mining Additional Info: miners/mining-additional-info.md
+      - Mining:
+          - Getting Started: miners/mining-getting-started.md
+          - Zilclient: miners/mining-zilclient.md
+          - Zilminer: miners/mining-zilminer.md
+          - Proxy: miners/mining-proxy.md
+          - Additional Info: miners/mining-additional-info.md
   - Staking:
       - Zilliqa Seed Node Staking:
           - Staking Overview: staking/staking-overview.md
           - Staking Disclaimer: staking/staking-disclaimer.md
       - Staking Phase 1.1:
-          - Staking Phase11 Notice: staking/phase1/staking-phase11-notice.md
-          - Staking Phase1 Overview: staking/phase1/staking-phase1-overview.md
-          - Staking General Information: staking/phase1/staking-general-information.md
+          - Phase 1.1 Notice: staking/phase1/staking-phase11-notice.md
+          - Phase 1 Overview: staking/phase1/staking-phase1-overview.md
+          - General Information: staking/phase1/staking-general-information.md
           - Delegators:
-              - Staking Delegator Overview: staking/phase1/delegator/staking-delegator-overview.md
-              - Staking Delegator Reading Contract States: staking/phase1/delegator/staking-delegator-reading-contract-states.md
-              - Staking Delegator Operations: staking/phase1/delegator/staking-delegator-operations.md
-              - Staking Delegator Gzil: staking/phase1/delegator/staking-delegator-gzil.md
+              - Overview: staking/phase1/delegator/staking-delegator-overview.md
+              - Reading Contract States: staking/phase1/delegator/staking-delegator-reading-contract-states.md
+              - Operations: staking/phase1/delegator/staking-delegator-operations.md
+              - Gzil: staking/phase1/delegator/staking-delegator-gzil.md
           - SSN Operators:
-              - Staking Ssn Before You Start: staking/phase1/ssn-operator/staking-ssn-before-you-start.md
-              - Staking Ssn Setup: staking/phase1/ssn-operator/staking-ssn-setup.md
-              - Staking Ssn Enrollment: staking/phase1/ssn-operator/staking-ssn-enrollment.md
+              - Before You Start: staking/phase1/ssn-operator/staking-ssn-before-you-start.md
+              - Setup: staking/phase1/ssn-operator/staking-ssn-setup.md
+              - Enrollment: staking/phase1/ssn-operator/staking-ssn-enrollment.md
               - Staking Commission Management: staking/phase1/ssn-operator/staking-commission-management.md
-              - Staking Ssn Maintenance: staking/phase1/ssn-operator/staking-ssn-maintenance.md
-              - Staking Ssn Upgrading: staking/phase1/ssn-operator/staking-ssn-upgrading.md
+              - Maintenance: staking/phase1/ssn-operator/staking-ssn-maintenance.md
+              - Upgrading: staking/phase1/ssn-operator/staking-ssn-upgrading.md
           - Staking Error Codes: staking/phase1/staking-error-codes.md
   - Exchanges:
       - Exchange Integration:
           - Getting Started:
-              - Exchange Getting Started: exchanges/exchange-getting-started.md
-              - Exchange Ip Whitelisting: exchanges/exchange-ip-whitelisting.md
-              - Exchange Key Whitelisting 1: exchanges/exchange-key-whitelisting-1.md
-              - Exchange Key Whitelisting 2: exchanges/exchange-key-whitelisting-2.md
-          - Exchange Account Management: exchanges/exchange-account-management.md
-          - Exchange Sending Transactions: exchanges/exchange-sending-transactions.md
-          - Exchange Tracking Deposits: exchanges/exchange-tracking-deposits.md
-          - Exchange Transaction Receipts: exchanges/exchange-transaction-receipts.md
-          - Exchange Managing Zrc2 Tokens: exchanges/exchange-managing-zrc2-tokens.md
+              - Getting Started: exchanges/exchange-getting-started.md
+              - Ip Whitelisting: exchanges/exchange-ip-whitelisting.md
+              - Key Whitelisting 1: exchanges/exchange-key-whitelisting-1.md
+              - Key Whitelisting 2: exchanges/exchange-key-whitelisting-2.md
+          - Account Management: exchanges/exchange-account-management.md
+          - Sending Transactions: exchanges/exchange-sending-transactions.md
+          - Tracking Deposits: exchanges/exchange-tracking-deposits.md
+          - Transaction Receipts: exchanges/exchange-transaction-receipts.md
+          - Managing Zrc2 Tokens: exchanges/exchange-managing-zrc2-tokens.md
       - Rosetta:
           - Introduction:
-              - Rosetta Introduction: exchanges/rosetta-introduction.md
-              - Rosetta Unsupported Api: exchanges/rosetta-unsupported-api.md
-              - Rosetta Setting Up Seed Node: exchanges/rosetta-setting-up-seed-node.md
-              - Rosetta Setting Up No Seed Node: exchanges/rosetta-setting-up-no-seed-node.md
+              - Introduction: exchanges/rosetta-introduction.md
+              - Unsupported Api: exchanges/rosetta-unsupported-api.md
+              - Setting Up Seed Node: exchanges/rosetta-setting-up-seed-node.md
+              - Setting Up No Seed Node: exchanges/rosetta-setting-up-no-seed-node.md
           - Data API:
               - Network:
-                  - Rosetta Data Network List: exchanges/rosetta-data-network-list.md
-                  - Rosetta Data Network Options: exchanges/rosetta-data-network-options.md
-                  - Rosetta Data Network Status: exchanges/rosetta-data-network-status.md
+                  - List: exchanges/rosetta-data-network-list.md
+                  - Options: exchanges/rosetta-data-network-options.md
+                  - Status: exchanges/rosetta-data-network-status.md
               - Account:
-                  - Rosetta Data Account Balance: exchanges/rosetta-data-account-balance.md
+                  - Account Balance: exchanges/rosetta-data-account-balance.md
               - Block:
-                  - Rosetta Data Block: exchanges/rosetta-data-block.md
-                  - Rosetta Data Block Transaction: exchanges/rosetta-data-block-transaction.md
+                  - Block: exchanges/rosetta-data-block.md
+                  - Block Transaction: exchanges/rosetta-data-block-transaction.md
           - Construction API:
-              - Rosetta Construction: exchanges/rosetta-construction.md
-              - Rosetta Construction Derive: exchanges/rosetta-construction-derive.md
-              - Rosetta Construction Preprocess: exchanges/rosetta-construction-preprocess.md
-              - Rosetta Construction Metadata: exchanges/rosetta-construction-metadata.md
-              - Rosetta Construction Payloads: exchanges/rosetta-construction-payloads.md
-              - Rosetta Construction Parse: exchanges/rosetta-construction-parse.md
-              - Rosetta Construction Combine: exchanges/rosetta-construction-combine.md
-              - Rosetta Construction Hash: exchanges/rosetta-construction-hash.md
-              - Rosetta Construction Submit: exchanges/rosetta-construction-submit.md
+              - Construction: exchanges/rosetta-construction.md
+              - Derive: exchanges/rosetta-construction-derive.md
+              - Preprocess: exchanges/rosetta-construction-preprocess.md
+              - Metadata: exchanges/rosetta-construction-metadata.md
+              - Payloads: exchanges/rosetta-construction-payloads.md
+              - Parse: exchanges/rosetta-construction-parse.md
+              - Combine: exchanges/rosetta-construction-combine.md
+              - Hash: exchanges/rosetta-construction-hash.md
+              - Submit: exchanges/rosetta-construction-submit.md
   - Contributors:
       - Contributors:
-          - Contribute Buildzil: contributors/contribute-buildzil.md
-          - Contribute Guidelines: contributors/contribute-guidelines.md
-          - Contribute Standards: contributors/contribute-standards.md
-          - Contribute Bug Bounty: contributors/contribute-bug-bounty.md
+          - Buildzil: contributors/contribute-buildzil.md
+          - Guidelines: contributors/contribute-guidelines.md
+          - Standards: contributors/contribute-standards.md
+          - Bug Bounty: contributors/contribute-bug-bounty.md
       - Core Protocol Design:
           - Design Overview:
-              - Core Node Operation: contributors/core-node-operation.md
+              - Operation: contributors/core-node-operation.md
           - Consensus Layer:
-              - Core Consensus: contributors/core-consensus.md
-              - Core Multisignatures: contributors/core-multisignatures.md
+              - Consensus: contributors/core-consensus.md
+              - Multisignatures: contributors/core-multisignatures.md
           - Network Layer:
-              - Core Gossip: contributors/core-gossip.md
-              - Core Broadcasting: contributors/core-broadcasting.md
-              - Core Blacklist: contributors/core-blacklist.md
-              - Core Messaging Limits: contributors/core-messaging-limits.md
+              - Gossip: contributors/core-gossip.md
+              - Broadcasting: contributors/core-broadcasting.md
+              - Blacklist: contributors/core-blacklist.md
+              - Messaging Limits: contributors/core-messaging-limits.md
           - Messaging Layer:
-              - Core Message Dispatch: contributors/core-message-dispatch.md
-              - Core Message Queues: contributors/core-message-queues.md
+              - Message Dispatch: contributors/core-message-dispatch.md
+              - Message Queues: contributors/core-message-queues.md
           - Data Layer:
-              - Core Accounts: contributors/core-accounts.md
-              - Core Transaction Lifecycle: contributors/core-transaction-lifecycle.md
-              - Core Incremental Db: contributors/core-incremental-db.md
-              - Core Scilla Operation: contributors/core-scilla-operation.md
+              - Accounts: contributors/core-accounts.md
+              - Transaction Lifecycle: contributors/core-transaction-lifecycle.md
+              - Incremental Db: contributors/core-incremental-db.md
+              - Scilla Operation: contributors/core-scilla-operation.md
           - Directory Service:
-              - Core Ds Mimo: contributors/core-ds-mimo.md
-              - Core Ds Reputation: contributors/core-ds-reputation.md
+              - Ds Mimo: contributors/core-ds-mimo.md
+              - Ds Reputation: contributors/core-ds-reputation.md
           - Lookup:
-              - Core Isolated Server: contributors/core-isolated-server.md
-              - Core Websocket Server: contributors/core-websocket-server.md
-              - Core Transaction Dispatch: contributors/core-transaction-dispatch.md
-              - Core Multipliers: contributors/core-multipliers.md
+              - Isolated Server: contributors/core-isolated-server.md
+              - Websocket Server: contributors/core-websocket-server.md
+              - Transaction Dispatch: contributors/core-transaction-dispatch.md
+              - Multipliers: contributors/core-multipliers.md
           - Mining:
-              - Core Pow: contributors/core-pow.md
-              - Core Difficulty Adjustment: contributors/core-difficulty-adjustment.md
-              - Core Por: contributors/core-por.md
-              - Core Coinbase: contributors/core-coinbase.md
-              - Core Global Gas Price: contributors/core-global-gas-price.md
+              - Pow: contributors/core-pow.md
+              - Difficulty Adjustment: contributors/core-difficulty-adjustment.md
+              - Por: contributors/core-por.md
+              - Coinbase: contributors/core-coinbase.md
+              - Global Gas Price: contributors/core-global-gas-price.md
           - Mitigation Measures:
-              - Core Guard Mode: contributors/core-guard-mode.md
-              - Core Rejoin Mechanism: contributors/core-rejoin-mechanism.md
-              - Core View Change: contributors/core-view-change.md
-              - Core Diagnostic Data: contributors/core-diagnostic-data.md
-              - Core Status Server: contributors/core-status-server.md
+              - Guard Mode: contributors/core-guard-mode.md
+              - Rejoin Mechanism: contributors/core-rejoin-mechanism.md
+              - View Change: contributors/core-view-change.md
+              - Diagnostic Data: contributors/core-diagnostic-data.md
+              - Status Server: contributors/core-status-server.md
