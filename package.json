@@ -1,6 +1,7 @@
 {
   "name": "zilliqa",
   "dependencies": {
+    "next": "13.0.5",
     "@apollo/client": "^3.7.1",
     "@docusaurus/core": "^2.2.0",
     "@docusaurus/preset-classic": "^2.2.0",

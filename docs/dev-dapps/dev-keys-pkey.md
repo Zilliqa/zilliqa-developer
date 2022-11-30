@@ -29,7 +29,6 @@ zilliqa.wallet.addByPrivateKey(privkey); //Private key was stored in the privKey
 The following code snippet illustrates how to import your account from an encrypted JSON keystore file and retrieve the private from the encrypted
 
 ```javascript
-import { decryptPrivateKey } from '@zilliqa-js/crypto';
 async function privKeyFromKeystore() {
   let keystore = JSON.parse(encryptedWallet); //encryptedWallet is the encrypted keystore file
   let privKey = await decryptPrivateKey(passphrase, keystore); //passphrase variable has the passphrase of the encrypted wallet
@@ -41,9 +40,9 @@ async function privKeyFromKeystore() {
 After importing the account using `zilliqa-js/crypto` module, the subsequent steps for doing anything are similar to the previous example.
 In the code snippet below, we call the `setHello()` transition of the `Hello World` Contract using a private key.
 
-:::info
-If you wish to use keystore instead of a private key, you can replace the `zilliqa.wallet.addByPrivateKey(privkey)` with the code snippet above.
-:::
+!!! info
+
+    If you wish to use keystore instead of a private key, you can replace the `zilliqa.wallet.addByPrivateKey(privkey)` with the code snippet above.
 
 ```javascript
   async updateWelcomeMsg(){

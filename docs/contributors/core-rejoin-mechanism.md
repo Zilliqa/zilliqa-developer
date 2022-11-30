@@ -30,15 +30,15 @@ The joining or rejoining process relies on a `m_syncType` setting, which can be 
 | `(6) NEW_LOOKUP_SYNC`   | New lookup node joining                           |
 | `(7) GUARD_DS_SYNC`     | DS guard node rejoining                           |
 
-:::note
-Guard-specific sequences have been omitted to simplify the sections below.
-:::
+!!! note
+
+    Guard-specific sequences have been omitted to simplify the sections below.
 
 ## New Node Joining
 
-:::note
-This also applies to existing shard nodes who attempt to rejoin using the launch script.
-:::
+!!! note
+
+    This also applies to existing shard nodes who attempt to rejoin using the launch script.
 
 1. Launch script downloads the latest persistence from AWS S3 [incremental DB](core-incremental-db.md) using `download_incr_db.py`
 1. Launch script starts the node (i.e., the `zilliqa` process) with `m_syncType = NEW_SYNC`
@@ -86,9 +86,9 @@ The node maintains a while loop within `Node::StartSynchronization()` while all 
 
 ## DS Node Joining
 
-:::note
-This also applies to existing DS nodes who attempt to rejoin using the launch script.
-:::
+!!! note
+
+    This also applies to existing DS nodes who attempt to rejoin using the launch script.
 
 This procedure mirrors that of new node joining, with some differences:
 

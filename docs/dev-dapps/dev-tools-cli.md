@@ -147,9 +147,9 @@ For instance:
 zli contract call -a 305d5b3acaa2f4a56b5e149400466c58194e695f -t SubmitTransaction -r "[{\"vname\":\"recipient\",\"type\":\"ByStr20\",\"value\":\"0x381f4008505e940ad7681ec3468a719060caf796\"},{\"vname\":\"amount\",\"type\":\"Uint128\",\"value\":\"10\"},{\"vname\":\"tag\",\"type\":\"String\",\"value\":\"a\"}]"
 ```
 
-:::note
-`zli` supports passing the private key as a parameter to the `zli contract deploy` or `zli contract call` command. Just use the `-k [private key]` option to switch to a different private key for sending transactions.
-:::
+!!! note
+
+    `zli` supports passing the private key as a parameter to the `zli contract deploy` or `zli contract call` command. Just use the `-k [private key]` option to switch to a different private key for sending transactions.
 
 #### Running zli Inside a Docker Container
 

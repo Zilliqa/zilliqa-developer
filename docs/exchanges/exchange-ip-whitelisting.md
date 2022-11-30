@@ -19,9 +19,9 @@ Before you start, please ensure the steps below are done.
 1. Share the static IP address and port of the node with the Zilliqa support team for whitelisting.
    This step is critical, as failing to provide the correct IP and port will result in failure to receive blockchain data.
 
-:::important
-The port of choice must be opened to inbound connections. Otherwise, the seed node will be unreachable.
-:::
+!!! important
+
+    The port of choice must be opened to inbound connections. Otherwise, the seed node will be unreachable.
 
 ### Docker Setup
 
@@ -50,10 +50,10 @@ $ tar -zxvf seed-configuration.tar.gz
 
 ### Native Setup
 
-:::note
-This approach has been tested on **Ubuntu 18.04** and involves compiling
-C++. We strongly recommend you consider using the Docker image provided above.
-:::
+!!! note
+
+    This approach has been tested on **Ubuntu 18.04** and involves compiling
+    C++. We strongly recommend you consider using the Docker image provided above.
 
 If you cannot or do not wish to use Docker, you may also build the Zilliqa
 binary from source and run it as such.

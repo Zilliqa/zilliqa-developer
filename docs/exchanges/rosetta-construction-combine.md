@@ -18,9 +18,9 @@ description: Combine
 
 Creates a Zilliqa payment transaction from an unsigned transaction and an array of provided signatures. The signed transaction returned from this method will thenbe sent to the `/construction/submit` endpoint by the caller.
 
-:::info
-Before calling `/combine`, please call `/payloads` to have the `unsigned_transaction`. Next, use [goZilliqa SDK](https://github.com/Zilliqa/gozilliqa-sdk) or other Zilliqa's SDKs to craft a transaction object and sign the transaction object; Print out the **_signature_** and **_transaction object_** in **hexadecimals** format.
-:::
+!!! info
+
+    Before calling `/combine`, please call `/payloads` to have the `unsigned_transaction`. Next, use [goZilliqa SDK](https://github.com/Zilliqa/gozilliqa-sdk) or other Zilliqa's SDKs to craft a transaction object and sign the transaction object; Print out the **_signature_** and **_transaction object_** in **hexadecimals** format.
 
 Refer to the [`signRosettaTransaction.js`](https://github.com/Zilliqa/zilliqa-rosetta/blob/master/examples/signRosettaTransaction.js) for an example code on how to craft and sign a transaction object.
 

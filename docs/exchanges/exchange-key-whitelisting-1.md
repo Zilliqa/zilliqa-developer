@@ -19,9 +19,9 @@ Before you start, please ensure the steps below are done.
 
 1. Choose and note down a port you wish to reserve for your seed node to receive incoming blockchain data.
 
-:::important
-The port of choice must be opened to inbound connections. Otherwise, the seed node will be unreachable.
-:::
+!!! important
+
+    The port of choice must be opened to inbound connections. Otherwise, the seed node will be unreachable.
 
 ### Docker Setup
 
@@ -59,17 +59,17 @@ $ sudo docker run --rm zilliqa/zilliqa:<version> -c genkeypair
 The first value from the ouput is the public key and second value is the private key.
 The private key is required to start the seed node.
 
-:::info
-Any number of seed nodes can use this key pair simultaneously.
-Hence, you only need to provide one key for whitelisting no matter how many seed nodes you will be operating.
-:::
+!!! info
+
+    Any number of seed nodes can use this key pair simultaneously.
+    Hence, you only need to provide one key for whitelisting no matter how many seed nodes you will be operating.
 
 ### Native Setup
 
-:::note
-This approach has been tested on **Ubuntu 18.04** and involves compiling
-C++. We strongly recommend you consider using the Docker image provided above.
-:::
+!!! note
+
+    This approach has been tested on **Ubuntu 18.04** and involves compiling
+    C++. We strongly recommend you consider using the Docker image provided above.
 
 If you cannot or do not wish to use Docker, you may also build the Zilliqa
 binary from source and run it as such.
