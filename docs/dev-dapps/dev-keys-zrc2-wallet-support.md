@@ -18,9 +18,9 @@ This guide is meant for wallet developers looking to add support for [ZRC-2 toke
 Since most of the wallet front-ends are built using a JavaScript framework, most developers would find the code found in the `js` tab to be relevant to them. We have included code snippets for some other languages as well in case you want to handle these functionalities
 at the backend.
 
-:::note
-It is assumed that you have already installed language-specific Zilliqa SDKs, e.g., zilliqa-js, laksaj, pyzil, gozilliqa.
-:::
+!!! note
+
+    It is assumed that you have already installed language-specific Zilliqa SDKs, e.g., zilliqa-js, laksaj, pyzil, gozilliqa.
 
 ## Introduction to ZRC-2
 
@@ -106,79 +106,56 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
 #### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'js', value: 'js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractInit",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "JavaScript"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractInit",
-    "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const smartContractInit = await zilliqa.blockchain.getSmartContractInit(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractInit.result);
+    ```
 
-</TabItem>
-<TabItem value="js">
+=== "Java"
 
-```js
-const smartContractInit = await zilliqa.blockchain.getSmartContractInit(
-  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
-);
-console.log(smartContractInit.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        Rep<List<Contract.State>> smartContractInit = client.getSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
-        System.out.println(new Gson().toJson(smartContractInit));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            Rep<List<Contract.State>> smartContractInit = client.getSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(new Gson().toJson(smartContractInit));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractInit() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractInit() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 #### Example Response
 
@@ -245,9 +222,9 @@ The response received consists of the `type`, `value`, and `vname` for each immu
 
 To check whether a contract is compliant with the ZRC-2 standard's immutable variables requirement, see if the contract implements the [mandatory immutable variables](#immutable-variables).
 
-:::note
-This code snippet is in JavaScript but the same logic can be applied in other languages.
-:::
+!!! note
+
+    This code snippet is in JavaScript but the same logic can be applied in other languages.
 
 ```js
 let vNameArray = []; //Array to store immutable variable names
@@ -271,76 +248,56 @@ The address of the ZRC2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6
 
 #### Example Request
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'js', value: 'js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractState",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractState",
-    "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+=== "JavaScript"
 
-</TabItem>
-<TabItem value="js">
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractState.result);
+    ```
 
-```js
-const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
-);
-console.log(smartContractState.result);
-```
+=== "Java"
 
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
-        System.out.println(smartContractState);
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(smartContractState);
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractState() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractState() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 #### Example Response
 
@@ -374,9 +331,9 @@ The response received above consists of the mutable variables `total_supply`, `b
 
 To check whether a contract is compliant with the ZRC-2 standard's mutable variables requirement, see if the contract implements the [mandatory mutable variables](#mutable-variables).
 
-:::note
-This code snippet is in JavaScript but the same logic can be applied in other languages.
-:::
+!!! note
+
+    This code snippet is in JavaScript but the same logic can be applied in other languages.
 
 ```js
 let vNameArray = []; //Array to store mutable variable names
@@ -406,76 +363,56 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
 #### Example Request
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'js', value: 'js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractState",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractState",
-    "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+=== "JavaScript"
 
-</TabItem>
-<TabItem value="js">
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractState.result);
+    ```
 
-```js
-const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
-);
-console.log(smartContractState.result);
-```
+=== "Java"
 
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
-        System.out.println(smartContractState);
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(smartContractState);
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractState() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractState() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 #### Example Response
 
@@ -508,76 +445,56 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
 #### Example Request
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'js', value: 'js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractState",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractState",
-    "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+=== "JavaScript"
 
-</TabItem>
-<TabItem value="js">
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractState.result);
+    ```
 
-```js
-const smartContractState = await zilliqa.blockchain.getSmartContractState(
-  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
-);
-console.log(smartContractState.result);
-```
+=== "Java"
 
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
-        System.out.println(smartContractState);
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(smartContractState);
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractState() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractState() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 #### Example Response
 
@@ -613,40 +530,27 @@ If the need to fetch a single token value from the `balances` map arises. Instea
 
 #### Example Request
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'js', value: 'js', },
-]
-}>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractSubState",
+        "params": ["173ca6770aa56eb00511dac8e6e13b3d7f16a5a5", "balances", ["0x00034c431f642dfca0129694061263d72049a909, ..."] ]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractSubState",
-    "params": ["173ca6770aa56eb00511dac8e6e13b3d7f16a5a5", "balances", ["0x00034c431f642dfca0129694061263d72049a909, ..."] ]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+=== "JavaScript"
 
-</TabItem>
-<TabItem value="js">
-
-```js
-const smartContractState = await zilliqa.blockchain.getSmartContractSubState(
-  "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5",
-  "balances",
-  ["0x8c3de413a9d8d602a1757210ab539853103e08d8, ..."]
-);
-console.log(smartContractState.result);
-```
-
-</TabItem>
-
-</Tabs>
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractSubState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5",
+      "balances",
+      ["0x8c3de413a9d8d602a1757210ab539853103e08d8, ..."]
+    );
+    console.log(smartContractState.result);
+    ```
 
 #### Example Response
 
@@ -667,110 +571,95 @@ ZRC-2 contracts have the `transfer` transition that allows users to transfer tok
 
 The code snippet below illustrates how one can transfer ZRC-2 tokens to another address.
 
-<Tabs
-defaultValue="js"
-values={[
-{ label: 'js', value: 'js', },
-{ label: 'java', value: 'java', },
-{ label: 'go', value: 'go', },
-]
-}>
+=== "JavaScript"
 
-<TabItem value="js">
+    ```js
+    //zilliqa, privateKey, bytes, units, recipientAddress, sendingAmount are defined in the codebase before
 
-```js
-//zilliqa, privateKey, bytes, units, recipientAddress, sendingAmount are defined in the codebase before
-
-zilliqa.wallet.addByPrivateKey(privateKey);
-const CHAIN_ID = 1;
-const MSG_VERSION = 1;
-const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
-const myGasPrice = units.toQa("1000", units.Units.Li); // Gas Price that will be used by all transactions
-try {
-  const contract = zilliqa.contracts.at(contractAddress);
-  const callTx = await contract.call(
-    "Transfer",
-    [
-      {
-        vname: "to",
-        type: "ByStr20",
-        value: recipientAddress,
-      },
-      {
-        vname: "amount",
-        type: "Uint128",
-        value: sendingAmount,
-      },
-    ],
-    {
-      // amount, gasPrice and gasLimit must be explicitly provided
-      version: VERSION,
-      amount: new BN(0),
-      gasPrice: myGasPrice,
-      gasLimit: Long.fromNumber(10000),
+    zilliqa.wallet.addByPrivateKey(privateKey);
+    const CHAIN_ID = 1;
+    const MSG_VERSION = 1;
+    const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
+    const myGasPrice = units.toQa("1000", units.Units.Li); // Gas Price that will be used by all transactions
+    try {
+      const contract = zilliqa.contracts.at(contractAddress);
+      const callTx = await contract.call(
+        "Transfer",
+        [
+          {
+            vname: "to",
+            type: "ByStr20",
+            value: recipientAddress,
+          },
+          {
+            vname: "amount",
+            type: "Uint128",
+            value: sendingAmount,
+          },
+        ],
+        {
+          // amount, gasPrice and gasLimit must be explicitly provided
+          version: VERSION,
+          amount: new BN(0),
+          gasPrice: myGasPrice,
+          gasLimit: Long.fromNumber(10000),
+        }
+      );
+      console.log(JSON.stringify(callTx.TranID));
+    } catch (err) {
+      console.log(err);
     }
-  );
-  console.log(JSON.stringify(callTx.TranID));
-} catch (err) {
-  console.log(err);
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="java">
+=== "Java"
 
-```java
-List<Value> init = Arrays.asList();
-Wallet wallet = new Wallet();
-wallet.addByPrivateKey(privateKey);
-ContractFactory factory = ContractFactory.builder().provider(new HttpProvider("https://api.zilliqa.com/")).signer(wallet).build();
-Contract contract = factory.atContract(contractAddress, "", (Value[]) init.toArray(), "");
-Integer nonce = Integer.valueOf(factory.getProvider().getBalance(address).getResult().getNonce());
-CallParams params = CallParams.builder().nonce(String.valueOf(nonce + 1)).version(String.valueOf(pack(333, 1))).gasPrice("1000000000").gasLimit("1000").senderPubKey(publicKey).amount("0").build();
-List<Value> values = Arrays.asList(Value.builder().vname("to").type("ByStr20").value(recipientAddress).build(), Value.builder().vname("amount").type("Uint128").value("10").build());
-contract.call("Transfer", (Value[]) values.toArray(), params, 3000, 3);
+    ```java
+    List<Value> init = Arrays.asList();
+    Wallet wallet = new Wallet();
+    wallet.addByPrivateKey(privateKey);
+    ContractFactory factory = ContractFactory.builder().provider(new HttpProvider("https://api.zilliqa.com/")).signer(wallet).build();
+    Contract contract = factory.atContract(contractAddress, "", (Value[]) init.toArray(), "");
+    Integer nonce = Integer.valueOf(factory.getProvider().getBalance(address).getResult().getNonce());
+    CallParams params = CallParams.builder().nonce(String.valueOf(nonce + 1)).version(String.valueOf(pack(333, 1))).gasPrice("1000000000").gasLimit("1000").senderPubKey(publicKey).amount("0").build();
+    List<Value> values = Arrays.asList(Value.builder().vname("to").type("ByStr20").value(recipientAddress).build(), Value.builder().vname("amount").type("Uint128").value("10").build());
+    contract.call("Transfer", (Value[]) values.toArray(), params, 3000, 3);
 
-```
+    ```
 
-</TabItem>
+=== "Go"
 
-<TabItem value="go">
+    ```go
+    wallet := account.NewWallet()
+    	wallet.AddByPrivateKey(privateKey)
+    	publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
+    	address := keytools.GetAddressFromPublic(publickKey)
+    	fmt.Println(address)
 
-```go
-wallet := account.NewWallet()
-	wallet.AddByPrivateKey(privateKey)
-	publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
-	address := keytools.GetAddressFromPublic(publickKey)
-	fmt.Println(address)
+    	contract := Contract{
+    		Address: "contractAddress",
+    		Signer:  wallet,
+    	}
 
-	contract := Contract{
-		Address: "contractAddress",
-		Signer:  wallet,
-	}
+    	args := []core.ContractValue{
+    		{
+    			"to",
+    			"ByStr20",
+    			"0x" + address,
+    		},
+    		{
+    			"amount",
+    			"Uint128",
+    			"10",
+    		},
+    	}
 
-	args := []core.ContractValue{
-		{
-			"to",
-			"ByStr20",
-			"0x" + address,
-		},
-		{
-			"amount",
-			"Uint128",
-			"10",
-		},
-	}
-
-	tx, err2 := contract.CallFor("Transfer", args, true, "0", TestNet)
-	assert.Nil(t, err2, err2)
-	tx.Confirm(tx.ID, 1000, 3, contract.Provider)
-	assert.True(t, tx.Status == core.Confirmed)
+    	tx, err2 := contract.CallFor("Transfer", args, true, "0", TestNet)
+    	assert.Nil(t, err2, err2)
+    	tx.Confirm(tx.ID, 1000, 3, contract.Provider)
+    	assert.True(t, tx.Status == core.Confirmed)
 
 
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Adding Token Allowance
 
@@ -781,63 +670,52 @@ In the example below, the allowance amount is the same as the entire token suppl
 
 However, you can make this value to be specific as well. Non-custodial control of the token should be ensured by the dApp contract itself, which does not allow for the transfer of tokens unless explicitly invoked by the sender.
 
-<Tabs
-defaultValue="js"
-values={[
-{ label: 'js', value: 'js', }
-]
-}>
+=== "JavaScript"
 
-<TabItem value="js">
+    ```js
+    let increaseAllowance = async function (contractAddress, spenderAddress) {
+      //contractAddress is the address of ZRC2 contract
+      //spenderAddress is the address of which you want to increase the allowance, eg: your dApp contract
+      const CHAIN_ID = 333;
+      const MSG_VERSION = 1;
+      const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
+      const myGasPrice = units.toQa("2000", units.Units.Li);
 
-```js
-let increaseAllowance = async function (contractAddress, spenderAddress) {
-  //contractAddress is the address of ZRC2 contract
-  //spenderAddress is the address of which you want to increase the allowance, eg: your dApp contract
-  const CHAIN_ID = 333;
-  const MSG_VERSION = 1;
-  const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
-  const myGasPrice = units.toQa("2000", units.Units.Li);
+      let smartContractState = await zilliqa.blockchain.getSmartContractState(
+        contractAddress
+      );
+      let totalSupply = smartContractState.result.total_supply;
 
-  let smartContractState = await zilliqa.blockchain.getSmartContractState(
-    contractAddress
-  );
-  let totalSupply = smartContractState.result.total_supply;
-
-  try {
-    const contract = zilliqa.contracts.at(contractAddress);
-    const callTx = await contract.call(
-      "IncreaseAllowance",
-      [
-        {
-          vname: "spender",
-          type: "ByStr20",
-          value: spenderAddress,
-        },
-        {
-          vname: "amount",
-          type: "Uint128",
-          value: totalSupply,
-        },
-      ],
-      {
-        // amount, gasPrice and gasLimit must be explicitly provided
-        version: VERSION,
-        amount: new BN(0),
-        gasPrice: myGasPrice,
-        gasLimit: Long.fromNumber(10000),
+      try {
+        const contract = zilliqa.contracts.at(contractAddress);
+        const callTx = await contract.call(
+          "IncreaseAllowance",
+          [
+            {
+              vname: "spender",
+              type: "ByStr20",
+              value: spenderAddress,
+            },
+            {
+              vname: "amount",
+              type: "Uint128",
+              value: totalSupply,
+            },
+          ],
+          {
+            // amount, gasPrice and gasLimit must be explicitly provided
+            version: VERSION,
+            amount: new BN(0),
+            gasPrice: myGasPrice,
+            gasLimit: Long.fromNumber(10000),
+          }
+        );
+        console.log(JSON.stringify(callTx.TranID));
+      } catch (err) {
+        console.log(err);
       }
-    );
-    console.log(JSON.stringify(callTx.TranID));
-  } catch (err) {
-    console.log(err);
-  }
-};
-```
-
-</TabItem>
-
-</Tabs>
+    };
+    ```
 
 ### Calling TransferFrom
 
@@ -846,65 +724,54 @@ The caller must be an `approved_spender`, refer the section on [Adding Token All
 if you want to add an address to become an approved_sender.
 Balance of recipient will increase and the balance of `token_owner` will decrease.
 
-<Tabs
-defaultValue="js"
-values={[
-{ label: 'js', value: 'js', }
-]
-}>
+=== "JavaScript"
 
-<TabItem value="js">
+    ```js
+    let transferFrom = async function (
+      contractAddress,
+      userAddress,
+      receiverAddress
+    ) {
+      const CHAIN_ID = 333;
+      const MSG_VERSION = 1;
+      const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
+      const myGasPrice = units.toQa("2000", units.Units.Li);
 
-```js
-let transferFrom = async function (
-  contractAddress,
-  userAddress,
-  receiverAddress
-) {
-  const CHAIN_ID = 333;
-  const MSG_VERSION = 1;
-  const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
-  const myGasPrice = units.toQa("2000", units.Units.Li);
-
-  try {
-    const contract = zilliqa.contracts.at(contractAddress);
-    const callTx = await contract.call(
-      "TransferFrom",
-      [
-        {
-          vname: "from",
-          type: "ByStr20",
-          value: userAddress,
-        },
-        {
-          vname: "to",
-          type: "ByStr20",
-          value: receiverAddress,
-        },
-        {
-          vname: "amount",
-          type: "Uint128",
-          value: "1000",
-        },
-      ],
-      {
-        // amount, gasPrice and gasLimit must be explicitly provided
-        version: VERSION,
-        amount: new BN(0),
-        gasPrice: myGasPrice,
-        gasLimit: Long.fromNumber(10000),
+      try {
+        const contract = zilliqa.contracts.at(contractAddress);
+        const callTx = await contract.call(
+          "TransferFrom",
+          [
+            {
+              vname: "from",
+              type: "ByStr20",
+              value: userAddress,
+            },
+            {
+              vname: "to",
+              type: "ByStr20",
+              value: receiverAddress,
+            },
+            {
+              vname: "amount",
+              type: "Uint128",
+              value: "1000",
+            },
+          ],
+          {
+            // amount, gasPrice and gasLimit must be explicitly provided
+            version: VERSION,
+            amount: new BN(0),
+            gasPrice: myGasPrice,
+            gasLimit: Long.fromNumber(10000),
+          }
+        );
+        console.log(JSON.stringify(callTx.TranID));
+      } catch (err) {
+        console.log(err);
       }
-    );
-    console.log(JSON.stringify(callTx.TranID));
-  } catch (err) {
-    console.log(err);
-  }
-};
-```
-
-</TabItem>
-
-</Tabs>
+    };
+    ```
 
 ## Tracking Incoming ZRC-2 Deposit
 

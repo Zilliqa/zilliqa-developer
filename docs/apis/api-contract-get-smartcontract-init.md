@@ -9,79 +9,56 @@ Returns the initialization (immutable) parameters of a given smart contract, rep
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractInit",
+        "params": ["fe001824823b12b58708bf24edd94d8b5e1cfcf7"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractInit",
-    "params": ["fe001824823b12b58708bf24edd94d8b5e1cfcf7"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const smartContractInit = await zilliqa.blockchain.getSmartContractInit(
+      "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
+    );
+    console.log(smartContractInit.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const smartContractInit = await zilliqa.blockchain.getSmartContractInit(
-  "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
-);
-console.log(smartContractInit.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        Rep<List<Contract.State>> smartContractInit = client.getSmartContractInit("fe001824823b12b58708bf24edd94d8b5e1cfcf7");
-        System.out.println(new Gson().toJson(smartContractInit));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            Rep<List<Contract.State>> smartContractInit = client.getSmartContractInit("fe001824823b12b58708bf24edd94d8b5e1cfcf7");
+            System.out.println(new Gson().toJson(smartContractInit));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractInit("fe001824823b12b58708bf24edd94d8b5e1cfcf7"))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractInit("fe001824823b12b58708bf24edd94d8b5e1cfcf7"))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractInit() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetSmartContractInit("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractInit() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetSmartContractInit("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

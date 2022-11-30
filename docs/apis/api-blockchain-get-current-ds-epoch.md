@@ -10,8 +10,6 @@ Returns the current number of DS blocks in the network. This is represented as a
 
 ### Example Request
 
-import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
-
 === "cURL"
 
     ```shell

@@ -26,9 +26,11 @@ The **minimum** requirements for running the **Zilliqa Client** are:
 - Any GPUs with at least 2 GB RAM
 - 100MB/s upload and download bandwidth
 
-:::info Hashing rate of the network is currently very high. A single GPU will be
-insufficient. You will need to setup [mining proxy](mining-proxy.md) connecting
-to multiple GPUs. :::
+!!! info
+
+    Hashing rate of the network is currently very high. A single GPU will be
+    insufficient. You will need to setup [mining proxy](mining-proxy.md) connecting
+    to multiple GPUs.
 
 ## Mining Steps
 
@@ -59,8 +61,10 @@ to multiple GPUs. :::
    curl https://ipinfo.io/ip
    ```
 
-:::note NAT IP is not supported. Kindly use the public IP address during the
-launch step. :::
+!!! note
+
+    NAT IP is not supported. Kindly use the public IP address during the
+    launch step.
 
 6. Edit your _constant.xml_ file in your configuration folder for the following
    types of mining mode:
@@ -127,18 +131,20 @@ launch step. :::
 
 9. You will be prompted to enter some information as shown below:
 
-   :::note **DO NOT** duplicate your IP address and use different ports to
-   create different CPU nodes. You will be blacklisted by the network and hence
-   not be able to receive any rewards. :::
+!!! note
 
-   - `Assign a name to your container (default: zilliqa):` <br/> [Press
-     **Enter** to skip if using default]
+    **DO NOT** duplicate your IP address and use different ports to
+       create different CPU nodes. You will be blacklisted by the network and hence
+    not be able to receive any rewards.
 
-   - `Enter your IP address (*.*.*.*):` <br/> [Key in your IP address as found
-     in step 5]
+- `Assign a name to your container (default: zilliqa):` <br/> [Press
+  **Enter** to skip if using default]
 
-   - `Enter your listening port (default: 33133):` <br/> [Press **Enter** to
-     skip if using default]
+- `Enter your IP address (*.*.*.*):` <br/> [Key in your IP address as found
+  in step 5]
+
+- `Enter your listening port (default: 33133):` <br/> [Press **Enter** to
+  skip if using default]
 
 ## Monitoring Progress
 
@@ -161,8 +167,10 @@ less mykey.txt
 The first hex string is your **public key**, and the second hex string is your
 **private key**.
 
-:::note This key pair is generated locally on your disk. Do remember to keep
-your private key somewhere safe! :::
+!!! note
+
+    This key pair is generated locally on your disk. Do remember to keep
+    your private key somewhere safe!
 
 ## Checking Your $ZIL Balance
 

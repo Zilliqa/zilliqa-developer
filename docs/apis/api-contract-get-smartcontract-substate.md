@@ -9,83 +9,60 @@ Returns the state (or a part specified) of a smart contract address, represented
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractSubState",
+        "params": ["fe001824823b12b58708bf24edd94d8b5e1cfcf7","admins",[]]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractSubState",
-    "params": ["fe001824823b12b58708bf24edd94d8b5e1cfcf7","admins",[]]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractSubState(
+      "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
+    );
+    console.log(smartContractState.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const smartContractState = await zilliqa.blockchain.getSmartContractSubState(
-  "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
-);
-console.log(smartContractState.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        List<Object> param = new ArrayList<>();
-        param.add("9611c53BE6d1b32058b2747bdeCECed7e1216793");
-        param.add("admins");
-        param.add(new ArrayList<>());
-        String state = client.getSmartContractSubState(param);
-        System.out.println(state);
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            List<Object> param = new ArrayList<>();
+            param.add("9611c53BE6d1b32058b2747bdeCECed7e1216793");
+            param.add("admins");
+            param.add(new ArrayList<>());
+            String state = client.getSmartContractSubState(param);
+            System.out.println(state);
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractSubState("fe001824823b12b58708bf24edd94d8b5e1cfcf7","admins",[]))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractSubState("fe001824823b12b58708bf24edd94d8b5e1cfcf7","admins",[]))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractSubState() {
-	provider := NewProvider("https://zilliqa.com")
-	response, _ := provider.GetSmartContractSubState("9611c53BE6d1b32058b2747bdeCECed7e1216793", "admins", []interface{}{})
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractSubState() {
+    	provider := NewProvider("https://zilliqa.com")
+    	response, _ := provider.GetSmartContractSubState("9611c53BE6d1b32058b2747bdeCECed7e1216793", "admins", []interface{}{})
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

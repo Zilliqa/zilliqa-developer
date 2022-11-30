@@ -18,9 +18,9 @@ description: Parse
 
 Parse is called on either unsigned or signed transactions to understand the intent of the formulated transaction. This is run as a sanity check before signing (after `/construction/payloads`) and before broadcast (after `/construction/combine`).
 
-:::info
-Set the `signed` flag accordingly to denote whether the transaction is signed or unsigned.
-:::
+!!! info
+
+    Set the `signed` flag accordingly to denote whether the transaction is signed or unsigned.
 
 Request:
 
@@ -41,52 +41,52 @@ Sample
 
 ```json
 {
-    "operations": [
-        {
-            "operation_identifier": {
-                "index": 0
-            },
-            "type": "TRANSFER",
-            "status": "",
-            "account": {
-                "address": "zil17jljwxdwh6mvt8gxe28cd7drjkhtfa3ds9c5en",
-                "metadata": {
-                    "base16": "F4bf2719AEBEB6C59D06ca8f86f9a395aeB4F62d"
-                }
-            },
-            "amount": {
-                "value": "-2000000000000",
-                "currency": {
-                    "symbol": "ZIL",
-                    "decimals": 12
-                }
-            }
-        },
-        {
-            "operation_identifier": {
-                "index": 1
-            },
-            "related_operations": [
-                {
-                    "index": 0
-                }
-            ],
-            "type": "TRANSFER",
-            "status": "",
-            "account": {
-                "address": "zil1rm988wdvdnue5we36tr2y0yyxufcfphqcxmj55",
-                "metadata": {
-                    "base16": "1Eca73B9ac6Cf99a3B31d2C6A23c8437138486e0"
-                }
-            },
-            "amount": {
-                "value": "2000000000000",
-                "currency": {
-                    "symbol": "ZIL",
-                    "decimals": 12
-                }
-            }
+  "operations": [
+    {
+      "operation_identifier": {
+        "index": 0
+      },
+      "type": "TRANSFER",
+      "status": "",
+      "account": {
+        "address": "zil17jljwxdwh6mvt8gxe28cd7drjkhtfa3ds9c5en",
+        "metadata": {
+          "base16": "F4bf2719AEBEB6C59D06ca8f86f9a395aeB4F62d"
         }
-    ]
+      },
+      "amount": {
+        "value": "-2000000000000",
+        "currency": {
+          "symbol": "ZIL",
+          "decimals": 12
+        }
+      }
+    },
+    {
+      "operation_identifier": {
+        "index": 1
+      },
+      "related_operations": [
+        {
+          "index": 0
+        }
+      ],
+      "type": "TRANSFER",
+      "status": "",
+      "account": {
+        "address": "zil1rm988wdvdnue5we36tr2y0yyxufcfphqcxmj55",
+        "metadata": {
+          "base16": "1Eca73B9ac6Cf99a3B31d2C6A23c8437138486e0"
+        }
+      },
+      "amount": {
+        "value": "2000000000000",
+        "currency": {
+          "symbol": "ZIL",
+          "decimals": 12
+        }
+      }
+    }
+  ]
 }
 ```

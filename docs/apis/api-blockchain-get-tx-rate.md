@@ -9,76 +9,54 @@ Returns the current Transaction rate per second **(TPS)** of the network. This i
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetTransactionRate",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetTransactionRate",
-    "params": [""]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const transactionRate = await zilliqa.blockchain.getTransactionRate();
+    console.log(transactionRate.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const transactionRate = await zilliqa.blockchain.getTransactionRate();
-console.log(transactionRate.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-        Rep<Integer> transactionRate = client.getTransactionRate();
-        System.out.println(new Gson().toJson(transactionRate));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+            Rep<Integer> transactionRate = client.getTransactionRate();
+            System.out.println(new Gson().toJson(transactionRate));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "Python"
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetTransactionRate())
-```
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetTransactionRate())
+    ```
 
-</TabItem>
+=== "Go"
 
-<TabItem value="go">
-
-```go
-func GetTransactionRate() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetTransactionRate()
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetTransactionRate() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetTransactionRate()
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

@@ -9,66 +9,45 @@ Returns the list of smart contract addresses created by an User's account.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', }
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContracts",
+        "params": ["1eefc4f453539e5ee732b49eb4792b268c2f3908"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContracts",
-    "params": ["1eefc4f453539e5ee732b49eb4792b268c2f3908"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const smartContracts = await zilliqa.blockchain.getSmartContracts(
+      "1eefc4f453539e5ee732b49eb4792b268c2f3908"
+    );
+    console.log(smartContracts.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const smartContracts = await zilliqa.blockchain.getSmartContracts(
-  "1eefc4f453539e5ee732b49eb4792b268c2f3908"
-);
-console.log(smartContracts.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        Rep<List<Contract>> smartContracts = client.getSmartContracts("fe001824823b12b58708bf24edd94d8b5e1cfcf7");
-        System.out.println(new Gson().toJson(smartContracts));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            Rep<List<Contract>> smartContracts = client.getSmartContracts("fe001824823b12b58708bf24edd94d8b5e1cfcf7");
+            System.out.println(new Gson().toJson(smartContracts));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
-
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContracts("fe001824823b12b58708bf24edd94d8b5e1cfcf7"))
-```
-
-</TabItem>
-
-</Tabs>
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContracts("fe001824823b12b58708bf24edd94d8b5e1cfcf7"))
+    ```
 
 ### Example Response
 

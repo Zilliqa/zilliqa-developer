@@ -7,40 +7,26 @@ title: GetTransactionStatus
 
 Returns the status of a specified transaction. This API is available from Zilliqa `V7.0.0` onwards and supports all transaction statuses (unconfirmed, confirmed, and rejected).
 
-:::note
-The `GetTransactionStatus` API relies on an off-chain transaction tracking solution, which may be periodically cleaned. We recommend to still primarily use `GetTransaction` for older (e.g., several days old) transactions, and only use `GetTransactionStatus` mainly for tracking the progress of ongoing transactions.
-:::
+!!! note
 
-:::note
-The `GetTransactionStatus` API is available only on https://api.zilliqa.com/. It is disabled for community-hosted or private-hosted seed nodes.
-:::
+    The `GetTransactionStatus` API relies on an off-chain transaction tracking solution, which may be periodically cleaned. We recommend to still primarily use `GetTransaction` for older (e.g., several days old) transactions, and only use `GetTransactionStatus` mainly for tracking the progress of ongoing transactions.
+
+!!! note
+
+    The `GetTransactionStatus` API is available only on https://api.zilliqa.com/. It is disabled for community-hosted or private-hosted seed nodes.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-]
-}>
-
-<TabItem value="cURL">
-
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetTransactionStatus",
-    "params": ["1bb178b023f816e950d862f6505cd79a32bb97e71fd78441cbc3486940a2e1b7"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
-
-</TabItem>
-
-</Tabs>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetTransactionStatus",
+        "params": ["1bb178b023f816e950d862f6505cd79a32bb97e71fd78441cbc3486940a2e1b7"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
 ### Example Response
 
@@ -114,9 +100,9 @@ curl -d '{
 | 2                   | 27       | Rejected - Nonce is lower than expected                                 |
 | 2                   | 255      | Rejected - Internal error                                               |
 
-:::warning
-The transaction pool is cleared by design **at the start of a new DS epoch**. Any transaction left in "Pending" state (e.g., "Pending - Dispatched", "Pending - Nonce is higher than expected", ...) after a new DS epoch has started will have most likely been dropped and will no longer be processed further at that point.
-:::
+!!! warning
+
+    The transaction pool is cleared by design **at the start of a new DS epoch**. Any transaction left in "Pending" state (e.g., "Pending - Dispatched", "Pending - Nonce is higher than expected", ...) after a new DS epoch has started will have most likely been dropped and will no longer be processed further at that point.
 
 ### HTTP Request
 

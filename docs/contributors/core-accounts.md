@@ -26,9 +26,11 @@ The diagram here shows that account data is organized according to those common
 to all accounts (`AccountBase`) and those that only contract accounts would have
 (`Account`).
 
-:::note We can distinguish a contract from non-contract account by checking if
-`m_codeHash` is NULL. We can also choose to serialize only the base fields or
-both the base and the contract-related fields. :::
+!!! note
+
+    We can distinguish a contract from non-contract account by checking if
+    `m_codeHash` is NULL. We can also choose to serialize only the base fields or
+    both the base and the contract-related fields.
 
 ## Contract Account States
 

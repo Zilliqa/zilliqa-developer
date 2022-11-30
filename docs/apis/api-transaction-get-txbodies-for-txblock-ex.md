@@ -21,24 +21,16 @@ This API is available from Zilliqa `V7.2.0` onwards.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs defaultValue="cURL" values={[ { label: 'cURL', value: 'cURL', }, ] }>
-
-<TabItem value="cURL">
-
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetTxnBodiesForTxBlockEx",
-    "params": ["1002353", "2"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
-
-</TabItem>
-
-</Tabs>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetTxnBodiesForTxBlockEx",
+        "params": ["1002353", "2"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
 ### Example Response
 

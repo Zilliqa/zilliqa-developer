@@ -136,14 +136,16 @@ For example:
 
 ## Recommended Steps for Exchanges Polling for Incoming $ZIL Deposit from Smart Contract Transactions
 
-1. Confirm that the **success** field is set to `true`.
-1. Traverse the **transitions** JSON array. For each transition, for a successful deposit of `$ZIL` via the smart contract, the following must be fulfilled:
-   1. **\_recipient** corresponds to a known deposit address controlled by the exchange.
-   2. **\_tag** is either `AddFunds` or empty.
-      :::note
-      `_tag` can be found under `msg` field. If either `_tag` or `msg` is not present, there is no incoming deposit from this particular transition.
-      :::
-   3. **\_amount** is non-zero.
-   4. Check the **\_recipient** and **\_amount** to complete the information on the balance transfer. In such a case, you can confirm that there is a deposit
-      to address **\_recipient** with value **\_amount** (in `Qa`).
-   5. Continue traversing the remaining transitions and checking for more deposits.
+1.  Confirm that the **success** field is set to `true`.
+1.  Traverse the **transitions** JSON array. For each transition, for a successful deposit of `$ZIL` via the smart contract, the following must be fulfilled:
+
+    1.  **\_recipient** corresponds to a known deposit address controlled by the exchange.
+    2.  **\_tag** is either `AddFunds` or empty.
+        !!! note
+
+                  `_tag` can be found under `msg` field. If either `_tag` or `msg` is not present, there is no incoming deposit from this particular transition.
+
+    3.  **\_amount** is non-zero.
+    4.  Check the **\_recipient** and **\_amount** to complete the information on the balance transfer. In such a case, you can confirm that there is a deposit
+        to address **\_recipient** with value **\_amount** (in `Qa`).
+    5.  Continue traversing the remaining transitions and checking for more deposits.

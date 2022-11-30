@@ -10,17 +10,15 @@ description: Core protocol design - guard mode.
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 Guard mode is a special operating mode in Zilliqa that can be used to maintain stability of the Mainnet until the protocol has been made perfectly robust. Guard mode ensures the following:
 
 - A maximum of `n` nodes (e.g., 2/3) in the DS committee are nodes operated by Zilliqa Research
 - A maximum of `n` nodes (e.g., 1/3) across all shards are nodes operated by Zilliqa Research
 - DS leader selection (in either normal or view change situations) will only include nodes operated by Zilliqa Research
 
-:::note
-Guard mode is designed to be toggleable and does not interfere with the standard protocol whether or not it is enabled.
-:::
+!!! note
+
+    Guard mode is designed to be toggleable and does not interfere with the standard protocol whether or not it is enabled.
 
 ## Terminology
 
@@ -52,9 +50,9 @@ The DS leader is selected from these DS guards by doing `mod n` rather than `mod
 
 A non-guard node joins the DS committee via [PoW](core-pow.md) as usual. If selected, it is inserted in the committee starting at index `n+1`. Following the [DS MIMO](core-ds-mimo.md) convention, the last few DS nodes (non-guards) are ejected from the DS committee to preserve the committee size.
 
-:::note
-The DS reputation feature (starting Zilliqa version 5.0.0) also impacts DS committee member placement. Please refer to both [DS MIMO](core-ds-mimo.md) and [DS Reputation](core-ds-reputation.md) sections for more information on how the DS committee membership is managed.
-:::
+!!! note
+
+    The DS reputation feature (starting Zilliqa version 5.0.0) also impacts DS committee member placement. Please refer to both [DS MIMO](core-ds-mimo.md) and [DS Reputation](core-ds-reputation.md) sections for more information on how the DS committee membership is managed.
 
 ## View Change Operation
 

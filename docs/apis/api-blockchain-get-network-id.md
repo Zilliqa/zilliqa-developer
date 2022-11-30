@@ -19,85 +19,63 @@ See table below for the `CHAIN_ID` for different chains:
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetNetworkId",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetNetworkId",
-    "params": [""]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const NetworkId = await zilliqa.network.GetNetworkId();
+    console.log(NetworkId);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const NetworkId = await zilliqa.network.GetNetworkId();
-console.log(NetworkId);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        Rep<String> networkId = client.getNetworkId();
-        System.out.println(new Gson().toJson(networkId));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            Rep<String> networkId = client.getNetworkId();
+            System.out.println(new Gson().toJson(networkId));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "Python"
 
-```python
-from pyzil.zilliqa import chain
-from pyzil.zilliqa.api import ZilliqaAPI
+    ```python
+    from pyzil.zilliqa import chain
+    from pyzil.zilliqa.api import ZilliqaAPI
 
-# EITHER
-chain.set_active_chain(chain.MainNet)
-network_id = chain.active_chain.api.GetNetworkId()
-print(network_id)
+    # EITHER
+    chain.set_active_chain(chain.MainNet)
+    network_id = chain.active_chain.api.GetNetworkId()
+    print(network_id)
 
-# OR
-new_api = ZilliqaAPI(endpoint="https://api.zilliqa.com")
-network_id = new_api.GetNetworkId()
-print(network_id)
-```
+    # OR
+    new_api = ZilliqaAPI(endpoint="https://api.zilliqa.com")
+    network_id = new_api.GetNetworkId()
+    print(network_id)
+    ```
 
-</TabItem>
+=== "Go"
 
-<TabItem value="go">
-
-```go
-func GetNetworkId() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetNetworkId()
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetNetworkId() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetNetworkId()
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

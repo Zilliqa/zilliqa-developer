@@ -55,11 +55,10 @@ As per [ZIP-18](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-18.md), whic
 
 When handling payment transactions, developers and exchanges will need to call `CreateTransaction` with `gasLimit` set to at least `50` instead of `1` from `v8.0.0` onwards. As a result of this change, the minimal cost of a payment transaction fee will increase from 0.002 $ZIL to 0.1 $ZIL assuming the lowest gas price.
 
-:::important
+!!! important
 
-1. Smart contract transaction gas unit remains unchanged.
-2. Developers and exchanges may proceed to make the `gasLimit` change above even before `v8.0.0` is deployed. Until the deployment, the payment transaction fee will continue to be 0.002 $ZIL, with or without the `gasLimit` change.
-   :::
+    1. Smart contract transaction gas unit remains unchanged.
+    2. Developers and exchanges may proceed to make the `gasLimit` change above even before `v8.0.0` is deployed. Until the deployment, the payment transaction fee will continue to be 0.002 $ZIL, with or without the `gasLimit` change.
 
 ### 4) Deprecation and removal of `GetPendingTxn` and `GetPendingTxns` API
 
@@ -76,9 +75,9 @@ IP_ADDRESS="x.y.z.a"
 IP_WHITELISTING="N" #optional
 ```
 
-:::note
-If `IP_WHITELISTING` is set to `N`, the script assumes the existence of the whitelisted keypair file called "whitelistkey.txt", and further assumes "mykey.txt" as the whitelisted key if "whitelistkey.txt" does not exist.
-:::
+!!! note
+
+    If `IP_WHITELISTING` is set to `N`, the script assumes the existence of the whitelisted keypair file called "whitelistkey.txt", and further assumes "mykey.txt" as the whitelisted key if "whitelistkey.txt" does not exist.
 
 ### 6) Bug fixes around mining node joining
 
@@ -88,11 +87,11 @@ We have fixed a few mining node joining issues. Special thanks to [K1-pool](http
 
 ### 1) Scilla disambiguation fix
 
-:::warning
-To support Scilla features such as remote state read and external library, user-defined ADTs will need to be non-ambiguous starting from `v8.0.0`. This means
-that when calling a contract transition that contains a user-defined ADT, the user-defined ADT will need to be prefixed with the contract address that defines
-the type.
-:::
+!!! warning
+
+    To support Scilla features such as remote state read and external library, user-defined ADTs will need to be non-ambiguous starting from `v8.0.0`. This means
+    that when calling a contract transition that contains a user-defined ADT, the user-defined ADT will need to be prefixed with the contract address that defines
+    the type.
 
 For instance, let's assume a user-defined ADT named `SSNCycleInfo` is defined in a contract deployed at address `0xb55cc7894536ac015350790550b0c03f49eb8ebd`. When using the user-defined ADT, it will need to be prefixed with the contract address (i.e., `0xb55cc7894536ac015350790550b0c03f49eb8ebd.SSNCycleInfo`). If your contract transition has user-defined ADTs, you will need to modify the way you call the transition by appending the contract address prefix.
 
@@ -117,15 +116,14 @@ As part of the `v8.0.0` rollout, the current Staking Phase 1.0 feature will be u
 
 Due to the Scilla disambiguation fix, we will be freezing the existing staking contract shortly before the `v8.0.0` network upgrade commences. The contract will be frozen permanently, and the contract states and funds will be migrated to a new contract.
 
-:::important
+!!! important
 
-1. Migration to the new contract is expected to take up to 7 days
-2. During the migration, the existing contract will be paused and no staking activities such as stake withdrawal can be conducted
-3. Rewards for staking will be retroactively distributed after the staking contract migration
-4. For wallets, explorers and exchanges, please note that the contract address will be changed and you will need to update it on your end. We will provide the address once we have deployed the Mainnet contract
-5. We will make Staking Phase 1.1 available on the public testnet shortly to help you prepare for the staking contract migration
-6. For community members, please kindly wait for your wallet provider to update to the new staking contract if you encounter any staking issue
-   :::
+    1. Migration to the new contract is expected to take up to 7 days
+    2. During the migration, the existing contract will be paused and no staking activities such as stake withdrawal can be conducted
+    3. Rewards for staking will be retroactively distributed after the staking contract migration
+    4. For wallets, explorers and exchanges, please note that the contract address will be changed and you will need to update it on your end. We will provide the address once we have deployed the Mainnet contract
+    5. We will make Staking Phase 1.1 available on the public testnet shortly to help you prepare for the staking contract migration
+    6. For community members, please kindly wait for your wallet provider to update to the new staking contract if you encounter any staking issue
 
 ### 2) Switching of staking wallet
 

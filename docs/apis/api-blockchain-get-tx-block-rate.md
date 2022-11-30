@@ -9,76 +9,54 @@ Returns the current Transaction blockrate per second for the network.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetTxBlockRate",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetTxBlockRate",
-    "params": [""]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const txBlockRate = await zilliqa.blockchain.getTxBlockRate();
+    console.log(txBlockRate.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const txBlockRate = await zilliqa.blockchain.getTxBlockRate();
-console.log(txBlockRate.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-        Rep<Double> txBlockRate = client.getTxBlockRate();
-        System.out.println(new Gson().toJson(txBlockRate));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+            Rep<Double> txBlockRate = client.getTxBlockRate();
+            System.out.println(new Gson().toJson(txBlockRate));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "Python"
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetTxBlockRate())
-```
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetTxBlockRate())
+    ```
 
-</TabItem>
+=== "Go"
 
-<TabItem value="go">
-
-```go
-func GetTxBlockRate() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetTxBlockRate()
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetTxBlockRate() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetTxBlockRate()
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

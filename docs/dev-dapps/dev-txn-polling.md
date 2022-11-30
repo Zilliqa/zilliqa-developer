@@ -16,44 +16,28 @@ After sending the transaction object, there will be a `transaction id`. We can i
 
 Example of transaction polling:
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "JavaScript"
 
-<Tabs
-defaultValue="js"
-values={[
-{ label: 'JavaScript', value: 'js', },
-{ label: 'Go', value: 'go', },
-{ label: 'Java', value: 'java', },
-]
-}>
-<TabItem value="js">
+    ```js
+    const txn = await zilliqa.blockchain.getTransaction(
+      "1899b381d644a4892ca5ba5d8d60bbcc7bd121d511d55e438a8ddbdcc53272c4"
+    );
+    console.log(JSON.stringify(txn));
+    ```
 
-```js
-const txn = await zilliqa.blockchain.getTransaction(
-  "1899b381d644a4892ca5ba5d8d60bbcc7bd121d511d55e438a8ddbdcc53272c4"
-);
-console.log(JSON.stringify(txn));
-```
+=== "Go"
 
-</TabItem>
-<TabItem value="go">
+    ```go
+    provider := NewProvider("https://dev-api.zilliqa.com/")
+    result, _ := provider.GetTransaction("c7d6550a6558edcddbf4b3c7cf14db9f1025200b89bcbcd6a570c84db58d554f")
+    resStr,_ := json.Marshal(result)
+    fmt.Println(string(resStr))
+    ```
 
-```go
-provider := NewProvider("https://dev-api.zilliqa.com/")
-result, _ := provider.GetTransaction("c7d6550a6558edcddbf4b3c7cf14db9f1025200b89bcbcd6a570c84db58d554f")
-resStr,_ := json.Marshal(result)
-fmt.Println(string(resStr))
-```
+=== "Java"
 
-</TabItem>
-<TabItem value="java">
-
-```java
-HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-Transaction transaction = client.getTransaction("055294ba67b3073d66ef078fb149dfb0490b2d46156479a9f2c9327fb762f4e9").getResult();
-System.out.println(new Gson().toJson(transaction))
-```
-
-</TabItem>
-</Tabs>
+    ```java
+    HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+    Transaction transaction = client.getTransaction("055294ba67b3073d66ef078fb149dfb0490b2d46156479a9f2c9327fb762f4e9").getResult();
+    System.out.println(new Gson().toJson(transaction))
+    ```

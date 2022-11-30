@@ -16,9 +16,9 @@ transactions sent to their addresses (deposits). We won't cover how this can
 be done for ERC20-like smart contracts on Zilliqa in this tutorial, but the
 same strategy can be applied.
 
-:::info
-The code in this tutorial is derived from the [example application](https://github.com/Zilliqa/dev-portal/blob/master/examples/exchange/src/cron/deposit.ts).
-:::
+!!! info
+
+    The code in this tutorial is derived from the [example application](https://github.com/Zilliqa/dev-portal/blob/master/examples/exchange/src/cron/deposit.ts).
 
 ## Setting Up
 
@@ -35,14 +35,9 @@ We will use a simple `class` called `DepositCron` to set up our cron job.
 We'll start by implementing a handler method, aptly named `handler`.
 
 ```ts
-import { flatten, range } from 'lodash';
-import pMap from 'p-map';
-import * as cron from 'node-cron';
-import { ZilliqaService } from '../services/zilliqa';
-
 export class DepositCron {
   addresses: string[] = [];
-  frequency: string = '* * * * *';
+  frequency: string = "* * * * *";
   svc: ZilliqaService;
   task: cron.ScheduledTask;
   // you should persist the last fetched block to a database, and initialise
@@ -58,7 +53,7 @@ export class DepositCron {
 
   async handler() {
     const currentTxBlock = await this.svc.getTxBlock();
-    console.log('Current tx block: ', currentTxBlock);
+    console.log("Current tx block: ", currentTxBlock);
     if (currentTxBlock > this.lastFetchedTxBlock) {
       // get transactions from lastFetchedTxBlock + 1 to current, and set
       // lastFetchedTxBlock to current
@@ -99,14 +94,9 @@ So far we have no way of starting up or controlling our `CronJob`. We'll do that
 implementing `start`, `stop`, and `nuke` methods.
 
 ```ts
-import { flatten, range } from 'lodash';
-import pMap from 'p-map';
-import * as cron from 'node-cron';
-import { ZilliqaService } from '../services/zilliqa';
-
 export class DepositCron {
   addresses: string[] = [];
-  frequency: string = '* * * * *';
+  frequency: string = "* * * * *";
   svc: ZilliqaService;
   task: cron.ScheduledTask;
   // you should persist the last fetched block to a database, and initialise
@@ -123,7 +113,7 @@ export class DepositCron {
 
   async handler() {
     const currentTxBlock = await this.svc.getTxBlock();
-    console.log('Current tx block: ', currentTxBlock);
+    console.log("Current tx block: ", currentTxBlock);
     if (currentTxBlock > this.lastFetchedTxBlock) {
       // get transactions from lastFetchedTxBlock + 1 to current, and set
       // lastFetchedTxBlock to current
@@ -161,18 +151,16 @@ Now that we have our methods, we can use the cron job like so:
 ```ts
 // app.ts
 // initialise services
-import * as services from './services';
-import * as crons from './cron';
 
 const zilliqaSvc = new services.ZilliqaService(
-  'https://stress-test-api.aws.z7a.xyz',
+  "https://stress-test-api.aws.z7a.xyz",
   {
-    [config.get('mnemonic')]: 8,
+    [config.get("mnemonic")]: 8,
   }
 );
 
 // boot up cron jobs
 // these can also be destroyed
-const depositCron = new crons.DepositCron('* * * * *', zilliqaSvc);
+const depositCron = new crons.DepositCron("* * * * *", zilliqaSvc);
 depositCron.start();
 ```

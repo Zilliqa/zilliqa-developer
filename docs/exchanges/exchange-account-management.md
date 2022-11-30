@@ -45,21 +45,18 @@ You may also wish to export a keypair to a portable format to use it somewhere e
 We support a modified implementation of the [Web3 Secret Storage Definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
 
 ```typescript
-import { Zilliqa } from '@zilliqa-js/zilliqa';
-import * fs from 'fs';
-
 export class ZilliqaService {
   accounts: string[] = [];
   zil: Zilliqa;
 
-  constructor(api: string, mnemonics: {[mnemonic: string]: number}) {
+  constructor(api: string, mnemonics: { [mnemonic: string]: number }) {
     const zilliqa = new Zilliqa(api);
     this.zil = zilliqa;
 
     // you can use one or more mnemonics to manage/generate a large number of accounts
     for (let m in mnemonics) {
       const num = mnemonics[m];
-      range(num).forEach(i => {
+      range(num).forEach((i) => {
         const address = this.zil.wallet.addByMnemonic(m, i);
         this.accounts.push(address);
       });
@@ -70,11 +67,11 @@ export class ZilliqaService {
 
   export(address: string) {
     // keep this secret.
-    const passphrase = 'something';
+    const passphrase = "something";
     const json = this.zil.wallet.export(address, passphrase);
     // at this point, you should safely write this to disk, or send it to
     // a vault somehwere. the point is to keep it safe.
-    fs.writeFile('/path/to/safe/place', json);
+    fs.writeFile("/path/to/safe/place", json);
   }
 
   /* truncated */
@@ -95,9 +92,6 @@ At some stage, you may also need to import a keystore file you had previously
 exported. There is a convenient facility for that.
 
 ```ts
-import pify from 'pify';
-import { Zilliqa } from '@zilliqa-js/zilliqa';
-import * fs from 'fs';
 
 export class ZilliqaService {
   accounts: string[] = [];

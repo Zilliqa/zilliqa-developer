@@ -16,58 +16,42 @@ Signing is done against the Protobuf-serialised version of the transaction's con
 
 Example of providing a private key:
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "JavaScript"
 
-<Tabs
-defaultValue="js"
-values={[
-{ label: 'JavaScript', value: 'js', },
-{ label: 'Go', value: 'go', },
-{ label: 'Java', value: 'java', },
-]
-}>
-<TabItem value="js">
+    ```js
+    const { Zilliqa } = require("@zilliqa-js/zilliqa");
+    const { getAddressFromPrivateKey } = require("@zilliqa-js/crypto");
+    const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
-```js
-const { Zilliqa } = require("@zilliqa-js/zilliqa");
-const { getAddressFromPrivateKey } = require("@zilliqa-js/crypto");
-const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
+    const PRIVATE_KEY =
+      "9afc1a1dab96127e902daaaec1a56c30346f007523c787c3bb62371c0e5a1be7";
 
-const PRIVATE_KEY =
-  "9afc1a1dab96127e902daaaec1a56c30346f007523c787c3bb62371c0e5a1be7";
+    zilliqa.wallet.addByPrivateKey(PRIVATE_KEY);
+    ```
 
-zilliqa.wallet.addByPrivateKey(PRIVATE_KEY);
-```
+=== "Go"
 
-</TabItem>
-<TabItem value="go">
+    ```go
+    import (
+    	"github.com/Zilliqa/gozilliqa-sdk/account"
+    )
 
-```go
-import (
-	"github.com/Zilliqa/gozilliqa-sdk/account"
-)
+    wallet := account.NewWallet()
+    wallet.AddByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930")
+    ```
 
-wallet := account.NewWallet()
-wallet.AddByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930")
-```
+=== "Java"
 
-</TabItem>
-<TabItem value="java">
+    ```java
+    package com.firestack.example;
 
-```java
-package com.firestack.example;
+    import com.firestack.laksaj.account.Wallet;
 
-import com.firestack.laksaj.account.Wallet;
-
-public class TransactionOperation {
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        Wallet wallet = new Wallet();
-        String ptivateKey = "e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930";
-        String address = wallet.addByPrivateKey(ptivateKey);
+    public class TransactionOperation {
+        public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+            Wallet wallet = new Wallet();
+            String ptivateKey = "e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930";
+            String address = wallet.addByPrivateKey(ptivateKey);
+        }
     }
-}
-```
-
-</TabItem>
-</Tabs>
+    ```

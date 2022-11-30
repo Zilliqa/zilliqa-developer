@@ -13,8 +13,6 @@ description: Zilliqa Hello World Example
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 In this section, we will deploy and interact with a `Hello World` smart contract onto the Zilliqa testnet using [Neo-Savant web IDE](https://ide.zilliqa.com/#/) and [ZilPay wallet](https://zilpay.xyz/).
 
 ## Create Testnet Wallet using ZilPay
@@ -25,12 +23,13 @@ It is a non-custodial wallet, meaning, only the user has full access and respons
 
 To create a ZilPay wallet:
 
-1. Visit ZilPay's [website](https://zilpay.xyz/) and download the extension for your respective browser.
-2. Open the extension, create a new wallet by verifying your 12 words recovery phrase and selecting a password for your wallet.
-   :::note
-   Please store your 12 words recovery phrase securely
-   :::
-3. Click on the `network change` button (shown below) and select the `network` as testnet.
+1.  Visit ZilPay's [website](https://zilpay.xyz/) and download the extension for your respective browser.
+2.  Open the extension, create a new wallet by verifying your 12 words recovery phrase and selecting a password for your wallet.
+    !!! note
+
+           Please store your 12 words recovery phrase securely
+
+3.  Click on the `network change` button (shown below) and select the `network` as testnet.
 
 <img
 alt="Change Network Button"

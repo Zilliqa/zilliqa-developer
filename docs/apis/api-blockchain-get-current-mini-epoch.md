@@ -9,76 +9,54 @@ Returns the current TX block number of the network. This is represented as a `St
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetCurrentMiniEpoch",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetCurrentMiniEpoch",
-    "params": [""]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const currentMiniEpoch = await zilliqa.blockchain.getCurrentMiniEpoch();
+    console.log(currentMiniEpoch.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const currentMiniEpoch = await zilliqa.blockchain.getCurrentMiniEpoch();
-console.log(currentMiniEpoch.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
-        Rep<String> currentMiniEpoch = client.getCurrentMiniEpoch();
-        System.out.println(new Gson().toJson(currentMiniEpoch));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com/");
+            Rep<String> currentMiniEpoch = client.getCurrentMiniEpoch();
+            System.out.println(new Gson().toJson(currentMiniEpoch));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
-<TabItem value="python">
+=== "Python"
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetCurrentMiniEpoch())
-```
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetCurrentMiniEpoch())
+    ```
 
-</TabItem>
+=== "Go"
 
-<TabItem value="go">
-
-```go
-func GetCurrentMiniEpoch() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetCurrentMiniEpoch()
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetCurrentMiniEpoch() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetCurrentMiniEpoch()
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example response
 

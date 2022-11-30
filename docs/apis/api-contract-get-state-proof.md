@@ -11,54 +11,36 @@ This API is available from Zilliqa `V8.1.0` onwards.
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-//{ label: 'node.js', value: 'node.js', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetStateProof",
+        "params": ["6d84363526a2d764835f8cf52dfeefe80a360fac","A0BD91DE66D97E6930118179BA4F1836C366C4CB3309A6B354D26F52ABB2AAC6","39"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetStateProof",
-    "params": ["6d84363526a2d764835f8cf52dfeefe80a360fac","A0BD91DE66D97E6930118179BA4F1836C366C4CB3309A6B354D26F52ABB2AAC6","39"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const stateProof = await zilliqa.blockchain.getSmartContractSubState(
+      "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
+    );
+    console.log(stateProof.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Go"
 
-```js
-const stateProof = await zilliqa.blockchain.getSmartContractSubState(
-  "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
-);
-console.log(stateProof.result);
-```
-
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetStateProof() {
-	provider := NewProvider("https://dev-api.zilliqa.com")
-	response, _ := provider.GetStateProof("6d84363526a2d764835f8cf52dfeefe80a360fac", "A0BD91DE66D97E6930118179BA4F1836C366C4CB3309A6B354D26F52ABB2AAC6","39")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetStateProof() {
+    	provider := NewProvider("https://dev-api.zilliqa.com")
+    	response, _ := provider.GetStateProof("6d84363526a2d764835f8cf52dfeefe80a360fac", "A0BD91DE66D97E6930118179BA4F1836C366C4CB3309A6B354D26F52ABB2AAC6","39")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

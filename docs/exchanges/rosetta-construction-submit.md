@@ -18,9 +18,9 @@ description: Submit
 
 Submit a signed transaction to the Zilliqa network. This call is non-blocking and will return immediately with a transaction hash.
 
-:::info
-Before calling `/submit`, please call `/combine` to obtain the `signed_transaction` required for the request parameters.
-:::
+!!! info
+
+    Before calling `/submit`, please call `/combine` to obtain the `signed_transaction` required for the request parameters.
 
 Request:
 

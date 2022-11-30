@@ -9,79 +9,56 @@ Returns the Scilla code associated with a smart contract address. This is repres
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractCode",
+        "params": ["fe001824823b12b58708bf24edd94d8b5e1cfcf7"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
-<TabItem value="cURL">
+=== "Node.js"
 
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetSmartContractCode",
-    "params": ["fe001824823b12b58708bf24edd94d8b5e1cfcf7"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
+    ```js
+    const smartContractCode = await zilliqa.blockchain.getSmartContractCode(
+      "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
+    );
+    console.log(smartContractCode.result);
+    ```
 
-</TabItem>
-<TabItem value="node.js">
+=== "Java"
 
-```js
-const smartContractCode = await zilliqa.blockchain.getSmartContractCode(
-  "fe001824823b12b58708bf24edd94d8b5e1cfcf7"
-);
-console.log(smartContractCode.result);
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-public class App {
-    public static void main(String[] args) throws IOException {
-        HttpProvider client = new HttpProvider("https://api.zilliqa.com");
-        Rep<HttpProvider.ContractResult> smartContractCode = client.getSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7");
-        System.out.println(new Gson().toJson(smartContractCode));
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            Rep<HttpProvider.ContractResult> smartContractCode = client.getSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7");
+            System.out.println(new Gson().toJson(smartContractCode));
+        }
     }
-}
-```
+    ```
 
-</TabItem>
+=== "Python"
 
-<TabItem value="python">
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7"))
+    ```
 
-```python
-from pyzil.zilliqa import chain
-chain.set_active_chain(chain.MainNet)
-print(chain.active_chain.api.GetSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7"))
-```
+=== "Go"
 
-</TabItem>
-
-<TabItem value="go">
-
-```go
-func GetSmartContractCode() {
-	provider := NewProvider("https://api.zilliqa.com/")
-	response := provider.GetSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
-	result, _ := json.Marshal(response)
-	fmt.Println(string(result))
-}
-```
-
-</TabItem>
-</Tabs>
+    ```go
+    func GetSmartContractCode() {
+    	provider := NewProvider("https://api.zilliqa.com/")
+    	response := provider.GetSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
+    	result, _ := json.Marshal(response)
+    	fmt.Println(string(result))
+    }
+    ```
 
 ### Example Response
 

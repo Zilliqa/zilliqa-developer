@@ -70,8 +70,10 @@ To track any new **incoming deposit** of a specific ZRC-2 token:
    - If it matches, `value` represents the amount of tokens that are being
      transferred from the sender to your deposit address.
 
-:::note When handling `value`, please note the number of decimal places used by
-the smart contract. :::
+!!! note
+
+    When handling `value`, please note the number of decimal places used by
+    the smart contract.
 
 3. **[Optional checks]** You can also check `event_logs` and ensure the
    following:

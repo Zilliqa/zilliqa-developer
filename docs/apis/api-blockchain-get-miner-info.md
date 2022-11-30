@@ -15,34 +15,16 @@ Returns the mining nodes (i.e., the members of the DS committee and shards) at t
 
 ### Example Request
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+=== "cURL"
 
-<Tabs
-defaultValue="cURL"
-values={[
-{ label: 'cURL', value: 'cURL', },
-{ label: 'node.js', value: 'node.js', },
-{ label: 'java', value: 'java', },
-{ label: 'python', value: 'python', },
-{ label: 'go', value: 'go', },
-]
-}>
-
-<TabItem value="cURL">
-
-```shell
-curl -d '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetMinerInfo",
-    "params": ["5500"]
-}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
-```
-
-</TabItem>
-
-</Tabs>
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetMinerInfo",
+        "params": ["5500"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
 
 ### Example Response
 

@@ -13,8 +13,6 @@ description: Guide on Building on Ceres
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 Ceres is a one-stop local development application for developers looking to build on top of Zilliqa.
 It is a simple to use graphical interface that has multiple Zilliqa development tools.
 Development tools that come with Ceres currently are [Isolated server](#isolated-server), [Devex](#devex) developer block explorer and [Scilla server](#scilla-server).
@@ -134,10 +132,10 @@ alt="Add Custom Network"
 src={useBaseUrl('img/dev-dapps/tools/customNetworkDetails.png')}
 />
 
-:::note
-Network ID for the isolated server is 222, refer https://dev.zilliqa.com/docs/apis/api-blockchain-get-network-id/ to
-know about the id of your Zilliqa network.
-:::
+!!! note
+
+    Network ID for the isolated server is 222, refer https://dev.zilliqa.com/docs/apis/api-blockchain-get-network-id/ to
+    know about the id of your Zilliqa network.
 
 Step 3: Select an account that you will eventually use to deploy the contract. In this example, we are using a keystore file but you can use ledger or Zilpay, which is a Zilliqa wallet available as a chrome extension similar to metamask.
 
