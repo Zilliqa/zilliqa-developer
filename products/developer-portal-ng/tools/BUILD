@@ -24,3 +24,5 @@ py_binary(
         requirement("mkdocs-material"),
     ],
 )
+
+exports_files(["mkdocs_wrapper.py"])

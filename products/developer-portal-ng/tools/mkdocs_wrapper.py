@@ -13,6 +13,9 @@ import warnings
 import click
 from mkdocs import __version__, config, utils
 
+print(sys.argv)
+print(os.getcwd())
+
 if sys.platform.startswith("win"):
     try:
         import colorama

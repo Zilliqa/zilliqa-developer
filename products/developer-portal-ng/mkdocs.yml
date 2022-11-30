@@ -6,7 +6,7 @@ docs_dir: docs
 site_description: Zilliqa blockhain
 site_author: Zilliqa
 extra_css:
-  - css/quantum-colors.css
+  - css/zilliqa-colors.css
 markdown_extensions:
   - admonition
   - pymdownx.superfences

@@ -2,16 +2,53 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load(":defs.bzl", "mkdocs_html")
 
+# TODO:
+# mkdocs_collect(
+#     name = "collect",
+#     srcs = [
+#         "mkdocs.yml",
+#         "//docs:files",
+#         "//assets:files",
+#     ],
+#     config = "mkdocs.yml",
+#     strip_path = package_name(),
+#     out = "source"
+# )
+#
+# py_binary(
+#     name = "dev",
+#     main= "mkdocs_wrapper.py",
+#     srcs = ["//products/developer-portal-ng/tools:mkdocs_wrapper.py"],
+#     visibility = ["//visibility:public"],
+#     args= ["serve", "-f", "$(location :collect)", "-a","0.0.0.0:8000" ],
+#     data = [":collect",],
+#     deps = [
+#         requirement("click"),
+#         requirement("ghp-import"),
+#         requirement("Jinja2"),
+#         requirement("Markdown"),
+#         requirement("MarkupSafe"),
+#         requirement("mergedeep"),
+#         requirement("mkdocs"),
+#         requirement("packaging"),
+#         requirement("pyparsing"),
+#         requirement("python-dateutil"),
+#         requirement("PyYAML"),
+#         requirement("pyyaml_env_tag"),
+#         requirement("six"),
+#         requirement("watchdog"),
+#         requirement("pymdown-extensions"),
+#         requirement("mkdocs-material"),
+#     ],
+# )
+
 mkdocs_html(
     name = "build",
     srcs = [
         "mkdocs.yml",
-        "//docs:files",
         "//assets:files",
-    ] + glob([
-        "tailwind_theme/*",
-        "tailwind_theme/**",
-    ]),
+        "//docs:files",
+    ],
     config = "mkdocs.yml",
     strip_path = package_name(),
 )
