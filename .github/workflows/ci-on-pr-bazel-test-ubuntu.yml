@@ -53,6 +53,7 @@ jobs:
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_SECRET_KEY }}
+          known_hosts: ""
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
 
       - name: Setting Github hash
