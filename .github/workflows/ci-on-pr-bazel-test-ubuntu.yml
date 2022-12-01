@@ -54,6 +54,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
 
+      - name: "Creating Devops repo update"
+        run: |
+          pip install PyGithub
+          python .github/scripts/open-preview.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - name: Setting Github hash
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -82,10 +89,3 @@ jobs:
       - name: "Build and push Docker"
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
-
-      - name: "Creating Devops repo update"
-        run: |
-          pip install PyGithub
-          python .github/scripts/open-preview.py
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
