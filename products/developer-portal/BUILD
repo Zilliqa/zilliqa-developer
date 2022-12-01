@@ -1,5 +1,6 @@
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 load(":defs.bzl", "mkdocs_html")
 
 # TODO:
@@ -51,6 +52,9 @@ mkdocs_html(
     strip_path = package_name(),
 )
 
+##
+# Docker
+
 pkg_tar(
     name = "html-folder",
     srcs = [":build"],
@@ -91,4 +95,20 @@ container_push(
 
     # Static
     # tag = "test"
+)
+
+###
+# CD update
+expand_workspace_status(
+    name = "preview-kustomization",
+    output = "cd/applications/devportal/overlays/preview/kustomization.yml",
+    template = "cd/applications/devportal/overlays/preview/kustomization.tpl.yml",
+)
+
+pkg_tar(
+    name = "cd_preview",
+    srcs = ["cd/applications/devportal/overlays/preview/kustomization.yml"],
+    mode = "0755",
+    package_dir = "",
+    strip_prefix = ".",
 )

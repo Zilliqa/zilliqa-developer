@@ -43,3 +43,6 @@ secret/*
 .infra/
 .infra/*
 .infra/**
+
+*_env
+**/*_env
