@@ -148,7 +148,7 @@ def main():
         print("Attempting to checking out the branch")
         subprocess.check_output("git checkout {}".format(branch_id), shell=True)
         subprocess.check_output("git pull", shell=True)
-    except:
+    except subprocess.CalledProcessError:
         print("Creating branch")
         subprocess.check_output("git checkout -b {}".format(branch_id), shell=True)
 
