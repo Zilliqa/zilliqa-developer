@@ -128,6 +128,8 @@ def main():
     if not os.path.exists(".infra"):
         os.system("git clone git@github.com:Zilliqa/devops.git .infra")
 
+    subprocess.check_output("git pull --all", shell=True)
+
     ## Checking out the branch
     print("Switching branch")
     os.chdir(".infra")
