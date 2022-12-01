@@ -58,6 +58,7 @@ def create_messages(github, pr_ref):
 
     if not current_pull:
         print("Could not find PR {}".format(pr_ref))
+        exit(-1)
 
     # Attempting to intepret updates and create messages from it
     messages = []

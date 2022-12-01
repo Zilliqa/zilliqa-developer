@@ -49,11 +49,6 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
@@ -86,7 +81,7 @@ jobs:
           git config --global user.email "bot@zilliqa.com"
           git config --global user.name "Zilliqa Bot"        
 
-          bazelisk run //cd:create_preview -- ${{ steps.extract_branch.outputs.branch }}
+          bazelisk run //cd:create_preview -- $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
