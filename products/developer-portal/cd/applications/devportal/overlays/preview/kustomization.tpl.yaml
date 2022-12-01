@@ -6,4 +6,4 @@ resources:
 images:
   - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
     newTag: ${STABLE_GIT_SHORT_HASH}
-namespace: devportal-pr-1
+namespace: devportal-preview-${STABLE_GIT_SHORT_HASH}

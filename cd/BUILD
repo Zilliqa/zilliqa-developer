@@ -1,4 +1,5 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("@zilliqa_python_deps//:requirements.bzl", "requirement")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 expand_workspace_status(
@@ -34,5 +35,6 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":version",
+        requirement("PyGithub"),
     ],
 )

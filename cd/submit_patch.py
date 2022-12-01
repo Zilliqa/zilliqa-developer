@@ -2,6 +2,8 @@ import os
 import subprocess
 import sys
 
+from github import Github
+
 from cd import version
 
 
@@ -14,13 +16,16 @@ def is_git_dirty(path):
 
 
 def main():
+    # Preparing the Github interaction
+    github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
+    repo = github.get_repo("Zilliqa/devops")
+
     # Defining branch name
     stable_git_hash = version.stable_git_hash
     branch_id = version.branch_id
     patches = sys.argv[1:]
 
     print("Branch: {}".format(branch_id))
-    print(patches)
 
     ## Getting the devops repo
     subprocess.check_output(
@@ -58,7 +63,28 @@ def main():
             'git commit -m "Preparing preview for commit: {}"'.format(stable_git_hash)
         )
         os.system("git push --set-upstream origin {}".format(branch_id))
-    exit(-1)
+
+        github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
+        repo = github.get_repo("Zilliqa/devops")
+
+        pulls = repo.get_pulls(state="open", sort="created", base="main")
+        pull_branches = []
+        for p in pulls:
+            pull_branches.append(p.head.ref)
+
+        if branch_id not in pull_branches:
+            body = """
+            SUMMARY
+            Automated pull request to preview zilliqa-developer/{}
+            """.format(
+                branch_id
+            )
+            repo.create_pull(
+                title="Preview of {}".format(branch_id),
+                body=body,
+                head=branch_id,
+                base="main",
+            )
 
 
 if __name__ == "__main__":

@@ -54,23 +54,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
 
-      - name: "Creating Devops repo update"
-        run: |
-          git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"        
-          pip install PyGithub
-
-          bazelisk run //cd:submit_patch
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Setting Github hash
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Check outputs
-        run: echo ${{ steps.vars.outputs.sha_short }}
-
       - name: Bazel cache
         id: cache-bazel-debug
         uses: actions/cache@v3.0.4
@@ -92,3 +75,13 @@ jobs:
       - name: "Build and push Docker"
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
+
+      - name: "Creating Devops repo update"
+        run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"        
+
+          bazelisk run //cd:submit_patch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}

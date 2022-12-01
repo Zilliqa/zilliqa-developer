@@ -101,13 +101,13 @@ container_push(
 # CD update
 expand_workspace_status(
     name = "preview-kustomization",
-    output = "cd/applications/devportal/overlays/preview/kustomization.yml",
-    template = "cd/applications/devportal/overlays/preview/kustomization.tpl.yml",
+    output = "cd/applications/devportal/overlays/preview/kustomization.yaml",
+    template = "cd/applications/devportal/overlays/preview/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_patch",
-    srcs = ["cd/applications/devportal/overlays/preview/kustomization.yml"],
+    srcs = ["cd/applications/devportal/overlays/preview/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
