@@ -50,11 +50,9 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
+        uses: webfactory/ssh-agent@v0.7.0
         with:
-          key: ${{ secrets.SSH_SECRET_KEY }}
-          known_hosts: ""
-          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
+          ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
 
       - name: Setting Github hash
         id: vars
@@ -87,6 +85,7 @@ jobs:
 
       - name: "Creating Devops repo update"
         run: |
+          pip install PyGithub
           python .github/scripts/open-preview.py
         env:
           GITHUB_TOKEN: ${{ github.token }}
