@@ -49,19 +49,11 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
-      - name: Add SSH key
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          mkdir -p /home/runner/.ssh
-          # Replace example.com with the hostname of the machine
-          # you're SSH-ing into
-          ssh-keyscan example.com >> /home/runner/.ssh/known_hosts
-          # SSH_SECRET_KEY is the name of the repository secret
-          echo "${{ secrets.SSH_SECRET_KEY }}" > /home/runner/.ssh/github_actions
-          chmod 600 /home/runner/.ssh/github_actions
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null   
-          ssh-add /home/runner/.ssh/github_actions
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_SECRET_KEY }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
 
       - name: Setting Github hash
         id: vars
