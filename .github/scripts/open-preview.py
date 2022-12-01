@@ -3,7 +3,7 @@ import subprocess
 
 workspace_status = subprocess.check_output(
     "python config/workspace-status.py", shell=True
-)
+).encode("utf-8")
 status = dict([tuple(x.split(" ", 1)) for x in workspace_status.strip().split("\n")])
 print(status)
 
@@ -15,7 +15,7 @@ subprocess.check_output(
 os.chdir(".infra")
 branch_output = subprocess.check_output(
     "git branch", stderr=subprocess.STDOUT, shell=True
-)
+).encode("utf-8")
 branches = [x.strip() for x in branch_output.split("\n") if x.strip() != ""]
 
 for branch in branches:
