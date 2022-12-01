@@ -60,7 +60,7 @@ jobs:
           git config --global user.name "Zilliqa Bot"        
           pip install PyGithub
 
-          bazelisk run //cd:submit-patch
+          bazelisk run //cd:submit_patch
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
