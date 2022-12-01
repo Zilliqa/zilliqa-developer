@@ -16,6 +16,23 @@ def is_git_dirty(path):
     return out.decode("ascii").strip() != ""
 
 
+def get_main_pull_request(github, pr_ref):
+    repo = github.get_repo("Zilliqa/zilliqa-developer")
+    current_pull = None
+    pulls = repo.get_pulls(state="open", sort="created", head=pr_ref)
+
+    for p in pulls:
+        if p.head.ref == pr_ref:
+            current_pull = p
+            break
+
+    if not current_pull:
+        print("Could not find PR {}".format(pr_ref))
+        exit(-1)
+
+    return current_pull
+
+
 def create_pr(github, orig_branch, branch_id):
     repo = github.get_repo("Zilliqa/devops")
 
@@ -31,34 +48,32 @@ def create_pr(github, orig_branch, branch_id):
         """.format(
             orig_branch
         )
-        repo.create_pull(
+
+        pull = repo.create_pull(
             title="Preview of zilliqa-developer:{}".format(orig_branch),
             body=body,
             head=branch_id,
             base="main",
         )
 
+        pull.set_labels(["preview"])
+
+        # Creating comment
+        current_pull = get_main_pull_request(github, orig_branch)
+        current_pull.create_issue_comment(
+            "A preview PR was openened at {}".format(pull.html_url)
+        )
+
 
 def create_messages(github, pr_ref):
-    repo = github.get_repo("Zilliqa/zilliqa-developer")
-
     # Getting list of changed files
     file_list_raw = subprocess.check_output(
         "git diff --name-only main", stderr=subprocess.STDOUT, shell=True
     ).decode("utf-8")
     file_list = file_list_raw.strip().split("\n")
 
-    current_pull = None
-    pulls = repo.get_pulls(state="open", sort="created", head=pr_ref)
-
-    for p in pulls:
-        if p.head.ref == pr_ref:
-            current_pull = p
-            break
-
-    if not current_pull:
-        print("Could not find PR {}".format(pr_ref))
-        exit(-1)
+    # Getting pull request object
+    current_pull = get_main_pull_request(github, pr_ref)
 
     # Attempting to intepret updates and create messages from it
     messages = []
