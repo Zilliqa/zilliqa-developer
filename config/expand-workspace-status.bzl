@@ -1,7 +1,8 @@
+"""
+Module to workspace status variables in template files
+"""
+
 def _impl(ctx):
-    # The list of arguments we pass to the script.
-    # volatile status file: ctx.version_file
-    # stable status file: ctx.info_file
     args = [
         "--output",
         ctx.outputs.output.path,
@@ -27,7 +28,6 @@ def _impl(ctx):
     )
 
     if ctx.outputs.output.path.endswith(".py"):
-        print("Generated", ctx.outputs.output.path)
         return [
             PyInfo(
                 transitive_sources = depset([ctx.outputs.output]),

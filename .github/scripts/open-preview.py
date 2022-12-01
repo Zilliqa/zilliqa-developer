@@ -54,8 +54,9 @@ print("Pushing")
 subprocess.check_output("git add . -A", shell=True)
 subprocess.check_output(
     'git commit -m "Preparing preview for commit: {}"'.format(
-        status["STABLE_GIT_SHORT_HASH"], shell=True
-    )
+        status["STABLE_GIT_SHORT_HASH"]
+    ),
+    shell=True,
 )
 subprocess.check_output("git push", shell=True)
 
