@@ -106,9 +106,10 @@ expand_workspace_status(
 )
 
 pkg_tar(
-    name = "cd_preview",
+    name = "cd_patch",
     srcs = ["cd/applications/devportal/overlays/preview/kustomization.yml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
+    visibility = ["//visibility:public"],
 )

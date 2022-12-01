@@ -1,14 +1,16 @@
 import os
 import subprocess
+import sys
+
+from cd import version
 
 # Defining branch name
-print("Getting workspace status")
-workspace_status = subprocess.check_output(
-    "python config/workspace-status.py", shell=True
-).decode("utf-8")
-status = dict([tuple(x.split(" ", 1)) for x in workspace_status.strip().split("\n")])
+stable_git_hash = version.stable_git_hash
+branch_id = version.branch_id
+patches = sys.argv[1:]
 
-branch_id = "preview/developer-{}".format(status["STABLE_GIT_SHORT_HASH"])
+print("Branch: {}".format(branch_id))
+print(patches)
 
 ## Getting the devops repo
 subprocess.check_output(
@@ -31,33 +33,15 @@ else:
     print("Creating branch")
     subprocess.check_output("git checkout -b {}".format(branch_id), shell=True)
 
-# Creating the patch
-print("Creating patch")
-os.chdir("..")
-
-# TODO: Update this to one single patch
-subprocess.check_output(
-    "bazelisk build //products/developer-portal:cd_preview", shell=True
-)
-
 # Applying patch
 print("Applying patch")
-os.chdir(".infra")
-subprocess.check_output(
-    "tar xvf ../bazel-bin/products/developer-portal/cd_preview.tar", shell=True
-)
+for patch in patches:
+    os.system("tar xvf {}".format(patch))
 
 
 # Pushing
 print("Pushing")
 # TODO: Check if anything updated
 os.system("git add . -A")
-os.system(
-    'git commit -m "Preparing preview for commit: {}"'.format(
-        status["STABLE_GIT_SHORT_HASH"]
-    )
-)
+os.system('git commit -m "Preparing preview for commit: {}"'.format(stable_git_hash))
 os.system("git push --set-upstream origin {}".format(branch_id))
-
-
-exit(-1)
