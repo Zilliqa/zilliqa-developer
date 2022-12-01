@@ -57,7 +57,7 @@ os.system(
         status["STABLE_GIT_SHORT_HASH"]
     )
 )
-os.system("git push")
+os.system("git push --set-upstream origin {}".format(branch_id))
 
 
 exit(-1)

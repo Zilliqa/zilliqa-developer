@@ -56,6 +56,8 @@ jobs:
 
       - name: "Creating Devops repo update"
         run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"        
           pip install PyGithub
           python .github/scripts/open-preview.py
         env:
