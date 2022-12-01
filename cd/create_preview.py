@@ -141,8 +141,8 @@ def main():
     branches = [x.strip() for x in branch_output.split("\n") if x.strip() != ""]
     branches = [b[2:].strip() if b.startswith("* ") else b for b in branches]
 
-    print(branches)
-    exit(0)
+    print("Branches available:", branches)
+    # exit(0)
 
     if branch_id in branches:
         print("Checking preview branch out")
