@@ -49,6 +49,20 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
+      - name: Add SSH key
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p /home/runner/.ssh
+          # Replace example.com with the hostname of the machine
+          # you're SSH-ing into
+          ssh-keyscan example.com >> /home/runner/.ssh/known_hosts
+          # SSH_SECRET_KEY is the name of the repository secret
+          echo "${{ secrets.SSH_SECRET_KEY }}" > /home/runner/.ssh/github_actions
+          chmod 600 /home/runner/.ssh/github_actions
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null   
+          ssh-add /home/runner/.ssh/github_actions
+
       - name: Setting Github hash
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -80,11 +94,6 @@ jobs:
 
       - name: "Creating Devops repo update"
         run: |
-          git clone git@github.com:Zilliqa/devops.git .infra
-          cd .infra && git checkout -b feature/preview-developer-${{ steps.vars.outputs.sha_short }}
-          echo "DO NOT MERGE" >> cd/applications/devportal/overlays/preview/kustomization.yaml
-          git add . -A
-          git commit -m "Preparing preview for commit: ${{ github.sha }}
-          git push
+          python .github/scripts/open-preview.py
         env:
           GITHUB_TOKEN: ${{ github.token }}
