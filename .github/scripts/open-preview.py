@@ -51,14 +51,13 @@ subprocess.check_output(
 # Pushing
 print("Pushing")
 # TODO: Check if anything updated
-subprocess.check_output("git add . -A", shell=True)
-subprocess.check_output(
+os.system("git add . -A")
+os.system(
     'git commit -m "Preparing preview for commit: {}"'.format(
         status["STABLE_GIT_SHORT_HASH"]
-    ),
-    shell=True,
+    )
 )
-subprocess.check_output("git push", shell=True)
+os.system("git push")
 
 
 exit(-1)
