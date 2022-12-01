@@ -56,7 +56,7 @@ def create_pr(github, orig_branch, branch_id):
             base="main",
         )
 
-        pull.set_labels(["preview"])
+        pull.set_labels("preview")
 
         # Creating comment
         current_pull = get_main_pull_request(github, orig_branch)
