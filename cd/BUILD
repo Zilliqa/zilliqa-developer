@@ -22,9 +22,9 @@ py_library(
 )
 
 py_binary(
-    name = "submit_patch",
+    name = "create_preview",
     srcs = [
-        "submit_patch.py",
+        "create_preview.py",
     ],
     args = [
         "$(location //products/developer-portal:cd_patch)",
