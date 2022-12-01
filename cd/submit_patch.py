@@ -46,7 +46,7 @@ def main():
     # Applying patch
     print("Applying patch")
     for patch in patches:
-        os.system("tar xvf {}".format(patch))
+        os.system("tar xvf ../{}".format(patch))
 
     # Pushing
     if not is_git_dirty("."):
