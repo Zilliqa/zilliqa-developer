@@ -22,8 +22,9 @@ def main():
 
     # Defining branch name
     stable_git_hash = version.stable_git_hash
-    branch_id = version.branch_id
-    patches = sys.argv[1:]
+    patches = sys.argv[1:-1]
+    orig_branch = sys.argv[-1]
+    branch_id = "zilliqa-developer/{}".format(sys.argv[-1])
 
     print("Branch: {}".format(branch_id))
 
@@ -77,10 +78,10 @@ def main():
             SUMMARY
             Automated pull request to preview zilliqa-developer/{}
             """.format(
-                branch_id
+                orig_branch
             )
             repo.create_pull(
-                title="Preview of {}".format(branch_id),
+                title="Preview of zilliqa-developer:{}".format(orig_branch),
                 body=body,
                 head=branch_id,
                 base="main",
