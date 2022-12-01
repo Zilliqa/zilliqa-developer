@@ -132,6 +132,7 @@ def main():
     print("Switching branch")
     os.chdir(".infra")
 
+    os.system("git fetch --all")
     os.system("git pull --all")
 
     branch_output = subprocess.check_output(
