@@ -5,11 +5,6 @@ import sys
 import yaml
 from github import Github
 
-try:
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader
-
 from cd import version
 
 
@@ -21,7 +16,7 @@ def is_git_dirty(path):
     return out.decode("ascii").strip() != ""
 
 
-def create_pr(github):
+def create_pr(github, orig_branch, branch_id):
     repo = github.get_repo("Zilliqa/devops")
 
     pulls = repo.get_pulls(state="open", sort="created", base="main")
@@ -95,7 +90,6 @@ def create_messages(github, pr_ref):
 def main():
     # Preparing the Github interaction
     github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
-    repo = github.get_repo("Zilliqa/devops")
 
     # Defining branch name
     stable_git_hash = version.stable_git_hash
@@ -142,10 +136,8 @@ def main():
         )
         os.system("git push --set-upstream origin {}".format(branch_id))
 
-        github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
-
         # Creating Devops PR
-        create_pr(github)
+        create_pr(github, orig_branch, branch_id)
 
         # Commenting updates to main PR
         create_messages(github, orig_branch)
