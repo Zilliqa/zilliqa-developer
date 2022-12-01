@@ -36,12 +36,14 @@ def get_main_pull_request(github, pr_ref):
 def create_pr(github, orig_branch, branch_id):
     repo = github.get_repo("Zilliqa/devops")
 
+    pull = None
     pulls = repo.get_pulls(state="open", sort="created", base="main")
-    pull_branches = []
     for p in pulls:
-        pull_branches.append(p.head.ref)
+        if branch_id == p.head.ref:
+            pull = p
+            break
 
-    if branch_id not in pull_branches:
+    if pull is None:
         body = """
         SUMMARY
         Automated pull request to preview zilliqa-developer/{}
@@ -56,13 +58,20 @@ def create_pr(github, orig_branch, branch_id):
             base="main",
         )
 
-        pull.set_labels(["preview"])
-
         # Creating comment
         current_pull = get_main_pull_request(github, orig_branch)
         current_pull.create_issue_comment(
             "A preview PR was openened at {}".format(pull.html_url)
         )
+
+    has_preview = False
+    for label in pull.get_labels():
+        if label.name == "preview":
+            has_preview = True
+            break
+
+    if not has_preview:
+        pull.set_labels("preview")
 
 
 def create_messages(github, pr_ref):
@@ -123,16 +132,23 @@ def main():
     print("Switching branch")
     os.chdir(".infra")
 
+    os.system("git fetch --all")
+    os.system("git pull --all")
+
     branch_output = subprocess.check_output(
         "git branch", stderr=subprocess.STDOUT, shell=True
     ).decode("utf-8")
     branches = [x.strip() for x in branch_output.split("\n") if x.strip() != ""]
     branches = [b[2:].strip() if b.startswith("* ") else b for b in branches]
 
-    if branch_id in branches:
-        print("Checking preview branch out")
+    print("Branches available:", branches)
+    # exit(0)
+
+    try:
+        print("Attempting to checking out the branch")
         subprocess.check_output("git checkout {}".format(branch_id), shell=True)
-    else:
+        subprocess.check_output("git pull", shell=True)
+    except subprocess.CalledProcessError:
         print("Creating branch")
         subprocess.check_output("git checkout -b {}".format(branch_id), shell=True)
 
