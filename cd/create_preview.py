@@ -141,6 +141,7 @@ def main():
     if branch_id in branches:
         print("Checking preview branch out")
         subprocess.check_output("git checkout {}".format(branch_id), shell=True)
+        subprocess.check_output("git pull", shell=True)
     else:
         print("Creating branch")
         subprocess.check_output("git checkout -b {}".format(branch_id), shell=True)
