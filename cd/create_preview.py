@@ -36,12 +36,14 @@ def get_main_pull_request(github, pr_ref):
 def create_pr(github, orig_branch, branch_id):
     repo = github.get_repo("Zilliqa/devops")
 
+    pull = None
     pulls = repo.get_pulls(state="open", sort="created", base="main")
-    pull_branches = []
     for p in pulls:
-        pull_branches.append(p.head.ref)
+        if branch_id == p.head.ref:
+            pull = p
+            break
 
-    if branch_id not in pull_branches:
+    if pull is None:
         body = """
         SUMMARY
         Automated pull request to preview zilliqa-developer/{}
@@ -56,13 +58,20 @@ def create_pr(github, orig_branch, branch_id):
             base="main",
         )
 
-        pull.set_labels("preview")
-
         # Creating comment
         current_pull = get_main_pull_request(github, orig_branch)
         current_pull.create_issue_comment(
             "A preview PR was openened at {}".format(pull.html_url)
         )
+
+    has_preview = False
+    for label in pull.get_labels():
+        if label.name == "preview":
+            has_preview = True
+            break
+
+    if not has_preview:
+        pull.set_labels("preview")
 
 
 def create_messages(github, pr_ref):
