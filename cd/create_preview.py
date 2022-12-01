@@ -144,11 +144,11 @@ def main():
     print("Branches available:", branches)
     # exit(0)
 
-    if branch_id in branches:
-        print("Checking preview branch out")
+    try:
+        print("Attempting to checking out the branch")
         subprocess.check_output("git checkout {}".format(branch_id), shell=True)
         subprocess.check_output("git pull", shell=True)
-    else:
+    except:
         print("Creating branch")
         subprocess.check_output("git checkout -b {}".format(branch_id), shell=True)
 
