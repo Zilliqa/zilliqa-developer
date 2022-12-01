@@ -1,5 +1,6 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 load(":defs.bzl", "mkdocs_html")
 
 # TODO:
@@ -51,6 +52,9 @@ mkdocs_html(
     strip_path = package_name(),
 )
 
+##
+# Docker
+
 pkg_tar(
     name = "html-folder",
     srcs = [":build"],
@@ -77,4 +81,35 @@ container_image(
         ":html-folder",
         ":nignx-conf",
     ],
+)
+
+container_push(
+    name = "push_image",
+    format = "Docker",
+    image = ":image",
+    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
+    repository = "zilliqa-devportal",
+
+    # Tagging from workspace status - requires --stamp as build args
+    tag = "{STABLE_GIT_SHORT_HASH}",
+
+    # Static
+    # tag = "test"
+)
+
+###
+# CD update
+expand_workspace_status(
+    name = "preview-kustomization",
+    output = "cd/applications/devportal/overlays/preview/kustomization.yaml",
+    template = "cd/applications/devportal/overlays/preview/kustomization.tpl.yaml",
+)
+
+pkg_tar(
+    name = "cd_patch",
+    srcs = ["cd/applications/devportal/overlays/preview/kustomization.yaml"],
+    mode = "0755",
+    package_dir = "",
+    strip_prefix = ".",
+    visibility = ["//visibility:public"],
 )

@@ -20,7 +20,6 @@ def get_full_version(
     return full
 
 
-
 def main():
     git_hash = get_git_hash(".")
     git_is_dirty = is_git_dirty(".")
@@ -29,6 +28,7 @@ def main():
     version["full_version"] = get_full_version(**version)
 
     print("STABLE_GIT_COMMIT_HASH {}".format(git_hash))
+    print("STABLE_GIT_SHORT_HASH {}".format(git_hash[:8]))
     print("STABLE_GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
@@ -36,8 +36,6 @@ def main():
     print("STABLE_GIT_CHANNEL {channel}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
     print("STABLE_FULL_VERSION {full_version}".format(**version))
-
-    print("STABLE_DUMMY A")
 
 
 def get_git_hash(path):
