@@ -128,17 +128,20 @@ def main():
     if not os.path.exists(".infra"):
         os.system("git clone git@github.com:Zilliqa/devops.git .infra")
 
-    subprocess.check_output("git pull --all", shell=True)
-
     ## Checking out the branch
     print("Switching branch")
     os.chdir(".infra")
+
+    os.system("git pull --all")
 
     branch_output = subprocess.check_output(
         "git branch", stderr=subprocess.STDOUT, shell=True
     ).decode("utf-8")
     branches = [x.strip() for x in branch_output.split("\n") if x.strip() != ""]
     branches = [b[2:].strip() if b.startswith("* ") else b for b in branches]
+
+    print(branches)
+    exit(0)
 
     if branch_id in branches:
         print("Checking preview branch out")
