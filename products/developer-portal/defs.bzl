@@ -1,3 +1,7 @@
+"""
+Rules to collect and byild MkDocs
+"""
+
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
 MkDocsInfo = provider(
