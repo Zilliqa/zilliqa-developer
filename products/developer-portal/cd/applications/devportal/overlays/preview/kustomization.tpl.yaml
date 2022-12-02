@@ -5,15 +5,15 @@ resources:
   - ../../base
 images:
   - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
-    newTag: ${STABLE_HASH_VERSION}
+    newTag: ${STABLE_FULL_VERSION}
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: dev-port-${STABLE_HASH_VERSION}.platform.prd.z7a.xyz
+        value: dev-port-${STABLE_FULL_VERSION_URI}.platform.prd.z7a.xyz
     target:
       kind: Ingress
       name: zilliqa-devportal
 
-namespace: devportal-preview-${STABLE_HASH_VERSION}
+namespace: devportal-preview-${STABLE_FULL_VERSION_URI}

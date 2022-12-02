@@ -103,7 +103,7 @@ container_push(
     repository = "zilliqa-devportal",
 
     # Tagging from workspace status - requires --stamp as build args
-    tag = "{STABLE_HASH_VERSION}",
+    tag = "{STABLE_FULL_VERSION}",
 )
 
 ###

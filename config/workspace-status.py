@@ -3,16 +3,16 @@ import subprocess
 import sys
 
 
-def get_full_version(
+def get_version(
     major, minor, revision, channel, patch, commit_hash, is_dirty, **kwargs
 ):
     # TODO: Replicated code from version-lib-generator
-    full = "%s.%s.%s" % (major, minor, revision)
+    full = "{}.{}.{}".format(major, minor, revision)
     if channel != "release":
-        full += "-%s" % channel
+        full += "-{}".format(channel)
 
-    if patch != "0":
-        full += "-patch-%s-%s" % (patch, commit_hash[:10])
+    if patch != "0" and patch != 0:
+        full += "-patch-{}".format(patch)
 
     if is_dirty:
         full += "-wip"
@@ -23,10 +23,11 @@ def get_full_version(
 def main():
     git_hash = get_git_hash(".")
     git_is_dirty = is_git_dirty(".")
-    version = get_version(".")
+    version = get_version_from_git(".")
     version.update({"commit_hash": git_hash, "is_dirty": git_is_dirty})
-    version["full_version"] = get_full_version(**version)
-    version["short_hash"] = git_hash[:7]
+    version["version"] = get_version(**version)
+    version["full_version"] = "{}-{}".format(version["version"], git_hash[:7])
+    version["full_version_uri"] = version["full_version"].replace(".", "-")
 
     print("STABLE_GIT_COMMIT_HASH {}".format(git_hash))
     print("STABLE_GIT_SHORT_HASH {}".format(git_hash[:7]))
@@ -37,7 +38,7 @@ def main():
     print("STABLE_GIT_CHANNEL {channel}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
     print("STABLE_FULL_VERSION {full_version}".format(**version))
-    print("STABLE_HASH_VERSION {full_version}-{short_hash}".format(**version))
+    print("STABLE_FULL_VERSION_URI {full_version_uri}".format(**version))
 
 
 def get_git_hash(path):
@@ -56,7 +57,7 @@ def is_git_dirty(path):
     return out.decode("ascii").strip() != ""
 
 
-def get_version(path):
+def get_version_from_git(path):
     ret = {
         "major": 0,
         "minor": 0,
