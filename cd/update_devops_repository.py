@@ -9,7 +9,7 @@ from cd import version
 
 
 def is_production(pr_ref):
-    return pr_ref != "!production"
+    return pr_ref == "!production"
 
 
 def is_git_dirty(path):
