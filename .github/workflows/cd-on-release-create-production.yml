@@ -1,12 +1,14 @@
 name: "Create application production"
 
 on:
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
   build-docker:
+    # https://github.com/orgs/community/discussions/26281
+    if: "github.event.release.prerelease"
+
     runs-on: ubuntu-22.04
     name: "Build and deploy"
     env:
