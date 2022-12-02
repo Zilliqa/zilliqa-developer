@@ -52,6 +52,7 @@ jobs:
           git config --global user.email "bot@zilliqa.com"
           git config --global user.name "Zilliqa Bot"        
           git fetch --all --tags
+          git tag -l
 
           bazelisk run //cd:create_preview -- $(git rev-parse --abbrev-ref HEAD)
         env:

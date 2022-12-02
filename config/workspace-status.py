@@ -58,6 +58,7 @@ def is_git_dirty(path):
 
 
 def get_version_from_git(path):
+    subprocess.check_output("git fetch --all --tags", shell=True)
     ret = {
         "major": 0,
         "minor": 0,
