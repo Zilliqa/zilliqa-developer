@@ -103,10 +103,7 @@ container_push(
     repository = "zilliqa-devportal",
 
     # Tagging from workspace status - requires --stamp as build args
-    tag = "{STABLE_GIT_SHORT_HASH}",
-
-    # Static
-    # tag = "test"
+    tag = "{STABLE_HASH_VERSION}",
 )
 
 ###
@@ -120,6 +117,21 @@ expand_workspace_status(
 pkg_tar(
     name = "cd_preview_patch",
     srcs = ["cd/applications/devportal/overlays/preview/kustomization.yaml"],
+    mode = "0755",
+    package_dir = "",
+    strip_prefix = ".",
+    visibility = ["//visibility:public"],
+)
+
+expand_workspace_status(
+    name = "production-kustomization",
+    output = "cd/applications/devportal/overlays/production/kustomization.yaml",
+    template = "cd/applications/devportal/overlays/production/kustomization.tpl.yaml",
+)
+
+pkg_tar(
+    name = "cd_production_patch",
+    srcs = ["cd/applications/devportal/overlays/production/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
