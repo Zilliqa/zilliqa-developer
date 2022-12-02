@@ -42,13 +42,25 @@ load(":defs.bzl", "mkdocs_html")
 #     ],
 # )
 
+filegroup(
+    name = "extra-files",
+    srcs = glob([
+        "stylesheets/*",
+        "overrides/*",
+    ]),
+)
+
 mkdocs_html(
     name = "build",
     srcs = [
         "mkdocs.yml",
+        ":extra-files",
         "//docs:files",
     ],
     config = "mkdocs.yml",
+    remap_paths = {
+        "stylesheets/extra.css": "docs/stylesheets/extra.css",
+    },
     strip_path = package_name(),
 )
 

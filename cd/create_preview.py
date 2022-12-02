@@ -102,8 +102,8 @@ def create_messages(github, pr_ref):
                 for x in lst:
                     if "path" in x and "value" in x and x["path"].endswith("/host"):
                         messages.append(
-                            "Host updated to {} for application {}".format(
-                                x["value"], application
+                            "Host updated to [{}](https://{}) for application {}".format(
+                                x["value"], x["value"], application
                             )
                         )
 

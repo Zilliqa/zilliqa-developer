@@ -1,3 +1,7 @@
+"""
+Rules to collect and byild MkDocs
+"""
+
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
 MkDocsInfo = provider(
@@ -16,6 +20,7 @@ def _mkdocs_collect_impl(ctx):
     root_dir = sandbox.path
     folders = [root_dir]
     strip_srcs = ctx.attr.strip_path
+    remapping = ctx.attr.remap_paths
     shell_cmds = [
         "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "mkdocs.yml")),
     ]
@@ -27,6 +32,9 @@ def _mkdocs_collect_impl(ctx):
             short_path = short_path[len(strip_srcs):]
             if short_path[0] == "/":
                 short_path = short_path[1:]
+
+        if short_path in remapping:
+            short_path = remapping[short_path]
 
         dest = paths.join(root_dir, short_path)
         folders.append(paths.dirname(dest))
@@ -70,6 +78,11 @@ _mkdocs_collect = rule(
             mandatory = True,
         ),
         "out": attr.output(),
+        "remap_paths": attr.string_dict(
+            doc = "Path remapping.",
+            default = {},
+            mandatory = False,
+        ),
         "srcs": attr.label_list(
             doc = "MkDocs source and include files.",
             allow_files = True,
@@ -100,6 +113,7 @@ def _mkdocs_html_impl(ctx):
     root_dir = sandbox.path
     folders = [root_dir]
     strip_srcs = ctx.attr.strip_path
+    remapping = ctx.attr.remap_paths
     shell_cmds = [
         "cp {} {}".format(ctx.file.config.path, paths.join(root_dir, "mkdocs.yml")),
     ]
@@ -111,6 +125,9 @@ def _mkdocs_html_impl(ctx):
             short_path = short_path[len(strip_srcs):]
             if short_path[0] == "/":
                 short_path = short_path[1:]
+
+        if short_path in remapping:
+            short_path = remapping[short_path]
 
         dest = paths.join(root_dir, short_path)
         folders.append(paths.dirname(dest))
@@ -163,6 +180,11 @@ _mkdocs_html = rule(
             doc = "MkDocs project config file.",
             allow_single_file = True,
             mandatory = True,
+        ),
+        "remap_paths": attr.string_dict(
+            doc = "Path remapping.",
+            default = {},
+            mandatory = False,
         ),
         "srcs": attr.label_list(
             doc = "MkDocs source and include files.",
