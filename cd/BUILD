@@ -24,14 +24,34 @@ py_library(
 py_binary(
     name = "create_preview",
     srcs = [
-        "create_preview.py",
+        "update_devops_repository.py",
     ],
     args = [
-        "$(location //products/developer-portal:cd_patch)",
+        "$(location //products/developer-portal:cd_preview_patch)",
     ],
     data = [
-        "//products/developer-portal:cd_patch",
+        "//products/developer-portal:cd_preview_patch",
     ],
+    main = "update_devops_repository.py",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":version",
+        requirement("PyGithub"),
+    ],
+)
+
+py_binary(
+    name = "create_deployment",
+    srcs = [
+        "update_devops_repository.py",
+    ],
+    args = [
+        "$(location //products/developer-portal:cd_preview_patch)",
+    ],
+    data = [
+        "//products/developer-portal:cd_preview_patch",
+    ],
+    main = "update_devops_repository.py",
     visibility = ["//visibility:public"],
     deps = [
         ":version",

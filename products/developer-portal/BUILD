@@ -118,7 +118,7 @@ expand_workspace_status(
 )
 
 pkg_tar(
-    name = "cd_patch",
+    name = "cd_preview_patch",
     srcs = ["cd/applications/devportal/overlays/preview/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
