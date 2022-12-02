@@ -47,6 +47,7 @@ py_binary(
     ],
     args = [
         "$(location //products/developer-portal:cd_production_patch)",
+        "!production",
     ],
     data = [
         "//products/developer-portal:cd_production_patch",

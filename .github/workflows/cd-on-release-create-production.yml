@@ -50,7 +50,7 @@ jobs:
           git config --global user.email "bot@zilliqa.com"
           git config --global user.name "Zilliqa Bot"        
 
-          bazelisk run //cd:create_production -- $(git rev-parse --abbrev-ref HEAD)
+          bazelisk run //cd:create_production
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
