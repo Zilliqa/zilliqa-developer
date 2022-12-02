@@ -43,12 +43,15 @@ jobs:
 
       - name: "Build and push Docker"
         run: |
+          git git fetch --all --tags
+
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
 
       - name: "Creating Devops repo update"
         run: |
           git config --global user.email "bot@zilliqa.com"
           git config --global user.name "Zilliqa Bot"        
+          git git fetch --all --tags
 
           bazelisk run //cd:create_production
         env:
