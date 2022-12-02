@@ -5,9 +5,11 @@ docs_dir: docs
 site_description: Zilliqa blockhain
 site_author: Zilliqa
 extra_css:
-  - css/zilliqa-colors.css
+  - stylesheets/extra.css
 
 markdown_extensions:
+  - attr_list
+  - md_in_html
   - markdown.extensions.toc:
       slugify:
         !!python/object/apply:pymdownx.slugs.slugify { kwds: { case: lower } }
@@ -100,15 +102,22 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/facelessuser
+      link: https://github.com/zilliqa
     - icon: fontawesome/brands/discord
-      link: https://discord.gg/TWs8Tgr
+      link: https://discord.com/invite/XMRE9tt
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/ZilliqaDevs
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/zilliqa
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCvinnFbf0u71cajoxKcfZIQ
 
 plugins:
   - search
 
 theme:
   name: "material"
+  custom_dir: overrides/
   language: en
   logo: assets/img/logo.png
   palette:

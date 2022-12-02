@@ -1,3 +1,11 @@
-# Zilliqa Developer Portal
+---
+template: frontpage.html
+hide:
+  - title
+  - navigation
+  - toc
+---
 
-Yet to be written ...
+<div style="background-color: #000; height: 100%; width: 100%; flex-grow:1">
+Hello world
+</div>
