@@ -21,6 +21,7 @@ def is_git_dirty(path):
 
 
 def get_main_pull_request(github, pr_ref):
+    assert not is_production(pr_ref)
     repo = github.get_repo("Zilliqa/zilliqa-developer")
     current_pull = None
     pulls = repo.get_pulls(state="open", sort="created", head=pr_ref)
