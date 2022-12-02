@@ -61,7 +61,7 @@ def create_pr(github, orig_branch, branch_id):
             """.format(
                 orig_branch
             )
-            title = "Update of zilliqa-developer:{}".format(orig_branch)
+            title = "Preview of zilliqa-developer:{}".format(orig_branch)
 
         pull = repo.create_pull(
             title=title,

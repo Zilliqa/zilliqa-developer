@@ -41,7 +41,7 @@ py_binary(
 )
 
 py_binary(
-    name = "create_deployment",
+    name = "create_production",
     srcs = [
         "update_devops_repository.py",
     ],
