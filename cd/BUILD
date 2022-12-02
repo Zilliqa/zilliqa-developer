@@ -46,10 +46,10 @@ py_binary(
         "update_devops_repository.py",
     ],
     args = [
-        "$(location //products/developer-portal:cd_preview_patch)",
+        "$(location //products/developer-portal:cd_production_patch)",
     ],
     data = [
-        "//products/developer-portal:cd_preview_patch",
+        "//products/developer-portal:cd_production_patch",
     ],
     main = "update_devops_repository.py",
     visibility = ["//visibility:public"],
