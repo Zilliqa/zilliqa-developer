@@ -227,7 +227,7 @@ nav:
           - Get Latest Tx Block: apis/api-blockchain-get-latest-tx-block.md
           - Get Miner Info: apis/api-blockchain-get-miner-info.md
           - Get Network Id: apis/api-blockchain-get-network-id.md
-          - Num Ds Blocks: apis/api-blockchain-num-ds-blocks.md
+          - Num Ds Blocks: apis/api-blockchain-get-num-ds-blocks.md
           - Get Num Tx: apis/api-blockchain-get-num-tx.md
           - Get Num Tx Blocks: apis/api-blockchain-get-num-tx-blocks.md
           - Get Prev Difficulty: apis/api-blockchain-get-prev-difficulty.md
@@ -281,11 +281,10 @@ nav:
               - Sdks: dev-dapps/dev-tools-sdks.md
           - Websockets: dev-dapps/dev-tools-websockets.md
           - Cli: dev-dapps/dev-tools-cli.md
-          - Ide: dev-dapps/dev-tools-ide.md
           - Explorer: dev-dapps/dev-tools-explorer.md
           - Faucet: dev-dapps/dev-tools-faucet.md
       - Other Developer Information:
-          - Dev Wrapped Zil: dev-dapps/dev-wrapped-zil.md
+          - Dev Wrapped Zil: dev-dapps/dev-wrapped-tokens.md
       - Transaction Lifecycle:
           - Signing: dev-dapps/dev-txn-signing.md
           - Broadcasting: dev-dapps/dev-txn-broadcasting.md
@@ -318,22 +317,22 @@ nav:
   - Staking:
       - Zilliqa Seed Node Staking:
           - Staking Overview: staking/overview.md
-          - Staking Disclaimer: staking/staking-disclaimer.md
+          - Staking Disclaimer: staking/disclaimer.md
       - Staking Phase 1.1:
           - Phase 1.1 Notice: staking/phase1/staking-phase11-notice.md
-          - Phase 1 Overview: staking/phase1/staking-phase1-overview.md
-          - General Information: staking/phase1/staking-general-information.md
+          - Phase 1 Overview: staking/phase1/overview.md
+          - General Information: staking/phase1/general-information.md
           - Delegators:
               - Overview: staking/phase1/delegator/staking-delegator-overview.md
-              - Reading Contract States: staking/phase1/delegator/staking-delegator-reading-contract-states.md
+              - Reading Contract States: staking/phase1/delegator/staking-delegator-reading-contract-state.md
               - Operations: staking/phase1/delegator/staking-delegator-operations.md
               - Gzil: staking/phase1/delegator/staking-delegator-gzil.md
           - SSN Operators:
               - Before You Start: staking/phase1/ssn-operator/staking-ssn-before-you-start.md
               - Setup: staking/phase1/ssn-operator/staking-ssn-setup.md
               - Enrollment: staking/phase1/ssn-operator/staking-ssn-enrollment.md
-              - Staking Commission Management: staking/phase1/ssn-operator/staking-commission-management.md
-              - Maintenance: staking/phase1/ssn-operator/staking-ssn-maintenance.md
+              - Staking Commission Management: staking/phase1/ssn-operator/staking-ssn-commission-management.md
+              - Maintenance: staking/phase1/ssn-operator/staking-ssn-maintainance.md
               - Upgrading: staking/phase1/ssn-operator/staking-ssn-upgrading.md
           - Staking Error Codes: staking/phase1/staking-error-codes.md
   - Exchanges:
@@ -369,7 +368,7 @@ nav:
               - Derive: exchanges/rosetta-construction-derive.md
               - Preprocess: exchanges/rosetta-construction-preprocess.md
               - Metadata: exchanges/rosetta-construction-metadata.md
-              - Payloads: exchanges/rosetta-construction-payloads.md
+              - Payloads: exchanges/rosetta-construction-payload.md
               - Parse: exchanges/rosetta-construction-parse.md
               - Combine: exchanges/rosetta-construction-combine.md
               - Hash: exchanges/rosetta-construction-hash.md
@@ -412,7 +411,7 @@ nav:
               - Difficulty Adjustment: contributors/core-difficulty-adjustment.md
               - Por: contributors/core-por.md
               - Coinbase: contributors/core-coinbase.md
-              - Global Gas Price: contributors/core-global-gas-price.md
+              - Global Gas Price: contributors/core-gas-computation.md
           - Mitigation Measures:
               - Guard Mode: contributors/core-guard-mode.md
               - Rejoin Mechanism: contributors/core-rejoin-mechanism.md
