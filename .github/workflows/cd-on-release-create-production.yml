@@ -26,6 +26,18 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
+      - name: Preparing merged branches
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          git fetch --all --tags
+          git fetch --depth=1 origin +refs/heads/${{github.base_ref}}:refs/remotes/origin/${{github.base_ref}}
+          git branch --track ${{github.base_ref}} origin/${{github.base_ref}}
+          while [ -z $( git merge-base ${{github.base_ref}} HEAD ) ]; do     
+            git fetch --deepen=10 origin ${{github.base_ref}} HEAD;
+          done
+          git checkout ${{ github.base_ref }}
+          git merge --squash ${{ github.head_ref }}
+
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
@@ -51,15 +63,6 @@ jobs:
 
       - name: "Build and push Docker"
         run: |
-          git fetch --all --tags
-          # TODO: Checkout target PR
-          #          git branch
-          #          echo  ${{ github.event.pull_request.base.ref }}
-          #          echo ${{ github.event.pull_request.head.ref }}
-          #          git checkout ${{ github.event.pull_request.base.ref }}
-          #          git merge --squash ${{ github.event.pull_request.head.ref }}
-
-
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
 
       - name: "Creating Devops repo update"
