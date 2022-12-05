@@ -8,7 +8,7 @@ description: Zilliqa EVM
 
 ---
 
-*Please bear with us as we populate these pages; if you have feedback/requests for documentation, please see the #ethereum-virtual-machine channel on [discord](https://discord.gg/nKznfCaZxy)*
+_Please bear with us as we populate these pages; if you have feedback/requests for documentation, please see the #ethereum-virtual-machine channel on [discord](https://discord.gg/nKznfCaZxy)_
 
 ## Getting Started with Zilliqa EVM
 
@@ -40,11 +40,11 @@ EVM is not yet available on Zilliqa Mainnet
 
 ##### Developer testnet
 
-| Network Type | Network Name  | Network RPC                       | ChainID | Currency Symbol | Block Explorer URL |
-|--------------|---------------|-----------------------------------|---------|-----------------|--------------------|
-| Devnet       | EVM Dev       | <https://evmdev-l2api.dev.z7a.xyz>  | 33101   | ZIL             |                    |
-| Testnet      | EVM Test      | <https://evm-api-dev.zilliqa.com>   | 33101   | ZIL             | <https://zilliqa-testnet.tryethernal.com/> |
-| Mainnet      |               |                                   |         |                 |                    |
+| Network Type | Network Name | Network RPC                        | ChainID | Currency Symbol | Block Explorer URL                         |
+| ------------ | ------------ | ---------------------------------- | ------- | --------------- | ------------------------------------------ |
+| Devnet       | EVM Dev      | <https://evmdev-l2api.dev.z7a.xyz> | 33101   | ZIL             |                                            |
+| Testnet      | EVM Test     | <https://evm-api-dev.zilliqa.com>  | 33101   | ZIL             | <https://zilliqa-testnet.tryethernal.com/> |
+| Mainnet      |              |                                    |         |                 |                                            |
 
 #### ZILEVM clients
 
@@ -54,8 +54,8 @@ ZILEVM should work with most popular EVM clients and wallets, including [Metamas
 
 For now, use:
 
-* [Viewblock](https://viewblock.io/zilliqa?network=testnet)
-* [DevEx](https://devex.zilliqa.com/?network=https%3A%2F%2Fdev-api.zilliqa.com)
+- [Viewblock](https://viewblock.io/zilliqa?network=testnet)
+- [DevEx](https://devex.zilliqa.com/?network=https%3A%2F%2Fdev-api.zilliqa.com)
 
 In particular, DevEx is capable of translating between ethereum and Zilliqa style addresses (use the recycle button next to the address in the account page).
 
