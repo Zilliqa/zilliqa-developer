@@ -24,10 +24,6 @@ def get_version_from_git(path):
 
     git_is_dirty = is_git_dirty(".")
     ret["is_dirty"] = git_is_dirty
-    if git_is_dirty:
-        # We increate the patch number by one if we are working on a dirty branch
-        # since technically we are working on the next version.
-        ret["patch"] = int(ret["patch"]) + 1
 
     ret["commit_hash"] = get_git_hash(".")
 
@@ -62,6 +58,11 @@ def get_version_from_git(path):
     ret["minor"] = int(ret["minor"])
     ret["patch"] = int(ret["patch"])
 
+    if git_is_dirty:
+        # We increate the patch number by one if we are working on a dirty branch
+        # since technically we are working on the next version.
+        ret["patch"] = int(ret["patch"]) + 1
+
     p = subprocess.Popen(
         ["git", "branch"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -82,20 +83,30 @@ def get_version_from_git(path):
                     if line.startswith("."):
                         line = line[1:].strip()
 
-                    patch = ret["patch"]
-                    try:
-                        major, minor = line.split(".")
-                        major = int(major)
-                        minor = int(minor)
-                        if major > ret["major"] or (
-                            major == ret["major"] and minor > ret["minor"]
-                        ):
-                            ret["major"] = major
-                            ret["minor"] = minor
-                            ret["patch"] = patch
-                            ret["prerelease"] = "rc.{}".format(patch)
-                    except:
-                        raise
+                    p = subprocess.Popen(
+                        ["git", "rev-list", "--count", "HEAD", "^main"],
+                        cwd=path,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+
+                    (out, err) = p.communicate()
+                    if p.returncode == 0:
+                        rc = int(out.decode("ascii").strip())
+
+                        try:
+                            major, minor = line.split(".")
+                            major = int(major)
+                            minor = int(minor)
+                            if major > ret["major"] or (
+                                major == ret["major"] and minor > ret["minor"]
+                            ):
+                                ret["major"] = major
+                                ret["minor"] = minor
+                                ret["patch"] = 0
+                                ret["prerelease"] = "rc.{}".format(rc)
+                        except:
+                            raise
 
     return ret
 
