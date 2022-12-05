@@ -58,6 +58,40 @@ def get_version_from_git(path):
         if ret["prerelease"] is None:
             ret["prerelease"] = ""
 
+    p = subprocess.Popen(
+        ["git", "branch"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    # Checking if we are starting a new release
+    (out, err) = p.communicate()
+    if p.returncode == 0:
+        out = out.decode("ascii").strip().split("\n")
+        for line in out:
+            line = line.strip()
+            if line.startswith("*"):
+                line = line[2:].strip()
+                if line.startswith("release/"):
+                    _, line = line.split("/", 1)
+                    if line.starts("v"):
+                        line = line[1:].strip()
+                    if line.starts("."):
+                        line = line[1:].strip()
+
+                    patch = ret["patch"]
+                    try:
+                        major, minor = line.split(".")
+                        major = int(major)
+                        minor = int(minor)
+                        if major > ret["major"] or (
+                            major == ret["major"] and minor > ret["minor"]
+                        ):
+                            ret["major"] = major
+                            ret["minor"] = minor
+                            ret["patch"] = patch
+                            ret["prerelease"] = "rc.{}".format(patch)
+                    except:
+                        raise
+
     return ret
 
 
