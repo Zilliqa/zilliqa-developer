@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - release/*
+      - main
 
 jobs:
   build-docker:
@@ -56,7 +57,7 @@ jobs:
           git config --global user.name "Zilliqa Bot"        
           git fetch --all --tags
 
-          bazelisk run //cd:create_production
+          bazelisk run //cd:create_production -- $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}

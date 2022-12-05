@@ -9,7 +9,8 @@ from cd import version
 
 
 def is_production(pr_ref):
-    return pr_ref == "!production"
+    # It is production if we are merging to a release branch
+    return pr_ref.startswith("release/") or pr_ref == "!production"
 
 
 def is_git_dirty(path):

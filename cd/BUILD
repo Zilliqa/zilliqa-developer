@@ -27,6 +27,7 @@ py_binary(
         "update_devops_repository.py",
     ],
     args = [
+        # Preview updates
         "$(location //products/developer-portal:cd_preview_patch)",
     ],
     data = [
@@ -46,8 +47,11 @@ py_binary(
         "update_devops_repository.py",
     ],
     args = [
+        # Preview updates
+        "$(location //products/developer-portal:cd_preview_patch)",
+
+        # Production updates
         "$(location //products/developer-portal:cd_production_patch)",
-        "!production",
     ],
     data = [
         "//products/developer-portal:cd_production_patch",
