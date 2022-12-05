@@ -107,12 +107,6 @@ def create_messages(github, pr_ref):
     ).decode("utf-8")
     file_list = file_list_raw.strip().split("\n")
 
-    # Getting pull request object
-    current_pull = get_main_pull_request(github, pr_ref)
-
-    if not current_pull:
-        return
-
     # Attempting to intepret updates and create messages from it
     messages = []
     if is_production(pr_ref):
@@ -140,6 +134,13 @@ def create_messages(github, pr_ref):
                                 x["value"], x["value"], application
                             )
                         )
+
+    # Getting pull request object
+    current_pull = get_main_pull_request(github, pr_ref)
+
+    if not current_pull:
+        print("Messages could not be sent to PR:\n\n" + "\n\n".join(messages))
+        return
 
     # Sending messages
     current_pull.create_issue_comment("\n\n".join(messages))
