@@ -13,8 +13,6 @@ description: Zilliqa Types Of Nodes
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 The Zilliqa Mainnet is composed of several types of nodes that perform different
 functions or provide specialized services.
 

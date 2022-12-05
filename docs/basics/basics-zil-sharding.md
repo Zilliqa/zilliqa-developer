@@ -12,8 +12,6 @@ description: Zilliqa Sharding Mechanism
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 In this section, we present the core idea of sharding that makes Zilliqa scale.
 Sharding in Zilliqa takes many forms: _network sharding_, _transaction
 sharding_, and _computational sharding_. The most important among these is

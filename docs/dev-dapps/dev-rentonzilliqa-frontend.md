@@ -10,23 +10,29 @@ description: Creating the RentOnZilliqa frontend application
 
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
-In this section, we will build the frontend application for accessing RentOnZilliqa.
+In this section, we will build the frontend application for accessing
+RentOnZilliqa.
 
 ## Technology
 
-The frontend is built using [Create React App](https://github.com/facebook/create-react-app) with [TypeScript](https://www.typescriptlang.org) enabled. We rely on [Tailwind CSS](https://tailwindcss.com) for styling the application. The setup for these is freely available on the respective documentations.
+The frontend is built using
+[Create React App](https://github.com/facebook/create-react-app) with
+[TypeScript](https://www.typescriptlang.org) enabled. We rely on
+[Tailwind CSS](https://tailwindcss.com) for styling the application. The setup
+for these is freely available on the respective documentations.
 
-Using [ZilPay](https://zilpay.io), we will connect the frontend elements to the transitions and state of the Smart Contract.
+Using [ZilPay](https://zilpay.io), we will connect the frontend elements to the
+transitions and state of the Smart Contract.
 
 ## Pages
 
-The frontend will consist of a homepage which shows all the available listings. Details about each listing will be displayed on a separate listing page.
+The frontend will consist of a homepage which shows all the available listings.
+Details about each listing will be displayed on a separate listing page.
 
 ### Listings Page
 
-This page lists all the houses that have been posted on the platform. For users with a host account, it also shows the listings managed by them.
+This page lists all the houses that have been posted on the platform. For users
+with a host account, it also shows the listings managed by them.
 
 | <img alt="Listings Page" width="1600" src={useBaseUrl("img/dev-dapps/rentonzilliqa/listings.png")} /> |
 | ----------------------------------------------------------------------------------------------------- |
@@ -35,7 +41,8 @@ This page lists all the houses that have been posted on the platform. For users 
 
 ### Individual Listing Page
 
-This page presents the details about the listing. Users can make a reservation for the listing from this page.
+This page presents the details about the listing. Users can make a reservation
+for the listing from this page.
 
 | <img alt="Individual Listing Page" width="1600" src={useBaseUrl("img/dev-dapps/rentonzilliqa/listing-1.png")} /> |
 | ---------------------------------------------------------------------------------------------------------------- |
@@ -45,11 +52,14 @@ This page presents the details about the listing. Users can make a reservation f
 
 ## Modals
 
-Most actions, including account and listing creation, booking, etc., will be accessible via modals.
+Most actions, including account and listing creation, booking, etc., will be
+accessible via modals.
 
 ### Account creation and ZilPay
 
-On the [Listings Page](#listings-page), the user can create an account. This is done via a modal, which provides options to connect ZilPay and the form for account creation.
+On the [Listings Page](#listings-page), the user can create an account. This is
+done via a modal, which provides options to connect ZilPay and the form for
+account creation.
 
 | <img alt="Account Modal" width="1600" src={useBaseUrl("img/dev-dapps/rentonzilliqa/account.png")} /> |
 | ---------------------------------------------------------------------------------------------------- |
@@ -58,7 +68,8 @@ On the [Listings Page](#listings-page), the user can create an account. This is 
 
 ### Creating and Managing Listings
 
-From the [Listings Page](#listings-page), a host user can create listings and manage existing listings via modals.
+From the [Listings Page](#listings-page), a host user can create listings and
+manage existing listings via modals.
 
 | <img alt="Create Listing Modal" width="1600" src={useBaseUrl("img/dev-dapps/rentonzilliqa/create-listing.png")} /> |
 | ------------------------------------------------------------------------------------------------------------------ |
