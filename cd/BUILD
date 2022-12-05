@@ -57,7 +57,10 @@ py_binary(
         "!production",
     ],
     data = [
+        # Preview updates
         "//products/developer-portal:cd_preview_patch",
+
+        # Production updates
         "//products/developer-portal:cd_production_patch",
     ],
     main = "update_devops_repository.py",
