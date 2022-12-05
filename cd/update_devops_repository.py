@@ -111,6 +111,11 @@ def create_messages_for_pr(github, pr_ref):
 
     # Attempting to intepret updates and create messages from it
     messages = []
+    if is_production(pr_ref):
+        messages = ["Production version {}".format(version.stable_git_hash)]
+    else:
+        messages = ["Preview version {}".format(version.stable_git_hash)]
+
     for f in file_list:
         with open(f, "r") as fb:
             obj = yaml.safe_load(fb.read())
@@ -133,8 +138,7 @@ def create_messages_for_pr(github, pr_ref):
                         )
 
     # Sending messages
-    for m in messages:
-        current_pull.create_issue_comment(m)
+    current_pull.create_issue_comment("\n\n".join(messages))
 
 
 def create_messages(github, pr_ref):
