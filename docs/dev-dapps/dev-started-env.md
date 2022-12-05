@@ -20,19 +20,22 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 |                        | URL(s)                                   |
 | :--------------------- | :--------------------------------------- |
 | **API URL**            | `https://api.zilliqa.com/`               |
+| **EVM API**            | N/A                                      |
 | **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa) |
 | **WebSocket endpoint** | `wss://api-ws.zilliqa.com`               |
 | **Chain ID**           | 1                                        |
-
+| **EVM Chain ID**       | N/A                                      |
 ## Developer Testnet
 
 |                        | URL(s)                                                   |
 | :--------------------- | :------------------------------------------------------- |
 | **API URL**            | `https://dev-api.zilliqa.com/`                           |
-| **Faucet**             | [**Link**](https://dev-wallet.zilliqa.com/home?network=testnet)               |
+| **EVM URL**            | `https://evm-dev-api.zilliqa.com/`                       |
+| **Faucet**             | [**Link**](https://dev-wallet.zilliqa.com/home?network=testnet) |
 | **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa?network=testnet) |
 | **WebSocket endpoint** | `wss://dev-ws.zilliqa.com`                               |
 | **Chain ID**           | 333                                                      |
+| **EVM Chain ID**       | 33101                                                    |
 
 ## Isolated Server
 
