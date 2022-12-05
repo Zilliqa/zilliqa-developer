@@ -12,9 +12,9 @@ description: Getting Started For Exchanges
 
 ---
 
-:::danger $ZIL Disclaimer
-Please read [$ZIL disclaimer](https://www.zilliqa.com/disclaimer) before proceeding.
-:::
+!!! danger $ZIL Disclaimer
+
+    Please read [$ZIL disclaimer](https://www.zilliqa.com/disclaimer) before proceeding.
 
 ## Introduction
 
@@ -37,19 +37,20 @@ In IP whitelisting mode, blockchain data is pushed directly to exchanges in
 periodic intervals. As seed nodes using this mode receive data directly and do
 not otherwise pull data from peers, exchanges must be whitelisted by Zilliqa to
 receive these data broadcasts. This requires a static, public IP address with
-minimally two open ports (inbound and outbound) at which it can be reached.
-The [IP Whitelisting](exchange-ip-whitelisting) section contains information
-about running a node in IP whitelisting mode.
+minimally two open ports (inbound and outbound) at which it can be reached. The
+[IP Whitelisting](exchange-ip-whitelisting) section contains information about
+running a node in IP whitelisting mode.
 
 ### Key Whitelisting Mode
 
 In key whitelisting mode, blockchain data is pulled by the seed from Zilliqa
-Research-hosted public seed nodes in periodic intervals. Exchanges using
-this mode generate a public-private key pair and share their public key with
-Zilliqa Research for whitelisting. At minimum, a port has to be opened for
-outbound traffic. Exchanges using this mode have the further option of
-configuring a second port for inbound traffic. The [Key Whitelisting](exchange-key-whitelisting-1)
-section contains information about running a node in key whitelisting mode.
+Research-hosted public seed nodes in periodic intervals. Exchanges using this
+mode generate a public-private key pair and share their public key with Zilliqa
+Research for whitelisting. At minimum, a port has to be opened for outbound
+traffic. Exchanges using this mode have the further option of configuring a
+second port for inbound traffic. The
+[Key Whitelisting](exchange-key-whitelisting-1) section contains information
+about running a node in key whitelisting mode.
 
 ## Minimum Hardware Requirements
 

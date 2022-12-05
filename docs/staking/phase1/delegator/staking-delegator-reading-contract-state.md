@@ -11,7 +11,8 @@ keywords:
 description: Reading contract states
 ---
 
-In this section, we will cover a few read operations that are useful from a delegator's perspective. These are:
+In this section, we will cover a few read operations that are useful from a
+delegator's perspective. These are:
 
 - [Current list of SSNs](#getting-the-current-list-of-ssns)
 - [List of delegators for a SSN](#getting-the-list-of-delegators-for-a-ssn)
@@ -22,7 +23,10 @@ In this section, we will cover a few read operations that are useful from a dele
 - [Delegator's pending stake withdrawal request](#getting-the-delegators-pending-stake-withdrawal-request)
 - [Delegation history](#getting-delegation-history)
 
-In order to read the above information from the smart contract, you should use the [`GetSmartContractSubState`](https://apidocs.zilliqa.com/#getsmartcontractsubstate) API by querying it from the `ssnlist` smart contract.
+In order to read the above information from the smart contract, you should use
+the
+[`GetSmartContractSubState`](https://apidocs.zilliqa.com/#getsmartcontractsubstate)
+API by querying it from the `ssnlist` smart contract.
 
 ## Getting the Current List of SSNs
 
@@ -44,7 +48,8 @@ curl -d '{
 
 Map of SSN with the corresponding SSN data type
 
-Map SSN address -> [SSN data type](https://github.com/Zilliqa/staking-contract/tree/spec/contracts#data-types)
+Map SSN address ->
+[SSN data type](https://github.com/Zilliqa/staking-contract/tree/spec/contracts#data-types)
 
 ```json
 {
@@ -126,13 +131,14 @@ curl -d '{
 
 ### Output
 
-Map of `ssn address` with the value being a map of `cycle number` and the `buffered deposit` at that particular `cycle number`
+Map of `ssn address` with the value being a map of `cycle number` and the
+`buffered deposit` at that particular `cycle number`
 
 Map `SSN address` -> Map `Cycle number` `buffered deposit amount in Qa`
 
-:::info
-Cycle number refers to the cycle number of the smart contract when the deposit was submitted to buffered deposit.
-:::
+!!! info
+
+    Cycle number refers to the cycle number of the smart contract when the deposit was submitted to buffered deposit.
 
 **Example**
 
@@ -161,7 +167,8 @@ curl -d '{
 
 ### Output
 
-Map consisting of SSN address and the corresponding delegated amount for a particular delegator
+Map consisting of SSN address and the corresponding delegated amount for a
+particular delegator
 
 Map `ssn address` -> `delegated amount`
 
@@ -199,7 +206,8 @@ curl -d '{
 
 ### Output
 
-Map consisting of the `epoch number` when the withdrawal was initiated and the corresponding `amount` to withdraw
+Map consisting of the `epoch number` when the withdrawal was initiated and the
+corresponding `amount` to withdraw
 
 Map `epoch number` -> `Pending withdrawal amount`
 
