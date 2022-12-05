@@ -9,7 +9,8 @@ from cd import version
 
 
 def is_production(pr_ref):
-    return pr_ref == "!production"
+    # It is production if we are merging to a release branch
+    return pr_ref.startswith("release/") or pr_ref == "!production"
 
 
 def is_git_dirty(path):
@@ -21,19 +22,26 @@ def is_git_dirty(path):
 
 
 def get_main_pull_request(github, pr_ref):
-    assert not is_production(pr_ref)
+
     repo = github.get_repo("Zilliqa/zilliqa-developer")
     current_pull = None
     pulls = repo.get_pulls(state="open", sort="created", head=pr_ref)
 
+    n = 0
     for p in pulls:
-        if p.head.ref == pr_ref:
+        if p.head.ref == pr_ref and (p.base.ref == "main" or "release/" in p.base.ref):
             current_pull = p
-            break
+            n += 1
 
     if not current_pull:
         print("Could not find PR {}".format(pr_ref))
-        exit(-1)
+        return None
+
+    if n != 1:
+        print(
+            "This branch is being merged into several other branches - cannot create a preview."
+        )
+        return None
 
     return current_pull
 
@@ -49,7 +57,9 @@ def create_pr(github, orig_branch, branch_id):
             break
 
     if pull is None:
+        type = "preview"
         if is_production(orig_branch):
+            type = "production"
             body = """
             SUMMARY
             Automated production pull request
@@ -64,6 +74,7 @@ def create_pr(github, orig_branch, branch_id):
             )
             title = "Preview of zilliqa-developer:{}".format(orig_branch)
 
+        print("- Creating PR")
         pull = repo.create_pull(
             title=title,
             body=body,
@@ -72,38 +83,37 @@ def create_pr(github, orig_branch, branch_id):
         )
 
         # Creating comment on original PR if not production
-        if not is_production(orig_branch):
-            current_pull = get_main_pull_request(github, orig_branch)
+        current_pull = get_main_pull_request(github, orig_branch)
+        if current_pull:
             current_pull.create_issue_comment(
-                "A preview PR was openened at {}".format(pull.html_url)
+                "A {} PR was openened at {}".format(type, pull.html_url)
             )
 
     # Adding preview label if this not a production PR
-    if not is_production(orig_branch):
-        has_preview = False
-        for label in pull.get_labels():
-            if label.name == "preview":
-                has_preview = True
-                break
+    has_preview = False
+    for label in pull.get_labels():
+        if label.name == "preview":
+            has_preview = True
+            break
 
-        if not has_preview:
-            pull.set_labels("preview")
+    if not has_preview:
+        pull.set_labels("preview")
 
 
-def create_messages_for_pr(github, pr_ref):
-    assert not is_production(pr_ref)
-
+def create_messages(github, pr_ref):
     # Getting list of changed files
     file_list_raw = subprocess.check_output(
         "git diff --name-only main", stderr=subprocess.STDOUT, shell=True
     ).decode("utf-8")
     file_list = file_list_raw.strip().split("\n")
 
-    # Getting pull request object
-    current_pull = get_main_pull_request(github, pr_ref)
-
     # Attempting to intepret updates and create messages from it
     messages = []
+    if is_production(pr_ref):
+        messages = ["Production version {}".format(version.stable_git_hash)]
+    else:
+        messages = ["Preview version {}".format(version.stable_git_hash)]
+
     for f in file_list:
         with open(f, "r") as fb:
             obj = yaml.safe_load(fb.read())
@@ -125,16 +135,15 @@ def create_messages_for_pr(github, pr_ref):
                             )
                         )
 
+    # Getting pull request object
+    current_pull = get_main_pull_request(github, pr_ref)
+
+    if not current_pull:
+        print("Messages could not be sent to PR:\n\n" + "\n\n".join(messages))
+        return
+
     # Sending messages
-    for m in messages:
-        current_pull.create_issue_comment(m)
-
-
-def create_messages(github, pr_ref):
-    if not is_production(pr_ref):
-        create_messages_for_pr(github, pr_ref)
-    else:
-        print("No messages created for production")
+    current_pull.create_issue_comment("\n\n".join(messages))
 
 
 def main():
@@ -145,7 +154,11 @@ def main():
     stable_git_hash = version.stable_git_hash
     patches = sys.argv[1:-1]
     orig_branch = sys.argv[-1]
-    branch_id = "zilliqa-developer/{}".format(sys.argv[-1])
+
+    if is_production(orig_branch):
+        branch_id = "zilliqa-developer/production/{}".format(sys.argv[-1])
+    else:
+        branch_id = "zilliqa-developer/{}".format(sys.argv[-1])
 
     print("Branch: {}".format(branch_id))
 
