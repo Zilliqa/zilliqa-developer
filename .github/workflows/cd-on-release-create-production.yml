@@ -52,6 +52,7 @@ jobs:
       - name: "Build and push Docker"
         run: |
           git fetch --all --tags
+          git branch
           git checkout ${{ github.event.pull_request.base.ref }}
           git merge ${{ github.event.pull_request.head.ref }}
 
