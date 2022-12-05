@@ -24,7 +24,7 @@ def get_version_from_git(path):
     }
 
     pattern = re.compile(
-        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>\d\d?))*(\-(?P<channel>\w[\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
+        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<channel>\w[\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
     )
     p = subprocess.Popen(
         ["git", "describe"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -82,13 +82,13 @@ def main():
     print("STABLE_VERSION {version}".format(**version))
     print("STABLE_FULL_VERSION {full_version}".format(**version))
     print("STABLE_FULL_VERSION_URI {full_version_uri}".format(**version))
-    print("STABLE_GIT_COMMIT_HASH {}".format(git_hash))
-    print("STABLE_GIT_SHORT_HASH {}".format(git_hash[:7]))
-    print("STABLE_GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
-    print("STABLE_GIT_CHANNEL {channel}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
+    print("STABLE_GIT_CHANNEL {channel}".format(**version))
+    print("STABLE_GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
+    print("STABLE_GIT_COMMIT_HASH {}".format(git_hash))
+    print("STABLE_GIT_SHORT_HASH {}".format(git_hash[:7]))
 
 
 def get_git_hash(path):
