@@ -35,13 +35,13 @@ def get_main_pull_request(github, pr_ref):
 
     if not current_pull:
         print("Could not find PR {}".format(pr_ref))
-        exit(-1)
+        return None
 
     if n != 1:
         print(
             "This branch is being merged into several other branches - cannot create a preview."
         )
-        exit(-1)
+        return None
 
     return current_pull
 
@@ -84,9 +84,10 @@ def create_pr(github, orig_branch, branch_id):
 
         # Creating comment on original PR if not production
         current_pull = get_main_pull_request(github, orig_branch)
-        current_pull.create_issue_comment(
-            "A {} PR was openened at {}".format(type, pull.html_url)
-        )
+        if current_pull:
+            current_pull.create_issue_comment(
+                "A {} PR was openened at {}".format(type, pull.html_url)
+            )
 
     # Adding preview label if this not a production PR
     has_preview = False
@@ -99,7 +100,7 @@ def create_pr(github, orig_branch, branch_id):
         pull.set_labels("preview")
 
 
-def create_messages_for_pr(github, pr_ref):
+def create_messages(github, pr_ref):
     # Getting list of changed files
     file_list_raw = subprocess.check_output(
         "git diff --name-only main", stderr=subprocess.STDOUT, shell=True
@@ -108,6 +109,9 @@ def create_messages_for_pr(github, pr_ref):
 
     # Getting pull request object
     current_pull = get_main_pull_request(github, pr_ref)
+
+    if not current_pull:
+        return
 
     # Attempting to intepret updates and create messages from it
     messages = []
@@ -139,13 +143,6 @@ def create_messages_for_pr(github, pr_ref):
 
     # Sending messages
     current_pull.create_issue_comment("\n\n".join(messages))
-
-
-def create_messages(github, pr_ref):
-    if not is_production(pr_ref):
-        create_messages_for_pr(github, pr_ref)
-    else:
-        print("No messages created for production")
 
 
 def main():
