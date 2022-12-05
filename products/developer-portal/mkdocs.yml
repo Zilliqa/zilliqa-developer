@@ -317,7 +317,7 @@ nav:
           - Additional Info: miners/mining-additional-info.md
   - Staking:
       - Zilliqa Seed Node Staking:
-          - Staking Overview: staking/staking-overview.md
+          - Staking Overview: staking/overview.md
           - Staking Disclaimer: staking/staking-disclaimer.md
       - Staking Phase 1.1:
           - Phase 1.1 Notice: staking/phase1/staking-phase11-notice.md
@@ -339,7 +339,7 @@ nav:
   - Exchanges:
       - Exchange Integration:
           - Getting Started:
-              - Getting Started: exchanges/exchange-getting-started.md
+              - Getting Started: exchanges/exchange-introduction.md
               - Ip Whitelisting: exchanges/exchange-ip-whitelisting.md
               - Key Whitelisting 1: exchanges/exchange-key-whitelisting-1.md
               - Key Whitelisting 2: exchanges/exchange-key-whitelisting-2.md
