@@ -8,6 +8,10 @@ from github import Github
 from cd import version
 
 
+def is_production(pr_ref):
+    return pr_ref == "!production"
+
+
 def is_git_dirty(path):
     p = subprocess.Popen(["git", "status", "-s"], cwd=path, stdout=subprocess.PIPE)
     (out, err) = p.communicate()
@@ -17,6 +21,7 @@ def is_git_dirty(path):
 
 
 def get_main_pull_request(github, pr_ref):
+    assert not is_production(pr_ref)
     repo = github.get_repo("Zilliqa/zilliqa-developer")
     current_pull = None
     pulls = repo.get_pulls(state="open", sort="created", head=pr_ref)
@@ -44,37 +49,50 @@ def create_pr(github, orig_branch, branch_id):
             break
 
     if pull is None:
-        body = """
-        SUMMARY
-        Automated pull request to preview zilliqa-developer/{}
-        """.format(
-            orig_branch
-        )
+        if is_production(orig_branch):
+            body = """
+            SUMMARY
+            Automated production pull request
+            """
+            title = "Production roll out of zilliqa-developer"
+        else:
+            body = """
+            SUMMARY
+            Automated pull request to preview zilliqa-developer/{}
+            """.format(
+                orig_branch
+            )
+            title = "Preview of zilliqa-developer:{}".format(orig_branch)
 
         pull = repo.create_pull(
-            title="Preview of zilliqa-developer:{}".format(orig_branch),
+            title=title,
             body=body,
             head=branch_id,
             base="main",
         )
 
-        # Creating comment
-        current_pull = get_main_pull_request(github, orig_branch)
-        current_pull.create_issue_comment(
-            "A preview PR was openened at {}".format(pull.html_url)
-        )
+        # Creating comment on original PR if not production
+        if not is_production(orig_branch):
+            current_pull = get_main_pull_request(github, orig_branch)
+            current_pull.create_issue_comment(
+                "A preview PR was openened at {}".format(pull.html_url)
+            )
 
-    has_preview = False
-    for label in pull.get_labels():
-        if label.name == "preview":
-            has_preview = True
-            break
+    # Adding preview label if this not a production PR
+    if not is_production(orig_branch):
+        has_preview = False
+        for label in pull.get_labels():
+            if label.name == "preview":
+                has_preview = True
+                break
 
-    if not has_preview:
-        pull.set_labels("preview")
+        if not has_preview:
+            pull.set_labels("preview")
 
 
-def create_messages(github, pr_ref):
+def create_messages_for_pr(github, pr_ref):
+    assert not is_production(pr_ref)
+
     # Getting list of changed files
     file_list_raw = subprocess.check_output(
         "git diff --name-only main", stderr=subprocess.STDOUT, shell=True
@@ -110,6 +128,13 @@ def create_messages(github, pr_ref):
     # Sending messages
     for m in messages:
         current_pull.create_issue_comment(m)
+
+
+def create_messages(github, pr_ref):
+    if not is_production(pr_ref):
+        create_messages_for_pr(github, pr_ref)
+    else:
+        print("No messages created for production")
 
 
 def main():
