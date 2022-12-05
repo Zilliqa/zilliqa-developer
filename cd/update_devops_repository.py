@@ -100,8 +100,6 @@ def create_pr(github, orig_branch, branch_id):
 
 
 def create_messages_for_pr(github, pr_ref):
-    assert not is_production(pr_ref)
-
     # Getting list of changed files
     file_list_raw = subprocess.check_output(
         "git diff --name-only main", stderr=subprocess.STDOUT, shell=True
