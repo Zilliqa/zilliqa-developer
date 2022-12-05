@@ -1,6 +1,7 @@
 name: "Create application production"
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - release/**
