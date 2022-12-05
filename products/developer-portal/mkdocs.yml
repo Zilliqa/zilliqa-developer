@@ -335,8 +335,8 @@ nav:
               - Maintenance: staking/phase1/ssn-operator/staking-ssn-maintainance.md
               - Upgrading: staking/phase1/ssn-operator/staking-ssn-upgrading.md
           - Staking Error Codes: staking/phase1/staking-error-codes.md
-  - ZILEVM:
-      - Getting Started: 
+  - EVM:
+      - Getting Started:
             - Introduction: zilevm/zilevm-introduction.md
             - User Introduction: zilevm/user-introduction.md
             - Clients: zilevm/developer-clients.md
