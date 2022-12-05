@@ -52,6 +52,13 @@ jobs:
       - name: "Build and push Docker"
         run: |
           git fetch --all --tags
+          # TODO: Checkout target PR
+          #          git branch
+          #          echo  ${{ github.event.pull_request.base.ref }}
+          #          echo ${{ github.event.pull_request.head.ref }}
+          #          git checkout ${{ github.event.pull_request.base.ref }}
+          #          git merge --squash ${{ github.event.pull_request.head.ref }}
+
 
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
 
@@ -61,7 +68,7 @@ jobs:
           git config --global user.name "Zilliqa Bot"        
           git fetch --all --tags
 
-          bazelisk run //cd:create_production
+          bazelisk run //cd:create_production -- $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
