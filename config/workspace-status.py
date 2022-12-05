@@ -22,6 +22,15 @@ def get_version_from_git(path):
         "build": "unkown",
     }
 
+    git_is_dirty = is_git_dirty(".")
+    ret["is_dirty"] = git_is_dirty
+    if git_is_dirty:
+        # We increate the patch number by one if we are working on a dirty branch
+        # since technically we are working on the next version.
+        ret["patch"] = int(ret["patch"]) + 1
+
+    ret["commit_hash"] = get_git_hash(".")
+
     pattern = re.compile(
         r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<channel>\w[\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
     )
@@ -46,15 +55,6 @@ def get_version_from_git(path):
             ret["patch"] = 0
         if ret["channel"] is None:
             ret["channel"] = "release"
-
-    git_is_dirty = is_git_dirty(".")
-    ret["is_dirty"] = git_is_dirty
-    if git_is_dirty:
-        # We increate the patch number by one if we are working on a dirty branch
-        # since technically we are working on the next version.
-        ret["patch"] = int(ret["patch"]) + 1
-
-    ret["commit_hash"] = get_git_hash(".")
 
     return ret
 
