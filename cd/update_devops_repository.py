@@ -146,7 +146,11 @@ def main():
     stable_git_hash = version.stable_git_hash
     patches = sys.argv[1:-1]
     orig_branch = sys.argv[-1]
-    branch_id = "zilliqa-developer/{}".format(sys.argv[-1])
+
+    if is_production(orig_branch):
+        branch_id = "zilliqa-developer/production/{}".format(sys.argv[-1])
+    else:
+        branch_id = "zilliqa-developer/{}".format(sys.argv[-1])
 
     print("Branch: {}".format(branch_id))
 
