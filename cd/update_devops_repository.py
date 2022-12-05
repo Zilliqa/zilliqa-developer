@@ -80,15 +80,14 @@ def create_pr(github, orig_branch, branch_id):
             )
 
     # Adding preview label if this not a production PR
-    if not is_production(orig_branch):
-        has_preview = False
-        for label in pull.get_labels():
-            if label.name == "preview":
-                has_preview = True
-                break
+    has_preview = False
+    for label in pull.get_labels():
+        if label.name == "preview":
+            has_preview = True
+            break
 
-        if not has_preview:
-            pull.set_labels("preview")
+    if not has_preview:
+        pull.set_labels("preview")
 
 
 def create_messages_for_pr(github, pr_ref):

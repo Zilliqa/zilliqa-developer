@@ -52,6 +52,9 @@ py_binary(
 
         # Production updates
         "$(location //products/developer-portal:cd_production_patch)",
+
+        # Production build
+        "!production",
     ],
     data = [
         "//products/developer-portal:cd_preview_patch",
