@@ -26,7 +26,6 @@ EVM is not yet available on Zilliqa Mainnet
 
 | Network Type | Network Name | Network RPC                        | ChainID | Currency Symbol | Block Explorer URL                         |
 | ------------ | ------------ | ---------------------------------- | ------- | --------------- | ------------------------------------------ |
-| Devnet       | EVM Dev      | <https://evmdev-l2api.dev.z7a.xyz> | 33101   | ZIL             |                                            |
 | Testnet      | EVM Test     | <https://evm-api-dev.zilliqa.com>  | 33101   | ZIL             | <https://zilliqa-testnet.tryethernal.com/> |
 | Mainnet      |              |                                    |         |                 |                                            |
 
@@ -36,7 +35,7 @@ ZILEVM should work with most popular EVM clients and wallets, including [Metamas
 
 #### ZILEVM block explorers
 
-For now, use:
+Use:
 
 - [Viewblock](https://viewblock.io/zilliqa?network=testnet)
 - [DevEx](https://devex.zilliqa.com/?network=https%3A%2F%2Fdev-api.zilliqa.com)

@@ -76,7 +76,7 @@ def get_version_from_git(path):
             line = line.strip()
             if line.startswith("*"):
                 line = line[2:].strip()
-                if line.startswith("release/"):
+                if line.startswith("pre-release/") or line.startswith("release/"):
                     _, line = line.split("/", 1)
                     if line.startswith("v"):
                         line = line[1:].strip()
