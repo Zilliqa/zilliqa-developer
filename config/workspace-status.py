@@ -106,7 +106,7 @@ def get_version_from_git(path):
                                 ret["patch"] = 0
                                 ret["prerelease"] = "rc.{}".format(rc)
                         except ValueError:
-                            raise
+                            pass
 
     return ret
 
