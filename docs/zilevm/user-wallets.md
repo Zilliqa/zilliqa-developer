@@ -12,7 +12,6 @@ description: Wallets that can interact with ZILEVM
 
 ### Setup
 
-
 :::warning
 Your seed phrase must be backed up and kept secret.
 Funds can be at risk if this phrase cannot be recalled or exposed publically.
@@ -30,9 +29,11 @@ Enter the below configuration, and press save.
 | Network Type | Network Name  | Network RPC                       | ChainID | Currency Symbol | Block Explorer URL |
 |--------------|---------------|-----------------------------------|---------|-----------------|--------------------|
 | Devnet       | EVM Dev       | https://evmdev-l2api.dev.z7a.xyz  | 33101   | ZIL             |                    |
-| Testnet      |               |                                   |         |                 |                    |
+| Testnet      | EVM Test      | https://evm-api-dev.zilliqa.com   | 33101   | ZIL             | https://zilliqa-testnet.tryethernal.com/ |
 | Mainnet      |               |                                   |         |                 |                    |
 
 ### Sending funds
 
 We can now send EVMZIL (on metamask) to other metamask wallets using the send function, ensuring the target wallet is a base 16 '0x' address.
+
+[Sending EVM ZIL](/img/evm/send_evm_zil.png)
