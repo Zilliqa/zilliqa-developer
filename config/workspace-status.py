@@ -42,12 +42,12 @@ def get_version_from_git(path):
 
     (out, err) = p.communicate()
     if p.returncode != 0:
-        return ret
+        out = "0.0.0"
+    else:
+        out = out.decode("ascii").strip()
 
-    out = out.decode("ascii").strip()
-
-    if "fatal" in out.lower():
-        return ret
+        if "fatal" in out.lower():
+            out = "0.0.0"
 
     m = pattern.search(out)
     if m:
@@ -58,6 +58,10 @@ def get_version_from_git(path):
         if ret["prerelease"] is None:
             ret["prerelease"] = ""
 
+    ret["major"] = int(ret["major"])
+    ret["minor"] = int(ret["minor"])
+    ret["patch"] = int(ret["patch"])
+
     p = subprocess.Popen(
         ["git", "branch"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -66,15 +70,16 @@ def get_version_from_git(path):
     (out, err) = p.communicate()
     if p.returncode == 0:
         out = out.decode("ascii").strip().split("\n")
+
         for line in out:
             line = line.strip()
             if line.startswith("*"):
                 line = line[2:].strip()
                 if line.startswith("release/"):
                     _, line = line.split("/", 1)
-                    if line.starts("v"):
+                    if line.startswith("v"):
                         line = line[1:].strip()
-                    if line.starts("."):
+                    if line.startswith("."):
                         line = line[1:].strip()
 
                     patch = ret["patch"]
