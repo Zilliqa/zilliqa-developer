@@ -37,6 +37,9 @@ jobs:
           done
           git checkout ${{ github.base_ref }}
           git merge --squash ${{ github.head_ref }}
+          echo "---"
+          git branch
+          python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
