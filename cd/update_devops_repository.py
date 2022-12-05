@@ -27,13 +27,20 @@ def get_main_pull_request(github, pr_ref):
     current_pull = None
     pulls = repo.get_pulls(state="open", sort="created", head=pr_ref)
 
+    n = 0
     for p in pulls:
-        if p.head.ref == pr_ref:
+        if p.head.ref == pr_ref and (p.base.ref == "main" or "release/" in p.base.ref):
             current_pull = p
-            break
+            n += 1
 
     if not current_pull:
         print("Could not find PR {}".format(pr_ref))
+        exit(-1)
+
+    if n != 1:
+        print(
+            "This branch is being merged into several other branches - cannot create a preview."
+        )
         exit(-1)
 
     return current_pull
@@ -50,7 +57,9 @@ def create_pr(github, orig_branch, branch_id):
             break
 
     if pull is None:
+        type = "preview"
         if is_production(orig_branch):
+            type = "production"
             body = """
             SUMMARY
             Automated production pull request
@@ -65,6 +74,7 @@ def create_pr(github, orig_branch, branch_id):
             )
             title = "Preview of zilliqa-developer:{}".format(orig_branch)
 
+        print("- Creating PR")
         pull = repo.create_pull(
             title=title,
             body=body,
@@ -73,11 +83,10 @@ def create_pr(github, orig_branch, branch_id):
         )
 
         # Creating comment on original PR if not production
-        if not is_production(orig_branch):
-            current_pull = get_main_pull_request(github, orig_branch)
-            current_pull.create_issue_comment(
-                "A preview PR was openened at {}".format(pull.html_url)
-            )
+        current_pull = get_main_pull_request(github, orig_branch)
+        current_pull.create_issue_comment(
+            "A {} PR was openened at {}".format(type, pull.html_url)
+        )
 
     # Adding preview label if this not a production PR
     has_preview = False
