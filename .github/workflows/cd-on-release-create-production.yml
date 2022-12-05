@@ -53,8 +53,10 @@ jobs:
         run: |
           git fetch --all --tags
           git branch
+          echo  ${{ github.event.pull_request.base.ref }}
+          echo ${{ github.event.pull_request.head.ref }}
           git checkout ${{ github.event.pull_request.base.ref }}
-          git merge ${{ github.event.pull_request.head.ref }}
+          git merge --squash ${{ github.event.pull_request.head.ref }}
 
 
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
