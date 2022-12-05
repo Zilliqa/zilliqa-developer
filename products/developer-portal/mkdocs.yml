@@ -335,6 +335,15 @@ nav:
               - Maintenance: staking/phase1/ssn-operator/staking-ssn-maintainance.md
               - Upgrading: staking/phase1/ssn-operator/staking-ssn-upgrading.md
           - Staking Error Codes: staking/phase1/staking-error-codes.md
+  - ZILEVM:
+      - Getting Started:
+          - Introduction: zilevm/zilevm-introduction.md
+          - Wallets: zilevm/user-wallets.md
+      - Developers:
+          - Developer Introduction: zilevm/developer-introduction.mdn
+          - Gas: zilevm/protocol-gas.md
+          - OPCodes: zilevm/protocol-opcodes.md
+          - RPC: zilevm/developer-rpc.md
   - Exchanges:
       - Exchange Integration:
           - Getting Started:
