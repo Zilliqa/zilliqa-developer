@@ -105,7 +105,7 @@ def get_version_from_git(path):
                                 ret["minor"] = minor
                                 ret["patch"] = 0
                                 ret["prerelease"] = "rc.{}".format(rc)
-                        except:
+                        except ValueError:
                             raise
 
     return ret
