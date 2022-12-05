@@ -13,8 +13,9 @@ description: Exchange Account Management
 
 ## Generating Numerous Accounts
 
-A common task for exchanges is to safely and predictably generate a large
-number of addresses. You can do so using one or more [BIP39 mnemonics](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki).
+A common task for exchanges is to safely and predictably generate a large number
+of addresses. You can do so using one or more
+[BIP39 mnemonics](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki).
 
 ```ts
 export class ZilliqaService {
@@ -41,8 +42,9 @@ export class ZilliqaService {
 
 ## Exporting an Account
 
-You may also wish to export a keypair to a portable format to use it somewhere else.
-We support a modified implementation of the [Web3 Secret Storage Definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
+You may also wish to export a keypair to a portable format to use it somewhere
+else. We support a modified implementation of the
+[Web3 Secret Storage Definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
 
 ```typescript
 export class ZilliqaService {
@@ -84,9 +86,9 @@ especially your passphrase, secret!
 
 ## Importing an Account
 
-:::caution
-Ethereum's implementation differs from Zilliqa's. You will **not** be able to decrypt a Zilliqa keystore file using web3 and vice-versa.
-:::
+!!! caution
+
+    Ethereum's implementation differs from Zilliqa's. You will **not** be able to decrypt a Zilliqa keystore file using web3 and vice-versa.
 
 At some stage, you may also need to import a keystore file you had previously
 exported. There is a convenient facility for that.
@@ -133,5 +135,4 @@ export class ZilliqaService {
   /* truncated */
 ```
 
-These two methods allow you to securely serialise and deserialise your
-accounts.
+These two methods allow you to securely serialise and deserialise your accounts.
