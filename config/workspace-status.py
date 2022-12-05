@@ -95,7 +95,11 @@ def get_version_from_git(path):
                         rc = int(out.decode("ascii").strip())
 
                         try:
-                            major, minor = line.split(".")
+                            try:
+                                major, minor = line.split(".")
+                            except ValueError:
+                                major, minor, _ = line.split(".")
+
                             major = int(major)
                             minor = int(minor)
                             if major > ret["major"] or (
