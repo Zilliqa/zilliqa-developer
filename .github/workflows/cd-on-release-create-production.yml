@@ -5,6 +5,11 @@ on:
     branches:
       - release/**
       - main
+  push:
+    branches:
+      - "releases/**"
+    tags:
+      - v*
 
 jobs:
   build-docker:
