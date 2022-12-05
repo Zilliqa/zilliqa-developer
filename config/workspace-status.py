@@ -34,6 +34,8 @@ def get_version_from_git(path):
     pattern = re.compile(
         r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>\w[\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
     )
+
+    # Getting git description
     p = subprocess.Popen(
         ["git", "describe"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -76,12 +78,12 @@ def main():
     git_hash = version["commit_hash"]
     git_is_dirty = version["is_dirty"]
     version["full_version"] = "{}+{}".format(version["version"], git_hash[:7])
-    version["full_version_uri"] = (
-        version["full_version"].replace(".", "-").replace("+", "_")
-    )
+    version["full_version_tag"] = version["full_version"].replace("+", "-")
+    version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
 
     print("STABLE_VERSION {version}".format(**version))
     print("STABLE_FULL_VERSION {full_version}".format(**version))
+    print("STABLE_FULL_VERSION_TAG {full_version_tag}".format(**version))
     print("STABLE_FULL_VERSION_URI {full_version_uri}".format(**version))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
