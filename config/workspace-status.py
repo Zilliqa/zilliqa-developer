@@ -175,17 +175,17 @@ def main():
     print("FULL_VERSION_TAG {full_version_tag}".format(**version))
     print("FULL_VERSION_URI {full_version_uri}".format(**version))
 
+    print(
+        "GIT_DISTANCE_FROM_MAIN_INTERSECTION {dist_from_main_intersection}".format(
+            **version
+        )
+    )
     print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("GIT_COMMIT_HASH {}".format(git_hash))
     print("GIT_SHORT_HASH {}".format(git_hash[:7]))
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
-    print(
-        "GIT_DISTANCE_FROM_MAIN_INTERSECTION {dist_from_main_intersection}".format(
-            **version
-        )
-    )
 
 
 def get_git_hash(path):
