@@ -40,9 +40,9 @@ Get list of all NFTs in a brand collectible.
 
     ```graphql
     {
-    	"input": {
+      "input": {
         "collectionId": "11"
-    	}
+      }
     }
     ```
 
