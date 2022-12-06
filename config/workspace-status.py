@@ -134,8 +134,10 @@ def get_version_from_git(path):
 
                         major = int(major)
                         minor = int(minor)
-                        if major > ret["major"] or (
-                            major == ret["major"] and minor > ret["minor"]
+                        if (
+                            major >= ret["major"]
+                            or (major == ret["major"] and minor >= ret["minor"])
+                            and ret["prerelease"] != ""
                         ):
                             ret["major"] = major
                             ret["minor"] = minor
