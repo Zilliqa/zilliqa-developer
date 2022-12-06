@@ -87,7 +87,8 @@ jobs:
 
       - name: "Creating Devops repo update"
         run: |
-          bazelisk run //cd:create_production -- $(git rev-parse --abbrev-ref HEAD)
+          bazelisk run //cd:create_production -- PR $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          # bazelisk run //cd:create_production -- HEAD $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
