@@ -166,11 +166,19 @@ def main():
     version["full_version_tag"] = version["full_version"].replace("+", "-")
     version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
 
+    version["partial_version_uri"] = (
+        version["full_version"].split("+", 1)[0].replace(".", "-")
+    )
+    version["short_branch"] = version["branch"]
+    if "/" in version["short_branch"]:
+        version["short_branch"] = version["short_branch"].rsplit("/", 1)[1]
+
     print("STABLE_VERSION {version}".format(**version))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
     print("STABLE_GIT_PRERELEASE {prerelease}".format(**version))
+    print("STABLE_VERSION_URI {partial_version_uri}-{short_branch}".format(**version))
 
     print("FULL_VERSION {full_version}".format(**version))
     print("FULL_VERSION_TAG {full_version_tag}".format(**version))

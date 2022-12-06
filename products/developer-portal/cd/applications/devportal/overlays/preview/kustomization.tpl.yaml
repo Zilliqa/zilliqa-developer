@@ -16,4 +16,4 @@ patches:
       kind: Ingress
       name: zilliqa-devportal
 
-namespace: devportal-preview-${FULL_VERSION_URI}
+namespace: devportal-${STABLE_VERSION_URI}
