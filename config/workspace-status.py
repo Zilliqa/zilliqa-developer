@@ -28,7 +28,7 @@ def get_version_from_git(path):
     ret["commit_hash"] = get_git_hash(".")
 
     pattern = re.compile(
-        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>\w[\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
+        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>[a-zA-Z][\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
     )
 
     # Getting git description
@@ -53,6 +53,7 @@ def get_version_from_git(path):
     m = pattern.search(out)
     if m:
         ret["prerelease"] = ""
+        print(m.groupdict())
         ret.update(m.groupdict())
         if ret["patch"] is None:
             ret["patch"] = 0
@@ -77,10 +78,11 @@ def get_version_from_git(path):
 
     # Getting the distance to main
     (out, err) = p.communicate()
-    ret["dist_from_main"] = -1
+    dist_from_main = -1
     if p.returncode == 0:
         dist_from_main = int(out.decode("ascii").strip())
-        ret["dist_from_main"] = dist_from_main
+
+    ret["dist_from_main"] = dist_from_main
 
     # Getting list of all branches
     p = subprocess.Popen(
@@ -151,7 +153,7 @@ def main():
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
-    print("STABLE_GIT_CHANNEL {prerelease}".format(**version))
+    print("STABLE_GIT_PRERELEASE {prerelease}".format(**version))
 
     print("FULL_VERSION {full_version}".format(**version))
     print("FULL_VERSION_TAG {full_version_tag}".format(**version))
