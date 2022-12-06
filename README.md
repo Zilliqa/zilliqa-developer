@@ -95,7 +95,7 @@ bazelisk build //zilliqa/js/util:pkg
 
 To build and run the docker image for the documentation locally, run
 
-```
+```sh
 ibazel run //products/developer-portal:dev-image
 ```
 
@@ -105,7 +105,7 @@ list.
 
 You can also run the main server on as
 
-```
+```sh
 ibazel run //products/developer-portal:image
 ```
 
