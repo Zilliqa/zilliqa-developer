@@ -41,6 +41,7 @@ def get_version_from_git(path):
         out = "0.0.0"
     else:
         out = out.decode("ascii").strip()
+        ret["describe"] = out
 
         if "fatal" in out.lower():
             out = "0.0.0"
@@ -69,9 +70,10 @@ def get_version_from_git(path):
 
     # Checking if we are starting a new release
     (out, err) = p.communicate()
+
     if p.returncode == 0:
         out = out.decode("ascii").strip().split("\n")
-
+        ret["branch"] = out
         for line in out:
             line = line.strip()
             if line.startswith("*"):
@@ -136,16 +138,20 @@ def main():
     version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
 
     print("STABLE_VERSION {version}".format(**version))
-    print("STABLE_FULL_VERSION {full_version}".format(**version))
-    print("STABLE_FULL_VERSION_TAG {full_version_tag}".format(**version))
-    print("STABLE_FULL_VERSION_URI {full_version_uri}".format(**version))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
     print("STABLE_GIT_CHANNEL {prerelease}".format(**version))
-    print("STABLE_GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
-    print("STABLE_GIT_COMMIT_HASH {}".format(git_hash))
-    print("STABLE_GIT_SHORT_HASH {}".format(git_hash[:7]))
+
+    print("FULL_VERSION {full_version}".format(**version))
+    print("FULL_VERSION_TAG {full_version_tag}".format(**version))
+    print("FULL_VERSION_URI {full_version_uri}".format(**version))
+    print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
+    print("GIT_COMMIT_HASH {}".format(git_hash))
+    print("GIT_SHORT_HASH {}".format(git_hash[:7]))
+    print("GIT_SHORT_HASH {}".format(git_hash[:7]))
+    print("GIT_BRANCH {branch}".format(**version))
+    print("GIT_BRANCH {branch}".format(**version))
 
 
 def get_git_hash(path):
