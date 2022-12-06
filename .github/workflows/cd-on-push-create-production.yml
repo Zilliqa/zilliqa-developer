@@ -27,6 +27,9 @@ jobs:
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
+          echo "Running git merge --squash ${{ github.head_ref }}"
+          git merge --squash ${{ github.head_ref }}
+                  
           echo "Running git checkout main"
 
           git checkout main

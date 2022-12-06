@@ -22,6 +22,9 @@ jobs:
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"      
+
           echo "Running git checkout main"
 
           git checkout main
@@ -36,14 +39,12 @@ jobs:
           git fetch --all --tags
           git pull --all
 
-          echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }}
-
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
         run: |
-          git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"           
+          echo "Running git merge --squash ${{ github.head_ref }}"
+          git merge --squash ${{ github.head_ref }}
+                  
           git add . -A
           git commit -m "Finish merge"
 
