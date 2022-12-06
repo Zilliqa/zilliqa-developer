@@ -39,7 +39,7 @@ jobs:
           git pull --all
 
           echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }} || echo "Seems like "
+          git merge --squash ${{ github.head_ref }}
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
