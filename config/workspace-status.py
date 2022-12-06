@@ -1,6 +1,9 @@
+import os
 import re
 import subprocess
 import sys
+
+GIT_SHORT_HASH_LEGNTH = 9
 
 
 def is_git_dirty(path):
@@ -28,7 +31,7 @@ def get_version_from_git(path):
     ret["commit_hash"] = get_git_hash(".")
 
     pattern = re.compile(
-        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>[a-zA-Z][\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
+        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>[a-zA-Z][\w\d]+))?(\-(?P<patch>\d+)\-g(?P<build>[\w\d]{6,10}))?"
     )
 
     # Getting git description
@@ -51,9 +54,14 @@ def get_version_from_git(path):
             out = "0.0.0"
 
     m = pattern.search(out)
+    ret["regex_match"] = "no match"
     if m:
         ret["prerelease"] = ""
         ret.update(m.groupdict())
+        ret["regex_match"] = ",".join(
+            "{}={}".format(str(k).strip(), str(v).strip())
+            for k, v in m.groupdict().items()
+        )
         if ret["patch"] is None:
             ret["patch"] = 0
         if ret["prerelease"] is None:
@@ -131,8 +139,10 @@ def get_version_from_git(path):
 
                         major = int(major)
                         minor = int(minor)
-                        if major > ret["major"] or (
-                            major == ret["major"] and minor > ret["minor"]
+                        if (
+                            major >= ret["major"]
+                            or (major == ret["major"] and minor >= ret["minor"])
+                            and ret["prerelease"] != ""
                         ):
                             ret["major"] = major
                             ret["minor"] = minor
@@ -162,9 +172,24 @@ def main():
     version["version"] = get_version(**version)
     git_hash = version["commit_hash"]
     git_is_dirty = version["is_dirty"]
-    version["full_version"] = "{}+{}".format(version["version"], git_hash[:7])
+    version["full_version"] = "{}+{}".format(
+        version["version"], git_hash[:GIT_SHORT_HASH_LEGNTH]
+    )
     version["full_version_tag"] = version["full_version"].replace("+", "-")
     version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
+
+    version["partial_version_uri"] = (
+        version["full_version"].split("+", 1)[0].replace(".", "-")
+    )
+
+    version["build_uri_suffix"] = os.environ.get(
+        "BUILD_URI_SUFFIX", git_hash[:GIT_SHORT_HASH_LEGNTH]
+    )
+    if "/" in version["build_uri_suffix"]:
+        version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
+        version["build_uri_suffix"] = (
+            version["build_uri_suffix"].replace(".", "-").replace("+", "-")
+        )
 
     print("STABLE_VERSION {version}".format(**version))
     print("STABLE_GIT_MAJOR {major}".format(**version))
@@ -184,10 +209,15 @@ def main():
     )
     print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("GIT_COMMIT_HASH {}".format(git_hash))
-    print("GIT_SHORT_HASH {}".format(git_hash[:7]))
+    print("GIT_SHORT_HASH {}".format(git_hash[:GIT_SHORT_HASH_LEGNTH]))
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
+    print(
+        "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(**version)
+    )
+
+    print("REGEX_DESCRIBE_MATCH {regex_match}".format(**version))
 
 
 def get_git_hash(path):
