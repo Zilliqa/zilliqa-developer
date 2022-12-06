@@ -53,7 +53,6 @@ def get_version_from_git(path):
     m = pattern.search(out)
     if m:
         ret["prerelease"] = ""
-        print(m.groupdict())
         ret.update(m.groupdict())
         if ret["patch"] is None:
             ret["patch"] = 0
