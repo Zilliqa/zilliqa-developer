@@ -31,7 +31,7 @@ def get_version_from_git(path):
     ret["commit_hash"] = get_git_hash(".")
 
     pattern = re.compile(
-        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>[a-zA-Z][\w\d]+))?(\-(?P<patch>\d+)\-(?P<build>[\w\d]{10}))?"
+        r"(v\.? ?)?(?P<major>\d+)(\.(?P<minor>\d\d?))(\.(?P<placeholder>[\d\w]\d?))*(\-(?P<prerelease>[a-zA-Z][\w\d]+))?(\-(?P<patch>\d+)\-g(?P<build>[\w\d]{6,10}))?"
     )
 
     # Getting git description
