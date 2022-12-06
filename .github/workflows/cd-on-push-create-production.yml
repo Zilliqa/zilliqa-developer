@@ -29,11 +29,6 @@ jobs:
         run: |
           git config --global user.email "bot@zilliqa.com"
           git config --global user.name "Zilliqa Bot"       
-                  
-          echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }}
-                  
-          echo "Running git checkout main"
 
           git checkout main
           git fetch --all --tags
