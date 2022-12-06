@@ -69,20 +69,34 @@ def get_version_from_git(path):
         # since technically we are working on the next version.
         ret["patch"] = int(ret["patch"]) + 1
 
+    # Finding intersectoin point between main and head
     p = subprocess.Popen(
-        ["git", "rev-list", "--count", "HEAD", "^main"],
+        ["git", "merge-base", "HEAD", "main"],
         cwd=path,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
 
-    # Getting the distance to main
+    intersection_point = "main"
     (out, err) = p.communicate()
-    dist_from_main = -1
     if p.returncode == 0:
-        dist_from_main = int(out.decode("ascii").strip())
+        intersection_point = out.decode("ascii").strip()
 
-    ret["dist_from_main"] = dist_from_main
+    # Compunting commits since intersection
+    p = subprocess.Popen(
+        ["git", "rev-list", "--count", "HEAD", "^{}".format(intersection_point)],
+        cwd=path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    # Getting the distance to intersection
+    (out, err) = p.communicate()
+    dist_from_main_intersection = -1
+    if p.returncode == 0:
+        dist_from_main_intersection = int(out.decode("ascii").strip())
+
+    ret["dist_from_main_intersection"] = dist_from_main_intersection
 
     # Getting list of all branches
     p = subprocess.Popen(
@@ -122,7 +136,9 @@ def get_version_from_git(path):
                             ret["major"] = major
                             ret["minor"] = minor
                             ret["patch"] = 0
-                            ret["prerelease"] = "rc.{}".format(dist_from_main)
+                            ret["prerelease"] = "rc.{}".format(
+                                dist_from_main_intersection
+                            )
                     except ValueError:
                         raise
 
@@ -165,7 +181,11 @@ def main():
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
-    print("GIT_DISTANCE_FROM_MAIN {dist_from_main}".format(**version))
+    print(
+        "GIT_DISTANCE_FROM_MAIN_INTERSECTION {dist_from_main_intersection}".format(
+            **version
+        )
+    )
 
 
 def get_git_hash(path):
