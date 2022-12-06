@@ -75,9 +75,19 @@ pkg_tar(
     #    strip_prefix = package_name(),
 )
 
+# TODO: Consider using genfile to use the same configuration for both deployments
+
 pkg_tar(
     name = "nignx-conf",
     srcs = ["nginx/default.conf"],
+    mode = "0755",
+    package_dir = "/etc/nginx/conf.d/",
+    deps = [],
+)
+
+pkg_tar(
+    name = "nignx-dev-conf",
+    srcs = ["nginx-dev/default.conf"],
     mode = "0755",
     package_dir = "/etc/nginx/conf.d/",
     deps = [],
@@ -92,6 +102,18 @@ container_image(
     tars = [
         ":html-folder",
         ":nignx-conf",
+    ],
+)
+
+container_image(
+    name = "dev-image",
+    base = "@nginx//image",
+    # Disabling legacy run behaviour to allow run from the command line
+    legacy_run_behavior = False,
+    ports = ["8000"],
+    tars = [
+        ":html-folder",
+        ":nignx-dev-conf",
     ],
 )
 
