@@ -91,6 +91,26 @@ or you can pick out a specific target as
 bazelisk build //zilliqa/js/util:pkg
 ```
 
+#### Building documentation
+
+To build and run the docker image for the documentation locally, run
+
+```sh
+ibazel run //products/developer-portal:dev-image
+```
+
+This will start a server on port `8000`. If `ibazel` is used, the Docker image
+will recompile everytime you make a file change to anything in the dependency
+list.
+
+You can also run the main server on as
+
+```sh
+ibazel run //products/developer-portal:image
+```
+
+which is served on port `80`.
+
 #### Building libraries
 
 #### Building and running Docker images
