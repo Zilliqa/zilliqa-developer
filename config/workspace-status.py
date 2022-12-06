@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import sys
@@ -166,6 +167,17 @@ def main():
     version["full_version_tag"] = version["full_version"].replace("+", "-")
     version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
 
+    version["partial_version_uri"] = (
+        version["full_version"].split("+", 1)[0].replace(".", "-")
+    )
+
+    version["build_uri_suffix"] = os.environ.get("BUILD_URI_SUFFIX", git_hash[:7])
+    if "/" in version["build_uri_suffix"]:
+        version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
+        version["build_uri_suffix"] = (
+            version["build_uri_suffix"].replace(".", "-").replace("+", "-")
+        )
+
     print("STABLE_VERSION {version}".format(**version))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
@@ -188,6 +200,9 @@ def main():
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
+    print(
+        "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(**version)
+    )
 
 
 def get_git_hash(path):
