@@ -170,7 +170,7 @@ def main():
         version["full_version"].split("+", 1)[0].replace(".", "-")
     )
 
-    version["build_uri_suffix"] = os.environ.get("BUILD_URI_SUFFIX", version["branch"])
+    version["build_uri_suffix"] = os.environ.get("BUILD_URI_SUFFIX", git_hash[:7])
     if "/" in version["build_uri_suffix"]:
         version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
         version["build_uri_suffix"] = (
@@ -200,9 +200,7 @@ def main():
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
     print(
-        "PERSISTENT_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(
-            **version
-        )
+        "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(**version)
     )
 
 
