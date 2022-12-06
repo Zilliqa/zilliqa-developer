@@ -2,12 +2,9 @@ name: "Create application production"
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - release/**
   push:
     branches:
-      - "releases/**"
+      - "releases/*"
     tags:
       - v*
 
@@ -25,6 +22,21 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
+
+      - name: Preparing merged branches
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          git checkout main
+          git fetch --all --tags
+          git pull --all
+
+          # Checking out the base branch to make this our working branch and 
+          # merge the head
+          git checkout ${{ github.ref_name }}
+          git fetch --all --tags
+          git pull --all
+          python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
@@ -51,24 +63,11 @@ jobs:
 
       - name: "Build and push Docker"
         run: |
-          git fetch --all --tags
-          # TODO: Checkout target PR
-          #          git branch
-          #          echo  ${{ github.event.pull_request.base.ref }}
-          #          echo ${{ github.event.pull_request.head.ref }}
-          #          git checkout ${{ github.event.pull_request.base.ref }}
-          #          git merge --squash ${{ github.event.pull_request.head.ref }}
-
-
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
 
       - name: "Creating Devops repo update"
         run: |
-          git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"        
-          git fetch --all --tags
-
-          bazelisk run //cd:create_production -- $(git rev-parse --abbrev-ref HEAD)
+          bazelisk run //cd:create_production -- HEAD $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}

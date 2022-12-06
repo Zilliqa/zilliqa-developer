@@ -48,7 +48,7 @@ for phase 1.
 
 ## How to Proceed
 
-!!! danger Disclaimer
+!!! caution Disclaimer
 
       Please read our [Disclaimer](../staking-disclaimer) page carefully before participating in our staking program.
 

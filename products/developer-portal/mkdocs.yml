@@ -340,7 +340,7 @@ nav:
           - Introduction: zilevm/zilevm-introduction.md
           - Wallets: zilevm/user-wallets.md
       - Developers:
-          - Developer Introduction: zilevm/developer-introduction.mdn
+          - Developer Introduction: zilevm/developer-introduction.md
           - Gas: zilevm/protocol-gas.md
           - OPCodes: zilevm/protocol-opcodes.md
           - RPC: zilevm/developer-rpc.md
