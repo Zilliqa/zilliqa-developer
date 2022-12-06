@@ -169,16 +169,19 @@ def main():
     version["partial_version_uri"] = (
         version["full_version"].split("+", 1)[0].replace(".", "-")
     )
-    version["short_branch"] = version["branch"]
-    if "/" in version["short_branch"]:
-        version["short_branch"] = version["short_branch"].rsplit("/", 1)[1]
+
+    version["build_uri_suffix"] = os.environ.get("BUILD_URI_SUFFIX", version["branch"])
+    if "/" in version["build_uri_suffix"]:
+        version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
+        version["build_uri_suffix"] = (
+            version["build_uri_suffix"].replace(".", "-").replace("+", "-")
+        )
 
     print("STABLE_VERSION {version}".format(**version))
     print("STABLE_GIT_MAJOR {major}".format(**version))
     print("STABLE_GIT_MINOR {minor}".format(**version))
     print("STABLE_GIT_PATCH {patch}".format(**version))
     print("STABLE_GIT_PRERELEASE {prerelease}".format(**version))
-    print("STABLE_VERSION_URI {partial_version_uri}-{short_branch}".format(**version))
 
     print("FULL_VERSION {full_version}".format(**version))
     print("FULL_VERSION_TAG {full_version_tag}".format(**version))
@@ -196,6 +199,11 @@ def main():
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
+    print(
+        "PERSISTENT_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(
+            **version
+        )
+    )
 
 
 def get_git_hash(path):

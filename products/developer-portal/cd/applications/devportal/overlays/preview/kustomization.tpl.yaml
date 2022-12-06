@@ -11,7 +11,7 @@ patches:
   - patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: dev-port-${STABLE_VERSION_URI}.platform.prd.z7a.xyz
+        value: dev-port-${PERSISTENT_VERSION_URI}.platform.prd.z7a.xyz
     target:
       kind: Ingress
       name: zilliqa-devportal
