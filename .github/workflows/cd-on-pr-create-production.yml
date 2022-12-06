@@ -30,11 +30,14 @@ jobs:
 
           # Checking out the base branch to make this our working branch and 
           # merge the head
+          echo "Running git checkout ${{ github.base_ref }}"
+
           git checkout ${{ github.base_ref }}
           git fetch --all --tags
           git pull --all
 
-          git merge --squash ${{ github.head_ref }}
+          echo "Running git merge --squash ${{ github.head_ref }}"
+          git merge --squash ${{ github.head_ref }} || echo "Seems like "
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
