@@ -17,38 +17,38 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
 
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"      
+
+          echo "Running git checkout main"
+
+          git checkout main
           git fetch --all --tags
-
-          # Getting the base branch to make a merge
-          git fetch --depth=1 origin +refs/heads/${{github.base_ref}}:refs/remotes/origin/${{github.base_ref}}
-          git branch --track ${{github.base_ref}} origin/${{github.base_ref}}
-          while [ -z $( git merge-base ${{github.base_ref}} HEAD ) ]; do     
-            git fetch --deepen=10 origin ${{github.base_ref}} HEAD;
-          done
-
-          # Getting the main branch to compute the distance to main
-          git fetch --depth=1 origin +refs/heads/main:refs/remotes/origin/main
-          git branch --track main origin/main
-          while [ -z $( git merge-base main HEAD ) ]; do     
-            git fetch --deepen=10 origin main HEAD;
-          done
+          git pull --all
 
           # Checking out the base branch to make this our working branch and 
           # merge the head
+          echo "Running git checkout ${{ github.base_ref }}"
+
           git checkout ${{ github.base_ref }}
-          git merge --squash ${{ github.head_ref }}
+          git fetch --all --tags
+          git pull --all
+          python config/workspace-status.py
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
         run: |
-          git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"           
+          echo "Running git merge --squash ${{ github.head_ref }}"
+          git merge --squash ${{ github.head_ref }}
+                  
           git add . -A
           git commit -m "Finish merge"
+          python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
@@ -79,7 +79,8 @@ jobs:
 
       - name: "Creating Devops repo update"
         run: |
-          bazelisk run //cd:create_preview -- $(git rev-parse --abbrev-ref HEAD)
+          bazelisk run //cd:create_preview -- PR $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
+          BUILD_URI_SUFFIX: ${{ github.head_ref }}
