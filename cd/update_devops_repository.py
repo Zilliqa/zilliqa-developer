@@ -114,9 +114,9 @@ def create_messages(github, pr_ref):
     # Attempting to intepret updates and create messages from it
     messages = []
     if is_production(pr_ref):
-        messages = ["Production version {}".format(version.stable_git_hash)]
+        messages = ["Production version {}".format(version.full_version)]
     else:
-        messages = ["Preview version {}".format(version.stable_git_hash)]
+        messages = ["Preview version {}".format(version.full_version)]
 
     for f in file_list:
         with open(f, "r") as fb:
@@ -155,7 +155,7 @@ def main():
     github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
 
     # Defining branch name
-    stable_git_hash = version.stable_git_hash
+    full_version = version.full_version
     patches = sys.argv[1:-1]
     orig_branch = sys.argv[-1]
 
@@ -206,7 +206,7 @@ def main():
         print("Pushing changes")
         os.system("git add . -A")
         os.system(
-            'git commit -m "Preparing preview for commit: {}"'.format(stable_git_hash)
+            'git commit -m "Preparing preview for commit: {}"'.format(full_version)
         )
         os.system("git push --set-upstream origin {}".format(branch_id))
 

@@ -152,6 +152,7 @@ def main():
     print("FULL_VERSION {full_version}".format(**version))
     print("FULL_VERSION_TAG {full_version_tag}".format(**version))
     print("FULL_VERSION_URI {full_version_uri}".format(**version))
+
     print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("GIT_COMMIT_HASH {}".format(git_hash))
     print("GIT_SHORT_HASH {}".format(git_hash[:7]))
