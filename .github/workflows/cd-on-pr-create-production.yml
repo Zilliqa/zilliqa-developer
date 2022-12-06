@@ -1,7 +1,6 @@
 name: "Create application production"
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - release/*
@@ -52,6 +51,7 @@ jobs:
           git config --global user.name "Zilliqa Bot"           
           git add . -A
           git commit -m "Finish merge"
+          python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0

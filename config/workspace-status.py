@@ -82,6 +82,8 @@ def get_version_from_git(path):
     if p.returncode == 0:
         intersection_point = out.decode("ascii").strip()
 
+    ret["intersection_point"] = intersection_point
+
     # Compunting commits since intersection
     p = subprocess.Popen(
         ["git", "rev-list", "--count", "HEAD", "^{}".format(intersection_point)],
@@ -136,7 +138,7 @@ def get_version_from_git(path):
                             ret["major"] = major
                             ret["minor"] = minor
                             ret["patch"] = 0
-                            ret["prerelease"] = "rc.{}".format(
+                            ret["prerelease"] = "rc{}".format(
                                 dist_from_main_intersection
                             )
                     except ValueError:
@@ -175,6 +177,7 @@ def main():
     print("FULL_VERSION_TAG {full_version_tag}".format(**version))
     print("FULL_VERSION_URI {full_version_uri}".format(**version))
 
+    print("GIT_MAIN_INTERSECTION {intersection_point}".format(**version))
     print(
         "GIT_DISTANCE_FROM_MAIN_INTERSECTION {dist_from_main_intersection}".format(
             **version
