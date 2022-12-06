@@ -12,9 +12,10 @@ description: Getting Started For Exchanges
 
 ---
 
-!!! caution $ZIL Disclaimer
+!!! caution Disclaimer
 
-    Please read [$ZIL disclaimer](https://www.zilliqa.com/disclaimer) before proceeding.
+    Please read
+    [$ZIL disclaimer](https://www.zilliqa.com/disclaimer) before proceeding.
 
 ## Introduction
 
