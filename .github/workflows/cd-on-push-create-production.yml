@@ -36,6 +36,7 @@ jobs:
           git checkout ${{ github.ref_name }}
           git fetch --all --tags
           git pull --all
+          python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
