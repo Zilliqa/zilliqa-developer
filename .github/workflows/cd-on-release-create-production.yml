@@ -37,6 +37,12 @@ jobs:
           done
           git checkout ${{ github.base_ref }}
           git merge --squash ${{ github.head_ref }}
+
+      - name:
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          git add . -A
+          git commit -m "Finish merge"
           echo "---"
           git branch
           python config/workspace-status.py
