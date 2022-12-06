@@ -21,61 +21,45 @@ Get the balance of a specific ZRC2 token for a given wallet.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
+    ```graphql
+    query UserBalance($input: WalletBalanceInput) {
+      getUserBalanceByToken(input: $input) {
+        tokenAddress
+        walletAddress
+        lastBlockID
+        amount
+      }
+    }
+    ```
 
-#### Query
+    #### Query Variables
 
-```graphql
-query UserBalance($input: WalletBalanceInput) {
-  getUserBalanceByToken(input: $input) {
-    tokenAddress
-    walletAddress
-    lastBlockID
-    amount
-  }
-}
-```
+    ```graphql
+    {
+      "input": {
+        "wallet": "0x22b251cc155ac0a181a156aaec74e964a82011c1",
+        "token": "0x98a71b463a33bbff650d123bf04f1f32d1c8b508"
+      }
+    }
+    ```
 
-#### Query Variables
+    #### HTTP Headers
 
-```graphql
-{
-  "input": {
-    "wallet": "0x22b251cc155ac0a181a156aaec74e964a82011c1",
-    "token": "0x98a71b463a33bbff650d123bf04f1f32d1c8b508"
-  }
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-#### HTTP Headers
+=== "cURL"
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```curl
 
-</TabItem>
-
-<TabItem value="cURL">
-
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

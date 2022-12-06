@@ -19,71 +19,55 @@ Get a list of of ZRC-2 contracts.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query TokensList($input: TokenDetailsInput) {
-  getTokenDetails(input: $input) {
-    cursor
-    list {
-      contractAddress
-      tokenName
-      tokenSymbol
-      init_supply
-      totalSupply
-      standard
-      decimals
-      ownerAddress
-      type
+    ```graphql
+    query TokensList($input: TokenDetailsInput) {
+      getTokenDetails(input: $input) {
+        cursor
+        list {
+          contractAddress
+          tokenName
+          tokenSymbol
+          init_supply
+          totalSupply
+          standard
+          decimals
+          ownerAddress
+          type
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
-  "input": {
-    "filter": {
-      "after": "1",
-      "limit": 5
+    ```graphql
+    {
+      "input": {
+        "filter": {
+          "after": "1",
+          "limit": 5
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

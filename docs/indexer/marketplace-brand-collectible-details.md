@@ -20,63 +20,47 @@ Get brand collectible details of an NFT.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
+    ```graphql
+    query BrandsAssetById($input: AssetInput) {
+      getBrandCollectibleByAssetId(input: $input) {
+        collectionId
+        createdAt
+        collectionContract
+        tokenId
+        tokenAddress
+        status
+      }
+    }
+    ```
 
-#### Query
+    #### Query Variables
 
-```graphql
-query BrandsAssetById($input: AssetInput) {
-  getBrandCollectibleByAssetId(input: $input) {
-    collectionId
-    createdAt
-    collectionContract
-    tokenId
-    tokenAddress
-    status
-  }
-}
-```
+    ```graphql
+    {
+     "input": {
+      "contractAddress": "0x084acc6bbbaeb09a6e276a426508765e53bf2459",
+      "tokenId": "8"
+     }
+    }
+    ```
 
-#### Query Variables
+    #### HTTP Headers
 
-```graphql
-{
- "input": {
-  "contractAddress": "0x084acc6bbbaeb09a6e276a426508765e53bf2459",
-  "tokenId": "8"
- }
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-#### HTTP Headers
+=== "cURL"
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```curl
 
-</TabItem>
-
-<TabItem value="cURL">
-
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

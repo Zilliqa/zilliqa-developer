@@ -19,62 +19,46 @@ Get list of all NFTs in a brand collectible.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query BrandCollectibleNFTs($input: BrandCollectiblesNFTInput) {
-  brandCollectiblesNFTs(input: $input) {
-    cursor
-    brandCollectiblesNFTList {
-      collectionId
-      createdAt
-      collectionContract
+    ```graphql
+    query BrandCollectibleNFTs($input: BrandCollectiblesNFTInput) {
+      brandCollectiblesNFTs(input: $input) {
+        cursor
+        brandCollectiblesNFTList {
+          collectionId
+          createdAt
+          collectionContract
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
-	"input": {
-    "collectionId": "11"
-	}
-}
-```
+    ```graphql
+    {
+    	"input": {
+        "collectionId": "11"
+    	}
+    }
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

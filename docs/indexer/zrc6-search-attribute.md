@@ -16,83 +16,67 @@ This applies to NFTS which follow the ZRC-7 metadata standard
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query getAssets($input: AssetsInput!) {
-  assets(input: $input) {
-    cursor
-    assetsList {
-      contractAddress
-      tokenId
-      tokenUri
-      minterAddress
-      ownerAddress
-      spenderAddress
-      operatorAddress
-      name
-      description
-      resource
-      resourceMimetype
-      externalUrl
-      externalDescription
-      attributes {
-        traitType
-        value
-      }
-      contractPaused
-      contractPaused
-    }
-  }
-}
-```
-
-#### Query Variables
-
-```graphql
-{
-  "input": {
-      "filter": {
-        "after": "0",
-        "limit": 12,
-        "keyword": "",
-        "attributes": [{ "type": "Metaverse Id", "value": "metaverse1" }]
+    ```graphql
+    query getAssets($input: AssetsInput!) {
+      assets(input: $input) {
+        cursor
+        assetsList {
+          contractAddress
+          tokenId
+          tokenUri
+          minterAddress
+          ownerAddress
+          spenderAddress
+          operatorAddress
+          name
+          description
+          resource
+          resourceMimetype
+          externalUrl
+          externalDescription
+          attributes {
+            traitType
+            value
+          }
+          contractPaused
+          contractPaused
+        }
       }
     }
-}
-```
+    ```
 
-#### HTTP Headers
+    #### Query Variables
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "input": {
+          "filter": {
+            "after": "0",
+            "limit": 12,
+            "keyword": "",
+            "attributes": [{ "type": "Metaverse Id", "value": "metaverse1" }]
+          }
+        }
+    }
+    ```
 
-</TabItem>
+    #### HTTP Headers
 
-<TabItem value="cURL">
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-```curl
+=== "cURL"
 
-```
+    ```curl
 
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

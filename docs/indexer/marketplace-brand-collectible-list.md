@@ -19,64 +19,48 @@ Get list of all collectibles owned by a brand.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query BrandCollectibles($input: BrandCollectiblesInput) {
-  brandCollectibles(input: $input) {
-    cursor
-    brandCollectiblesList {
-      collectionId
-      brandOwner
-      createdAt
-      collectionContract
-      commissionFee
+    ```graphql
+    query BrandCollectibles($input: BrandCollectiblesInput) {
+      brandCollectibles(input: $input) {
+        cursor
+        brandCollectiblesList {
+          collectionId
+          brandOwner
+          createdAt
+          collectionContract
+          commissionFee
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
-	"input": {
-    "brandOwner": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
-  }
-}
-```
+    ```graphql
+    {
+    	"input": {
+        "brandOwner": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
+      }
+    }
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

@@ -32,69 +32,53 @@ Get native ZIL transactions
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query TxDetails($input: TransactionDetailsInput) {
-  getTransactionDetails(input: $input) {
-    list {
-      blockID
-      TxId
-      toAddress
-      fromAddress
-      tokenAddress
-      amount
-      gasAmount
-      gasPrice
+    ```graphql
+    query TxDetails($input: TransactionDetailsInput) {
+      getTransactionDetails(input: $input) {
+        list {
+          blockID
+          TxId
+          toAddress
+          fromAddress
+          tokenAddress
+          amount
+          gasAmount
+          gasPrice
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
-  "input": {
-    "tokenAddress": "0x0000000000000000000000000000000000000000",
-    "filter": {
-      "limit":5
+    ```graphql
+    {
+      "input": {
+        "tokenAddress": "0x0000000000000000000000000000000000000000",
+        "filter": {
+          "limit":5
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

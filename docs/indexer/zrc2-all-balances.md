@@ -20,62 +20,46 @@ Get all available ZR2 token balances for a given wallet.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query UserBalances($input: WalletBalancesInput) {
-  getUserBalances(input: $input) {
-    list {
-      lastBlockID
-      amount
-      tokenAddress
-      walletAddress
+    ```graphql
+    query UserBalances($input: WalletBalancesInput) {
+      getUserBalances(input: $input) {
+        list {
+          lastBlockID
+          amount
+          tokenAddress
+          walletAddress
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
-  "input": {
-    "wallet": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
-  }
-}
-```
+    ```graphql
+    {
+      "input": {
+        "wallet": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
+      }
+    }
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

@@ -19,82 +19,66 @@ Get all the NFTs owned by a wallet address
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query Query($userInput: UserInput) {
-  user(input: $userInput) {
-    address
-    ownedAssets {
-      assetsList {
-        contractAddress
-        tokenId
-        tokenUri
-        name
-        resource
-        minterAddress
-        spenderAddress
-        operatorAddress
+    ```graphql
+    query Query($userInput: UserInput) {
+      user(input: $userInput) {
+        address
+        ownedAssets {
+          assetsList {
+            contractAddress
+            tokenId
+            tokenUri
+            name
+            resource
+            minterAddress
+            spenderAddress
+            operatorAddress
+          }
+        }
+        mintedAssets {
+          assetsList {
+            contractAddress
+            tokenId
+            tokenUri
+            name
+            resource
+            description
+            ownerAddress
+            spenderAddress
+            operatorAddress
+          }
+        }
       }
     }
-    mintedAssets {
-      assetsList {
-        contractAddress
-        tokenId
-        tokenUri
-        name
-        resource
-        description
-        ownerAddress
-        spenderAddress
-        operatorAddress
-      }
+    ```
+
+    #### Query Variables
+
+    ```graphql
+    {
+     "userInput": {
+      "address": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
+     }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### HTTP Headers
 
-```graphql
-{
- "userInput": {
-  "address": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
- }
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-#### HTTP Headers
+=== "cURL"
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```curl
 
-</TabItem>
-
-<TabItem value="cURL">
-
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

@@ -20,71 +20,55 @@ Get the metadata of an NFT or asset. This is the data stored in the `tokenURI`.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query Query($input: AssetInput) {
-  asset1: assetById(input: $input) {
-    tokenId
-    tokenUri
-    name
-    description
-    externalUrl
-    ownerAddress
-    minterAddress
-    contractAddress
-    resource
-    resourceMimetype
-    attributes {
-      traitType
-      value
+    ```graphql
+    query Query($input: AssetInput) {
+      asset1: assetById(input: $input) {
+        tokenId
+        tokenUri
+        name
+        description
+        externalUrl
+        ownerAddress
+        minterAddress
+        contractAddress
+        resource
+        resourceMimetype
+        attributes {
+          traitType
+          value
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
- "input": {
-  "contractAddress": "0x084acc6bbbaeb09a6e276a426508765e53bf2459",
-  "tokenId": "1"
- }
-}
-```
+    ```graphql
+    {
+     "input": {
+      "contractAddress": "0x084acc6bbbaeb09a6e276a426508765e53bf2459",
+      "tokenId": "1"
+     }
+    }
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

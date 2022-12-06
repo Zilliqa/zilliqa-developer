@@ -35,74 +35,58 @@ Retrieve the details of transactions based on the given parameters.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query TxDetails($input: TransactionDetailsInput) {
-  getTransactionDetails(input: $input) {
-    list {
-      blockID
-      TxId
-      sender
-      toAddress
-      fromAddress
-      isTransferFrom
-      tokenAddress
-      amount
+    ```graphql
+    query TxDetails($input: TransactionDetailsInput) {
+      getTransactionDetails(input: $input) {
+        list {
+          blockID
+          TxId
+          sender
+          toAddress
+          fromAddress
+          isTransferFrom
+          tokenAddress
+          amount
+        }
+      }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
-  "input": {
-    "tokenAddress": "0xc5c5f8786574522e83242e5981482d63c9ac7101",
-    "sender": "0x86f0875da311ee5332d5d4a8485c8d3db0f7f57b",
-    "toAddress": "0x22b251cc155ac0a181a156aaec74e964a82011c1",
-    "fromAddress": "",
-    "filter": {
-      "limit": 15,
-      "after": "2"
+    ```graphql
+    {
+      "input": {
+        "tokenAddress": "0xc5c5f8786574522e83242e5981482d63c9ac7101",
+        "sender": "0x86f0875da311ee5332d5d4a8485c8d3db0f7f57b",
+        "toAddress": "0x22b251cc155ac0a181a156aaec74e964a82011c1",
+        "fromAddress": "",
+        "filter": {
+          "limit": 15,
+          "after": "2"
+        }
+      }
     }
-  }
-}
 
-```
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

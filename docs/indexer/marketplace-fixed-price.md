@@ -20,79 +20,63 @@ Get fixed price offers for an asset.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query Query($input: AssetInput) {
-  asset: assetById(input: $input) {
-    listingData {
-      sourceId
-      data {
-        ZILLIQA_FIXED_PRICE {
-          othersOffers {
-            maker
-            unit
-            amount
-            currency
-            expirationInBlockNumber
+    ```graphql
+    query Query($input: AssetInput) {
+      asset: assetById(input: $input) {
+        listingData {
+          sourceId
+          data {
+            ZILLIQA_FIXED_PRICE {
+              othersOffers {
+                maker
+                unit
+                amount
+                currency
+                expirationInBlockNumber
+              }
+              ownerOffers {
+                maker
+                unit
+                amount
+                currency
+                expirationInBlockNumber
+              }
+              marketplaceContractAddress
+            }
           }
-          ownerOffers {
-            maker
-            unit
-            amount
-            currency
-            expirationInBlockNumber
-          }
-          marketplaceContractAddress
         }
       }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
- "input": {
-  "contractAddress": "0xa7bfba9919112883b137ecbad5139f537dff944d",
-  "tokenId": "3"
- }
-}
-```
+    ```graphql
+    {
+     "input": {
+      "contractAddress": "0xa7bfba9919112883b137ecbad5139f537dff944d",
+      "tokenId": "3"
+     }
+    }
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

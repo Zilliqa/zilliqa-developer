@@ -20,97 +20,81 @@ Get auction offers for an asset.
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
-
-#### Query
-
-```graphql
-query Query($input: AssetInput) {
-  asset: assetById(input: $input) {
-    listingData {
-      sourceId
-      data {
-        ZILLIQA_ENGLISH_AUCTION {
-          startingBid {
-            unit
-            amount
-            currency
-          }
-          winnerBid {
-            maker
-            unit
-            amount
-          }
-          bids {
-            maker
-            unit
-            amount
-            dest
-          }
-          maker
-          marketplaceContractAddress
-        }
-        fulfilled {
-          __typename
-          ... on FulfilledZilliqaEnglishAuctionV1 {
-            id
-            marketplaceContractAddress
-            amount
-            buyer
-            currency
-            seller
-            unit
-            assetRecipient
-            paymentTokensRecipient
-            royaltyRecipient
+    ```graphql
+    query Query($input: AssetInput) {
+      asset: assetById(input: $input) {
+        listingData {
+          sourceId
+          data {
+            ZILLIQA_ENGLISH_AUCTION {
+              startingBid {
+                unit
+                amount
+                currency
+              }
+              winnerBid {
+                maker
+                unit
+                amount
+              }
+              bids {
+                maker
+                unit
+                amount
+                dest
+              }
+              maker
+              marketplaceContractAddress
+            }
+            fulfilled {
+              __typename
+              ... on FulfilledZilliqaEnglishAuctionV1 {
+                id
+                marketplaceContractAddress
+                amount
+                buyer
+                currency
+                seller
+                unit
+                assetRecipient
+                paymentTokensRecipient
+                royaltyRecipient
+              }
+            }
           }
         }
       }
     }
-  }
-}
-```
+    ```
 
-#### Query Variables
+    #### Query Variables
 
-```graphql
-{
- "input": {
-  "contractAddress": "0x084acc6bbbaeb09a6e276a426508765e53bf2459",
-  "tokenId": "1"
- }
-}
-```
+    ```graphql
+    {
+     "input": {
+      "contractAddress": "0x084acc6bbbaeb09a6e276a426508765e53bf2459",
+      "tokenId": "1"
+     }
+    }
+    ```
 
-#### HTTP Headers
+    #### HTTP Headers
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-</TabItem>
+=== "cURL"
 
-<TabItem value="cURL">
+    ```curl
 
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

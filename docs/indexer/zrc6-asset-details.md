@@ -20,63 +20,47 @@ Get the details of a particular NFT or asset
 
 ### Example Request
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+=== "Graphql"
 
-<Tabs
-  defaultValue="GraphQL"
-  values={[
-    { label: 'GraphQL', value: 'GraphQL', },
-    { label: 'cURL', value: 'cURL', },
-  ]
-}>
+    #### Query
 
-<TabItem value="GraphQL">
+    ```graphql
+    query Query($input: AssetInput) {
+      assetById(input: $input) {
+        contractAddress
+        tokenId
+        tokenUri
+        ownerAddress
+        spenderAddress
+        operatorAddress
+      }
+    }
+    ```
 
-#### Query
+    #### Query Variables
 
-```graphql
-query Query($input: AssetInput) {
-  assetById(input: $input) {
-    contractAddress
-    tokenId
-    tokenUri
-    ownerAddress
-    spenderAddress
-    operatorAddress
-  }
-}
-```
+    ```graphql
+    {
+     "input": {
+      "contractAddress": "0xe9f34009d95b5c818fc6a81ca90a150f7564cdb8",
+      "tokenId": "1"
+     }
+    }
+    ```
 
-#### Query Variables
+    #### HTTP Headers
 
-```graphql
-{
- "input": {
-  "contractAddress": "0xe9f34009d95b5c818fc6a81ca90a150f7564cdb8",
-  "tokenId": "1"
- }
-}
-```
+    ```graphql
+    {
+      "Authorization": "Bearer <insert token>"
+    }
+    ```
 
-#### HTTP Headers
+=== "cURL"
 
-```graphql
-{
-  "Authorization": "Bearer <insert token>"
-}
-```
+    ```curl
 
-</TabItem>
-
-<TabItem value="cURL">
-
-```curl
-
-```
-
-</TabItem>
-</Tabs>
+    ```
 
 ### Example Response
 

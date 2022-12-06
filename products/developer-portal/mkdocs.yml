@@ -307,6 +307,26 @@ nav:
                   - Scripting: dev-dapps/dev-rentonzilliqa-scripting.md
                   - Modals: dev-dapps/dev-rentonzilliqa-modals.md
                   - Pages: dev-dapps/dev-rentonzilliqa-pages.md
+  - Indexer:
+      - Marketplace Fixed Price: docs/indexer/marketplace-fixed-price.md
+      - Marketplace Brand Collectible List: docs/indexer/marketplace-brand-collectible-list.md
+      - Marketplace English Auction: docs/indexer/marketplace-english-auction.md
+      - ZRC2 Transaction History: docs/indexer/zrc2-transaction-history.md
+      - ZRC2 Contract List: docs/indexer/zrc2-contract-list.md
+      - ZRC2 Balance: docs/indexer/zrc2-balance.md
+      - ZRC2 Contract Details: docs/indexer/zrc2-contract-details.md
+      - ZRC6 Recently Minted: docs/indexer/zrc6-recently-minted.md
+      - ZRC6 Asset Metadata: docs/indexer/zrc6-asset-metadata.md
+      - Marketplace Brand Collectible Details: docs/indexer/marketplace-brand-collectible-details.md
+      - ZRC6 User Assets: docs/indexer/zrc6-user-assets.md
+      - ZRC2 All Balances: docs/indexer/zrc2-all-balances.md
+      - Indexer Introduction: docs/indexer/indexer-introduction.md
+      - Marketplace Brand Collectible Assets: docs/indexer/marketplace-brand-collectible-assets.md
+      - ZIL All Transactions: docs/indexer/zil-all-transactions.md
+      - ZIL Balance: docs/indexer/zil-balance.md
+      - ZRC6 Search Attribute: docs/indexer/zrc6-search-attribute.md
+      - ZRC6 Asset Details: docs/indexer/zrc6-asset-details.md
+
   - Miners:
       - Mining:
           - Getting Started: miners/mining-getting-started.md
