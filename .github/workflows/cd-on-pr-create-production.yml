@@ -24,12 +24,16 @@ jobs:
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
+          git checkout main
           git fetch --all --tags
           git pull --all
 
           # Checking out the base branch to make this our working branch and 
           # merge the head
           git checkout ${{ github.base_ref }}
+          git fetch --all --tags
+          git pull --all
+
           git merge --squash ${{ github.head_ref }}
 
       - name: Committing head
