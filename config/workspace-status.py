@@ -3,6 +3,8 @@ import re
 import subprocess
 import sys
 
+GIT_SHORT_HASH_LEGNTH = 9
+
 
 def is_git_dirty(path):
     p = subprocess.Popen(["git", "status", "-s"], cwd=path, stdout=subprocess.PIPE)
@@ -163,7 +165,9 @@ def main():
     version["version"] = get_version(**version)
     git_hash = version["commit_hash"]
     git_is_dirty = version["is_dirty"]
-    version["full_version"] = "{}+{}".format(version["version"], git_hash[:7])
+    version["full_version"] = "{}+{}".format(
+        version["version"], git_hash[:GIT_SHORT_HASH_LEGNTH]
+    )
     version["full_version_tag"] = version["full_version"].replace("+", "-")
     version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
 
@@ -171,7 +175,9 @@ def main():
         version["full_version"].split("+", 1)[0].replace(".", "-")
     )
 
-    version["build_uri_suffix"] = os.environ.get("BUILD_URI_SUFFIX", git_hash[:7])
+    version["build_uri_suffix"] = os.environ.get(
+        "BUILD_URI_SUFFIX", git_hash[:GIT_SHORT_HASH_LEGNTH]
+    )
     if "/" in version["build_uri_suffix"]:
         version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
         version["build_uri_suffix"] = (
@@ -196,7 +202,7 @@ def main():
     )
     print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("GIT_COMMIT_HASH {}".format(git_hash))
-    print("GIT_SHORT_HASH {}".format(git_hash[:7]))
+    print("GIT_SHORT_HASH {}".format(git_hash[:GIT_SHORT_HASH_LEGNTH]))
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
