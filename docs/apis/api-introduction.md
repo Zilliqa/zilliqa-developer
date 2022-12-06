@@ -9,8 +9,9 @@ description: Zilliqa JSON RPC API
 
 ---
 
-[JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC) is a remote procedure call protocol encoded in JSON. You can use this API to access data from the Zilliqa nodes.
-The JSON-RPC API server runs on:
+[JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC) is a remote procedure call
+protocol encoded in JSON. You can use this API to access data from the Zilliqa
+nodes. The JSON-RPC API server runs on:
 
 | Chain(s)              | URL(s)                                       |
 | --------------------- | -------------------------------------------- |
@@ -30,7 +31,8 @@ You can use the following block explorers for the various networks
 
 All API calls are POST requests.
 
-All requests follow the standard JSON-RPC format and include 4 variables in the data object:
+All requests follow the standard JSON-RPC format and include 4 variables in the
+data object:
 
 | Data object | Example             |
 | ----------- | :------------------ |
