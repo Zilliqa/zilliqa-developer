@@ -22,18 +22,20 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
 
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
+          git checkout main
           git fetch --all --tags
+          git pull --all
 
-          # Getting the main branch to compute the distance to main
-          git fetch --depth=1 origin +refs/heads/main:refs/remotes/origin/main
-          git branch --track main origin/main
-          while [ -z $( git merge-base main HEAD ) ]; do     
-            git fetch --deepen=10 origin main HEAD;
-          done
+          # Checking out the base branch to make this our working branch and 
+          # merge the head
+          git checkout ${{ github.ref_name }}
+          git fetch --all --tags
+          git pull --all
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
