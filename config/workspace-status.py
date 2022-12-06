@@ -33,11 +33,15 @@ def get_version_from_git(path):
 
     # Getting git description
     p = subprocess.Popen(
-        ["git", "describe"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ["git", "describe", "--tags"],
+        cwd=path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 
     (out, err) = p.communicate()
     if p.returncode != 0:
+        ret["describe"] = "error"
         out = "0.0.0"
     else:
         out = out.decode("ascii").strip()
@@ -70,14 +74,16 @@ def get_version_from_git(path):
 
     # Checking if we are starting a new release
     (out, err) = p.communicate()
-
+    ret["branch"] = "unknown"
     if p.returncode == 0:
         out = out.decode("ascii").strip().split("\n")
-        ret["branch"] = out
+        ret["branches"] = ",".join([x.strip() for x in out])
+
         for line in out:
             line = line.strip()
             if line.startswith("*"):
                 line = line[2:].strip()
+                ret["branch"] = line
                 if line.startswith("pre-release/") or line.startswith("release/"):
                     _, line = line.split("/", 1)
                     if line.startswith("v"):
@@ -149,9 +155,9 @@ def main():
     print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("GIT_COMMIT_HASH {}".format(git_hash))
     print("GIT_SHORT_HASH {}".format(git_hash[:7]))
-    print("GIT_SHORT_HASH {}".format(git_hash[:7]))
     print("GIT_BRANCH {branch}".format(**version))
-    print("GIT_BRANCH {branch}".format(**version))
+    print("GIT_BRANCHES {branches}".format(**version))
+    print("GIT_DESCRIBE {describe}".format(**version))
 
 
 def get_git_hash(path):
