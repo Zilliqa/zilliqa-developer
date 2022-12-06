@@ -18,6 +18,38 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
+      - name: Preparing merged branches
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          git fetch --all --tags
+
+          # Getting the base branch to make a merge
+          git fetch --depth=1 origin +refs/heads/${{github.base_ref}}:refs/remotes/origin/${{github.base_ref}}
+          git branch --track ${{github.base_ref}} origin/${{github.base_ref}}
+          while [ -z $( git merge-base ${{github.base_ref}} HEAD ) ]; do     
+            git fetch --deepen=10 origin ${{github.base_ref}} HEAD;
+          done
+
+          # Getting the main branch to compute the distance to main
+          git fetch --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          git branch --track main origin/main
+          while [ -z $( git merge-base main HEAD ) ]; do     
+            git fetch --deepen=10 origin main HEAD;
+          done
+
+          # Checking out the base branch to make this our working branch and 
+          # merge the head
+          git checkout ${{ github.base_ref }}
+          git merge --squash ${{ github.head_ref }}
+
+      - name: Committing head
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"           
+          git add . -A
+          git commit -m "Finish merge"
+
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
@@ -43,17 +75,10 @@ jobs:
 
       - name: "Build and push Docker"
         run: |
-          git fetch --all --tags
-
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
 
       - name: "Creating Devops repo update"
         run: |
-          git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"        
-          git fetch --all --tags
-          git tag -l
-
           bazelisk run //cd:create_preview -- $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
