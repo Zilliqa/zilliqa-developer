@@ -57,7 +57,6 @@ Get list of all NFTs in a brand collectible.
 === "cURL"
 
     ```curl
-
     ```
 
 ### Example Response

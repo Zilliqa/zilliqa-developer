@@ -11,7 +11,7 @@ description: All native zil transactions
 
 Get native ZIL transactions
 
-### Parameters
+## Parameters
 
 | Name           | Type   | Required | Description                                                                               |
 | -------------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
@@ -20,7 +20,7 @@ Get native ZIL transactions
 | `fromAddress`  | String | Optional | Address where zil is from. If set to empty string `""`, this parameter is ignored.        |
 | `filter`       | JSON   | Optional | Filter is used for pagination, `after` is the offset and `limit` is the size of the list. |
 
-##### Notes
+### Notes
 
 - To get all native zil transactions
   - Set `tokenAddress` to zero address

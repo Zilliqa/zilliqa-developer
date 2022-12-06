@@ -12,7 +12,7 @@ description: Get ZRC2 transaction history
 
 Retrieve the details of transactions based on the given parameters.
 
-### Parameters
+## Parameters
 
 | Name           | Type   | Required | Description                                                                               |
 | -------------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
@@ -22,7 +22,7 @@ Retrieve the details of transactions based on the given parameters.
 | `fromAddress`  | String | Optional | From Address of the token. If set to empty string `""`, this parameter is ignored.        |
 | `filter`       | JSON   | Optional | Filter is used for pagination, `after` is the offset and `limit` is the size of the list. |
 
-##### Notes
+### Notes
 
 - To get all transactions for a given token
   - Set `tokenAddress` to the ZRC2 contract address

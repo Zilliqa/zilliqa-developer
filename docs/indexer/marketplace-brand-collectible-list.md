@@ -42,7 +42,7 @@ Get list of all collectibles owned by a brand.
 
     ```graphql
     {
-    	"input": {
+      "input": {
         "brandOwner": "0x22b251cc155ac0a181a156aaec74e964a82011c1"
       }
     }
