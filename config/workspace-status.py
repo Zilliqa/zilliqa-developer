@@ -54,9 +54,14 @@ def get_version_from_git(path):
             out = "0.0.0"
 
     m = pattern.search(out)
+    ret["regex_match"] = "no match"
     if m:
         ret["prerelease"] = ""
         ret.update(m.groupdict())
+        ret["regex_match"] = ",".join(
+            "{}={}".format(str(k).strip(), str(v).strip())
+            for k, v in m.groupdict().items()
+        )
         if ret["patch"] is None:
             ret["patch"] = 0
         if ret["prerelease"] is None:
@@ -211,6 +216,8 @@ def main():
     print(
         "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(**version)
     )
+
+    print("REGEX_DESCRIBE_MATCH {regex_match}".format(**version))
 
 
 def get_git_hash(path):
