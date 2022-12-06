@@ -69,6 +69,21 @@ def get_version_from_git(path):
         ret["patch"] = int(ret["patch"]) + 1
 
     p = subprocess.Popen(
+        ["git", "rev-list", "--count", "HEAD", "^main"],
+        cwd=path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    # Getting the distance to main
+    (out, err) = p.communicate()
+    ret["dist_from_main"] = -1
+    if p.returncode == 0:
+        dist_from_main = int(out.decode("ascii").strip())
+        ret["dist_from_main"] = dist_from_main
+
+    # Getting list of all branches
+    p = subprocess.Popen(
         ["git", "branch"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
@@ -91,34 +106,23 @@ def get_version_from_git(path):
                     if line.startswith("."):
                         line = line[1:].strip()
 
-                    p = subprocess.Popen(
-                        ["git", "rev-list", "--count", "HEAD", "^main"],
-                        cwd=path,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                    )
-
-                    (out, err) = p.communicate()
-                    if p.returncode == 0:
-                        rc = int(out.decode("ascii").strip())
-
+                    try:
                         try:
-                            try:
-                                major, minor = line.split(".")
-                            except ValueError:
-                                major, minor, _ = line.split(".")
-
-                            major = int(major)
-                            minor = int(minor)
-                            if major > ret["major"] or (
-                                major == ret["major"] and minor > ret["minor"]
-                            ):
-                                ret["major"] = major
-                                ret["minor"] = minor
-                                ret["patch"] = 0
-                                ret["prerelease"] = "rc.{}".format(rc)
+                            major, minor = line.split(".")
                         except ValueError:
-                            pass
+                            major, minor, _ = line.split(".")
+
+                        major = int(major)
+                        minor = int(minor)
+                        if major > ret["major"] or (
+                            major == ret["major"] and minor > ret["minor"]
+                        ):
+                            ret["major"] = major
+                            ret["minor"] = minor
+                            ret["patch"] = 0
+                            ret["prerelease"] = "rc.{}".format(dist_from_main)
+                    except ValueError:
+                        raise
 
     return ret
 
@@ -159,6 +163,7 @@ def main():
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
+    print("GIT_DISTANCE_FROM_MAIN {dist_from_main}".format(**version))
 
 
 def get_git_hash(path):
