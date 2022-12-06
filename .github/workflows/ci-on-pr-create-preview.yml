@@ -38,6 +38,7 @@ jobs:
           git checkout ${{ github.base_ref }}
           git fetch --all --tags
           git pull --all
+          python config/workspace-status.py
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
