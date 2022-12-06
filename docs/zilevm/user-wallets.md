@@ -23,7 +23,7 @@ description: Wallets that can interact with ZILEVM
 !!! info
 
     If you already have Ledger/Metamask - you can use the existing seed
-    phrase to generate the same wallet addresses.
+    phrase to generate the same wallet addresses used on other EVM chains.
 
 To add a new network to MetaMask - click the current network selected at the top
 of the extenstion and press 'Add Network'.
@@ -37,7 +37,7 @@ Enter the below configuration, and press save.
 
 ### Sending funds
 
-We can now send EVMZIL (on metamask) to other metamask wallets using the send
-function, ensuring the target wallet is a base 16 '0x' address.
+We can now send EVMZIL (on Metamask) to other Metamask wallets using the send
+function. Do not send funds to Zilpay wallets or base 16 Scilla addresses.
 
-[Sending EVM ZIL](/img/evm/send_evm_zil.png)
+!["Sending EVM ZIL"](/assets/img/evm/send_evm_zil.png)

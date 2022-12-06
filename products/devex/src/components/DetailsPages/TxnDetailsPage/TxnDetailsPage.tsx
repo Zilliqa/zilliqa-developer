@@ -57,7 +57,7 @@ const TxnDetailsPage: React.FC = () => {
       } catch (e) {
         console.error(e);
         setError("An error occurred - please see console for details");
-        // TODO: Extract the correct error infomation from the exception and use it
+        // TODO: Extract the correct error information from the exception and use it
       } finally {
         setIsLoading(false);
       }

@@ -14,7 +14,7 @@ You should have these technologies installed on your machine to run the scilla c
 
 ### Contributing
 
-Please review [this guide](https://github.com/firstcontributions/first-contributions) for further infomation on how to contribute to a github repository and [this guide](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716) about commit messages.
+Please review [this guide](https://github.com/firstcontributions/first-contributions) for further information on how to contribute to a github repository and [this guide](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716) about commit messages.
 
 * Fork this repo
 * Clone your fork of this repo to your local machine
