@@ -308,24 +308,28 @@ nav:
                   - Modals: dev-dapps/dev-rentonzilliqa-modals.md
                   - Pages: dev-dapps/dev-rentonzilliqa-pages.md
   - Indexer:
-      - Marketplace Fixed Price: indexer/marketplace-fixed-price.md
-      - Marketplace Brand Collectible List: indexer/marketplace-brand-collectible-list.md
-      - Marketplace English Auction: indexer/marketplace-english-auction.md
-      - ZRC2 Transaction History: indexer/zrc2-transaction-history.md
-      - ZRC2 Contract List: indexer/zrc2-contract-list.md
-      - ZRC2 Balance: indexer/zrc2-balance.md
-      - ZRC2 Contract Details: indexer/zrc2-contract-details.md
-      - ZRC6 Recently Minted: indexer/zrc6-recently-minted.md
-      - ZRC6 Asset Metadata: indexer/zrc6-asset-metadata.md
-      - Marketplace Brand Collectible Details: indexer/marketplace-brand-collectible-details.md
-      - ZRC6 User Assets: indexer/zrc6-user-assets.md
-      - ZRC2 All Balances: indexer/zrc2-all-balances.md
       - Indexer Introduction: indexer/indexer-introduction.md
-      - Marketplace Brand Collectible Assets: indexer/marketplace-brand-collectible-assets.md
-      - ZIL All Transactions: indexer/zil-all-transactions.md
-      - ZIL Balance: indexer/zil-balance.md
-      - ZRC6 Search Attribute: indexer/zrc6-search-attribute.md
-      - ZRC6 Asset Details: indexer/zrc6-asset-details.md
+      - ZILs:
+          - ZIL All Transactions: indexer/zil-all-transactions.md
+          - ZIL Balance: indexer/zil-balance.md
+      - ZRC-2:
+          - ZRC2 Contract Details: indexer/zrc2-contract-details.md
+          - ZRC2 Contract List: indexer/zrc2-contract-list.md
+          - ZRC2 Balance: indexer/zrc2-balance.md
+          - ZRC2 All Balances: indexer/zrc2-all-balances.md
+          - ZRC2 Transaction History: indexer/zrc2-transaction-history.md
+      - ZRC-6:
+          - ZRC6 Recently Minted: indexer/zrc6-recently-minted.md
+          - ZRC6 Asset Details: indexer/zrc6-asset-details.md
+          - ZRC6 User Assets: indexer/zrc6-user-assets.md
+          - ZRC6 Asset Metadata: indexer/zrc6-asset-metadata.md
+          - ZRC6 Search Attribute: indexer/zrc6-search-attribute.md
+      - Marketplace:
+          - Marketplace Fixed Price: indexer/marketplace-fixed-price.md
+          - Marketplace English Auction: indexer/marketplace-english-auction.md
+          - Marketplace Brand Collectible List: indexer/marketplace-brand-collectible-list.md
+          - Marketplace Brand Collectible Assets: indexer/marketplace-brand-collectible-assets.md
+          - Marketplace Brand Collectible Details: indexer/marketplace-brand-collectible-details.md
 
   - Miners:
       - Mining:
