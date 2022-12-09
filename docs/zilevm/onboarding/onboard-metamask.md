@@ -1,6 +1,6 @@
 ---
-id: user-wallets
-title: Wallets
+id: onboard-metamask
+title: Onboard onto ZILEVM with Metamask
 keywords:
   - Wallets
 description: Wallets that can interact with ZILEVM
@@ -9,8 +9,6 @@ description: Wallets that can interact with ZILEVM
 ---
 
 ## MetaMask
-
-### Setup
 
 !!! warning
 
@@ -30,6 +28,8 @@ description: Wallets that can interact with ZILEVM
     You can send funds between ZILEVM and Zilliqa networks by translating
     your Zilliqa address into it's base 16 representation which ZILEVM and
     Metamask can understand.
+
+### Configure MetaMask with ZILEVM network
 
 To add a new network to MetaMask - click the current network selected at the top
 of the extenstion and press 'Add Network'.
@@ -73,3 +73,7 @@ to send EVMZIL to other Metamask wallets using the send function within Metamask
 Do not send funds to Zilpay wallets or base 16 Scilla addresses.
 
 !["Sending EVM ZIL"](/assets/img/evm/send_evm_zil.png)
+
+#### ZILEVM testnet faucet
+
+You can use the [testnet faucet](../../dev-dapps/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.

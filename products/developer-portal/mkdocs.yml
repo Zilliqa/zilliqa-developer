@@ -338,12 +338,19 @@ nav:
   - ZILEVM:
       - Getting Started:
           - Introduction: zilevm/zilevm-introduction.md
-          - Wallets: zilevm/user-wallets.md
-      - Developers:
-          - Developer Introduction: zilevm/developer-introduction.md
-          - Gas: zilevm/protocol-gas.md
-          - OPCodes: zilevm/protocol-opcodes.md
-          - RPC: zilevm/developer-rpc.md
+      - Onboard:
+          - Configure Metamask: zilevm/onboarding/onboard-metamask.md
+      - Developer Onboarding:
+          - Introduction: zilevm/dev-onboarding/dev-onboarding-introduction.md
+          - Remix: zilevm/dev-onboarding/remix.md
+          - Truffle: zilevm/dev-onboarding/truffle.md
+          - HardHat: zilevm/dev-onboarding/hardhat.md
+          - OpenZeppelin: zilevm/dev-onboarding/open-zeppelin.md
+          - VSC Plugins: zilevm/dev-onboarding/vsc-plugins.md
+      - Protocol:
+          - Gas: zilevm/protocol/protocol-gas.md
+          - OPCodes: zilevm/protocol/protocol-opcodes.md
+          - RPC: zilevm/protocol/developer-rpc.md
   - Exchanges:
       - Exchange Integration:
           - Getting Started:

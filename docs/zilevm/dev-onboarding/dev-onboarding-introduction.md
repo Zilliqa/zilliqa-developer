@@ -9,7 +9,7 @@ description: ZILEVM for developers
 
 ---
 
-## Developer Introduction
+## Developer Onboarding Introduction
 
 If you are new to Solidity and looking to learn the basics of the language, there are a few guides that can provide a good starting point. These can include:
 
@@ -31,16 +31,20 @@ In addition to these guides, there are also many other resources available onlin
 
 ### Remix IDE
 
-[Remix IDE](/docs/zilevm/onboarding/remix.md)
+[Remix IDE](remix)
+
+### Hardhat
+
+[Hardhat](hardhat)
 
 ### Open Zeppelin
 
-[Open Zeppelin](/docs/zilevm/onboarding/open-zeppelin.md.md)
+[Open Zeppelin](open-zeppelin)
 
 ### Truffle
 
-[Truffle](/docs/zilevm/onboarding/truffle.md)
+[Truffle](truffle)
 
 ### VSC Plugins
 
-[VSC Plugins](/docs/zilevm/onboarding/vsc-plugins.md.md)
+[VSC Plugins](vsc-plugins)

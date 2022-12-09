@@ -16,7 +16,11 @@ _Please bear with us as we populate these pages; if you have feedback/requests f
 
 #### Quick connect guide
 
-Guide on getting starting with ZILEVM
+[Guide on configuring Metamask to ZILEVM](onboarding/onboard-metamask.md)
+
+#### Developer onboarding
+
+[Guides for developing Solidity contracts for ZILEVM](dev-onboarding/developer-onboarding-introduction.md)
 
 ##### Zilliqa Mainnet
 
@@ -28,10 +32,6 @@ EVM is not yet available on Zilliqa Mainnet
 | ------------ | ------------ | --------------------------------- | ------- | --------------- | ------------------------------------------ |
 | Testnet      | EVM Test     | <https://evm-api-dev.zilliqa.com> | 33101   | ZIL             | <https://zilliqa-testnet.tryethernal.com/> |
 | Mainnet      |              |                                   |         |                 |                                            |
-
-#### ZILEVM clients
-
-ZILEVM should work with most popular EVM clients and wallets, including [Metamask](https://metamask.io/), [Hardhat](https://hardhat.org) and [Truffle](https://trufflesuite.com/).
 
 #### ZILEVM block explorers
 
@@ -45,7 +45,3 @@ In particular, DevEx is capable of translating between ethereum and Zilliqa styl
 #### ZILEVM testnet faucet
 
 You can use the [testnet faucet](../dev-dapps/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.
-
-#### ZILEVM RPC
-
-List of ZILEVM RPC tutorials
