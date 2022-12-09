@@ -163,19 +163,19 @@ def main():
     version["version"] = get_version(**version)
     git_hash = version["commit_hash"]
     git_is_dirty = version["is_dirty"]
-    version["full_version"] = "{}+{}".format(version["version"], git_hash[:7])
-    version["full_version_tag"] = version["full_version"].replace("+", "-")
-    version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
+    version["full_version"] = "{}+{}".format(version["version"], git_hash[:7]).lower()
+    version["full_version_tag"] = version["full_version"].replace("+", "-").lower()
+    version["full_version_uri"] = version["full_version_tag"].replace(".", "-").lower()
 
     version["partial_version_uri"] = (
-        version["full_version"].split("+", 1)[0].replace(".", "-")
+        version["full_version"].split("+", 1)[0].replace(".", "-").lower()
     )
 
     version["build_uri_suffix"] = os.environ.get("BUILD_URI_SUFFIX", git_hash[:7])
     if "/" in version["build_uri_suffix"]:
         version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
         version["build_uri_suffix"] = (
-            version["build_uri_suffix"].replace(".", "-").replace("+", "-")
+            version["build_uri_suffix"].replace(".", "-").replace("+", "-").lower()
         )
 
     print("STABLE_VERSION {version}".format(**version))
