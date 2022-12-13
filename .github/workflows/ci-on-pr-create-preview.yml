@@ -76,6 +76,7 @@ jobs:
       - name: "Build and push Docker"
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
 
       - name: "Creating Devops repo update"
         run: |
