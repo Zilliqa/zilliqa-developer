@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+images:
+  - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devel-explorer
+    newTag: ${FULL_VERSION_TAG}
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: dev-port-${CUSTOM_VERSION_URI}.platform.prd.z7a.xyz
+    target:
+      kind: Ingress
+      name: zilliqa-devel-explorer
+
+namespace: devel-explorer-preview-${FULL_VERSION_URI}
