@@ -176,13 +176,13 @@ container_push(
 # CD update
 expand_workspace_status(
     name = "preview-kustomization",
-    output = "cd/applications/developer-explorer/overlays/preview/kustomization.yaml",
-    template = "cd/applications/developer-explorer/overlays/preview/kustomization.tpl.yaml",
+    output = "cd/applications/devex/overlays/preview/kustomization.yaml",
+    template = "cd/applications/devex/overlays/preview/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_preview_patch",
-    srcs = ["cd/applications/developer-explorer/overlays/preview/kustomization.yaml"],
+    srcs = ["cd/applications/devex/overlays/preview/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
@@ -191,13 +191,13 @@ pkg_tar(
 
 expand_workspace_status(
     name = "production-kustomization",
-    output = "cd/applications/developer-explorer/overlays/production/kustomization.yaml",
-    template = "cd/applications/developer-explorer/overlays/production/kustomization.tpl.yaml",
+    output = "cd/applications/devex/overlays/production/kustomization.yaml",
+    template = "cd/applications/devex/overlays/production/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_production_patch",
-    srcs = ["cd/applications/developer-explorer/overlays/production/kustomization.yaml"],
+    srcs = ["cd/applications/devex/overlays/production/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
