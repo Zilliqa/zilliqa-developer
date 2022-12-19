@@ -87,7 +87,7 @@ jobs:
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
 
       - name: "Creating Devops repo update for PR"
-        if: needs.pr-check.outputs.number != 'null'
+        if: github.event_name == 'pull_request'
         run: |
           bazelisk run //cd:create_production -- PR $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
         env:
@@ -96,7 +96,7 @@ jobs:
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
 
       - name: "Creating Devops repo update for push and/or tag"
-        if: needs.pr-check.outputs.number == 'null'
+        if: github.event_name != 'pull_request'
         run: |
           bazelisk run //cd:create_production -- HEAD $(git rev-parse --abbrev-ref HEAD)
         env:
