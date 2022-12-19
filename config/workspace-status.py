@@ -213,9 +213,15 @@ def main():
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
-    print(
-        "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(**version)
-    )
+
+    if version["build_uri_suffix"]:
+        print(
+            "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(
+                **version
+            )
+        )
+    else:
+        print("CUSTOM_VERSION_URI {partial_version_uri}".format(**version))
 
     print("REGEX_DESCRIBE_MATCH {regex_match}".format(**version))
 
