@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - release/*
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build-docker:
