@@ -104,7 +104,10 @@ class PrepareDevops(object):
         self.pr = None
 
         if self.type == "HEAD":
+            # If it is a HEAD call then base and head branch
+            # are the same.
             self.head_branch = source
+            self.base_branch = source
             self.find_pr_from_head()
         elif self.type == "PR":
             self.find_pr_from_id(int(source))
@@ -119,6 +122,7 @@ class PrepareDevops(object):
         self.base_branch = None
         if self.pr:
             self.base_branch = self.pr.base.ref
+
         self.production = self.is_production(self.base_branch)
 
         if self.production:
