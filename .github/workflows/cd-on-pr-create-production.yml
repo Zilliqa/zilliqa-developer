@@ -53,10 +53,9 @@ jobs:
         # Fetch the ref of the base branch, just the single commit.
         run: |
           echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }}        
-
-          git add . -A
-          git commit -m "Finish merge"
+          git merge --squash ${{ github.head_ref }} && \
+            git add . -A && \
+            git commit -m "Finish merge" || echo "Nothing to merge"
           python config/workspace-status.py
 
       - name: Install SSH key
