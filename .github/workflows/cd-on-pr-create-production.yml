@@ -7,6 +7,8 @@ on:
   push:
     tags:
       - "v*"
+    branches:
+      - release/*
 
 jobs:
   build-docker:
@@ -85,9 +87,19 @@ jobs:
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
 
-      - name: "Creating Devops repo update"
+      - name: "Creating Devops repo update for PR"
+        if: needs.pr-check.outputs.number != 'null'
         run: |
           bazelisk run //cd:create_production -- PR $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
+          BUILD_URI_SUFFIX: ${{ github.head_ref }}
+
+      - name: "Creating Devops repo update for push and/or tag"
+        if: needs.pr-check.outputs.number == 'null'
+        run: |
+          bazelisk run //cd:create_production -- HEAD $(git rev-parse --abbrev-ref HEAD)
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}

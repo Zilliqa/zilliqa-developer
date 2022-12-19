@@ -99,7 +99,7 @@ class PrepareDevops(object):
         self.developer_repo = self.github.get_repo("Zilliqa/zilliqa-developer")
         self.devops_repo = self.github.get_repo("Zilliqa/devops")
 
-        self.patches = sys.argv[1:-2]
+        self.patches = patches
         self.type = update_type
         self.pr = None
 
