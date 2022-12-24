@@ -48,8 +48,7 @@ contribute:
    design
 1. Submit bug reports and feature requests in the
    [repository issues](https://github.com/Zilliqa/Zilliqa/issues)
-1. Submit security-related issues to our
-   [bug bounty program](contribute-bug-bounty.md)
+1. Submit security-related issues to [security@zilliqa.com](security@zilliqa.com)
 
 ## Contributing to Scilla
 
