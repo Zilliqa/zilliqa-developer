@@ -16,38 +16,46 @@ description: Mining Getting Started
 There are theoretically multiple ways to participate in the Zilliqa Mainnet as a
 miner.
 
-1. Operating Zilliqa Client using the default settings for CPU mining
-1. Operating Zilliqa Client using OpenCL or CUDA settings for GPU mining
-1. Operating a proxy mining setup using Zilliqa Client, ZilMiner, and Zilliqa
-   Mining Proxy
-1. Participating in mining pools
-
-However, at the present level of mining difficulty in the Mainnet, the first two
-ways are no longer possible.
+1. Operating a mining setup to support a pool of 300+ modern GPU's
+2. Participating in mining pools
 
 !!! note
-
-    Mining difficulty on the Mainnet is high. Hence, it will not be feasible
-    to mine using CPU or a single GPU (i.e, options 1 and 2 above).
 
     To enter the shard network requires >300 modern GPUs. As such, it will be
     advisable to participate in a mining pool if you do not have a sufficient amount
     of GPUs.
 
-### Proxy Mining
+    If you have less than 300 modern GPU's your nodes will not be selected. You should
+    join an existing pool and contribute hashpower there.
 
-To proceed with proxy mining:
-
-1. An introduction to proxy mining is provided [here](mining-proxy.md)
-1. The Zilliqa Client instructions can be found [here](mining-zilclient.md)
-1. The ZilMiner instructions can be found [here](mining-zilminer.md)
-
-### Mining Pools
-
-Zilliqa's use of Ethereum's Ethash algorithm for PoW allows existing mining pool
-operators to easily integrate mining on Zilliqa, giving retail miners another
-way to participate in the Zilliqa Mainnet.
+### Participation in existing mining pools
 
 The Zilliqa page on [MiningPoolStats](https://miningpoolstats.stream/zilliqa)
 has a list of mining pools that support Zilliqa. Please refer to the pool's
 website for specific instructions on how to participate.
+
+### Setting up Zilliqa Miner infrastructure
+
+If you have less than 300 modern GPU's your nodes will not be selected. You should join an existing pool and contribute hashpower there.
+
+To proceed with proxy mining, you'll need the following services:
+
+#### Zilliqa Client
+
+[Zilliqa Client repository](https://github.com/Zilliqa/Zilliqa). The Zilliqa Client instructions can be found [here](mining-zilclient.md).
+
+A CPU node instance will run the **Zilliqa Client** and carry out the pBFT consensus process to receive rewards. It forwards messages to the GPU cluster via the proxy. It recieves a response which is the GPU's solution to the PoW round which is forwarded onto the chain for reward distribution.
+
+The Zilliqa client is managed by Zilliqa. Though the GPU cluster and proxy could be bespoke client applications.
+
+#### GPU cluster
+
+The GPU cluster will do PoW mining and provide solutions back to the Zilliqa Client via the proxy.
+
+The GPU cluster could be an existing mining protocol such as Claymore, CGMiner, BFGMiner.
+
+Zilliqa have a GPU cluster, but it is not as popular with mining pools already intergrating with Zilliqa since they will typically use one of the above existing mining clients. The ZilMiner instructions can be found [here](mining-zilminer.md).
+
+#### Mining proxy
+
+The [Zilliqa Mining Proxy](https://github.com/DurianStallSingapore/Zilliqa-Mining-Proxy) provides an abstraction between the Zilliqa client and the GPU's. It forwards messages between the internal IPs of the two services.

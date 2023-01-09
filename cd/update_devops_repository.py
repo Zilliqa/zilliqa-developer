@@ -24,29 +24,6 @@ class PrepareDevops(object):
             or pr_ref == "!production"
         )
 
-    def find_pr_from_head(self):
-        pulls = self.developer_repo.get_pulls(
-            state="open", sort="created", head=self.head_branch
-        )
-
-        n = 0
-        for p in pulls:
-            if p.head.ref == self.head_branch and (
-                p.base.ref == "main" or "release/" in p.base.ref
-            ):
-                self.pr = p
-                n += 1
-
-        if not self.pr:
-            print("Could not find PR {}".format(self.head_branch))
-            return
-
-        if n != 1:
-            print(
-                "This branch is being merged into several other branches - cannot create a preview."
-            )
-            return
-
     def find_pr_from_id(self, id):
         pulls = self.developer_repo.get_pulls(state="open", sort="created")
         for p in pulls:
@@ -99,13 +76,17 @@ class PrepareDevops(object):
         self.developer_repo = self.github.get_repo("Zilliqa/zilliqa-developer")
         self.devops_repo = self.github.get_repo("Zilliqa/devops")
 
-        self.patches = sys.argv[1:-2]
+        self.patches = patches
         self.type = update_type
         self.pr = None
+        self.base_branch = None
 
         if self.type == "HEAD":
+            # If it is a HEAD call then base and head branch
+            # are the same.
             self.head_branch = source
-            self.find_pr_from_head()
+            self.base_branch = source
+
         elif self.type == "PR":
             self.find_pr_from_id(int(source))
             if not self.pr:
@@ -116,9 +97,9 @@ class PrepareDevops(object):
                 "Rollout takes either a head branch or a PR as argument. Got neither"
             )
 
-        self.base_branch = None
         if self.pr:
             self.base_branch = self.pr.base.ref
+
         self.production = self.is_production(self.base_branch)
 
         if self.production:

@@ -174,12 +174,12 @@ def main():
     git_is_dirty = version["is_dirty"]
     version["full_version"] = "{}+{}".format(
         version["version"], git_hash[:GIT_SHORT_HASH_LEGNTH]
-    )
-    version["full_version_tag"] = version["full_version"].replace("+", "-")
-    version["full_version_uri"] = version["full_version_tag"].replace(".", "-")
+    ).lower()
+    version["full_version_tag"] = version["full_version"].replace("+", "-").lower()
+    version["full_version_uri"] = version["full_version_tag"].replace(".", "-").lower()
 
     version["partial_version_uri"] = (
-        version["full_version"].split("+", 1)[0].replace(".", "-")
+        version["full_version"].split("+", 1)[0].replace(".", "-").lower()
     )
 
     version["build_uri_suffix"] = os.environ.get(
@@ -188,7 +188,7 @@ def main():
     if "/" in version["build_uri_suffix"]:
         version["build_uri_suffix"] = version["build_uri_suffix"].rsplit("/", 1)[1]
         version["build_uri_suffix"] = (
-            version["build_uri_suffix"].replace(".", "-").replace("+", "-")
+            version["build_uri_suffix"].replace(".", "-").replace("+", "-").lower()
         )
 
     print("STABLE_VERSION {version}".format(**version))
@@ -213,9 +213,15 @@ def main():
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))
-    print(
-        "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(**version)
-    )
+
+    if version["build_uri_suffix"]:
+        print(
+            "CUSTOM_VERSION_URI {partial_version_uri}-{build_uri_suffix}".format(
+                **version
+            )
+        )
+    else:
+        print("CUSTOM_VERSION_URI {partial_version_uri}".format(**version))
 
     print("REGEX_DESCRIBE_MATCH {regex_match}".format(**version))
 
