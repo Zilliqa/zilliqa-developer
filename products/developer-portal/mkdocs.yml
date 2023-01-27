@@ -434,3 +434,4 @@ nav:
               - View Change: contributors/core-view-change.md
               - Diagnostic Data: contributors/core-diagnostic-data.md
               - Status Server: contributors/core-status-server.md
+  - Ecosystem: ecosystem/index.md
