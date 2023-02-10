@@ -56,12 +56,12 @@ The next sections in this phase 1.1 documentation are organized as follows:
 
 1. The [General Information](staking-general-information) section contains
    useful details for anyone interested in the staking program
-1. The [Delegators](delegator/staking-delegator-overview) section targets the
+1. The [Delegators](staking/staking-phase-1.1/delegators/staking-delegator-overview) section targets the
    following audiences:
    - Staking wallet builders
    - Staking dashboard builders
    - Delegators who want to build their own toolchains
-1. The [SSN Operators](ssn-operator/staking-ssn-before-you-start) section
+1. The [SSN Operators](staking/staking-phase-1.1/ssn-operators/staking-ssn-before-you-start) section
    targets operators who wish to launch and maintain an SSN. These operators,
    which can be either custodial or non-custodial, include:
    - Explorer and wallet providers

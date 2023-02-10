@@ -40,7 +40,7 @@ The joining or rejoining process relies on a `m_syncType` setting, which can be 
 
     This also applies to existing shard nodes who attempt to rejoin using the launch script.
 
-1. Launch script downloads the latest persistence from AWS S3 [incremental DB](core-incremental-db.md) using `download_incr_db.py`
+1. Launch script downloads the latest persistence from AWS S3 [incremental DB](contributors/core-protocol-design/data-layer/core-incremental-db) using `download_incr_db.py`
 1. Launch script starts the node (i.e., the `zilliqa` process) with `m_syncType = NEW_SYNC`
 1. The node reads out the local `persistence` which was updated by the launch script
 1. The node recreates the current state using the base state and state deltas fetched from incremental DB
@@ -49,7 +49,7 @@ The joining or rejoining process relies on a `m_syncType` setting, which can be 
 
 ### `Node::StartSynchronization()`
 
-1. Send request to all upper seeds to remove the node's IP address from their [relaxed blacklist](core-blacklist.md#relaxed-blacklist)
+1. Send request to all upper seeds to remove the node's IP address from their [relaxed blacklist](contributors/core-protocol-design/network-layer/core-blacklist)
 1. Fetch the more recent DS blocks and Tx blocks from a random upper seed
 1. Separate threads process Tx blocks upon receipt, fetching the corresponding state deltas and calculating the current state for each one
 1. If the latest Tx block is for a non-vacuous epoch:

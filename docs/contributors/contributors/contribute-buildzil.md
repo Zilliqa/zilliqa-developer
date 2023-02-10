@@ -60,8 +60,8 @@ to the [Scilla website](https://scilla-lang.org/#getinvolvedsection).
 These are the available resources that help explain the core protocol:
 
 1. The Zilliqa [whitepaper](https://docs.zilliqa.com/whitepaper.pdf)
-2. The [Zilliqa architecture](../basics/basics-zil-nodes.md) and
-   [Core protocol design](../contributors/core-node-operation.md) sections
+2. The [Zilliqa architecture](basics/zilliqa-architecture/basics-zil-nodes) and
+   [Core protocol design](contributors/core-protocol-design/design-overview/core-node-operation) sections
 3. The [Zilliqa Improvement Proposals](https://github.com/Zilliqa/ZIP/)
    repository
 4. Monthly updates and tech writeups in the

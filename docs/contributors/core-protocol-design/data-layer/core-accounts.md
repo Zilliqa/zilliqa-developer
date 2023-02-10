@@ -43,7 +43,7 @@ Immutable states are more commonly referred to as the **init data**, and
 examples of this include `_scilla_version`, `_library`, and `_extlibs`.
 
 Init data is supplied to the node within the transaction body (please refer to
-the [CreateTransaction](/apis/api-transaction-create-tx) API documentation),
+the [CreateTransaction](api/transaction-related-methods/api-transaction-create-tx) API documentation),
 although the node will also eventually add more fields into init data (such as
 `_creation_block` and `_this_address`) during transaction processing.
 
@@ -87,7 +87,7 @@ within the structure without the requesting party needing to know the rest of
 the structure. All the requesting party needs is the hash of the key-value pair
 at the particular time that the structure is being evaluated. For example, the
 **contractTrie** database supports requests from the
-[GetStateProof](/apis/api-contract-get-state-proof) API, which requests for
+[GetStateProof](api/contract-related-methods/api-contract-get-state-proof) API, which requests for
 proof of a particular state for an account at a specific Tx block.
 
 The **contractTrie** database was implemented in order to support bridging

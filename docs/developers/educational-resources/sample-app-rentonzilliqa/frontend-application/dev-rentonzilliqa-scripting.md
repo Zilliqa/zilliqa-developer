@@ -215,7 +215,7 @@ export default formatListings;
 
 This function creates a toast using [`react-hot-toast`](https://react-hot-toast.com),
 It uses [`zilPay.wallet`](https://zilpay.github.io/zilpay-docs/getting-started/#basic-considerations) to subscribe to transactions.
-It updates toast with the status of the transaction and shows a message as per the [Messages Codes](dev-rentonzilliqa-library.md#message-codes) we defined earlier.
+It updates toast with the status of the transaction and shows a message as per the [Messages Codes](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-library) we defined earlier.
 
 Note that in this function, we use another helper function, `decodeMessage`, to get a human-readable message from the message code. This function is quite basic and hence not included here. You can take a look at [`/src/functions/decodeMessage.ts`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/decodeMessage.ts). It also includes a `decodeZilPayError` function that we will use in the coming sections.
 
@@ -264,14 +264,14 @@ We finally come to the Transition Functions that simply call the contract transi
 
 The following functions are created at [`/src/functions/`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/) for calling their respective transitions.
 
-| Function                                                                                                                          | Transition                                                          |
-| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| [`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts)       | [`create_user`](dev-rentonzilliqa-transitions.md#create_user)       |
-| [`createListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createListingTransition.ts) | [`create_listing`](dev-rentonzilliqa-transitions.md#create_listing) |
-| [`updateListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/updateListingTransition.ts) | [`update_listing`](dev-rentonzilliqa-transitions.md#update_listing) |
-| [`deleteListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/deleteListingTransition.ts) | [`delete_listing`](dev-rentonzilliqa-transitions.md#delete_listing) |
-| [`bookListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/bookListingTransition.ts)     | [`book_listing`](dev-rentonzilliqa-transitions.md#book_listing)     |
-| [`claimRentTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/claimRentTransition.ts)         | [`claim_rent`](dev-rentonzilliqa-transitions.md#claim_rent)         |
+| Function                                                                                                                          | Transition                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts)       | [`create_user`](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions)    |
+| [`createListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createListingTransition.ts) | [`create_listing`](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions) |
+| [`updateListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/updateListingTransition.ts) | [`update_listing`](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions) |
+| [`deleteListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/deleteListingTransition.ts) | [`delete_listing`](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions) |
+| [`bookListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/bookListingTransition.ts)     | [`book_listing`](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions)   |
+| [`claimRentTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/claimRentTransition.ts)         | [`claim_rent`](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions)     |
 
 Let us see the [`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts) function as an example. We use the [`decodeZilPayError`](#transitionmessagealert) we defined earlier.
 

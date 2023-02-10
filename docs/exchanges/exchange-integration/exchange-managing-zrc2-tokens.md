@@ -41,13 +41,13 @@ standard may lead to composability issues with other contracts or dApp/exchange
 integration.
 
 Please check the
-[ZRC-2 specification](../dev-dapps/dev-keys-zrc2-wallet-support.md#zrc-2-specification)
+[ZRC-2 specification](developers/user-key-management/dev-keys-zrc2-wallet-support)
 subsection in the Developers section of this developer portal.
 
 ## Contract Operations
 
 Please check the
-[Integrating with ZRC-2 Fungible Tokens Contract](../dev-dapps/dev-keys-zrc2-wallet-support.md#integrating-with-zrc-2-fungible-tokens-contract)
+[Integrating with ZRC-2 Fungible Tokens Contract](developers/user-key-management/dev-keys-zrc2-wallet-support)
 subsection on how to get token balance and transfer tokens.
 
 ## Tracking Incoming ZRC-2 Deposit
@@ -55,7 +55,7 @@ subsection on how to get token balance and transfer tokens.
 To track any new **incoming deposit** of a specific ZRC-2 token:
 
 1. Poll the blockchain block by block using API
-   [`GetTxnBodiesForTxBlock`](../apis/api-transaction-get-txbodies-for-txblock.md)
+   [`GetTxnBodiesForTxBlock`](api/transaction-related-methods/api-transaction-get-txbodies-for-txblock)
    API and process each transactions
 2. For each transaction in the TxBlock, perform the following:
    - Check whether `toAddr` matches the corresponding ZRC-2 token contract

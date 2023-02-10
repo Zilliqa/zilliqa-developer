@@ -27,6 +27,6 @@ In each of these cases, OpenZeppelin's pre-written and audited contract librarie
 
 ### Remix and Open Zeppelin
 
-The [Remix (IDE)](remix) is a web-based tool that allows developers to write, test, and deploy Solidity smart contracts. Remix integrates with OpenZeppelin by providing access to the framework's Solidity libraries directly within the IDE. This allows developers to easily use OpenZeppelin's pre-written contract patterns and components in their own contracts, without having to manually import the libraries or copy and paste code.
+The [Remix (IDE)](zilevm/developer-onboarding/remix) is a web-based tool that allows developers to write, test, and deploy Solidity smart contracts. Remix integrates with OpenZeppelin by providing access to the framework's Solidity libraries directly within the IDE. This allows developers to easily use OpenZeppelin's pre-written contract patterns and components in their own contracts, without having to manually import the libraries or copy and paste code.
 
 To use OpenZeppelin in Remix, select the "OpenZeppelin" tab in the left-hand menu, and then browse and select the specific libraries and contracts they want to use in their project. The selected libraries will be automatically imported and added to the project, and then reference and use them in their own code.

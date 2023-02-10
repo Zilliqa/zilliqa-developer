@@ -10,10 +10,18 @@ except ImportError:
     from yaml import Dumper, Loader
 
 import glob
+import re
 
 print("Hello world")
 with open("/tmp/test.json") as fb:
     cfg = json.loads(fb.read())
+
+name_regex = "[^]]+"
+url_regex = "[^)]+"
+
+markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
+markup_regex_full = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
+
 
 changes = {}
 for item in cfg:
@@ -47,26 +55,39 @@ for name, change in changes.items():
     with open(os.path.join("docs", candidates[0]), "r") as fb:
         contents = fb.read()
 
+    replace_cand = []
+    for match in re.finditer(markup_regex_full, contents):
+        x1, x2 = match.span()
+        replace_cand.append(
+            {
+                "from": x1,
+                "to": x2,
+                "name": match.group(1),
+                "url": match.group(2),
+                "full": match.group(),
+            }
+        )
+
+    replacements = {}
     for k, v in change.items():
-        print("- ", k, "=>", v)
         if v.endswith(".md"):
             v = v[:-3]
+        for r in replace_cand:
 
-        parts = contents.split(k)
-        final = parts[0]
-        for p in parts[1:]:
-            try:
-                final = final.rsplit("(", 1)[0]
-                p = p.split(")", 1)[1]
-                final += "({}){}".format(v, p)
-            except:
-                print("FAILED")
-                print(final)
-                print("---")
-                print(p)
-                raise
-        contents = final
+            if k in r["url"]:
+                replacements[r["full"]] = "[{}](/{})".format(r["name"], v)
 
+    print("Replacements?")
+    for k, v in replacements.items():
+        print(k, "=>", v)
+        contents = contents.replace(k, v)
+
+        # if match:
+        #     print(match)
+        #     full, name, url = match
+        #     print(full)
+        #     print(name)
+        #     print(url)
     with open(os.path.join("docs", candidates[0]), "w") as fb:
         fb.write(final)
 

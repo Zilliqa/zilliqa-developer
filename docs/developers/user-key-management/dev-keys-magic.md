@@ -46,7 +46,7 @@ Magic interacts with the Zilliqa blockchain via Magic's extension NPM package @m
 
 ## Initializing Extension
 
-To initialize the magic extension, you would need to specify the Zilliqa RPC Node URL which can be found [here](/docs/dev-dapps/dev-started-env).
+To initialize the magic extension, you would need to specify the Zilliqa RPC Node URL which can be found [here](developers/getting-started/dev-started-env).
 You would need to specify your API Key for Magic, which you'll get by signing up on Magic's [dashboard](https://dashboard.magic.link/signup) - if you face any issues, refer to Magic's [documentation](https://dashboard.magic.link/signup).
 
 === "JavaScript"

@@ -1,20 +1,6 @@
 ---
-id: dev-keys-zrc2-wallet-support
-title: ZRC-2 Wallet Support
-keywords:
-  - key management
-  - zrc2
-  - wallet
-  - support
-  - token
-  - fungible
-  - zilliqa
-description: Integrating ZRC-2 Fungible Tokens Support into Wallets and dApps
----
 
----
-
-This guide is meant for wallet developers looking to add support for [ZRC-2 tokens](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md) in their wallet.
+id: (developers/user-key-management/dev-keys-zrc2-wallet-support) in their wallet.
 Since most of the wallet front-ends are built using a JavaScript framework, most developers would find the code found in the `js` tab to be relevant to them. We have included code snippets for some other languages as well in case you want to handle these functionalities
 at the backend.
 
@@ -720,7 +706,7 @@ However, you can make this value to be specific as well. Non-custodial control o
 ### Calling TransferFrom
 
 `TransferFrom` transition moves a given amount of tokens from one address to another using the allowance mechanism.
-The caller must be an `approved_spender`, refer the section on [Adding Token Allowance](dev-keys-zrc2-wallet-support#adding-token-allowance)
+The caller must be an `approved_spender`, refer the section on [Adding Token Allowance](developers/user-key-management/dev-keys-zrc2-wallet-support)
 if you want to add an address to become an approved_sender.
 Balance of recipient will increase and the balance of `token_owner` will decrease.
 
@@ -775,7 +761,7 @@ Balance of recipient will increase and the balance of `token_owner` will decreas
 
 ## Tracking Incoming ZRC-2 Deposit
 
-Please check the [Tracking Incoming ZRC-2 Deposit](../exchanges/exchange-managing-zrc2-tokens#tracking-incoming-zrc-2-deposit) subsection
+Please check the [Tracking Incoming ZRC-2 Deposit](exchanges/exchange-integration/exchange-managing-zrc2-tokens) subsection
 under exchanges section to track any new incoming deposit of a specific ZRC-2 token.
 
 ## Getting your Token Listed

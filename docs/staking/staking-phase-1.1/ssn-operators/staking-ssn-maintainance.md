@@ -20,7 +20,7 @@ manual intervention.
 
 However, if the node is unable to resync on its own, it will need to be launched
 again in a fresh mode (i.e. clean start). Please refer to the section
-[Preparing the node](staking-ssn-setup#preparing-the-node) at Getting started
+[Preparing the node](staking/staking-phase-1.1/ssn-operators/staking-ssn-setup) at Getting started
 page
 
 !!! caution

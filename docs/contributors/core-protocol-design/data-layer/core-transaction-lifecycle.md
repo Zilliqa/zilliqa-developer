@@ -14,11 +14,11 @@ from user creation to Tx block generation.
 
 Contributors may also be interested to review these related documents:
 
-- [Types of Nodes](/basics/basics-zil-nodes) under the Basics section (for
+- [Types of Nodes](basics/zilliqa-architecture/basics-zil-nodes) under the Basics section (for
   understanding the roles of nodes in the network)
-- [Transaction Lifecycle](/dev-dapps/dev-txn-signing) under the Developers
+- [Transaction Lifecycle](developers/transaction-lifecycle/dev-txn-signing) under the Developers
   section (for handling transactions at user level)
-- [Account Management](/contributors/core-accounts#state-deltas) under the
+- [Account Management](contributors/core-protocol-design/data-layer/core-accounts) under the
   Contributors section (for the meaning of state deltas)
 
 In the diagram, it is worth emphasizing that epoch time has been optimized by

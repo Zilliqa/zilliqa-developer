@@ -24,7 +24,7 @@ These are the available documentation on Isolated Server:
 - Isolated server build instructions in
   [Zilliqa Github Wiki](https://github.com/Zilliqa/Zilliqa/blob/master/ISOLATED_SERVER_setup.md)
 - Isolated server launch instructions in
-  [Ceres documentation](/dev-dapps/dev-tools-ceres#isolated-server)
+  [Ceres documentation](developers/developer-toolings/dev-tools-ceres)
 
 ## Implementation Details
 

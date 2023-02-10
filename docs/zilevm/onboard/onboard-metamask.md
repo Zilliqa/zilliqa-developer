@@ -76,4 +76,4 @@ Do not send funds to Zilpay wallets or base 16 Scilla addresses.
 
 #### ZILEVM testnet faucet
 
-You can use the [testnet faucet](../../dev-dapps/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.
+You can use the [testnet faucet](developers/developer-toolings/dev-tools-faucet) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.

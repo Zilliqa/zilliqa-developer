@@ -32,21 +32,21 @@ Before preparing to host an SSN, please note that these are the ports that
 
 Additionally, there are ports that **may** be enabled in the SSN:
 
-| Type    | Default | Purpose                                                      |
-| ------- | ------- | ------------------------------------------------------------ |
-| Inbound | 4401    | [WebSocket service](../../../dev-dapps/dev-tools-websockets) |
+| Type    | Default | Purpose                                                                 |
+| ------- | ------- | ----------------------------------------------------------------------- |
+| Inbound | 4401    | [WebSocket service](developers/developer-toolings/dev-tools-websockets) |
 
 ## Preparing the Node
 
 Launching a seed node for staking is similar to launching a normal seed node
 using
-[key whitelisting mode (option 1)](../../../exchanges/exchange-key-whitelisting-1),
+[key whitelisting mode (option 1)](exchanges/exchange-integration/getting-started/exchange-key-whitelisting-1),
 with some additional configuration steps.
 
 1. First, please verify that your SSN meets the
    [minimum hardware requirements](../../../exchanges/exchange-getting-started#minimum-hardware-requirements).
 1. Follow the steps for launching a seed node using
-   [key whitelisting mode (option 1)](../../../exchanges/exchange-key-whitelisting-1),
+   [key whitelisting mode (option 1)](exchanges/exchange-integration/getting-started/exchange-key-whitelisting-1),
    except use `ssn-configuration.tar.gz` instead of `seed-configuration.tar.gz`.
 
 !!! caution
