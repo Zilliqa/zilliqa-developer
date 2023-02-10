@@ -30,8 +30,8 @@ Follow these steps to perform the build:
 1. Install the required dependencies according to
    [this section](https://github.com/Zilliqa/Zilliqa/#build-dependencies) in the
    repository.
-1. Clone the [Zilliqa repository](https://github.com/Zilliqa/Zilliqa/).
-1. Build the source code according to
+2. Clone the [Zilliqa repository](https://github.com/Zilliqa/Zilliqa/).
+3. Build the source code according to
    [this section](https://github.com/Zilliqa/Zilliqa/#build-from-source-code).
 
 When successful, the outputs (including the `zilliqa` binary) will be created in
@@ -60,7 +60,7 @@ to the [Scilla website](https://scilla-lang.org/#getinvolvedsection).
 These are the available resources that help explain the core protocol:
 
 1. The Zilliqa [whitepaper](https://docs.zilliqa.com/whitepaper.pdf)
-2. The [Zilliqa architecture](../basics/basics-zil-nodes.mdx) and
+2. The [Zilliqa architecture](../basics/basics-zil-nodes.md) and
    [Core protocol design](../contributors/core-node-operation.md) sections
 3. The [Zilliqa Improvement Proposals](https://github.com/Zilliqa/ZIP/)
    repository

@@ -1,6 +1,6 @@
 site_name: Zilliqa Developer Portal
 
-site_url: https://docs.zilliqa.com
+site_url: https://dev.zilliqa.com
 docs_dir: docs
 site_description: Zilliqa blockhain
 site_author: Zilliqa
@@ -394,7 +394,6 @@ nav:
           - Buildzil: contributors/contribute-buildzil.md
           - Guidelines: contributors/contribute-guidelines.md
           - Standards: contributors/contribute-standards.md
-          - Bug Bounty: contributors/contribute-bug-bounty.md
       - Core Protocol Design:
           - Design Overview:
               - Operation: contributors/core-node-operation.md
