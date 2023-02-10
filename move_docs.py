@@ -55,9 +55,16 @@ for name, change in changes.items():
         parts = contents.split(k)
         final = parts[0]
         for p in parts[1:]:
-            final = final.rsplit("(", 1)[0]
-            p = p.split(")", 1)[1]
-            final += "({}){}".format(v, p)
+            try:
+                final = final.rsplit("(", 1)[0]
+                p = p.split(")", 1)[1]
+                final += "({}){}".format(v, p)
+            except:
+                print("FAILED")
+                print(final)
+                print("---")
+                print(p)
+                raise
         contents = final
 
     with open(os.path.join("docs", candidates[0]), "w") as fb:
