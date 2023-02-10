@@ -52,14 +52,13 @@ for name, change in changes.items():
         if v.endswith(".md"):
             v = v[:-3]
 
-
         parts = contents.split(k)
         final = parts[0]
-        for p in parts[1:]
-            final = final.rsplit("(",1)
-            p = p.split(")",1)[1]
+        for p in parts[1:]:
+            final = final.rsplit("(", 1)[0]
+            p = p.split(")", 1)[1]
             final += "({}){}".format(v, p)
-
+        contents = final
 
     with open(os.path.join("docs", candidates[0]), "w") as fb:
         fb.write(final)
