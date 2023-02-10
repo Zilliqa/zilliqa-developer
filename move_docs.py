@@ -38,6 +38,9 @@ for item in cfg:
             changes[link_from] = {}
 
         changes[link_from][name] = candidates[0]
+    else:
+        print("NOT FOUND:", search_name)
+print("-------")
 
 for name, change in changes.items():
     search_name = name.split("://", 1)[1].split("/", 1)[1][:-1]
@@ -52,7 +55,8 @@ for name, change in changes.items():
 
     print("Automatic {}".format(name))
 
-    with open(os.path.join("docs", candidates[0]), "r") as fb:
+    filename = os.path.join("docs", candidates[0])
+    with open(filename, "r") as fb:
         contents = fb.read()
 
     replace_cand = []
@@ -78,8 +82,20 @@ for name, change in changes.items():
         cand_pat = "**/{}.md".format(url)
         cands = [x for x in glob.glob(cand_pat, root_dir="docs", recursive=True)]
         if len(cands) > 0:
-            print(match.group(2), "=>", cands)
-    exit(0)
+            link_file = os.path.join("docs", cands[0])
+            relpath = os.path.relpath(link_file, os.path.dirname(filename))
+            relpath = relpath[:-3]
+            if match.group(2) != relpath:
+                old = match.group()
+                new = "[{}]({})".format(match.group(1), relpath)
+                replacements[old] = new
+
+    print("")
+    print(filename)
+    for k, v in replacements.items():
+        print(k, " ==> ", v)
+
+    continue
     for k, v in change.items():
         if v.endswith(".md"):
             v = v[:-3]
