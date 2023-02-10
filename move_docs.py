@@ -56,19 +56,30 @@ for name, change in changes.items():
         contents = fb.read()
 
     replace_cand = []
+    replacements = {}
     for match in re.finditer(markup_regex_full, contents):
         x1, x2 = match.span()
+        url = match.group(2)
         replace_cand.append(
             {
                 "from": x1,
                 "to": x2,
                 "name": match.group(1),
-                "url": match.group(2),
+                "url": url,
                 "full": match.group(),
             }
         )
 
-    replacements = {}
+        if "/" in url:
+            _, url = url.split("/", 1)
+        if url.endswith(".md"):
+            url = url[:-3]
+
+        cand_pat = "**/{}.md".format(url)
+        cands = [x for x in glob.glob(cand_pat, root_dir="docs", recursive=True)]
+        if len(cands) > 0:
+            print(match.group(2), "=>", cands)
+    exit(0)
     for k, v in change.items():
         if v.endswith(".md"):
             v = v[:-3]
