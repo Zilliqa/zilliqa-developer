@@ -321,7 +321,7 @@ nav:
       - Staking Phase 1.1:
           - Phase 1.1 Notice: staking/staking-phase-1.1/staking-phase11-notice.md
           - Phase 1 Overview: staking/staking-phase-1.1/overview.md
-          - General Information: staking/staking-phase-1.1/general-information.md
+          - General Information: staking/staking-phase-1.1/staking-general-information.md
           - Delegators:
               - Overview: staking/staking-phase-1.1/delegators/staking-delegator-overview.md
               - Reading Contract States: staking/staking-phase-1.1/delegators/staking-delegator-reading-contract-state.md

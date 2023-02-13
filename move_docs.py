@@ -34,24 +34,24 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
     replacements = {}
     for match in re.finditer(src_regex, contents):
         old = match.group()
-        filename = match.group(2)
-        if '("' in filename:
-            filename = filename.split('("', 1)[1].rsplit('"', 1)[0]
+        src_filename = match.group(2)
+        if '("' in src_filename:
+            src_filename = src_filename.split('("', 1)[1].rsplit('"', 1)[0]
 
-        print("Found", filename)
+        print("Found", src_filename)
         print("- Before:", old)
 
-        fullpath = os.path.abspath(os.path.join(dirname, filename))
-        cand1 = os.path.abspath(os.path.join("docs", "assets", filename))
+        fullpath = os.path.abspath(os.path.join(dirname, src_filename))
+        cand1 = os.path.abspath(os.path.join("docs", "assets", src_filename))
         if os.path.exists(cand1):
             fullpath = cand1
-        # if filename[0] == "/":
-        #     fullpath = os.path.abspath(os.path.join("docs", filename[1:]))
+        # if src_filename[0] == "/":
+        #     fullpath = os.path.abspath(os.path.join("docs", src_filename[1:]))
 
         print("- Full path", fullpath)
         if os.path.exists(fullpath):
             relpath = os.path.relpath(fullpath, dirname)
-            new = 'src="{}"'.format(filename)
+            new = 'src="{}"'.format(src_filename)
             print("=>", new)
             if old != new:
                 replacements[old] = new
@@ -65,7 +65,7 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
     with open(filename, "w") as fb:
         fb.write(contents)
 
-exit(0)
+# exit(0)
 markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 markup_regex_full = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 
