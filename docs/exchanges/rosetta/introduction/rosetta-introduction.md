@@ -15,11 +15,10 @@ description: Introduction to Rosetta
 
 !["Network sharding"](../../../assets/img/exchanges/rosetta.png)
 
-Rosetta is an open-source initiaitve by
-[Coinbase](https://blog.coinbase.com/introducing-rosetta-build-once-integrate-your-blockchain-everywhere-9b97d284f5b9).
-Today, one of the main issues for software developers is the ever increasing
-number of blockchains with different node and wallet APIs. The goal of Rosetta
-is to [standardize](https://github.com/coinbase/rosetta-specifications) how to
+Rosetta is an open-source initiaitve by Coinbase. Today, one of the main issues
+for software developers is the ever increasing number of blockchains with
+different node and wallet APIs. The goal of Rosetta is to
+[standardize](https://github.com/coinbase/rosetta-specifications) how to
 interact with blockchains, making it easy for anyone to build on top of a
 blockchain for a variety of different use cases.
 
