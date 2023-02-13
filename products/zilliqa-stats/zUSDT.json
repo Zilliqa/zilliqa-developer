@@ -1,0 +1,10 @@
+{
+  "symbol": "zUSDT",
+  "totalSupply": "6524690517762",
+  "name": "Zilliqa-bridged USDT token",
+  "hash": "zil1sxx29cshups269ahh5qjffyr58mxjv9ft78jqy",
+  "decimals": 6,
+  "txCount": 23779,
+  "coingeckoId": "tether",
+  "coingeckoValue": 1
+}
