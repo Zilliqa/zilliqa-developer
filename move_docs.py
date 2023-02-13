@@ -104,6 +104,7 @@ for x in cfg:
         os.system("git mv {} {}".format(src, dest))
 
 # exit(0)
+failed = []
 for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
     print("FILE:", f)
     filename = os.path.abspath(os.path.join("docs", f))
@@ -121,6 +122,7 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
         anchor = None
         x1, x2 = match.span()
         url = match.group(2)
+        orig_url = url
         replace_cand.append(
             {
                 "from": x1,
@@ -196,6 +198,11 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
             print("=>", new)
             if old != new:
                 replacements[old] = new
+            continue
+
+        if not orig_url in failed:
+            failed.append(orig_url)
+        print("FAILED:", orig_url)
 
     # print(filename)
     for k, v in replacements.items():
@@ -214,6 +221,11 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
     #     print(url)
     # with open(os.path.join("docs", candidates[0]), "w") as fb:
     #     fb.write(contents)
+
+
+print("FAILED:")
+for f in failed:
+    print("-", f)
 
 exit(0)
 changes = {}
@@ -234,7 +246,7 @@ for item in cfg:
     else:
         print("NOT FOUND:", search_name)
 print("-------")
-
+failed = []
 for name, change in changes.items():
     search_name = name.split("://", 1)[1].split("/", 1)[1][:-1]
     cand_pat = os.path.join("**/{}.md".format(search_name))
@@ -282,6 +294,10 @@ for name, change in changes.items():
                 old = match.group()
                 new = "[{}]({})".format(match.group(1), relpath)
                 replacements[old] = new
+            continue
+
+        if filename not in failed:
+            failed.append(fileanme)
 
     print("")
     print(filename)
@@ -298,7 +314,9 @@ for name, change in changes.items():
     with open(os.path.join("docs", candidates[0]), "w") as fb:
         fb.write(contents)
 
-
+print("FAILED:")
+for f in failed:
+    print("-", f)
 exit(0)
 with open("products/developer-portal/mkdocs.yml") as fb:
     cfg = yaml.load(fb.read(), Loader=Loader)

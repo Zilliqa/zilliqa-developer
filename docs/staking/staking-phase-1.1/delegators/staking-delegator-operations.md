@@ -106,7 +106,7 @@ back to the delegator's wallet. When the stake amount is in unbonding state, it
 will not be eligible for any new rewards ($ZIL and/or gZIL).
 
 The current unbounding period can be found at
-[general information](../staking-general-information) page.
+[general information](../staking-general-information.md) page.
 
 !!! info
 
@@ -158,7 +158,7 @@ process and withdraw it back to delegator's wallet. This operation is agnostic
 to SSN.
 
 The current unbounding period can be found at
-[general information](../staking-general-information) page.
+[general information](../staking-general-information.md) page.
 
 ### Pre-condition
 

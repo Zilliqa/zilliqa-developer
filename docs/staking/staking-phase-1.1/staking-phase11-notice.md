@@ -53,7 +53,7 @@ The migration to phase 1.1 will involve the following:
 For wallets and explorers, we will aim to let you know of the phase 1.1 Mainnet
 staking contract addresses as soon as we can. In the meantime, we have migrated
 the testnet staking contract from phase 1 to phase 1.1. Please refer to
-[this page](staking-general-information) for the phase 1.1 testnet contracts.
+[this page](staking-general-information.md) for the phase 1.1 testnet contracts.
 
 ## Changes to Staking Parameters (Mainnet)
 

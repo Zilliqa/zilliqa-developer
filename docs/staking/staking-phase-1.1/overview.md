@@ -54,7 +54,7 @@ for phase 1.
 
 The next sections in this phase 1.1 documentation are organized as follows:
 
-1. The [General Information](staking-general-information) section contains
+1. The [General Information](staking-general-information.md) section contains
    useful details for anyone interested in the staking program
 1. The [Delegators](delegators/staking-delegator-overview.md) section targets the
    following audiences:
