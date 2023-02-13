@@ -30,10 +30,10 @@ EVM is not yet available on Zilliqa Mainnet
 
 ##### Developer testnet
 
-| Network Type | Network Name | Network RPC                       | ChainID | Currency Symbol | Block Explorer URL                         |
-| ------------ | ------------ | --------------------------------- | ------- | --------------- | ------------------------------------------ |
-| Testnet      | EVM Test     | <https://evm-api-dev.zilliqa.com> | 33101   | ZIL             | <https://zilliqa-testnet.tryethernal.com/> |
-| Mainnet      |              |                                   |         |                 |                                            |
+| Network Type | Network Name | Network RPC                                                        | ChainID | Currency Symbol | Block Explorer URL                                                                   |
+| ------------ | ------------ | ------------------------------------------------------------------ | ------- | --------------- | ------------------------------------------------------------------------------------ |
+| Testnet      | EVM Test     | [https://evm-api-dev.zilliqa.com](https://evm-api-dev.zilliqa.com) | 33101   | ZIL             | [https://zilliqa-testnet.tryethernal.com/](https://zilliqa-testnet.tryethernal.com/) |
+| Mainnet      |              |                                                                    |         |                 |                                                                                      |
 
 #### ZILEVM block explorers
 

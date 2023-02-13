@@ -5,7 +5,8 @@ title: GetSmartContractState
 
 ---
 
-Returns the state (mutable) variables of a smart contract address, represented in a JSON format.
+Returns the state (mutable) variables of a smart contract address, represented
+in a JSON format.
 
 ### Example Request
 
@@ -53,16 +54,18 @@ Returns the state (mutable) variables of a smart contract address, represented i
 
     ```go
     func GetSmartContractState() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetSmartContractState("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
 ### Example Response
 
-_Note: The format of response has been changed_
+!!! note
+
+    The format of response has been changed\_
 
 ```json
 {
@@ -79,12 +82,12 @@ _Note: The format of response has been changed_
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 

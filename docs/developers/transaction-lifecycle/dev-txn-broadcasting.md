@@ -11,12 +11,20 @@ description: Zilliqa Transaction Broadcasting
 
 ---
 
-After signing the transaction, we may broadcast the transaction to a seed node (e.g. https://dev-api.zilliqa.com) by creating a transaction object. The correct RPC API to use is `CreateTransaction`.
-Refer to https://apidocs.zilliqa.com/#createtransaction for more information.
+After signing the transaction, we may broadcast the transaction to a seed node
+(e.g. [https://dev-api.zilliqa.com](https://dev-api.zilliqa.com)) by creating a
+transaction object. The correct RPC API to use is `CreateTransaction`. Refer
+to[https://apidocs.zilliqa.com/#createtransaction](https://apidocs.zilliqa.com/#createtransaction)for
+more information.
 
-The seed node performs some basic validation of the JSON payload it receives, and will attempt to verify the signature. Please note that it does not verify the correctness of the `nonce`. It is at all times the developer's responsiblity to correctly increment the nonce used in the transaction.
+The seed node performs some basic validation of the JSON payload it receives,
+and will attempt to verify the signature. Please note that it does not verify
+the correctness of the `nonce`. It is at all times the developer's responsiblity
+to correctly increment the nonce used in the transaction.
 
-If `nonce` is incorrect, the transaction can silently fail. This means that the seed/lookup node will blindly forward the transaction to the correct shard, which may then reject the transaction with no error receipt.
+If `nonce` is incorrect, the transaction can silently fail. This means that the
+seed/lookup node will blindly forward the transaction to the correct shard,
+which may then reject the transaction with no error receipt.
 
 !!! info
 
@@ -63,42 +71,42 @@ Example of creating a **non-contract** transaction object:
     package main
 
     import (
-    	"fmt"
-    	"github.com/Zilliqa/gozilliqa-sdk/account"
-    	provider2 "github.com/Zilliqa/gozilliqa-sdk/provider"
-    	"github.com/Zilliqa/gozilliqa-sdk/transaction"
-    	"github.com/Zilliqa/gozilliqa-sdk/util"
-    	"strconv"
+        "fmt"
+        "github.com/Zilliqa/gozilliqa-sdk/account"
+        provider2 "github.com/Zilliqa/gozilliqa-sdk/provider"
+        "github.com/Zilliqa/gozilliqa-sdk/transaction"
+        "github.com/Zilliqa/gozilliqa-sdk/util"
+        "strconv"
     )
 
     func main() {
 
-    	wallet := account.NewWallet()
-    	wallet.AddByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930")
-    	provider := provider2.NewProvider("https://dev-api.zilliqa.com/")
+        wallet := account.NewWallet()
+        wallet.AddByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930")
+        provider := provider2.NewProvider("https://dev-api.zilliqa.com/")
 
-    	gasPrice, _ := provider.GetMinimumGasPrice()
+        gasPrice, _ := provider.GetMinimumGasPrice()
 
-    	tx := &transaction.Transaction{
-    		Version:      strconv.FormatInt(int64(util.Pack(333, 1)), 10),
-    		SenderPubKey: "0246E7178DC8253201101E18FD6F6EB9972451D121FC57AA2A06DD5C111E58DC6A",
-    		ToAddr:       "4BAF5faDA8e5Db92C3d3242618c5B47133AE003C",
-    		Amount:       "10000000",
-    		GasPrice:     gasPrice,
-    		GasLimit:     "50",
-    		Code:         "",
-    		Data:         "",
-    		Priority:     false,
-    	}
+        tx := &transaction.Transaction{
+            Version:      strconv.FormatInt(int64(util.Pack(333, 1)), 10),
+            SenderPubKey: "0246E7178DC8253201101E18FD6F6EB9972451D121FC57AA2A06DD5C111E58DC6A",
+            ToAddr:       "4BAF5faDA8e5Db92C3d3242618c5B47133AE003C",
+            Amount:       "10000000",
+            GasPrice:     gasPrice,
+            GasLimit:     "50",
+            Code:         "",
+            Data:         "",
+            Priority:     false,
+        }
 
-    	_ = wallet.Sign(tx, *provider)
+        _ = wallet.Sign(tx, *provider)
 
-    	rsp, _ := provider.CreateTransaction(tx.ToTransactionPayload())
+        rsp, _ := provider.CreateTransaction(tx.ToTransactionPayload())
 
-    	resMap := rsp.Result.(map[string]interface{})
-    	hash := resMap["TranID"].(string)
-    	fmt.Printf("hash is %s\n", hash)
-    	tx.Confirm(hash, 1000, 3, provider)
+        resMap := rsp.Result.(map[string]interface{})
+        hash := resMap["TranID"].(string)
+        fmt.Printf("hash is %s\n", hash)
+        tx.Confirm(hash, 1000, 3, provider)
     }
     ```
 
@@ -162,8 +170,12 @@ Example of creating a **non-contract** transaction object:
 
 ## Contract Transaction Object
 
-The following is an example of creating a **contract** transaction object. The difference between **contract** and **non-contract** transaction objects is the additional contract transitions such as `setHello` and its relevant params such as the `vname`, `type` and `value` as describe in the deployed contract.
-The other significant difference is the `gasLimit` field. For **contract** transaction objects, the recommended `gasLimit` is between `10000` to `30000`.
+The following is an example of creating a **contract** transaction object. The
+difference between **contract** and **non-contract** transaction objects is the
+additional contract transitions such as `setHello` and its relevant params such
+as the `vname`, `type` and `value` as describe in the deployed contract. The
+other significant difference is the `gasLimit` field. For **contract**
+transaction objects, the recommended `gasLimit` is between `10000` to `30000`.
 
 Example of creating a **contract** transaction object:
 
@@ -221,58 +233,58 @@ Example of creating a **contract** transaction object:
     package main
 
     import (
-    	"github.com/Zilliqa/gozilliqa-sdk/account"
-    	contract2 "github.com/Zilliqa/gozilliqa-sdk/contract"
-    	"github.com/Zilliqa/gozilliqa-sdk/core"
-    	"github.com/Zilliqa/gozilliqa-sdk/keytools"
-    	provider2 "github.com/Zilliqa/gozilliqa-sdk/provider"
-    	"github.com/Zilliqa/gozilliqa-sdk/util"
-    	"strconv"
+        "github.com/Zilliqa/gozilliqa-sdk/account"
+        contract2 "github.com/Zilliqa/gozilliqa-sdk/contract"
+        "github.com/Zilliqa/gozilliqa-sdk/core"
+        "github.com/Zilliqa/gozilliqa-sdk/keytools"
+        provider2 "github.com/Zilliqa/gozilliqa-sdk/provider"
+        "github.com/Zilliqa/gozilliqa-sdk/util"
+        "strconv"
     )
 
     func main() {
-    	host := "https://dev-api.zilliqa.com/"
-    	privateKey := "e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930"
-    	chainID := 333
-    	msgVersion := 1
+        host := "https://dev-api.zilliqa.com/"
+        privateKey := "e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930"
+        chainID := 333
+        msgVersion := 1
 
-    	publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
-    	address := keytools.GetAddressFromPublic(publickKey)
-    	pubkey := util.EncodeHex(publickKey)
-    	provider := provider2.NewProvider(host)
+        publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
+        address := keytools.GetAddressFromPublic(publickKey)
+        pubkey := util.EncodeHex(publickKey)
+        provider := provider2.NewProvider(host)
 
-    	wallet := account.NewWallet()
-    	wallet.AddByPrivateKey(privateKey)
+        wallet := account.NewWallet()
+        wallet.AddByPrivateKey(privateKey)
 
-    	contract := contract2.Contract{
-    		Address:  "bd7198209529dC42320db4bC8508880BcD22a9f2",
-    		Signer:   wallet,
-    		Provider: provider,
-    	}
+        contract := contract2.Contract{
+            Address:  "bd7198209529dC42320db4bC8508880BcD22a9f2",
+            Signer:   wallet,
+            Provider: provider,
+        }
 
-    	args := []core.ContractValue{
-    		{
-    			"msg",
-    			"String",
-    			"hello world",
-    		},
-    	}
+        args := []core.ContractValue{
+            {
+                "msg",
+                "String",
+                "hello world",
+            },
+        }
 
-    	balAndNonce, _ := provider.GetBalance(address)
-    	n := balAndNonce.Nonce + 1
-    	gasPrice, _ := provider.GetMinimumGasPrice()
+        balAndNonce, _ := provider.GetBalance(address)
+        n := balAndNonce.Nonce + 1
+        gasPrice, _ := provider.GetMinimumGasPrice()
 
-    	params := contract2.CallParams{
-    		Nonce:        strconv.FormatInt(n, 10),
-    		Version:      strconv.FormatInt(int64(util.Pack(chainID, msgVersion)), 10),
-    		GasPrice:     gasPrice,
-    		GasLimit:     "10000",
-    		SenderPubKey: pubkey,
-    		Amount:       "0",
-    	}
+        params := contract2.CallParams{
+            Nonce:        strconv.FormatInt(n, 10),
+            Version:      strconv.FormatInt(int64(util.Pack(chainID, msgVersion)), 10),
+            GasPrice:     gasPrice,
+            GasLimit:     "10000",
+            SenderPubKey: pubkey,
+            Amount:       "0",
+        }
 
-    	tx, _ := contract.Call("setHello", args, params, true)
-    	tx.Confirm(tx.ID, 1000, 3, provider)
+        tx, _ := contract.Call("setHello", args, params, true)
+        tx.Confirm(tx.ID, 1000, 3, provider)
 
     }
     ```

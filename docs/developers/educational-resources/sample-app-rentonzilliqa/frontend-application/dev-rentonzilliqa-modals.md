@@ -27,7 +27,7 @@ It uses [`Input`](dev-rentonzilliqa-components.md#input) and
 [`CheckBox`](dev-rentonzilliqa-components.md#checkbox) for selecting the user
 role. A button is presented for connecting ZilPay when required.
 
-The [`createAccountTransition`](#createaccounttransition) function is used.
+The `createAccountTransition` function is used.
 
 ```tsx
 import React, { useEffect, useState } from "react";
@@ -153,7 +153,7 @@ It uses [`Input`](dev-rentonzilliqa-components.md#input) and
 the available amenities. A button is presented for connecting ZilPay when
 required.
 
-The [`createListingTransition`](#createlistingtransition) function is used.
+The `createListingTransition` function is used.
 
 ```tsx
 import React, { useEffect, useState } from "react";
@@ -299,9 +299,8 @@ It uses [`Input`](dev-rentonzilliqa-components.md#modal) and
 the available amenities. A button is presented for connecting ZilPay when
 required.
 
-The [`deleteListingTransition`](#createlistingtransition),
-[`updateListingTransition`](#updatelistingtransition), and
-[`claimRentTransition`](#claimrenttransition) functions are called as required.
+The `deleteListingTransition`, `updateListingTransition`, and
+`claimRentTransition` functions are called as required.
 
 ```tsx
 import React, { useEffect, useState } from "react";

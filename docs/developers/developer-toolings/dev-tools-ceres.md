@@ -63,10 +63,10 @@ productivity for dApp developers.
 
 Isolated server runs 2 containers that are tied together:
 
-1. Server Container (http://localhost:5555) is the local Zilliqa blockchain
-   network and it comes with 10 pre-loaded accounts.
-2. Faucet Container (http://localhost:5556) is a faucet for the above server,
-   you can query the faucet to get $ZILs to an account.
+1. Server Container ([http://localhost:5555](http://localhost:5555)) is the
+   local Zilliqa blockchain network and it comes with 10 pre-loaded accounts.
+2. Faucet Container ([http://localhost:5556](http://localhost:5556)) is a faucet
+   for the above server, you can query the faucet to get $ZILs to an account.
 
 To start the isolated server, you need to click on “Isolated server” from the
 Ceres’ home screen and then click on “Download and install”. After downloading
@@ -95,7 +95,8 @@ RPC server URL and Chain ID to the one specific to your network as mentioned
 
 Devex is a developer-focused lightweight blockchain explorer that shows data on
 the local blockchain network running on the isolated server. Devex runs on the
-port 5557. You can access it from any browser on http://localhost:5557.
+port 5557. You can access it from any browser on
+[http://localhost:5557](http://localhost:5557).
 
 To start the explorer, you need to click on “Network explorer” from the Ceres’
 home screen and then click on “Download and install”. After downloading is
@@ -112,7 +113,8 @@ functionality of `scilla-runner` and `scilla-checker` as a JSON-RPC server.
 Scilla server accepts contract execution requests and executes them, providing a
 JSON output within the server process itself.
 
-Scilla Server runs on port 4000. You can call it's API on http://localhost:4000.
+Scilla Server runs on port 4000. You can call it's API on
+[http://localhost:4000](http://localhost:4000).
 
 To start the server, you need to click on “Scilla” from the Ceres’ home screen
 and then click on “Download and install”. After downloading is finished, you
@@ -146,7 +148,7 @@ blockchain network to the IDE by filling in details of your network.
 
 !!! note
 
-    Network ID for the isolated server is 222, refer https://dev.zilliqa.com/docs/apis/api-blockchain-get-network-id/ to
+    Network ID for the isolated server is 222, refer[https://dev.zilliqa.com/docs/apis/api-blockchain-get-network-id/](https://dev.zilliqa.com/docs/apis/api-blockchain-get-network-id/)to
     know about the id of your Zilliqa network.
 
 Step 3: Select an account that you will eventually use to deploy the contract.
@@ -166,9 +168,9 @@ the contract!
 !["Deploy Success"](../../assets/img/dev-dapps/tools/deploySuccess.png)
 
 Step 6: You can click on the transaction ID link and you will be redirected to
-Devex page, alternatively you can also visit http://localhost:5557 (local
-network explorer) and you will find your contract creation transaction there as
-well.
+Devex page, alternatively you can also visit
+[http://localhost:5557](http://localhost:5557) (local network explorer) and you
+will find your contract creation transaction there as well.
 
 !["Devex"](../../assets/img/dev-dapps/tools/deployDevex.png)
 

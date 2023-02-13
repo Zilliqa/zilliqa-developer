@@ -51,15 +51,14 @@ The **minimum** requirements for running the **Zilliqa Client** are:
 4. Get the joining configuration files:
 
    ```shell
-   wget https://mainnet-join.zilliqa.com/configuration.tar.gz
-   tar zxvf configuration.tar.gz
+   wget[https://mainnet-join.zilliqa.com/configuration.tar.gz](https://mainnet-join.zilliqa.com/configuration.tar.gz)   tar zxvf configuration.tar.gz
    ```
 
 5. Find out your current IP address in the command prompt and record it down:
 
-   ```shell
-   curl https://ipinfo.io/ip
-   ```
+   ````shell
+   curl[https://ipinfo.io/ip](https://ipinfo.io/ip)   ```
+   ````
 
 !!! note
 
@@ -89,7 +88,7 @@ The **minimum** requirements for running the **Zilliqa Client** are:
      <FULL_DATASET_MINE>false</FULL_DATASET_MINE>
      <OPENCL_GPU_MINE>false</OPENCL_GPU_MINE>
      <REMOTE_MINE>true</REMOTE_MINE>
-     MINING_PROXY_URL>http://127.0.0.1:4202/api</MINING_PROXY_URL>
+     MINING_PROXY_URL[http://127.0.0.1:4202/api](http://127.0.0.1:4202/api)/MINING_PROXY_URL>
      ```
 
    ### Get Work Server Mine
@@ -175,7 +174,7 @@ The first hex string is your **public key**, and the second hex string is your
 ## Checking Your $ZIL Balance
 
 To check your balance for mining, input the address located in your _myaddr.txt_
-file in the search bar of https://viewblock.io/zilliqa:
+file in the search bar of[https://viewblock.io/zilliqa:](https://viewblock.io/zilliqa:)
 
 ```shell
 less myaddr.txt

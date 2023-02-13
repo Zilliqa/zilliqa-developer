@@ -53,10 +53,10 @@ Returns the Scilla code associated with a smart contract address. This is repres
 
     ```go
     func GetSmartContractCode() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractCode("fe001824823b12b58708bf24edd94d8b5e1cfcf7")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -74,12 +74,12 @@ Returns the Scilla code associated with a smart contract address. This is repres
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 

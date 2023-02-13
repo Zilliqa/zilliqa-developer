@@ -118,5 +118,5 @@ an equal burn of wZIL.</b>
 
 ### Interacting programmatically
 
-You can refer to https://github.com/Zilliqa/zilwrap-sdk for more information on
+You can refer to[https://github.com/Zilliqa/zilwrap-sdk](https://github.com/Zilliqa/zilwrap-sdk)for more information on
 how to use the SDK for wZIL.

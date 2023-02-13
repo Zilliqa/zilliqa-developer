@@ -6,9 +6,11 @@ title: GetBalance
 ---
 
 - Returns the current `balance` of an account, measured in the smallest
-  accounting unit **Qa** (or 10^-12 **Zil**). This is represented as a `String`.
+  accounting unit **Qa** (or 10^-12 **Zil**). This is represented as a
+  `String`.
 
-- Returns the current `nonce` of an account. This is represented as a `Number`.
+- Returns the current `nonce` of an account. This is represented as a
+  `Number`.
 
 ### Example Request
 
@@ -78,12 +80,12 @@ title: GetBalance
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 

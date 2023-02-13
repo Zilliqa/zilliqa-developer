@@ -47,7 +47,7 @@ In the code snippet below, we call the `setHello()` transition of the `Hello Wor
 ```javascript
   async updateWelcomeMsg(){
     //Only the below two lines are different when compared with ZilPay login.
-    let zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+    let zilliqa = new Zilliqa([https://dev-api.zilliqa.com](https://dev-api.zilliqa.com));
     zilliqa.wallet.addByPrivateKey(privkey); //Private key was stored in the privKey variable
 
     let setHelloValue = this.state.setHelloValue; //new value of the welcome msg

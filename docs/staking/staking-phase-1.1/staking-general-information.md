@@ -15,19 +15,17 @@ import TabItem from '@theme/TabItem';
 
 ## Staking Portal for Node Operators and Delegators
 
-Zillion Staking Portal (Mainnet): https://stake.zilliqa.com/
-
-Zillion Staking Portal (Testnet): https://testnet-stake.zilliqa.com/
+Zillion Staking Portal (Mainnet):[https://stake.zilliqa.com/](https://stake.zilliqa.com/)
+Zillion Staking Portal (Testnet):[https://testnet-stake.zilliqa.com/](https://testnet-stake.zilliqa.com/)
 
 ## Staked Seed Nodes Status Viewer
 
-Staking viewer (Mainnet): https://staking-viewer.zilliqa.com/
-
-Staking viewer (Testnet): https://testnet-viewer.zilliqa.com/
+Staking viewer (Mainnet):[https://staking-viewer.zilliqa.com/](https://staking-viewer.zilliqa.com/)
+Staking viewer (Testnet):[https://testnet-viewer.zilliqa.com/](https://testnet-viewer.zilliqa.com/)
 
 ## Smart Contract Code Repository
 
-Phase 1.1 contracts : https://github.com/Zilliqa/staking-contract
+Phase 1.1 contracts :[https://github.com/Zilliqa/staking-contract](https://github.com/Zilliqa/staking-contract)
 
 ## Staking Smart Contract Information
 

@@ -136,10 +136,10 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
     ```go
     func GetSmartContractInit() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -278,10 +278,10 @@ The address of the ZRC2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6
 
     ```go
     func GetSmartContractState() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -393,10 +393,10 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
     ```go
     func GetSmartContractState() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -475,10 +475,10 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
     ```go
     func GetSmartContractState() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -616,33 +616,33 @@ The code snippet below illustrates how one can transfer ZRC-2 tokens to another 
 
     ```go
     wallet := account.NewWallet()
-    	wallet.AddByPrivateKey(privateKey)
-    	publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
-    	address := keytools.GetAddressFromPublic(publickKey)
-    	fmt.Println(address)
+        wallet.AddByPrivateKey(privateKey)
+        publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
+        address := keytools.GetAddressFromPublic(publickKey)
+        fmt.Println(address)
 
-    	contract := Contract{
-    		Address: "contractAddress",
-    		Signer:  wallet,
-    	}
+        contract := Contract{
+            Address: "contractAddress",
+            Signer:  wallet,
+        }
 
-    	args := []core.ContractValue{
-    		{
-    			"to",
-    			"ByStr20",
-    			"0x" + address,
-    		},
-    		{
-    			"amount",
-    			"Uint128",
-    			"10",
-    		},
-    	}
+        args := []core.ContractValue{
+            {
+                "to",
+                "ByStr20",
+                "0x" + address,
+            },
+            {
+                "amount",
+                "Uint128",
+                "10",
+            },
+        }
 
-    	tx, err2 := contract.CallFor("Transfer", args, true, "0", TestNet)
-    	assert.Nil(t, err2, err2)
-    	tx.Confirm(tx.ID, 1000, 3, contract.Provider)
-    	assert.True(t, tx.Status == core.Confirmed)
+        tx, err2 := contract.CallFor("Transfer", args, true, "0", TestNet)
+        assert.Nil(t, err2, err2)
+        tx.Confirm(tx.ID, 1000, 3, contract.Provider)
+        assert.True(t, tx.Status == core.Confirmed)
 
 
     ```

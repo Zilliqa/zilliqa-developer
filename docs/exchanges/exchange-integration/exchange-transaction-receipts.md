@@ -14,11 +14,14 @@ description: Transaction Receipts Exchanges
 
 ## Transaction Receipts
 
-Confirmed transactions come with a **receipt** under the **result** field when [fetching the transaction](https://apidocs.zilliqa.com/#gettransaction) in JSON format.
+Confirmed transactions come with a **receipt** under the **result** field when
+[fetching the transaction](https://apidocs.zilliqa.com/#gettransaction) in JSON
+format.
 
 ## Basic Fields
 
-The following are the fields a **receipt** may have. These fields generally apply to both payment and contract transactions.
+The following are the fields a **receipt** may have. These fields generally
+apply to both payment and contract transactions.
 
 | Field              | Type    | Description                                              |
 | :----------------- | :------ | :------------------------------------------------------- |
@@ -28,7 +31,7 @@ The following are the fields a **receipt** may have. These fields generally appl
 
 For example:
 
-```
+```json
 "receipt": {
   "cumulative_gas": "10481",
   "epoch_num": "586524",
@@ -38,11 +41,13 @@ For example:
 
 ## Additional Fields
 
-For smart contract transactions, additional information relating to smart contract execution is contained in additional fields under the "**receipt**".
+For smart contract transactions, additional information relating to smart
+contract execution is contained in additional fields under the "**receipt**".
 
 ### Successful Transactions
 
-If a transaction is successful (i.e., the **success** field is `true`), these fields will be present:
+If a transaction is successful (i.e., the **success** field is `true`), these
+fields will be present:
 
 | Field           | Type       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | :-------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -52,7 +57,7 @@ If a transaction is successful (i.e., the **success** field is `true`), these fi
 
 For example:
 
-```
+```json
 "receipt": {
   "accepted": true,
   "cumulative_gas": "878",
@@ -84,11 +89,11 @@ For example:
         "_amount": "50000000000000",
         "_recipient": "0xc0e28525e9d329156e16603b9c1b6e4a9c7ed813",
         "_tag": "onFundsReceived",
-        "params": [
+        "params": {
           "vname": "emp_addr",
           "type": "ByStr20",
           "Value": "0x00345678901234567890123456789012345678ab"
-        ]
+        }
       }
     }
   ]
@@ -98,7 +103,8 @@ For example:
 
 ### Unsuccessful Transactions
 
-If a transaction is unsuccessful (i.e., the **success** field is `false`), no balance transfer will be executed. Additionally, these fields will be present:
+If a transaction is unsuccessful (i.e., the **success** field is `false`), no
+balance transfer will be executed. Additionally, these fields will be present:
 
 | Field          | Type        | Description                                                                                                                                                                                                                                                                                                                                                                  |
 | :------------- | :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -107,7 +113,7 @@ If a transaction is unsuccessful (i.e., the **success** field is `false`), no ba
 
 For example:
 
-```
+```json
 "receipt": {
   "cumulative_gas": "1220",
   "epoch_num": "588004",
@@ -137,15 +143,19 @@ For example:
 ## Recommended Steps for Exchanges Polling for Incoming $ZIL Deposit from Smart Contract Transactions
 
 1.  Confirm that the **success** field is set to `true`.
-1.  Traverse the **transitions** JSON array. For each transition, for a successful deposit of `$ZIL` via the smart contract, the following must be fulfilled:
+1.  Traverse the **transitions** JSON array. For each transition, for a
+    successful deposit of `$ZIL` via the smart contract, the following must be
+    fulfilled:
 
-    1.  **\_recipient** corresponds to a known deposit address controlled by the exchange.
-    2.  **\_tag** is either `AddFunds` or empty.
-        !!! note
+    1.  **\_recipient** corresponds to a known deposit address controlled by the
+        exchange.
+    2.  **\_tag** is either `AddFunds` or empty. !!! note
 
                   `_tag` can be found under `msg` field. If either `_tag` or `msg` is not present, there is no incoming deposit from this particular transition.
 
     3.  **\_amount** is non-zero.
-    4.  Check the **\_recipient** and **\_amount** to complete the information on the balance transfer. In such a case, you can confirm that there is a deposit
-        to address **\_recipient** with value **\_amount** (in `Qa`).
-    5.  Continue traversing the remaining transitions and checking for more deposits.
+    4.  Check the **\_recipient** and **\_amount** to complete the information
+        on the balance transfer. In such a case, you can confirm that there is a
+        deposit to address **\_recipient** with value **\_amount** (in `Qa`).
+    5.  Continue traversing the remaining transitions and checking for more
+        deposits.

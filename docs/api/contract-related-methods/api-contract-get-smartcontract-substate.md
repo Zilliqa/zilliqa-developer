@@ -5,7 +5,8 @@ title: GetSmartContractSubState
 
 ---
 
-Returns the state (or a part specified) of a smart contract address, represented in a JSON format.
+Returns the state (or a part specified) of a smart contract address, represented
+in a JSON format.
 
 ### Example Request
 
@@ -57,10 +58,10 @@ Returns the state (or a part specified) of a smart contract address, represented
 
     ```go
     func GetSmartContractSubState() {
-    	provider := NewProvider("https://zilliqa.com")
-    	response, _ := provider.GetSmartContractSubState("9611c53BE6d1b32058b2747bdeCECed7e1216793", "admins", []interface{}{})
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://zilliqa.com")
+        response, _ := provider.GetSmartContractSubState("9611c53BE6d1b32058b2747bdeCECed7e1216793", "admins", []interface{}{})
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -80,12 +81,12 @@ Returns the state (or a part specified) of a smart contract address, represented
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 
@@ -106,6 +107,9 @@ Returns the state (or a part specified) of a smart contract address, represented
 
 The `params` is a JSON array.
 
-Example: `"params"`:`["fe001824823b12b58708bf24edd94d8b5e1cfcf7","admins",[\"0x9bfec715a6bd658fcb62b0f8cc9bfa2ade71434a\""]]`
+Example:
+`"params"`:`["fe001824823b12b58708bf24edd94d8b5e1cfcf7","admins",[\"0x9bfec715a6bd658fcb62b0f8cc9bfa2ade71434a\""]]`
 
-_Note: If Variable Name and Indices Array are both empty, the response would be same as GetSmartContractState_
+!!! note
+
+    If Variable Name and Indices Array are both empty, the response would be same as `GetSmartContractState_`

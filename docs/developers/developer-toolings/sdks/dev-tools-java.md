@@ -16,11 +16,13 @@ description: Zilliqa Java SDK LaksaJ
 
 ## Source Code
 
-The Github repository can be found at [https://github.com/FireStack-Lab/LaksaJ](https://github.com/FireStack-Lab/LaksaJ)
+The Github repository can be found at
+[https://github.com/FireStack-Lab/LaksaJ](https://github.com/FireStack-Lab/LaksaJ)
 
 ## Getting Started (Installation and Packages Explained)
 
-You can get start with the installation by using Maven, Gradle or manually building the `jar` file.
+You can get start with the installation by using Maven, Gradle or manually
+building the `jar` file.
 
 ## Maven
 
@@ -46,15 +48,16 @@ dependencies {
 
 First clone the `laksaj` repository
 
-```bash
-git clone https://github.com/FireStack-Lab/LaksaJ.git
-```
+````bash
+git clone[https://github.com/FireStack-Lab/LaksaJ.git](https://github.com/FireStack-Lab/LaksaJ.git)```
 
 Next, build `jar` using following command
 
-```
+````
+
 gradle build -x test
-```
+
+````text
 
 ## Methods and APIs
 
@@ -201,7 +204,7 @@ public class GenerateAddress {
         }
     }
 
-```
+````
 
 ### Validate an Address
 

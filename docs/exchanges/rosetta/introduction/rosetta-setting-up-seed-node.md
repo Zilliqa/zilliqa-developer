@@ -21,7 +21,7 @@ description: Setting up Zilliqa Rosetta with Seed node
 
     Please note that whitelisting will be required for operating a Zilliqa seed node. Currently, whitelisting is granted on a case by case basis and usually for reason such as supporting exchange infrastracture.
 
-### Step 1: Download `Zilliqa-rosetta` latest release from https://github.com/Zilliqa/zilliqa-rosetta/releases.
+### Step 1: Download `Zilliqa-rosetta` latest release from[https://github.com/Zilliqa/zilliqa-rosetta/releases](https://github.com/Zilliqa/zilliqa-rosetta/releases)
 
 ### Step 2: Build `Zilliqa-rosetta` Docker image from Zilliqa and Scilla source code
 

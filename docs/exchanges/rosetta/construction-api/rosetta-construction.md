@@ -15,7 +15,9 @@ description: Introduction
 
 ## Construction
 
-Construction API enables developers to write to a blockchain (i.e. construct transactions) in a standard format. Implementations are stateless and can operate entirely offline, and support detached key generation and signing.
+Construction API enables developers to write to a blockchain (i.e. construct
+transactions) in a standard format. Implementations are stateless and can
+operate entirely offline, and support detached key generation and signing.
 
 ### Construction Flow
 
@@ -33,7 +35,7 @@ The construction flow is in this sequence:
 
 ### Flow of Operations
 
-```
+```text
                                Caller (i.e. Coinbase)                + Construction API Implementation
                               +-------------------------------------------------------------------------------------------+
                                                                      |

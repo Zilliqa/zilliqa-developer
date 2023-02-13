@@ -33,7 +33,7 @@ Example of providing a private key:
 
     ```go
     import (
-    	"github.com/Zilliqa/gozilliqa-sdk/account"
+        "github.com/Zilliqa/gozilliqa-sdk/account"
     )
 
     wallet := account.NewWallet()

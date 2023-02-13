@@ -10,13 +10,20 @@ description: Connecting the RentOnZillqa frontend application with the Scilla co
 
 ---
 
-In this section, we prepare the TypeScript for connecting the frontend with the Scilla contract. As discussed, we use [ZilPay](https://zilpay.io) to access the Zilliqa JS utilities, which in turn allows us to interface with the deployed contract.
+In this section, we prepare the TypeScript for connecting the frontend with the
+Scilla contract. As discussed, we use [ZilPay](https://zilpay.io) to access the
+Zilliqa JS utilities, which in turn allows us to interface with the deployed
+contract.
 
 ## Environment Variables
 
-We store the address of the smart contract in an environment variable in an [`.env`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/.env) file. We also store a [Google Maps API Key](https://developers.google.com/maps/documentation/embed/get-api-key) for embedding a Map on the Individual Listing page.
+We store the address of the smart contract in an environment variable in an
+[`.env`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/.env) file.
+We also store a
+[Google Maps API Key](https://developers.google.com/maps/documentation/embed/get-api-key)
+for embedding a Map on the Individual Listing page.
 
-```
+```sh
 REACT_APP_SMART_CONTRACT_ADDRESS=zil1tug5k2la6xrjqc78ysfacskgt2m72uzdwmd86z
 REACT_APP_MAPS_API_KEY=XXXXXXXXXXXXXXXX
 ```
@@ -25,11 +32,17 @@ REACT_APP_MAPS_API_KEY=XXXXXXXXXXXXXXXX
 
 ## Helper Functions
 
-We create a bunch of helper functions to facilitate the contract connection. We will define them in the [`/src/functions/`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/) directory.
+We create a bunch of helper functions to facilitate the contract connection. We
+will define them in the
+[`/src/functions/`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/)
+directory.
 
 ### `ContextContainer`
 
-We use [`unstated-next`](https://github.com/jamiebuilds/unstated-next) to create a Context Provider for the application. We use this to make some objects available across all the components of the application. We will see how this is used in the coming sections.
+We use [`unstated-next`](https://github.com/jamiebuilds/unstated-next) to create
+a Context Provider for the application. We use this to make some objects
+available across all the components of the application. We will see how this is
+used in the coming sections.
 
 ```ts
 import { useState } from "react";
@@ -75,9 +88,11 @@ export default ContextContainer;
 
 ### `getCallParameters`
 
-This function returns an object with the parameters required for calling transitions.
-An optional `amountValue` argument can be used when sending messages with a non-zero amount.
-The values are converted to the appropriate units using [`zilPay.utils`](https://zilpay.github.io/zilpay-docs/zilliqa-api-utils/#window-zilpay-utils).
+This function returns an object with the parameters required for calling
+transitions. An optional `amountValue` argument can be used when sending
+messages with a non-zero amount. The values are converted to the appropriate
+units using
+[`zilPay.utils`](https://zilpay.github.io/zilpay-docs/zilliqa-api-utils/#window-zilpay-utils).
 
 ```ts
 const getCallParameters = (zilPay: any, amountValue: string = "0") => {
@@ -105,7 +120,8 @@ export default getCallParameters;
 
 ### `getCurrentUser`
 
-This function fetches the wallet address of the active ZilPay user. It gets the `name` and `role` of the user from the contract state.
+This function fetches the wallet address of the active ZilPay user. It gets the
+`name` and `role` of the user from the contract state.
 
 ```ts
 const getCurrentUser = (contractState: any, zilPay: any) => {
@@ -142,9 +158,11 @@ export default getCurrentEpochNumber;
 
 ### `formatListings`
 
-This function takes the multiple Map objects in the contract state and returns a handy user object.
-It checks if the current ZilPay user's wallet address matches that of the host of the listing.
-It also checks the rented status of the listing. Prices and rent are converted from `Qa`. Amenities are converted to `boolean`.
+This function takes the multiple Map objects in the contract state and returns a
+handy user object. It checks if the current ZilPay user's wallet address matches
+that of the host of the listing. It also checks the rented status of the
+listing. Prices and rent are converted from `Qa`. Amenities are converted to
+`boolean`.
 
 ```ts
 const formatListings = (
@@ -213,11 +231,20 @@ export default formatListings;
 
 ### `transitionMessageAlert`
 
-This function creates a toast using [`react-hot-toast`](https://react-hot-toast.com),
-It uses [`zilPay.wallet`](https://zilpay.github.io/zilpay-docs/getting-started/#basic-considerations) to subscribe to transactions.
-It updates toast with the status of the transaction and shows a message as per the [Messages Codes](../scilla-contract/dev-rentonzilliqa-library.md) we defined earlier.
+This function creates a toast using
+[`react-hot-toast`](https://react-hot-toast.com), It uses
+[`zilPay.wallet`](https://zilpay.github.io/zilpay-docs/getting-started/#basic-considerations)
+to subscribe to transactions. It updates toast with the status of the
+transaction and shows a message as per the
+[Messages Codes](../scilla-contract/dev-rentonzilliqa-library.md) we defined
+earlier.
 
-Note that in this function, we use another helper function, `decodeMessage`, to get a human-readable message from the message code. This function is quite basic and hence not included here. You can take a look at [`/src/functions/decodeMessage.ts`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/decodeMessage.ts). It also includes a `decodeZilPayError` function that we will use in the coming sections.
+Note that in this function, we use another helper function, `decodeMessage`, to
+get a human-readable message from the message code. This function is quite basic
+and hence not included here. You can take a look at
+[`/src/functions/decodeMessage.ts`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/decodeMessage.ts).
+It also includes a `decodeZilPayError` function that we will use in the coming
+sections.
 
 ```ts
 import toast from "react-hot-toast";
@@ -260,9 +287,15 @@ export default transitionMessageAlert;
 
 ## Transition Functions
 
-We finally come to the Transition Functions that simply call the contract transitions using [`zilPay.contract`](https://zilpay.github.io/zilpay-docs/zilliqa-contracts/#window-zilpay-contracts). The [`transitionMessageAlert`](#transitionmessagealert) is also setup after the transitions are triggered.
+We finally come to the Transition Functions that simply call the contract
+transitions using
+[`zilPay.contract`](https://zilpay.github.io/zilpay-docs/zilliqa-contracts/#window-zilpay-contracts).
+The [`transitionMessageAlert`](#transitionmessagealert) is also setup after the
+transitions are triggered.
 
-The following functions are created at [`/src/functions/`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/) for calling their respective transitions.
+The following functions are created at
+[`/src/functions/`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/)
+for calling their respective transitions.
 
 | Function                                                                                                                          | Transition                                                              |
 | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -273,7 +306,10 @@ The following functions are created at [`/src/functions/`](https://github.com/Qu
 | [`bookListingTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/bookListingTransition.ts)     | [`book_listing`](../scilla-contract/dev-rentonzilliqa-transitions.md)   |
 | [`claimRentTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/claimRentTransition.ts)         | [`claim_rent`](../scilla-contract/dev-rentonzilliqa-transitions.md)     |
 
-Let us see the [`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts) function as an example. We use the [`decodeZilPayError`](#transitionmessagealert) we defined earlier.
+Let us see the
+[`createUserTransition`](https://github.com/Quinence/zilliqa-fullstack-app/blob/main/src/functions/createUserTransition.ts)
+function as an example. We use the
+[`decodeZilPayError`](#transitionmessagealert) we defined earlier.
 
 ```ts
 import getCallParameters from "./getCallParameters";

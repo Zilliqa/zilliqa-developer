@@ -53,10 +53,10 @@ Returns the details of a specified Transaction.
 
     ```go
     func GetTransaction() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetTransaction("cd8727674bc05e0ede405597a218164e1c13c7103b9d0ba43586785f3d8cede5")
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetTransaction("cd8727674bc05e0ede405597a218164e1c13c7103b9d0ba43586785f3d8cede5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -194,12 +194,12 @@ Returns the details of a specified Transaction.
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 

@@ -35,8 +35,9 @@ Request:
 
 Response:
 
-Sample
-**Note**: The operation type is `TRANSFER`.
+!!! note
+
+    The operation type is `TRANSFER`.
 
 ```json
 {
@@ -113,7 +114,7 @@ Sample
 }
 ```
 
-_Get a Block Transaction - Contract Deployment_
+## Get a Block Transaction - Contract Deployment
 
 Request:
 
@@ -135,8 +136,7 @@ Request:
 
 Response:
 
-Sample
-**Note**: The operation type is `contract_deployment`.
+Sample **Note**: The operation type is `contract_deployment`.
 
 ```json
 {
@@ -195,13 +195,17 @@ Sample
 A contract call can be defined in the either one of the following two forms:
 
 1. An account has invoked a function in a contract
-2. An account has invoked a function in a contract which further invokes another function in a different contract (a.k.a Chain Calling)
+2. An account has invoked a function in a contract which further invokes another
+   function in a different contract (a.k.a Chain Calling)
 
-Depending on the functions invoked by the contract, a contract call may perform additional smart contract deposits to some accounts.
-These smart contract deposits will be shown under the `operations []` idential to how typical payment transaction is displayed.
-Additional metadata information related to the transaction such as the _contract address_ and _gas amount_ are displayed only at the **final operation block** to reduce cluttering of metadata.
+Depending on the functions invoked by the contract, a contract call may perform
+additional smart contract deposits to some accounts. These smart contract
+deposits will be shown under the `operations []` idential to how typical payment
+transaction is displayed. Additional metadata information related to the
+transaction such as the _contract address_ and _gas amount_ are displayed only
+at the **final operation block** to reduce cluttering of metadata.
 
-_Get a Block Transaction - Contract Call without Smart Contract Deposits_
+## Get a Block Transaction - Contract Call without Smart Contract Deposits
 
 Request:
 
@@ -223,8 +227,7 @@ Request:
 
 Response:
 
-Sample
-**Note**: The operation type is `contract_call`.
+Sample **Note**: The operation type is `contract_call`.
 
 ```json
 {
@@ -295,7 +298,9 @@ Sample
 }
 ```
 
-_Get a Block Transaction - Contract Call with Smart Contract Deposits (With Chain Calls)_
+## Get a Block Transaction - Contract Call with Smart Contract Deposits (With
+
+Chain Calls)
 
 Request:
 
@@ -317,13 +322,19 @@ Request:
 
 Response:
 
-Sample
-**Note**: The operation type is `contract_call`, follow by `contract_call_transfer` for subsequent operations with a smart contract deposits.
+Sample **Note**: The operation type is `contract_call`, follow by
+`contract_call_transfer` for subsequent operations with a smart contract
+deposits.
 
 In the sample, the sequence of operations are as follows:
 
-- Initiator `zil16ura3fhsf84h60s7w6xjy4u2wxel892n7sq5dp` -> Contract `zil135gsjk2wqxwecn00axm2s40ey6g6ne8668046h` (invokes a contract call to add funds)
-- Contract `zil135gsjk2wqxwecn00axm2s40ey6g6ne8668046h` (`8d1109594e019d9c4defe9b6a855f92691a9e4fa`) -> Recipient `zil12n6h5gqhlpw87gtzlqe5sq5r7pq2spj8x2g8pe` (amount is deducted from contract balance and trasnferred to recipient)
+- Initiator `zil16ura3fhsf84h60s7w6xjy4u2wxel892n7sq5dp` -> Contract
+  `zil135gsjk2wqxwecn00axm2s40ey6g6ne8668046h` (invokes a contract call to add
+  funds)
+- Contract `zil135gsjk2wqxwecn00axm2s40ey6g6ne8668046h`
+  (`8d1109594e019d9c4defe9b6a855f92691a9e4fa`) -> Recipient
+  `zil12n6h5gqhlpw87gtzlqe5sq5r7pq2spj8x2g8pe` (amount is deducted from contract
+  balance and trasnferred to recipient)
 
 ```json
 {

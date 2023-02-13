@@ -51,10 +51,10 @@ Returns the current number of validated Transactions in the network. This is rep
 
     ```go
     func GetNumTransactions() {
-    	provider := NewProvider("https://api.zilliqa.com/")
-    	response := provider.GetNumTransactions()
-    	result, _ := json.Marshal(response)
-    	fmt.Println(string(result))
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetNumTransactions()
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
     }
     ```
 
@@ -70,12 +70,12 @@ Returns the current number of validated Transactions in the network. This is rep
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 

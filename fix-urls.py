@@ -5,8 +5,8 @@ import re
 url_pattern = "https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)"
 pattern_not_fenced = '([^\("\[])({})([^\)"\]])'.format(url_pattern)
 
-for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
-    filename = os.path.join("docs", f)
+for f in glob.glob("**/*.md", root_dir="old-docs", recursive=True):
+    filename = os.path.join("old-docs", f)
     with open(filename, "r") as fb:
         contents = fb.read()
 
@@ -32,3 +32,13 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
         new_url = "[{}]({})".format(url, url)
         contents = contents[:f] + new_url + contents[t:]
         print("- ", new_url)
+
+    if (
+        "(http://localhost:4201/)" not in contents
+        and "[http://localhost:4201/]" not in contents
+    ):
+        parts = contents.split("http://localhost:4201/")
+        contents = "[http://localhost:4201/](http://localhost:4201/)".join(parts)
+
+    with open(filename, "w") as fb:
+        fb.write(contents)

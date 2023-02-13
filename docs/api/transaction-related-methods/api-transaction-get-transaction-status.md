@@ -13,7 +13,7 @@ Returns the status of a specified transaction. This API is available from Zilliq
 
 !!! note
 
-    The `GetTransactionStatus` API is available only on https://api.zilliqa.com/. It is disabled for community-hosted or private-hosted seed nodes.
+    The `GetTransactionStatus` API is available only on[https://api.zilliqa.com/](https://api.zilliqa.com/) It is disabled for community-hosted or private-hosted seed nodes.
 
 ### Example Request
 
@@ -106,10 +106,10 @@ Returns the status of a specified transaction. This API is available from Zilliq
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                       |
-| --------------------- | ---------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/     |
-| **Developer testnet** | https://dev-api.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                       |
+| --------------------- | ------------------------------------------------------------ |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/) |
 
 ### Arguments
 

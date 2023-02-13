@@ -105,37 +105,37 @@ Create a new Transaction object and send it to the network to be processed. <br/
 
     ```go
     func SendTransaction() {
-    	wallet := NewWallet()
-    	wallet.AddByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930")
-    	provider := provider2.NewProvider("https://api.zilliqa.com/")
+        wallet := NewWallet()
+        wallet.AddByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930")
+        provider := provider2.NewProvider("https://api.zilliqa.com/")
 
-    	tx := &transaction.Transaction{
-    		Version:      strconv.FormatInt(int64(util.Pack(1, 1)), 10),
-    		SenderPubKey: "0246E7178DC8253201101E18FD6F6EB9972451D121FC57AA2A06DD5C111E58DC6A",
-    		ToAddr:       "4BAF5faDA8e5Db92C3d3242618c5B47133AE003C",
-    		Amount:       "10000000",
-    		GasPrice:     "2000000000",
-    		GasLimit:     "50",
-    		Code:         "",
-    		Data:         "",
-    		Priority:     false,
-    	}
+        tx := &transaction.Transaction{
+            Version:      strconv.FormatInt(int64(util.Pack(1, 1)), 10),
+            SenderPubKey: "0246E7178DC8253201101E18FD6F6EB9972451D121FC57AA2A06DD5C111E58DC6A",
+            ToAddr:       "4BAF5faDA8e5Db92C3d3242618c5B47133AE003C",
+            Amount:       "10000000",
+            GasPrice:     "2000000000",
+            GasLimit:     "50",
+            Code:         "",
+            Data:         "",
+            Priority:     false,
+        }
 
-    	err := wallet.Sign(tx, *provider)
-    	if err != nil {
-    		fmt.Println(err)
-    	}
+        err := wallet.Sign(tx, *provider)
+        if err != nil {
+            fmt.Println(err)
+        }
 
-    	rsp := provider.CreateTransaction(tx.ToTransactionPayload())
+        rsp := provider.CreateTransaction(tx.ToTransactionPayload())
 
-    	if rsp.Error != nil {
-    		fmt.Println(rsp.Error)
-    	} else {
-    		result := rsp.Result.(map[string]interface{})
-    		hash := result["TranID"].(string)
-    		fmt.Printf("hash is %s\n", hash)
-    		tx.Confirm(hash, 1000, 3, provider)
-    	}
+        if rsp.Error != nil {
+            fmt.Println(rsp.Error)
+        } else {
+            result := rsp.Result.(map[string]interface{})
+            hash := result["TranID"].(string)
+            fmt.Printf("hash is %s\n", hash)
+            tx.Confirm(hash, 1000, 3, provider)
+        }
     }
     ```
 
@@ -160,12 +160,12 @@ Create a new Transaction object and send it to the network to be processed. <br/
 
 ### HTTP Request
 
-| Chain(s)              | URL(s)                                       |
-| --------------------- | -------------------------------------------- |
-| **Zilliqa mainnet**   | https://api.zilliqa.com/                     |
-| **Developer testnet** | https://dev-api.zilliqa.com/                 |
-| **Local testnet**     | http://localhost:4201/                       |
-| **Isolated server**   | https://zilliqa-isolated-server.zilliqa.com/ |
+| Chain(s)              | URL(s)                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| **Zilliqa mainnet**   | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                         |
+| **Developer testnet** | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                                 |
+| **Local testnet**     | [http://localhost:4201/](http://localhost:4201/)                                             |
+| **Isolated server**   | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
 
 ### Arguments
 

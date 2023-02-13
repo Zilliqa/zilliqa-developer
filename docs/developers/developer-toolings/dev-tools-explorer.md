@@ -35,10 +35,10 @@ dropdown button at the top right corner.
 ViewBlock allows you to look at blocks, address, transactions, status of the
 Zilliqa network, contract code and variables.
 
-| Network | Link                                         |
-| ------- | -------------------------------------------- |
-| Mainnet | https://viewblock.io/zilliqa                 |
-| Testnet | https://viewblock.io/zilliqa?network=testnet |
+| Network | Link                                                                                         |
+| ------- | -------------------------------------------------------------------------------------------- |
+| Mainnet | [https://viewblock.io/zilliqa](https://viewblock.io/zilliqa)                                 |
+| Testnet | [https://viewblock.io/zilliqa?network=testnet](https://viewblock.io/zilliqa?network=testnet) |
 
 For example,
 [this](https://viewblock.io/zilliqa/tx/c4030c73d6dae558ff0c9d98237101e342888115f13219a00bb14a8ee46fa3be?network=testnet)

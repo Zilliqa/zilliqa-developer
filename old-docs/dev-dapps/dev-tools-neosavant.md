@@ -20,7 +20,7 @@ description: Zilliqa Online Smart Contract (Scilla) IDE
 !["Faucet"](/assets/img/dev-dapps/tools/neosavant.png)
 
 A fully-fledged IDE used for writing, testing and deploying Scilla smart
-contracts painlessly. It can be tried out at https://ide.zilliqa.com/.
+contracts painlessly. It can be tried out at[https://ide.zilliqa.com/](https://ide.zilliqa.com/)
 
 Neo-Savant helps Scilla developers to create and deploy Smart Contracts using an
 automated development environment, in-browser, with quick and intuitive

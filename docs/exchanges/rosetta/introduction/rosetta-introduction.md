@@ -34,7 +34,7 @@ can use a blockchain project’s Rosetta implementation to read on-chain data an
 construct transactions in a standard format; minimizing code and simplifying
 maintenance.
 
-# Zilliqa Rosetta
+## Zilliqa Rosetta
 
 Zilliqa Rosetta is reference implementation of the Rosetta specification for
 Zilliqa blockchain platform. Data and construction API has been implemented.
@@ -42,7 +42,7 @@ Zilliqa blockchain platform. Data and construction API has been implemented.
 Latest release of Zilliqa Rosetta can be found at
 [https://github.com/Zilliqa/zilliqa-rosetta](https://github.com/Zilliqa/zilliqa-rosetta)
 
-## Running Zilliqa Rosetta with Zilliqa seed node
+### Running Zilliqa Rosetta with Zilliqa seed node
 
 To run Zilliqa Rosetta, please refer to
 ["Setting up Zilliqa Rosetta with Seed node"](rosetta-setting-up-seed-node.md)
@@ -54,14 +54,14 @@ node together Rosetta or connect Rosetta to our public endpoing,
 
     For running a seed node option, whitelisting will be required and whitelisting is only given on a case by case basis.
 
-## Running Zilliqa Rosetta without Zilliqa seed node
+### Running Zilliqa Rosetta without Zilliqa seed node
 
 To run Zilliqa Rosetta connecting to Zilliqa public API endpoint, please refer
 to
 ["Setting up Zilliqa Rosetta connecting to public API endpoint"](rosetta-setting-up-no-seed-node.md)
 section.
 
-## Interacting with Zilliqa Rosetta
+### Interacting with Zilliqa Rosetta
 
 You can refer to the Zilliqa Rosetta APIs for the list of supported restful
 APIs. If need you need a SDK, the Rosetta project has provided a

@@ -36,8 +36,7 @@ tarball for the Mainnet:
 # create a directory
 $ mkdir my_seed && cd my_seed
 # download the seed node configuration files
-$ curl -O https://mainnet-join.zilliqa.com/seed-configuration.tar.gz
-$ tar -zxvf seed-configuration.tar.gz
+$ curl -O[https://mainnet-join.zilliqa.com/seed-configuration.tar.gz](https://mainnet-join.zilliqa.com/seed-configuration.tar.gz)$ tar -zxvf seed-configuration.tar.gz
 
 # Contents:
 #
@@ -76,7 +75,7 @@ binary from source and run it as such.
 
 ```sh
 # clone Zilliqa source files
-$ git clone https://github.com/Zilliqa/Zilliqa.git && cd Zilliqa && git checkout
+$ git clone[https://github.com/Zilliqa/Zilliqa.git](https://github.com/Zilliqa/Zilliqa.git)&& cd Zilliqa && git checkout
 tags/<tag_id>
 
 # install system dependencies
@@ -106,8 +105,7 @@ $ sudo apt-get update && sudo apt-get install \
 
 # Run the following to install latest version of cmake.
 # We suggest to install cmake 3.19 or any version >=3.16:
-wget https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-x86_64.sh
-mkdir -p "${HOME}"/.local
+wget[https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-x86_64.sh](https://github.com/Kitware/CMake/releases/download/v3.19.3/cmake-3.19.3-Linux-x86_64.sh)mkdir -p "${HOME}"/.local
 bash ./cmake-3.19.3-Linux-x86_64.sh --skip-license --prefix="${HOME}"/.local/
 export PATH=$HOME/.local/bin:$PATH
 cmake --version
@@ -127,8 +125,7 @@ configuration tarball, and generate a keypair:
 # make a separate folder for keys and configuration
 $ cd ../ && mkdir my_seed && cd my_seed
 # download the seed node configuration files
-$ curl -O https://mainnet-join.zilliqa.com/seed-configuration.tar.gz
-$ tar -zxvf seed-configuration.tar.gz
+$ curl -O[https://mainnet-join.zilliqa.com/seed-configuration.tar.gz](https://mainnet-join.zilliqa.com/seed-configuration.tar.gz)$ tar -zxvf seed-configuration.tar.gz
 
 # Contents:
 #
@@ -218,8 +215,7 @@ If you received the latest blockchain information (similar to the one below) fro
 
 You can use an online WebSocket test utility to test whether your WebSocket is publicly accessible.
 
-1. Visit https://www.websocket.org/echo.html
-1. Under location, put your WebSocket URL link (e.g., `wss://<yourdomain here or ip:port>`)
+1. Visit[https://www.websocket.org/echo.html](https://www.websocket.org/echo.html)1. Under location, put your WebSocket URL link (e.g., `wss://<yourdomain here or ip:port>`)
 1. Click on connect
 1. If **“CONNECTED”** is shown in the log, your WebSocket port is publicly accessible
 

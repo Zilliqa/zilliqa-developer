@@ -31,7 +31,9 @@ To create a ZilPay wallet:
 1.  Visit ZilPay's [website](https://zilpay.xyz/) and download the extension for
     your respective browser.
 2.  Open the extension, create a new wallet by verifying your 12 words recovery
-    phrase and selecting a password for your wallet. !!! note
+    phrase and selecting a password for your wallet.
+
+    !!! note
 
            Please store your 12 words recovery phrase securely
 

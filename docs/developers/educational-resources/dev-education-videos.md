@@ -13,10 +13,13 @@ description: Zilliqa and Scilla Development Videos - Write smart contracts and b
 
 ---
 
-There are numerous channels that cover Zilliqa and Scilla programming content on various social media channels.
-In this section we'll cover videos related to Zilliqa and Scilla programming that are available on Zilliqa's official channels. We'll continue to add videos to this course over time.
+There are numerous channels that cover Zilliqa and Scilla programming content on
+various social media channels. In this section we'll cover videos related to
+Zilliqa and Scilla programming that are available on Zilliqa's official
+channels. We'll continue to add videos to this course over time.
 
-Playlist link on youtube : https://www.youtube.com/playlist?list=PLhAZ7IjBUYmvQGQmEGRHNgBQRu-ZNH_J6
+Playlist link on youtube
+:[https://www.youtube.com/playlist?list=PLhAZ7IjBUYmvQGQmEGRHNgBQRu-ZNH_J6](https://www.youtube.com/playlist?list=PLhAZ7IjBUYmvQGQmEGRHNgBQRu-ZNH_J6)
 
 ### 1 Zilliqa and Scilla Programming Course Introduction
 
@@ -29,7 +32,8 @@ Playlist link on youtube : https://www.youtube.com/playlist?list=PLhAZ7IjBUYmvQG
   allowfullscreen
 ></iframe>
 
-Course introduction video in which we talk about the overview of the course - share it with your friends to get them excited about Zilliqa!
+Course introduction video in which we talk about the overview of the course -
+share it with your friends to get them excited about Zilliqa!
 
 ### 2 Zilliqa and Scilla Programming Course Content, and Developer Resources
 
@@ -55,7 +59,9 @@ Course structure and developer resources you will need to build on Zilliqa.
   allowfullscreen
 ></iframe>
 
-Background on what were the motivations for creating a new smart contract language which is safe by design and formally verifiable, i.e., Scilla. We also talk about some of the core features of Scilla in this video.
+Background on what were the motivations for creating a new smart contract
+language which is safe by design and formally verifiable, i.e., Scilla. We also
+talk about some of the core features of Scilla in this video.
 
 ### 4 Scilla Key Concepts - Part 1
 
@@ -68,7 +74,8 @@ Background on what were the motivations for creating a new smart contract langua
   allowfullscreen
 ></iframe>
 
-We cover some key Scilla concepts like variables (mutable, immutable), expressions, statements, transitions, procedures, events, and messages.
+We cover some key Scilla concepts like variables (mutable, immutable),
+expressions, statements, transitions, procedures, events, and messages.
 
 ### 5 Deploying a Scilla "Hello World" Contract on the Blockchain - With Code Explanation
 
@@ -81,11 +88,13 @@ We cover some key Scilla concepts like variables (mutable, immutable), expressio
   allowfullscreen
 ></iframe>
 
-In this video, we deploy a Hello World contract on Zilliqa using the IDE available at https://ide.zilliqa.com/.
+In this video, we deploy a Hello World contract on Zilliqa using the IDE
+available at[https://ide.zilliqa.com/](https://ide.zilliqa.com/)
 
-Hello World contract code with some explanation of its components: https://scilla.readthedocs.io/en/latest/scilla-by-example.html#helloworld.
+Hello World contract code with some explanation of its
+components:[https://scilla.readthedocs.io/en/latest/scilla-by-example.html#helloworld](https://scilla.readthedocs.io/en/latest/scilla-by-example.html#helloworld)
 
-### 6 Deploying a ZRC-2/Fungible Token Contract on the Blockchain - No Programming Knowledge Needed!
+### 6 Deploying a ZRC-2/Fungible Token Contract on the Blockchain - No Programming Knowledge Needed
 
 <iframe
   width="560"
@@ -96,13 +105,15 @@ Hello World contract code with some explanation of its components: https://scill
   allowfullscreen
 ></iframe>
 
-In this video we teach you how to deploy a ZRC-2 (fungible token contract) using the Zilliqa IDE.
+In this video we teach you how to deploy a ZRC-2 (fungible token contract) using
+the Zilliqa IDE.
 
 Relevant Links:
 
-ZRC-2 Standard: https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md
-
-ZRC-2 Contract Code: https://github.com/Zilliqa/ZRC/blob/main/reference-contracts/FungibleToken.scilla
+ZRC-2
+Standard:[https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md)
+ZRC-2 Contract
+Code:[https://github.com/Zilliqa/ZRC/blob/main/reference-contracts/FungibleToken.scilla](https://github.com/Zilliqa/ZRC/blob/main/reference-contracts/FungibleToken.scilla)
 
 ### 7 Scilla Key Concepts - Part 2
 
@@ -115,7 +126,8 @@ ZRC-2 Contract Code: https://github.com/Zilliqa/ZRC/blob/main/reference-contract
   allowfullscreen
 ></iframe>
 
-We look at important Scilla concepts like functions, error handling, options, maps, booleans, lists, and standard libraries.
+We look at important Scilla concepts like functions, error handling, options,
+maps, booleans, lists, and standard libraries.
 
 ### 8 Crowdfunding Contract In Scilla - Part1
 
@@ -128,7 +140,8 @@ We look at important Scilla concepts like functions, error handling, options, ma
   allowfullscreen
 ></iframe>
 
-We explore the crowdfunding contract and its various components as available on: https://scilla.readthedocs.io/en/latest/scilla-by-example.html#a-second-example-crowdfunding
+We explore the crowdfunding contract and its various components as available
+on:[https://scilla.readthedocs.io/en/latest/scilla-by-example.html#a-second-example-crowdfunding](https://scilla.readthedocs.io/en/latest/scilla-by-example.html#a-second-example-crowdfunding)
 
 ### 9 Crowdfunding Contract In Scilla - Part2
 
@@ -154,5 +167,6 @@ Finish coding all the components of the crowdfunding contract.
   allowfullscreen
 ></iframe>
 
-In this video we look at some Scilla tips and tricks that you can use to write better Scilla smart contracts
-Reference : [https://scilla.readthedocs.io/en/latest/scilla-tips-and-tricks.html](https://scilla.readthedocs.io/en/latest/scilla-tips-and-tricks.html)
+In this video we look at some Scilla tips and tricks that you can use to write
+better Scilla smart contracts Reference :
+[https://scilla.readthedocs.io/en/latest/scilla-tips-and-tricks.html](https://scilla.readthedocs.io/en/latest/scilla-tips-and-tricks.html)

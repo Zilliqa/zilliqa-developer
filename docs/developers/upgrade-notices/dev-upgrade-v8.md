@@ -2,15 +2,18 @@
 id: dev-upgrade-v8
 title: v8.0.0 Upgrade Notice
 keywords:
-  - upgrade
-  - v8.0.0
-  - zilliqa
+    - upgrade
+    - v8.0.0
+    - zilliqa
 description: Zilliqa v8.0.0 upgrade notice
 ---
 
 ---
 
-Zilliqa version `8.0.0` consists of numerous significant changes. This page summarizes some of the major changes that developers and exchanges will need to take note of. The full release note of `v8.0.0` is available [here](https://github.com/Zilliqa/Zilliqa/releases/tag/v8.0.0).
+Zilliqa version `8.0.0` consists of numerous significant changes. This page
+summarizes some of the major changes that developers and exchanges will need to
+take note of. The full release note of `v8.0.0` is available
+[here](https://github.com/Zilliqa/Zilliqa/releases/tag/v8.0.0).
 
 ## Upgrade Duration
 
@@ -23,7 +26,9 @@ Zilliqa version `8.0.0` consists of numerous significant changes. This page summ
 
 ### 1) Faster block production rate
 
-We have made some changes to our pBFT (Practical Byzantine Fault Tolerance) consensus and transaction dispatching and processing implementation. This allows for faster block production rate.
+We have made some changes to our pBFT (Practical Byzantine Fault Tolerance)
+consensus and transaction dispatching and processing implementation. This allows
+for faster block production rate.
 
 |                                      | Before `v8.0.0` | `v8.0.0`        |
 | ------------------------------------ | --------------- | --------------- |
@@ -32,28 +37,40 @@ We have made some changes to our pBFT (Practical Byzantine Fault Tolerance) cons
 
 References:
 
-- [`ZIP-14 - Revised pBFT Consensus`](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-14.md)
-- [`Revised pBFT consensus with txn processing implementation`](https://github.com/Zilliqa/Zilliqa/pull/2216)
+-   [`ZIP-14 - Revised pBFT Consensus`](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-14.md)
+-   [`Revised pBFT consensus with txn processing implementation`](https://github.com/Zilliqa/Zilliqa/pull/2216)
 
 ### 2) Block reward adjustment
 
-Faster block production rate will result in an increase in inflation rate. Zilliqa `v8.0.0` will not include any adjustment to the current inflation rate. Instead, in order to preserve the current inflation rate, the reward allocated per DS epoch will be decreased from 275,000 $ZIL per DS block to 176,000 $ZIL per DS block. We will update the `COINBASE_REWARD_PER_DS`as follows:
+Faster block production rate will result in an increase in inflation rate.
+Zilliqa `v8.0.0` will not include any adjustment to the current inflation rate.
+Instead, in order to preserve the current inflation rate, the reward allocated
+per DS epoch will be decreased from 275,000 $ZIL per DS block to 176,000 $ZIL
+per DS block. We will update the `COINBASE_REWARD_PER_DS`as follows:
 
 |                          | Before `v8.0.0`    | `v8.0.0`           |
 | ------------------------ | ------------------ | ------------------ |
 | `COINBASE_REWARD_PER_DS` | 275000000000000000 | 176000000000000000 |
 
-Please note that this change is considered an interim change. If the block production rate deviates from the expected value significantly, a new governance proposal can be introduced to adjust the value in subsequent Mainnet upgrades.
+Please note that this change is considered an interim change. If the block
+production rate deviates from the expected value significantly, a new governance
+proposal can be introduced to adjust the value in subsequent Mainnet upgrades.
 
 ### 3) Payment transaction gas unit increase from 1 to 50
 
-As per [ZIP-18](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-18.md), which passed Zilliqa governance vote, the gas unit of payment transaction will be adjusted from 1 to 50 gas unit. We will update `NORMAL_TRAN_GAS` as follows:
+As per [ZIP-18](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-18.md),
+which passed Zilliqa governance vote, the gas unit of payment transaction will
+be adjusted from 1 to 50 gas unit. We will update `NORMAL_TRAN_GAS` as follows:
 
 |                   | Before `v8.0.0` | `v8.0.0` |
 | ----------------- | --------------- | -------- |
 | `NORMAL_TRAN_GAS` | 1               | 50       |
 
-When handling payment transactions, developers and exchanges will need to call `CreateTransaction` with `gasLimit` set to at least `50` instead of `1` from `v8.0.0` onwards. As a result of this change, the minimal cost of a payment transaction fee will increase from 0.002 $ZIL to 0.1 $ZIL assuming the lowest gas price.
+When handling payment transactions, developers and exchanges will need to call
+`CreateTransaction` with `gasLimit` set to at least `50` instead of `1` from
+`v8.0.0` onwards. As a result of this change, the minimal cost of a payment
+transaction fee will increase from 0.002 $ZIL to 0.1 $ZIL assuming the lowest
+gas price.
 
 !!! important
 
@@ -62,14 +79,18 @@ When handling payment transactions, developers and exchanges will need to call `
 
 ### 4) Deprecation and removal of `GetPendingTxn` and `GetPendingTxns` API
 
-Since `v7.0.0`, we have released a new API [`GetTransactionStatus`](https://dev.zilliqa.com/docs/apis/api-transaction-get-transaction-status) which
-tracks transaction status during the transactional lifetime. `GetPendingTxn` and `GetPendingTxns` will be removed with effect from `v8.0.0`.
+Since `v7.0.0`, we have released a new API
+[`GetTransactionStatus`](https://dev.zilliqa.com/docs/apis/api-transaction-get-transaction-status)
+which tracks transaction status during the transactional lifetime.
+`GetPendingTxn` and `GetPendingTxns` will be removed with effect from `v8.0.0`.
 
 ### 5) Non-interactive mode support for seed nodes
 
-Seed node operators will now have the option of invoking `launch.sh` in non-interactive mode. Operators will need to configure the following environment variables when using non-interactive mode.
+Seed node operators will now have the option of invoking `launch.sh` in
+non-interactive mode. Operators will need to configure the following environment
+variables when using non-interactive mode.
 
-```
+```sh
 NONINTERACTIVE="true"
 IP_ADDRESS="x.y.z.a"
 IP_WHITELISTING="N" #optional
@@ -81,7 +102,8 @@ IP_WHITELISTING="N" #optional
 
 ### 6) Bug fixes around mining node joining
 
-We have fixed a few mining node joining issues. Special thanks to [K1-pool](https://k1pool.com/pool/zil) for reporting a few issues to us.
+We have fixed a few mining node joining issues. Special thanks to
+[K1-pool](https://k1pool.com/pool/zil) for reporting a few issues to us.
 
 ## Scilla Updates
 
@@ -93,15 +115,22 @@ We have fixed a few mining node joining issues. Special thanks to [K1-pool](http
     that when calling a contract transition that contains a user-defined ADT, the user-defined ADT will need to be prefixed with the contract address that defines
     the type.
 
-For instance, let's assume a user-defined ADT named `SSNCycleInfo` is defined in a contract deployed at address `0xb55cc7894536ac015350790550b0c03f49eb8ebd`. When using the user-defined ADT, it will need to be prefixed with the contract address (i.e., `0xb55cc7894536ac015350790550b0c03f49eb8ebd.SSNCycleInfo`). If your contract transition has user-defined ADTs, you will need to modify the way you call the transition by appending the contract address prefix.
+For instance, let's assume a user-defined ADT named `SSNCycleInfo` is defined in
+a contract deployed at address `0xb55cc7894536ac015350790550b0c03f49eb8ebd`.
+When using the user-defined ADT, it will need to be prefixed with the contract
+address (i.e., `0xb55cc7894536ac015350790550b0c03f49eb8ebd.SSNCycleInfo`). If
+your contract transition has user-defined ADTs, you will need to modify the way
+you call the transition by appending the contract address prefix.
 
 ### 2) Introduction of new Scilla feature - remote state read
 
-With effect from `v8.0.0`, a Scilla contract will be able to read the state of another contract by using the remote state read feature.
+With effect from `v8.0.0`, a Scilla contract will be able to read the state of
+another contract by using the remote state read feature.
 
 ### 3) Smart contract parameters change
 
-To support larger dApps and the need for more contract calls, we will adjust the following constant values
+To support larger dApps and the need for more contract calls, we will adjust the
+following constant values
 
 |                          | Before `v8.0.0` | `v8.0.0` |
 | ------------------------ | --------------- | -------- |
@@ -110,11 +139,15 @@ To support larger dApps and the need for more contract calls, we will adjust the
 
 ## Staking Updates
 
-As part of the `v8.0.0` rollout, the current Staking Phase 1.0 feature will be updated to the new Staking Phase 1.1.
+As part of the `v8.0.0` rollout, the current Staking Phase 1.0 feature will be
+updated to the new Staking Phase 1.1.
 
 ### 1) Staking contract migration
 
-Due to the Scilla disambiguation fix, we will be freezing the existing staking contract shortly before the `v8.0.0` network upgrade commences. The contract will be frozen permanently, and the contract states and funds will be migrated to a new contract.
+Due to the Scilla disambiguation fix, we will be freezing the existing staking
+contract shortly before the `v8.0.0` network upgrade commences. The contract
+will be frozen permanently, and the contract states and funds will be migrated
+to a new contract.
 
 !!! important
 
@@ -127,11 +160,14 @@ Due to the Scilla disambiguation fix, we will be freezing the existing staking c
 
 ### 2) Switching of staking wallet
 
-The new staking contract will also have a new `swap delegate` feature which allows a delegator to swap his wallet address with another address without incurring any unbonding period or rewards penalty.
+The new staking contract will also have a new `swap delegate` feature which
+allows a delegator to swap his wallet address with another address without
+incurring any unbonding period or rewards penalty.
 
 ### 3) Staking parameter adjustments
 
-Due to faster block production rate after `v8.0.0`, we will be adjusting the following parameters to bring rewarding and unbonding timing back to parity.
+Due to faster block production rate after `v8.0.0`, we will be adjusting the
+following parameters to bring rewarding and unbonding timing back to parity.
 
 | Parameters        | New value                      |
 | ----------------- | ------------------------------ |
@@ -139,8 +175,12 @@ Due to faster block production rate after `v8.0.0`, we will be adjusting the fol
 | Reward cycle      | 2,200 final blocks (~1 day)    |
 | Unbonding period  | 30,800 Final blocks (~2 weeks) |
 
-Please note that this change is considered an interim change. If the block production rate deviates from the expected value significantly, a new governance proposal can be introduced to adjust the staking parameter accordingly.
+Please note that this change is considered an interim change. If the block
+production rate deviates from the expected value significantly, a new governance
+proposal can be introduced to adjust the staking parameter accordingly.
 
 ### 4) $gZIL ending period
 
-`$gZIL` minting period has been set to end on block `1483713`. This value cannot be changed. With the changes to block time in `v8.0.0`, the ending wall clock may vary as a result.
+`$gZIL` minting period has been set to end on block `1483713`. This value cannot
+be changed. With the changes to block time in `v8.0.0`, the ending wall clock
+may vary as a result.

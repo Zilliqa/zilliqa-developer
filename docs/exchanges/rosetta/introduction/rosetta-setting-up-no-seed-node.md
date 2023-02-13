@@ -21,7 +21,7 @@ Zilliqa rosetta standalone provide the option of connecting to public seed node 
 
 ## Setup
 
-### Step 1: Download `Zilliqa-rosetta` latest release from https://github.com/Zilliqa/zilliqa-rosetta/releases.
+### Step 1: Download `Zilliqa-rosetta` latest release from[https://github.com/Zilliqa/zilliqa-rosetta/releases](https://github.com/Zilliqa/zilliqa-rosetta/releases)
 
 ### Step 2: Build `Zilliqa-rosetta standalone` Docker image
 
