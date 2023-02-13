@@ -23,12 +23,51 @@ url_regex = "[^)]+"
 markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 markup_regex_full = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 
+global_replacements = {}
+for x in cfg:
+    orig_fullpath = x["path"]
+    path, name = orig_fullpath.rsplit("/", 1)
+
+    if "%" in name:
+        name = name.split("%", 1)[0]
+
+    if "'" in name:
+        name = name.split("%", 1)[0]
+
+    if name == "":
+        continue
+
+    fullpath = os.path.join(path, name)
+
+    if orig_fullpath != fullpath:
+        global_replacements["({})".format(orig_fullpath)] = "({})".format(fullpath)
+
+    cand_pat = "**/{}".format(name)
+    cands = [x for x in glob.glob(cand_pat, root_dir="old-docs", recursive=True)]
+    print("Looing for", name)
+    if len(cands):
+        print("Found missing file", name)
+        src = os.path.join("old-docs", cands[0])
+        dest = os.path.join("docs", cands[0])
+        dest_folder, _ = dest.rsplit("/", 1)
+        try:
+            os.makedirs(dest_folder)
+        except:
+            pass
+        print(src, "=>", dest)
+        os.system("git mv {} {}".format(src, dest))
+
+# exit(0)
 for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
     print("FILE:", f)
     filename = os.path.abspath(os.path.join("docs", f))
     dirname = os.path.abspath(os.path.dirname(filename))
     with open(filename, "r") as fb:
         contents = fb.read()
+
+    for k, v in global_replacements.items():
+        print("GREP", k, "=>", v)
+        contents = contents.replace(k, v)
 
     replace_cand = []
     replacements = {}
