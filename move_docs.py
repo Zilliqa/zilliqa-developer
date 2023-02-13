@@ -116,6 +116,9 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
     for k, v in replacements.items():
         print("REP", k, "=>", v)
         contents = contents.replace(k, v)
+
+    with open(filename, "w") as fb:
+        fb.write(contents)
     continue
 
     # if match:
