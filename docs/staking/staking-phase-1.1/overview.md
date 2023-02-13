@@ -50,14 +50,14 @@ for phase 1.
 
 !!! caution Disclaimer
 
-      Please read our [Disclaimer](../staking-disclaimer) page carefully before participating in our staking program.
+      Please read our [Disclaimer](../zilliqa-seed-node-staking/disclaimer.md) page carefully before participating in our staking program.
 
 The next sections in this phase 1.1 documentation are organized as follows:
 
 1. The [General Information](staking-general-information.md) section contains
    useful details for anyone interested in the staking program
-1. The [Delegators](delegators/staking-delegator-overview.md) section targets the
-   following audiences:
+1. The [Delegators](delegators/staking-delegator-overview.md) section targets
+   the following audiences:
    - Staking wallet builders
    - Staking dashboard builders
    - Delegators who want to build their own toolchains

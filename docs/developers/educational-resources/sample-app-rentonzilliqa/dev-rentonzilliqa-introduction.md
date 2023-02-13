@@ -15,7 +15,7 @@ Zilliqa Blockchain for listing and renting houses. In this guide, we will go
 through the process of building the full-stack application, from writing the
 contract to building the frontend application.
 
-!["Quinence Logo"](/assets/https://quinence.com/favicon-196x196.png)
+!["Quinence Logo"](https://quinence.com/favicon-196x196.png)
 
 Built by
 [Quinence - Digital product specialists from Singapore](https://quinence.com).

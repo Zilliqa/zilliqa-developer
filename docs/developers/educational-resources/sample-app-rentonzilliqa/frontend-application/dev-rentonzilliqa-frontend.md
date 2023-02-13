@@ -86,6 +86,6 @@ In the coming sections, we will build the frontend in the following stages:
 
 ## Built by Quinence
 
-!["Quinence Logo"](/assets/https://quinence.com/favicon-196x196.png)
+!["Quinence Logo"](https://quinence.com/favicon-196x196.png)
 
 [Quinence - Digital product specialists from Singapore](https://quinence.com).

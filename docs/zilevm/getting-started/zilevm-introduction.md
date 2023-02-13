@@ -8,7 +8,9 @@ description: Zilliqa EVM
 
 ---
 
-_Please bear with us as we populate these pages; if you have feedback/requests for documentation, please see the #ethereum-virtual-machine channel on [discord](https://discord.gg/nKznfCaZxy)_
+_Please bear with us as we populate these pages; if you have feedback/requests
+for documentation, please see the #ethereum-virtual-machine channel on
+[discord](https://discord.gg/nKznfCaZxy)_
 
 ## Getting Started with Zilliqa EVM
 
@@ -20,7 +22,7 @@ _Please bear with us as we populate these pages; if you have feedback/requests f
 
 #### Developer onboarding
 
-[Guides for developing Solidity contracts for ZILEVM](dev-onboarding/developer-onboarding-introduction.md)
+[Guides for developing Solidity contracts for ZILEVM](../developer-onboarding/dev-onboarding-introduction.md)
 
 ##### Zilliqa Mainnet
 
@@ -40,8 +42,13 @@ Use:
 - [Viewblock](https://viewblock.io/zilliqa?network=testnet)
 - [DevEx](https://devex.zilliqa.com/?network=https%3A%2F%2Fdev-api.zilliqa.com)
 
-In particular, DevEx is capable of translating between ethereum and Zilliqa style addresses (use the recycle button next to the address in the account page).
+In particular, DevEx is capable of translating between ethereum and Zilliqa
+style addresses (use the recycle button next to the address in the account
+page).
 
 #### ZILEVM testnet faucet
 
-You can use the [testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.
+You can use the
+[testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add
+ZIL to your EVM account; just paste your ethereum address (given by your wallet)
+into the faucet destination address.

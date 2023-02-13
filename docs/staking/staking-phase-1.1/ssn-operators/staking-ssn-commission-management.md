@@ -1,5 +1,5 @@
 ---
-id: staking-commission-management
+id: staking-ssn-commission-management
 title: Commission Management
 keywords:
   - staking
