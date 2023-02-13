@@ -62,8 +62,8 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
         print("REP", k, "=>", v)
         contents = contents.replace(k, v)
 
-    # with open(filename, "w") as fb:
-    #    fb.write(contents)
+    with open(filename, "w") as fb:
+        fb.write(contents)
 
 exit(0)
 markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)

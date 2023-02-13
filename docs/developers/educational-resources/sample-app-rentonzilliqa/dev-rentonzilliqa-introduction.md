@@ -59,42 +59,42 @@ rent anytime they want.
 The listings page lists all houses listed with the RentOnZilliqa application. It
 shows the image of the listing, some basic details, and the price per night.
 
-| <img alt="Listings Page" width="1600" src="img/dev-dapps/rentonzilliqa/listings.png" /> |
-| --------------------------------------------------------------------------------------- |
+| <img alt="Listings Page" width="1600" src="../../../assets/img/dev-dapps/rentonzilliqa/listings.png" /> |
+| ------------------------------------------------------------------------------------------------------- |
 
 ### Individual Listing Page
 
 The page showcasing an individual listing. Shows the title, image, and
 description of the home as well as the rental price per night.
 
-| <img alt="Individual Listing Page" width="1600" src="img/dev-dapps/rentonzilliqa/listing-1.png" /> |
-| -------------------------------------------------------------------------------------------------- |
+| <img alt="Individual Listing Page" width="1600" src="../../../assets/img/dev-dapps/rentonzilliqa/listing-1.png" /> |
+| ------------------------------------------------------------------------------------------------------------------ |
 
 It also lists the number of bedrooms and bathrooms in the home, the amenities
 available, and the location of the listing in an embedded map.
 
-| <img alt="Individual Listing Page" width="1600" src="img/dev-dapps/rentonzilliqa/listing-2.png" /> |
-| -------------------------------------------------------------------------------------------------- |
+| <img alt="Individual Listing Page" width="1600" src="../../../assets/img/dev-dapps/rentonzilliqa/listing-2.png" /> |
+| ------------------------------------------------------------------------------------------------------------------ |
 
 ### Account Modal
 
 Anyone can create an account by first connecting with ZilPay. They provide their
 name and register as a host or a renter.
 
-| <img alt="Account Modal" width="1600" src="img/dev-dapps/rentonzilliqa/account.png" /> |
-| -------------------------------------------------------------------------------------- |
+| <img alt="Account Modal" width="1600" src="../../../assets/img/dev-dapps/rentonzilliqa/account.png" /> |
+| ------------------------------------------------------------------------------------------------------ |
 
 ### Create Listing Modal
 
 A host can create a listing they have created by providing the details of the
 home and the rental price per night.
 
-| <img alt="Create Listing Modal" width="1600" src="img/dev-dapps/rentonzilliqa/create-listing.png" /> |
-| ---------------------------------------------------------------------------------------------------- |
+| <img alt="Create Listing Modal" width="1600" src="../../../assets/img/dev-dapps/rentonzilliqa/create-listing.png" /> |
+| -------------------------------------------------------------------------------------------------------------------- |
 
 ### Update Listing Modal
 
 A host can also update the details of a home and delete it from the listing.
 
-| <img alt="Update Listing Modal" width="1600" src="img/dev-dapps/rentonzilliqa/update-listing.png" /> |
-| ---------------------------------------------------------------------------------------------------- |
+| <img alt="Update Listing Modal" width="1600" src="../../../assets/img/dev-dapps/rentonzilliqa/update-listing.png" /> |
+| -------------------------------------------------------------------------------------------------------------------- |

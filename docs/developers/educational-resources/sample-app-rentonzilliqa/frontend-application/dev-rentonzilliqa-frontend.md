@@ -34,8 +34,8 @@ Details about each listing will be displayed on a separate listing page.
 This page lists all the houses that have been posted on the platform. For users
 with a host account, it also shows the listings managed by them.
 
-| <img alt="Listings Page" width="1600" src="img/dev-dapps/rentonzilliqa/listings.png" /> |
-| --------------------------------------------------------------------------------------- |
+| <img alt="Listings Page" width="1600" src="../../../../assets/img/dev-dapps/rentonzilliqa/listings.png" /> |
+| ---------------------------------------------------------------------------------------------------------- |
 
 <br />
 
@@ -44,9 +44,9 @@ with a host account, it also shows the listings managed by them.
 This page presents the details about the listing. Users can make a reservation
 for the listing from this page.
 
-| <img alt="Individual Listing Page" width="1600" src="img/dev-dapps/rentonzilliqa/listing-1.png" /> |
-| -------------------------------------------------------------------------------------------------- |
-| <img alt="Individual Listing Page" width="1600" src="img/dev-dapps/rentonzilliqa/listing-2.png" /> |
+| <img alt="Individual Listing Page" width="1600" src="../../../../assets/img/dev-dapps/rentonzilliqa/listing-1.png" /> |
+| --------------------------------------------------------------------------------------------------------------------- |
+| <img alt="Individual Listing Page" width="1600" src="../../../../assets/img/dev-dapps/rentonzilliqa/listing-2.png" /> |
 
 <br />
 
@@ -61,8 +61,8 @@ On the [Listings Page](#listings-page), the user can create an account. This is
 done via a modal, which provides options to connect ZilPay and the form for
 account creation.
 
-| <img alt="Account Modal" width="1600" src="img/dev-dapps/rentonzilliqa/account.png" /> |
-| -------------------------------------------------------------------------------------- |
+| <img alt="Account Modal" width="1600" src="../../../../assets/img/dev-dapps/rentonzilliqa/account.png" /> |
+| --------------------------------------------------------------------------------------------------------- |
 
 <br />
 
@@ -71,9 +71,9 @@ account creation.
 From the [Listings Page](#listings-page), a host user can create listings and
 manage existing listings via modals.
 
-| <img alt="Create Listing Modal" width="1600" src="img/dev-dapps/rentonzilliqa/create-listing.png" /> |
-| ---------------------------------------------------------------------------------------------------- |
-| <img alt="Update Listing Modal" width="1600" src="img/dev-dapps/rentonzilliqa/update-listing.png" /> |
+| <img alt="Create Listing Modal" width="1600" src="../../../../assets/img/dev-dapps/rentonzilliqa/create-listing.png" /> |
+| ----------------------------------------------------------------------------------------------------------------------- |
+| <img alt="Update Listing Modal" width="1600" src="../../../../assets/img/dev-dapps/rentonzilliqa/update-listing.png" /> |
 
 ## Building the Frontend
 
