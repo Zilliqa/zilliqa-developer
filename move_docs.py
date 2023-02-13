@@ -11,6 +11,7 @@ except ImportError:
 
 import glob
 import re
+from pathlib import Path
 
 print("Hello world")
 with open("/tmp/test.json") as fb:
@@ -22,7 +23,111 @@ url_regex = "[^)]+"
 markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 markup_regex_full = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 
+for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
+    print("FILE:", f)
+    filename = os.path.abspath(os.path.join("docs", f))
+    dirname = os.path.abspath(os.path.dirname(filename))
+    with open(filename, "r") as fb:
+        contents = fb.read()
 
+    replace_cand = []
+    replacements = {}
+    for match in re.finditer(markup_regex_full, contents):
+        anchor = None
+        x1, x2 = match.span()
+        url = match.group(2)
+        replace_cand.append(
+            {
+                "from": x1,
+                "to": x2,
+                "name": match.group(1),
+                "url": url,
+                "full": match.group(),
+            }
+        )
+
+        if url.startswith("http://") or url.startswith("https://"):
+            continue
+
+        anchor = None
+        if "#" in url:
+            url, anchor = url.split("#", 1)
+
+        url = url.strip()
+        if url.strip() == "":
+            continue
+        print("MATCH:", url)
+
+        fullpath = os.path.abspath(os.path.join(dirname, url))
+        if url[0] == "/":
+            fullpath = os.path.abspath(os.path.join("docs", url[1:]))
+
+        print("-", fullpath)
+        print("-", os.path.exists(fullpath))
+        print("-", os.path.exists(fullpath + ".md"))
+        if os.path.exists(fullpath + ".md"):
+            fullpath += ".md"
+
+        if os.path.exists(fullpath):
+            relpath = os.path.relpath(fullpath, dirname)
+            # if relpath.endswith(".md"):
+            #     relpath = relpath[:-3]
+            if anchor:
+                relpath = "{}#{}".format(relpath, anchor)
+            old = match.group()
+            new = "[{}]({})".format(match.group(1), relpath)
+            print("=>", new)
+            if old != new:
+                replacements[old] = new
+            continue
+
+        if "/" in url:
+            _, url = url.rsplit("/", 1)
+
+        if url.endswith(".md"):
+            url = url[:-3]
+
+        if url == "":
+            continue
+
+        if "." not in url:
+            url += ".md"
+
+        cand_pat = "**/{}".format(url)
+        cands = [x for x in glob.glob(cand_pat, root_dir="docs", recursive=True)]
+        print("Searching for", cand_pat, "=>", cands)
+        if len(cands) == 0:
+            print("- No candidates for", match.group(2))
+        else:
+            link_file = os.path.abspath(os.path.join("docs", cands[0]))
+            relpath = os.path.relpath(link_file, os.path.dirname(filename))
+            # relpath = relpath[:-3]
+            if match.group(2) != relpath:
+                old = match.group()
+            if anchor:
+                relpath = "{}#{}".format(relpath, anchor)
+            old = match.group()
+            new = "[{}]({})".format(match.group(1), relpath)
+            print("=>", new)
+            if old != new:
+                replacements[old] = new
+
+    # print(filename)
+    for k, v in replacements.items():
+        print("REP", k, "=>", v)
+        contents = contents.replace(k, v)
+    continue
+
+    # if match:
+    #     print(match)
+    #     full, name, url = match
+    #     print(full)
+    #     print(name)
+    #     print(url)
+    # with open(os.path.join("docs", candidates[0]), "w") as fb:
+    #     fb.write(contents)
+
+exit(0)
 changes = {}
 for item in cfg:
 
@@ -30,7 +135,7 @@ for item in cfg:
     search_name = name
     if search_name.endswith(".md"):
         search_name = search_name[:-3]
-    cand_pat = os.path.join("**/{}.md".format(search_name))
+
     candidates = [x for x in glob.glob(cand_pat, root_dir="docs", recursive=True)]
     if len(candidates) > 0:
         link_from = item["link_from"]
@@ -93,19 +198,6 @@ for name, change in changes.items():
     print("")
     print(filename)
     for k, v in replacements.items():
-        print(k, " ==> ", v)
-
-    continue
-    for k, v in change.items():
-        if v.endswith(".md"):
-            v = v[:-3]
-        for r in replace_cand:
-
-            if k in r["url"]:
-                replacements[r["full"]] = "[{}](/{})".format(r["name"], v)
-
-    print("Replacements?")
-    for k, v in replacements.items():
         print(k, "=>", v)
         contents = contents.replace(k, v)
 
@@ -116,7 +208,7 @@ for name, change in changes.items():
         #     print(name)
         #     print(url)
     with open(os.path.join("docs", candidates[0]), "w") as fb:
-        fb.write(final)
+        fb.write(contents)
 
 
 exit(0)
