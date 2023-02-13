@@ -38,6 +38,15 @@
     },
     {
       "pattern": "^https://app.pillarprotocol.com"
+    },
+    {
+      "pattern": "^https://www.websocket.org"
+    },
+    {
+      "pattern": "^https://viewblock.io"
+    },
+    {
+      "pattern": "^https://github.com/Zilliqa/zilliqa-js/tree/dev-dapps"
     }
   ],
   "replacementPatterns": [],
