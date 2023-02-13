@@ -24,7 +24,7 @@ src_regex = '(src)\="([^"]+)"'
 string_regex = '"([^"])"'
 
 for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
-    #    print("FILE:", f)
+    print("FILE:", f)
     filename = os.path.abspath(os.path.join("docs", f))
     dirname = os.path.abspath(os.path.dirname(filename))
     with open(filename, "r") as fb:
@@ -50,10 +50,12 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
 
         print("- Full path", fullpath)
         if os.path.exists(fullpath):
-            relpath = os.path.relpath(fullpath, dirname)
+            relpath = os.path.relpath(fullpath, os.path.join(dirname, "fn"))
             new = 'src="{}"'.format(relpath)
-            print("=>", new)
+            print("- From:", filename)
+            print("- Relpath:", relpath)
             if old != new:
+                print("=>", new)
                 replacements[old] = new
 
             continue
