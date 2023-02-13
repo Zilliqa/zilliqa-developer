@@ -20,6 +20,52 @@ with open("/tmp/test.json") as fb:
 name_regex = "[^]]+"
 url_regex = "[^)]+"
 
+src_regex = "(src)\=\{([^}]+)\}"
+string_regex = '"([^"])"'
+
+for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
+    #    print("FILE:", f)
+    filename = os.path.abspath(os.path.join("docs", f))
+    dirname = os.path.abspath(os.path.dirname(filename))
+    with open(filename, "r") as fb:
+        contents = fb.read()
+
+    replace_cand = []
+    replacements = {}
+    for match in re.finditer(src_regex, contents):
+        old = match.group()
+        filename = match.group(2)
+        if '("' in filename:
+            filename = filename.split('("', 1)[1].rsplit('"', 1)[0]
+
+        print("Found", filename)
+        print("- Before:", old)
+
+        fullpath = os.path.abspath(os.path.join(dirname, filename))
+        cand1 = os.path.abspath(os.path.join("docs", "assets", filename))
+        if os.path.exists(cand1):
+            fullpath = cand1
+        # if filename[0] == "/":
+        #     fullpath = os.path.abspath(os.path.join("docs", filename[1:]))
+
+        print("- Full path", fullpath)
+        if os.path.exists(fullpath):
+            relpath = os.path.relpath(fullpath, dirname)
+            new = 'src="{}"'.format(filename)
+            print("=>", new)
+            if old != new:
+                replacements[old] = new
+
+            continue
+
+    for k, v in replacements.items():
+        print("REP", k, "=>", v)
+        contents = contents.replace(k, v)
+
+    with open(filename, "w") as fb:
+        fb.write(contents)
+
+exit(0)
 markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 markup_regex_full = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 
