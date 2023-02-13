@@ -8,6 +8,36 @@
     },
     {
       "pattern": "^https://docs.github.com/en/actions/security-guides/encrypted-secrets"
+    },
+    {
+      "pattern": "^https://api.zilliqa.com"
+    },
+    {
+      "pattern": "^https://dev-api.zilliqa.com"
+    },
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^http://localhost:4201"
+    },
+    {
+      "pattern": "^http://localhost:5555"
+    },
+    {
+      "pattern": "^https://zilliqa-isolated-server.zilliqa.com"
+    },
+    {
+      "pattern": "^https://evm-api-dev.zilliqa.com"
+    },
+    {
+      "pattern": "^https://devex.zilliqa.com"
+    },
+    {
+      "pattern": "^https://dev-wallet.zilliqa.com"
+    },
+    {
+      "pattern": "^https://app.pillarprotocol.com"
     }
   ],
   "replacementPatterns": [],
