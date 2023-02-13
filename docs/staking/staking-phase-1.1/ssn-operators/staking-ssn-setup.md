@@ -44,7 +44,7 @@ using
 with some additional configuration steps.
 
 1. First, please verify that your SSN meets the
-   [minimum hardware requirements](../../../exchanges/exchange-getting-started#minimum-hardware-requirements).
+   [minimum hardware requirements](../../../exchanges/exchange-integration/getting-started/exchange-introduction.md#minimum-hardware-requirements).
 1. Follow the steps for launching a seed node using
    [key whitelisting mode (option 1)](../../../exchanges/exchange-integration/getting-started/exchange-key-whitelisting-1.md),
    except use `ssn-configuration.tar.gz` instead of `seed-configuration.tar.gz`.
