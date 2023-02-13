@@ -10,16 +10,27 @@ description: Core protocol design - computing global gas price.
 
 ---
 
-Each miner node's PoW solution comes with a proposed minimum transaction processing gas price that the node is willing to accept. During DS block consensus, the DS committee runs an algorithm to compute the globally acceptable minimum gas price that the entire network will operate on. The DS committee then informs the shards, lookups, and seeds (through `m_gasPrice` in the DS block) about the agreed upon global minimum gas price. The network will accept any transaction that has a gas price larger than or equal to the minimum gas price and reject transactions that don't.
+Each miner node's PoW solution comes with a proposed minimum transaction
+processing gas price that the node is willing to accept. During DS block
+consensus, the DS committee runs an algorithm to compute the globally acceptable
+minimum gas price that the entire network will operate on. The DS committee then
+informs the shards, lookups, and seeds (through `m_gasPrice` in the DS block)
+about the agreed upon global minimum gas price. The network will accept any
+transaction that has a gas price larger than or equal to the minimum gas price
+and reject transactions that don't.
 
 The algorithm to compute the global minimum gas price takes into account:
 
 1. the average `m_gasPrice` used over the last _n_ DS epochs
-1. the average of the gas prices proposed by each individual miner for the next DS epoch (in case a price increase is necessary)
-1. the trend in network congestion (i.e., the actual consumed gas in the Tx blocks) in the last DS epoch
+1. the average of the gas prices proposed by each individual miner for the next
+   DS epoch (in case a price increase is necessary)
+1. the trend in network congestion (i.e., the actual consumed gas in the Tx
+   blocks) in the last DS epoch
 
-Essentially, the algorithm decides on the gas price depending on the level of network congestion: if network congestion is high, then the miners
-get to have a say on the gas price; otherwise, the minimum gas price should not depend too much on their proposed gas prices.
+Essentially, the algorithm decides on the gas price depending on the level of
+network congestion: if network congestion is high, then the miners get to have a
+say on the gas price; otherwise, the minimum gas price should not depend too
+much on their proposed gas prices.
 
 ## Algorithm Inputs
 
@@ -42,10 +53,15 @@ get to have a say on the gas price; otherwise, the minimum gas price should not 
 
 ## Algorithm Steps
 
-In the following, we describe an algorithm to compute `global_gas_price` for the next DS epoch.
+In the following, we describe an algorithm to compute `global_gas_price` for the
+next DS epoch.
 
-1. We first compute `percentage_full_tx_blocks`, i.e., the number of Tx blocks mined in the last DS epoch for which the total gas consumed is at least 80% of `txblock_gas_limit`. This computation will require checking each `consumed_gas_tx_block[j][k]`.
-1. Then, we make the decision on how to set `global_gas_price` according to the table below.
+1. We first compute `percentage_full_tx_blocks`, i.e., the number of Tx blocks
+   mined in the last DS epoch for which the total gas consumed is at least 80%
+   of `txblock_gas_limit`. This computation will require checking each
+   `consumed_gas_tx_block[j][k]`.
+1. Then, we make the decision on how to set `global_gas_price` according to the
+   table below.
 
 | Percentage of Full Blocks | Interpretation                                                                      | Impact on Gas Price                                           |
 | ------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -72,7 +88,8 @@ In the following, we describe an algorithm to compute `global_gas_price` for the
 
 ### Increasing the Gas Price
 
-1. Get the median `proposed_min_price_node[i]` value over all values from the _N_ miners:
+1. Get the median `proposed_min_price_node[i]` value over all values from the
+   _N_ miners:
    ```
    median_proposed_min_price = median(proposed_min_price_node[1], ..., proposed_min_price_node[N])
    ```
@@ -89,10 +106,10 @@ In the following, we describe an algorithm to compute `global_gas_price` for the
    ```
    global_gas_price = min_price_epoch[j] =
       max{
-      	max[
-      	     min(median_proposed_min_price, increased_gas_price_val_upper_bound),
-      	     increased_gas_price_val_lower_bound
-      	   ],
-      	default_min_gas_price
+         max[
+              min(median_proposed_min_price, increased_gas_price_val_upper_bound),
+              increased_gas_price_val_lower_bound
+            ],
+         default_min_gas_price
       }
    ```
