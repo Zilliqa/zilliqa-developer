@@ -38,4 +38,4 @@ users to withdraw their stake reward before the ~1-year duration is up.
     It is very possible that all the 722,700 $gZIL may not get minted as the number of $gZIL that get minted depends on the frequency of stake reward withdrawals.
 
 For integration with $gZIL, please refer to
-[ZRC-2 integration guide](developers/user-key-management/dev-keys-zrc2-wallet-support).
+[ZRC-2 integration guide](../../../developers/user-key-management/dev-keys-zrc2-wallet-support.md).

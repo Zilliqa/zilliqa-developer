@@ -13,7 +13,7 @@ description: Introduction to Rosetta
 
 ---
 
-!["Network sharding"](/assets/img/exchanges/rosetta.png)
+!["Network sharding"](../../../assets/img/exchanges/rosetta.png)
 
 Rosetta is an open-source initiaitve by
 [Coinbase](https://blog.coinbase.com/introducing-rosetta-build-once-integrate-your-blockchain-everywhere-9b97d284f5b9).
@@ -46,7 +46,7 @@ Latest release of Zilliqa Rosetta can be found at
 ## Running Zilliqa Rosetta with Zilliqa seed node
 
 To run Zilliqa Rosetta, please refer to
-["Setting up Zilliqa Rosetta with Seed node"](exchanges/rosetta/introduction/rosetta-setting-up-seed-node)
+["Setting up Zilliqa Rosetta with Seed node"](rosetta-setting-up-seed-node.md)
 section on instruction on how to set it up. You can choose to either run a seed
 node together Rosetta or connect Rosetta to our public endpoing,
 `api.zilliqa.com`.
@@ -59,7 +59,7 @@ node together Rosetta or connect Rosetta to our public endpoing,
 
 To run Zilliqa Rosetta connecting to Zilliqa public API endpoint, please refer
 to
-["Setting up Zilliqa Rosetta connecting to public API endpoint"](exchanges/rosetta/introduction/rosetta-setting-up-no-seed-node)
+["Setting up Zilliqa Rosetta connecting to public API endpoint"](rosetta-setting-up-no-seed-node.md)
 section.
 
 ## Interacting with Zilliqa Rosetta

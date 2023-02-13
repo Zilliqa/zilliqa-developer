@@ -16,7 +16,7 @@ _Please bear with us as we populate these pages; if you have feedback/requests f
 
 #### Quick connect guide
 
-[Guide on configuring Metamask to ZILEVM](onboarding/onboard-metamask.md)
+[Guide on configuring Metamask to ZILEVM](../onboard/onboard-metamask.md)
 
 #### Developer onboarding
 
@@ -44,4 +44,4 @@ In particular, DevEx is capable of translating between ethereum and Zilliqa styl
 
 #### ZILEVM testnet faucet
 
-You can use the [testnet faucet](../dev-dapps/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.
+You can use the [testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.

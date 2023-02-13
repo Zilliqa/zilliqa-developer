@@ -15,14 +15,14 @@ description: Devex and ViewBlock Explorer
 
 ## Devex
 
-!["Viewblock"](/assets/img/dev-dapps/tools/devex.png)
+!["Viewblock"](../../assets/img/dev-dapps/tools/devex.png)
 
 Devex is a developer explorer that is maintained by Zilliqa Research. Devex is
 integrated directly into developer tools like Ceres and Scilla IDE. Devex allows
 you to look at blocks, address, transactions, status of the Zilliqa network as
 well as contract code, variables and any transition events.
 
-!["Viewblock"](/assets/img/dev-dapps/tools/devexNetworkChange.png)
+!["Viewblock"](../../assets/img/dev-dapps/tools/devexNetworkChange.png)
 
 Devex is available at this [link](https://devex.zilliqa.com/), by default, devex
 points to the Zilliqa mainnet but you can change the network by using the
@@ -30,7 +30,7 @@ dropdown button at the top right corner.
 
 ## ViewBlock
 
-!["Viewblock"](/assets/img/dev-dapps/tools/viewblock.png)
+!["Viewblock"](../../assets/img/dev-dapps/tools/viewblock.png)
 
 ViewBlock allows you to look at blocks, address, transactions, status of the
 Zilliqa network, contract code and variables.

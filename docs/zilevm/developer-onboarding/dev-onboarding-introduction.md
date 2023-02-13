@@ -25,26 +25,26 @@ This is a comprehensive tutorial that covers the basics of Solidity, as well as 
   This is an interactive, game-like learning platform that teaches Solidity through a series of lessons and exercises. It is a fun and engaging way to learn the basics of Solidity and get started with building your own contracts. Check the [documentation](https://cryptozombies.io/) for more information.
 - The Solidity section of the Truffle documentation
 
-If you are using the Truffle development framework, the Truffle documentation includes a number of guides and tutorials specifically focused on Solidity development. Check the [documentation](zilevm/developer-onboarding/truffle) for more information.
+If you are using the Truffle development framework, the Truffle documentation includes a number of guides and tutorials specifically focused on Solidity development. Check the [documentation](truffle.md) for more information.
 
 In addition to these guides, there are also many other resources available online, such as blog posts, videos, and forums, that can provide useful information and tips for learning Solidity. You may want to explore these resources as well to find the ones that best suit your learning style and needs.
 
 ### Remix IDE
 
-[Remix IDE](zilevm/developer-onboarding/remix)
+[Remix IDE](remix.md)
 
 ### Hardhat
 
-[Hardhat](zilevm/developer-onboarding/hardhat)
+[Hardhat](hardhat.md)
 
 ### Open Zeppelin
 
-[Open Zeppelin](zilevm/developer-onboarding/open-zeppelin)
+[Open Zeppelin](open-zeppelin.md)
 
 ### Truffle
 
-[Truffle](zilevm/developer-onboarding/truffle)
+[Truffle](truffle.md)
 
 ### VSC Plugins
 
-[VSC Plugins](zilevm/developer-onboarding/vsc-plugins)
+[VSC Plugins](vsc-plugins.md)

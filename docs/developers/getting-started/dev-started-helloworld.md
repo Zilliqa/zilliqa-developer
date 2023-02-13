@@ -38,7 +38,7 @@ To create a ZilPay wallet:
 3.  Click on the `network change` button (shown below) and select the `network`
     as testnet.
 
-!["Change Network Button"](/assets/img/dev-dapps/getting-started/zilpay-change-network-btn.png)
+!["Change Network Button"](../../assets/img/dev-dapps/getting-started/zilpay-change-network-btn.png)
 
 Voila! You have now successfully set up a testnet ZilPay wallet.
 
@@ -54,7 +54,7 @@ To request for testnet $ZIL from the faucet,
    testnet $ZIL shortly. This will take about 30s to 1 min, as the transactions
    will need to be confirmed on the blockchain.
 
-!["Nucleus Wallet Faucet"](/assets/img/dev-dapps/getting-started/nucleus-faucet.png)
+!["Nucleus Wallet Faucet"](../../assets/img/dev-dapps/getting-started/nucleus-faucet.png)
 
 ## Deploying Contract on Testnet
 
@@ -64,20 +64,20 @@ Scilla web IDE, [Neo-Savant IDE](https://ide.zilliqa.com/).
 1. Change the `network` to testnet and import your wallet by connecting with
    Zilpay.
 
-!["IDE Step1"](/assets/img/dev-dapps/getting-started/neo-savant-step1.png)
+!["IDE Step1"](../../assets/img/dev-dapps/getting-started/neo-savant-step1.png)
 
 2. Select the `Hello World` contract under the files tab and click on `Check`
    button to use the
    [typechecker](https://scilla.readthedocs.io/en/latest/scilla-checker.html) to
    check for any syntax errors in your contract.
 
-!["IDE Step2"](/assets/img/dev-dapps/getting-started/neo-savant-step2.png)
+!["IDE Step2"](../../assets/img/dev-dapps/getting-started/neo-savant-step2.png)
 
 3. Once the typechecker result is passed, click on `Deploy` button to deploy the
    contract to testnet. Use your wallet address (Base16 format) for the "owner"
    initialisation parameter.
 
-!["IDE Step3"](/assets/img/dev-dapps/getting-started/neo-savant-step3.png)
+!["IDE Step3"](../../assets/img/dev-dapps/getting-started/neo-savant-step3.png)
 
 Yay! Your contract is now deployed on the testnet and can be accessed under the
 "Contracts" tab on the left side of the IDE.

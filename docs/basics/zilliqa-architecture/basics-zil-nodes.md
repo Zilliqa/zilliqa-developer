@@ -16,7 +16,7 @@ description: Zilliqa Types Of Nodes
 The Zilliqa Mainnet is composed of several types of nodes that perform different
 functions or provide specialized services.
 
-!["Network Layout Image 1"](/assets/img/contributors/core/network-layout/image01.png)
+!["Network Layout Image 1"](../../assets/img/contributors/core/network-layout/image01.png)
 
 ## Shard Nodes
 

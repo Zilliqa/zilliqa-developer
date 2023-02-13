@@ -20,7 +20,7 @@ sharding layer.
 
 ## Network Sharding
 
-!["Network sharding"](/assets/img/basics/networksharding.png)
+!["Network sharding"](../../assets/img/basics/networksharding.png)
 
 Network sharding (which will be referred to simply as _sharding_ in this
 context) is a mechanism that allows the Zilliqa network to be divided into
@@ -68,7 +68,7 @@ a _user account_ (or a non-contract account) if it is controlled by a user and
 does not hold contract code. As an extension, an account that holds contract
 code will be referred to as a _contract account_.
 
-!["Transaction sharding"](/assets/img/basics/txnsharding.png)
+!["Transaction sharding"](../../assets/img/basics/txnsharding.png)
 
 ### Type I
 

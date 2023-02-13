@@ -64,8 +64,8 @@ Returns the details of the most recent Transaction block.
 
     From Zilliqa `V7.2.0` onwards, an additional `NumPages` field is
     included in the `header` response section. This field is used by
-    [GetTransactionsForTxBlockEx](api/transaction-related-methods/api-transaction-get-txs-for-txblock-ex) and
-    [GetTxnBodiesForTxBlockEx](api/transaction-related-methods/api-transaction-get-txbodies-for-txblock-ex).
+    [GetTransactionsForTxBlockEx](../transaction-related-methods/api-transaction-get-txs-for-txblock-ex.md) and
+    [GetTxnBodiesForTxBlockEx](../transaction-related-methods/api-transaction-get-txbodies-for-txblock-ex.md).
 
 ```json
 {

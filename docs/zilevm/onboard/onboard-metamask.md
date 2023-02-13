@@ -51,7 +51,7 @@ Navigate to `https://devex.zilliqa.com/address/{address}` either using a ZIL bec
 
 By pressing the covert button, we can turn a bech32 address (zil...) into a base16 address(0x...), and vice-versa.
 
-!["Coverting address types"](/assets/img/evm/convert_address.png)
+!["Coverting address types"](../../assets/img/evm/convert_address.png)
 
 #### ZIL -> ZILEVM
 
@@ -72,8 +72,8 @@ to send EVMZIL to other Metamask wallets using the send function within Metamask
 
 Do not send funds to Zilpay wallets or base 16 Scilla addresses.
 
-!["Sending EVM ZIL"](/assets/img/evm/send_evm_zil.png)
+!["Sending EVM ZIL"](../../assets/img/evm/send_evm_zil.png)
 
 #### ZILEVM testnet faucet
 
-You can use the [testnet faucet](developers/developer-toolings/dev-tools-faucet) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.
+You can use the [testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add ZIL to your EVM account; just paste your ethereum address (given by your wallet) into the faucet destination address.

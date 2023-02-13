@@ -13,7 +13,7 @@ description: Zilliqa Testnet Faucet
 
 ## Testnet Faucet via Nucleus Wallet
 
-!["Nucleus Wallet Faucet"](/assets/img/dev-dapps/getting-started/nucleus-faucet.png)
+!["Nucleus Wallet Faucet"](../../assets/img/dev-dapps/getting-started/nucleus-faucet.png)
 
 In order to deploy a contract to Zilliqa's testnet and send transactions, you
 will need testnet $ZIL in your account.

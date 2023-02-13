@@ -10,8 +10,8 @@ This API behaves similar to
 returns the transactions in batches (or pages) of 2,500.
 
 The number of pages available is defined by the `NumPages` header value in the
-[GetTxBlock](api/blockchain-related-methods/api-blockchain-get-tx-block) or
-[GetLatestTxBlock](api/blockchain-related-methods/api-blockchain-get-latest-tx-block) response. Page
+[GetTxBlock](../blockchain-related-methods/api-blockchain-get-tx-block.md) or
+[GetLatestTxBlock](../blockchain-related-methods/api-blockchain-get-latest-tx-block.md) response. Page
 indexing is zero-based and indicated in the request after the block number.
 
 For example, to retrieve all the transactions for a block with `NumPages=3`, one

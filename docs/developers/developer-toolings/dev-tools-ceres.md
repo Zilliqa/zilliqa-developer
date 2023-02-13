@@ -22,7 +22,7 @@ run these tools locally on their machine which allows them to: run a local
 Zilliqa blockchain network, deploy contracts locally, test their contracts using
 a testing library and view these transactions on a network explorer.
 
-<!-- ![Docusaurus with Keytar](/assets/img/dev-dapps/tools/ceres.png) -->
+<!-- ![Docusaurus with Keytar](../../assets/img/dev-dapps/tools/ceres.png) -->
 
 ## Installation
 
@@ -73,7 +73,7 @@ Ceres’ home screen and then click on “Download and install”. After downloa
 is finished, you need to click on to Start Service - you have now successfully
 started the isolated server and faucet.
 
-!["Isolated Server"](/assets/img/dev-dapps/tools/isolatedStartService.png)
+!["Isolated Server"](../../assets/img/dev-dapps/tools/isolatedStartService.png)
 
 #### Using Isolated server during dApp development
 
@@ -102,7 +102,7 @@ home screen and then click on “Download and install”. After downloading is
 finished, you need to click on to Start Service - you have now successfully
 started the network explorer.
 
-!["Devex"](/assets/img/dev-dapps/tools/explorerStartService.png)
+!["Devex"](../../assets/img/dev-dapps/tools/explorerStartService.png)
 
 ### Scilla Server
 
@@ -119,7 +119,7 @@ and then click on “Download and install”. After downloading is finished, you
 need to click on to Start Service - you have now successfully started the Scilla
 server.
 
-!["Scilla Server"](/assets/img/dev-dapps/tools/scillaStartService.png)
+!["Scilla Server"](../../assets/img/dev-dapps/tools/scillaStartService.png)
 
 ## Using Ceres with a dApp
 
@@ -142,7 +142,7 @@ Fungible Token contract from the left tab.
 Step 2 : Go to the networks tab and click on “Add Network” to add your local
 blockchain network to the IDE by filling in details of your network.
 
-!["Add Custom Network"](/assets/img/dev-dapps/tools/customNetworkDetails.png)
+!["Add Custom Network"](../../assets/img/dev-dapps/tools/customNetworkDetails.png)
 
 !!! note
 
@@ -156,21 +156,21 @@ which is a Zilliqa wallet available as a chrome extension similar to metamask.
 Step 4 : Paste your account address and request funds from the faucet available
 on Ceres.
 
-!["Faucet Request"](/assets/img/dev-dapps/tools/faucetRequest.png)
+!["Faucet Request"](../../assets/img/dev-dapps/tools/faucetRequest.png)
 
 Step 5: Click on “Deploy”, enter the initialization params and finally deploy
 the contract!
 
-!["Deploy Contract"](/assets/img/dev-dapps/tools/deployContract.png)
+!["Deploy Contract"](../../assets/img/dev-dapps/tools/deployContract.png)
 
-!["Deploy Success"](/assets/img/dev-dapps/tools/deploySuccess.png)
+!["Deploy Success"](../../assets/img/dev-dapps/tools/deploySuccess.png)
 
 Step 6: You can click on the transaction ID link and you will be redirected to
 Devex page, alternatively you can also visit http://localhost:5557 (local
 network explorer) and you will find your contract creation transaction there as
 well.
 
-!["Devex"](/assets/img/dev-dapps/tools/deployDevex.png)
+!["Devex"](../../assets/img/dev-dapps/tools/deployDevex.png)
 
 Voila! Your contract is now deployed on the local network and can be accessed
 under the "Contracts" tab on the left side of the IDE.

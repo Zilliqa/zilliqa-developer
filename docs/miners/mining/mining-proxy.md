@@ -39,7 +39,7 @@ CPU cluster requests for mining responses provided by the GPU cluster. This
 request-response process is defined by the
 [Stratum mining protocol](https://en.bitcoin.it/wiki/Stratum_mining_protocol).
 
-!["Proxy Mining"](/assets/img/miners/proxy-mining.png)
+!["Proxy Mining"](../../assets/img/miners/proxy-mining.png)
 
 ## Proxy Mining Setup
 

@@ -19,7 +19,7 @@ A Zilliqa node requires the following information during launch:
 
 Most other operational parameters are defined in the file `constants.xml`.
 
-During launch, a node will assume its [identity](basics/zilliqa-architecture/basics-zil-nodes)
+During launch, a node will assume its [identity](../../../basics/zilliqa-architecture/basics-zil-nodes.md)
 as follows:
 
 - New, shard, or DS node based on sync type and bootstrap conditions (e.g.,

@@ -39,7 +39,7 @@ In the diagram below, transaction processing is handled by `UpdateAccounts()` in
 contains most of the internal functions related to interacting with the Scilla
 server.
 
-![image01](/assets/img/contributors/core/scilla-operation/image01.png)
+![image01](../../../assets/img/contributors/core/scilla-operation/image01.png)
 
 ## Scilla Operation Steps
 
@@ -69,4 +69,4 @@ contract deployment and contract call transactions. Note the following:
    (e.g., the source and destination account) will be different for each call in
    the chain.
 
-![image02](/assets/img/contributors/core/scilla-operation/image02.png)
+![image02](../../../assets/img/contributors/core/scilla-operation/image02.png)

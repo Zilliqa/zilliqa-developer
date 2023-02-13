@@ -66,4 +66,4 @@ The script `downloadIncrDB.py` is executed upon startup by every miner or seed n
 1. Node then recreates the latest state using the state deltas in `StateDeltasFromS3` (e.g. `stateDelta_101.tar.gz`, `stateDelta_101.tar.gz`, ...., `stateDelta_199.tar.gz`, `stateDelta_200.tar.gz`, `stateDelta_201.tar.gz`, ....)
 1. Using these files, the final state `Y` is computed as `Y = X + x1 + x2 + ... + x99 + x100 + x101 + x102 + ...`
 
-More information on new node joining can be found in the [Rejoin Mechanism](contributors/core-protocol-design/mitigation-measures/core-rejoin-mechanism) page.
+More information on new node joining can be found in the [Rejoin Mechanism](../mitigation-measures/core-rejoin-mechanism.md) page.

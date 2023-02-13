@@ -44,16 +44,16 @@ PoW algorithm. Hence, Zilliqa uses a DAG in its proof-of-work algorithm, which
 is generated at an incremental rate for each **DS epoch**. The bootstrap DAG
 size will be roughly `1.02GB`.
 
-Refer to the [Core Protocol Documentation](contributors/core-protocol-design/mining/core-pow) for more
+Refer to the [Core Protocol Documentation](../../contributors/core-protocol-design/mining/core-pow.md) for more
 details on the Zilliqa PoW algorithm.
 
 ## Network Difficulty
 
 Refer to the
-[Core Protocol Documentation](contributors/core-protocol-design/mining/core-difficulty-adjustment) for
+[Core Protocol Documentation](../../contributors/core-protocol-design/mining/core-difficulty-adjustment.md) for
 more details on the difficulty adjustment algorithm.
 
 ## Network Reward Mechanism
 
 Refer to
-[Zilliqa Architecture - Reward mechanism](basics/zilliqa-architecture/basics-zil-reward).
+[Zilliqa Architecture - Reward mechanism](../../basics/zilliqa-architecture/basics-zil-reward.md).

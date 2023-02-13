@@ -706,7 +706,7 @@ However, you can make this value to be specific as well. Non-custodial control o
 ### Calling TransferFrom
 
 `TransferFrom` transition moves a given amount of tokens from one address to another using the allowance mechanism.
-The caller must be an `approved_spender`, refer the section on [Adding Token Allowance](developers/user-key-management/dev-keys-zrc2-wallet-support)
+The caller must be an `approved_spender`, refer the section on [Adding Token Allowance](dev-keys-zrc2-wallet-support.md)
 if you want to add an address to become an approved_sender.
 Balance of recipient will increase and the balance of `token_owner` will decrease.
 
@@ -761,7 +761,7 @@ Balance of recipient will increase and the balance of `token_owner` will decreas
 
 ## Tracking Incoming ZRC-2 Deposit
 
-Please check the [Tracking Incoming ZRC-2 Deposit](exchanges/exchange-integration/exchange-managing-zrc2-tokens) subsection
+Please check the [Tracking Incoming ZRC-2 Deposit](../../exchanges/exchange-integration/exchange-managing-zrc2-tokens.md) subsection
 under exchanges section to track any new incoming deposit of a specific ZRC-2 token.
 
 ## Getting your Token Listed

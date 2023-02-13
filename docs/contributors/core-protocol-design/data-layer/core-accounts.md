@@ -16,7 +16,7 @@ The Zilliqa blockchain supports two types of accounts:
 - **Non-contract** - for balance transfers
 - **Contract** - for both balance transfers and smart contract execution
 
-![image01](/assets/img/contributors/core/account-management/image01.png)
+![image01](../../../assets/img/contributors/core/account-management/image01.png)
 
 While non-contract accounts simply need to record base data like **balance** and
 **nonce**, contract accounts also have to store smart contract **code**, as well
@@ -43,7 +43,7 @@ Immutable states are more commonly referred to as the **init data**, and
 examples of this include `_scilla_version`, `_library`, and `_extlibs`.
 
 Init data is supplied to the node within the transaction body (please refer to
-the [CreateTransaction](api/transaction-related-methods/api-transaction-create-tx) API documentation),
+the [CreateTransaction](../../../api/transaction-related-methods/api-transaction-create-tx.md) API documentation),
 although the node will also eventually add more fields into init data (such as
 `_creation_block` and `_this_address`) during transaction processing.
 
@@ -87,7 +87,7 @@ within the structure without the requesting party needing to know the rest of
 the structure. All the requesting party needs is the hash of the key-value pair
 at the particular time that the structure is being evaluated. For example, the
 **contractTrie** database supports requests from the
-[GetStateProof](api/contract-related-methods/api-contract-get-state-proof) API, which requests for
+[GetStateProof](../../../api/contract-related-methods/api-contract-get-state-proof.md) API, which requests for
 proof of a particular state for an account at a specific Tx block.
 
 The **contractTrie** database was implemented in order to support bridging
@@ -106,7 +106,7 @@ Zilliqa uses Ethereum's `GenericTrieDB` library for the trie structure. The
 `GenericTrieDB` class contains a `TraceableDB` member, which manages the loading
 from or saving to disk (i.e., to the levelDB database) of the trie structure.
 
-![image02](/assets/img/contributors/core/account-management/image02.png)
+![image02](../../../assets/img/contributors/core/account-management/image02.png)
 
 The basic usage will involve:
 
@@ -130,7 +130,7 @@ we won't be going deeper into **contractTrie** for now.
 The diagram below highlights the Zilliqa architecture around account and account
 state storage.
 
-![image03](/assets/img/contributors/core/account-management/image03.png)
+![image03](../../../assets/img/contributors/core/account-management/image03.png)
 
 There are essentially _three_ account store objects in a Zilliqa node:
 
@@ -196,8 +196,8 @@ getting the differences for an account between `AccountStore` and
 
 ## Account and State Management During Tx Epoch
 
-![image04](/assets/img/contributors/core/account-management/image04.png)
+![image04](../../../assets/img/contributors/core/account-management/image04.png)
 
 ## Account and State Management During Node Launch
 
-![image05](/assets/img/contributors/core/account-management/image05.png)
+![image05](../../../assets/img/contributors/core/account-management/image05.png)

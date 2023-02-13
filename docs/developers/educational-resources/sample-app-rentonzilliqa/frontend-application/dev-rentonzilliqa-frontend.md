@@ -79,7 +79,7 @@ manage existing listings via modals.
 
 In the coming sections, we will build the frontend in the following stages:
 
-- [Components](developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-library)
+- [Components](../scilla-contract/dev-rentonzilliqa-library.md)
 - [Scripting](dev-rentonzilliqa-scripting.md)
 - [Modals](dev-rentonzilliqa-modals.md)
 - [Pages](dev-rentonzilliqa-pages.md)

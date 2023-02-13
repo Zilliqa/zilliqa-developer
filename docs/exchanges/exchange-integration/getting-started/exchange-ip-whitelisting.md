@@ -131,7 +131,7 @@ in the directory we extracted `seed-configuration.tar.gz` to. Minimally, the
 following changes are required:
 
 - Change the value of `ENABLE_WEBSOCKET` to `true` if your seed node will support
-  websockets (refer to the [Zilliqa Websocket Server](developers/developer-toolings/dev-tools-websockets) documentation).
+  websockets (refer to the [Zilliqa Websocket Server](../../../developers/developer-toolings/dev-tools-websockets.md) documentation).
 
 ## Joining the Network
 

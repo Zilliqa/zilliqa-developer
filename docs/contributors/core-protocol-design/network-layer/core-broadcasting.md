@@ -39,7 +39,7 @@ all the nodes within a shard.
    `((n/Y * Z + Z + 1)* Y - 1)`. Bound checks on node index need to be done
    before multicasting. If the checks fail, we don’t broadcast.
 
-!["Broadcasting Image 1"](/assets/img/contributors/core/tree-based-cluster-broadcasting/broadcast.png)
+!["Broadcasting Image 1"](../../../assets/img/contributors/core/tree-based-cluster-broadcasting/broadcast.png)
 
 ## Application
 
