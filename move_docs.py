@@ -20,7 +20,7 @@ with open("/tmp/test.json") as fb:
 name_regex = "[^]]+"
 url_regex = "[^)]+"
 
-src_regex = "(src)\=\{([^}]+)\}"
+src_regex = '(src)\="([^"]+)"'
 string_regex = '"([^"])"'
 
 for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
@@ -51,7 +51,7 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
         print("- Full path", fullpath)
         if os.path.exists(fullpath):
             relpath = os.path.relpath(fullpath, dirname)
-            new = 'src="{}"'.format(src_filename)
+            new = 'src="{}"'.format(relpath)
             print("=>", new)
             if old != new:
                 replacements[old] = new
@@ -62,10 +62,10 @@ for f in glob.glob("**/*.md", root_dir="docs", recursive=True):
         print("REP", k, "=>", v)
         contents = contents.replace(k, v)
 
-    with open(filename, "w") as fb:
-        fb.write(contents)
+    # with open(filename, "w") as fb:
+    #    fb.write(contents)
 
-# exit(0)
+exit(0)
 markup_regex = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 markup_regex_full = "\[({0})]\(\s*({1})\s*\)".format(name_regex, url_regex)
 
