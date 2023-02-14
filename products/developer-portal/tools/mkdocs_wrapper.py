@@ -114,6 +114,7 @@ theme_help = "The theme to use when building your documentation."
 try:
     theme_choices = sorted(utils.get_theme_names())
 except TypeError:
+    print("MARKDOWN VERSION:", __version__)
     theme_choices = []
 site_dir_help = "The directory to output the result of the documentation build."
 use_directory_urls_help = "Use directory URLs when building pages (the default)."
