@@ -1,4 +1,4 @@
-name: "Ubuntu 22 CI"
+name: "Ubuntu 20 CI"
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
 
 jobs:
   build-debug:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     name: "Bazel Debug Build"
     steps:
       - name: Checkout code
@@ -23,6 +23,13 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Installing latest python
+        run: |
+          apt-get update -y
+          apt-get install software-properties-common –y
+          add-apt-repository ppa:deadsnakes/ppa
+          apt-get install python3.10 -y
 
       - name: Bazel cache
         id: cache-bazel-debug
