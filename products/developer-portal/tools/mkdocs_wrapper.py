@@ -111,7 +111,10 @@ strict_help = (
     "Enable strict mode. This will cause MkDocs to abort the build on any warnings."
 )
 theme_help = "The theme to use when building your documentation."
-theme_choices = sorted(utils.get_theme_names())
+try:
+    theme_choices = sorted(utils.get_theme_names())
+except TypeError:
+    theme_choices = []
 site_dir_help = "The directory to output the result of the documentation build."
 use_directory_urls_help = "Use directory URLs when building pages (the default)."
 reload_help = (
