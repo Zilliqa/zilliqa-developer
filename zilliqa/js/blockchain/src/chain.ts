@@ -15,6 +15,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/* eslint-disable */
 import { Transaction, util, Wallet } from "@zilliqa-js/account";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation } from "@zilliqa-js/util";
@@ -35,6 +36,7 @@ import {
   ZilliqaModule,
   sign,
 } from "@zilliqa-js/core";
+/* eslint-enable */
 
 import { toTxParams } from "./util";
 
