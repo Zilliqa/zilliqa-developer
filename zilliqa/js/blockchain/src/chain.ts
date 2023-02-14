@@ -33,6 +33,7 @@ import {
   TxBlockObj,
   TxList,
   ZilliqaModule,
+  sign,
 } from "@zilliqa-js/core";
 
 import { toTxParams } from "./util";
