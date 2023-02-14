@@ -68,16 +68,14 @@ The **minimum** requirements for running the **Zilliqa Client** are:
 1.  Edit your _constant.xml_ file in your configuration folder for the following
     types of mining mode:
 
-    **Remote Mine**
-
-    This mode is enabled by setting "REMOTE_MINE" to true in constants.xml, and
-    MINING_PROXY_URL needs to be set to the address of the mining proxy
-    listening address. In this mode, multiple zilliqa node can send PoW work
-    request to the mining proxy, and mining proxy dispatches the work packages
-    to multiple mining machines. If the mining machine find result, it sends to
-    the mining proxy, and mining proxy send to Zilliqa node. This mode can
-    support multiple Zilliqa nodes and mining machines, but it needs to run a
-    mining proxy server separately.
+    **Remote Mine**: This mode is enabled by setting "REMOTE_MINE" to true in
+    constants.xml, and MINING_PROXY_URL needs to be set to the address of the
+    mining proxy listening address. In this mode, multiple zilliqa node can send
+    PoW work request to the mining proxy, and mining proxy dispatches the work
+    packages to multiple mining machines. If the mining machine find result, it
+    sends to the mining proxy, and mining proxy send to Zilliqa node. This mode
+    can support multiple Zilliqa nodes and mining machines, but it needs to run
+    a mining proxy server separately.
 
     - Set `REMOTE_MINE` to `true`.
     - Set `MINING_PROXY_URL` to the URL of the mining proxy you are using.
@@ -91,14 +89,13 @@ The **minimum** requirements for running the **Zilliqa Client** are:
     MINING_PROXY_URL[http://127.0.0.1:4202/api](http://127.0.0.1:4202/api)/MINING_PROXY_URL>
     ```
 
-    **Get Work Server Mine**
-
-    This mode is enabled by setting "GETWORK_SERVER_MINE" to true in
-    constants.xml. The zilliqa node will be used as an mining server, other GPU
-    machine can get work from this server and submit the result if the GPU
-    machine find the result. It can combine the hash power of multiple GPU
-    machines to finish a high difficulty PoW job. But if there are multiple
-    zilliqa node using this mode, it is not easy to maintain.
+    **Get Work Server Mine**: This mode is enabled by setting
+    "GETWORK_SERVER_MINE" to true in constants.xml. The zilliqa node will be
+    used as an mining server, other GPU machine can get work from this server
+    and submit the result if the GPU machine find the result. It can combine the
+    hash power of multiple GPU machines to finish a high difficulty PoW job. But
+    if there are multiple zilliqa node using this mode, it is not easy to
+    maintain.
 
     - Set `GETWORK_SERVER_MINE` to `true`.
     - Set `GETWORK_SERVER_PORT` to the port you will be using to GetWork.
@@ -145,20 +142,16 @@ The **minimum** requirements for running the **Zilliqa Client** are:
     - `Enter your listening port (default: 33133):` <br/> [Press **Enter** to
       skip if using default]
 
-    **Monitoring Progress**
-
-    You are now a miner in the Zilliqa Mainnet. You can monitor your progress on
-    your CPU node by using:
+    **Monitoring Progress**: You are now a miner in the Zilliqa Mainnet. You can
+    monitor your progress on your CPU node by using:
 
     ```shell
     tail -f zilliqa-00001-log.txt
     ```
 
-    **Checking Your Generated Keypairs**
-
-    To check your locally generated public and private key pairs in your
-    _mykey.txt_ file, you can enter the following in your command prompt on your
-    CPU node:
+    **Checking Your Generated Keypairs**: To check your locally generated public
+    and private key pairs in your _mykey.txt_ file, you can enter the following
+    in your command prompt on your CPU node:
 
     ```shell
     less mykey.txt
@@ -172,20 +165,16 @@ The **minimum** requirements for running the **Zilliqa Client** are:
         This key pair is generated locally on your disk. Do remember to keep
         your private key somewhere safe!
 
-    **Checking Your $ZIL Balance**
-
-    To check your balance for mining, input the address located in your
-    _myaddr.txt_ file in the search bar
+    **Checking Your $ZIL Balance**: To check your balance for mining, input the
+    address located in your _myaddr.txt_ file in the search bar
     of[https://viewblock.io/zilliqa:](https://viewblock.io/zilliqa:)
 
     ```shell
     less myaddr.txt
     ```
 
-    **Stopping the Mining Process**
-
-    To stop the mining client, stop the docker container running the **Zilliqa
-    Client** on the CPU node:
+    **Stopping the Mining Process**: To stop the mining client, stop the docker
+    container running the **Zilliqa Client** on the CPU node:
 
     ```shell
     sudo docker stop <zilliqa container name>
