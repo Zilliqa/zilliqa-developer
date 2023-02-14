@@ -27,7 +27,9 @@ jobs:
       - name: Install Python 3.10
         run: |
           sudo apt-get update 
-          sudo apt-get remove python3*
+          sudo apt-get remove python3.8
+          sudo apt install software-properties-common -y
+          sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get install -y python3.10 python3.10-dev python3.10-distutils python3.10-venv
 
       - name: Bazel cache
