@@ -1,8 +1,0 @@
-/node_modules
-./node_modules
-.vscode
-./.vscode
-.env
-./transactions.json
-./viewblock-1W.json
-./viewblock-2Y.json
