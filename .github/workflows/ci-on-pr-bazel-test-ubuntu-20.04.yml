@@ -31,10 +31,10 @@ jobs:
           sudo apt install software-properties-common -y
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get install -y python3.10 python3.10-dev python3.10-distutils python3.10-venv
-          sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10
           python3.10 --help
           which python3.10
           whereis python3.10
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 0
           python --help
 
       - name: Bazel cache
