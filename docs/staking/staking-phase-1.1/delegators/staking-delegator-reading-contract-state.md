@@ -89,7 +89,7 @@ Map SSN address ->
 - `ssn_deleg_amt`
 - Address of SSN
 
-**Example**
+#### Example
 
 ```bash
 curl -d '{
@@ -104,7 +104,7 @@ curl -d '{
 
 Map `SSN addreess` -> Map `delegator address` `stake deposit amount`
 
-**Example**
+#### Example
 
 ```json
 { "<ssn address>": { "<delegator address>": "<stake deposit amount>" } }
@@ -118,7 +118,7 @@ Map `SSN addreess` -> Map `delegator address` `stake deposit amount`
 - `buff_deposit_deleg`
 - Address of delegator
 
-**Example**
+#### Example
 
 ```bash
 curl -d '{
@@ -140,7 +140,7 @@ Map `SSN address` -> Map `Cycle number` `buffered deposit amount in Qa`
 
     Cycle number refers to the cycle number of the smart contract when the deposit was submitted to buffered deposit.
 
-**Example**
+#### Example
 
 ```json
 { "<ssn address>": { "<cycle number>": "<deposit amount>" } }
@@ -154,7 +154,7 @@ Map `SSN address` -> Map `Cycle number` `buffered deposit amount in Qa`
 - `deposit_amt_deleg`
 - Address of `delegator`
 
-**Example**
+#### Example
 
 ```bash
 curl -d '{
@@ -192,7 +192,7 @@ Coming soon
 - `withdrawal_pending`
 - Address of `delegator`
 
-**Example**
+#### Example
 
 ```bash
 curl -d '{

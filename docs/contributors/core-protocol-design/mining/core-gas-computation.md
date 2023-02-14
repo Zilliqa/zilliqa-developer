@@ -22,9 +22,9 @@ and reject transactions that don't.
 The algorithm to compute the global minimum gas price takes into account:
 
 1. the average `m_gasPrice` used over the last _n_ DS epochs
-2. the average of the gas prices proposed by each individual miner for the next
+1. the average of the gas prices proposed by each individual miner for the next
    DS epoch (in case a price increase is necessary)
-3. the trend in network congestion (i.e., the actual consumed gas in the Tx
+1. the trend in network congestion (i.e., the actual consumed gas in the Tx
    blocks) in the last DS epoch
 
 Essentially, the algorithm decides on the gas price depending on the level of
@@ -60,7 +60,7 @@ next DS epoch.
    mined in the last DS epoch for which the total gas consumed is at least 80%
    of `txblock_gas_limit`. This computation will require checking each
    `consumed_gas_tx_block[j][k]`.
-2. Then, we make the decision on how to set `global_gas_price` according to the
+1. Then, we make the decision on how to set `global_gas_price` according to the
    table below.
 
 | Percentage of Full Blocks | Interpretation                                                                      | Impact on Gas Price                                           |
@@ -72,19 +72,19 @@ next DS epoch.
 ### Decreasing the Gas Price
 
 1. Discard all `proposed_min_price_node[i]` values
-2. Compute the average gas price over the last _n_ DS epochs:
+1. Compute the average gas price over the last _n_ DS epochs:
 
    ```text
    average_gas_price_val = mean(min_price_epoch[j-1], ..., min_price_epoch[j-n])
    ```
 
-3. Compute the decreased gas price value:
+1. Compute the decreased gas price value:
 
    ```text
    decreased_gas_price_val = 99% of average_gas_price_val
    ```
 
-4. Finally, compute the new `global_gas_price`:
+1. Finally, compute the new `global_gas_price`:
 
    ```text
    global_gas_price = min_price_epoch[j] =
@@ -100,20 +100,20 @@ next DS epoch.
    median_proposed_min_price = median(proposed_min_price_node[1], ..., proposed_min_price_node[N])
    ```
 
-2. Compute the average gas price over the last _n_ DS epochs:
+1. Compute the average gas price over the last _n_ DS epochs:
 
    ```text
    average_gas_price_val = mean(min_price_epoch[j-1], ..., min_price_epoch[j-n])
    ```
 
-3. Compute the lower and upper bounds for the increased gas price value:
+1. Compute the lower and upper bounds for the increased gas price value:
 
    ```text
    increased_gas_price_val_lower_bound = 100.5% of average_gas_price_val
    increased_gas_price_val_upper_bound = 101.5% of average_gas_price_val
    ```
 
-4. Finally, compute the new `global_gas_price`:
+1. Finally, compute the new `global_gas_price`:
 
    ```text
    global_gas_price = min_price_epoch[j] =

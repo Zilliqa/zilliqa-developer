@@ -30,8 +30,8 @@ Follow these steps to perform the build:
 1. Install the required dependencies according to
    [this section](https://github.com/Zilliqa/Zilliqa/#build-dependencies) in the
    repository.
-2. Clone the [Zilliqa repository](https://github.com/Zilliqa/Zilliqa/).
-3. Build the source code according to
+1. Clone the [Zilliqa repository](https://github.com/Zilliqa/Zilliqa/).
+1. Build the source code according to
    [this section](https://github.com/Zilliqa/Zilliqa/#build-from-source-code).
 
 When successful, the outputs (including the `zilliqa` binary) will be created in
@@ -44,9 +44,9 @@ contribute:
 
 1. Submit code changes as pull requests (please read the
    [guidelines](contribute-guidelines.md))
-2. Submit [proposals](contribute-standards.md) to improve the core protocol
+1. Submit [proposals](contribute-standards.md) to improve the core protocol
    design
-3. Submit bug reports and feature requests in the
+1. Submit bug reports and feature requests in the
    [repository issues](https://github.com/Zilliqa/Zilliqa/issues)
 
 ## Contributing to Scilla
@@ -60,14 +60,14 @@ to the [Scilla website](https://scilla-lang.org/#getinvolvedsection).
 These are the available resources that help explain the core protocol:
 
 1. The Zilliqa [whitepaper](https://docs.zilliqa.com/whitepaper.pdf)
-2. The
+1. The
    [Zilliqa architecture](../../basics/zilliqa-architecture/basics-zil-nodes.md)
    and
    [Core protocol design](../core-protocol-design/design-overview/core-node-operation.md)
    sections
-3. The [Zilliqa Improvement Proposals](https://github.com/Zilliqa/ZIP/)
+1. The [Zilliqa Improvement Proposals](https://github.com/Zilliqa/ZIP/)
    repository
-4. Monthly updates and tech writeups in the
+1. Monthly updates and tech writeups in the
    [official blog](https://blog.zilliqa.com/)
-5. The developer community channels on our
+1. The developer community channels on our
    [official Discord server](https://discord.com/invite/XMRE9tt)

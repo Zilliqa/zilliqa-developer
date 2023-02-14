@@ -1,8 +1,17 @@
 ---
+id: dev-keys-zrc2-wallet-support
+title: ZRC-2 Wallet Support
+keywords:
+  - zrc2
+  - wallet
+  - zilliqa
+description: Wallet support for ZRC-2 tokens
+---
 
-id: (developers/user-key-management/dev-keys-zrc2-wallet-support) in their wallet.
-Since most of the wallet front-ends are built using a JavaScript framework, most developers would find the code found in the `js` tab to be relevant to them. We have included code snippets for some other languages as well in case you want to handle these functionalities
-at the backend.
+Since most of the wallet front-ends are built using a JavaScript framework, most
+developers would find the code found in the `js` tab to be relevant to them. We
+have included code snippets for some other languages as well in case you want to
+handle these functionalities at the backend.
 
 !!! note
 
@@ -10,7 +19,9 @@ at the backend.
 
 ## Introduction to ZRC-2
 
-[ZRC-2](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md) is the formal standard for Fungible Token in Zilliqa. It is an open standard for creating currencies on the Zilliqa blockchain.
+[ZRC-2](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md) is the formal
+standard for Fungible Token in Zilliqa. It is an open standard for creating
+currencies on the Zilliqa blockchain.
 
 The ZRC-2 standard allows for functionalities like
 
@@ -23,8 +34,10 @@ The ZRC-2 standard allows for functionalities like
 
 ## Examples of ZRC-2
 
-- [$XSGD](https://www.xfers.com/) - the first Singapore dollar-pegged stablecoin built by [Xfers](https://www.xfers.com/)
-- [$gZIL](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-11.md#governance-tokens-aka-gzil) - Governance ZIL token earned through Zilliqa Seed Node Staking Program
+- [$XSGD](https://www.xfers.com/) - the first Singapore dollar-pegged
+  stablecoin built by [Xfers](https://www.xfers.com/)
+- [$gZIL](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-11.md#governance-tokens-aka-gzil) -
+  Governance ZIL token earned through Zilliqa Seed Node Staking Program
 
 ## Getting Testnet ZRC-2 Tokens
 
@@ -33,7 +46,9 @@ The ZRC-2 standard allows for functionalities like
 
 ## ZRC-2 Specification
 
-ZRC-2 fungible tokens contract consists of the following components in smart contracts as per the [specification](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md#iv-specification).
+ZRC-2 fungible tokens contract consists of the following components in smart
+contracts as per the
+[specification](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md#iv-specification).
 
 ### Error Codes
 
@@ -83,12 +98,15 @@ ZRC-2 fungible tokens contract consists of the following components in smart con
 
 ## Checking if Contract is Compliant with ZRC-2 Standard
 
-In order to check if the address entered by the user is a ZRC-2 compliant contract, we need to look at the contract code and check if it has the required properties.
+In order to check if the address entered by the user is a ZRC-2 compliant
+contract, we need to look at the contract code and check if it has the required
+properties.
 
 ### Check Immutable Variables
 
-For immutable variables, we'll use the `GetSmartContractInit` method of the Zilliqa API to get the immutable variables of the contract.
-The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+For immutable variables, we'll use the `GetSmartContractInit` method of the
+Zilliqa API to get the immutable variables of the contract. The address of the
+ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
 
 #### Example Request
 
@@ -204,9 +222,12 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 }
 ```
 
-The response received consists of the `type`, `value`, and `vname` for each immutable variable.
+The response received consists of the `type`, `value`, and `vname` for each
+immutable variable.
 
-To check whether a contract is compliant with the ZRC-2 standard's immutable variables requirement, see if the contract implements the [mandatory immutable variables](#immutable-variables).
+To check whether a contract is compliant with the ZRC-2 standard's immutable
+variables requirement, see if the contract implements the
+[mandatory immutable variables](#immutable-variables).
 
 !!! note
 
@@ -229,8 +250,9 @@ console.log(isZRC2);
 
 ### Check Mutable Variables
 
-For mutable variables, we'll use the `GetSmartContractState` method of the Zilliqa API to get the mutable variables of the contract.
-The address of the ZRC2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+For mutable variables, we'll use the `GetSmartContractState` method of the
+Zilliqa API to get the mutable variables of the contract. The address of the
+ZRC2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
 
 #### Example Request
 
@@ -313,9 +335,12 @@ The address of the ZRC2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6
 }
 ```
 
-The response received above consists of the mutable variables `total_supply`, `balances`, and `allowances`.
+The response received above consists of the mutable variables `total_supply`,
+`balances`, and `allowances`.
 
-To check whether a contract is compliant with the ZRC-2 standard's mutable variables requirement, see if the contract implements the [mandatory mutable variables](#mutable-variables).
+To check whether a contract is compliant with the ZRC-2 standard's mutable
+variables requirement, see if the contract implements the
+[mandatory mutable variables](#mutable-variables).
 
 !!! note
 
@@ -337,15 +362,22 @@ console.log(isZRC2);
 
 ### Check Transitions, Events, and Error Codes
 
-Currently, you need to look at the smart contract code manually and check for transitions, events, and error codes in a contract. To check whether a contract is compliant with the ZRC-2 standard's error codes - as well transitions and events - requirement, see if the contract implements the [mandatory error codes](#error-codes) and [mandatory transitions and events](#transitions-and-events).
+Currently, you need to look at the smart contract code manually and check for
+transitions, events, and error codes in a contract. To check whether a contract
+is compliant with the ZRC-2 standard's error codes - as well transitions and
+events - requirement, see if the contract implements the
+[mandatory error codes](#error-codes) and
+[mandatory transitions and events](#transitions-and-events).
 
 ## Integrating with ZRC-2 Fungible Tokens Contract
 
 ### Fetch Token Supply
 
-In a ZRC-2 fungible tokens contract, the mutable field `total_supply` stores the value of the current total supply.
-We'll use the `GetSmartContractState` method of the Zilliqa API to get the mutable variables of the contract.
-The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+In a ZRC-2 fungible tokens contract, the mutable field `total_supply` stores the
+value of the current total supply. We'll use the `GetSmartContractState` method
+of the Zilliqa API to get the mutable variables of the contract. The address of
+the ZRC-2 contract referred below is
+`0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
 
 #### Example Request
 
@@ -414,7 +446,8 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 }
 ```
 
-If the response json received above is stored in the variable `smartContractState`, total supply would then be:
+If the response json received above is stored in the variable
+`smartContractState`, total supply would then be:
 
 ```js
 let smartContractState = await zilliqa.blockchain.getSmartContractState(
@@ -425,9 +458,11 @@ let totalSupply = smartContractState.result.total_supply; // Total Supply
 
 ### Fetch Token Balance
 
-In a ZRC-2 fungible tokens contract, the mutable field `balances` (with data type `Map`) stores the mapping between addresses and their
-corresponding token balances. We'll use the `GetSmartContractState` method of the Zilliqa API to get the mutable variables of the contract.
-The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+In a ZRC-2 fungible tokens contract, the mutable field `balances` (with data
+type `Map`) stores the mapping between addresses and their corresponding token
+balances. We'll use the `GetSmartContractState` method of the Zilliqa API to get
+the mutable variables of the contract. The address of the ZRC-2 contract
+referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
 
 #### Example Request
 
@@ -512,7 +547,12 @@ The address of the ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e
 
 ### Fetch Token Balance For A Single Key
 
-If the need to fetch a single token value from the `balances` map arises. Instead of requesting the whole map state over the network, using `getSmartContractSubState` is the most efficent method to use when you don't need to fetch the whole map. It returns one value per key, instead of the entire map. Allowing for quicker response times when only certain key values are required to be fetched.
+If the need to fetch a single token value from the `balances` map arises.
+Instead of requesting the whole map state over the network, using
+`getSmartContractSubState` is the most efficent method to use when you don't
+need to fetch the whole map. It returns one value per key, instead of the entire
+map. Allowing for quicker response times when only certain key values are
+required to be fetched.
 
 #### Example Request
 
@@ -553,9 +593,11 @@ If the need to fetch a single token value from the `balances` map arises. Instea
 
 ### Transfer Token
 
-ZRC-2 contracts have the `transfer` transition that allows users to transfer tokens to another address by specifying the receiving address and amount.
+ZRC-2 contracts have the `transfer` transition that allows users to transfer
+tokens to another address by specifying the receiving address and amount.
 
-The code snippet below illustrates how one can transfer ZRC-2 tokens to another address.
+The code snippet below illustrates how one can transfer ZRC-2 tokens to another
+address.
 
 === "JavaScript"
 
@@ -649,12 +691,22 @@ The code snippet below illustrates how one can transfer ZRC-2 tokens to another 
 
 ### Adding Token Allowance
 
-The Zilliqa blockchain allows transactions with smart contracts and those smart contracts can be facilitated by third parties like a DEX or a protocol relayer – permissions have to be granted to the third party by token owners before those smart contracts can execute.
-Token allowance permission gives the dApp contract the right to transfer the user's ZRC-2 token if the current approved allowance is equal to or more than `amount` requested to being transferred. The approval is done by calling `IncreaseAllowance` transition.
+The Zilliqa blockchain allows transactions with smart contracts and those smart
+contracts can be facilitated by third parties like a DEX or a protocol relayer –
+permissions have to be granted to the third party by token owners before those
+smart contracts can execute. Token allowance permission gives the dApp contract
+the right to transfer the user's ZRC-2 token if the current approved allowance
+is equal to or more than `amount` requested to being transferred. The approval
+is done by calling `IncreaseAllowance` transition.
 
-In the example below, the allowance amount is the same as the entire token supply. This is done so that the approval needs to only be done once per token contract, reducing the number of approval transactions required for users conducting multiple swaps.
+In the example below, the allowance amount is the same as the entire token
+supply. This is done so that the approval needs to only be done once per token
+contract, reducing the number of approval transactions required for users
+conducting multiple swaps.
 
-However, you can make this value to be specific as well. Non-custodial control of the token should be ensured by the dApp contract itself, which does not allow for the transfer of tokens unless explicitly invoked by the sender.
+However, you can make this value to be specific as well. Non-custodial control
+of the token should be ensured by the dApp contract itself, which does not allow
+for the transfer of tokens unless explicitly invoked by the sender.
 
 === "JavaScript"
 
@@ -705,10 +757,11 @@ However, you can make this value to be specific as well. Non-custodial control o
 
 ### Calling TransferFrom
 
-`TransferFrom` transition moves a given amount of tokens from one address to another using the allowance mechanism.
-The caller must be an `approved_spender`, refer the section on [Adding Token Allowance](dev-keys-zrc2-wallet-support.md)
-if you want to add an address to become an approved_sender.
-Balance of recipient will increase and the balance of `token_owner` will decrease.
+`TransferFrom` transition moves a given amount of tokens from one address to
+another using the allowance mechanism. The caller must be an `approved_spender`,
+refer the section on [Adding Token Allowance](dev-keys-zrc2-wallet-support.md)
+if you want to add an address to become an approved_sender. Balance of recipient
+will increase and the balance of `token_owner` will decrease.
 
 === "JavaScript"
 
@@ -761,22 +814,31 @@ Balance of recipient will increase and the balance of `token_owner` will decreas
 
 ## Tracking Incoming ZRC-2 Deposit
 
-Please check the [Tracking Incoming ZRC-2 Deposit](../../exchanges/exchange-integration/exchange-managing-zrc2-tokens.md) subsection
-under exchanges section to track any new incoming deposit of a specific ZRC-2 token.
+Please check the
+[Tracking Incoming ZRC-2 Deposit](../../exchanges/exchange-integration/exchange-managing-zrc2-tokens.md)
+subsection under exchanges section to track any new incoming deposit of a
+specific ZRC-2 token.
 
 ## Getting your Token Listed
 
-You can get your token listed on various Zilliqa ecosystem products to allow for easier recognition by your community.
+You can get your token listed on various Zilliqa ecosystem products to allow for
+easier recognition by your community.
 
 ### Listing on [Zilswap](https://zilswap.io/)
 
-To add your token to the token listed on Zilswap, please refer the README.md file on this [repository](https://github.com/Switcheo/zilswap-token-list).
+To add your token to the token listed on Zilswap, please refer the README.md
+file on this [repository](https://github.com/Switcheo/zilswap-token-list).
 
-[Zilpay wallet](https://zilpay.xyz/) also refers to the listed tokens list on Zilswap when deciding which tokens to add to their default list.
+[Zilpay wallet](https://zilpay.xyz/) also refers to the listed tokens list on
+Zilswap when deciding which tokens to add to their default list.
 
 ### Listing on [Viewblock](https://viewblock.io/zilliqa)
 
-To add your token to [Viewblock tokens listing page](https://viewblock.io/zilliqa/tokens), please refer to the README.md file on this [repository](https://github.com/Ashlar/cryptometa.git). Viewblock will assign a score to your token based on the stated token listing criteria.
+To add your token to
+[Viewblock tokens listing page](https://viewblock.io/zilliqa/tokens), please
+refer to the README.md file on this
+[repository](https://github.com/Ashlar/cryptometa.git). Viewblock will assign a
+score to your token based on the stated token listing criteria.
 
 ## Other References
 

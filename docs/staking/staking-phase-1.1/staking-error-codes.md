@@ -14,9 +14,10 @@ description: Smart Contract Error Codes
 
 ## Overview
 
-The `ssnlist` smart contract will emit out exception with an error code when an error condition is encountered. An example is shown below.
+The `ssnlist` smart contract will emit out exception with an error code when an
+error condition is encountered. An example is shown below.
 
-```
+```text
 Exception thrown: (Message [(_exception : (String "Error")) ; (code : (Int32 -13))]) :188
   Raised from IsProxy :269
   Raised from IsPaused :279

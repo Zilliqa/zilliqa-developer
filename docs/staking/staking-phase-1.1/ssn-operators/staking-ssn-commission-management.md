@@ -44,7 +44,7 @@ The node operator must not have change commission rate in the current cycle.
 
 ### Transition
 
-```
+```scilla
 transition UpdateComm(new_rate: Uint128)
 ```
 
@@ -74,7 +74,7 @@ None
 
 ### Transition
 
-```
+```scilla
 transition WithdrawComm()
 ```
 
@@ -99,7 +99,7 @@ transition
 
 ### Transition
 
-```
+```scilla
 transition UpdateReceivedAddr(new_addr: ByStr20)
 ```
 

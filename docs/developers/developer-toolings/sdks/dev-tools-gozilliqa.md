@@ -2,13 +2,13 @@
 id: dev-tools-gozilliqa
 title: gozilliqa
 keywords:
-    - go
-    - gozilliqa
-    - sdk
-    - installation
-    - apis
-    - examples
-    - zilliqa
+  - go
+  - gozilliqa
+  - sdk
+  - installation
+  - apis
+  - examples
+  - zilliqa
 description: gozilliqa
 ---
 
@@ -59,112 +59,112 @@ SDK.
 
 ### Account API
 
--   fromFile
--   toFile
--   newHDAccount (with default derivation path "m/44'/313'/0'/0/${index}")
--   newHDAccountWithDerivationPath
+- fromFile
+- toFile
+- newHDAccount (with default derivation path "m/44'/313'/0'/0/${index}")
+- newHDAccountWithDerivationPath
 
 ### Wallet API
 
--   createAccount
--   addByPrivateKey addByKeyStore
--   remove
--   setDefault
--   signTransaction (default account)
--   signTransactionWith (specific account)
+- createAccount
+- addByPrivateKey addByKeyStore
+- remove
+- setDefault
+- signTransaction (default account)
+- signTransactionWith (specific account)
 
 ### TransactionFactory Transaction
 
--   sendTransaction
--   trackTx
--   confirm
--   isPending isInitialised isConfirmed isRejected
+- sendTransaction
+- trackTx
+- confirm
+- isPending isInitialised isConfirmed isRejected
 
 ### ContractFactory Contract
 
--   deploy
--   call
--   isInitialised isDeployed isRejected
--   getState
--   getAddressForContract
+- deploy
+- call
+- isInitialised isDeployed isRejected
+- getState
+- getAddressForContract
 
 ### Crypto API
 
--   getDerivedKey (PBKDF2 and Scrypt)
--   generatePrivateKey
--   Schnorr.sign
--   Schnorr.verify
--   getPublicKeyFromPrivateKey
--   getAddressFromPublicKey
--   getAddressFromPrivateKey
--   encryptPrivateKey
--   decryptPrivateKey
+- getDerivedKey (PBKDF2 and Scrypt)
+- generatePrivateKey
+- Schnorr.sign
+- Schnorr.verify
+- getPublicKeyFromPrivateKey
+- getAddressFromPublicKey
+- getAddressFromPrivateKey
+- encryptPrivateKey
+- decryptPrivateKey
 
 ### JSON-RPC API
 
 Blockchain-related methods
 
--   getNetworkId
--   getBlockchainInfo
--   getShardingStructure
--   getDsBlock
--   getLatestDsBlock
--   getNumDSBlocks
--   getDSBlockRate
--   getDSBlockListing
--   getTxBlock
--   getLatestTxBlock
--   getNumTxBlocks
--   getTxBlockRate
--   getTxBlockListing
--   getNumTransactions
--   getTransactionRate
--   getCurrentMiniEpoch
--   getCurrentDSEpoch
--   getPrevDifficulty
--   getPrevDSDifficulty
+- getNetworkId
+- getBlockchainInfo
+- getShardingStructure
+- getDsBlock
+- getLatestDsBlock
+- getNumDSBlocks
+- getDSBlockRate
+- getDSBlockListing
+- getTxBlock
+- getLatestTxBlock
+- getNumTxBlocks
+- getTxBlockRate
+- getTxBlockListing
+- getNumTransactions
+- getTransactionRate
+- getCurrentMiniEpoch
+- getCurrentDSEpoch
+- getPrevDifficulty
+- getPrevDSDifficulty
 
 Transaction-related methods
 
--   createTransaction
--   getTransaction
--   getRecentTransactions
--   getTransactionsForTxBlock
--   getNumTxnsTxEpoch
--   getNumTxnsDSEpoch
--   getMinimumGasPrice
+- createTransaction
+- getTransaction
+- getRecentTransactions
+- getTransactionsForTxBlock
+- getNumTxnsTxEpoch
+- getNumTxnsDSEpoch
+- getMinimumGasPrice
 
 Contract-related methods
 
--   getSmartContractCode
--   getSmartContractInit
--   getSmartContractState
--   getSmartContracts
--   getContractAddressFromTransactionID
+- getSmartContractCode
+- getSmartContractInit
+- getSmartContractState
+- getSmartContracts
+- getContractAddressFromTransactionID
 
 Account-related methods
 
--   getBalance
+- getBalance
 
 ### Validation
 
--   isAddress
--   isPublicjKey
--   isPrivateKey
--   isSignature
+- isAddress
+- isPublicjKey
+- isPrivateKey
+- isSignature
 
 ### Util
 
--   byteArrayToHexString
--   hexStringToByteArray
--   generateMac
--   isByteString
--   encodeTransactionProto
--   toChecksumAddress
--   isValidChecksumAddress
--   bech32 encode decode
--   isBech32
--   fromBech32Address toBech32Address
+- byteArrayToHexString
+- hexStringToByteArray
+- generateMac
+- isByteString
+- encodeTransactionProto
+- toChecksumAddress
+- isValidChecksumAddress
+- bech32 encode decode
+- isBech32
+- fromBech32Address toBech32Address
 
 ## Demo
 

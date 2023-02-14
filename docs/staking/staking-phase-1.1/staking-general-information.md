@@ -10,35 +10,33 @@ keywords:
 description: General Information
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 ## Staking Portal for Node Operators and Delegators
 
-Zillion Staking Portal (Mainnet):[https://stake.zilliqa.com/](https://stake.zilliqa.com/)
-Zillion Staking Portal (Testnet):[https://testnet-stake.zilliqa.com/](https://testnet-stake.zilliqa.com/)
+Zillion Staking Portal
+(Mainnet):[https://stake.zilliqa.com/](https://stake.zilliqa.com/) Zillion
+Staking Portal
+(Testnet):[https://testnet-stake.zilliqa.com/](https://testnet-stake.zilliqa.com/)
 
 ## Staked Seed Nodes Status Viewer
 
-Staking viewer (Mainnet):[https://staking-viewer.zilliqa.com/](https://staking-viewer.zilliqa.com/)
-Staking viewer (Testnet):[https://testnet-viewer.zilliqa.com/](https://testnet-viewer.zilliqa.com/)
+Staking viewer
+(Mainnet):[https://staking-viewer.zilliqa.com/](https://staking-viewer.zilliqa.com/)
+Staking viewer
+(Testnet):[https://testnet-viewer.zilliqa.com/](https://testnet-viewer.zilliqa.com/)
 
 ## Smart Contract Code Repository
 
-Phase 1.1 contracts :[https://github.com/Zilliqa/staking-contract](https://github.com/Zilliqa/staking-contract)
+Phase 1.1 contracts
+:[https://github.com/Zilliqa/staking-contract](https://github.com/Zilliqa/staking-contract)
 
 ## Staking Smart Contract Information
 
-<Tabs
-defaultValue="mainnet"
-values={[
-{ label: 'Mainnet', value: 'mainnet', },
-{ label: 'Testnet', value: 'testnet', }
-]
-}>
-<TabItem value="mainnet">
+<Tabs defaultValue="mainnet" values={[ { label: 'Mainnet', value: 'mainnet', },
+{ label: 'Testnet', value: 'testnet', } ] }> <TabItem value="mainnet">
 
-**Contract Parameters**
+### Contract Parameters
 
 | Parameters         | Phase 1.0 Value (Deprecated)   | Phase 1.1 Value (mainet v8.0.0 - v8.0.3) | Phase 1.1 Value (mainet v8.0.4) |
 | ------------------ | ------------------------------ | ---------------------------------------- | ------------------------------- |
@@ -48,7 +46,7 @@ values={[
 | Reward cycle       | 18 DS blocks                   | 22 DS blocks                             | 22 DS blocks                    |
 | Unbonding period   | 24,000 Final blocks (~2 weeks) | 30,800 Final Blocks (~2 weeks)           | 30,800 Final Blocks (~2 weeks)  |
 
-**Phase 1.1 contracts (Live)**
+### Phase 1.1 contracts (Live)
 
 | Type    | Address                                                                                                                    |
 | ------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -56,7 +54,7 @@ values={[
 | ssnlist | [zil15lr86jwg937urdeayvtypvhy6pnp6d7p8n5z09](https://devex.zilliqa.com/address/zil15lr86jwg937urdeayvtypvhy6pnp6d7p8n5z09) |
 | gZIL    | [zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e](https://devex.zilliqa.com/address/zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e) |
 
-**Phase 1 contracts (Contract frozen)**
+### Phase 1 contracts (Contract frozen)
 
 | Type           | Address                                                                                                                    |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -68,7 +66,7 @@ values={[
 </TabItem>
 <TabItem value="testnet">
 
-**Phase 1.1 (Live)**
+### Phase 1.1 (Live)
 
 | Type    | Address                                                                                                                                                              |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +74,7 @@ values={[
 | ssnlist | [zil15tjx2l0gzzxaxucwk50stgw5smthhckl8qcqmf](https://devex.zilliqa.com/address/zil15tjx2l0gzzxaxucwk50stgw5smthhckl8qcqmf?network=https%3A%2F%2Fdev-api.zilliqa.com) |
 | gZIL    | [zil1zmatu4uka68ghtt4vk5h2tdfrwkrp6pcq0y2rm](https://devex.zilliqa.com/address/zil1zmatu4uka68ghtt4vk5h2tdfrwkrp6pcq0y2rm?network=https%3A%2F%2Fdev-api.zilliqa.com) |
 
-**Phase 1.0 (Contract frozen)**
+### Phase 1.0 (Contract frozen)
 
 | Type    | Address                                                                                                                                                              |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

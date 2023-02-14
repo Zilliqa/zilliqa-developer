@@ -48,7 +48,7 @@ throw an error in case the amount being delegated is less than `mindelegstake`.
 
 ### Transition
 
-```
+```scilla
 transition DelegateStake(ssnaddr: ByStr20)
 ```
 
@@ -81,7 +81,7 @@ the reward from
 
 ### Transition
 
-```
+```scilla
 transition WithdrawStakeRewards(ssnaddr: ByStr20)
 ```
 
@@ -129,7 +129,7 @@ particular SSN
 
 ### Transition
 
-```
+```scilla
  WithdrawStakeAmt(ssnaddr: ByStr20, amt: Uint128)
 ```
 
@@ -170,7 +170,7 @@ None
 
 ### Transition
 
-```
+```scilla
  CompleteWithdrawal()
 ```
 
@@ -198,7 +198,7 @@ delegation `amount`: the amount of the stake amount to transfer to the new SSN
 
 ### Transition
 
-```
+```scilla
 transition ReDelegateStake(ssnaddr: ByStr20, to_ssn: ByStr20, amount: Uint128)
 ```
 

@@ -43,9 +43,11 @@ Immutable states are more commonly referred to as the **init data**, and
 examples of this include `_scilla_version`, `_library`, and `_extlibs`.
 
 Init data is supplied to the node within the transaction body (please refer to
-the [CreateTransaction](../../../api/transaction-related-methods/api-transaction-create-tx.md) API documentation),
-although the node will also eventually add more fields into init data (such as
-`_creation_block` and `_this_address`) during transaction processing.
+the
+[CreateTransaction](../../../api/transaction-related-methods/api-transaction-create-tx.md)
+API documentation), although the node will also eventually add more fields into
+init data (such as `_creation_block` and `_this_address`) during transaction
+processing.
 
 Mutable states, on the other hand, are the variables that are manipulated by the
 Scilla interpreter as it executes a transition on the contract. The Zilliqa node
@@ -87,8 +89,9 @@ within the structure without the requesting party needing to know the rest of
 the structure. All the requesting party needs is the hash of the key-value pair
 at the particular time that the structure is being evaluated. For example, the
 **contractTrie** database supports requests from the
-[GetStateProof](../../../api/contract-related-methods/api-contract-get-state-proof.md) API, which requests for
-proof of a particular state for an account at a specific Tx block.
+[GetStateProof](../../../api/contract-related-methods/api-contract-get-state-proof.md)
+API, which requests for proof of a particular state for an account at a specific
+Tx block.
 
 The **contractTrie** database was implemented in order to support bridging
 between the Zilliqa and Ethereum blockchains. While the contract state trie is
@@ -110,12 +113,13 @@ from or saving to disk (i.e., to the levelDB database) of the trie structure.
 
 The basic usage will involve:
 
-1. Calling `init()` to reset the root to NULL
-1. Calling `insert()` to add nodes to the trie
-1. Calling `at()` to access any of the added nodes
-1. Calling `db()` to access the underlying `TraceableDB` member, and then either
-   1. Calling `commit()` to save the changes to disk
-   1. Calling `rollback()` to discard changes
+1.  Calling `init()` to reset the root to NULL
+1.  Calling `insert()` to add nodes to the trie
+1.  Calling `at()` to access any of the added nodes
+1.  Calling `db()` to access the underlying `TraceableDB` member, and then
+    either
+    1. Calling `commit()` to save the changes to disk
+    1. Calling `rollback()` to discard changes
 
 This basic usage applies to the **state** database. In this context, a node
 basically refers to the `Address` (key) and the `AccountBase` (value) pair.

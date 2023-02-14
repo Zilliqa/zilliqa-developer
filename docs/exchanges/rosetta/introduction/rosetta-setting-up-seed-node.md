@@ -29,7 +29,8 @@ description: Setting up Zilliqa Rosetta with Seed node
 sh ./build_docker.sh
 ```
 
-If you need to build `Zilliqa-rosetta` with a specific Zilliqa and Scilla version, you can using the following
+If you need to build `Zilliqa-rosetta` with a specific Zilliqa and Scilla
+version, you can using the following
 
 ```bash
 docker build \
@@ -41,11 +42,12 @@ docker build \
 
 Please note compiling Zilliqa and Scilla may take some time.
 
-### Step 3: Create `config.yaml` for `Zilliqa-rosetta`. We have also provided a sample of [testnet](https://github.com/Zilliqa/zilliqa-rosetta/blob/master/testnet.config.local.yaml) and [mainnet](https://github.com/Zilliqa/zilliqa-rosetta/blob/master/mainnet.config.local.yaml) configuration.
+### Step 3: Create `config.yaml` for `Zilliqa-rosetta`. We have also provided a sample of [testnet](https://github.com/Zilliqa/zilliqa-rosetta/blob/master/testnet.config.local.yaml) and [mainnet](https://github.com/Zilliqa/zilliqa-rosetta/blob/master/mainnet.config.local.yaml) configuration
 
 ### Step 4: Generation of keypair for whitelisting (only for public key whitelisting method)
 
-If you are using public key whtielisting method and wish to generate a keypair, you can do the following
+If you are using public key whtielisting method and wish to generate a keypair,
+you can do the following
 
 ```bash
 mkdir secrets

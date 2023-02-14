@@ -14,9 +14,10 @@ description: Unsupported Rosetta API
 
 ---
 
-# Unsupported API
+## Unsupported API
 
-Some of the API are not relevant or critical for interacting with Zilliqa blockchain. This list belows are the list of unsupported API
+Some of the API are not relevant or critical for interacting with Zilliqa
+blockchain. This list belows are the list of unsupported API
 
 | API            | Reason                                          |
 | -------------- | ----------------------------------------------- |

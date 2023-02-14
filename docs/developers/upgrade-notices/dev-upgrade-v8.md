@@ -2,9 +2,9 @@
 id: dev-upgrade-v8
 title: v8.0.0 Upgrade Notice
 keywords:
-    - upgrade
-    - v8.0.0
-    - zilliqa
+  - upgrade
+  - v8.0.0
+  - zilliqa
 description: Zilliqa v8.0.0 upgrade notice
 ---
 
@@ -37,8 +37,8 @@ for faster block production rate.
 
 References:
 
--   [`ZIP-14 - Revised pBFT Consensus`](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-14.md)
--   [`Revised pBFT consensus with txn processing implementation`](https://github.com/Zilliqa/Zilliqa/pull/2216)
+- [`ZIP-14 - Revised pBFT Consensus`](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-14.md)
+- [`Revised pBFT consensus with txn processing implementation`](https://github.com/Zilliqa/Zilliqa/pull/2216)
 
 ### 2) Block reward adjustment
 

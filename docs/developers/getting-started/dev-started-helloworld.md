@@ -30,14 +30,14 @@ To create a ZilPay wallet:
 
 1.  Visit ZilPay's [website](https://zilpay.xyz/) and download the extension for
     your respective browser.
-2.  Open the extension, create a new wallet by verifying your 12 words recovery
+1.  Open the extension, create a new wallet by verifying your 12 words recovery
     phrase and selecting a password for your wallet.
 
     !!! note
 
-           Please store your 12 words recovery phrase securely
+         Please store your 12 words recovery phrase securely
 
-3.  Click on the `network change` button (shown below) and select the `network`
+1.  Click on the `network change` button (shown below) and select the `network`
     as testnet.
 
 !["Change Network Button"](../../assets/img/dev-dapps/getting-started/zilpay-change-network-btn.png)
@@ -52,7 +52,7 @@ need testnet $ZIL in your ZilPay account to pay for the gas.
 To request for testnet $ZIL from the faucet,
 
 1. Visit [Nucleus wallet testnet faucet](https://dev-wallet.zilliqa.com/faucet)
-2. Enter and submit your ZilPay address to the faucet, you will receive 300
+1. Enter and submit your ZilPay address to the faucet, you will receive 300
    testnet $ZIL shortly. This will take about 30s to 1 min, as the transactions
    will need to be confirmed on the blockchain.
 
@@ -63,21 +63,21 @@ To request for testnet $ZIL from the faucet,
 To deploy the `Hello World` contract on the Zilliqa testnet, we will use the
 Scilla web IDE, [Neo-Savant IDE](https://ide.zilliqa.com/).
 
-1. Change the `network` to testnet and import your wallet by connecting with
-   Zilpay.
+1.  Change the `network` to testnet and import your wallet by connecting with
+    Zilpay.
 
-!["IDE Step1"](../../assets/img/dev-dapps/getting-started/neo-savant-step1.png)
+    !["IDE Step1"](../../assets/img/dev-dapps/getting-started/neo-savant-step1.png)
 
-2. Select the `Hello World` contract under the files tab and click on `Check`
-   button to use the
-   [typechecker](https://scilla.readthedocs.io/en/latest/scilla-checker.html) to
-   check for any syntax errors in your contract.
+1.  Select the `Hello World` contract under the files tab and click on `Check`
+    button to use the
+    [typechecker](https://scilla.readthedocs.io/en/latest/scilla-checker.html)
+    to check for any syntax errors in your contract.
 
-!["IDE Step2"](../../assets/img/dev-dapps/getting-started/neo-savant-step2.png)
+    !["IDE Step2"](../../assets/img/dev-dapps/getting-started/neo-savant-step2.png)
 
-3. Once the typechecker result is passed, click on `Deploy` button to deploy the
-   contract to testnet. Use your wallet address (Base16 format) for the "owner"
-   initialisation parameter.
+1.  Once the typechecker result is passed, click on `Deploy` button to deploy
+    the contract to testnet. Use your wallet address (Base16 format) for the
+    "owner" initialisation parameter.
 
 !["IDE Step3"](../../assets/img/dev-dapps/getting-started/neo-savant-step3.png)
 
