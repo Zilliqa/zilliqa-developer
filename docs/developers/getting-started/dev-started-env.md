@@ -31,7 +31,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 |                        | URL(s)                                                               |
 | :--------------------- | :------------------------------------------------------------------- |
 | **API URL**            | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)         |
-| **EVM URL**            | [https://evm-dev-api.zilliqa.com/](https://evm-dev-api.zilliqa.com/) |
+| **EVM URL**            | [https://evm-api-dev.zilliqa.com/](https://evm-api-dev.zilliqa.com/) |
 | **Faucet**             | [**Link**](https://dev-wallet.zilliqa.com/home?network=testnet)      |
 | **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa?network=testnet)             |
 | **WebSocket endpoint** | `wss://dev-ws.zilliqa.com`                                           |
@@ -40,7 +40,9 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 
 ## Isolated Server
 
-Zilliqa Isolated Server is a test server for dApp developers to quickly test their applications. Transactions are validated immediately, hence improving the productivity for dApp developers.
+Zilliqa Isolated Server is a test server for dApp developers to quickly test
+their applications. Transactions are validated immediately, hence improving the
+productivity for dApp developers.
 
 |             | URL(s)                                                                                       |
 | :---------- | :------------------------------------------------------------------------------------------- |

@@ -5,7 +5,8 @@ title: GetTotalCoinSupply
 
 ---
 
-Returns the total supply (ZIL) of coins in the network. This is represented as a `String`.
+Returns the total supply (ZIL) of coins in the network. This is represented as a
+`String`.
 
 ### Example Request
 
@@ -23,7 +24,7 @@ Returns the total supply (ZIL) of coins in the network. This is represented as a
 === "Node.js"
 
     ```js
-    const totalCoinSupply = await zilliqa.network.GetTotalCoinSupply();
+    const totalCoinSupply = await zilliqa.blockchain.getTotalCoinSupply();
     console.log(totalCoinSupply);
     ```
 
