@@ -28,7 +28,6 @@ import {
   RPCMethod,
   RPCResponse,
   ShardingStructure,
-  sign,
   TransactionObj,
   MinerInfo,
   TxBlockObj,
