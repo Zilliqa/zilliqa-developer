@@ -47,6 +47,12 @@
     },
     {
       "pattern": "^https://github.com/Zilliqa/zilliqa-js/tree/dev-dapps"
+    },
+    {
+      "pattern": "^https://api.zindex.zilliqa.com/zilliqa"
+    },
+    {
+      "pattern": "^https://stg-indexer-api.rialto.studio/zilliqa"
     }
   ],
   "replacementPatterns": [],

@@ -307,6 +307,30 @@ nav:
                   - Scripting: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-scripting.md"
                   - Modals: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-modals.md"
                   - Pages: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-pages.md"
+  - Indexer:
+      - Indexer Introduction: indexer/indexer-introduction.md
+      - ZILs:
+          - All Transactions: indexer/zil-all-transactions.md
+          - Balance: indexer/zil-balance.md
+      - ZRC-2:
+          - Contract Details: indexer/zrc2-contract-details.md
+          - Contract List: indexer/zrc2-contract-list.md
+          - Balance: indexer/zrc2-balance.md
+          - All Balances: indexer/zrc2-all-balances.md
+          - Transaction History: indexer/zrc2-transaction-history.md
+      - ZRC-6:
+          - Recently Minted: indexer/zrc6-recently-minted.md
+          - Asset Details: indexer/zrc6-asset-details.md
+          - User Assets: indexer/zrc6-user-assets.md
+          - Asset Metadata: indexer/zrc6-asset-metadata.md
+          - Search Attribute: indexer/zrc6-search-attribute.md
+      - Marketplace:
+          - Fixed Price: indexer/marketplace-fixed-price.md
+          - English Auction: indexer/marketplace-english-auction.md
+          - Brand Collectible List: indexer/marketplace-brand-collectible-list.md
+          - Brand Collectible Assets: indexer/marketplace-brand-collectible-assets.md
+          - Brand Collectible Details: indexer/marketplace-brand-collectible-details.md
+
   - Miners:
       - Mining:
           - Getting Started: miners/mining/mining-getting-started.md
