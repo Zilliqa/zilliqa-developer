@@ -1,0 +1,54 @@
+name: "Ubuntu 20 CI"
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - release/*
+  release:
+    types:
+      - created
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-20.04
+    name: "Bazel Debug Build"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Install Python 3.10
+        run: |
+          sudo apt-get update 
+          sudo apt-get remove python3.8
+          sudo apt install software-properties-common -y
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt-get install -y python3.10 python3.10-dev python3.10-distutils python3.10-venv
+          python3.10 --help
+          which python3.10
+          whereis python3.10
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 0
+          python --help
+
+      - name: Bazel cache
+        id: cache-bazel-debug
+        uses: actions/cache@v3.0.4
+        with:
+          path: ~/.cache/bazel/
+          key: ${{ runner.os }}-bazel-debug
+
+      - name: "Building debug"
+        run: |
+          python --version
+          bazelisk build --keep_going --disk_cache=~/.cache/bazel/  //...
+
+      - name: "Running tests"
+        run: |
+          bazelisk test --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //...

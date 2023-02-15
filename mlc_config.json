@@ -1,0 +1,71 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://opensource.org/licenses/gpl-license"
+    },
+    {
+      "pattern": "^https://opensource.org/licenses/GPL-3.0"
+    },
+    {
+      "pattern": "^https://docs.github.com/en/actions/security-guides/encrypted-secrets"
+    },
+    {
+      "pattern": "^https://api.zilliqa.com"
+    },
+    {
+      "pattern": "^https://dev-api.zilliqa.com"
+    },
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^http://localhost:4201"
+    },
+    {
+      "pattern": "^http://localhost:5555"
+    },
+    {
+      "pattern": "^https://zilliqa-isolated-server.zilliqa.com"
+    },
+    {
+      "pattern": "^https://evm-api-dev.zilliqa.com"
+    },
+    {
+      "pattern": "^https://devex.zilliqa.com"
+    },
+    {
+      "pattern": "^https://dev-wallet.zilliqa.com"
+    },
+    {
+      "pattern": "^https://app.pillarprotocol.com"
+    },
+    {
+      "pattern": "^https://www.websocket.org"
+    },
+    {
+      "pattern": "^https://viewblock.io"
+    },
+    {
+      "pattern": "^https://github.com/Zilliqa/zilliqa-js/tree/dev-dapps"
+    }
+  ],
+  "replacementPatterns": [],
+  "timeout": "20s",
+  "retryOn429": true,
+  "retryCount": 5,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200],
+  "httpHeaders": [
+    {
+      "urls": [
+        "https://github.com/",
+        "https://guides.github.com/",
+        "https://help.github.com/",
+        "https://docs.github.com/"
+      ],
+      "headers": {
+        "Accept-Encoding": "zstd, br, gzip, deflate"
+      }
+    }
+  ]
+}
