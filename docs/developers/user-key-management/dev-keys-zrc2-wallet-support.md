@@ -1,0 +1,845 @@
+---
+id: dev-keys-zrc2-wallet-support
+title: ZRC-2 Wallet Support
+keywords:
+  - zrc2
+  - wallet
+  - zilliqa
+description: Wallet support for ZRC-2 tokens
+---
+
+Since most of the wallet front-ends are built using a JavaScript framework, most
+developers would find the code found in the `js` tab to be relevant to them. We
+have included code snippets for some other languages as well in case you want to
+handle these functionalities at the backend.
+
+!!! note
+
+    It is assumed that you have already installed language-specific Zilliqa SDKs, e.g., zilliqa-js, laksaj, pyzil, gozilliqa.
+
+## Introduction to ZRC-2
+
+[ZRC-2](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md) is the formal
+standard for Fungible Token in Zilliqa. It is an open standard for creating
+currencies on the Zilliqa blockchain.
+
+The ZRC-2 standard allows for functionalities like
+
+- Minting/burning tokens
+- Transferring tokens from one account to another
+- Querying account token balance
+- Querying total token balances
+- Approving third party to spend a certain amount of tokens
+- Etc.
+
+## Examples of ZRC-2
+
+- [$XSGD](https://www.xfers.com/) - the first Singapore dollar-pegged
+  stablecoin built by [Xfers](https://www.xfers.com/)
+- [$gZIL](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-11.md#governance-tokens-aka-gzil) -
+  Governance ZIL token earned through Zilliqa Seed Node Staking Program
+
+## Getting Testnet ZRC-2 Tokens
+
+- [$XSGD faucet](https://faucet.xfers.com/) by Xfers
+- [Stake testnet $ZIL and earn testnet $gZIL](https://testnet-stake.zilliqa.com/)
+
+## ZRC-2 Specification
+
+ZRC-2 fungible tokens contract consists of the following components in smart
+contracts as per the
+[specification](https://github.com/Zilliqa/ZRC/blob/master/zrcs/zrc-2.md#iv-specification).
+
+### Error Codes
+
+| Name                        | Type    | Code | Mandatory?                            |
+| --------------------------- | ------- | ---- | ------------------------------------- |
+| `CodeIsSender`              | `Int32` | `-1` | <center> :heavy_check_mark: </center> |
+| `CodeInsufficientFunds`     | `Int32` | `-2` | <center> :heavy_check_mark: </center> |
+| `CodeInsufficientAllowance` | `Int32` | `-3` | <center> :heavy_check_mark: </center> |
+| `CodeNotOwner`              | `Int32` | `-4` | <center> :x: </center>                |
+| `CodeNotApprovedOperator`   | `Int32` | `-5` | <center> :x: </center>                |
+
+### Immutable Variables
+
+| Name                | Type           | Mandatory?                            |
+| ------------------- | -------------- | ------------------------------------- |
+| `contract_owner`    | `ByStr20`      | <center> :heavy_check_mark: </center> |
+| `name`              | `String`       | <center> :heavy_check_mark: </center> |
+| `symbol`            | `String`       | <center> :heavy_check_mark: </center> |
+| `decimals`          | `Uint32`       | <center> :heavy_check_mark: </center> |
+| `init_supply`       | `Uint128`      | <center> :heavy_check_mark: </center> |
+| `default_operators` | `List ByStr20` | <center> :x: </center>                |
+
+### Mutable Variables
+
+| Name                        | Type                                | Mandatory?                            |
+| --------------------------- | ----------------------------------- | ------------------------------------- |
+| `total_supply`              | `Uint128`                           | <center> :heavy_check_mark: </center> |
+| `balances`                  | `Map ByStr20 Uint128`               | <center> :heavy_check_mark: </center> |
+| `allowances`                | `Map ByStr20 (Map ByStr20 Uint128)` | <center> :heavy_check_mark: </center> |
+| `operators`                 | `Map ByStr20 (Map ByStr20 Unit)`    | <center> :x: </center>                |
+| `revoked_default_operators` | `Map ByStr20 (Map ByStr20 Unit)`    | <center> :x: </center>                |
+
+### Transitions and Events
+
+| Name                  | Events                              | Mandatory?                            |
+| --------------------- | ----------------------------------- | ------------------------------------- |
+| `IsOperatorFor()`     |                                     | <center> :x: </center>                |
+| `Mint()`              | `Minted`, `Error`                   | <center> :x: </center>                |
+| `Burn()`              | `Burnt`, `Error`                    | <center> :x: </center>                |
+| `AuthorizeOperator()` | `AuthorizeOperatorSuccess`, `Error` | <center> :x: </center>                |
+| `RevokeOperator()`    | `RevokeOperatorSuccess`, `Error`    | <center> :x: </center>                |
+| `IncreaseAllowance()` | `IncreasedAllowance`, `Error`       | <center> :heavy_check_mark: </center> |
+| `DecreaseAllowance()` | `DecreasedAllowance`, `Error`       | <center> :heavy_check_mark: </center> |
+| `Transfer()`          | `TransferSuccess`, `Error`          | <center> :heavy_check_mark: </center> |
+| `TransferFrom()`      | `TransferFromSuccess`, `Error`      | <center> :heavy_check_mark: </center> |
+| `OperatorSend()`      | `OperatorSendSuccess`, `Error`      | <center> :x: </center>                |
+
+## Checking if Contract is Compliant with ZRC-2 Standard
+
+In order to check if the address entered by the user is a ZRC-2 compliant
+contract, we need to look at the contract code and check if it has the required
+properties.
+
+### Check Immutable Variables
+
+For immutable variables, we'll use the `GetSmartContractInit` method of the
+Zilliqa API to get the immutable variables of the contract. The address of the
+ZRC-2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+
+#### Example Request
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractInit",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+=== "JavaScript"
+
+    ```js
+    const smartContractInit = await zilliqa.blockchain.getSmartContractInit(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractInit.result);
+    ```
+
+=== "Java"
+
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            Rep<List<Contract.State>> smartContractInit = client.getSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(new Gson().toJson(smartContractInit));
+        }
+    }
+    ```
+
+=== "Python"
+
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
+
+=== "Go"
+
+    ```go
+    func GetSmartContractInit() {
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractInit("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
+    }
+    ```
+
+#### Example Response
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "type": "Uint32",
+      "value": "0",
+      "vname": "_scilla_version"
+    },
+    {
+      "type": "ByStr20",
+      "value": "0x0f8167a0CBFfb8AB1d1919E31f83DC26C863D0F9",
+      "vname": "contract_owner"
+    },
+    {
+      "type": "String",
+      "value": "XSGD",
+      "vname": "name"
+    },
+    {
+      "type": "String",
+      "value": "XSGD",
+      "vname": "symbol"
+    },
+    {
+      "type": "Uint32",
+      "value": "6",
+      "vname": "decimals"
+    },
+    {
+      "type": "Uint128",
+      "value": "0",
+      "vname": "init_supply"
+    },
+    {
+      "type": "ByStr20",
+      "value": "0x0f8167a0CBFfb8AB1d1919E31f83DC26C863D0F9",
+      "vname": "init_implementation"
+    },
+    {
+      "type": "ByStr20",
+      "value": "0x0f8167a0CBFfb8AB1d1919E31f83DC26C863D0F9",
+      "vname": "init_admin"
+    },
+    {
+      "type": "BNum",
+      "value": "732529",
+      "vname": "_creation_block"
+    },
+    {
+      "type": "ByStr20",
+      "value": "0x173ca6770aa56eb00511dac8e6e13b3d7f16a5a5",
+      "vname": "_this_address"
+    }
+  ]
+}
+```
+
+The response received consists of the `type`, `value`, and `vname` for each
+immutable variable.
+
+To check whether a contract is compliant with the ZRC-2 standard's immutable
+variables requirement, see if the contract implements the
+[mandatory immutable variables](#immutable-variables).
+
+!!! note
+
+    This code snippet is in JavaScript but the same logic can be applied in other languages.
+
+```js
+let vNameArray = []; //Array to store immutable variable names
+for (let i = 0; i < smartContractInit.result.length; i++) {
+  vNameArray[i] = smartContractInit.result[i].vname;
+}
+//check if the immutable variables: name, symbol, decimals & init_supply exist in the vName array.
+let isZRC2 =
+  vNameArray.includes("name") &&
+  vNameArray.includes("symbol") &&
+  vNameArray.includes("decimals") &&
+  vNameArray.includes("init_supply");
+
+console.log(isZRC2);
+```
+
+### Check Mutable Variables
+
+For mutable variables, we'll use the `GetSmartContractState` method of the
+Zilliqa API to get the mutable variables of the contract. The address of the
+ZRC2 contract referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+
+#### Example Request
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractState",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+=== "JavaScript"
+
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractState.result);
+    ```
+
+=== "Java"
+
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(smartContractState);
+        }
+    }
+    ```
+
+=== "Python"
+
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
+
+=== "Go"
+
+    ```go
+    func GetSmartContractState() {
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
+    }
+    ```
+
+#### Example Response
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": {
+    "_balance": "0",
+    "admin": "0x2f604cbd408e2c8b7442b1b629a1288c44945130",
+    "allowances": {},
+    "balances": {
+      "0x05d087623bc636108d450e0550ddbfc03da99fa9": "10000000",
+      "0x0f8167a0cbffb8ab1d1919e31f83dc26c863d0f9": "24250000",
+      "0x18c241a5f0d6cf380f721618880f2c2b7aa5ea97": "9975750000",
+      "0x5abf71d798ca594b7317b04f52ad5a31fae62170": "10000000",
+      "0x8c3de413a9d8d602a1757210ab539853103e08d8": "250000000000",
+      "0x93eb1d0cb7ba3962fcc86cd28aa45b241c888277": "20000",
+      "0xab61c57a9a4b2742a4a325ecd9e77b5da67f663a": "980000",
+      "0xabe1e844c776e97beb619f3ca64faa2b3edc2840": "400000",
+      "0xc48565c853fe4ffa5d7eac33e255141134640ceb": "600000",
+      "0xf5f9e1ad8ea6439f625e12b8ef57e1e99ac2d383": "7000000"
+    },
+    "implementation": "0x3bd9ad6fee7bfdf5b5875828b555e4f702e427cd",
+    "total_supply": "260029000000"
+  }
+}
+```
+
+The response received above consists of the mutable variables `total_supply`,
+`balances`, and `allowances`.
+
+To check whether a contract is compliant with the ZRC-2 standard's mutable
+variables requirement, see if the contract implements the
+[mandatory mutable variables](#mutable-variables).
+
+!!! note
+
+    This code snippet is in JavaScript but the same logic can be applied in other languages.
+
+```js
+let vNameArray = []; //Array to store mutable variable names
+for (let i = 0; i < smartContractState.result.length; i++) {
+  vNameArray[i] = smartContractState.result[i].vname;
+}
+//check if the mutable variables: total_supply, balances & allowances exist in the vName array.
+let isZRC2 =
+  vNameArray.includes("total_supply") &&
+  vNameArray.includes("balances") &&
+  vNameArray.includes("allowances");
+
+console.log(isZRC2);
+```
+
+### Check Transitions, Events, and Error Codes
+
+Currently, you need to look at the smart contract code manually and check for
+transitions, events, and error codes in a contract. To check whether a contract
+is compliant with the ZRC-2 standard's error codes - as well transitions and
+events - requirement, see if the contract implements the
+[mandatory error codes](#error-codes) and
+[mandatory transitions and events](#transitions-and-events).
+
+## Integrating with ZRC-2 Fungible Tokens Contract
+
+### Fetch Token Supply
+
+In a ZRC-2 fungible tokens contract, the mutable field `total_supply` stores the
+value of the current total supply. We'll use the `GetSmartContractState` method
+of the Zilliqa API to get the mutable variables of the contract. The address of
+the ZRC-2 contract referred below is
+`0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+
+#### Example Request
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractState",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+=== "JavaScript"
+
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractState.result);
+    ```
+
+=== "Java"
+
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(smartContractState);
+        }
+    }
+    ```
+
+=== "Python"
+
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
+
+=== "Go"
+
+    ```go
+    func GetSmartContractState() {
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
+    }
+    ```
+
+#### Example Response
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": {
+    "balances": {
+      "0x00034c431f642dfca0129694061263d72049a909": "1033606"
+    }
+  }
+}
+```
+
+If the response json received above is stored in the variable
+`smartContractState`, total supply would then be:
+
+```js
+let smartContractState = await zilliqa.blockchain.getSmartContractState(
+  contractAddress
+);
+let totalSupply = smartContractState.result.total_supply; // Total Supply
+```
+
+### Fetch Token Balance
+
+In a ZRC-2 fungible tokens contract, the mutable field `balances` (with data
+type `Map`) stores the mapping between addresses and their corresponding token
+balances. We'll use the `GetSmartContractState` method of the Zilliqa API to get
+the mutable variables of the contract. The address of the ZRC-2 contract
+referred below is `0x173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5`.
+
+#### Example Request
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractState",
+        "params": ["173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+=== "JavaScript"
+
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"
+    );
+    console.log(smartContractState.result);
+    ```
+
+=== "Java"
+
+    ```java
+    public class App {
+        public static void main(String[] args) throws IOException {
+            HttpProvider client = new HttpProvider("https://api.zilliqa.com");
+            String smartContractState = client.getSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5");
+            System.out.println(smartContractState);
+        }
+    }
+    ```
+
+=== "Python"
+
+    ```python
+    from pyzil.zilliqa import chain
+    chain.set_active_chain(chain.MainNet)
+    print(chain.active_chain.api.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5"))
+    ```
+
+=== "Go"
+
+    ```go
+    func GetSmartContractState() {
+        provider := NewProvider("https://api.zilliqa.com/")
+        response := provider.GetSmartContractState("173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5")
+        result, _ := json.Marshal(response)
+        fmt.Println(string(result))
+    }
+    ```
+
+#### Example Response
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": {
+    "_balance": "0",
+    "admin": "0x2f604cbd408e2c8b7442b1b629a1288c44945130",
+    "allowances": {},
+    "balances": {
+      "0x05d087623bc636108d450e0550ddbfc03da99fa9": "10000000",
+      "0x0f8167a0cbffb8ab1d1919e31f83dc26c863d0f9": "24250000",
+      "0x18c241a5f0d6cf380f721618880f2c2b7aa5ea97": "9975750000",
+      "0x5abf71d798ca594b7317b04f52ad5a31fae62170": "10000000",
+      "0x8c3de413a9d8d602a1757210ab539853103e08d8": "250000000000",
+      "0x93eb1d0cb7ba3962fcc86cd28aa45b241c888277": "20000",
+      "0xab61c57a9a4b2742a4a325ecd9e77b5da67f663a": "980000",
+      "0xabe1e844c776e97beb619f3ca64faa2b3edc2840": "400000",
+      "0xc48565c853fe4ffa5d7eac33e255141134640ceb": "600000",
+      "0xf5f9e1ad8ea6439f625e12b8ef57e1e99ac2d383": "7000000"
+    },
+    "implementation": "0x3bd9ad6fee7bfdf5b5875828b555e4f702e427cd",
+    "total_supply": "260029000000"
+  }
+}
+```
+
+### Fetch Token Balance For A Single Key
+
+If the need to fetch a single token value from the `balances` map arises.
+Instead of requesting the whole map state over the network, using
+`getSmartContractSubState` is the most efficent method to use when you don't
+need to fetch the whole map. It returns one value per key, instead of the entire
+map. Allowing for quicker response times when only certain key values are
+required to be fetched.
+
+#### Example Request
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetSmartContractSubState",
+        "params": ["173ca6770aa56eb00511dac8e6e13b3d7f16a5a5", "balances", ["0x00034c431f642dfca0129694061263d72049a909, ..."] ]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+=== "JavaScript"
+
+    ```js
+    const smartContractState = await zilliqa.blockchain.getSmartContractSubState(
+      "173Ca6770Aa56EB00511Dac8e6E13B3D7f16a5a5",
+      "balances",
+      ["0x8c3de413a9d8d602a1757210ab539853103e08d8, ..."]
+    );
+    console.log(smartContractState.result);
+    ```
+
+#### Example Response
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": {
+      "0x8c3de413a9d8d602a1757210ab539853103e08d8": "250000000000",
+      ...
+  }
+}
+```
+
+### Transfer Token
+
+ZRC-2 contracts have the `transfer` transition that allows users to transfer
+tokens to another address by specifying the receiving address and amount.
+
+The code snippet below illustrates how one can transfer ZRC-2 tokens to another
+address.
+
+=== "JavaScript"
+
+    ```js
+    //zilliqa, privateKey, bytes, units, recipientAddress, sendingAmount are defined in the codebase before
+
+    zilliqa.wallet.addByPrivateKey(privateKey);
+    const CHAIN_ID = 1;
+    const MSG_VERSION = 1;
+    const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
+    const myGasPrice = units.toQa("1000", units.Units.Li); // Gas Price that will be used by all transactions
+    try {
+      const contract = zilliqa.contracts.at(contractAddress);
+      const callTx = await contract.call(
+        "Transfer",
+        [
+          {
+            vname: "to",
+            type: "ByStr20",
+            value: recipientAddress,
+          },
+          {
+            vname: "amount",
+            type: "Uint128",
+            value: sendingAmount,
+          },
+        ],
+        {
+          // amount, gasPrice and gasLimit must be explicitly provided
+          version: VERSION,
+          amount: new BN(0),
+          gasPrice: myGasPrice,
+          gasLimit: Long.fromNumber(10000),
+        }
+      );
+      console.log(JSON.stringify(callTx.TranID));
+    } catch (err) {
+      console.log(err);
+    }
+    ```
+
+=== "Java"
+
+    ```java
+    List<Value> init = Arrays.asList();
+    Wallet wallet = new Wallet();
+    wallet.addByPrivateKey(privateKey);
+    ContractFactory factory = ContractFactory.builder().provider(new HttpProvider("https://api.zilliqa.com/")).signer(wallet).build();
+    Contract contract = factory.atContract(contractAddress, "", (Value[]) init.toArray(), "");
+    Integer nonce = Integer.valueOf(factory.getProvider().getBalance(address).getResult().getNonce());
+    CallParams params = CallParams.builder().nonce(String.valueOf(nonce + 1)).version(String.valueOf(pack(333, 1))).gasPrice("1000000000").gasLimit("1000").senderPubKey(publicKey).amount("0").build();
+    List<Value> values = Arrays.asList(Value.builder().vname("to").type("ByStr20").value(recipientAddress).build(), Value.builder().vname("amount").type("Uint128").value("10").build());
+    contract.call("Transfer", (Value[]) values.toArray(), params, 3000, 3);
+
+    ```
+
+=== "Go"
+
+    ```go
+    wallet := account.NewWallet()
+        wallet.AddByPrivateKey(privateKey)
+        publickKey := keytools.GetPublicKeyFromPrivateKey(util.DecodeHex(privateKey), true)
+        address := keytools.GetAddressFromPublic(publickKey)
+        fmt.Println(address)
+
+        contract := Contract{
+            Address: "contractAddress",
+            Signer:  wallet,
+        }
+
+        args := []core.ContractValue{
+            {
+                "to",
+                "ByStr20",
+                "0x" + address,
+            },
+            {
+                "amount",
+                "Uint128",
+                "10",
+            },
+        }
+
+        tx, err2 := contract.CallFor("Transfer", args, true, "0", TestNet)
+        assert.Nil(t, err2, err2)
+        tx.Confirm(tx.ID, 1000, 3, contract.Provider)
+        assert.True(t, tx.Status == core.Confirmed)
+
+
+    ```
+
+### Adding Token Allowance
+
+The Zilliqa blockchain allows transactions with smart contracts and those smart
+contracts can be facilitated by third parties like a DEX or a protocol relayer –
+permissions have to be granted to the third party by token owners before those
+smart contracts can execute. Token allowance permission gives the dApp contract
+the right to transfer the user's ZRC-2 token if the current approved allowance
+is equal to or more than `amount` requested to being transferred. The approval
+is done by calling `IncreaseAllowance` transition.
+
+In the example below, the allowance amount is the same as the entire token
+supply. This is done so that the approval needs to only be done once per token
+contract, reducing the number of approval transactions required for users
+conducting multiple swaps.
+
+However, you can make this value to be specific as well. Non-custodial control
+of the token should be ensured by the dApp contract itself, which does not allow
+for the transfer of tokens unless explicitly invoked by the sender.
+
+=== "JavaScript"
+
+    ```js
+    let increaseAllowance = async function (contractAddress, spenderAddress) {
+      //contractAddress is the address of ZRC2 contract
+      //spenderAddress is the address of which you want to increase the allowance, eg: your dApp contract
+      const CHAIN_ID = 333;
+      const MSG_VERSION = 1;
+      const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
+      const myGasPrice = units.toQa("2000", units.Units.Li);
+
+      let smartContractState = await zilliqa.blockchain.getSmartContractState(
+        contractAddress
+      );
+      let totalSupply = smartContractState.result.total_supply;
+
+      try {
+        const contract = zilliqa.contracts.at(contractAddress);
+        const callTx = await contract.call(
+          "IncreaseAllowance",
+          [
+            {
+              vname: "spender",
+              type: "ByStr20",
+              value: spenderAddress,
+            },
+            {
+              vname: "amount",
+              type: "Uint128",
+              value: totalSupply,
+            },
+          ],
+          {
+            // amount, gasPrice and gasLimit must be explicitly provided
+            version: VERSION,
+            amount: new BN(0),
+            gasPrice: myGasPrice,
+            gasLimit: Long.fromNumber(10000),
+          }
+        );
+        console.log(JSON.stringify(callTx.TranID));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    ```
+
+### Calling TransferFrom
+
+`TransferFrom` transition moves a given amount of tokens from one address to
+another using the allowance mechanism. The caller must be an `approved_spender`,
+refer the section on [Adding Token Allowance](dev-keys-zrc2-wallet-support.md)
+if you want to add an address to become an approved_sender. Balance of recipient
+will increase and the balance of `token_owner` will decrease.
+
+=== "JavaScript"
+
+    ```js
+    let transferFrom = async function (
+      contractAddress,
+      userAddress,
+      receiverAddress
+    ) {
+      const CHAIN_ID = 333;
+      const MSG_VERSION = 1;
+      const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
+      const myGasPrice = units.toQa("2000", units.Units.Li);
+
+      try {
+        const contract = zilliqa.contracts.at(contractAddress);
+        const callTx = await contract.call(
+          "TransferFrom",
+          [
+            {
+              vname: "from",
+              type: "ByStr20",
+              value: userAddress,
+            },
+            {
+              vname: "to",
+              type: "ByStr20",
+              value: receiverAddress,
+            },
+            {
+              vname: "amount",
+              type: "Uint128",
+              value: "1000",
+            },
+          ],
+          {
+            // amount, gasPrice and gasLimit must be explicitly provided
+            version: VERSION,
+            amount: new BN(0),
+            gasPrice: myGasPrice,
+            gasLimit: Long.fromNumber(10000),
+          }
+        );
+        console.log(JSON.stringify(callTx.TranID));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    ```
+
+## Tracking Incoming ZRC-2 Deposit
+
+Please check the
+[Tracking Incoming ZRC-2 Deposit](../../exchanges/exchange-integration/exchange-managing-zrc2-tokens.md)
+subsection under exchanges section to track any new incoming deposit of a
+specific ZRC-2 token.
+
+## Getting your Token Listed
+
+You can get your token listed on various Zilliqa ecosystem products to allow for
+easier recognition by your community.
+
+### Listing on [Zilswap](https://zilswap.io/)
+
+To add your token to the token listed on Zilswap, please refer the README.md
+file on this [repository](https://github.com/Switcheo/zilswap-token-list).
+
+[Zilpay wallet](https://zilpay.xyz/) also refers to the listed tokens list on
+Zilswap when deciding which tokens to add to their default list.
+
+### Listing on [Viewblock](https://viewblock.io/zilliqa)
+
+To add your token to
+[Viewblock tokens listing page](https://viewblock.io/zilliqa/tokens), please
+refer to the README.md file on this
+[repository](https://github.com/Ashlar/cryptometa.git). Viewblock will assign a
+score to your token based on the stated token listing criteria.
+
+## Other References
+
+- [Sample codes for various ZRC-2 operations](https://github.com/Zilliqa/ZRC/tree/master/example/zrc2)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import shutil
@@ -13,6 +14,18 @@ import warnings
 import click
 from mkdocs import __version__, config, utils
 
+print("META:", dir(importlib))
+print("META:", importlib.__file__)
+print("META:", importlib.__package__)
+if hasattr(importlib, "__version__"):
+    print("META:", importlib.__version__)
+else:
+    try:
+        import pkg_resources
+
+        print("PKG:", pkg_resources.get_distribution("importlib").version)
+    except pkg_resources.DistributionNotFound:
+        print("PKG: Not distributed")
 if sys.platform.startswith("win"):
     try:
         import colorama
@@ -111,7 +124,12 @@ strict_help = (
     "Enable strict mode. This will cause MkDocs to abort the build on any warnings."
 )
 theme_help = "The theme to use when building your documentation."
-theme_choices = sorted(utils.get_theme_names())
+try:
+    theme_choices = sorted(utils.get_theme_names())
+except TypeError:
+    print("MARKDOWN VERSION:", __version__)
+    theme_choices = []
+
 site_dir_help = "The directory to output the result of the documentation build."
 use_directory_urls_help = "Use directory URLs when building pages (the default)."
 reload_help = (
