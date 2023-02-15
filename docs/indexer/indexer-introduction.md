@@ -18,7 +18,7 @@ The GraphQL API playground is available at
 
 | Chain(s)              | URL(s)                                                                                         |
 | --------------------- | ---------------------------------------------------------------------------------------------- |
-| **Zilliqa Mainnet**   | [ https://api.zindex.zilliqa.com/zilliqa](https://api.zindex.zilliqa.com/zilliqa)\             |
+| **Zilliqa Mainnet**   | [https://api.zindex.zilliqa.com/zilliqa](https://api.zindex.zilliqa.com/zilliqa)               |
 | **Developer Testnet** | [https://stg-indexer-api.rialto.studio/zilliqa](https://stg-indexer-api.rialto.studio/zilliqa) |
 
 Schema can be downloaded from the above GraphQL playground.
