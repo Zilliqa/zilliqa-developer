@@ -15,9 +15,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Transaction, util, Wallet } from '@zilliqa-js/account';
-import { fromBech32Address } from '@zilliqa-js/crypto';
-import { validation } from '@zilliqa-js/util';
+/* eslint-disable */
+import { Transaction, util, Wallet } from "@zilliqa-js/account";
+import { fromBech32Address } from "@zilliqa-js/crypto";
+import { validation } from "@zilliqa-js/util";
 import {
   BlockchainInfo,
   BlockList,
@@ -28,15 +29,16 @@ import {
   RPCMethod,
   RPCResponse,
   ShardingStructure,
-  sign,
   TransactionObj,
   MinerInfo,
   TxBlockObj,
   TxList,
   ZilliqaModule,
-} from '@zilliqa-js/core';
+  sign,
+} from "@zilliqa-js/core";
+/* eslint-enable */
 
-import { toTxParams } from './util';
+import { toTxParams } from "./util";
 
 const isBlockNumber = (blockNum: number) =>
   Number.isFinite(blockNum) && Number.isInteger(blockNum) && blockNum >= 0;
@@ -45,63 +47,63 @@ export class Blockchain implements ZilliqaModule {
   signer: Wallet;
   provider: Provider;
   pendingErrorMap: { [key: number]: string } = {
-    0: 'Transaction not found',
-    1: 'Pending - Dispatched',
-    2: 'Pending - Soft-confirmed (awaiting Tx block generation)',
-    4: 'Pending - Nonce is higher than expected',
-    5: 'Pending - Microblock gas limit exceeded',
-    6: 'Pending - Consensus failure in network',
-    3: 'Confirmed',
-    10: 'Rejected - Transaction caused math error',
-    11: 'Rejected - Scilla invocation error',
-    12: 'Rejected - Contract account initialization error',
-    13: 'Rejected - Invalid source account',
-    14: 'Rejected - Gas limit higher than shard gas limit',
-    15: 'Rejected - Unknown transaction type',
-    16: 'Rejected - Transaction sent to wrong shard',
-    17: 'Rejected - Contract & source account cross-shard issue',
-    18: 'Rejected - Code size exceeded limit',
-    19: 'Rejected - Transaction verification failed',
-    20: 'Rejected - Gas limit too low',
-    21: 'Rejected - Insufficient balance',
-    22: 'Rejected - Insufficient gas to invoke Scilla checker',
-    23: 'Rejected - Duplicate transaction exists',
-    24: 'Rejected - Transaction with same nonce but same/higher gas price exists',
-    25: 'Rejected - Invalid destination address',
-    26: 'Rejected - Failed to add contract account to state',
-    27: 'Rejected - Nonce is lower than expected',
-    255: 'Rejected - Internal error',
+    0: "Transaction not found",
+    1: "Pending - Dispatched",
+    2: "Pending - Soft-confirmed (awaiting Tx block generation)",
+    4: "Pending - Nonce is higher than expected",
+    5: "Pending - Microblock gas limit exceeded",
+    6: "Pending - Consensus failure in network",
+    3: "Confirmed",
+    10: "Rejected - Transaction caused math error",
+    11: "Rejected - Scilla invocation error",
+    12: "Rejected - Contract account initialization error",
+    13: "Rejected - Invalid source account",
+    14: "Rejected - Gas limit higher than shard gas limit",
+    15: "Rejected - Unknown transaction type",
+    16: "Rejected - Transaction sent to wrong shard",
+    17: "Rejected - Contract & source account cross-shard issue",
+    18: "Rejected - Code size exceeded limit",
+    19: "Rejected - Transaction verification failed",
+    20: "Rejected - Gas limit too low",
+    21: "Rejected - Insufficient balance",
+    22: "Rejected - Insufficient gas to invoke Scilla checker",
+    23: "Rejected - Duplicate transaction exists",
+    24: "Rejected - Transaction with same nonce but same/higher gas price exists",
+    25: "Rejected - Invalid destination address",
+    26: "Rejected - Failed to add contract account to state",
+    27: "Rejected - Nonce is lower than expected",
+    255: "Rejected - Internal error",
   };
 
   transactionStatusMap: { [key: number]: { [key: number]: string } } = {
-    0: { 0: 'Transaction not found', 1: ' Pending - Dispatched' },
+    0: { 0: "Transaction not found", 1: " Pending - Dispatched" },
     1: {
-      2: 'Pending - Soft-confirmed (awaiting Tx block generation)',
-      4: 'Pending - Nonce is higher than expected',
-      5: 'Pending - Microblock gas limit exceeded',
-      6: 'Pending - Consensus failure in network',
+      2: "Pending - Soft-confirmed (awaiting Tx block generation)",
+      4: "Pending - Nonce is higher than expected",
+      5: "Pending - Microblock gas limit exceeded",
+      6: "Pending - Consensus failure in network",
     },
     2: {
-      3: 'Confirmed',
-      10: 'Rejected - Transaction caused math error',
-      11: 'Rejected - Scilla invocation error',
-      12: 'Rejected - Contract account initialization error',
-      13: 'Rejected - Invalid source account',
-      14: 'Rejected - Gas limit higher than shard gas limit',
-      15: 'Rejected - Unknown transaction type',
-      16: 'Rejected - Transaction sent to wrong shard',
-      17: 'Rejected - Contract & source account cross-shard issue',
-      18: 'Rejected - Code size exceeded limit',
-      19: 'Rejected - Transaction verification failed',
-      20: 'Rejected - Gas limit too low',
-      21: 'Rejected - Insufficient balance',
-      22: 'Rejected - Insufficient gas to invoke Scilla checker',
-      23: 'Rejected - Duplicate transaction exists',
-      24: 'Rejected - Transaction with higher gas price exists',
-      25: 'Rejected - Invalid destination address',
-      26: 'Rejected - Failed to add contract account to state',
-      27: 'Rejected - Nonce is lower than expected',
-      255: 'Rejected - Internal error',
+      3: "Confirmed",
+      10: "Rejected - Transaction caused math error",
+      11: "Rejected - Scilla invocation error",
+      12: "Rejected - Contract account initialization error",
+      13: "Rejected - Invalid source account",
+      14: "Rejected - Gas limit higher than shard gas limit",
+      15: "Rejected - Unknown transaction type",
+      16: "Rejected - Transaction sent to wrong shard",
+      17: "Rejected - Contract & source account cross-shard issue",
+      18: "Rejected - Code size exceeded limit",
+      19: "Rejected - Transaction verification failed",
+      20: "Rejected - Gas limit too low",
+      21: "Rejected - Insufficient balance",
+      22: "Rejected - Insufficient gas to invoke Scilla checker",
+      23: "Rejected - Duplicate transaction exists",
+      24: "Rejected - Transaction with higher gas price exists",
+      25: "Rejected - Invalid destination address",
+      26: "Rejected - Failed to add contract account to state",
+      27: "Rejected - Nonce is lower than expected",
+      255: "Rejected - Internal error",
     },
   };
 
@@ -109,7 +111,7 @@ export class Blockchain implements ZilliqaModule {
     this.provider = provider;
     this.provider.middleware.request.use(
       util.formatOutgoingTx,
-      RPCMethod.CreateTransaction,
+      RPCMethod.CreateTransaction
     );
     this.signer = signer;
   }
@@ -220,7 +222,7 @@ export class Blockchain implements ZilliqaModule {
     tx: Transaction,
     maxAttempts: number = GET_TX_ATTEMPTS,
     interval: number = 1000,
-    blockConfirm: boolean = false,
+    blockConfirm: boolean = false
   ): Promise<Transaction> {
     try {
       const response = await this.provider.send(RPCMethod.CreateTransaction, {
@@ -247,13 +249,13 @@ export class Blockchain implements ZilliqaModule {
     signedTxList: Transaction[],
     maxAttempts: number = GET_TX_ATTEMPTS,
     interval: number = 1000,
-    blockConfirm: boolean = false,
+    blockConfirm: boolean = false
   ): Promise<Transaction[]> {
     try {
       const txParamsList = [];
       for (const signedTx of signedTxList) {
         if (signedTx.txParams.signature === undefined) {
-          throw new Error('The transaction is not signed.');
+          throw new Error("The transaction is not signed.");
         }
         txParamsList.push({
           ...signedTx.txParams,
@@ -263,7 +265,7 @@ export class Blockchain implements ZilliqaModule {
 
       const response = await this.provider.sendBatch(
         RPCMethod.CreateTransaction,
-        txParamsList,
+        txParamsList
       );
 
       if (response.error) {
@@ -278,11 +280,11 @@ export class Blockchain implements ZilliqaModule {
 
         if (blockConfirm) {
           batchResults.push(
-            await tx.blockConfirm(txRes.result.TranID, maxAttempts, interval),
+            await tx.blockConfirm(txRes.result.TranID, maxAttempts, interval)
           );
         } else {
           batchResults.push(
-            await tx.confirm(txRes.result.TranID, maxAttempts, interval),
+            await tx.confirm(txRes.result.TranID, maxAttempts, interval)
           );
         }
       }
@@ -301,7 +303,7 @@ export class Blockchain implements ZilliqaModule {
       const tx = JSON.parse(payload);
       const response = await this.provider.send(
         RPCMethod.CreateTransaction,
-        tx,
+        tx
       );
       if (response.error) {
         throw response.error;
@@ -331,13 +333,13 @@ export class Blockchain implements ZilliqaModule {
 
   // used together with signed batch
   async createBatchTransactionWithoutConfirm(
-    signedTxList: Transaction[],
+    signedTxList: Transaction[]
   ): Promise<Transaction[]> {
     try {
       const txParamsList = [];
       for (const signedTx of signedTxList) {
         if (signedTx.txParams.signature === undefined) {
-          throw new Error('The transaction is not signed.');
+          throw new Error("The transaction is not signed.");
         }
         txParamsList.push({
           ...signedTx.txParams,
@@ -347,7 +349,7 @@ export class Blockchain implements ZilliqaModule {
 
       const response = await this.provider.sendBatch(
         RPCMethod.CreateTransaction,
-        txParamsList,
+        txParamsList
       );
 
       if (response.error) {
@@ -372,7 +374,7 @@ export class Blockchain implements ZilliqaModule {
     try {
       const response = await this.provider.send<TransactionObj>(
         RPCMethod.GetTransaction,
-        txHash.replace('0x', ''),
+        txHash.replace("0x", "")
       );
 
       if (response.error) {
@@ -392,7 +394,7 @@ export class Blockchain implements ZilliqaModule {
     try {
       const response = await this.provider.send<TransactionStatusObj>(
         RPCMethod.GetTransactionStatus,
-        txHash.replace('0x', ''),
+        txHash.replace("0x", "")
       );
       if (response.error) {
         return Promise.reject(response.error);
@@ -417,36 +419,36 @@ export class Blockchain implements ZilliqaModule {
   // within a specified final transaction block as an array of
   // length i, where i is the number of shards plus the DS committee.
   getTransactionsForTxBlock(
-    txBlock: number,
+    txBlock: number
   ): Promise<RPCResponse<string[][], string>> {
     return this.provider.send(
       RPCMethod.GetTransactionsForTxBlock,
-      txBlock.toString(),
+      txBlock.toString()
     );
   }
 
   // returns the transactions in batches (or pages) of 2,500.
   // This API behaves similar to GetTransactionsForTxBlock
   getTransactionsForTxBlockEx(
-    txBlock: number,
+    txBlock: number
   ): Promise<RPCResponse<any, string>> {
     if (!isBlockNumber(txBlock)) {
-      throw new Error('invalid txBlock');
+      throw new Error("invalid txBlock");
     }
     return this.provider.send(
       RPCMethod.GetTransactionsForTxBlockEx,
-      txBlock.toString(),
+      txBlock.toString()
     );
   }
 
   // Returns the validated transactions (in verbose form)
   // included within a specified final transaction block.
   getTxnBodiesForTxBlock(
-    txBlock: number,
+    txBlock: number
   ): Promise<RPCResponse<TransactionObj[], string>> {
     return this.provider.send(
       RPCMethod.GetTxnBodiesForTxBlock,
-      txBlock.toString(),
+      txBlock.toString()
     );
   }
 
@@ -454,11 +456,11 @@ export class Blockchain implements ZilliqaModule {
   // This API behaves similar to GetTxBodiesForTxBlock
   getTxnBodiesForTxBlockEx(txBlock: number): Promise<RPCResponse<any, string>> {
     if (!isBlockNumber(txBlock)) {
-      throw new Error('invalid txBlock');
+      throw new Error("invalid txBlock");
     }
     return this.provider.send(
       RPCMethod.GetTxnBodiesForTxBlockEx,
-      txBlock.toString(),
+      txBlock.toString()
     );
   }
 
@@ -482,18 +484,18 @@ export class Blockchain implements ZilliqaModule {
     const address = validation.isBech32(addr) ? fromBech32Address(addr) : addr;
     return this.provider.send(
       RPCMethod.GetBalance,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase()
     );
   }
 
   // Returns the Scilla code associated with a smart contract address
   getSmartContractCode(
-    addr: string,
+    addr: string
   ): Promise<RPCResponse<{ code: string }, string>> {
     const address = validation.isBech32(addr) ? fromBech32Address(addr) : addr;
     return this.provider.send(
       RPCMethod.GetSmartContractCode,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase()
     );
   }
 
@@ -503,7 +505,7 @@ export class Blockchain implements ZilliqaModule {
     const address = validation.isBech32(addr) ? fromBech32Address(addr) : addr;
     return this.provider.send(
       RPCMethod.GetSmartContractInit,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase()
     );
   }
 
@@ -512,7 +514,7 @@ export class Blockchain implements ZilliqaModule {
     const address = validation.isBech32(addr) ? fromBech32Address(addr) : addr;
     return this.provider.send(
       RPCMethod.GetSmartContractState,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase()
     );
   }
 
@@ -520,18 +522,18 @@ export class Blockchain implements ZilliqaModule {
   getSmartContractSubState(
     addr: string,
     variableName: string,
-    indices?: string[],
+    indices?: string[]
   ): Promise<RPCResponse<any, string>> {
     const address = validation.isBech32(addr) ? fromBech32Address(addr) : addr;
     if (!variableName) {
-      throw new Error('Variable name required');
+      throw new Error("Variable name required");
     }
 
     return this.provider.send(
       RPCMethod.GetSmartContractSubState,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase(),
       variableName,
-      indices === undefined ? [] : indices,
+      indices === undefined ? [] : indices
     );
   }
 
@@ -544,16 +546,16 @@ export class Blockchain implements ZilliqaModule {
     const address = validation.isBech32(addr) ? fromBech32Address(addr) : addr;
     return this.provider.send(
       RPCMethod.GetSmartContracts,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase()
     );
   }
 
   getContractAddressFromTransactionID(
-    txHash: string,
+    txHash: string
   ): Promise<RPCResponse<string, string>> {
     return this.provider.send(
       RPCMethod.GetContractAddressFromTransactionID,
-      txHash,
+      txHash
     );
   }
 
@@ -561,23 +563,23 @@ export class Blockchain implements ZilliqaModule {
   getStateProof(
     contractAddress: string,
     sha256Hash: string,
-    txBlock: number | string,
+    txBlock: number | string
   ): Promise<RPCResponse<any, string>> {
     const address = validation.isBech32(contractAddress)
       ? fromBech32Address(contractAddress)
       : contractAddress;
 
-    const isLatestStr = txBlock === 'latest';
+    const isLatestStr = txBlock === "latest";
     const isValid = isLatestStr || isBlockNumber(Number(txBlock));
     if (!isValid) {
-      throw new Error('invalid txBlock');
+      throw new Error("invalid txBlock");
     }
 
     return this.provider.send(
       RPCMethod.GetStateProof,
-      address.replace('0x', '').toLowerCase(),
+      address.replace("0x", "").toLowerCase(),
       sha256Hash,
-      txBlock.toString(),
+      txBlock.toString()
     );
   }
 }

@@ -1,4 +1,6 @@
 MD013: false
 MD047: false
 MD024: { allow_different_nesting: true }
+MD030: false
 MD033: false
+MD046: false
