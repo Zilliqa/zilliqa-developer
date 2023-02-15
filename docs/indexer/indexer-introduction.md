@@ -9,17 +9,17 @@ description: Zindexer API
 
 ---
 
-The Zilliqa Indexer API service is still under development and is subject to changes.
+The Zilliqa Indexer API service is still under development and is subject to
+changes.
 
 ## GraphQL Playground
 
 The GraphQL API playground is available at
 
-| Chain(s)              | URL(s)                                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Zilliqa Mainnet**   | [https://gam-indexer-api.rialto.studio/zilliqa/prod](https://gam-indexer-api.rialto.studio/zilliqa/prod)\  |
-|                       | _Note: This is a pre-production environment. Please report bugs at support@zilliqa.com._                   |
-| **Developer Testnet** | [https://stg-indexer-api.rialto.studio/zilliqa](https://stg-indexer-api.rialto.studio/zilliqa)             |
+| Chain(s)              | URL(s)                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------- |
+| **Zilliqa Mainnet**   | [ https://api.zindex.zilliqa.com/zilliqa](https://api.zindex.zilliqa.com/zilliqa)\             |
+| **Developer Testnet** | [https://stg-indexer-api.rialto.studio/zilliqa](https://stg-indexer-api.rialto.studio/zilliqa) |
 
 Schema can be downloaded from the above GraphQL playground.
 
