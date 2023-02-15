@@ -433,3 +433,4 @@ nav:
               - View Change: contributors/core-protocol-design/mitigation-measures/core-view-change.md
               - Diagnostic Data: contributors/core-protocol-design/mitigation-measures/core-diagnostic-data.md
               - Status Server: contributors/core-protocol-design/mitigation-measures/core-status-server.md
+  - Ecosystem: ecosystem/index.md
