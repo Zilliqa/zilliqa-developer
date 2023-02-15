@@ -22,7 +22,7 @@ More ecosystem members can be found on our
 [website](https://www.zilliqa.com/ecosystem).
 
 If you would like to be listed here, please contact us via our discord, linked
-from the [contributors page](/contributors/contribute-buildzil#resources).
+from the [contributors page](../contributors/contribute-buildzil.md#resources).
 
 ### nownodes.io
 
