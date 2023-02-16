@@ -2,27 +2,24 @@
 title: The Scilla Standard Library
 ---
 
-::: {#stdlib}
-The Scilla standard library contains five libraries: `BoolUtils.scilla`,
-`IntUtils.scilla`, `ListUtils.scilla`, `NatUtils.scilla` and
-`PairUtils.scilla`. As the names suggests these contracts implement
-utility operations for the `Bool`, `IntX`, `List`, `Nat` and `Pair`
-types, respectively.
+::: {#stdlib} The Scilla standard library contains five libraries:
+`BoolUtils.scilla`, `IntUtils.scilla`, `ListUtils.scilla`, `NatUtils.scilla` and
+`PairUtils.scilla`. As the names suggests these contracts implement utility
+operations for the `Bool`, `IntX`, `List`, `Nat` and `Pair` types, respectively.
 :::
 
-To use functions from the standard library in a contract, the relevant
-library file must be imported using the `import` declaration. The
-following code snippet shows how to import the functions from the
-`ListUtils` and `IntUtils` libraries:
+To use functions from the standard library in a contract, the relevant library
+file must be imported using the `import` declaration. The following code snippet
+shows how to import the functions from the `ListUtils` and `IntUtils` libraries:
 
-```{.ocaml}
+```ocaml
 import ListUtils IntUtils
 ```
 
-The `import` declaration must occur immediately before the contract\'s
-own library declaration, e.g.:
+The `import` declaration must occur immediately before the contract\'s own
+library declaration, e.g.:
 
-```{.ocaml}
+```ocaml
 import ListUtils IntUtils
 
 library WalletLib
@@ -34,24 +31,21 @@ contract Wallet ( ... )
 
 Below, we present the functions defined in each of the library.
 
-# BoolUtils
+## BoolUtils
 
-- `andb : Bool -> Bool -> Bool`: Computes the logical AND of two
-  `Bool` values.
-- `orb : Bool -> Bool -> Bool`: Computes the logical OR of two `Bool`
-  values.
-- `negb : Bool -> Bool`: Computes the logical negation of a `Bool`
-  value.
-- `bool_to_string : Bool -> String`: Transforms a `Bool` value into a
-  `String` value. `True` is transformed into `"True"`, and `False` is
-  transformed into `"False"`.
+- `andb : Bool -> Bool -> Bool`: Computes the logical AND of two `Bool` values.
+- `orb : Bool -> Bool -> Bool`: Computes the logical OR of two `Bool` values.
+- `negb : Bool -> Bool`: Computes the logical negation of a `Bool` value.
+- `bool_to_string : Bool -> String`: Transforms a `Bool` value into a `String`
+  value. `True` is transformed into `"True"`, and `False` is transformed into
+  `"False"`.
 
-# IntUtils
+## IntUtils
 
-- `intX_eq : IntX -> IntX -> Bool`: Equality operator specialised for
-  each `IntX` type.
+- `intX_eq : IntX -> IntX -> Bool`: Equality operator specialised for each
+  `IntX` type.
 
-```{.ocaml}
+```ocaml
 let int_list_eq = @list_eq Int64 in
 
 let one = Int64 1 in
@@ -70,37 +64,37 @@ let f = int64_eq in
 int_list_eq f l3 l4
 ```
 
-- `uintX_eq : UintX -> UintX -> Bool`: Equality operator specialised
-  for each `UintX` type.
-- `intX_lt : IntX -> IntX -> Bool`: Less-than operator specialised for
+- `uintX_eq : UintX -> UintX -> Bool`: Equality operator specialised for each
+  `UintX` type.
+- `intX_lt : IntX -> IntX -> Bool`: Less-than operator specialised for each
+  `IntX` type.
+- `uintX_lt : UintX -> UintX -> Bool`: Less-than operator specialised for each
+  `UintX` type.
+- `intX_neq : IntX -> IntX -> Bool`: Not-equal operator specialised for each
+  `IntX` type.
+- `uintX_neq : UintX -> UintX -> Bool`: Not-equal operator specialised for each
+  `UintX` type.
+- `intX_le : IntX -> IntX -> Bool`: Less-than-or-equal operator specialised for
   each `IntX` type.
-- `uintX_lt : UintX -> UintX -> Bool`: Less-than operator specialised
+- `uintX_le : UintX -> UintX -> Bool`: Less-than-or-equal operator specialised
   for each `UintX` type.
-- `intX_neq : IntX -> IntX -> Bool`: Not-equal operator specialised
+- `intX_gt : IntX -> IntX -> Bool`: Greater-than operator specialised for each
+  `IntX` type.
+- `uintX_gt : UintX -> UintX -> Bool`: Greater-than operator specialised for
+  each `UintX` type.
+- `intX_ge : IntX -> IntX -> Bool`: Greater-than-or-equal operator specialised
   for each `IntX` type.
-- `uintX_neq : UintX -> UintX -> Bool`: Not-equal operator specialised
-  for each `UintX` type.
-- `intX_le : IntX -> IntX -> Bool`: Less-than-or-equal operator
-  specialised for each `IntX` type.
-- `uintX_le : UintX -> UintX -> Bool`: Less-than-or-equal operator
-  specialised for each `UintX` type.
-- `intX_gt : IntX -> IntX -> Bool`: Greater-than operator specialised
-  for each `IntX` type.
-- `uintX_gt : UintX -> UintX -> Bool`: Greater-than operator
-  specialised for each `UintX` type.
-- `intX_ge : IntX -> IntX -> Bool`: Greater-than-or-equal operator
-  specialised for each `IntX` type.
 - `uintX_ge : UintX -> UintX -> Bool`: Greater-than-or-equal operator
   specialised for each `UintX` type.
 
-# ListUtils
+## ListUtils
 
 - `list_map : ('A -> 'B) -> List 'A -> : List 'B`.
 
-  | Apply `f : 'A -> 'B` to every element of `l : List 'A`,
-  constructing a list (of type `List 'B`) of the results.
+  | Apply `f : 'A -> 'B` to every element of `l : List 'A`, constructing a list
+  (of type `List 'B`) of the results.
 
-  ```{.ocaml}
+  ```ocaml
   (* Library *)
   let f =
     fun (a : Int32) =>
@@ -116,12 +110,11 @@ int_list_eq f l3 l4
 
 - `list_filter : ('A -> Bool) -> List 'A -> List 'A`.
 
-  | Filter out elements on the list based on the predicate
-  `f : 'A -> Bool`. If an element satisfies `f`, it will be in the
-  resultant list, otherwise it is removed. The order of the elements
-  is preserved.
+  | Filter out elements on the list based on the predicate `f : 'A -> Bool`. If
+  an element satisfies `f`, it will be in the resultant list, otherwise it is
+  removed. The order of the elements is preserved.
 
-  ```{.ocaml}
+  ```ocaml
   (*Library*)
   let f =
     fun (a : Int32) =>
@@ -137,25 +130,24 @@ int_list_eq f l3 l4
 
 - `list_head : (List 'A) -> (Option 'A)`.
 
-  | Return the head element of a list `l : List 'A` as an optional
-  value. If `l` is not empty with the first element `h`, the result
-  is `Some h`. If `l` is empty, then the result is `None`.
+  | Return the head element of a list `l : List 'A` as an optional value. If `l`
+  is not empty with the first element `h`, the result is `Some h`. If `l` is
+  empty, then the result is `None`.
 
 - `list_tail : (List 'A) -> (Option List 'A)`.
 
-  | Return the tail of a list `l : List 'A` as an optional value. If
-  `l` is a non-empty list of the form `Cons h t`, then the result is
-  `Some t`. If `l` is empty, then the result is `None`.
+  | Return the tail of a list `l : List 'A` as an optional value. If `l` is a
+  non-empty list of the form `Cons h t`, then the result is `Some t`. If `l` is
+  empty, then the result is `None`.
 
 - `list_foldl_while : ('B -> 'A -> Option 'B) -> 'B -> List 'A -> 'B`
 
-  | Given a function `f : 'B -> 'A -> Option 'B`, accumulator `z : 'B`
-  and list `ls : List 'A` execute a left fold when our given
-  function returns `Some x : Option 'B` using `f z x : 'B` or list
-  is empty but in the case of `None : Option 'B` terminate early,
-  returning `z`.
+  | Given a function `f : 'B -> 'A -> Option 'B`, accumulator `z : 'B` and list
+  `ls : List 'A` execute a left fold when our given function returns
+  `Some x : Option 'B` using `f z x : 'B` or list is empty but in the case of
+  `None : Option 'B` terminate early, returning `z`.
 
-```{.ocaml}
+```ocaml
 (* assume zero = 0, one = 1, negb is in scope and ls = [10,12,9,7]
  given a max and list with elements a_0, a_1, ..., a_m
  find largest n s.t. sum of i from 0 to (n-1) a_i <= max *)
@@ -181,43 +173,42 @@ end
 
 - `list_append : (List 'A -> List 'A -> List 'A)`.
 
-  | Append the first list to the front of the second list, keeping the
-  order of the elements in both lists. Note that `list_append` has
-  linear time complexity in the length of the first argument list.
+  | Append the first list to the front of the second list, keeping the order of
+  the elements in both lists. Note that `list_append` has linear time complexity
+  in the length of the first argument list.
 
 - `list_reverse : (List 'A -> List 'A)`.
 
-  | Return the reverse of the input list. Note that `list_reverse` has
-  linear time complexity in the length of the argument list.
+  | Return the reverse of the input list. Note that `list_reverse` has linear
+  time complexity in the length of the argument list.
 
 - `list_flatten : (List List 'A) -> List 'A`.
 
-  | Construct a list of all the elements in a list of lists. Each
-  element (which has type `List 'A`) of the input list (which has
-  type `List List 'A`) are all concatenated together, keeping the
-  order of the input list. Note that `list_flatten` has linear time
-  complexity in the total number of elements in all of the lists.
+  | Construct a list of all the elements in a list of lists. Each element (which
+  has type `List 'A`) of the input list (which has type `List List 'A`) are all
+  concatenated together, keeping the order of the input list. Note that
+  `list_flatten` has linear time complexity in the total number of elements in
+  all of the lists.
 
 - `list_length : List 'A -> Uint32`
 
-  | Count the number of elements in a list. Note that `list_length`
-  has linear time complexity in the number of elements in the list.
+  | Count the number of elements in a list. Note that `list_length` has linear
+  time complexity in the number of elements in the list.
 
 - `list_eq : ('A -> 'A -> Bool) -> List 'A -> List 'A -> Bool`.
 
   | Compare two lists element by element, using a predicate function
-  `f : 'A -> 'A -> Bool`. If `f` returns `True` for every pair of
-  elements, then `list_eq` returns `True`. If `f` returns `False`
-  for at least one pair of elements, or if the lists have different
-  lengths, then `list_eq` returns `False`.
+  `f : 'A -> 'A -> Bool`. If `f` returns `True` for every pair of elements, then
+  `list_eq` returns `True`. If `f` returns `False` for at least one pair of
+  elements, or if the lists have different lengths, then `list_eq` returns
+  `False`.
 
 - `list_mem : ('A -> 'A -> Bool) -> 'A -> List 'A -> Bool`.
 
-  | Checks whether an element `a : 'A` is an element in the list
-  `l : List'A`. `f : 'A -> 'A -> Bool` should be provided for
-  equality comparison.
+  | Checks whether an element `a : 'A` is an element in the list `l : List'A`.
+  `f : 'A -> 'A -> Bool` should be provided for equality comparison.
 
-  ```{.ocaml}
+  ```ocaml
   (* Library *)
   let f =
     fun (a : Int32) =>
@@ -234,26 +225,24 @@ end
 
 - `list_forall : ('A -> Bool) -> List 'A -> Bool`.
 
-  | Check whether all elements of list `l : List 'A` satisfy the
-  predicate `f : 'A -> Bool`. `list_forall` returns `True` if all
-  elements satisfy `f`, and `False` if at least one element does not
-  satisfy `f`.
+  | Check whether all elements of list `l : List 'A` satisfy the predicate
+  `f : 'A -> Bool`. `list_forall` returns `True` if all elements satisfy `f`,
+  and `False` if at least one element does not satisfy `f`.
 
 - `list_exists : ('A -> Bool) -> List 'A -> Bool`.
 
-  | Check whether at least one element of list `l : List 'A` satisfies
-  the predicate `f : 'A -> Bool`. `list_exists` returns `True` if at
-  least one element satisfies `f`, and `False` if none of the
-  elements satisfy `f`.
+  | Check whether at least one element of list `l : List 'A` satisfies the
+  predicate `f : 'A -> Bool`. `list_exists` returns `True` if at least one
+  element satisfies `f`, and `False` if none of the elements satisfy `f`.
 
 - `list_sort : ('A -> 'A -> Bool) -> List 'A -> List 'A`.
 
-  | Sort the input list `l : List 'A` using insertion sort. The
-  comparison function `flt : 'A -> 'A -> Bool` provided must return
-  `True` if its first argument is less than its second argument.
-  `list_sort` has quadratic time complexity.
+  | Sort the input list `l : List 'A` using insertion sort. The comparison
+  function `flt : 'A -> 'A -> Bool` provided must return `True` if its first
+  argument is less than its second argument. `list_sort` has quadratic time
+  complexity.
 
-  ```{.ocaml}
+  ```ocaml
   let int_sort = @list_sort Uint64 in
 
   let flt =
@@ -284,67 +273,61 @@ end
 
 - `list_find : ('A -> Bool) -> List 'A -> Option 'A`.
 
-  | Return the first element in a list `l : List 'A` satisfying the
-  predicate `f : 'A -> Bool`. If at least one element in the list
-  satisfies the predicate, and the first one of those elements is
-  `x`, then the result is `Some x`. If no element satisfies the
-  predicate, the result is `None`.
+  | Return the first element in a list `l : List 'A` satisfying the predicate
+  `f : 'A -> Bool`. If at least one element in the list satisfies the predicate,
+  and the first one of those elements is `x`, then the result is `Some x`. If no
+  element satisfies the predicate, the result is `None`.
 
 - `list_zip : List 'A -> List 'B -> List (Pair 'A 'B)`.
 
-  | Combine two lists element by element, resulting in a list of
-  pairs. If the lists have different lengths, the trailing elements
-  of the longest list are ignored.
+  | Combine two lists element by element, resulting in a list of pairs. If the
+  lists have different lengths, the trailing elements of the longest list are
+  ignored.
 
 - `list_zip_with : ('A -> 'B -> 'C) -> List 'A -> List 'B -> List 'C )`.
 
   | Combine two lists element by element using a combining function
-  `f : 'A -> 'B -> 'C`. The result of `list_zip_with` is a list of
-  the results of applying `f` to the elements of the two lists. If
-  the lists have different lengths, the trailing elements of the
-  longest list are ignored.
+  `f : 'A -> 'B -> 'C`. The result of `list_zip_with` is a list of the results
+  of applying `f` to the elements of the two lists. If the lists have different
+  lengths, the trailing elements of the longest list are ignored.
 
 - `list_unzip : List (Pair 'A 'B) -> Pair (List 'A) (List 'B)`.
 
-  | Split a list of pairs into a pair of lists consisting of the
-  elements of the pairs of the original list.
+  | Split a list of pairs into a pair of lists consisting of the elements of the
+  pairs of the original list.
 
 - `list_nth : Uint32 -> List 'A -> Option 'A`.
 
-  | Return the element number `n` from a list. If the list has at
-  least `n` elements, and the element number `n` is `x`, `list_nth`
-  returns `Some x`. If the list has fewer than `n` elements,
-  `list_nth` returns `None`.
+  | Return the element number `n` from a list. If the list has at least `n`
+  elements, and the element number `n` is `x`, `list_nth` returns `Some x`. If
+  the list has fewer than `n` elements, `list_nth` returns `None`.
 
-# NatUtils
+## NatUtils
 
-- `nat_prev : Nat -> Option Nat`: Return the Peano number one less
-  than the current one. If the current number is `Zero`, the result is
-  `None`. If the current number is `Succ x`, then the result is
-  `Some x`.
-- `nat_fold_while : ('T -> Nat -> Option 'T) -> 'T -> Nat -> 'T`:
-  Takes arguments `f : 'T -> Nat -> Option 'T`, `` z : `T `` and
-  `m : Nat`. This is `nat_fold` with early termination. Continues
-  recursing so long as `f` returns `Some y` with new accumulator `y`.
-  Once `f` returns `None`, the recursion terminates.
+- `nat_prev : Nat -> Option Nat`: Return the Peano number one less than the
+  current one. If the current number is `Zero`, the result is `None`. If the
+  current number is `Succ x`, then the result is `Some x`.
+- `nat_fold_while : ('T -> Nat -> Option 'T) -> 'T -> Nat -> 'T`: Takes
+  arguments `f : 'T -> Nat -> Option 'T`, `` z : `T `` and `m : Nat`. This is
+  `nat_fold` with early termination. Continues recursing so long as `f` returns
+  `Some y` with new accumulator `y`. Once `f` returns `None`, the recursion
+  terminates.
 - `is_some_zero : Nat -> Bool`: Zero check for Peano numbers.
-- `nat_eq : Nat -> Nat -> Bool`: Equality check specialised for the
-  `Nat` type.
-- `nat_to_int : Nat -> Uint32`: Convert a Peano number to its
-  equivalent `Uint32` integer.
-- `uintX_to_nat : UintX -> Nat`: Convert a `UintX` integer to its
-  equivalent Peano number. The integer must be small enough to fit
-  into a `Uint32`. If it is not, then an overflow error will occur.
-- `intX_to_nat : IntX -> Nat`: Convert an `IntX` integer to its
-  equivalent Peano number. The integer must be non-negative, and must
-  be small enough to fit into a `Uint32`. If it is not, then an
-  underflow or overflow error will occur.
+- `nat_eq : Nat -> Nat -> Bool`: Equality check specialised for the `Nat` type.
+- `nat_to_int : Nat -> Uint32`: Convert a Peano number to its equivalent
+  `Uint32` integer.
+- `uintX_to_nat : UintX -> Nat`: Convert a `UintX` integer to its equivalent
+  Peano number. The integer must be small enough to fit into a `Uint32`. If it
+  is not, then an overflow error will occur.
+- `intX_to_nat : IntX -> Nat`: Convert an `IntX` integer to its equivalent Peano
+  number. The integer must be non-negative, and must be small enough to fit into
+  a `Uint32`. If it is not, then an underflow or overflow error will occur.
 
-# PairUtils
+## PairUtils
 
 - `fst : Pair 'A 'B -> 'A`: Extract the first element of a Pair.
 
-```{.ocaml}
+```ocaml
 let fst_strings = @fst String String in
 let nick_name = "toby" in
 let dog = "dog" in
@@ -354,83 +337,79 @@ fst_strings tobias
 
 - `snd : Pair 'A 'B -> 'B`: Extract the second element of a Pair.
 
-# Conversions
+## Conversions
 
 This library provides conversions b/w Scilla types, particularly between
 integers and byte strings.
 
-To enable specifying the encoding of integer arguments to these
-functions, a type is defined for endianness.
+To enable specifying the encoding of integer arguments to these functions, a
+type is defined for endianness.
 
-```{.ocaml}
+```ocaml
 type IntegerEncoding =
   | LittleEndian
   | BigEndian
 ```
 
 The functions below, along with their primary result, also return
-`next_pos : Uint32` which indicates the position from which any further
-data extraction from the input `ByStr` value can proceed. This is useful
-when deserializing a byte stream. In other words, `next_pos` indicates
-where this function stopped reading bytes from the input byte string.
+`next_pos : Uint32` which indicates the position from which any further data
+extraction from the input `ByStr` value can proceed. This is useful when
+deserializing a byte stream. In other words, `next_pos` indicates where this
+function stopped reading bytes from the input byte string.
 
-- `substr_safe : ByStr -> Uint32 -> Uint32 -> Option ByStr` While
-  Scilla provides a builtin to extract substrings of byte strings
-  (`ByStr`), it is not exception safe. When provided incorrect
-  arguments, it throws exceptions. This library function is provided
-  as an exception safe function to extract, from a string `s : ByStr`,
-  a substring starting at position `pos : Uint32` and of length
-  `len : Uint32`. It returns `Some ByStr` on success and `None` on
+- `substr_safe : ByStr -> Uint32 -> Uint32 -> Option ByStr` While Scilla
+  provides a builtin to extract substrings of byte strings (`ByStr`), it is not
+  exception safe. When provided incorrect arguments, it throws exceptions. This
+  library function is provided as an exception safe function to extract, from a
+  string `s : ByStr`, a substring starting at position `pos : Uint32` and of
+  length `len : Uint32`. It returns `Some ByStr` on success and `None` on
   failure.
 - `extract_uint32 : IntegerEncoding -> ByStr -> Uint32 -> Option (Pair Uint32 Uint32)`
   Extracts a `Uint32` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_uint32_value next_pos`
-  is returned. `None` otherwise.
+  `pos : Uint32`. On success, `Some extracted_uint32_value next_pos` is
+  returned. `None` otherwise.
 - `extract_uint64 : IntegerEncoding -> ByStr -> Uint32 -> Option (Pair Uint64 Uint32)`
   Extracts a `Uint64` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_uint64_value next_pos`
-  is returned. `None` otherwise.
+  `pos : Uint32`. On success, `Some extracted_uint64_value next_pos` is
+  returned. `None` otherwise.
 - `extract_uint128 : IntegerEncoding -> ByStr -> Uint32 -> Option (Pair Uint128 Uint32)`
   Extracts a Uint128 value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_uint128_value next_pos`
-  is returned. `None` otherwise.
+  `pos : Uint32`. On success, `Some extracted_uint128_value next_pos` is
+  returned. `None` otherwise.
 - `extract_uint256 : IntegerEncoding -> ByStr -> Uint32 -> Option (Pair Uint256 Uint32)`
   Extracts a `Uint256` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_uint256_value next_pos`
-  is returned. `None` otherwise.
-- `extract_bystr1 : ByStr -> Uint32 -> Option (Pair ByStr1 Uint32)`
-  Extracts a `ByStr1` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_bystr1_value next_pos`
-  is returned. `None` otherwise.
-- `extract_bystr2 : ByStr -> Uint32 -> Option (Pair ByStr2 Uint32)`
-  Extracts a `ByStr2` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_bystr2_value next_pos`
-  is returned. `None` otherwise.
-- `extract_bystr20 : ByStr -> Uint32 -> Option (Pair ByStr20 Uint32)`
-  Extracts a `ByStr2` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_bystr20_value next_pos`
-  is returned. `None` otherwise.
-- `extract_bystr32 : ByStr -> Uint32 -> Option (Pair ByStr32 Uint32)`
-  Extracts a `ByStr2` value from `bs : ByStr`, starting at position
-  `pos : Uint32`. On success, `Some extracted_bystr32_value next_pos`
-  is returned. `None` otherwise.
-- `append_uint32 : IntegerEncoding -> ByStr -> Uint32 -> ByStr`
-  Serialize a `Uint32` value (with the specified encoding) and append
-  it to the provided `ByStr` and return the result `ByStr`.
-- `append_uint64 : IntegerEncoding -> ByStr -> Uint32 -> ByStr`
-  Serialize a `Uint64` value (with the specified encoding) and append
-  it to the provided `ByStr` and return the result `ByStr`.
-- `append_uint128 : IntegerEncoding -> ByStr -> Uint32 -> ByStr`
-  Serialize a `Uint128` value (with the specified encoding) and append
-  it to the provided `ByStr` and return the result `ByStr`.
-- `append_uint256 : IntegerEncoding -> ByStr -> Uint32 -> ByStr`
-  Serialize a `Uint256` value (with the specified encoding) and append
-  it to the provided `ByStr` and return the result `ByStr`.
+  `pos : Uint32`. On success, `Some extracted_uint256_value next_pos` is
+  returned. `None` otherwise.
+- `extract_bystr1 : ByStr -> Uint32 -> Option (Pair ByStr1 Uint32)` Extracts a
+  `ByStr1` value from `bs : ByStr`, starting at position `pos : Uint32`. On
+  success, `Some extracted_bystr1_value next_pos` is returned. `None` otherwise.
+- `extract_bystr2 : ByStr -> Uint32 -> Option (Pair ByStr2 Uint32)` Extracts a
+  `ByStr2` value from `bs : ByStr`, starting at position `pos : Uint32`. On
+  success, `Some extracted_bystr2_value next_pos` is returned. `None` otherwise.
+- `extract_bystr20 : ByStr -> Uint32 -> Option (Pair ByStr20 Uint32)` Extracts a
+  `ByStr2` value from `bs : ByStr`, starting at position `pos : Uint32`. On
+  success, `Some extracted_bystr20_value next_pos` is returned. `None`
+  otherwise.
+- `extract_bystr32 : ByStr -> Uint32 -> Option (Pair ByStr32 Uint32)` Extracts a
+  `ByStr2` value from `bs : ByStr`, starting at position `pos : Uint32`. On
+  success, `Some extracted_bystr32_value next_pos` is returned. `None`
+  otherwise.
+- `append_uint32 : IntegerEncoding -> ByStr -> Uint32 -> ByStr` Serialize a
+  `Uint32` value (with the specified encoding) and append it to the provided
+  `ByStr` and return the result `ByStr`.
+- `append_uint64 : IntegerEncoding -> ByStr -> Uint32 -> ByStr` Serialize a
+  `Uint64` value (with the specified encoding) and append it to the provided
+  `ByStr` and return the result `ByStr`.
+- `append_uint128 : IntegerEncoding -> ByStr -> Uint32 -> ByStr` Serialize a
+  `Uint128` value (with the specified encoding) and append it to the provided
+  `ByStr` and return the result `ByStr`.
+- `append_uint256 : IntegerEncoding -> ByStr -> Uint32 -> ByStr` Serialize a
+  `Uint256` value (with the specified encoding) and append it to the provided
+  `ByStr` and return the result `ByStr`.
 
-# Polynetwork Support Library
+## Polynetwork Support Library
 
-This library provides utility functions used in building the Zilliqa
-Polynetwork bridge. These functions are migrated from [Polynetwork\'s
-ethereum
-support](https://github.com/polynetwork/eth-contracts/tree/master/contracts/core/cross_chain_manager),
+This library provides utility functions used in building the Zilliqa Polynetwork
+bridge. These functions are migrated from
+[Polynetwork\'s ethereum support](https://github.com/polynetwork/eth-contracts/tree/master/contracts/core/cross_chain_manager),
 with the contract itself separately deployed.

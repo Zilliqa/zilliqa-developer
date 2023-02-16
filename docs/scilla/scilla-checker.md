@@ -6,7 +6,7 @@ title: The Scilla checker
 frontend, parsing the contract and performing a number of static checks
 including typechecking. :::
 
-# Phases of the Scilla checker
+## Phases of the Scilla checker
 
 ::: {#scilla_checker_phases} The Scilla checker operates in distinct phases,
 each of which can perform checks (and potentially reject contracts that do not
@@ -49,14 +49,14 @@ Additionally, the Scilla checker provides an option that dumps the
 [call graph](https://en.wikipedia.org/wiki/Call_graph) in the `.dot` format
 which is useful for auditing contracts.
 
-## Annotations
+### Annotations
 
 ::: {#scilla_checker_annotations} Each phase in the Scilla checker can add an
 annotation to each node in the abstract syntax tree. The type of an annotation
 is specified through instantiations of the module signature `Rep`. `Rep`
 specifies the type `rep`, which is the type of the annotation: :::
 
-```{.ocaml}
+```ocaml
 module type Rep = sig
   type rep
   ...
@@ -69,7 +69,7 @@ of previous phases. Some of these functions are declared in the `Rep` signature,
 because they involve creating new abstract syntax nodes, which must be created
 with annotations from the parser onward:
 
-```{.ocaml}
+```ocaml
 module type Rep = sig
   ...
 
@@ -101,7 +101,7 @@ likely be removed in future versions of the Scilla checker.
 
 As an example, consider the annotation module `TypecheckerERep`:
 
-```{.ocaml}
+```ocaml
 module TypecheckerERep (R : Rep) = struct
   type rep = PlainTypes.t inferred_type * R.rep
   [@@deriving sexp]
@@ -150,7 +150,7 @@ subsequent phases. This function is not mentioned in the `Rep` signature, since
 it is made available by the typechecker once type annotations have been added to
 the AST.
 
-## Abstract syntax
+### Abstract syntax
 
 ::: {#scilla_checker_syntax} The `ScillaSyntax` functor defines the AST node
 types. Each phase will instantiate the functor twice, once for the input syntax
@@ -161,7 +161,7 @@ annotations, the two instantiations will be identical. :::
 The parameters `SR` and `ER`, both of type `Rep`, define the annotations for
 statements and expressions, respectively.
 
-```{.ocaml}
+```ocaml
 module ScillaSyntax (SR : Rep) (ER : Rep) = struct
 
   type expr_annot = expr * ER.rep
@@ -172,7 +172,7 @@ module ScillaSyntax (SR : Rep) (ER : Rep) = struct
 end
 ```
 
-## Initial annotation
+### Initial annotation
 
 ::: {#scilla_checker_initial_annotation} The parser generates the initial
 annotation, which only contains information about where the syntax node is
@@ -182,7 +182,7 @@ access the location. :::
 The `ParserRep` structure is used for annotations both of statements and
 expressions.
 
-```{.ocaml}
+```ocaml
 module ParserRep = struct
   type rep = loc
   [@@deriving sexp]
@@ -192,7 +192,7 @@ module ParserRep = struct
 end
 ```
 
-## Typical phase
+### Typical phase
 
 ::: {#scilla_checker_typical_phase} Each phase that produces additional
 annotations will need to provide a new implementation of the `Rep` module type.
@@ -207,7 +207,7 @@ defines an annotation type for expressions.
 In addition, the `Rep` implementation defines a function `get_type`, so that
 subsequent phases can access the type in the annotation.
 
-```{.ocaml}
+```ocaml
 module TypecheckerERep (R : Rep) = struct
   type rep = PlainTypes.t inferred_type * R.rep
   [@@deriving sexp]
@@ -225,7 +225,7 @@ annotation type), `ScillaSyntax` (creating the abstract syntax type for the
 previous phase, which serves as input to the typechecker), and `ScillaSyntax`
 again (creating the abstract syntax type that the typechecker outputs).
 
-```{.ocaml}
+```ocaml
 module ScillaTypechecker
   (SR : Rep)
   (ER : Rep) = struct
@@ -258,7 +258,7 @@ that it generates, so that they can be made available to the next phase.
 The typechecker finally instantiates helper functors such as `TypeUtilities` and
 `ScillaBuiltIns`.
 
-# Cashflow Analysis
+## Cashflow Analysis
 
 ::: {#scilla_checker_cashflow} The cashflow analysis phase analyzes the usage of
 a contract\'s variables, fields, and ADT constructor, and attempts to determine
@@ -270,7 +270,7 @@ fields, variables, and ADT constructors. The tags are not guaranteed to be
 accurate, but are intended as a tool to help the contract developer use her
 fields in the intended manner.
 
-## Running the analysis
+### Running the analysis
 
 The cashflow analysis is activated by running `scilla-checker` with the option
 `-cf`. The analysis is not run by default, since it is only intended to be used
@@ -280,7 +280,7 @@ A contract is never rejected due to the result of the cashflow analysis. It is
 up to the contract developer to determine whether the cashflow tags are
 consistent with the intended use of each contract field.
 
-## The Analysis in Detail
+### The Analysis in Detail
 
 The analysis works by continually analysing the transitions and procedures of
 the contract until no further information is gathered.
@@ -322,7 +322,7 @@ while keeping the tags of the contract fields and ADTs. The analysis continues
 until all the transitions and procedures have been analysed without any existing
 tags having changed.
 
-## Tags
+### Tags
 
 The analysis uses the following set of tags:
 
@@ -349,11 +349,11 @@ Library and local functions are only partially supported, since no attempt is
 made to connect the tags of parameters to the tag of the result. Built-in
 functions are fully supported, however.
 
-## A simple example {#example}
+### A simple example {#example}
 
 Consider the following code snippet:
 
-```{.ocaml}
+```ocaml
 match p with
 | Nil =>
 | Cons x xs =>
@@ -381,14 +381,14 @@ Unifying the two tags [List (No information)]{.title-ref} and [List
 Money]{.title-ref} gives the tag [List Money]{.title-ref}, so `p` gets tagged
 with [List Money]{.title-ref}.
 
-## ADT constructor tagging
+### ADT constructor tagging
 
 In addition to tagging fields and local variables, the cashflow analyser also
 tags constructors of custom ADTs.
 
 To see how this works, consider the following custom ADT:
 
-```{.ocaml}
+```ocaml
 type Transaction =
 | UserTransaction of ByStr20 Uint128
 | ContractTransaction of ByStr20 String Uint128
@@ -409,12 +409,12 @@ represent non-money. The cashflow analyser therefore attempts to tag the
 arguments of the two constructors with appropriate tags, using the principles
 described in the previous sections.
 
-## A more elaborate example
+### A more elaborate example
 
 As an example, consider a crowdfunding contract written in Scilla. Such a
 contract may declare the following immutable parameters and mutable fields:
 
-```{.ocaml}
+```ocaml
 contract Crowdfunding
 
 (*  Parameters *)
@@ -449,7 +449,7 @@ are used in the contract\'s transitions and procedures, and if the resulting
 tags do not correspond to the expectation, then the contract likely contains a
 bug somewhere.
 
-# Exploring the call graph
+## Exploring the call graph
 
 ::: {#scilla_checker_call_graph} The call graph option allows the user to view
 the graphical representation of relationships between functions, procedures and
@@ -464,12 +464,12 @@ converted into a picture using the command
 It is also possible to dump the call graph to `stdout` using the option
 `-dump-callgraph-stdout`.
 
-## Example
+### Example
 
 Consider the following contract, which we assume to be located in the file
 `callgraph.scilla`:
 
-```{.ocaml}
+```ocaml
 scilla_version 0
 
 library Callgraph
@@ -505,9 +505,9 @@ end
 
 We now run the shell commands
 
-```{.bash}
-$ scilla-checker -dump-callgraph -libdir path/to/stdlib -gaslimit 1000 callgraph.scilla
-$ dot -Tsvg callgraph.dot -o callgraph.svg
+```sh
+scilla-checker -dump-callgraph -libdir path/to/stdlib -gaslimit 1000 callgraph.scilla
+dot -Tsvg callgraph.dot -o callgraph.svg
 ```
 
 This will generate the following graphic illustrating the call graph, located in
@@ -515,7 +515,7 @@ the file `callgraph.svg` (note that comments have been added manually):
 
 ![image](../assets/img/callgraph.png)
 
-## Tools to work with the call graph
+### Tools to work with the call graph
 
 The suggested way to work with the call graph is the
 [Graphviz plugin](https://marketplace.visualstudio.com/items?itemName=joaompinto.vscode-graphviz)

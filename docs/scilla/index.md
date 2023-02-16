@@ -40,14 +40,14 @@ presents the features of the two IDEs.
 There are several resources to learn about Scilla and Zilliqa. Some of these are
 given below:
 
-**Scilla**
+### Scilla
 
 : - [Scilla Design Paper](https://ilyasergey.net/papers/scilla-oopsla19.pdf) -
 [Scilla Slides](https://drive.google.com/file/d/10gIef8jeoQ2h9kYInvU3s0i5B6Z9syGB/view) -
 [Scilla Language Grammar](https://docs.zilliqa.com/scilla-grammar.pdf) -
 [Scilla Design Story Piece by Piece: Part 1 (Why do we need a new language?)](https://blog.zilliqa.com/scilla-design-story-piece-by-piece-part-1-why-do-we-need-a-new-language-27d5f14ae661)
 
-**Zilliqa**
+### Zilliqa
 
 : -
 [The Zilliqa Design Story Piece by Piece: Part 1 (Network Sharding)](https://blog.zilliqa.com/https-blog-zilliqa-com-the-zilliqa-design-story-piece-by-piece-part1-d9cb32ea1e65) -
@@ -56,7 +56,7 @@ given below:
 [Technical Whitepaper](https://docs.zilliqa.com/whitepaper.pdf) -
 [The Not-So-Short Zilliqa Technical FAQ](https://docs.zilliqa.com/techfaq.pdf)
 
-# Contents
+## Contents
 
 ::: {.toctree maxdepth="3"} intro scilla-trial scilla-by-example scilla-in-depth
 stdlib scilla-tips-and-tricks scilla-checker interface contact :::
