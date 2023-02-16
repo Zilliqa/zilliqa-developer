@@ -359,6 +359,16 @@ nav:
               - Maintenance: staking/staking-phase-1.1/ssn-operators/staking-ssn-maintainance.md
               - Upgrading: staking/staking-phase-1.1/ssn-operators/staking-ssn-upgrading.md
           - Staking Error Codes: staking/staking-phase-1.1/staking-error-codes.md
+  - Scilla:
+      - Overview: scilla/index.md
+      - Introduction: scilla/intro.md
+      - Interface: scilla/interface.md
+      - Scilla By Example: scilla/scilla-by-example.md
+      - Scilla Checker: scilla/scilla-checker.md
+      - Scilla In Depth: scilla/scilla-in-depth.md
+      - Scilla Tips and Tricks: scilla/scilla-tips-and-tricks.md
+      - Scilla Trial: scilla/scilla-trial.md
+      - Standard Library: scilla/stdlib.md
   - ZILEVM:
       - Getting Started:
           - Introduction: zilevm/getting-started/zilevm-introduction.md
