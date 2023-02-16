@@ -43,7 +43,6 @@ given below:
 ### Scilla
 
 : - [Scilla Design Paper](https://ilyasergey.net/papers/scilla-oopsla19.pdf) -
-[Scilla Slides](https://drive.google.com/file/d/10gIef8jeoQ2h9kYInvU3s0i5B6Z9syGB/view) -
 [Scilla Language Grammar](https://docs.zilliqa.com/scilla-grammar.pdf) -
 [Scilla Design Story Piece by Piece: Part 1 (Why do we need a new language?)](https://blog.zilliqa.com/scilla-design-story-piece-by-piece-part-1-why-do-we-need-a-new-language-27d5f14ae661)
 
