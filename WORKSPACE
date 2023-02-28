@@ -265,11 +265,15 @@ maven_install(
     artifacts = [
         "junit:junit:4.12",
         "org.web3j:core:4.2.0",
+        "org.web3j:crypto:4.2.0",
+        "org.web3j:utils:4.2.0",
         "org.projectlombok:lombok:1.18.26",
         "com.google.guava:guava:28.2-jre",
         "com.squareup.okhttp3:okhttp:3.14.9",
         "com.google.code.gson:gson:2.10.1",
-        "com.google.protobuf:protobuf-java:3.21.12"
+        "com.google.protobuf:protobuf-java:3.21.12",
+        "org.apache.commons:commons-lang3:3.12.0",
+        "org.bouncycastle:bcprov-jdk18on:1.72"
     ],
     repositories = [
         "https://maven.google.com",

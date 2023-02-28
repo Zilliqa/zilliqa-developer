@@ -6,7 +6,8 @@ import com.firestack.laksaj.jsonrpc.HttpProvider;
 import com.firestack.laksaj.transaction.Transaction;
 import com.firestack.laksaj.transaction.TxStatus;
 import com.google.gson.Gson;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import lombok.Builder;
 import lombok.Data;
 
@@ -69,13 +70,13 @@ public class Contract {
         transaction = this.prepareTx(transaction, attempts, interval);
         if (transaction.isRejected()) {
             this.contractStatus = ContractStatus.Rejected;
-            Pair<Transaction, Contract> pair = new Pair<>(transaction, this);
+            Pair<Transaction, Contract> pair = new ImmutablePair<>(transaction, this);
             return pair;
         }
 
         this.contractStatus = ContractStatus.Deployed;
         this.address = ContractFactory.getAddressForContract(transaction);
-        Pair<Transaction, Contract> pair = new Pair<>(transaction, this);
+        Pair<Transaction, Contract> pair = new ImmutablePair<>(transaction, this);
         return pair;
     }
 
