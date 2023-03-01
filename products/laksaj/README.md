@@ -4,6 +4,11 @@ LaksaJ -- Zilliqa Blockchain Java Library
 
 The project is still under development.
 
+This project was originally hosted at
+https://github.com/FireStack-Lab/LaksaJ ; pulled into
+`zilliqa-developer` and moved under `com.zilliqa` by
+richard@zilliqa.com 2023-03-01.
+
 ## Quick Start
 
 More docs can be found in https://apidocs.zilliqa.com/
@@ -12,10 +17,10 @@ More docs can be found in https://apidocs.zilliqa.com/
 
 ```java
 
-package com.firestack.example;
+package com.zilliqa.example;
 
-import com.firestack.laksaj.crypto.KeyTools;
-import com.firestack.laksaj.utils.ByteUtil;
+import com.zilliqa.laksaj.crypto.KeyTools;
+import com.zilliqa.laksaj.utils.ByteUtil;
 import org.web3j.crypto.ECKeyPair;
 
 import java.math.BigInteger;
@@ -44,9 +49,9 @@ public class GenerateAddress {
 ### Validate an address
 
 ```java
-package com.firestack.example;
+package com.zilliqa.example;
 
-import com.firestack.laksaj.utils.Validation;
+import com.zilliqa.laksaj.utils.Validation;
 
 public class ValidateAddress {
     public static void main(String[] args) {
@@ -60,9 +65,9 @@ public class ValidateAddress {
 ### Validate checksum address
 
 ```java
-package com.firestack.example;
+package com.zilliqa.example;
 
-import com.firestack.laksaj.utils.Validation;
+import com.zilliqa.laksaj.utils.Validation;
 
 public class ValidChecksumAddress {
     public static void main(String[] args) {
@@ -76,16 +81,16 @@ public class ValidChecksumAddress {
 ### Transaction operation (include construct transaction, calculate transaction fee, do serialization, sign a transaction, broadcast)
 
 ```java
-package com.firestack.example;
+package com.zilliqa.example;
 
-import com.firestack.laksaj.account.Wallet;
-import com.firestack.laksaj.contract.Contract;
-import com.firestack.laksaj.contract.ContractFactory;
-import com.firestack.laksaj.contract.DeployParams;
-import com.firestack.laksaj.contract.Value;
-import com.firestack.laksaj.jsonrpc.HttpProvider;
-import com.firestack.laksaj.transaction.Transaction;
-import com.firestack.laksaj.transaction.TransactionFactory;
+import com.zilliqa.laksaj.account.Wallet;
+import com.zilliqa.laksaj.contract.Contract;
+import com.zilliqa.laksaj.contract.ContractFactory;
+import com.zilliqa.laksaj.contract.DeployParams;
+import com.zilliqa.laksaj.contract.Value;
+import com.zilliqa.laksaj.jsonrpc.HttpProvider;
+import com.zilliqa.laksaj.transaction.Transaction;
+import com.zilliqa.laksaj.transaction.TransactionFactory;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -93,7 +98,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.firestack.laksaj.account.Wallet.pack;
+import static com.zilliqa.laksaj.account.Wallet.pack;
 
 public class TransactionOperation {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
@@ -201,10 +206,10 @@ public class TransactionOperation {
 
 ```java
 
-package com.firestack.example;
+package com.zilliqa.example;
 
-import com.firestack.laksaj.blockchain.Contract;
-import com.firestack.laksaj.jsonrpc.HttpProvider;
+import com.zilliqa.laksaj.blockchain.Contract;
+import com.zilliqa.laksaj.jsonrpc.HttpProvider;
 
 import java.io.IOException;
 import java.util.List;
