@@ -1,18 +1,5 @@
 load(":defs.bzl", "run_tests")
 
-java_toolchain(
-    name = "toolchain",
-    source_version = "11",
-    target_version = "11",
-    bootclasspath = [ "@bazel_tools//tools/jdk:bootclasspath" ],
-    javabuilder = [ "@bazel_tools//tools/jdk:javabuilder" ],
-    singlejar = [ "@bazel_tools//tools/jdk:singlejar" ],
-    genclass = [ "@bazel_tools//tools/jdk:genclass" ],
-    ijar = [ "@bazel_tools//tools/jdk:ijar" ],
-    java_runtime =  "@bazel_tools//tools/jdk:java_runtime",
-    forcibly_disable_header_compilation = True
-)
-
 filegroup(
     name = "srcs",
     srcs = glob(["src/main/**/*.java"]),

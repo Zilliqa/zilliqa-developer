@@ -45,6 +45,10 @@ test  --keep_going
 test --test_verbose_timeout_warnings
 build --experimental_remote_build_event_upload=minimal
 
+### Disable Java header compilation because Lombok can't cope with it
+build --nojava_header_compilation
+test --nojava_header_compilation
+
 
 # Tries to import additional config
 try-import %workspace%/.bazelrc.configure

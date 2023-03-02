@@ -358,42 +358,18 @@ public class SmartContractDeposit {
 
 ## Build and Installation
 
-you can build jar using following command :
+You can build with:
 
-```
-gradle build -x test
-```
+```sh
 
-and you can also try our snapshot version by
-
-gradle: (please see our example project)
-
-```groovy
-repositories {
-    mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/groups/public"
-    }
-}
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile group: 'org.firestack', name: 'laksaj', version: '0.4.5-SNAPSHOT'
-}
-
+bazelisk build //products/laksaj:laksaj
 ```
 
-maven:
+And test with
 
-```xml
-<dependency>
-  <groupId>org.firestack</groupId>
-  <artifactId>laksaj</artifactId>
-  <version>1.0.5-SNAPSHOT</version>
-</dependency>
+```sh
+
+bazelisk test //products/laksaj:tests
 ```
 
-
-
-
-
+Remember that Bazel runs tests in parallel, so you will need to make sure your tests all use different testnet accounts or their nonces will clash.
