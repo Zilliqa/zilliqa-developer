@@ -15,7 +15,7 @@ description: Transaction Receipts Exchanges
 ## Transaction Receipts
 
 Confirmed transactions come with a **receipt** under the **result** field when
-[fetching the transaction](https://apidocs.zilliqa.com/#gettransaction) in JSON
+[fetching the transaction](https://dev.zilliqa.com/api/transaction-related-methods/api-transaction-get-tx/) in JSON
 format.
 
 ## Basic Fields
