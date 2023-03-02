@@ -23,6 +23,10 @@ lint:
     - isort@5.12.0
     - black@23.1.0
   ignore:
+    - linters: [gitleaks]
+      paths:
+        - products/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
+        - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
     - linters: [ALL]
       paths:
         - products/devex/public/*.js

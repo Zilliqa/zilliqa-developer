@@ -5,13 +5,13 @@ LaksaJ -- Zilliqa Blockchain Java Library
 The project is still under development.
 
 This project was originally hosted at
-https://github.com/FireStack-Lab/LaksaJ ; pulled into
+[https://github.com/FireStack-Lab/LaksaJ](https://github.com/FireStack-Lab/LaksaJ) ; pulled into
 `zilliqa-developer` and moved under `com.zilliqa` by
 richard@zilliqa.com 2023-03-01.
 
 ## Quick Start
 
-More docs can be found in https://apidocs.zilliqa.com/
+More docs can be found in [https://apidocs.zilliqa.com/](https://apidocs.zilliqa.com)
 
 ### Generate large amount of addresses
 
