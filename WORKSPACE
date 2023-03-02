@@ -242,12 +242,13 @@ k8s_repositories()
 # ================================================================
 
 RULES_JVM_EXTERNAL_TAG = "4.5"
+
 RULES_JVM_EXTERNAL_SHA = "b17d7388feb9bfa7f2fa09031b32707df529f26c91ab9e5d909eb1676badd9a6"
 
 http_archive(
     name = "rules_jvm_external",
-    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     sha256 = RULES_JVM_EXTERNAL_SHA,
+    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
 )
 
@@ -273,7 +274,7 @@ maven_install(
         "com.google.code.gson:gson:2.10.1",
         "com.google.protobuf:protobuf-java:3.21.12",
         "org.apache.commons:commons-lang3:3.12.0",
-        "org.bouncycastle:bcprov-jdk18on:1.72"
+        "org.bouncycastle:bcprov-jdk18on:1.72",
     ],
     repositories = [
         "https://maven.google.com",

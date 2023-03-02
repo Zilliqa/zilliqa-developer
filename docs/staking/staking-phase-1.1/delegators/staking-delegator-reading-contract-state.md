@@ -25,7 +25,7 @@ delegator's perspective. These are:
 
 In order to read the above information from the smart contract, you should use
 the
-[`GetSmartContractSubState`](https://apidocs.zilliqa.com/#getsmartcontractsubstate)
+[`GetSmartContractSubState`](https://dev.zilliqa.com/api/contract-related-methods/api-contract-get-smartcontract-substate)
 API by querying it from the `ssnlist` smart contract.
 
 ## Getting the Current List of SSNs

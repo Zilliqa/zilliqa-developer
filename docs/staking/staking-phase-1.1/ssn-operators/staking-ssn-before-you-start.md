@@ -24,7 +24,7 @@ A seed node is a Zilliqa full node that does not participate in Zilliqa network 
 
 ## What is the Difference between Seed Node and Staked Seed Node?
 
-Seed nodes have been a part of the Zilliqa ecosystem since day 1. They are vital as they provide [API](https://apidocs.zilliqa.com/#introduction) access to dApps, wallets, explorers, and exchanges. Most seed nodes are private and access is restricted to the operator's infrastructure. Zilliqa has provided a set of seed nodes publicly accessible at [api.zilliqa.com](https://api.zilliqa.com).
+Seed nodes have been a part of the Zilliqa ecosystem since day 1. They are vital as they provide [API](https://dev.zilliqa.com/api/introduction/api-introduction/) access to dApps, wallets, explorers, and exchanges. Most seed nodes are private and access is restricted to the operator's infrastructure. Zilliqa has provided a set of seed nodes publicly accessible at [api.zilliqa.com](https://api.zilliqa.com).
 
 The purpose of staked seed nodes (SSNs) is to "open up" seed nodes to trusted operators, bringing us a step closer towards the decentralization of the overall seed node architecture. To attract high-quality seed node operators, a proper incentive mechanism must be put in place. This is described in both [ZIP-11](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-11.md) and [ZIP-19](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-19.md). We highly recommend anyone who wishes to become an SSN operator in phase 1.1 to read ZIP-11 and ZIP-19.
 

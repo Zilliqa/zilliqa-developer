@@ -193,7 +193,7 @@ public class TransactionOperation {
         //deploy contract, this will take a while to track transaction util it has been confirmed or failed
         Pair<Transaction, Contract> deployResult = contract.deploy(deployParams, 300, 3);
         System.out.println("result is: " + deployResult);
-        
+
         //calculate transaction fee
         String transactionFee = new BigInteger(deployResult.getKey().getReceipt().getCumulative_gas()).multiply(new BigInteger(deployResult.getKey().getGasPrice())).toString();
         System.out.println("transaction fee is: " + transactionFee);
