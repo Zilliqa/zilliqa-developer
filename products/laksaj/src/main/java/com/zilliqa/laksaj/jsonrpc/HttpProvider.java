@@ -497,7 +497,7 @@ public class HttpProvider {
         return rep;
     }
 
-    public List<Transaction> createTransactions(List<Transaction> transactions) throws Exception {
+  public List<Transaction> createTransactions(List<Transaction> transactions) throws Exception {
         List<Req> reqs = new ArrayList<>();
         Map<String, Transaction> transactionMap = new HashMap<>();
         for (int i = 0; i < transactions.size(); i++) {
@@ -554,7 +554,7 @@ public class HttpProvider {
                 throw new IOException("get result error = " + resultString);
             }
             TransactionStatus status = rep.getResult();
-            rep.getResult().setInfo(transactionStatusMap.get(status.getModificationState()).get(status.getStatus()));
+            status.setInfo(transactionStatusMap.get(status.getModificationState()).get(status.getStatus()));
             return rep;
         } catch (JsonSyntaxException e) {
             throw new IOException("get wrong result: " + resultString);
@@ -578,27 +578,14 @@ public class HttpProvider {
         throw new IOException("failed after retry");
     }
 
-    public Rep<PendingStatus> getPendingTnx(String hash) throws  IOException {
-        Req req = Req.builder().id("1").jsonrpc("2.0").method("GetPendingTxn").params(new String[]{hash}).build();
-        Response response = client.newCall(buildRequest(req)).execute();
-        String resultString = Objects.requireNonNull(response.body()).string();
-        Type type = new TypeToken<Rep<PendingStatus>>() {
-        }.getType();
-        Rep<PendingStatus> rep = gson.fromJson(resultString, type);
-        if (rep.getResult() == null) {
-            throw new IOException("get result error = " + resultString);
-        }
-        return rep;
-    }
-
-    public Rep<Transaction> getTransaction(String hash) throws IOException {
+    public Rep<TransactionData> getTransaction(String hash) throws IOException {
         Req req = Req.builder().id("1").jsonrpc("2.0").method("GetTransaction").params(new String[]{hash}).build();
         Response response = client.newCall(buildRequest(req)).execute();
         String resultString = Objects.requireNonNull(response.body()).string();
-        Type type = new TypeToken<Rep<Transaction>>() {
+        Type type = new TypeToken<Rep<TransactionData>>() {
         }.getType();
         try {
-            Rep<Transaction> rep = gson.fromJson(resultString, type);
+            Rep<TransactionData> rep = gson.fromJson(resultString, type);
             if (rep.getResult() == null) {
                 throw new IOException("get result error = " + resultString);
             }
@@ -608,8 +595,8 @@ public class HttpProvider {
         }
     }
 
-    public Rep<Transaction> getTransaction32(String hash) throws Exception {
-        Rep<Transaction> rep = getTransaction(hash);
+    public Rep<TransactionData> getTransaction32(String hash) throws Exception {
+        Rep<TransactionData> rep = getTransaction(hash);
         rep.getResult().setToAddr(Bech32.toBech32Address(rep.getResult().getToAddr()));
         return rep;
     }
@@ -679,10 +666,11 @@ public class HttpProvider {
 
     private Request buildRequest(Req req) throws MalformedURLException {
         RequestBody body = RequestBody.create(JSON, gson.toJson(req));
-        return new Request.Builder()
+        Request result = new Request.Builder()
                 .post(body)
                 .url(new URL(this.url))
                 .build();
+        return result;
     }
 
     private Request buildRequests(List<Req> reqs) throws MalformedURLException {
@@ -743,6 +731,4 @@ public class HttpProvider {
         return Pair.builder().code(err.get("code").getAsInt()).message(err.get("message").getAsString()).build();
 
     }
-
-
 }

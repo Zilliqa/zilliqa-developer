@@ -7,5 +7,6 @@ def run_tests(name, srcs, deps, src_prefix):
         print(pkg_name)
         test_list.append(src_name)
         native.java_test(name=src_name, test_class = pkg_name,
-                         srcs = srcs, deps = deps, size = "small")
+                         srcs = srcs, deps = deps, size = "small",
+                         timeout = "eternal")
     return test_list

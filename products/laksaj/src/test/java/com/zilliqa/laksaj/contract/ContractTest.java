@@ -216,16 +216,16 @@ public class ContractTest {
         List<Value> init = Arrays.asList(
                 Value.builder().vname("_scilla_version").type("Uint32").value("0").build(),
                 Value.builder().vname("owner").type("ByStr20").value("0x9bfec715a6bd658fcb62b0f8cc9bfa2ade71434a").build(),
-                Value.builder().vname("total_tokens").type("Uint128").value("1000000000").build(),
+                Value.builder().vname("total_tokens").type("Uint128").value("1000000001").build(),
                 Value.builder().vname("decimals").type("Uint32").value("0").build(),
                 Value.builder().vname("name").type("String").value("BobCoin").build(),
                 Value.builder().vname("symbol").type("String").value("BOB").build());
         Wallet wallet = new Wallet();
         wallet.addByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930");
         ContractFactory factory = ContractFactory.builder().provider(new HttpProvider("https://dev-api.zilliqa.com/")).signer(wallet).build();
-        Contract contract = factory.newContract(code, (Value[]) init.toArray(), "");
+        Contract contract = factory.newContract(code, (Value[]) init.toArray(new Value[init.size()]), "");
         Integer nonce = Integer.valueOf(factory.getProvider().getBalance("9bfec715a6bd658fcb62b0f8cc9bfa2ade71434a").getResult().getNonce());
-        DeployParams deployParams = DeployParams.builder().version(String.valueOf(pack(333, 1))).gasPrice("1000000000").gasLimit("10000").nonce(String.valueOf(nonce + 1)).senderPubKey("0246e7178dc8253201101e18fd6f6eb9972451d121fc57aa2a06dd5c111e58dc6a").build();
+        DeployParams deployParams = DeployParams.builder().version(String.valueOf(pack(333, 1))).gasPrice("2000000000").gasLimit("10000").nonce(String.valueOf(nonce + 1)).senderPubKey("0246e7178dc8253201101e18fd6f6eb9972451d121fc57aa2a06dd5c111e58dc6a").build();
         System.out.println(contract.deployWithoutConfirm(deployParams));
 //        Pair<Transaction, Contract> result = contract.deploy(deployParams, 3000, 3);
 
@@ -248,11 +248,12 @@ public class ContractTest {
         Wallet wallet = new Wallet();
         wallet.addByPrivateKey("e19d05c5452598e24caad4a0d85a49146f7be089515c905ae6a19e8a578a6930");
         ContractFactory factory = ContractFactory.builder().provider(new HttpProvider("https://dev-api.zilliqa.com/")).signer(wallet).build();
-        Contract contract = factory.atContract("zil1h4cesgy498wyyvsdkj7g2zygp0xj920jw2hyx0", "", (Value[]) init.toArray(), "");
+      // ContractFactory factory = ContractFactory.builder().provider(new HttpProvider("http://localhost:8082")).signer(wallet).build();
+        Contract contract = factory.atContract("zil1h4cesgy498wyyvsdkj7g2zygp0xj920jw2hyx0", "", (Value[]) init.toArray(new Value[init.size()]), "");
         Integer nonce = Integer.valueOf(factory.getProvider().getBalance("9bfec715a6bd658fcb62b0f8cc9bfa2ade71434a").getResult().getNonce());
-        CallParams params = CallParams.builder().nonce(String.valueOf(nonce + 1)).version(String.valueOf(pack(333, 1))).gasPrice("1000000000").gasLimit("1000").senderPubKey("0246e7178dc8253201101e18fd6f6eb9972451d121fc57aa2a06dd5c111e58dc6a").amount("0").build();
-        List<Value> values = Arrays.asList(Value.builder().vname("to").type("ByStr20").value("0x381f4008505e940ad7681ec3468a719060caf796").build(), Value.builder().vname("tokens").type("Uint128").value("10").build());
-        contract.call("Transfer", (Value[]) values.toArray(), params, 3000, 3);
+        CallParams params = CallParams.builder().nonce(String.valueOf(nonce + 1)).version(String.valueOf(pack(333, 1))).gasPrice("2000000000").gasLimit("1000").senderPubKey("0246e7178dc8253201101e18fd6f6eb9972451d121fc57aa2a06dd5c111e58dc6a").amount("0").build();
+        List<Value> values = Arrays.asList(Value.builder().vname("to").type("ByStr20").value("0x381f4008505e940ad7681ec3468a719060caf796").build(), Value.builder().vname("tokens").type("Uint128").value("11").build());
+        contract.call("Transfer", (Value[]) values.toArray(new Value[values.size()]), params, 20, 1);
     }
 
 

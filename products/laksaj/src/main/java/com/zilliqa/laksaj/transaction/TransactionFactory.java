@@ -51,14 +51,18 @@ public class TransactionFactory {
 
         }
 
-        for (int i = 0; i < maxAttempts; i++) {
+        boolean workToDo = true;
+        for (int i = 0; i < maxAttempts && workToDo; i++) {
             Thread.sleep(Duration.of(interval, SECONDS).toMillis());
+            workToDo = false;
             for (int j = 0; j < transactions.size(); j++) {
                 Transaction transaction = transactions.get(j);
                 // if transaction status is pending, track it, otherwise just ignore it
                 if (TxStatus.Pending == transaction.getStatus()) {
                     if (transaction.trackTx(transaction.getID())) {
                         transaction.setStatus(TxStatus.Confirmed);
+                    } else {
+                      workToDo = true;
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.zilliqa.laksaj.transaction;
 
 import com.zilliqa.laksaj.account.Account;
 import com.zilliqa.laksaj.blockchain.TransactionReceipt;
+import com.zilliqa.laksaj.blockchain.TransactionData;
 import com.zilliqa.laksaj.jsonrpc.HttpProvider;
 import com.zilliqa.laksaj.utils.Base58;
 import com.zilliqa.laksaj.utils.ByteUtil;
@@ -115,16 +116,16 @@ public class Transaction {
 
     public boolean trackTx(String txHash) {
         System.out.println("tracking transaction: " + txHash);
-        Transaction response;
+        TransactionData response;
         try {
             response = this.provider.getTransaction(txHash).getResult();
         } catch (Exception e) {
-            System.out.println("transaction not confirmed yet");
+            System.out.println(String.format("transaction not confirmed yet (%s)", e.toString()));
             return false;
         }
 
         if (null == response) {
-            System.out.println("transaction not confirmed yet");
+            System.out.println("transaction not confirmed yet (null response)");
             return false;
         }
 
