@@ -1,0 +1,6 @@
+2023-03-02	Richard Watts <richard@zilliqa.com>
+
+	* package: Changed package to com.zilliqa.lakasj
+	* HttpProvider: getTransaction() now returns a TransactionData, since modern
+	versions of gson cannot deserialise Transaction directly.
+	* GetPendingTxn: has been removed, as this API is no longer available in Zilliqa 8.0+

@@ -80,7 +80,7 @@ gas price.
 ### 4) Deprecation and removal of `GetPendingTxn` and `GetPendingTxns` API
 
 Since `v7.0.0`, we have released a new API
-[`GetTransactionStatus`](https://dev.zilliqa.com/docs/apis/api-transaction-get-transaction-status)
+[`GetTransactionStatus`](https://dev.zilliqa.com/api/transaction-related-methods/api-transaction-get-transaction-status)
 which tracks transaction status during the transactional lifetime.
 `GetPendingTxn` and `GetPendingTxns` will be removed with effect from `v8.0.0`.
 
