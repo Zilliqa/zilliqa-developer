@@ -1,0 +1,237 @@
+scilla_version 0
+
+(* Contract to lock tokens forever *)
+(* Zilliqa Research *)
+
+import IntUtils
+
+library BurnTokens
+
+let uint128_zero = Uint128 0
+let bool_active = True
+let bool_inactive = False
+
+(* Error events *)
+type Error =
+| CodeNotOwner
+| ContractIsPausedFailure
+| ContractAddressNoMatch
+| ZRC2AddressNoMatch
+| BurnAllowanceNotSetForWallet
+| BurnAllowanceExceedForWallet
+
+let make_error =
+  fun (result : Error) =>
+    let result_code = 
+      match result with
+      | CodeNotOwner                  => Int32 -101
+      | ContractIsPausedFailure       => Int32 -102
+      | ContractAddressNoMatch        => Int32 -103
+      | ZRC2AddressNoMatch            => Int32 -104
+      | BurnAllowanceNotSetForWallet  => Int32 -105
+      | BurnAllowanceExceedForWallet  => Int32 -106
+      end
+    in
+    { _exception : "Error"; code : result_code }
+
+contract BurnTokens
+(contract_owner: ByStr20,
+ token_address: ByStr20)
+
+field paused : Bool = False
+
+(* Map to track token burning allowance per wallet *)
+field allow_burn_tokens: Map ByStr20 Uint128 
+= Emp ByStr20 Uint128
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+(* Helper for throwing error *)
+procedure ThrowError(err : Error)
+  e = make_error err;
+  throw e
+end
+
+(* Check if the address is owner *)
+procedure IsOwner(address: ByStr20)
+  is_owner = builtin eq contract_owner address;
+  match is_owner with
+  | True =>
+  | False =>
+    err = CodeNotOwner;
+    ThrowError err
+  end
+end
+
+(* Check if the contract is not paused *)
+procedure IsNotPaused()
+  paused_tmp <- paused;
+  match paused_tmp with
+  | False =>
+  | True  =>
+    err = ContractIsPausedFailure;
+    ThrowError err
+  end
+end
+
+(* Does address match the immutable ZRC2 contract address *)
+procedure IsAddressMatchZRC2(address: ByStr20)
+  
+  is_match = builtin eq address token_address;
+
+  match is_match with
+  | True =>
+  | False  =>
+    err = ZRC2AddressNoMatch;
+    ThrowError err
+  end
+
+end
+
+(* Does address match this contract *)
+procedure IsRecipientMatchContract(address: ByStr20)
+  
+  is_match = builtin eq address _this_address;
+
+  match is_match with
+  | True =>
+  | False  =>
+    err = ContractAddressNoMatch;
+    ThrowError err
+  end
+
+end
+
+(* Update the burn allowance with allowance check *)
+procedure ProcessBurnTokens(address: ByStr20, amount: Uint128)
+
+  get_balance <- allow_burn_tokens[address];
+  
+  match get_balance with
+  | Some bal =>
+      is_within_limit = uint128_le amount bal;
+      match is_within_limit with
+      | True =>
+          updated_amount = builtin sub bal amount;
+
+          is_zero = builtin eq updated_amount uint128_zero;
+
+          match is_zero with
+          | True =>
+            (* Delete the address from the map if the burn allowance is now zero *)
+            delete allow_burn_tokens[address]
+          | False  =>
+            (* Update the burn allowance *)
+            allow_burn_tokens[address] := updated_amount
+          end
+
+      | False  =>
+          err = BurnAllowanceExceedForWallet;
+          ThrowError err
+      end
+  | None =>
+      err = BurnAllowanceNotSetForWallet;
+      ThrowError err
+  end
+  
+end
+
+(**************************************)
+(*             Transitions            *)
+(**************************************)
+
+(* @multi-sig *)
+(* Pause the contract - only owner or multi sig can call *)
+transition Pause()
+  IsOwner _sender;
+  paused := bool_active;
+  e = {
+        _eventname: "PauseSuccess";
+        paused_by: _sender
+      };
+  event e
+end
+
+(* @multi-sig *)
+(* Unpause the contract - only owner or multi sig can call *)
+transition UnPause()
+  IsOwner _sender;
+  paused := bool_inactive;
+  e = {
+        _eventname: "UnPauseSuccess";
+        unpaused_by: _sender
+      };
+  event e
+end
+
+(* Transition to set burn allowance for a wallet *)
+transition UpdateBurnAllowance(token_amount : Uint128)
+
+  (* Check that the contract is not paused *)
+  IsNotPaused;
+
+  allow_burn_tokens[_sender] := token_amount;
+
+  (* Emit a success message *)
+  e = {_eventname: "UpdateBurnAllowanceSuccess"; token_address: token_address; 
+        token_amount: token_amount; updated_by: _sender};
+  event e
+
+end
+
+(* Do checks inside callback transition - direct transfer "push" case *)
+transition RecipientAcceptTransfer(
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+
+  (* Check that the contract is not paused *)
+  IsNotPaused;
+
+  (* The sender has to be the ZRC2 contract that has been set at deployment *)
+  IsAddressMatchZRC2 _sender;
+
+  (* The intended recipient has to be this contract *)
+  IsRecipientMatchContract recipient;
+
+  (* Process the burn from the sender account *)
+  ProcessBurnTokens sender amount;
+
+  (* Emit a success message *)
+  e = {_eventname: "BurnTokensByDirectTransferSuccess"; token_address: token_address; 
+        token_amount: amount; burnt_by: sender};
+  event e
+
+end
+
+(* Do checks inside callback transition - indirect transfer via allowance "pull" case *)
+transition RecipientAcceptTransferFrom(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+
+  (* Check that the contract is not paused *)
+  IsNotPaused;
+
+  (* The sender has to be the ZRC2 contract that has been set at deployment *)
+  IsAddressMatchZRC2 _sender;
+
+  (* The intended recipient has to be this contract *)
+  IsRecipientMatchContract recipient;
+
+  (* The initiator could be a DEX or could be the sender parameter *)
+  (* Nothing to check against the initiator *)
+
+  (* Just accept the transfer - the caller would have to have set the allowance anyway *)
+
+  (* Emit a success message *)
+  e = {_eventname: "BurnTokensByAllowanceSuccess"; token_address: token_address; 
+        token_amount: amount; burnt_by: sender };
+  event e
+
+end
