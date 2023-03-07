@@ -123,6 +123,9 @@ cra_bin.react_app_rewired(
     chdir = package_name(),
     env = {
         "BUILD_PATH": "./build",
+        #        "REACT_APP_DEPLOY_ENV": "prod",
+        #        "PUBLIC_URL": "http:/maxwell.up",
+        #        "NODE_ENV": "production"
     },
     out_dirs = ["build"],
 )

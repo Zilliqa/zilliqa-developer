@@ -115,7 +115,10 @@ const LabelsPage: React.FC = () => {
                   networkNameFilter === "All" ||
                   v.networkName === networkNameFilter
               )
-              .filter(([, v]) => v.name.includes(searchFilter))
+              .filter(
+                ([, v]) =>
+                  v.name && v.name.includes && v.name.includes(searchFilter)
+              )
               .map(([k, v]) => (
                 <Col className="my-3" key={k} md={6} lg={4}>
                   <LabelCard k={k} v={v} />
