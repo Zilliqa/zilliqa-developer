@@ -1,0 +1,188 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    ext {
+        lombokVersion = '1.18.26'
+    }
+}
+//plugins {
+//    id 'io.freefair.lombok' version '6.6.3'
+//}
+
+apply plugin: 'java'
+// apply plugin: 'maven-publish'
+apply plugin: 'signing'
+repositories {
+    mavenCentral()
+}
+
+
+group 'com.firestack'
+version '1.1.0-RELEASE'
+
+
+sourceCompatibility = 1.11
+
+
+dependencies {
+    // compile files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+    compile group: 'junit', name: 'junit', version: '4.12'
+    compile "org.web3j:core:4.2.0"
+    //compileOnly "org.projectlombok:lombok:1.18.26"
+
+    annotationProcessor "org.projectlombok:lombok:1.18.26"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.26"
+    compile 'com.google.guava:guava:28.2-jre'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.14.9'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.21.12'
+}
+
+test {
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task sourceJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives jar
+    archives sourceJar
+    archives javadocJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+// publishing {
+//     publications {
+//         mavenJava(MavenPublication) {
+//             customizePom(pom)
+//             groupId = 'org.firestack'
+//             artifactId = 'laksaj'
+//             version = '1.1.0-RELEASE'
+//             from components.java
+
+//             // create the sign pom artifact
+//             pom.withXml {
+//                 def pomFile = file("${project.buildDir}/generated-pom.xml")
+//                 writeTo(pomFile)
+//                 def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+//                 artifact(pomAscFile) {
+//                     classifier = null
+//                     extension = 'pom.asc'
+//                 }
+//             }
+
+//             artifact(sourceJar) {
+//                 classifier = 'sources'
+//             }
+//             artifact(javadocJar) {
+//                 classifier = 'javadoc'
+//             }
+
+//             // create the signed artifacts
+//             project.tasks.signArchives.signatureFiles.each {
+//                 artifact(it) {
+//                     def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+//                     if (matcher.find()) {
+//                         classifier = matcher.group(1)
+//                     } else {
+//                         classifier = null
+//                     }
+//                     extension = 'jar.asc'
+//                 }
+//             }
+//         }
+//     }
+//     repositories {
+//         mavenCentral()
+//         //maven {
+//             // snapshot
+// //            url = "https://oss.sonatype.org/content/repositories/snapshots"
+//             // staging(release on page)
+//             //url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+//             //credentials {
+//             //    username 'xiaohuo'
+//             //    password System.properties['mavenpassword']
+//            // }
+//         //}
+
+//     }
+// }
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        // eliminate test-scoped dependencies (no need in maven central POMs)
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        // add all items necessary for maven central publication
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'Zilliqa java library'
+            name 'zilliqa.com Java'
+            url 'https://github.com/FireStack-Lab/LaksaJ'
+            organization {
+                name 'com.zilliqa'
+                url 'https://github.com/zilliqa'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/FireStack-Lab/LaksaJ/issues'
+            }
+            licenses {
+                license {
+                    name 'Apache License 2.0'
+                    url 'https://github.com/FireStack-Lab/LaksaJ/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/FireStack-Lab/LaksaJ'
+                connection 'scm:git:git://github.com/FireStack-Lab/LaksaJ.git'
+                developerConnection 'scm:git:ssh://git@github.com:FireStack-Lab/LaksaJ.git'
+            }
+            developers {
+                developer {
+                    name 'xiaohuo200@gmail.com'
+                }
+            }
+        }
+    }
+}
+
+//model {
+//    tasks.generatePomFileForMavenJavaPublication {
+//        destination = file("$buildDir/generated-pom.xml")
+//    }
+//    tasks.publishMavenJavaPublicationToMavenLocal {
+//        dependsOn project.tasks.signArchives
+//    }
+//    tasks.publishMavenJavaPublicationToMavenRepository {
+//        dependsOn project.tasks.signArchives
+ //   }
+//}

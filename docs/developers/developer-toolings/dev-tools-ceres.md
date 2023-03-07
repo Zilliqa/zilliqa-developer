@@ -89,7 +89,7 @@ the isolated server i.e. 222.
 Switching from testing on isolated server to pushing your dApp to production on
 Zilliqa testnet or mainnet is simple, you just need to change the value of the
 RPC server URL and Chain ID to the one specific to your network as mentioned
-[here](https://dev.zilliqa.com/docs/apis/api-introduction).
+[here](https://dev.zilliqa.com/api/introduction/api-introduction/)
 
 ### Devex
 

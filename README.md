@@ -28,7 +28,7 @@ following table is a place holder:
 
 This repository is based on the [Bazel build tool](https://bazel.build/). Bazel
 builds are mostly self-contained because Bazel downloads dependencies and
-arrange them in you workspace. The only external tools we rely on is
+arrange them in your workspace. The only external tools we rely on is
 
 - Bazelisk, ibazel or Bazel 5.2
 - Pnpm / Npm / Yarn
@@ -227,9 +227,12 @@ previous builds: `bazel clean --expunge`
 
 To get information about your current Bazel setup run `bazelisk info`.
 
+If you get bored with bazel constantly asking you for your password/to authenticate via your key, add
+`--workspace_status_command=echo` to your command line.
+
 ## Reasoning Behind Repository Organisation
 
-This reposository is organised as follows:
+This repository is organised as follows:
 
 - `docs/`: Pure documentation in `md` or `mdx` format.
 - `exmaples/`: Reference material.

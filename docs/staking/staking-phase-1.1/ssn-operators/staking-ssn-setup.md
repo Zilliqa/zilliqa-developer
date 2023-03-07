@@ -23,12 +23,12 @@ import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 Before preparing to host an SSN, please note that these are the ports that
 **must** be enabled in the SSN:
 
-| Type     | Default  | Purpose                                                  |
-| -------- | -------- | -------------------------------------------------------- |
-| Inbound  | 33133    | Protocol level port for receiving network data           |
-| Inbound  | 4201/443 | [API service](https://apidocs.zilliqa.com/#introduction) |
-| Inbound  | 4501     | Staking API service                                      |
-| Outbound | 443      | For getting initial node data for syncing                |
+| Type     | Default  | Purpose                                                                   |
+| -------- | -------- | ------------------------------------------------------------------------- |
+| Inbound  | 33133    | Protocol level port for receiving network data                            |
+| Inbound  | 4201/443 | [API service](https://dev.zilliqa.com/api/introduction/api-introduction/) |
+| Inbound  | 4501     | Staking API service                                                       |
+| Outbound | 443      | For getting initial node data for syncing                                 |
 
 Additionally, there are ports that **may** be enabled in the SSN:
 

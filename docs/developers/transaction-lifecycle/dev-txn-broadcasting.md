@@ -14,7 +14,7 @@ description: Zilliqa Transaction Broadcasting
 After signing the transaction, we may broadcast the transaction to a seed node
 (e.g. [https://dev-api.zilliqa.com](https://dev-api.zilliqa.com)) by creating a
 transaction object. The correct RPC API to use is `CreateTransaction`. Refer
-to[https://apidocs.zilliqa.com/#createtransaction](https://apidocs.zilliqa.com/#createtransaction)for
+to[https://apidocs.zilliqa.com/#createtransaction](https://dev.zilliqa.com/api/transaction-related-methods/api-transaction-create-tx) for
 more information.
 
 The seed node performs some basic validation of the JSON payload it receives,
