@@ -6,6 +6,7 @@ plugins:
     - id: trunk
       ref: v0.0.6
       uri: https://github.com/trunk-io/plugins
+
 lint:
   enabled:
     - hadolint@2.10.0
@@ -24,6 +25,7 @@ lint:
   ignore:
     - linters: [ALL]
       paths:
+      - needing-organisation/**/*
       - products/devex/public/*.js    
       - .devcontainer/*
       - .devcontainer/**

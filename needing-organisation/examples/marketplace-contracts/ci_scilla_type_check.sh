@@ -1,5 +1,5 @@
 container=$(docker run -d -p 5555:5555 --entrypoint isolatedServer zilliqa/zilliqa-isolated-server:a01fe00 -t 0 -u 0 -f boot.json)
-echo $container
+echo "$container"
 
 scilla="/scilla/0/"
 checker="${scilla}bin/scilla-checker"
@@ -7,9 +7,9 @@ stdlib="${scilla}src/stdlib"
 gas_limit="9999999"
 
 function quit {
-	rm_container=$(docker stop $container | xargs docker rm)
-	echo $rm_container
-	exit $1
+	rm_container=$(docker stop "$container" | xargs docker rm)
+	echo "$rm_container"
+	exit "$1"
 }
 
 for src in **/*.scilla; do
