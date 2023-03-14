@@ -1,9 +1,10 @@
 name: "Create application preview"
 
 on:
-  pull_request:
-    branches:
-      - main
+  # pull_request:
+  #   branches:
+  #     - main
+  push:
 
 jobs:
   build-docker:
@@ -73,10 +74,14 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      # - name: "Build and push Docker"
+      #   run: |
+      #     bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
+      #     bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
+      #     bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image
+
       - name: "Build and push Docker"
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image
 
       - name: "Creating Devops repo update"
