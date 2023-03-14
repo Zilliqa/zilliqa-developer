@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+images:
+  - name: nginx
+    newName: 298213327629.dkr.ecr.us-west-2.amazonaws.com/scilla-savant-ide
+    newTag: ${FULL_VERSION_TAG}
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: neo-savant-ide.platform.prd.z7a.xyz
+      - op: replace
+        path: "/spec/rules/1/host"
+        value: ide.zilliqa.com 
+    target:
+      kind: Ingress
+      name: neo-savant-ide
+
+namespace: neo-savant-ide-prd

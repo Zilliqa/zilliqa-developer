@@ -14,6 +14,9 @@ jobs:
   build-docker:
     # https://github.com/orgs/community/discussions/26281
 
+    permissions:
+      id-token: write
+      contents: write
     runs-on: ubuntu-22.04
     name: "Build and deploy"
     env:
@@ -61,7 +64,7 @@ jobs:
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
-          ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
+          ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
       - name: Bazel cache
         id: cache-bazel-debug
@@ -69,6 +72,35 @@ jobs:
         with:
           path: ~/.cache/bazel/
           key: ${{ runner.os }}-bazel-debug
+
+      - name: Configure AWS Credentials - production
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::298213327629:role/ecr-read-write
+          oidc-role: ${{ secrets.OIDC_ROLE }}
+          aws-region: us-west-2
+
+      - name: Login to the registry - production
+        uses: docker/login-action@v2
+        with:
+          registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
+
+      - name: "Build and push - production"
+        run: |
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_prod
+
+      - name: "Creating production update"
+        run: |
+          bazelisk run //cd:update_production
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
+          BUILD_URI_SUFFIX: ${{ github.head_ref }}
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
