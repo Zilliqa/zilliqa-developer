@@ -20,36 +20,36 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
-      - name: Preparing merged branches
-        # Fetch the ref of the base branch, just the single commit.
-        run: |
-          git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"      
+      # - name: Preparing merged branches
+      #   # Fetch the ref of the base branch, just the single commit.
+      #   run: |
+      #     git config --global user.email "bot@zilliqa.com"
+      #     git config --global user.name "Zilliqa Bot"      
 
-          echo "Running git checkout main"
+      #     echo "Running git checkout main"
 
-          git checkout main
-          git fetch --all --tags
-          git pull --all
+      #     git checkout main
+      #     git fetch --all --tags
+      #     git pull --all
 
-          # Checking out the base branch to make this our working branch and 
-          # merge the head
-          echo "Running git checkout ${{ github.base_ref }}"
+      #     # Checking out the base branch to make this our working branch and 
+      #     # merge the head
+      #     echo "Running git checkout ${{ github.base_ref }}"
 
-          git checkout ${{ github.base_ref }}
-          git fetch --all --tags
-          git pull --all
-          python config/workspace-status.py
+      #     git checkout ${{ github.base_ref }}
+      #     git fetch --all --tags
+      #     git pull --all
+      #     python config/workspace-status.py
 
-      - name: Committing head
-        # Fetch the ref of the base branch, just the single commit.
-        run: |
-          echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }}
+      # - name: Committing head
+      #   # Fetch the ref of the base branch, just the single commit.
+      #   run: |
+      #     echo "Running git merge --squash ${{ github.head_ref }}"
+      #     git merge --squash ${{ github.head_ref }}
                   
-          git add . -A
-          git commit -m "Finish merge"
-          python config/workspace-status.py
+      #     git add . -A
+      #     git commit -m "Finish merge"
+      #     python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
