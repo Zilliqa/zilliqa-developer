@@ -15,12 +15,13 @@ Detailed documentation of the Zilliqa ecosystem is found in [docs/](docs/).
 Product targets contained in this repository are released as follows: TODO(tfr):
 following table is a place holder:
 
-| Target                        | Release page        | Notes             |
-| ----------------------------- | ------------------- | ----------------- |
-| `//products/developer-portal` | portal.zilliqa.com  | Contains `//docs` |
-| `//products/dev-wallet`       | wallet.zilliqa.com  |                   |
-| `//products/dev-ex`           | explore.zilliqa.com |                   |
-| `//products/ceres`            | zilliqa.com/apps    |                   |
+| Target                        | Release page       | Notes             |
+| ----------------------------- | ------------------ | ----------------- |
+| `//products/developer-portal` | portal.zilliqa.com | Contains `//docs` |
+| `//products/dev-wallet`       | wallet.zilliqa.com |                   |
+| `//products/devex`            | devex.zilliqa.com  |                   |
+| `//products/ceres`            | zilliqa.com/apps   |                   |
+| `//products/neo-savant`       | ide.zilliqa.com    |                   |
 
 ## Building
 

@@ -69,7 +69,6 @@ class PrepareDevops(object):
             os.system("tar xvf ../{}".format(patch))
 
     def __init__(self, patches, update_type, source):
-
         self.github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
         self.full_version = version.full_version
 
@@ -222,7 +221,6 @@ class PrepareDevops(object):
         self.pr.create_issue_comment("\n\n".join(messages))
 
     def __call__(self):
-
         self.get_devops_repo()
 
         self.apply_patches()

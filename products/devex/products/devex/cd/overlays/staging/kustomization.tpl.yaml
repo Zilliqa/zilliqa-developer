@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+images:
+  - name: developer-explorer
+    newName: 816080630680.dkr.ecr.us-west-2.amazonaws.com/developer-explorer
+    newTag: ${FULL_VERSION_TAG}
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: devex.eks01uws2.stg.z7a.xyz
+      - op: replace
+        path: "/spec/rules/1/host"
+        value: stg-devex.zilliqa.com
+    target:
+      kind: Ingress
+      name: devex
+
+namespace: devex-stg

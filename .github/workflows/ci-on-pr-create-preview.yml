@@ -7,6 +7,9 @@ on:
 
 jobs:
   build-docker:
+    permissions:
+      id-token: write
+      contents: write
     runs-on: ubuntu-22.04
     name: "Build and deploy"
     env:
@@ -23,7 +26,7 @@ jobs:
         # Fetch the ref of the base branch, just the single commit.
         run: |
           git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"      
+          git config --global user.name "Zilliqa Bot"
 
           echo "Running git checkout main"
 
@@ -31,7 +34,7 @@ jobs:
           git fetch --all --tags
           git pull --all
 
-          # Checking out the base branch to make this our working branch and 
+          # Checking out the base branch to make this our working branch and
           # merge the head
           echo "Running git checkout ${{ github.base_ref }}"
 
@@ -42,10 +45,12 @@ jobs:
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }}
-                  
+          echo "Running git merge --squash ${{ env.HEAD_REF }}"
+          git merge --squash ${{ env.HEAD_REF }}
+
           git add . -A
           git commit -m "Finish merge"
           python config/workspace-status.py
@@ -53,7 +58,7 @@ jobs:
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
-          ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
+          ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
       - name: Bazel cache
         id: cache-bazel-debug
@@ -62,26 +67,65 @@ jobs:
           path: ~/.cache/bazel/
           key: ${{ runner.os }}-bazel-debug
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS Credentials - staging
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
+          oidc-role: ${{ secrets.OIDC_ROLE }}
+          aws-region: us-west-2
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to the registry - staging
+        uses: docker/login-action@v2
+        with:
+          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
-      - name: "Build and push Docker"
+      - name: "Build neo-savant"
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
+          cd products/neo-savant
+          mkdir -p savant-artifact/
+          docker build --build-arg DEPLOY_ENV="stg" -t "neo-savant:local" .
+          docker create --name extractstg "neo-savant:local"
+          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+          docker rm extractstg
 
-      - name: "Creating Devops repo update"
+      - name: "Build and push - staging"
         run: |
-          bazelisk run //cd:create_preview -- PR $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
+
+      - name: "Creating staging update"
+        run: |
+          bazelisk run //cd:update_staging
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
+
+      # - name: Install SSH key
+      #   uses: webfactory/ssh-agent@v0.7.0
+      #   with:
+      #     ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
+
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v1
+
+      # - name: "Build and push Docker"
+      #   run: |
+      #     bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
+      #     bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
+
+      # - name: "Creating Devops repo update"
+      #   run: |
+      #     bazelisk run //cd:create_preview -- PR $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #     DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
+      #     BUILD_URI_SUFFIX: ${{ github.head_ref }}
