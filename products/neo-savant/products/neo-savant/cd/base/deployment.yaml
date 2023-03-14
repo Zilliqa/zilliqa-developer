@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo-savant-ide
+  namespace: default
+  labels:
+    "app.kubernetes.io/name": "neo-savant-ide"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "neo-savant-ide"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "neo-savant-ide"
+    spec:
+      containers:
+        - image: nginx:latest
+          name: neo-savant-ide
+          ports:
+            - containerPort: 80
