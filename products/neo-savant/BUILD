@@ -155,10 +155,13 @@ container_image(
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["80"],
-    tars = [
-        ":html-folder",
-        ":nignx-conf",
-    ],
+    env = {
+        "DEPLOY_ENV": "stg",
+    },
+    # tars = [
+    #     ":html-folder",
+    #     ":nignx-conf",
+    # ],
 )
 
 container_push(
