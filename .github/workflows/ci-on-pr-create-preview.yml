@@ -7,6 +7,9 @@ on:
   push:
 
 jobs:
+  permissions:
+    id-token: write
+    contents: write
   build-docker:
     runs-on: ubuntu-22.04
     name: "Build and deploy"
