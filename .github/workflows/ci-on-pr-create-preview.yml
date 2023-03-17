@@ -71,7 +71,7 @@ jobs:
       #     aws-region: ${{ env.AWS_REGION }}
 
       - name: Configure AWS Credentials - staging
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@main
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
