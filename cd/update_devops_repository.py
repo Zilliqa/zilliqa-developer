@@ -151,6 +151,11 @@ class PrepareDevops(object):
                 title = "Preview of zilliqa-developer:{}".format(self.head_branch)
 
             print("- Creating PR")
+
+            print(title)
+            print(body)
+            print(self.devops_branch_id)
+
             self.devops_pr = repo.create_pull(
                 title=title,
                 body=body,
