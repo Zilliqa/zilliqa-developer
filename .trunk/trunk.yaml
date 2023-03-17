@@ -6,6 +6,7 @@ plugins:
     - id: trunk
       ref: v0.0.11
       uri: https://github.com/trunk-io/plugins
+
 lint:
   enabled:
     - actionlint@1.6.23
@@ -29,7 +30,8 @@ lint:
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
     - linters: [ALL]
       paths:
-        - products/devex/public/*.js
+        - needing-organisation/**/*
+        - products/devex/public/*.js    
         - .devcontainer/*
         - .devcontainer/**
         - .trunk/*out/**
@@ -46,6 +48,7 @@ lint:
         - "**/templates/*"
         - "templates/**"
         - "**/templates/**"
+
 runtimes:
   enabled:
     - go@1.18.3
