@@ -179,13 +179,13 @@ container_push(
 # CD update
 expand_workspace_status(
     name = "preview-kustomization",
-    output = "cd/applications/neo-savant-ide/overlays/preview/kustomization.yaml",
-    template = "cd/applications/neo-savant-ide/overlays/preview/kustomization.tpl.yaml",
+    output = "cd/applications/neo-savant-ide/overlays/staging/kustomization.yaml",
+    template = "cd/applications/neo-savant-ide/overlays/staging/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_preview_patch",
-    srcs = ["cd/applications/neo-savant-ide/overlays/preview/kustomization.yaml"],
+    srcs = ["cd/applications/neo-savant-ide/overlays/staging/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
