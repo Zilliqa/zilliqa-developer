@@ -36,7 +36,7 @@ common_deps = [
     "@maven//:org_bouncycastle_bcprov_jdk18on",
 ]
 
-LAKSAJ_VERSION = "2.0.0rc3-SNAPSHOT"
+LAKSAJ_VERSION = "2.0.0"
 
 java_export(
     name = "laksaj",
