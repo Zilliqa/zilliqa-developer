@@ -69,7 +69,7 @@ jobs:
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
-          ssh-private-key: ${{ secrets.SSH_SECRET_KEY }}
+          ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
       - name: Bazel cache
         id: cache-bazel-debug
