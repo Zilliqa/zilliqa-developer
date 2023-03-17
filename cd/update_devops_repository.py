@@ -70,7 +70,7 @@ class PrepareDevops(object):
 
     def __init__(self, patches, update_type, source):
 
-        self.github = Github(os.environ["DEVOPS_ACCESS_TOKEN"])
+        self.github = Github(os.environ["GITHUB_TOKEN"])
         self.full_version = version.full_version
 
         self.developer_repo = self.github.get_repo("Zilliqa/zilliqa-developer")
