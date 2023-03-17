@@ -22,48 +22,36 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
-      - name: Configure AWS Credentials - staging
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
-          oidc-role: ${{ secrets.OIDC_ROLE }}
-          aws-region: us-west-2
+      - name: Preparing merged branches
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"      
 
-      - name: Login to the registry - staging
-        uses: docker/login-action@v2
-        with:
-          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
+          echo "Running git checkout main"
 
-      # - name: Preparing merged branches
-      #   # Fetch the ref of the base branch, just the single commit.
-      #   run: |
-      #     git config --global user.email "bot@zilliqa.com"
-      #     git config --global user.name "Zilliqa Bot"      
+          git checkout main
+          git fetch --all --tags
+          git pull --all
 
-      #     echo "Running git checkout main"
+          # Checking out the base branch to make this our working branch and 
+          # merge the head
+          echo "Running git checkout ${{ github.base_ref }}"
 
-      #     git checkout main
-      #     git fetch --all --tags
-      #     git pull --all
+          git checkout ${{ github.base_ref }}
+          git fetch --all --tags
+          git pull --all
+          python config/workspace-status.py
 
-      #     # Checking out the base branch to make this our working branch and 
-      #     # merge the head
-      #     echo "Running git checkout ${{ github.base_ref }}"
-
-      #     git checkout ${{ github.base_ref }}
-      #     git fetch --all --tags
-      #     git pull --all
-      #     python config/workspace-status.py
-
-      # - name: Committing head
-      #   # Fetch the ref of the base branch, just the single commit.
-      #   run: |
-      #     echo "Running git merge --squash ${{ github.head_ref }}"
-      #     git merge --squash ${{ github.head_ref }}
+      - name: Committing head
+        # Fetch the ref of the base branch, just the single commit.
+        run: |
+          echo "Running git merge --squash ${{ github.head_ref }}"
+          git merge --squash ${{ github.head_ref }}
                   
-      #     git add . -A
-      #     git commit -m "Finish merge"
-      #     python config/workspace-status.py
+          git add . -A
+          git commit -m "Finish merge"
+          python config/workspace-status.py
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
@@ -77,13 +65,17 @@ jobs:
           path: ~/.cache/bazel/
           key: ${{ runner.os }}-bazel-debug
 
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS Credentials - staging
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
+          oidc-role: ${{ secrets.OIDC_ROLE }}
+          aws-region: us-west-2
 
+      - name: Login to the registry - staging
+        uses: docker/login-action@v2
+        with:
+          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
