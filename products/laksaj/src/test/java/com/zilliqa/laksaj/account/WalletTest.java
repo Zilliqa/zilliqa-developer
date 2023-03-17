@@ -72,49 +72,21 @@ public class WalletTest {
 
         //construct non-contract transactions
         List<Transaction> transactions = new ArrayList<>();
-        Transaction tx1 = Transaction.builder()
-                          .version(String.valueOf(pack(333, 1)))
-                          .toAddr("zil16jrfrs8vfdtc74yzhyy83je4s4c5sqrcasjlc4")
-                          .senderPubKey("035e37f311c6fa25829d29d1055256912719586971b11499d904726ec6f0d9de5b")
-                          .amount("10000002")
-                          .nonce(Integer.toString(nonce + 1))
-                          .gasPrice("2000000000")
-                          .gasLimit("50")
-                          .code("")
-                          .data("")
-                          .provider(provider)
-                          .build();
-
-        Transaction tx2 = Transaction.builder()
-                          .version(String.valueOf(pack(333, 1)))
-                          .toAddr("zil16jrfrs8vfdtc74yzhyy83je4s4c5sqrcasjlc4")
-                          .senderPubKey("035e37f311c6fa25829d29d1055256912719586971b11499d904726ec6f0d9de5b")
-                          .amount("10000003")
-                          .gasPrice("2000000000")
-                          .gasLimit("50")
-                          .nonce(Integer.toString(nonce + 2))
-                          .code("")
-                          .data("")
-                          .provider(provider)
-                          .build();
-
-        Transaction tx3 = Transaction.builder()
-                          .version(String.valueOf(pack(333, 1)))
-                          .toAddr("zil1n0lvw9dxh4jcljmzkruvexl69t08zs62ds9ats")
-                          .senderPubKey("035e37f311c6fa25829d29d1055256912719586971b11499d904726ec6f0d9de5b")
-                          .amount("10000005")
-                          .gasPrice("2000000000")
-                          .gasLimit("50")
-                          .nonce(Integer.toString(nonce + 3))
-                          .code("")
-                          .data("")
-                          .provider(provider)
-                          .build();
-
-        transactions.add(tx1);
-        transactions.add(tx2);
-        transactions.add(tx3);
-
+        for (int i =0;i < 16; ++i) {
+          Transaction tx = Transaction.builder()
+                           .version(String.valueOf(pack(333, 1)))
+                           .toAddr("zil16jrfrs8vfdtc74yzhyy83je4s4c5sqrcasjlc4")
+                           .senderPubKey("035e37f311c6fa25829d29d1055256912719586971b11499d904726ec6f0d9de5b")
+                           .amount(Integer.toString(10001000 + i))
+                           .nonce(Integer.toString(nonce + 1+i))
+                           .gasPrice("2000000000")
+                           .gasLimit("50")
+                           .code("")
+                           .data("")
+                           .provider(provider)
+                           .build();
+          transactions.add(tx);
+        }
 
         wallet.batchSign(transactions);
         provider.createTransactions(transactions);

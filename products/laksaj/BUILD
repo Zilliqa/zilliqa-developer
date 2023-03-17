@@ -1,4 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_plugin")
+load("@rules_jvm_external//:defs.bzl", "java_export")
 load(":defs.bzl", "run_tests")
 
 filegroup(
@@ -35,16 +36,19 @@ common_deps = [
     "@maven//:org_bouncycastle_bcprov_jdk18on",
 ]
 
-java_library(
+java_export(
     name = "laksaj",
     srcs = [
         ":srcs",
     ],
     data = [
     ],
+    maven_coordinates = "com.zilliqa:laksaj:2.0.0rc1-SNAPSHOT",
     plugins = [
         ":lombok-java",
     ],
+    pom_template = "pom.tmpl",
+    visibility = ["//:__subpackages__"],
     deps = common_deps,
 )
 

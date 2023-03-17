@@ -373,3 +373,41 @@ bazelisk test //products/laksaj:tests
 ```
 
 Remember that Bazel runs tests in parallel, so you will need to make sure your tests all use different testnet accounts or their nonces will clash.
+
+## Publishing
+
+```sh
+export MAVEN_USER=...
+export MAVEN_PWD=...
+export MAVEN_URL=...
+bazel run --stamp \
+  --define "maven_repo=${MAVEN_URL}" \
+  --define "maven_user=${MAVEN_USER}" \
+  --define "maven_password=${MAVEN_PWD}" \
+  --define gpg_sign=true \
+  '//products/laksaj:laksaj.publish'
+```
+
+Snapshots:
+
+```sh
+export MAVEN_URL=https://s01.oss.sonatype.org/content/repositories/snapshots
+```
+
+Staging:
+
+```sh
+export MAVEN_URL=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2
+```
+
+To set your gpg default key, get a key fingerprint from `gpg -K` and put:
+
+```sh
+default-key <key-fingerprint>
+```
+
+in `~/.gnupg/gpg.conf`. You'll need to send your key to a keyserver so that people can verify it:
+
+```sh
+gpg --keyserver keyserver.ubuntu.com --send-key <key-fingerprint>
+```

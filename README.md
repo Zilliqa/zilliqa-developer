@@ -222,6 +222,8 @@ debug.
 If you experience that it is difficult to understand what folder structure Bazel
 builds, add `--sandbox_debug`
 
+To get all output from tests, use `--test_output=all`
+
 Sometimes while debugging it is helpful to clean all to aviod artefacts from
 previous builds: `bazel clean --expunge`
 
