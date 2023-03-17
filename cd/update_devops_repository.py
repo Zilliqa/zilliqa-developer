@@ -32,7 +32,7 @@ class PrepareDevops(object):
 
     def get_devops_repo(self):
         if not os.path.exists(".infra"):
-            os.system("git clone git@github.com:Zilliqa/devops.git .infra")
+            os.system("git clone git@github.com:Zilliqa/zilliqa-developer-manifests.git .infra")
 
         ## Checking out the branch
         print("Switching branch")
