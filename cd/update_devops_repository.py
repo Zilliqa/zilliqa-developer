@@ -74,7 +74,7 @@ class PrepareDevops(object):
         self.full_version = version.full_version
 
         self.developer_repo = self.github.get_repo("Zilliqa/zilliqa-developer")
-        self.devops_repo = self.github.get_repo("Zilliqa/devops")
+        self.devops_repo = self.github.get_repo("Zilliqa/zilliqa-developer-manifests")
 
         self.patches = patches
         self.type = update_type
