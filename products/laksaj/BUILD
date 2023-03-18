@@ -1,4 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+load("@rules_java//java:defs.bzl", "java_plugin")
+load("@rules_jvm_external//:defs.bzl", "java_export")
 load(":defs.bzl", "run_tests")
 
 filegroup(
@@ -35,16 +36,28 @@ common_deps = [
     "@maven//:org_bouncycastle_bcprov_jdk18on",
 ]
 
-java_library(
+LAKSAJ_VERSION = "2.0.0"
+
+java_export(
     name = "laksaj",
     srcs = [
         ":srcs",
     ],
     data = [
     ],
+    # @TODO make this more dynamic.  There are a few issues here: the
+    # release process is, basically, manual, and so moving it to CICD
+    # isn't all that useful.
+    # The version number is pretty sensitive - needs to be increasing, and
+    # not overlap the previously issued numbers.
+    # Almost all variables are forbidden to macros (and java_export is quite
+    # a complicated macro) :-(
+    maven_coordinates = "com.zilliqa:laksaj:%s" % LAKSAJ_VERSION,
     plugins = [
         ":lombok-java",
     ],
+    pom_template = "pom.tmpl",
+    visibility = ["//:__subpackages__"],
     deps = common_deps,
 )
 

@@ -241,15 +241,15 @@ k8s_repositories()
 # Java
 # ================================================================
 
-RULES_JVM_EXTERNAL_TAG = "4.5"
+RULES_JVM_EXTERNAL_TAG = "5.1"
 
-RULES_JVM_EXTERNAL_SHA = "b17d7388feb9bfa7f2fa09031b32707df529f26c91ab9e5d909eb1676badd9a6"
+RULES_JVM_EXTERNAL_SHA = "8c3b207722e5f97f1c83311582a6c11df99226e65e2471086e296561e57cc954"
 
 http_archive(
     name = "rules_jvm_external",
     sha256 = RULES_JVM_EXTERNAL_SHA,
     strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
+    url = "https://github.com/bazelbuild/rules_jvm_external/releases/download/%s/rules_jvm_external-%s.tar.gz" % (RULES_JVM_EXTERNAL_TAG, RULES_JVM_EXTERNAL_TAG),
 )
 
 load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
@@ -265,14 +265,14 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 maven_install(
     artifacts = [
         "junit:junit:4.12",
-        "org.web3j:core:4.2.0",
-        "org.web3j:crypto:4.2.0",
-        "org.web3j:utils:4.2.0",
+        "org.web3j:core:4.9.7",
+        "org.web3j:crypto:4.9.7",
+        "org.web3j:utils:4.9.7",
         "org.projectlombok:lombok:1.18.26",
-        "com.google.guava:guava:28.2-jre",
-        "com.squareup.okhttp3:okhttp:3.14.9",
+        "com.google.guava:guava:31.1-jre",
+        "com.squareup.okhttp3:okhttp:4.9.3",
         "com.google.code.gson:gson:2.10.1",
-        "com.google.protobuf:protobuf-java:3.21.12",
+        "com.google.protobuf:protobuf-java:3.22.2",
         "org.apache.commons:commons-lang3:3.12.0",
         "org.bouncycastle:bcprov-jdk18on:1.72",
     ],

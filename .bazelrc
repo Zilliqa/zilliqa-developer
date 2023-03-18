@@ -49,6 +49,9 @@ build --experimental_remote_build_event_upload=minimal
 build --nojava_header_compilation
 test --nojava_header_compilation
 
+### Set laksaj version to alpha to avoid clashing with real version numbers
+build --define=laksaj_version=0.0.0-dev
+
 
 # Tries to import additional config
 try-import %workspace%/.bazelrc.configure
