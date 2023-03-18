@@ -14,50 +14,48 @@
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
 const state = {
-    selected: null,
-    events: []
+  selected: null,
+  events: [],
 };
 
 const getters = {
-    selected: state => state.selected,
-    list: state => state.events.reverse()
+  selected: (state) => state.selected,
+  list: (state) => state.events.reverse(),
 };
 
 const actions = {
-    AddEvents({ commit }, eventsList) {
-        eventsList.map(ev => {
-            commit('add', ev);
-        });
-    },
-    RemoveEvent({ commit }, { index }) {
-        commit('remove', { index });
-    },
-    ClearEvents({ commit }) {
-        commit('clear');
-    }
+  AddEvents({ commit }, eventsList) {
+    eventsList.map((ev) => {
+      commit("add", ev);
+    });
+  },
+  RemoveEvent({ commit }, { index }) {
+    commit("remove", { index });
+  },
+  ClearEvents({ commit }) {
+    commit("clear");
+  },
 };
-
 
 const mutations = {
-    select(state, payload) {
-        state.selected = payload;
-    },
-    add(state, payload) {
-        state.events.push(payload);
-    },
-    remove(state, { index }) {
-        state.events.splice(index, 1);
-    },
-    clear(state) {
-        state.events = [];
-    }
+  select(state, payload) {
+    state.selected = payload;
+  },
+  add(state, payload) {
+    state.events.push(payload);
+  },
+  remove(state, { index }) {
+    state.events.splice(index, 1);
+  },
+  clear(state) {
+    state.events = [];
+  },
 };
 
-
 export default {
-    namespaced: true,
-    state,
-    getters,
-    actions,
-    mutations
-}
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations,
+};

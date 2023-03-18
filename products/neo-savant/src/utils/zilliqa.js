@@ -13,28 +13,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-import { schnorr, getAddressFromPrivateKey } from '@zilliqa-js/crypto';
+import { schnorr, getAddressFromPrivateKey } from "@zilliqa-js/crypto";
 
 const generateZilliqaAccount = async () => {
-    const privateKey = await schnorr.generatePrivateKey();
+  const privateKey = await schnorr.generatePrivateKey();
 
-    const address = await getAddressFromPrivateKey(privateKey);
-    return {
-        address,
-        privateKey
-    };
-}
-
-const generateMultipleZilliqaAccounts = async (count) => {
-    let accounts = [];
-    for (let i = 1; i <= count; i++) {
-        const acc = await generateZilliqaAccount();
-
-        await accounts.push(acc);
-    }
-
-    return accounts;
+  const address = await getAddressFromPrivateKey(privateKey);
+  return {
+    address,
+    privateKey,
+  };
 };
 
+const generateMultipleZilliqaAccounts = async (count) => {
+  let accounts = [];
+  for (let i = 1; i <= count; i++) {
+    const acc = await generateZilliqaAccount();
+
+    await accounts.push(acc);
+  }
+
+  return accounts;
+};
 
 export { generateZilliqaAccount, generateMultipleZilliqaAccounts };

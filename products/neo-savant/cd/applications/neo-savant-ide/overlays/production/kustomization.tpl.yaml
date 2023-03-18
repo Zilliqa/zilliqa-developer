@@ -15,7 +15,7 @@ patches:
         value: neo-savant-ide.platform.prd.z7a.xyz
       - op: replace
         path: "/spec/rules/1/host"
-        value: ide.zilliqa.com 
+        value: ide.zilliqa.com
     target:
       kind: Ingress
       name: neo-savant-ide

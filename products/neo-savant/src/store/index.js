@@ -13,37 +13,37 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-import Vue from 'vue'
-import Vuex from 'vuex'
-import VuexPersist from 'vuex-persist'
+import Vue from "vue";
+import Vuex from "vuex";
+import VuexPersist from "vuex-persist";
 
-import accounts from './modules/accounts'
-import networks from './modules/networks'
-import files from './modules/files'
-import contracts from './modules/contracts'
-import events from './modules/events'
-import general from './modules/general'
-import transactions from './modules/transactions'
+import accounts from "./modules/accounts";
+import networks from "./modules/networks";
+import files from "./modules/files";
+import contracts from "./modules/contracts";
+import events from "./modules/events";
+import general from "./modules/general";
+import transactions from "./modules/transactions";
 // import console from './modules/console'
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 const vuexPersist = new VuexPersist({
-  key: 'savant-ide',
+  key: "savant-ide",
   storage: window.localStorage,
-  reducer: state => ({
+  reducer: (state) => ({
     accounts: state.accounts,
     contracts: state.contracts,
     events: state.events,
     files: state.files,
     general: {
-      editor: state.general.editor
+      editor: state.general.editor,
     },
     networks: state.networks,
-    transactions: state.transactions
+    transactions: state.transactions,
     // getRidOfThisModule: state.getRidOfThisModule (No one likes it.)
-  })
-})
+  }),
+});
 
 export default new Vuex.Store({
   modules: {
@@ -53,8 +53,8 @@ export default new Vuex.Store({
     contracts,
     events,
     general,
-    transactions
+    transactions,
     // console
   },
-  plugins: [vuexPersist.plugin]
-})
+  plugins: [vuexPersist.plugin],
+});

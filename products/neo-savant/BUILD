@@ -1,4 +1,3 @@
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
@@ -6,14 +5,14 @@ load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 # Filename conventions described at
 # https://create-react-app.dev/docs/running-tests#filename-conventions
-_TESTS = [
-    "src/**/*.test.js*",
-    "src/**/*.test.ts*",
-    "src/**/*.spec.js*",
-    "src/**/*.spec.ts*",
-    "src/**/__tests__/**/*.js*",
-    "src/**/__tests__/**/*.ts*",
-]
+# _TESTS = [
+#     "src/**/*.test.js*",
+#     "src/**/*.test.ts*",
+#     "src/**/*.spec.js*",
+#     "src/**/*.spec.ts*",
+#     "src/**/__tests__/**/*.js*",
+#     "src/**/__tests__/**/*.ts*",
+# ]
 
 # copy_to_bin(
 #     name = "static_files",
@@ -151,13 +150,13 @@ _RUNTIME_DEPS = [
 container_image(
     name = "image_stag",
     base = "@nginx//image",
+    env = {
+        "DEPLOY_ENV": "stg",
+    },
 
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["80"],
-    env = {
-        "DEPLOY_ENV": "stg",
-    },
     # tars = [
     #     ":html-folder",
     #     ":nignx-conf",
@@ -178,13 +177,13 @@ container_push(
 container_image(
     name = "image_prod",
     base = "@nginx//image",
+    env = {
+        "DEPLOY_ENV": "prd",
+    },
 
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["80"],
-    env = {
-        "DEPLOY_ENV": "prd",
-    },
     # tars = [
     #     ":html-folder",
     #     ":nignx-conf",

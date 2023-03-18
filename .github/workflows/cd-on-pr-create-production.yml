@@ -31,12 +31,14 @@ jobs:
 
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           git config --global user.email "bot@zilliqa.com"
           git config --global user.name "Zilliqa Bot"       
                   
-          echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }}
+          echo "Running git merge --squash ${{ env.HEAD_REF }}"
+          git merge --squash ${{ env.HEAD_REF }}
 
           echo "Running git checkout main"
 
@@ -54,9 +56,11 @@ jobs:
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          echo "Running git merge --squash ${{ github.head_ref }}"
-          git merge --squash ${{ github.head_ref }} && \
+          echo "Running git merge --squash ${{ env.HEAD_REF }}"
+          git merge --squash ${{ env.HEAD_REF }} && \
             git add . -A && \
             git commit -m "Finish merge" || echo "Nothing to merge"
           python config/workspace-status.py

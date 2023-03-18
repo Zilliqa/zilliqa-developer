@@ -15,7 +15,7 @@ patches:
         value: neo-savant-ide.eks01uws2.stg.z7a.xyz
       - op: replace
         path: "/spec/rules/1/host"
-        value: stg-ide.zilliqa.com 
+        value: stg-ide.zilliqa.com
     target:
       kind: Ingress
       name: neo-savant-ide
