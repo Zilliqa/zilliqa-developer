@@ -1,4 +1,4 @@
-# load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@io_bazel_rules_docker//docker:docker.bzl", "docker_build", "docker_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
