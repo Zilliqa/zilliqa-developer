@@ -1,4 +1,4 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+# load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@io_bazel_rules_docker//docker:docker.bzl", "docker_build", "docker_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
@@ -195,32 +195,32 @@ docker_push(
     tags = ["{FULL_VERSION_TAG}"],
 )
 
-container_image(
-    name = "image_prod",
-    base = "@nginx//image",
-    env = {
-        "DEPLOY_ENV": "prd",
-    },
+# container_image(
+#     name = "image_prod",
+#     base = "@nginx//image",
+#     env = {
+#         "DEPLOY_ENV": "prd",
+#     },
 
-    # Disabling legacy run behaviour to allow run from the command line
-    legacy_run_behavior = False,
-    ports = ["80"],
-    # tars = [
-    #     ":html-folder",
-    #     ":nignx-conf",
-    # ],
-)
+#     # Disabling legacy run behaviour to allow run from the command line
+#     legacy_run_behavior = False,
+#     ports = ["80"],
+#     # tars = [
+#     #     ":html-folder",
+#     #     ":nignx-conf",
+#     # ],
+# )
 
-container_push(
-    name = "push_image_prd",
-    format = "Docker",
-    image = ":image_prod",
-    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "scilla-savant-ide",
+# container_push(
+#     name = "push_image_prd",
+#     format = "Docker",
+#     image = ":image_prod",
+#     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
+#     repository = "scilla-savant-ide",
 
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
-)
+#     # Tagging from workspace status - requires --stamp as build args
+#     tag = "{FULL_VERSION_TAG}",
+# )
 
 ###
 # CD update
