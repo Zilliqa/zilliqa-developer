@@ -1,5 +1,5 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_build")
+# load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_build", "docker_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
@@ -174,15 +174,25 @@ docker_build(
     tags = ["816080630680.dkr.ecr.us-west-2.amazonaws.com:{FULL_VERSION_TAG}"],
 )
 
-container_push(
+# container_push(
+#     name = "push_image_stag",
+#     format = "Docker",
+#     image = ":image_stag",
+#     registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
+#     repository = "scilla-savant-ide",
+
+#     # Tagging from workspace status - requires --stamp as build args
+#     tag = "{FULL_VERSION_TAG}",
+# )
+
+docker_push(
     name = "push_image_stag",
-    format = "Docker",
     image = ":image_stag",
     registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
     repository = "scilla-savant-ide",
 
     # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
+    tags = ["{FULL_VERSION_TAG}"],
 )
 
 container_image(
