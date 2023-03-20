@@ -163,58 +163,61 @@ _RUNTIME_DEPS = [
 #     # ],
 # )
 
-# Build stage
+pkg_tar(
+    name = "package-tar",
+    srcs = [
+        ":package.json",
+    ],
+    include_runfiles = True,
+    mode = "0755",
+    package_dir = "/savant-ide/",
+    strip_prefix = ".",
+)
+
 container_image(
-    name = "build_image",
-    base = "node:14.17",
-    cmd = [
+    name = "image-package",
+    base = "@docker_node16//image",
+    env = {},
+    legacy_run_behavior = False,
+    ports = ["5000"],
+    tars = [":package-tar"],
+    workdir = "/savant-ide",
+)
+
+container_run_and_commit(
+    name = "image-with-deps",
+    commands = [
+        "mv .env_stg .env",
         "npm install",
         "npm rebuild node-sass",
         "npm run build",
     ],
-    workspace = "//:workspace",
+    image = ":image-package.tar",
 )
 
-# Production stage
+pkg_tar(
+    name = "app-tar",
+    srcs = [":**"],
+    include_runfiles = True,
+    mode = "0755",
+    package_dir = "/savant-ide",
+    strip_prefix = ".",
+)
+
 container_image(
     name = "image_stag",
-    base = "nginx:stable-alpine",
-    copy = [
-        ("//:dist", "/usr/share/nginx/html"),
-        # ("//:nginx.conf", "/etc/nginx/nginx.conf"),
-    ],
+    base = ":image-with-deps_commit.tar",
     entrypoint = [
         "nginx",
         "-g",
         "daemon off;",
     ],
-    ports = ["80"],
+    env = {},
+    legacy_run_behavior = False,
+    ports = ["3000"],
+    tars = [":app-tar"],
+    workdir = "/savant-ide",
 )
-
-# container_image(
-#     name = "image_stag",
-#     base = "node:14.17",
-#     dockerfile = "Dockerfile",
-#     context = ".",
-#     args = ["--build-arg", "DEPLOY_ENV=dev"],
-#     entrypoint = ["/bin/sh", "-c"],
-#     cmd = [
-#         "npm install && npm rebuild node-sass && npm run build && mv .env_$DEPLOY_ENV .env && nginx -g 'daemon off;'",
-#     ],
-#     labels = {
-#         "maintainer": "Your Name <your.email@example.com>",
-#     },
-# )
-
-# docker_build(
-#     name = "image_stag",
-#     build_args = {
-#         "DEPLOY_ENV": "stg",
-#     },
-#     context = "products/neo-savant-ide/",
-#     dockerfile = "Dockerfile",
-#     tags = ["816080630680.dkr.ecr.us-west-2.amazonaws.com:{FULL_VERSION_TAG}"],
-# )
 
 container_push(
     name = "push_image_stag",
@@ -227,32 +230,32 @@ container_push(
     tag = "{FULL_VERSION_TAG}",
 )
 
-# container_image(
-#     name = "image_prod",
-#     base = "@nginx//image",
-#     env = {
-#         "DEPLOY_ENV": "prd",
-#     },
+container_image(
+    name = "image_prod",
+    base = "@nginx//image",
+    env = {
+        "DEPLOY_ENV": "prd",
+    },
 
-#     # Disabling legacy run behaviour to allow run from the command line
-#     legacy_run_behavior = False,
-#     ports = ["80"],
-#     # tars = [
-#     #     ":html-folder",
-#     #     ":nignx-conf",
-#     # ],
-# )
+    # Disabling legacy run behaviour to allow run from the command line
+    legacy_run_behavior = False,
+    ports = ["80"],
+    # tars = [
+    #     ":html-folder",
+    #     ":nignx-conf",
+    # ],
+)
 
-# container_push(
-#     name = "push_image_prd",
-#     format = "Docker",
-#     image = ":image_prod",
-#     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
-#     repository = "scilla-savant-ide",
+container_push(
+    name = "push_image_prd",
+    format = "Docker",
+    image = ":image_prod",
+    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
+    repository = "scilla-savant-ide",
 
-#     # Tagging from workspace status - requires --stamp as build args
-#     tag = "{FULL_VERSION_TAG}",
-# )
+    # Tagging from workspace status - requires --stamp as build args
+    tag = "{FULL_VERSION_TAG}",
+)
 
 ###
 # CD update
