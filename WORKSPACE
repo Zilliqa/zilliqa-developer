@@ -218,6 +218,14 @@ container_pull(
     tag = "1.23.1",
 )
 
+container_pull(
+    name = "nginx-alpine",
+    digest = "sha256:ff2a5d557ca22fa93669f5e70cfbeefda32b98f8fd3d33b38028c582d700f93a",
+    registry = "index.docker.io",
+    repository = "library/nginx",
+    tag = "1.22.1-alpine",
+)
+
 # ================================================================
 # Kubernetes
 # ================================================================
