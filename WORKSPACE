@@ -226,6 +226,14 @@ container_pull(
     tag = "1.22.1-alpine",
 )
 
+container_pull(
+    name = "docker_node16",
+    digest = "sha256:4e07d6b92e6c01cc537bcb363587038d574bb511c448e7a86e21a905db49fbd9",
+    registry = "index.docker.io",
+    repository = "library/node",
+    tag = "16.19.0",
+)
+
 # ================================================================
 # Kubernetes
 # ================================================================
