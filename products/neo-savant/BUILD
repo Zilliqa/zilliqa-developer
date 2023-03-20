@@ -202,7 +202,7 @@ container_run_and_extract(
         "npm run build",
     ],
     extract_file = "/savant-ide/dist",
-    image = ":image-package.tar",
+    image = ":image-package",
 )
 
 # pkg_tar(
