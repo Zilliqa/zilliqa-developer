@@ -1,5 +1,3 @@
-# load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_build", "docker_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
@@ -164,35 +162,68 @@ _RUNTIME_DEPS = [
 #     # ],
 # )
 
-docker_build(
-    name = "image_stag",
-    build_args = {
-        "DEPLOY_ENV": "stg",
-    },
-    context = "products/neo-savant-ide/",
-    dockerfile = "Dockerfile",
-    tags = ["816080630680.dkr.ecr.us-west-2.amazonaws.com:{FULL_VERSION_TAG}"],
+# Build stage
+container_image(
+    name = "build_image",
+    base = "node:14.17",
+    cmd = [
+        "npm install",
+        "npm rebuild node-sass",
+        "npm run build",
+    ],
+    workspace = "//:workspace",
 )
 
-# container_push(
-#     name = "push_image_stag",
-#     format = "Docker",
-#     image = ":image_stag",
-#     registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-#     repository = "scilla-savant-ide",
+# Production stage
+container_image(
+    name = "image_stag",
+    base = "nginx:stable-alpine",
+    copy = [
+        ("//:dist", "/usr/share/nginx/html"),
+        # ("//:nginx.conf", "/etc/nginx/nginx.conf"),
+    ],
+    entrypoint = [
+        "nginx",
+        "-g",
+        "daemon off;",
+    ],
+    ports = ["80"],
+)
 
-#     # Tagging from workspace status - requires --stamp as build args
-#     tag = "{FULL_VERSION_TAG}",
+# container_image(
+#     name = "image_stag",
+#     base = "node:14.17",
+#     dockerfile = "Dockerfile",
+#     context = ".",
+#     args = ["--build-arg", "DEPLOY_ENV=dev"],
+#     entrypoint = ["/bin/sh", "-c"],
+#     cmd = [
+#         "npm install && npm rebuild node-sass && npm run build && mv .env_$DEPLOY_ENV .env && nginx -g 'daemon off;'",
+#     ],
+#     labels = {
+#         "maintainer": "Your Name <your.email@example.com>",
+#     },
 # )
 
-docker_push(
+# docker_build(
+#     name = "image_stag",
+#     build_args = {
+#         "DEPLOY_ENV": "stg",
+#     },
+#     context = "products/neo-savant-ide/",
+#     dockerfile = "Dockerfile",
+#     tags = ["816080630680.dkr.ecr.us-west-2.amazonaws.com:{FULL_VERSION_TAG}"],
+# )
+
+container_push(
     name = "push_image_stag",
+    format = "Docker",
     image = ":image_stag",
     registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
     repository = "scilla-savant-ide",
 
     # Tagging from workspace status - requires --stamp as build args
-    tags = ["{FULL_VERSION_TAG}"],
+    tag = "{FULL_VERSION_TAG}",
 )
 
 # container_image(
