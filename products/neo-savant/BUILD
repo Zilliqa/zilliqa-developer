@@ -1,4 +1,5 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_pull", "container_push")
+load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_extract")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
@@ -165,9 +166,6 @@ _RUNTIME_DEPS = [
 
 pkg_tar(
     name = "package-tar",
-    srcs = [
-        ":package.json",
-    ],
     include_runfiles = True,
     mode = "0755",
     package_dir = "/savant-ide/",
@@ -184,7 +182,18 @@ container_image(
     workdir = "/savant-ide",
 )
 
-container_run_and_commit(
+# container_run_and_commit(
+#     name = "image-with-deps",
+#     commands = [
+#         "mv .env_stg .env",
+#         "npm install",
+#         "npm rebuild node-sass",
+#         "npm run build",
+#     ],
+#     image = ":image-package.tar",
+# )
+
+container_run_and_extract(
     name = "image-with-deps",
     commands = [
         "mv .env_stg .env",
@@ -192,31 +201,51 @@ container_run_and_commit(
         "npm rebuild node-sass",
         "npm run build",
     ],
+    extract_file = "/savant-ide/dist",
     image = ":image-package.tar",
 )
 
-pkg_tar(
-    name = "app-tar",
-    srcs = [":**"],
-    include_runfiles = True,
-    mode = "0755",
-    package_dir = "/savant-ide",
-    strip_prefix = ".",
+# pkg_tar(
+#     name = "app-tar",
+#     srcs = [":**"],
+#     include_runfiles = True,
+#     mode = "0755",
+#     package_dir = "/savant-ide",
+#     strip_prefix = ".",
+# )
+
+container_image(
+    name = "final_image",
+    base = "@ubuntu16//image",
+    files = [
+        "extract_a1/a1.txt",
+        "extract_a2/a2.txt",
+    ],
+)
+
+container_pull(
+    name = "nginx",
+    registry = "docker.io",
+    repository = "nginx",
+    tag = "stable-alpine",
 )
 
 container_image(
     name = "image_stag",
-    base = ":image-with-deps_commit.tar",
+    base = ":nginx",
     entrypoint = [
         "nginx",
         "-g",
         "daemon off;",
     ],
     env = {},
+    # tars = [":app-tar"],
+    # workdir = "/savant-ide",
+    files = [
+        "image-with-deps/savant-ide/dist",
+    ],
     legacy_run_behavior = False,
-    ports = ["3000"],
-    tars = [":app-tar"],
-    workdir = "/savant-ide",
+    ports = ["80"],
 )
 
 container_push(
