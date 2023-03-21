@@ -81,7 +81,7 @@ jobs:
 
       - name: "Build and push - staging"
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_stag
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_stag --verbose_failures --sandbox_debug
 
       - name: "Creating staging update"
         run: |
