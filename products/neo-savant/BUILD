@@ -108,6 +108,44 @@ _RUNTIME_DEPS = [
     "//:node_modules/hdkey",
 ]
 
+# load("@npm//:node_modules.bzl", "npm_install")
+
+# nodejs_binary(
+#     name = "my_app",
+#     entry_point = "index.js",
+#     data = [".env_$DEPLOY_ENV"],
+#     deps = [
+#         "@npm//:node-sass",
+#         "//:package.json",
+#     ],
+# )
+
+# npm_install(
+#     name = "my_app_deps",
+#     package_json = "//:package.json",
+# )
+
+# filegroup(
+#     name = "env_files",
+#     srcs = glob([".env_*"]),
+# )
+
+# sh_binary(
+#     name = "npm_build",
+#     srcs = ["//:env_files"],
+#     cmd = """
+#         mv .env_$DEPLOY_ENV .env &&
+#         npm install &&
+#         npm rebuild node-sass &&
+#         npm run build
+#     """,
+#     data = [
+#         ":my_app_deps",
+#         "//:package.json",
+#     ],
+#     output_files = ["dist/"],
+# )
+
 # cra_bin.react_app_rewired(
 #     # Note: If you want to change the name make sure you update BUILD_PATH below accordingly
 #     # https://create-react-app.dev/docs/advanced-configuration/
@@ -200,8 +238,11 @@ container_run_and_extract(
         "npm install",
         "npm rebuild node-sass",
         "npm run build",
+        "mkdir -p /usr/share/nginx/html",
+        "cd /savant-ide/dist && cp -R . /usr/share/nginx/html",
+        "tar -cvf /dist.tar /usr/share/nginx/html",
     ],
-    extract_file = "/savant-ide/dist",
+    extract_file = "/dist.tar",
     image = ":image-package",
 )
 
@@ -214,14 +255,14 @@ container_run_and_extract(
 #     strip_prefix = ".",
 # )
 
-container_image(
-    name = "final_image",
-    base = "@ubuntu16//image",
-    files = [
-        "extract_a1/a1.txt",
-        "extract_a2/a2.txt",
-    ],
-)
+# container_image(
+#     name = "final_image",
+#     base = "@ubuntu16//image",
+#     files = [
+#         "extract_a1/a1.txt",
+#         "extract_a2/a2.txt",
+#     ],
+# )
 
 container_image(
     name = "image_stag",
@@ -235,7 +276,7 @@ container_image(
     # tars = [":app-tar"],
     # workdir = "/savant-ide",
     files = [
-        "image-with-deps/savant-ide/dist",
+        "image-with-deps/dist.tar",
     ],
     legacy_run_behavior = False,
     ports = ["80"],
