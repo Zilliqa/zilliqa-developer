@@ -1,4 +1,4 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push", "container_layer")
 load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_extract", "container_run_and_commit")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
@@ -180,20 +180,33 @@ pkg_tar(
     strip_prefix = ".",
 )
 
+container_layer(
+    name = "staging_layer",
+    tars = [
+        ":package_workspace",
+    ],
+)
+
+# Build an image that uses the official bazel base image and includes the
+# gcloud layer on top
 container_image(
     name = "layer_staging",
     base = "@docker_node14//image",
-    env = {
-        "DEPLOY_ENV": "stg",
-    },
-    entrypoint = [
-        "sh",
-        "-c",
-    ],
-    legacy_run_behavior = False,
-    tars = [":package_workspace"],
+    cmd = "",
+    entrypoint = "",
+    layers = [":staging_layer"],
     workdir = "/savant-ide",
 )
+
+# container_image(
+#     name = "layer_staging",
+#     base = "@docker_node14//image",
+#     cmd = "",
+#     entrypoint = "",
+#     # legacy_run_behavior = False,
+#     tars = [":package_workspace"],
+#     workdir = "/savant-ide",
+# )
 
 # container_run_and_extract(
 #     name = "extract_a2",
