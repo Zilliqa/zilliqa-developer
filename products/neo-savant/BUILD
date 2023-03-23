@@ -186,6 +186,10 @@ container_image(
     env = {
         "DEPLOY_ENV": "stg",
     },
+    entrypoint = [
+        "bash",
+        "-c",
+    ],
     legacy_run_behavior = False,
     tars = [":package_workspace"],
     workdir = "/savant-ide",
