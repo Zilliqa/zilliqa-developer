@@ -1,7 +1,7 @@
 # build stage
 FROM node:14.17 as build-stage
 
-ARG DEPLOY_ENV="dev"
+ARG DEPLOY_ENV="stg"
 
 COPY . /savant-ide
 WORKDIR /savant-ide

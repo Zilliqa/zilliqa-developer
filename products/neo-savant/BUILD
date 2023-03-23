@@ -20,14 +20,14 @@ load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 # container_image(
 #     name = "base1",
-#     base = "@docker_node16//image",
+#     base = "@docker_node14//image",
 #     legacy_run_behavior = False,
 #     workdir = "/savant-ide",
 # )
 
 # container_image(
 #     name = "base2",
-#     base = "@docker_node16//image",
+#     base = "@docker_node14//image",
 #     legacy_run_behavior = False,
 #     workdir = "/savant-ide",
 # )
@@ -47,7 +47,7 @@ load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 # container_image(
 #     name = "final_image",
-#     base = "@docker_node16//image",
+#     base = "@docker_node14//image",
 #     files = [
 #         "extract_a1/a1.txt",
 #         "extract_a2/a2.txt",
@@ -182,7 +182,7 @@ pkg_tar(
 
 container_image(
     name = "layer_staging",
-    base = "@docker_node16//image",
+    base = "@docker_node14//image",
     env = {
         "DEPLOY_ENV": "stg",
     },
@@ -200,7 +200,7 @@ container_image(
 
 # container_image(
 #     name = "final_image",
-#     base = "@docker_node16//image",
+#     base = "@docker_node14//image",
 #     files = [
 #         "extract_a2/a2.txt",
 #     ],
@@ -234,7 +234,7 @@ container_run_and_extract(
 
 container_image(
     name = "final_image",
-    base = "@docker_node16//image",
+    base = "@docker_node14//image",
     files = [
         "build_staging/savant-ide/.env",
     ],

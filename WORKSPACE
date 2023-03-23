@@ -246,11 +246,11 @@ container_pull(
 )
 
 container_pull(
-    name = "docker_node16",
-    digest = "sha256:4e07d6b92e6c01cc537bcb363587038d574bb511c448e7a86e21a905db49fbd9",
+    name = "docker_node14",
+    digest = "sha256:d8af604130d324909081188092c3b49e886a3a493c7b57c011a155e62e51358e",
     registry = "index.docker.io",
     repository = "library/node",
-    tag = "16.19.0",
+    tag = "14.17",
 )
 
 # ================================================================
