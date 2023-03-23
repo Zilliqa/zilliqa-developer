@@ -236,6 +236,9 @@ container_image(
 
 container_run_and_commit(
     name = "build_staging",
+    docker_run_flags = [
+        "--platform linux/amd64",
+    ],
     commands = [
         "./ci_build.sh",
         # "mkdir -p /usr/share/nginx/html",
