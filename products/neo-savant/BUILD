@@ -224,10 +224,7 @@ container_image(
 container_run_and_commit(
     name = "build_staging",
     commands = [
-        "mv .env_stg .env",
-        "npm install",
-        "npm rebuild node-sass",
-        "npm run build",
+        "./ci_build.sh",
         # "mkdir -p /usr/share/nginx/html",
         # "cd /savant-ide/dist && cp -R . /usr/share/nginx/html",
         # "tar -cvf /dist.tar /usr/share/nginx/html",
