@@ -221,7 +221,7 @@ container_image(
 #     image = ":image-package.tar",
 # )
 
-container_run_and_extract(
+container_run_and_commit(
     name = "build_staging",
     commands = [
         "mv .env_stg .env",
@@ -232,9 +232,24 @@ container_run_and_extract(
         # "cd /savant-ide/dist && cp -R . /usr/share/nginx/html",
         # "tar -cvf /dist.tar /usr/share/nginx/html",
     ],
-    extract_file = "/savant-ide/.env",
+    # extract_file = "/savant-ide/.env",
     image = ":layer_staging.tar",
 )
+
+# container_run_and_extract(
+#     name = "build_staging",
+#     commands = [
+#         "mv .env_stg .env",
+#         # "npm install",
+#         # "npm rebuild node-sass",
+#         # "npm run build",
+#         # "mkdir -p /usr/share/nginx/html",
+#         # "cd /savant-ide/dist && cp -R . /usr/share/nginx/html",
+#         # "tar -cvf /dist.tar /usr/share/nginx/html",
+#     ],
+#     extract_file = "/savant-ide/.env",
+#     image = ":layer_staging.tar",
+# )
 
 container_image(
     name = "final_image",
