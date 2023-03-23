@@ -1,0 +1,59 @@
+version: 0.1
+cli:
+  version: 1.5.1
+plugins:
+  sources:
+    - id: trunk
+      ref: v0.0.11
+      uri: https://github.com/trunk-io/plugins
+lint:
+  enabled:
+    - actionlint@1.6.23
+    - hadolint@2.12.0
+    - eslint@8.35.0
+    - buildifier@6.0.1
+    - git-diff-check
+    - markdownlint@0.33.0
+    - prettier@2.8.4
+    - shellcheck@0.9.0
+    - shfmt@3.5.0
+    - svgo@3.0.2
+    - gitleaks@8.16.0
+    - flake8@6.0.0
+    - isort@5.12.0
+    - black@23.1.0
+  ignore:
+    - linters: [gitleaks]
+      paths:
+        - products/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
+        - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
+    - linters: [ALL]
+      paths:
+        - products/devex/public/*.js
+        - .devcontainer/*
+        - .devcontainer/**
+        - .trunk/*out/**
+        - node_modules/**
+        - "**/node_modules/**"
+        - develop_env/**
+        - "tailwind_theme/**"
+        - "**/tailwind_theme/**"
+        - "**/develop_env/**"
+        - "bazel-*/**"
+        - "**/static/css/*"
+        - "static/css/**"
+        - "templates/*"
+        - "**/templates/*"
+        - "templates/**"
+        - "**/templates/**"
+runtimes:
+  enabled:
+    - go@1.18.3
+    - node@16.14.2
+    - python@3.10.3
+actions:
+  enabled:
+    - trunk-announce
+    - trunk-check-pre-push
+    - trunk-fmt-pre-commit
+    - trunk-upgrade-available
