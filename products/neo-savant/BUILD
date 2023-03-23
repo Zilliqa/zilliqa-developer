@@ -187,7 +187,7 @@ container_image(
         "DEPLOY_ENV": "stg",
     },
     entrypoint = [
-        "bash",
+        "sh",
         "-c",
     ],
     legacy_run_behavior = False,
