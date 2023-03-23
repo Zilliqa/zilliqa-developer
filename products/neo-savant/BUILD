@@ -4,17 +4,6 @@ load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
-# Filename conventions described at
-# https://create-react-app.dev/docs/running-tests#filename-conventions
-# _TESTS = [
-#     "src/**/*.test.js*",
-#     "src/**/*.test.ts*",
-#     "src/**/*.spec.js*",
-#     "src/**/*.spec.ts*",
-#     "src/**/__tests__/**/*.js*",
-#     "src/**/__tests__/**/*.ts*",
-# ]
-
 # copy_to_bin(
 #     name = "static_files",
 #     srcs = glob(
@@ -22,11 +11,46 @@ load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 #             "public/*",
 #             "src/**/*",
 #         ],
-#         exclude = _TESTS,
 #     ) + [
 #         "package.json",
 #         "tsconfig.json",
 #         "config-overrides.js",
+#     ],
+# )
+
+# container_image(
+#     name = "base1",
+#     base = "@docker_node16//image",
+#     legacy_run_behavior = False,
+#     workdir = "/savant-ide",
+# )
+
+# container_image(
+#     name = "base2",
+#     base = "@docker_node16//image",
+#     legacy_run_behavior = False,
+#     workdir = "/savant-ide",
+# )
+
+# container_run_and_extract(
+#     name = "extract_a1",
+#     image = ":base1.tar",
+#     commands = ["touch /a1.txt",],
+#     extract_file = "/a1.txt"
+# )
+# container_run_and_extract(
+#     name = "extract_a2",
+#     image = ":base2.tar",
+#     commands = ["touch /a2.txt",],
+#     extract_file = "/a2.txt"
+# )
+
+# container_image(
+#     name = "final_image",
+#     base = "@docker_node16//image",
+#     files = [
+#         "extract_a1/a1.txt",
+#         "extract_a2/a2.txt",
 #     ],
 # )
 
@@ -108,44 +132,6 @@ _RUNTIME_DEPS = [
     "//:node_modules/hdkey",
 ]
 
-# load("@npm//:node_modules.bzl", "npm_install")
-
-# nodejs_binary(
-#     name = "my_app",
-#     entry_point = "index.js",
-#     data = [".env_$DEPLOY_ENV"],
-#     deps = [
-#         "@npm//:node-sass",
-#         "//:package.json",
-#     ],
-# )
-
-# npm_install(
-#     name = "my_app_deps",
-#     package_json = "//:package.json",
-# )
-
-# filegroup(
-#     name = "env_files",
-#     srcs = glob([".env_*"]),
-# )
-
-# sh_binary(
-#     name = "npm_build",
-#     srcs = ["//:env_files"],
-#     cmd = """
-#         mv .env_$DEPLOY_ENV .env &&
-#         npm install &&
-#         npm rebuild node-sass &&
-#         npm run build
-#     """,
-#     data = [
-#         ":my_app_deps",
-#         "//:package.json",
-#     ],
-#     output_files = ["dist/"],
-# )
-
 # cra_bin.react_app_rewired(
 #     # Note: If you want to change the name make sure you update BUILD_PATH below accordingly
 #     # https://create-react-app.dev/docs/advanced-configuration/
@@ -165,60 +151,60 @@ _RUNTIME_DEPS = [
 #     out_dirs = ["build"],
 # )
 
-# copy_to_bin(
-#     name = "copy_test_files",
-#     srcs = glob(_TESTS),
-# )
+filegroup(
+    name = "workspace",
+    srcs = glob([
+        "**",
+    ]),
+    # visibility = ["//visibility:public"],
+)
 
-# pkg_tar(
-#     name = "html-folder",
-#     srcs = [":build"],
-#     mode = "0755",
-#     package_dir = "/usr/share/nginx/html/",
-#     strip_prefix = "build",
-# )
-
-# pkg_tar(
-#     name = "nignx-conf",
-#     srcs = ["nginx/default.conf"],
-#     mode = "0755",
-#     package_dir = "/etc/nginx/conf.d/",
-#     deps = [],
-# )
-
-# container_image(
-#     name = "image_stag",
-#     base = "@nginx//image",
-#     env = {
-#         "DEPLOY_ENV": "stg",
-#     },
-
-#     # Disabling legacy run behaviour to allow run from the command line
-#     legacy_run_behavior = False,
-#     ports = ["80"],
-#     # tars = [
-#     #     ":html-folder",
-#     #     ":nignx-conf",
-#     # ],
+# genrule(
+#     name = "concat_all_files",
+#     srcs = [
+#         ":exported_testdata",  # a filegroup with multiple files in it ==> $(locations)
+#     ],
+#     outs = ["concatenated.txt"],
+#     # cmd = "cat $(locations //some:files) $(location //other:gen) > $@",
+#     cmd = "npm install > $@",
 # )
 
 pkg_tar(
-    name = "package-tar",
+    name = "package_workspace",
+    srcs = [
+        ":workspace",
+    ],
     include_runfiles = True,
     mode = "0755",
-    package_dir = "/savant-ide/",
+    package_dir = "/savant-ide",
     strip_prefix = ".",
 )
 
 container_image(
-    name = "image-package",
+    name = "layer_staging",
     base = "@docker_node16//image",
-    env = {},
+    env = {
+        "DEPLOY_ENV": "stg",
+    },
     legacy_run_behavior = False,
-    ports = ["5000"],
-    tars = [":package-tar"],
+    tars = [":package_workspace"],
     workdir = "/savant-ide",
 )
+
+# container_run_and_extract(
+#     name = "extract_a2",
+#     image = ":base1.tar",
+#     commands = ["touch /a2.txt",],
+#     extract_file = "/a2.txt"
+# )
+
+# container_image(
+#     name = "final_image",
+#     base = "@docker_node16//image",
+#     files = [
+#         "extract_a2/a2.txt",
+#     ],
+# )
 
 # container_run_and_commit(
 #     name = "image-with-deps",
@@ -232,18 +218,42 @@ container_image(
 # )
 
 container_run_and_extract(
-    name = "image-with-deps",
+    name = "build_staging",
     commands = [
         "mv .env_stg .env",
         "npm install",
         "npm rebuild node-sass",
         "npm run build",
-        "mkdir -p /usr/share/nginx/html",
-        "cd /savant-ide/dist && cp -R . /usr/share/nginx/html",
-        "tar -cvf /dist.tar /usr/share/nginx/html",
+        # "mkdir -p /usr/share/nginx/html",
+        # "cd /savant-ide/dist && cp -R . /usr/share/nginx/html",
+        # "tar -cvf /dist.tar /usr/share/nginx/html",
     ],
-    extract_file = "/dist.tar",
-    image = ":image-package",
+    extract_file = "/savant-ide/.env",
+    image = ":layer_staging.tar",
+)
+
+container_image(
+    name = "final_image",
+    base = "@docker_node16//image",
+    files = [
+        "build_staging/savant-ide/.env",
+    ],
+)
+
+container_run_and_extract(
+    name = "image-with-deps",
+    commands = [
+        "ls",
+        # "touch /foo.txt",
+        # "echo 'test' > /foo.txt",
+    ],
+    # docker_run_flags = [
+    #     "-u",
+    #     "root",
+    # ],
+    # legacy_run_behavior = True,
+    extract_file = "/savant-ide/README.md",
+    image = ":image-package.tar",
 )
 
 # pkg_tar(
