@@ -3,5 +3,5 @@ This module contains the applications which are deployed upon merge into main an
 """
 
 APPLICATIONS = [
-    "//products/neo-savant",
+    "//products/devex",
 ]

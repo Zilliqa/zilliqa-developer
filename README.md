@@ -19,7 +19,7 @@ following table is a place holder:
 | ----------------------------- | ------------------- | ----------------- |
 | `//products/developer-portal` | portal.zilliqa.com  | Contains `//docs` |
 | `//products/dev-wallet`       | wallet.zilliqa.com  |                   |
-| `//products/dev-ex`           | explore.zilliqa.com |                   |
+| `//products/devex`            | devex.zilliqa.com   |                   |
 | `//products/ceres`            | zilliqa.com/apps    |                   |
 | `//products/neo-savant`       | ide.zilliqa.com     |                   |
 

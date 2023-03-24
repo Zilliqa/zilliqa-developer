@@ -6,4 +6,14 @@ resources:
 images:
   - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/developer-explorer
     newTag: ${FULL_VERSION_TAG}
-namespace: devel-explorer-prd
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: devex-${CUSTOM_VERSION_URI}.eks01uws2.stg.z7a.xyz
+    target:
+      kind: Ingress
+      name: developer-explorer
+
+namespace: devel-explorer-preview-${FULL_VERSION_URI}

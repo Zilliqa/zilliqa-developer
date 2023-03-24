@@ -26,7 +26,7 @@ jobs:
         # Fetch the ref of the base branch, just the single commit.
         run: |
           git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"      
+          git config --global user.name "Zilliqa Bot"
 
           echo "Running git checkout main"
 
@@ -34,7 +34,7 @@ jobs:
           git fetch --all --tags
           git pull --all
 
-          # Checking out the base branch to make this our working branch and 
+          # Checking out the base branch to make this our working branch and
           # merge the head
           echo "Running git checkout ${{ github.base_ref }}"
 
@@ -50,7 +50,7 @@ jobs:
         run: |
           echo "Running git merge --squash ${{ env.HEAD_REF }}"
           git merge --squash ${{ env.HEAD_REF }}
-                  
+
           git add . -A
           git commit -m "Finish merge"
           python config/workspace-status.py
@@ -81,7 +81,8 @@ jobs:
 
       - name: "Build and push - staging"
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:build_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image
 
       - name: "Creating staging update"
         run: |
