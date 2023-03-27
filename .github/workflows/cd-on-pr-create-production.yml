@@ -181,10 +181,19 @@ jobs:
         with:
           registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
 
+      - name: "Build neo-savant"
+        run: |
+          cd products/neo-savant
+          mkdir -p savant-artifact/
+          docker build --build-arg DEPLOY_ENV="prd" -t "neo-savant:local" .
+          docker create --name extractstg "neo-savant:local"
+          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+          docker rm extractstg
+
       - name: "Build and push - production"
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_prod
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_prod
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
       # - name: "Creating Devops repo update for PR"
       #   if: github.event_name == 'pull_request'
