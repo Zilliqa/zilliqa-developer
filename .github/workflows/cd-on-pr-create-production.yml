@@ -103,8 +103,6 @@ jobs:
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.ref }}
 
-
-
   build-production:
     # https://github.com/orgs/community/discussions/26281
 
