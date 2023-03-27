@@ -42,11 +42,9 @@ jobs:
 
       - name: Committing head
         # Fetch the ref of the base branch, just the single commit.
-        env:
-          HEAD_REF: ${{ github.head_ref }}
         run: |
-          echo "Running git merge --squash ${{ env.HEAD_REF }}"
-          git merge --squash ${{ env.HEAD_REF }}
+          echo "Running git merge --squash ${{ github.head_ref }}"
+          git merge --squash ${{ github.head_ref }}
 
           git add . -A
           git commit -m "Finish merge"
@@ -86,8 +84,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
-
-
 
   build-staging:
     permissions:
