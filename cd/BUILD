@@ -30,11 +30,9 @@ py_binary(
     args = [
         # Preview updates
         "$(location //products/developer-portal:cd_preview_patch)",
-        "$(location //products/devex:cd_preview_patch)",
     ],
     data = [
         "//products/developer-portal:cd_preview_patch",
-        "//products/devex:cd_preview_patch",
     ],
     main = "update_devops_repository.py",
     visibility = ["//visibility:public"],
@@ -82,20 +80,16 @@ py_binary(
     args = [
         # Preview updates
         "$(location //products/developer-portal:cd_preview_patch)",
-        "$(location //products/devex:cd_preview_patch)",
 
         # Production updates
         "$(location //products/developer-portal:cd_production_patch)",
-        "$(location //products/devex:cd_production_patch)",
     ],
     data = [
         # Preview updates
         "//products/developer-portal:cd_preview_patch",
-        "//products/devex:cd_preview_patch",
 
         # Production updates
         "//products/developer-portal:cd_production_patch",
-        "//products/devex:cd_production_patch",
     ],
     main = "update_devops_repository.py",
     visibility = ["//visibility:public"],
