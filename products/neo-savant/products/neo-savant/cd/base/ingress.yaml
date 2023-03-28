@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: neo-savant-ide
+  namespace: default
+  labels:
+    "app.kubernetes.io/name": "neo-savant-ide"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: ide.platform.prd.z7a.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: neo-savant-ide
+                port:
+                  number: 80
+    - host: stg-ide.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: neo-savant-ide
+                port:
+                  number: 80
