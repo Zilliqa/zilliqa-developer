@@ -158,7 +158,9 @@
   "devDependencies": {
     "@types/long": "4.0.2",
     "@types/node": "18.7.18",
-    "@types/protobufjs": "6.0.0"
+    "@types/protobufjs": "6.0.0",
+    "eslint": "^8.36.0",
+    "eslint-plugin-vue": "^5.0.0"
   },
   "overrides": {
     "@mdx-js/react": {
