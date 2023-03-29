@@ -35,7 +35,7 @@ jobs:
         # Fetch the ref of the base branch, just the single commit.
         run: |
           git config --global user.email "bot@zilliqa.com"
-          git config --global user.name "Zilliqa Bot"      
+          git config --global user.name "Zilliqa Bot"
 
           echo "Running git checkout ${{ env.DEFAULT_BRANCH }}"
 
@@ -43,7 +43,7 @@ jobs:
           git fetch --all --tags
           git pull --all
 
-          # Checking out the base branch to make this our working branch and 
+          # Checking out the base branch to make this our working branch and
           # merge the head
           echo "Running git checkout ${{ github.base_ref }}"
 
@@ -104,6 +104,7 @@ jobs:
       - name: "Build and push Docker - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
 
@@ -134,6 +135,7 @@ jobs:
       - name: "Build and push Docker - production"
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
