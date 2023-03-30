@@ -25,6 +25,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **WebSocket endpoint** | `wss://api-ws.zilliqa.com`                           |
 | **Chain ID**           | 1                                                    |
 | **EVM Chain ID**       | N/A                                                  |
+| **Zilliqa version**    | v8.1.2                                                  |
 
 ## Developer Testnet
 
@@ -37,6 +38,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **WebSocket endpoint** | `wss://dev-ws.zilliqa.com`                                           |
 | **Chain ID**           | 333                                                                  |
 | **EVM Chain ID**       | 33101                                                                |
+| **Zilliqa version**    | v8.7.0rc0                                                  |
 
 ## Isolated Server
 
@@ -47,3 +49,4 @@ productivity for dApp developers.
 |             | URL(s)                                                                                       |
 | :---------- | :------------------------------------------------------------------------------------------- |
 | **API URL** | [https://zilliqa-isolated-server.zilliqa.com/](https://zilliqa-isolated-server.zilliqa.com/) |
+| **Zilliqa version**    | v8.1.1-isolated-2                                                 |
