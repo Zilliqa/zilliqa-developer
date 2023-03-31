@@ -11,9 +11,12 @@ patches:
   - patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: dev-port-${CUSTOM_VERSION_URI}.platform.prd.z7a.xyz
+        value: zilliqa-devportal.eks01uws2.stg.z7a.xyz
+      - op: replace
+        path: "/spec/rules/1/host"
+        value: stg-dev.zilliqa.com
     target:
       kind: Ingress
       name: zilliqa-devportal
 
-namespace: devportal-preview-${FULL_VERSION_URI}
+namespace: devportal-stg

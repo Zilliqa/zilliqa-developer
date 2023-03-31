@@ -6,4 +6,5 @@ resources:
 images:
   - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
     newTag: ${FULL_VERSION_TAG}
+
 namespace: devportal-prd
