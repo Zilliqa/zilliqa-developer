@@ -1,33 +1,32 @@
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 # Not currently used as Dockerfile still part of the process
-copy_to_bin(
-    name = "static_files",
-    srcs = glob(
-        [
-            "*",
-            "config/*",
-            "datasource/*",
-            "gql/*",
-            "mongodb/*",
-        ],
-    ) + [
-        "package.json",
-        "yarn.lock",
-    ],
-)
+#copy_to_bin(
+#    name = "static_files",
+#    srcs = glob(
+#        [
+#            "*",
+#            "config/*",
+#            "datasource/*",
+#            "gql/*",
+#            "mongodb/*",
+#        ],
+#    ) + [
+#        "package.json",
+#        "yarn.lock",
+#    ],
+#)
 
-container_image(
-    name = "image",
-    base = "@node//image",
-
-    # Disabling legacy run behaviour to allow run from the command line
-    legacy_run_behavior = False,
-    ports = ["5000"],
-)
+#container_image(
+#    name = "image",
+#    base = "@node//image",
+#
+#    # Disabling legacy run behaviour to allow run from the command line
+#    legacy_run_behavior = False,
+#    ports = ["5000"],
+#)
 
 container_push(
     name = "push_image_staging",
@@ -43,7 +42,7 @@ container_push(
 container_push(
     name = "push_image_production",
     format = "Docker",
-    image = ":image",
+    image = "devex-apollo:local",
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
     repository = "developer-explorer",
 
