@@ -159,7 +159,7 @@ expand_workspace_status(
 
 pkg_tar(
     name = "cd_staging_patch",
-    srcs = ["products/devportal/cd/overlays/preview/kustomization.yaml"],
+    srcs = ["products/devportal/cd/overlays/staging/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
