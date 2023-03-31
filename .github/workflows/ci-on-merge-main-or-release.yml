@@ -91,6 +91,12 @@ jobs:
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
+      - name: "Build devex-apollo - staging"
+#        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        run: |
+          cd products/devex-apollo
+          docker build -t "devex-apollo:local" .
+
       - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
@@ -102,11 +108,12 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+#        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
+#          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
+#          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
+#          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex-apollo:push_image_staging
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'

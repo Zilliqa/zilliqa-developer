@@ -1,0 +1,39 @@
+{
+  "name": "devex-apollo",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start-dev": "NODE_ENV=dev node -r dotenv/config index.js",
+    "start": "nodemon -r dotenv/config index.js",
+    "start-prod": "node -r dotenv/config index.js"
+  },
+  "dependencies": {
+    "@zilliqa-js/crypto": "^1.0.0-alpha.1",
+    "@zilliqa-js/util": "^0.11.1",
+    "@zilliqa-js/zilliqa": "^1.0.0",
+    "apollo-datasource-rest": "^0.9.3",
+    "apollo-server": "^2.18.2",
+    "apollo-server-express": "^2.18.2",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "graphql": "^14.7.0",
+    "graphql-compose": "^9.0.4",
+    "graphql-compose-mongoose": "^9.7.0",
+    "mongodb": "^3.5.9",
+    "mongoose": "^5.10.9",
+    "node-fetch": "^2.6.0",
+    "remove": "^0.1.5"
+  },
+  "devDependencies": {
+    "cz-conventional-changelog": "3.2.0",
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
