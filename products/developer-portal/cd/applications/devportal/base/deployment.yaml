@@ -4,21 +4,21 @@ metadata:
   name: zilliqa-devportal
   namespace: default
   labels:
-    "app.kubernetes.io/name": 'zilliqa-devportal'
+    "app.kubernetes.io/name": "zilliqa-devportal"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      "app.kubernetes.io/name": 'zilliqa-devportal'
+      "app.kubernetes.io/name": "zilliqa-devportal"
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        "app.kubernetes.io/name": 'zilliqa-devportal'
+        "app.kubernetes.io/name": "zilliqa-devportal"
     spec:
       containers:
-      - image: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal:test
-        name: zilliqa-devportal
-        ports:
-        - containerPort: 80
+        - image: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal:test
+          name: zilliqa-devportal
+          ports:
+            - containerPort: 80

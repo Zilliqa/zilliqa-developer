@@ -4,7 +4,7 @@ metadata:
   name: zilliqa-devportal
   namespace: default
   labels:
-    "app.kubernetes.io/name": 'zilliqa-devportal'
+    "app.kubernetes.io/name": "zilliqa-devportal"
 spec:
   type: ClusterIP
   ports:
@@ -13,4 +13,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    "app.kubernetes.io/name": 'zilliqa-devportal'
+    "app.kubernetes.io/name": "zilliqa-devportal"
