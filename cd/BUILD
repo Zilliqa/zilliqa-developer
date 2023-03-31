@@ -23,26 +23,6 @@ py_library(
 )
 
 py_binary(
-    name = "create_preview",
-    srcs = [
-        "update_devops_repository.py",
-    ],
-    args = [
-        # Preview updates
-        "$(location //products/developer-portal:cd_preview_patch)",
-    ],
-    data = [
-        "//products/developer-portal:cd_preview_patch",
-    ],
-    main = "update_devops_repository.py",
-    visibility = ["//visibility:public"],
-    deps = [
-        ":version",
-        requirement("PyGithub"),
-    ],
-)
-
-py_binary(
     name = "update_staging",
     srcs = [
         "update_manifests_repository.py",
@@ -65,33 +45,6 @@ py_binary(
     args = ["$(location {}:cd_production_patch)".format(s) for s in APPLICATIONS],
     data = ["{}:cd_production_patch".format(s) for s in APPLICATIONS],
     main = "update_manifests_repository.py",
-    visibility = ["//visibility:public"],
-    deps = [
-        ":version",
-        requirement("PyGithub"),
-    ],
-)
-
-py_binary(
-    name = "create_production",
-    srcs = [
-        "update_devops_repository.py",
-    ],
-    args = [
-        # Preview updates
-        "$(location //products/developer-portal:cd_preview_patch)",
-
-        # Production updates
-        "$(location //products/developer-portal:cd_production_patch)",
-    ],
-    data = [
-        # Preview updates
-        "//products/developer-portal:cd_preview_patch",
-
-        # Production updates
-        "//products/developer-portal:cd_production_patch",
-    ],
-    main = "update_devops_repository.py",
     visibility = ["//visibility:public"],
     deps = [
         ":version",

@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+images:
+  - name: zilliqa-devportal
+    newName: 816080630680.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
+    newTag: ${FULL_VERSION_TAG}
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: zilliqa-devportal.eks01uws2.stg.z7a.xyz
+      - op: replace
+        path: "/spec/rules/1/host"
+        value: stg-dev.zilliqa.com
+    target:
+      kind: Ingress
+      name: zilliqa-devportal
+
+namespace: devportal-stg

@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - ../../base
 images:
-  - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
+  - name: zilliqa-devportal
+    newName: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
     newTag: ${FULL_VERSION_TAG}
+
 namespace: devportal-prd
