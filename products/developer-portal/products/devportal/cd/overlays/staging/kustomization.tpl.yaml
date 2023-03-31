@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
 images:
-  - name: 298213327629.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
+  - name: 816080630680.dkr.ecr.us-west-2.amazonaws.com/zilliqa-devportal
     newTag: ${FULL_VERSION_TAG}
 
 patches:
