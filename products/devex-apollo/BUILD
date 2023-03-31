@@ -31,7 +31,7 @@ load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 container_push(
     name = "push_image_staging",
     format = "Docker",
-    image = "devex-apollo:local",
+    image = "@devex-apollo:local",
     registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
     repository = "developer-explorer",
 
@@ -42,7 +42,7 @@ container_push(
 container_push(
     name = "push_image_production",
     format = "Docker",
-    image = "devex-apollo:local",
+    image = "@devex-apollo:local",
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
     repository = "developer-explorer",
 
