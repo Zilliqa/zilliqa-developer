@@ -10,7 +10,7 @@ pkg_tar(
     srcs = glob(["devex-apollo-artifact/**"]),
     mode = "0755",
     package_dir = "/",
-    strip_prefix = "devex-apollo",
+    strip_prefix = "devex-apollo-artifact",
 )
 
 container_image(
