@@ -22,3 +22,44 @@ spec:
           name: devex-apollo
           ports:
             - containerPort: 5000
+          env:
+            - name: BLOCKS_PER_REQUEST
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: BLOCKS_PER_REQUEST
+            - name: DOCUMENTDB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: BLOCKS_PER_REQUEST
+            - name: DOCUMENTDB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_PORT
+            - name: DOCUMENTDB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_USER
+            - name: FAST_SYNC
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: FAST_SYNC
+            - name: NETWORK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: NETWORK_URL
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: NODE_ENV
+            - name: DOCUMENTDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_PASSWORD

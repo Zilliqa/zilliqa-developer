@@ -3,6 +3,8 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - configmap.yaml
+  - secrets.yaml
 
 images:
   - name: devex-apollo
