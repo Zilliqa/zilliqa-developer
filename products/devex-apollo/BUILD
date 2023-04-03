@@ -15,7 +15,8 @@ pkg_tar(
 
 container_image(
     name = "image",
-    base = "@node:12.18.3//image",
+    base = "@node//image",
+    image_tag = "12.18.3"
     cmd = [
         "bash",
         "run.sh",
