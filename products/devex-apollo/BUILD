@@ -56,7 +56,7 @@ container_push(
 
 pkg_tar(
     name = "cd_base",
-    srcs = glob(["products/devex/cd/base/*.yaml"]),
+    srcs = glob(["products/devex-apollo/cd/base/*.yaml"]),
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
@@ -65,13 +65,13 @@ pkg_tar(
 
 expand_workspace_status(
     name = "staging-kustomization",
-    output = "products/devex/cd/overlays/staging/kustomization.yaml",
-    template = "products/devex/cd/overlays/staging/kustomization.tpl.yaml",
+    output = "products/devex-apollo/cd/overlays/staging/kustomization.yaml",
+    template = "products/devex-apollo/cd/overlays/staging/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_staging_patch",
-    srcs = ["products/devex/cd/overlays/staging/kustomization.yaml"],
+    srcs = ["products/devex-apollo/cd/overlays/staging/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
@@ -80,13 +80,13 @@ pkg_tar(
 
 expand_workspace_status(
     name = "production-kustomization",
-    output = "products/devex/cd/overlays/production/kustomization.yaml",
-    template = "products/devex/cd/overlays/production/kustomization.tpl.yaml",
+    output = "products/devex-apollo/cd/overlays/production/kustomization.yaml",
+    template = "products/devex-apollo/cd/overlays/production/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_production_patch",
-    srcs = ["products/devex/cd/overlays/production/kustomization.yaml"],
+    srcs = ["products/devex-apollo/cd/overlays/production/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
