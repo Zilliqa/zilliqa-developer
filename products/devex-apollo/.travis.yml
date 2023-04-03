@@ -12,18 +12,18 @@ addons:
   apt:
     update: true
     package:
-    - build-essential
-    - git
-    - curl
-    - zip
-    - unzip
+      - build-essential
+      - git
+      - curl
+      - zip
+      - unzip
 
 before_cache:
   - docker save -o docker_images/images.tar $(docker images -aq)
 
 cache:
   directories:
-  - docker_images
+    - docker_images
 
 before_deploy:
   - pip install --user awscli
@@ -37,4 +37,3 @@ deploy:
     - ./scripts/ci_build.sh
   on:
     branch: master
-

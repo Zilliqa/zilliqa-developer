@@ -94,7 +94,11 @@ jobs:
       - name: "Build devex-apollo - staging"
         run: |
           cd products/devex-apollo
+          mkdir -p devex-apollo-artifact/
           docker build -t "devex-apollo:local" .
+          docker create --name extractstgdevexapollo "devex-apollo:local"
+          docker cp extractstgdevexapollo:/. "$(pwd)/devex-apollo-artifact/"
+          docker rm extractstgdevexapollo
 
       - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
