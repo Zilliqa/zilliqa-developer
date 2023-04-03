@@ -30,19 +30,21 @@ spec:
                   key: BLOCKS_PER_REQUEST
             - name: DOCUMENTDB_HOST
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: devex-apollo
                   key: BLOCKS_PER_REQUEST
             - name: DOCUMENTDB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: devex-apollo
-                  key: DOCUMENTDB_PORT
+              value: 27017
             - name: DOCUMENTDB_USER
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: devex-apollo
                   key: DOCUMENTDB_USER
+            - name: DOCUMENTDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_PASSWORD
             - name: FAST_SYNC
               valueFrom:
                 configMapKeyRef:
@@ -58,8 +60,3 @@ spec:
                 configMapKeyRef:
                   name: devex-apollo
                   key: NODE_ENV
-            - name: DOCUMENTDB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: devex-apollo
-                  key: DOCUMENTDB_PASSWORD

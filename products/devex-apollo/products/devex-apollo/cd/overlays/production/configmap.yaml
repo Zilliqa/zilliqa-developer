@@ -5,9 +5,6 @@ metadata:
   namespace: devex-apollo-prd
 data:
   BLOCKS_PER_REQUEST: 50
-  DOCUMENTDB_HOST: docdb-usw2-devex-apollo-prd.cluster-cl0h2ggs1wut.us-west-2.docdb.amazonaws.com
-  DOCUMENTDB_PORT: 27017
-  DOCUMENTDB_USER: devexprdapollo
   FAST_SYNC: false
   NETWORK_URL: https://api.zilliqa.com/
   NODE_ENV: prd

@@ -5,9 +5,6 @@ metadata:
   namespace: devex-apollo-stg
 data:
   BLOCKS_PER_REQUEST: 50
-  DOCUMENTDB_HOST: docdb-usw2-devex-apollo-stg.cluster-c4dbcrlaavc0.us-west-2.docdb.amazonaws.com
-  DOCUMENTDB_PORT: 27017
-  DOCUMENTDB_USER: devexstgapollo
   FAST_SYNC: false
   NETWORK_URL: https://dev-api.zilliqa.com/
   NODE_ENV: stg
