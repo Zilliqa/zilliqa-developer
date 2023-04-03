@@ -17,10 +17,7 @@ container_image(
     name = "image",
     base = "@node//image",
     image_tag = "12.18.3"
-    cmd = [
-        "bash",
-        "run.sh",
-    ],
+    cmd = ["run.sh"],
 
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
