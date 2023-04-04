@@ -1,67 +1,89 @@
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_layer")
-load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_commit")
+load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_commit", "container_run_and_commit_layer")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 _RUNTIME_DEPS = [
 ]
 
-container_layer(
-    name = "package_json",
-    directory = "/app",
-    files = [
-        "package.json",
-        "yarn.lock",
-    ],
-    # mode = "755",
+pkg_tar(
+    name = "src",
+    srcs = glob(["**"]),
+    
+    package_dir = "/app",
 )
 
 container_image(
     name = "installer",
     base = "@node12//image",
-    layers = [":package_json"],
-    legacy_run_behavior = False,
-    workdir = "/app",
-)
 
-container_run_and_commit(
-    name = "install",
-    commands = [
-        # "apt-get update",
-        # "apt-get install -y python",
-        # "yarn install",
-        "ls",
+    tars = [
+        ":src",
     ],
-    image = ":installer.tar",
-)
 
-container_image(
-    name = "installed",
-    base = ":install_commit.tar",
-    cmd = [
-        "bash",
-        "run.sh",
-    ],
-    layers = [":src_in_layer"],
     legacy_run_behavior = False,
     ports = ["5000"],
     workdir = "/app",
 )
 
-pkg_tar(
-    name = "src",
-    srcs = glob(["**"]),
-    # mode = "0755",
-    # package_dir = "/usr/share/nginx/html/",
-    # strip_prefix = "savant-artifact",
+container_run_and_commit_layer(
+    name = "install",
+    commands = ["apt-get update", "apt-get install -y python", "yarn install"],
+    docker_run_flags = [
+        "-u",
+        "root",
+    ],
+    image = ":installer.tar",
 )
 
-container_layer(
-    name = "src_in_layer",
-    directory = "/app",
-    # files = ["package.json", "yarn.lock"],
-    tars = [":src"],
-    # mode = "755",
-)
+# container_run_and_commit(
+#     name = "install",
+#     commands = [
+#         # "apt-get update",
+#         # "apt-get install -y python",
+#         # "yarn install",
+#         "ls",
+#     ],
+#     image = ":installer.tar",
+# )
+
+# container_run_and_commit_layer(
+#     name = "test_container_commit_layer",
+#     commands = ["touch /foo.txt"],
+#     docker_run_flags = [
+#         "-u",
+#         "root",
+#     ],
+#     image = "@debian_base//image",
+# )
+
+# container_image(
+#     name = "installed",
+#     base = ":install_commit.tar",
+#     cmd = [
+#         "bash",
+#         "run.sh",
+#     ],
+#     layers = [":src_in_layer"],
+#     legacy_run_behavior = False,
+#     ports = ["5000"],
+#     workdir = "/app",
+# )
+
+# pkg_tar(
+#     name = "src",
+#     srcs = glob(["**"]),
+#     # mode = "0755",
+#     # package_dir = "/usr/share/nginx/html/",
+#     # strip_prefix = "savant-artifact",
+# )
+
+# container_layer(
+#     name = "src_in_layer",
+#     directory = "/app",
+#     # files = ["package.json", "yarn.lock"],
+#     tars = [":src"],
+#     # mode = "755",
+# )
 
 # container_image(
 #     name = "installer",
