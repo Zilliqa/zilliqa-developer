@@ -89,14 +89,14 @@ jobs:
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
-      - name: "Build devex-apollo - staging"
-        run: |
-          cd products/devex-apollo
-          mkdir -p devex-apollo-artifact/
-          docker build -t "devex-apollo:local" .
-          docker create --name extractstgdevexapollo "devex-apollo:local"
-          docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
-          docker rm extractstgdevexapollo
+      # - name: "Build devex-apollo - staging"
+      #   run: |
+      #     cd products/devex-apollo
+      #     mkdir -p devex-apollo-artifact/
+      #     docker build -t "devex-apollo:local" .
+      #     docker create --name extractstgdevexapollo "devex-apollo:local"
+      #     docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
+      #     docker rm extractstgdevexapollo
 
       - name: "Build and push Docker - staging"
         run: |
@@ -142,7 +142,7 @@ jobs:
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex-apollo:push_image_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex-apollo:push_image_production
 
       - name: "Creating staging update"
         run: |

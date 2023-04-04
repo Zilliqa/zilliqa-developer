@@ -239,8 +239,9 @@ container_pull(
 
 container_pull(
     name = "node12",
+    digest = "sha256:c1a87a687d7635e668ab37eb66e113cad004f69ec488f9da19179d0328f7959c",
     registry = "index.docker.io",
-    repository = "node",
+    repository = "library/node",
     tag = "12.18.3",
 )
 
@@ -307,3 +308,16 @@ maven_install(
         "https://repo1.maven.org/maven2",
     ],
 )
+
+# ================================================================
+# AWS
+# ================================================================
+
+# http_file(
+#     name = "gcloud_archive",
+#     downloaded_file_path = "google-cloud-sdk.tar.gz",
+#     sha256 = "a2205e35b11136004d52d47774762fbec9145bf0bda74ca506f52b71452c570e",
+#     urls = [
+#         "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-220.0.0-linux-x86_64.tar.gz",
+#     ],
+# )
