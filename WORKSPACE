@@ -245,6 +245,13 @@ container_pull(
     tag = "12.18.3",
 )
 
+container_pull(
+    name = "devex-apollo-local",
+    registry = "localhost:5000",
+    repository = "devex-apollo",
+    tag = "local",
+)
+
 # ================================================================
 # Kubernetes
 # ================================================================

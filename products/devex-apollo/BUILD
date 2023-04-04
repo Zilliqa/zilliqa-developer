@@ -1,6 +1,7 @@
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_layer")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_layer", "container_pull", "container_push")
 load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_commit", "container_run_and_commit_layer")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 _RUNTIME_DEPS = [
 ]
@@ -153,13 +154,6 @@ container_image(
 #         ":devex-apollo",
 #     ],
 # )
-
-container_pull(
-    name = "devex-apollo-local",
-    registry = "localhost:5000",
-    repository = "devex-apollo",
-    tag = "local",
-)
 
 container_image(
     name = "image",
