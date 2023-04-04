@@ -42,7 +42,7 @@ container_image(
         "bash",
         "run.sh",
     ],
-    layers = [":install-layer.tar"],
+    layers = [":install"],
     legacy_run_behavior = False,
     ports = ["5000"],
     workdir = "/app",
@@ -154,76 +154,96 @@ container_image(
 #     ],
 # )
 
-# container_push(
-#     name = "push_image_staging",
-#     format = "Docker",
-#     image = ":image",
-#     registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-#     repository = "devex-apollo",
+container_pull(
+    name = "devex-apollo-local",
+    registry = "localhost:5000",
+    repository = "devex-apollo",
+    tag = "local",
+)
 
-#     # Tagging from workspace status - requires --stamp as build args
-#     tag = "{FULL_VERSION_TAG}",
-# )
+container_image(
+    name = "image",
+    base = "@devex-apollo-local//image",
+    cmd = [
+        "bash",
+        "ls",
+    ],
 
-# container_push(
-#     name = "push_image_production",
-#     format = "Docker",
-#     image = ":image",
-#     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
-#     repository = "devex-apollo",
+    # Disabling legacy run behaviour to allow run from the command line
+    legacy_run_behavior = False,
+    ports = ["5000"],
+)
 
-#     # Tagging from workspace status - requires --stamp as build args
-#     tag = "{FULL_VERSION_TAG}",
-# )
+container_push(
+    name = "push_image_staging",
+    format = "Docker",
+    image = ":image",
+    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
+    repository = "devex-apollo",
 
-# ###
-# # CD update
+    # Tagging from workspace status - requires --stamp as build args
+    tag = "{FULL_VERSION_TAG}",
+)
 
-# pkg_tar(
-#     name = "cd_base",
-#     srcs = glob(["products/devex-apollo/cd/base/*.yaml"]),
-#     mode = "0755",
-#     package_dir = "",
-#     strip_prefix = ".",
-#     visibility = ["//visibility:public"],
-# )
+container_push(
+    name = "push_image_production",
+    format = "Docker",
+    image = ":image",
+    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
+    repository = "devex-apollo",
 
-# expand_workspace_status(
-#     name = "staging-kustomization",
-#     output = "products/devex-apollo/cd/overlays/staging/kustomization.yaml",
-#     template = "products/devex-apollo/cd/overlays/staging/kustomization.tpl.yaml",
-# )
+    # Tagging from workspace status - requires --stamp as build args
+    tag = "{FULL_VERSION_TAG}",
+)
 
-# pkg_tar(
-#     name = "cd_staging_patch",
-#     srcs = glob(
-#         ["products/devex-apollo/cd/overlays/staging/*.yaml"],
-#         exclude = ["products/devex-apollo/cd/overlays/staging/*.tpl.yaml"],
-#     ) + [
-#         "products/devex-apollo/cd/overlays/staging/kustomization.yaml",
-#     ],
-#     mode = "0755",
-#     package_dir = "",
-#     strip_prefix = ".",
-#     visibility = ["//visibility:public"],
-# )
+###
+# CD update
 
-# expand_workspace_status(
-#     name = "production-kustomization",
-#     output = "products/devex-apollo/cd/overlays/production/kustomization.yaml",
-#     template = "products/devex-apollo/cd/overlays/production/kustomization.tpl.yaml",
-# )
+pkg_tar(
+    name = "cd_base",
+    srcs = glob(["products/devex-apollo/cd/base/*.yaml"]),
+    mode = "0755",
+    package_dir = "",
+    strip_prefix = ".",
+    visibility = ["//visibility:public"],
+)
 
-# pkg_tar(
-#     name = "cd_production_patch",
-#     srcs = glob(
-#         ["products/devex-apollo/cd/overlays/production/*.yaml"],
-#         exclude = ["products/devex-apollo/cd/overlays/production/*.tpl.yaml"],
-#     ) + [
-#         "products/devex-apollo/cd/overlays/production/kustomization.yaml",
-#     ],
-#     mode = "0755",
-#     package_dir = "",
-#     strip_prefix = ".",
-#     visibility = ["//visibility:public"],
-# )
+expand_workspace_status(
+    name = "staging-kustomization",
+    output = "products/devex-apollo/cd/overlays/staging/kustomization.yaml",
+    template = "products/devex-apollo/cd/overlays/staging/kustomization.tpl.yaml",
+)
+
+pkg_tar(
+    name = "cd_staging_patch",
+    srcs = glob(
+        ["products/devex-apollo/cd/overlays/staging/*.yaml"],
+        exclude = ["products/devex-apollo/cd/overlays/staging/*.tpl.yaml"],
+    ) + [
+        "products/devex-apollo/cd/overlays/staging/kustomization.yaml",
+    ],
+    mode = "0755",
+    package_dir = "",
+    strip_prefix = ".",
+    visibility = ["//visibility:public"],
+)
+
+expand_workspace_status(
+    name = "production-kustomization",
+    output = "products/devex-apollo/cd/overlays/production/kustomization.yaml",
+    template = "products/devex-apollo/cd/overlays/production/kustomization.tpl.yaml",
+)
+
+pkg_tar(
+    name = "cd_production_patch",
+    srcs = glob(
+        ["products/devex-apollo/cd/overlays/production/*.yaml"],
+        exclude = ["products/devex-apollo/cd/overlays/production/*.tpl.yaml"],
+    ) + [
+        "products/devex-apollo/cd/overlays/production/kustomization.yaml",
+    ],
+    mode = "0755",
+    package_dir = "",
+    strip_prefix = ".",
+    visibility = ["//visibility:public"],
+)

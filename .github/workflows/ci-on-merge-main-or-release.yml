@@ -98,6 +98,11 @@ jobs:
       #     docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
       #     docker rm extractstgdevexapollo
 
+      - name: "Build devex-apollo - staging"
+        run: |
+          cd products/devex-apollo
+          docker build -t "devex-apollo:local" .
+
       - name: "Build and push Docker - staging"
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex-apollo:installed
