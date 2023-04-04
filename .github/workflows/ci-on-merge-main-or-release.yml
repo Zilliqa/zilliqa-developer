@@ -96,7 +96,6 @@ jobs:
           docker build -t "devex-apollo:local" .
           docker create --name extractstgdevexapollo "devex-apollo:local"
           docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
-          ls -la "$(pwd)/devex-apollo-artifact/"
           docker rm extractstgdevexapollo
 
       - name: "Build and push Docker - staging"
