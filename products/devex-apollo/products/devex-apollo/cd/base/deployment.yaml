@@ -32,9 +32,9 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: devex-apollo
-                  key: BLOCKS_PER_REQUEST
+                  key: DOCUMENTDB_HOST
             - name: DOCUMENTDB_PORT
-              value: 27017
+              value: "27017"
             - name: DOCUMENTDB_USER
               valueFrom:
                 secretKeyRef:
