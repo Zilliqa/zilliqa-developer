@@ -26,9 +26,10 @@ container_image(
 container_run_and_commit(
     name = "install",
     commands = [
-        "apt-get update",
-        "apt-get install -y python",
-        "yarn install",
+        # "apt-get update",
+        # "apt-get install -y python",
+        # "yarn install",
+        "ls",
     ],
     image = ":installer.tar",
 )
