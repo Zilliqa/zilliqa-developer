@@ -17,7 +17,8 @@ container_image(
     name = "image",
     base = "@node12//image",
     cmd = [
-        "ls -la"
+        "bash",
+        "ls",
     ],
 
     # Disabling legacy run behaviour to allow run from the command line
