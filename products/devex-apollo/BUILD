@@ -35,6 +35,19 @@ container_run_and_commit_layer(
     image = ":installer.tar",
 )
 
+container_image(
+    name = "installed",
+    base = "@node12//image",
+    entrypoint = [
+        "bash",
+        "run.sh",
+    ],
+    layers = [":install-layer.tar"],
+    legacy_run_behavior = False,
+    ports = ["5000"],
+    workdir = "/app",
+)
+
 # container_run_and_commit(
 #     name = "install",
 #     commands = [
