@@ -100,7 +100,7 @@ jobs:
 
       - name: "Build and push Docker - staging"
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex-apollo:push_image_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex-apollo:installed
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
