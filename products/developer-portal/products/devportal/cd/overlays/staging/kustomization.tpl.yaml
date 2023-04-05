@@ -20,4 +20,4 @@ patches:
       kind: Ingress
       name: zilliqa-devportal
 
-namespace: devportal-stg
+namespace: devportal-staging

@@ -20,4 +20,4 @@ patches:
       kind: Ingress
       name: devex
 
-namespace: devex-stg
+namespace: devex-staging

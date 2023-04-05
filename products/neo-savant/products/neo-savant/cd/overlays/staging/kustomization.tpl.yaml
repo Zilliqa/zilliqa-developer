@@ -20,4 +20,4 @@ patches:
       kind: Ingress
       name: neo-savant-ide
 
-namespace: neo-savant-ide-stg
+namespace: neo-savant-ide-staging
