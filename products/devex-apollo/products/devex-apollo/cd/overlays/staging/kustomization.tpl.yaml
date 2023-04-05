@@ -21,6 +21,6 @@ patches:
         value: stg-devex.zilliqa.com
     target:
       kind: Ingress
-      name: devex
+      name: devex-apollo
 
 namespace: devex-apollo-stg
