@@ -9,7 +9,7 @@ pkg_tar(
     name = "devex-apollo",
     srcs = glob(["devex-apollo-artifact/**"]),
     mode = "0755",
-    package_dir = "/app/",
+    package_dir = "/",
     strip_prefix = "devex-apollo-artifact",
 )
 
@@ -18,7 +18,7 @@ container_image(
     base = "@node12//image",
     cmd = [
         "bash",
-        "ls",
+        "run.sh",
     ],
 
     # Disabling legacy run behaviour to allow run from the command line

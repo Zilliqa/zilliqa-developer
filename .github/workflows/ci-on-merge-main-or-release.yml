@@ -91,12 +91,23 @@ jobs:
 
       - name: "Build devex-apollo - staging"
         run: |
+          echo $FULL_VERSION_TAG
           cd products/devex-apollo
           mkdir -p devex-apollo-artifact/
           docker build -t "devex-apollo:local" .
           docker create --name extractstgdevexapollo "devex-apollo:local"
           docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
           docker rm extractstgdevexapollo
+
+      - name: "Build neo-savant - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        run: |
+          cd products/neo-savant
+          mkdir -p savant-artifact/
+          docker build --build-arg DEPLOY_ENV="stg" -t "neo-savant:local" .
+          docker create --name extractstg "neo-savant:local"
+          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+          docker rm extractstg
 
       - name: "Build and push Docker - staging"
         run: |

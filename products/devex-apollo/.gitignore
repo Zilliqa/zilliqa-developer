@@ -2,3 +2,4 @@
 /mongodb/data
 .env
 *.swp
+/devex-apollo-artifact
