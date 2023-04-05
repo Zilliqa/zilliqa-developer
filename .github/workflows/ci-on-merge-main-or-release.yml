@@ -97,11 +97,12 @@ jobs:
 
       - name: "Build and push devex-apollo - staging"
         run: |
+          VERSION=$(cat VERSION)
           cd products/devex-apollo
           mkdir -p devex-apollo-artifact/
           docker build -t devex-apollo:local .
-          docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$(cat VERSION)
-          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$(cat VERSION)
+          docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
+          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
