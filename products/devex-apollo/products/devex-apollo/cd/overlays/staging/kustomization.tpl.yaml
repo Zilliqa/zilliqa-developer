@@ -23,4 +23,4 @@ patches:
       kind: Ingress
       name: devex-apollo
 
-namespace: devex-apollo-stg
+namespace: devex-apollo-staging

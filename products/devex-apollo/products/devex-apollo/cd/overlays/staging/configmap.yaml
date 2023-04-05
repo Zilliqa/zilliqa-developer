@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: devex-apollo
-  namespace: devex-apollo-stg
+  namespace: devex-apollo-staging
 data:
   BLOCKS_PER_REQUEST: "50"
   FAST_SYNC: "false"
