@@ -152,7 +152,7 @@ connection.once("open", function () {
           .sort({ customId: -1 })
           .limit(1)
           .exec((err, res) => {
-            const latestBlockInDB = res == null ? 0 : res.customId;
+            const latestBlockInDB = res === null ? 0 : res.customId;
             console.log(
               `Blocks need to be synced from ${latestBlockInNetwork} to ${latestBlockInDB}`
             );
