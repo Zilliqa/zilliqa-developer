@@ -70,6 +70,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
+      - name: Get tag version
+        id: get-version
+        run: |
+          python config/workspace-status.py | grep FULL_VERSION_TAG | awk '{print $2}' > VERSION
+          cat VERSION
+
       - name: Bazel cache
         id: cache-bazel-debug
         uses: actions/cache@v3.0.4
@@ -89,17 +95,13 @@ jobs:
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
-      - name: "Build devex-apollo - staging"
+      - name: "Build and push devex-apollo - staging"
         run: |
-          echo $(cat bazel-out/volatile-status.txt | grep FULL_VERSION_TAG | awk '{print $2}')
-          FULL_VERSION_TAG=$(cat bazel-out/volatile-status.txt | grep FULL_VERSION_TAG | awk '{print $2}')
-          echo $FULL_VERSION_TAG
           cd products/devex-apollo
           mkdir -p devex-apollo-artifact/
-          docker build -t "devex-apollo:local" .
-          docker create --name extractstgdevexapollo "devex-apollo:local"
-          docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
-          docker rm extractstgdevexapollo
+          docker build -t devex-apollo:local .
+          docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$(cat VERSION)
+          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$(cat VERSION)
 
       - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'

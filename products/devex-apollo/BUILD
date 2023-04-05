@@ -9,8 +9,8 @@ pkg_tar(
     name = "devex-apollo",
     srcs = glob(["devex-apollo-artifact/**"]),
     mode = "0755",
-    package_dir = "/",
-    strip_prefix = "devex-apollo-artifact",
+    package_dir = "/app/",
+    strip_prefix = ".",
 )
 
 container_image(
@@ -20,13 +20,15 @@ container_image(
         "bash",
         "run.sh",
     ],
+    files = ["server:run.sh"],
 
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["5000"],
-    tars = [
-        ":devex-apollo",
-    ],
+    workdir = "/app/",
+    #tars = [
+    #    ":devex-apollo",
+    #],
 )
 
 container_push(
