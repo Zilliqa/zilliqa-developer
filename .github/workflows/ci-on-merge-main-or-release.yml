@@ -91,6 +91,8 @@ jobs:
 
       - name: "Build devex-apollo - staging"
         run: |
+          echo $(cat bazel-out/volatile-status.txt | grep FULL_VERSION_TAG | awk '{print $2}')
+          FULL_VERSION_TAG=$(cat bazel-out/volatile-status.txt | grep FULL_VERSION_TAG | awk '{print $2}')
           echo $FULL_VERSION_TAG
           cd products/devex-apollo
           mkdir -p devex-apollo-artifact/
