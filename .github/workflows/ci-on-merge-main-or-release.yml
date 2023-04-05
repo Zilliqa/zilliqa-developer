@@ -105,16 +105,6 @@ jobs:
           docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build devex-apollo - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          cd products/devex-apollo
-          mkdir -p devex-apollo-artifact/
-          docker build -t "devex-apollo:local" .
-          docker create --name extractstgdevexapollo "devex-apollo:local"
-          docker cp extractstgdevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
-          docker rm extractstgdevexapollo
-
       - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
@@ -147,22 +137,12 @@ jobs:
           registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - production"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.event_name == 'release' && github.event.action == 'created'
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
           docker tag devex-apollo:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
-
-      - name: "Build devex-apollo - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
-        run: |
-          cd products/devex-apollo
-          mkdir -p devex-apollo-artifact/
-          docker build -t "devex-apollo:local" .
-          docker create --name extractprddevexapollo "devex-apollo:local"
-          docker cp extractprddevexapollo:/app/. "$(pwd)/devex-apollo-artifact/"
-          docker rm extractprddevexapollo
 
       - name: "Build neo-savant - production"
         if: github.event_name == 'release' && github.event.action == 'created'
