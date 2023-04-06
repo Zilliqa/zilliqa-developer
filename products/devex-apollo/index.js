@@ -8,12 +8,8 @@ import GQLSchema from "./gql/schema2.js";
 import Api from "./datasource/api.js";
 import config from "./config/config.js";
 
-import {
-  txBlockReducer,
-  txnReducer,
-  transitionReducer,
-} from "./mongodb/reducer.js";
-import { TxBlockModel, TxnModel, TransitionModel } from "./mongodb/model.js";
+import { txBlockReducer, txnReducer } from "./mongodb/reducer.js";
+import { TxBlockModel, TxnModel } from "./mongodb/model.js";
 
 const { ApolloServer } = apollo;
 

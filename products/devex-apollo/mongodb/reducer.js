@@ -2,8 +2,7 @@
 // at the same time doing some primary formatting
 
 import { pubKeyToHex } from "../util.js";
-import Api from "../datasource/api.js";
-const api = new Api();
+
 export const txBlockReducer = (txBlock) => {
   return {
     ...txBlock,
@@ -42,7 +41,7 @@ export const transitionReducer = async (txn) => {
   return transitions;
 };
 
-export const txnReducer = (txn, block) => {
+export const txnReducer = (txn) => {
   let type = "payment";
 
   if (txn.toAddr === "0000000000000000000000000000000000000000") {

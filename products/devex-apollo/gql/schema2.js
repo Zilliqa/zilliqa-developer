@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import pkg from "graphql-compose-mongoose";
 const { composeMongoose } = pkg;
 
@@ -6,7 +5,6 @@ import pkg2 from "graphql-compose";
 const { schemaComposer } = pkg2;
 
 import { TxnModel, TransitionModel } from "../mongodb/model.js";
-import { stripHexPrefix, addHexPrefix } from "../util.js";
 
 const customizationOptions = {}; // left it empty for simplicity, described below
 const TxTC = composeMongoose(TxnModel, customizationOptions);
