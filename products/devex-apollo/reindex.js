@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import config from "./config/config.js";
-import { TxBlockModel, TxnModel, TransitionModel } from "./mongodb/model.js";
+import { TxBlockModel, TxnModel } from "./mongodb/model.js";
 
 mongoose.connect(config.dbUrl, { ...config.mongooseOpts });
 
