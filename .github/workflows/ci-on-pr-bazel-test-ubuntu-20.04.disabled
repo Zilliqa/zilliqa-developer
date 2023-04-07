@@ -47,7 +47,7 @@ jobs:
       - name: "Building debug"
         run: |
           python --version
-          bazelisk build --keep_going --disk_cache=~/.cache/bazel/  //...
+          bazelisk build --jobs=1 --keep_going --disk_cache=~/.cache/bazel/  //...
 
       - name: "Running tests"
         run: |
