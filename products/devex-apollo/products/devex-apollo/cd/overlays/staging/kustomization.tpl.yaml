@@ -18,7 +18,7 @@ patches:
         value: stg-devex-apollo.eks01uws2.stg.z7a.xyz
       - op: replace
         path: "/spec/rules/1/host"
-        value: stg-devex.zilliqa.com
+        value: stg-devex-apollo.zilliqa.com
     target:
       kind: Ingress
       name: devex-apollo

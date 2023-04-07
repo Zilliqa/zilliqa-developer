@@ -84,7 +84,6 @@ jobs:
           cat VERSION
 
       - name: Configure AWS Credentials - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
@@ -92,13 +91,11 @@ jobs:
           oidc-role: ${{ secrets.OIDC_ROLE }}
 
       - name: Login to the registry - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: docker/login-action@v2
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -162,7 +159,6 @@ jobs:
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
       - name: "Creating staging update"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run //cd:update_staging
         env:
