@@ -103,7 +103,6 @@ jobs:
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           cd products/neo-savant
           mkdir -p savant-artifact/
@@ -113,7 +112,6 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
