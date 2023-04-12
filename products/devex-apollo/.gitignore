@@ -1,0 +1,5 @@
+/node_modules
+/mongodb/data
+.env
+*.swp
+/devex-apollo-artifact

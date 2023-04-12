@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devex-apollo
+  namespace: devex-apollo-staging
+data:
+  BLOCKS_PER_REQUEST: "50"
+  FAST_SYNC: "false"
+  NETWORK_URL: "https://dev-api.zilliqa.com/"
+  NODE_ENV: "stg"

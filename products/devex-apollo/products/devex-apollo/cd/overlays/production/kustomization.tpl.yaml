@@ -3,21 +3,24 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - configmap.yaml
+  - sealed-secrets.yaml
+
 images:
-  - name: nginx
-    newName: 816080630680.dkr.ecr.us-west-2.amazonaws.com/scilla-savant-ide
+  - name: devex-apollo
+    newName: 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo
     newTag: ${FULL_VERSION_TAG}
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: neo-savant-ide.eks01uws2.stg.z7a.xyz
+        value: devex-apollo.platform.prd.z7a.xyz
       - op: replace
         path: "/spec/rules/1/host"
-        value: stg-ide.zilliqa.com
+        value: devex-apollo.zilliqa.com
     target:
       kind: Ingress
-      name: neo-savant-ide
+      name: devex-apollo
 
-namespace: neo-savant-ide-staging
+namespace: devex-apollo-prd

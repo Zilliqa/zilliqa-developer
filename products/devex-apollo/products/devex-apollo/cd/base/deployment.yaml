@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devex-apollo
+  namespace: default
+  labels:
+    "app.kubernetes.io/name": "devex-apollo"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "devex-apollo"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "devex-apollo"
+    spec:
+      containers:
+        - image: devex-apollo:latest
+          name: devex-apollo
+          ports:
+            - containerPort: 5000
+          env:
+            - name: BLOCKS_PER_REQUEST
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: BLOCKS_PER_REQUEST
+            - name: DOCUMENTDB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_HOST
+            - name: DOCUMENTDB_PORT
+              value: "27017"
+            - name: DOCUMENTDB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_USER
+            - name: DOCUMENTDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_PASSWORD
+            - name: FAST_SYNC
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: FAST_SYNC
+            - name: NETWORK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: NETWORK_URL
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: devex-apollo
+                  key: NODE_ENV
