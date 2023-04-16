@@ -200,4 +200,307 @@ describe("BurnAnyTokenZRC2Test", () => {
       "The admin must have all unburned tokens"
     );
   });
+
+  it("Should be possible to burn via allowances", async () => {
+    setAccount(0);
+    await zrc2contract.Transfer(useraddress, 100);
+    await burncontract.ChangeBurnCancelBlocks(0);
+
+    // This is rather dodgy, because we're reusing the admin address.
+    // @todo when we have transfers, use a second user address for this.
+    setAccount(1);
+    await zrc2contract.IncreaseAllowance(adminaddress, 100);
+    await burncontract.UpdateBurnAllowance(zrc2contract.address, 100);
+
+    // Now the allowance is set up, we should be able to burn the tokens by
+    // sending them via the allowance,
+    setAccount(0);
+    await zrc2contract.TransferFrom(useraddress, burncontract.address, 100);
+    await burncontract.FinaliseBurn(zrc2contract.address, useraddress);
+
+    const pending_burn = await burncontract.pending_burn();
+    const balances = await zrc2contract.balances();
+
+    // This should have worked ..
+    assert(
+      pending_burn[useraddress] == null,
+      "The user should have no pending burns"
+    );
+    assert(balances[useraddress] == 0, "The user should have no tokens");
+    assert(
+      balances[burncontract.address!.toLowerCase()] == 100,
+      "The contract should have 100 tokens"
+    );
+    assert(
+      balances[adminaddress] == 99900,
+      "The admin must have all unburned tokens"
+    );
+  });
+
+  it("Should not be possible to burn more tokens than the allowance", async () => {
+    setAccount(0);
+    await zrc2contract.Transfer(useraddress, 100);
+    await burncontract.ChangeBurnCancelBlocks(0);
+
+    setAccount(1);
+    // We'll check that the events fire properly here so as not to have another test
+    // case (and thus speed up tests)
+    {
+      let tx = await burncontract.UpdateBurnAllowance(zrc2contract.address, 50);
+      expect(tx).to.eventLogWithParams(
+        "UpdateBurnAllowanceSuccess",
+        { value: zrc2contract.address.toLowerCase(), vname: "token_address" },
+        { value: "50", vname: "token_amount" },
+        { value: useraddress, vname: "updated_by" }
+      );
+    }
+    {
+      let tx = await zrc2contract.Transfer(burncontract.address!, 100);
+      expect(tx).to.nested.include({ "receipt.accepted": false });
+      expect(tx).to.nested.include({ "receipt.errors.1[0]": 7 });
+    }
+
+    // Burn finalisation should still work.
+    setAccount(0);
+    {
+      await burncontract.FinaliseBurn(zrc2contract.address, useraddress);
+    }
+
+    // The user should still have their tokens
+    const pending_burn = await burncontract.pending_burn();
+    const balances = await zrc2contract.balances();
+    assert(
+      pending_burn[useraddress] == null,
+      "The user should have no pending burns"
+    );
+    assert(balances[useraddress] == 100, "The user should have 100 tokens");
+    // 0 - in fact, this will be undefined
+    assert(
+      balances[burncontract.address!.toLowerCase()] === undefined,
+      "The contract should have 0 tokens"
+    );
+    assert(
+      balances[adminaddress] == 99900,
+      "The admin must have all unburned tokens"
+    );
+  });
+
+  it("Should be possible to hand over control of the contract", async () => {
+    setAccount(0);
+    // First, check that you can abort a failed ownership request.
+    await burncontract.SetContractOwnershipRecipient(zrc2contract.address);
+
+    setAccount(1);
+    // We should fail to take ownership..
+    {
+      let tx = await burncontract.AcceptContractOwnership();
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    // Now do it right ..
+    setAccount(0);
+    await burncontract.SetContractOwnershipRecipient(useraddress);
+
+    setAccount(1);
+    await burncontract.AcceptContractOwnership();
+
+    const owner = await burncontract.contract_owner();
+    const recipient = await burncontract.contract_ownership_recipient();
+
+    assert(owner === useraddress.toLowerCase());
+    assert(recipient === "0x0000000000000000000000000000000000000000");
+  });
+
+  it("Should be possible to pause a single ZRC2", async () => {
+    setAccount(0);
+    await zrc2contract.Transfer(useraddress, 100);
+
+    // You can only pause if you're the owner.
+    setAccount(1);
+    {
+      let tx = await burncontract.Pause(zrc2contract.address);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    // Set up some allowances so that we might succeed later on.
+    await burncontract.UpdateBurnAllowance(zrc2contract.address, 50);
+    await zrc2contract.IncreaseAllowance(adminaddress, 50);
+
+    {
+      let paused = await burncontract.paused();
+      let paused_zrc2 = await burncontract.paused_zrc2();
+
+      // Annoyingly, can't check this with current hardhat-scilla-plugin
+      expect(paused["constructor"]).to.equal("False");
+      expect(paused_zrc2).to.be.empty;
+    }
+
+    {
+      // .. so be the owner
+      setAccount(0);
+      await burncontract.Pause(zrc2contract.address);
+      let paused = await burncontract.paused();
+      let paused_zrc2 = await burncontract.paused_zrc2();
+      let zca = zrc2contract.address.toLowerCase();
+      expect(paused_zrc2[zca]["constructor"]).to.equal("True");
+    }
+    setAccount(1);
+    {
+      let tx = await burncontract.UpdateBurnAllowance(
+        zrc2contract.address,
+        100
+      );
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+    {
+      let tx = await zrc2contract.Transfer(burncontract.address!, 50);
+      //console.log(`xTy ${JSON.stringify(tx)}`);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.1[0]": 7 });
+    }
+
+    setAccount(0);
+    {
+      let tx = await zrc2contract.TransferFrom(
+        useraddress,
+        burncontract.address,
+        50
+      );
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.1[0]": 7 });
+    }
+
+    setAccount(1);
+    {
+      let tx = await burncontract.CancelBurn(zrc2contract.address);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    {
+      let tx = await burncontract.FinaliseBurn(
+        zrc2contract.address,
+        useraddress
+      );
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+    // You need to be admin to unpause
+    setAccount(1);
+    {
+      let tx = await burncontract.UnPause(zrc2contract.address);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    setAccount(0);
+    await burncontract.UnPause(zrc2contract.address);
+    {
+      let paused = await burncontract.paused();
+      let paused_zrc2 = await burncontract.paused_zrc2();
+      // Annoyingly, can't check this with current hardhat-scilla-plugin
+      expect(paused["constructor"]).to.equal("False");
+      expect(paused_zrc2).to.be.empty;
+    }
+  });
+
+  it("Should be possible to pause everything", async () => {
+    setAccount(0);
+    await zrc2contract.Transfer(useraddress, 100);
+
+    // You can only pause if you're the owner.
+    setAccount(1);
+    {
+      let tx = await burncontract.PauseAll();
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    // Set up some allowances so that we might succeed later on.
+    await burncontract.UpdateBurnAllowance(zrc2contract.address, 50);
+    await zrc2contract.IncreaseAllowance(adminaddress, 50);
+
+    {
+      let paused = await burncontract.paused();
+      let paused_zrc2 = await burncontract.paused_zrc2();
+
+      // Annoyingly, can't check this with current hardhat-scilla-plugin
+      expect(paused["constructor"]).to.equal("False");
+      expect(paused_zrc2).to.be.empty;
+    }
+
+    {
+      // .. so be the owner
+      setAccount(0);
+      await burncontract.PauseAll();
+      let paused = await burncontract.paused();
+      let paused_zrc2 = await burncontract.paused_zrc2();
+      let zca = zrc2contract.address.toLowerCase();
+      expect(paused["constructor"]).to.equal("True");
+      expect(paused_zrc2).to.be.empty;
+    }
+
+    setAccount(1);
+    {
+      let tx = await burncontract.UpdateBurnAllowance(
+        zrc2contract.address,
+        100
+      );
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+    {
+      let tx = await zrc2contract.Transfer(burncontract.address!, 50);
+      //console.log(`xTy ${JSON.stringify(tx)}`);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.1[0]": 7 });
+    }
+
+    setAccount(0);
+    {
+      let tx = await zrc2contract.TransferFrom(
+        useraddress,
+        burncontract.address,
+        50
+      );
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.1[0]": 7 });
+    }
+
+    setAccount(1);
+    {
+      let tx = await burncontract.CancelBurn(zrc2contract.address);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    {
+      let tx = await burncontract.FinaliseBurn(
+        zrc2contract.address,
+        useraddress
+      );
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+    // You need to be admin to unpause
+    setAccount(1);
+    {
+      let tx = await burncontract.UnPause(zrc2contract.address);
+      expect(tx).to.nested.include({ "receipt.success": false });
+      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+    }
+
+    setAccount(0);
+    await burncontract.UnPauseAll();
+    {
+      let paused = await burncontract.paused();
+      let paused_zrc2 = await burncontract.paused_zrc2();
+      // Annoyingly, can't check this with current hardhat-scilla-plugin
+      expect(paused["constructor"]).to.equal("False");
+      expect(paused_zrc2).to.be.empty;
+    }
+  });
 });

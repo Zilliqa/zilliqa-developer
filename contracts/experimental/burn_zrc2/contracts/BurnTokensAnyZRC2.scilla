@@ -283,7 +283,7 @@ end
 (* Unpause the contract - only owner or multi sig can call *)
 transition UnPause(token_address: ByStr20)
   IsOwner _sender;
-  paused_zrc2[token_address] := bool_unpaused;
+  delete paused_zrc2[token_address];
 
   e = {
         _eventname: "UnPauseSuccess";
@@ -374,6 +374,7 @@ end
 
 (* Cancels a scheduled burn and returns funds to sender *)
 transition CancelBurn(token:ByStr20)
+  IsNotPaused token;
   FinaliseBurnHelper token _sender;
   somependingamount <- pending_burn[token][_sender];
   match somependingamount with
@@ -400,6 +401,7 @@ transition ChangeBurnCancelBlocks(new_cancel_blocks: Uint32)
 end
 
 transition FinaliseBurn(token_address : ByStr20, wallet_address : ByStr20)
+  IsNotPaused token_address;
   FinaliseBurnHelper token_address wallet_address
 end
 
