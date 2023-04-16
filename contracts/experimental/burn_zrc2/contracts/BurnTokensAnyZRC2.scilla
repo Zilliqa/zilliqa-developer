@@ -188,7 +188,7 @@ procedure FinaliseBurnHelper(token_address: ByStr20,
         end;
 
         (* Emit a success message *)
-        e = {_eventname: "Token Burn Confirmation"; token_address: token_address; 
+        e = {_eventname: "TokenBurnConfirmation"; token_address: token_address; 
         token_amount: pendingburn; burnt_by: wallet_address};
         event e;
 
