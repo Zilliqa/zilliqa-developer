@@ -1,12 +1,17 @@
 # Burn ZRC2
 
-This contract aims to allow users to burn ZRC2 tokens:
+The purpose of this contract is to allow users to permanently burn ZRC2 tokens.
 
 - The owner can pause the contract for a particular ZRC2 or overall
 - The owner can change the number of blocks before the burn is final.
 - The owner can assign owership to a new owner.
 
 It is recommended that each project deploy its own burn contract, to keep the contract state size small.
+
+## Use cases
+
+It is envisioned that this would mainly be used by ZRC2 maintainers to
+permanently reduce the supply of ZRC-2 tokens.
 
 ## Burning tokens
 
@@ -60,7 +65,9 @@ It is not defined if the owner can interact with the
 contract whilst it is paused. The owner can reassign ownership and
 call the pause and unpause transitions whilst the contract is paused.
 
-## Tests
+## Tests and deployment instructions
+
+### Tests
 
 To run the tests against the isolated server on port 5555
 
@@ -70,3 +77,13 @@ npx hardhat test
 ```
 
 The tests are in `test/BurnTokensAnyZRC2.test.ts` ; edit the parameters at the top of the file to run tests against localdev, testnet or mainnet.
+
+### Deployment
+
+Deploy `contracts/BurnTokensAnyZRC2.scilla` .
+
+Use your usual way of deploying to the chain, depending on your custody requirements. This might include:
+
+- Use the test script and provide a key via environment variables or in some other way.
+- Deploy using a wallet via [Neosavant](https://ide.zilliqa.com/#/)
+- Using [zli](https://github.com/Zilliqa/zli) .
