@@ -374,10 +374,11 @@ describe("BurnAnyTokenZRC2Test", () => {
     }
 
     setAccount(1);
+    // Cancel is in fact allowed when a particular ZRC2 is paused.
+    // See the README.md
     {
       let tx = await burncontract.CancelBurn(zrc2contract.address);
-      expect(tx).to.nested.include({ "receipt.success": false });
-      expect(tx).to.nested.include({ "receipt.errors.0[0]": 7 });
+      expect(tx).to.nested.include({ "receipt.success": true });
     }
 
     {

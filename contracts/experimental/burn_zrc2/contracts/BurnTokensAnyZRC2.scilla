@@ -374,7 +374,7 @@ end
 
 (* Cancels a scheduled burn and returns funds to sender *)
 transition CancelBurn(token:ByStr20)
-  IsNotPaused token;
+  IsNotPausedAll;
   FinaliseBurnHelper token _sender;
   somependingamount <- pending_burn[token][_sender];
   match somependingamount with
