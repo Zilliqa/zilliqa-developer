@@ -99,6 +99,8 @@ container_image(
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["80"],
+    # Due to bazel's OS X docker support: https://github.com/bazelbuild/rules_docker/issues/768
+    docker_run_flags = "--publish=80:80",
     tars = [
         ":html-folder",
         ":nignx-conf",
@@ -111,6 +113,8 @@ container_image(
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["8000"],
+    # Due to bazel's OS X docker support: https://github.com/bazelbuild/rules_docker/issues/768
+    docker_run_flags = "--publish=8000:8000",
     tars = [
         ":html-folder",
         ":nignx-dev-conf",
