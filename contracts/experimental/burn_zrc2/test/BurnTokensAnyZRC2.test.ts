@@ -31,7 +31,10 @@ describe("BurnAnyTokenZRC2Test", () => {
 
   beforeEach(async () => {
     setAccount(0);
-    burncontract = await hre.deployScillaContract("BurnTokensAnyZRC2", adminaddress);
+    burncontract = await hre.deployScillaContract(
+      "BurnTokensAnyZRC2",
+      adminaddress
+    );
     zrc2contract = await hre.deployScillaContract(
       "FungibleToken",
       adminaddress,
@@ -83,9 +86,17 @@ describe("BurnAnyTokenZRC2Test", () => {
       );
       expect(tx).to.eventLogWithParams(
         "UpdateBurnAllowanceSuccess",
-        { value: zrc2contract.address.toLowerCase(), vname: "token_address" },
-        { value: "100", vname: "token_amount" },
-        { value: useraddress, vname: "updated_by" }
+        {
+          type: "ByStr20",
+          value: zrc2contract.address.toLowerCase(),
+          vname: "token_address",
+        },
+        {
+          type: "Uint128",
+          value: { _hex: "0x64", _isBigNumber: true },
+          vname: "token_amount",
+        },
+        { type: "ByStr20", value: useraddress, vname: "updated_by" }
       );
     }
     await zrc2contract.Transfer(burncontract.address!, 100);
@@ -101,9 +112,17 @@ describe("BurnAnyTokenZRC2Test", () => {
       );
       expect(tx).to.eventLogWithParams(
         "TokenBurnConfirmation",
-        { value: zrc2contract.address.toLowerCase(), vname: "token_address" },
-        { value: "100", vname: "token_amount" },
-        { value: useraddress, vname: "burnt_by" }
+        {
+          type: "ByStr20",
+          value: zrc2contract.address.toLowerCase(),
+          vname: "token_address",
+        },
+        {
+          type: "Uint128",
+          value: { _hex: "0x64", _isBigNumber: true },
+          vname: "token_amount",
+        },
+        { type: "ByStr20", value: useraddress, vname: "burnt_by" }
       );
     }
 
@@ -249,9 +268,17 @@ describe("BurnAnyTokenZRC2Test", () => {
       let tx = await burncontract.UpdateBurnAllowance(zrc2contract.address, 50);
       expect(tx).to.eventLogWithParams(
         "UpdateBurnAllowanceSuccess",
-        { value: zrc2contract.address.toLowerCase(), vname: "token_address" },
-        { value: "50", vname: "token_amount" },
-        { value: useraddress, vname: "updated_by" }
+        {
+          type: "ByStr20",
+          value: zrc2contract.address.toLowerCase(),
+          vname: "token_address",
+        },
+        {
+          type: "Uint128",
+          value: { _hex: "0x32", _isBigNumber: true },
+          vname: "token_amount",
+        },
+        { type: "ByStr20", value: useraddress, vname: "updated_by" }
       );
     }
     {
