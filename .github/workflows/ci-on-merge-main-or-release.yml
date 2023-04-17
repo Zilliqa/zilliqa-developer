@@ -78,9 +78,10 @@ jobs:
           key: ${{ runner.os }}-bazel-debug
 
   build-docker:
+    needs: prepare
     strategy:
       matrix:
-        app: [devex-apollo]
+        app: [devex-apollo, neo-savant]
     permissions:
       id-token: write
       contents: write
@@ -117,7 +118,7 @@ jobs:
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
-      - name: "Build and push devex-apollo - staging"
+      - name: "Build and push ${{ matrix.app }} - staging"
         #        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           VERSION=$(cat VERSION)
@@ -182,6 +183,7 @@ jobs:
   #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
   update-environment:
+    needs: build-docker
     permissions:
       id-token: write
       contents: write
