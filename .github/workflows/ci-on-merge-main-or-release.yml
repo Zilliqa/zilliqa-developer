@@ -14,12 +14,12 @@ on:
     types: [created]
 
 jobs:
-  build-docker:
+  prepare:
     permissions:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    name: "Build and deploy"
+    name: "Prepare"
     env:
       AWS_REGION: us-west-2
       DEFAULT_BRANCH: main
@@ -77,6 +77,16 @@ jobs:
           path: ~/.cache/bazel/
           key: ${{ runner.os }}-bazel-debug
 
+  build-docker:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-22.04
+    name: "Build and push"
+    env:
+      AWS_REGION: us-west-2
+      DEFAULT_BRANCH: main
+    steps:
       - name: Get tag version
         id: get-version
         run: |
@@ -105,22 +115,22 @@ jobs:
           docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          cd products/neo-savant
-          mkdir -p savant-artifact/
-          docker build --build-arg DEPLOY_ENV="stg" -t "neo-savant:local" .
-          docker create --name extractstg "neo-savant:local"
-          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
-          docker rm extractstg
+      #      - name: "Build neo-savant - staging"
+      #        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+      #        run: |
+      #          cd products/neo-savant
+      #          mkdir -p savant-artifact/
+      #          docker build --build-arg DEPLOY_ENV="stg" -t "neo-savant:local" .
+      #          docker create --name extractstg "neo-savant:local"
+      #          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+      #          docker rm extractstg
 
-      - name: "Build and push Docker - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
+      #      - name: "Build and push Docker - staging"
+      #        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+      #        run: |
+      #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
+      #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
+      #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -144,23 +154,33 @@ jobs:
           docker tag devex-apollo:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build neo-savant - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
-        run: |
-          cd products/neo-savant
-          mkdir -p savant-artifact/
-          docker build --build-arg DEPLOY_ENV="prd" -t "neo-savant:local" .
-          docker create --name extractstg "neo-savant:local"
-          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
-          docker rm extractstg
+  #      - name: "Build neo-savant - production"
+  #        if: github.event_name == 'release' && github.event.action == 'created'
+  #        run: |
+  #          cd products/neo-savant
+  #          mkdir -p savant-artifact/
+  #          docker build --build-arg DEPLOY_ENV="prd" -t "neo-savant:local" .
+  #          docker create --name extractstg "neo-savant:local"
+  #          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+  #          docker rm extractstg
+  #
+  #      - name: "Build and push Docker - production"
+  #        if: github.event_name == 'release' && github.event.action == 'created'
+  #        run: |
+  #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
+  #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
+  #          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
-      - name: "Build and push Docker - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
-        run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
-
+  update-environment:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-22.04
+    name: "Update environment"
+    env:
+      AWS_REGION: us-west-2
+      DEFAULT_BRANCH: main
+    steps:
       - name: "Creating staging update"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
