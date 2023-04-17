@@ -12,7 +12,7 @@ jobs:
       - uses: deepakputhraya/action-pr-title@master
         with:
           regex: '(DEVOPS|US|ZT)\-\d+\:\s+.*'
-          allowed_prefixes: "DEVOPS,US" # title should start with the given prefix
+          allowed_prefixes: "DEVOPS,US,ZT" # title should start with the given prefix
           disallowed_prefixes: "release/,feature/,feat/,hotfix"
           prefix_case_sensitive: false
           min_length: 5
