@@ -28,6 +28,9 @@ lint:
       paths:
         - products/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
+    - linters: [eslint]
+      paths:
+        - contracts/experimental/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
     - linters: [ALL]
       paths:
         - needing-organisation/**/*
