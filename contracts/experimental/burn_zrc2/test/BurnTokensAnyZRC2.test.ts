@@ -193,7 +193,7 @@ describe("BurnAnyTokenZRC2Test", () => {
     assert(balances[useraddress] == 0, "The user should have no tokens");
     assert(
       balances[burncontract.address!.toLowerCase()] == 100,
-      "The contract should have 200 tokens"
+      "The contract should have 100 tokens"
     );
     assert(
       balances[adminaddress] == 99900,
