@@ -31,8 +31,8 @@ describe("BurnAnyTokenZRC2Test", () => {
 
   beforeEach(async () => {
     setAccount(0);
-    burncontract = await hre.deployScilla("BurnTokensAnyZRC2", adminaddress);
-    zrc2contract = await hre.deployScilla(
+    burncontract = await hre.deployScillaContract("BurnTokensAnyZRC2", adminaddress);
+    zrc2contract = await hre.deployScillaContract(
       "FungibleToken",
       adminaddress,
       "TestToken",
