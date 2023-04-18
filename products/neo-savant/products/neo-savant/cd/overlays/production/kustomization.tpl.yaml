@@ -5,7 +5,7 @@ resources:
   - ../../base
 images:
   - name: nginx
-    newName: 298213327629.dkr.ecr.us-west-2.amazonaws.com/scilla-savant-ide
+    newName: 298213327629.dkr.ecr.us-west-2.amazonaws.com/neo-savant
     newTag: ${FULL_VERSION_TAG}
 
 patches:
