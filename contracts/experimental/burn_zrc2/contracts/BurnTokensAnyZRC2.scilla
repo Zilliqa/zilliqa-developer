@@ -1,0 +1,450 @@
+scilla_version 0
+
+(* Contract to lock tokens forever - for any ZRC2 *)
+(* Zilliqa Research *)
+
+import IntUtils
+
+library BurnTokensAnyZRC2
+
+let zero_address = 0x0000000000000000000000000000000000000000
+let uint128_zero = Uint128 0
+let bool_paused = True
+let bool_unpaused = False
+
+(* Error events *)
+type Error =
+| CodeNotOwner
+| ContractIsPausedFailure
+| ContractAddressNoMatch
+| ZRC2AddressNoMatch
+| BurnAllowanceNotSetForWallet
+| BurnAllowanceExceedForWallet
+| SelfError
+| NotContractOwnershipRecipientError
+
+let make_error =
+  fun (result : Error) =>
+    let result_code = 
+      match result with
+      | CodeNotOwner                  => Int32 -101
+      | ContractIsPausedFailure       => Int32 -102
+      | ContractAddressNoMatch        => Int32 -103
+      | ZRC2AddressNoMatch            => Int32 -104
+      | BurnAllowanceNotSetForWallet  => Int32 -105
+      | BurnAllowanceExceedForWallet  => Int32 -106
+      | SelfError                     => Int32 -11
+      | NotContractOwnershipRecipientError => Int32 -22
+      end
+    in
+    { _exception : "Error"; code : result_code }
+    
+let one_msg = 
+  fun (msg : Message) => 
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+contract BurnTokensAnyZRC2
+(initial_contract_owner: ByStr20)
+
+(* Global pause flag - all actions paused *)
+field paused : Bool = False
+
+(* Owner *)
+field contract_owner : ByStr20 = initial_contract_owner
+
+(* Contract ownership recipient *)
+(* Defaults to `zero_address` *)
+field contract_ownership_recipient: ByStr20 = zero_address
+
+
+(* Time to cancel a pending burn in blocks *)
+field burncancelblocks : Uint32 = Uint32 20
+
+(* Map from token to user to when the users burns are confirmed *)
+field confirm_time : Map ByStr20(Map ByStr20 BNum)
+= Emp ByStr20(Map ByStr20 BNum)
+
+(* Map from token to user to pending amount to be burned *)
+(* Map from token to user to when the users burns are confirmed *)
+field pending_burn : Map ByStr20(Map ByStr20 Uint128)
+= Emp ByStr20(Map ByStr20 Uint128)
+
+(* Map from token to total amount burned *)
+field token_total_burned : Map ByStr20 Uint128
+= Emp ByStr20 Uint128
+
+(* Map to track pause flag per ZRC2 *)
+field paused_zrc2: Map ByStr20 Bool 
+= Emp ByStr20 Bool
+
+(* Nested map to track token burning allowance per wallet per ZRC2 *)
+(* Map key is the ZRC2 token address *)
+(* The nested key is the wallet address *)
+field allow_burn_tokens: Map ByStr20 (Map ByStr20 Uint128) 
+= Emp ByStr20 (Map ByStr20 Uint128)
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+(* Helper for throwing error *)
+procedure ThrowError(err : Error)
+  e = make_error err;
+  throw e
+end
+
+(* Check if the address is owner *)
+procedure IsOwner(address: ByStr20)
+  cur_owner <- contract_owner;
+  is_owner = builtin eq cur_owner address;
+  match is_owner with
+  | True =>
+  | False =>
+    err = CodeNotOwner;
+    ThrowError err
+  end
+end
+
+(* Check that two addresses are not equal *)
+procedure RequireNotSelf(address_a: ByStr20, address_b: ByStr20)
+  is_self = builtin eq address_a address_b;
+  match is_self with
+  | False =>
+  | True =>
+    error = SelfError;
+    ThrowError error
+  end
+end
+
+(* Check if the contract is not paused *)
+procedure IsNotPausedAll()
+  paused_tmp <- paused;
+  match paused_tmp with
+  | False =>
+  | True  =>
+    err = ContractIsPausedFailure;
+    ThrowError err
+  end
+end
+
+(* Check if the contract is not paused *)
+procedure IsNotPaused(contract_address: ByStr20)
+  (* check the global pause flag first *)
+  IsNotPausedAll;
+
+  paused_flag <- paused_zrc2[contract_address];
+  
+  match paused_flag with
+  | Some flag =>
+      match flag with
+      | True =>
+        err = ContractIsPausedFailure;
+        ThrowError err
+      | False  =>
+      end
+  | None =>
+    end
+
+end
+
+(* Does address match this contract *)
+procedure IsRecipientMatchContract(address: ByStr20)
+  
+  is_match = builtin eq address _this_address;
+
+  match is_match with
+  | True =>
+  | False  =>
+    err = ContractAddressNoMatch;
+    ThrowError err
+  end
+
+end
+
+procedure FinaliseBurnHelper(token_address: ByStr20,
+  wallet_address: ByStr20)
+  somependingburn <- pending_burn[token_address][wallet_address];
+  match somependingburn with
+  | Some pendingburn =>
+    someconfirmtime <- confirm_time[token_address][wallet_address];
+    match someconfirmtime with
+    | Some confirmtime =>
+      (* Semantics we want is confirmed by block confirm time not after *)
+      blknum <- & BLOCKNUMBER;
+      notconfirmtimepassed = builtin blt blknum confirmtime;
+      match notconfirmtimepassed with
+      | True =>
+        (* Confirm time has not passed - do nothing *)
+      | False =>
+        (* Confirm time has passed - update total burned and delete pending *)
+        some_token_total_burned <- token_total_burned[token_address];
+        match some_token_total_burned with
+        | Some tokentotalburned =>
+          newtotalburned = builtin add tokentotalburned pendingburn;
+          token_total_burned[token_address] := newtotalburned
+        | None =>
+          token_total_burned[token_address] := pendingburn
+        end;
+
+        (* Emit a success message *)
+        e = {_eventname: "TokenBurnConfirmation"; token_address: token_address; 
+        token_amount: pendingburn; burnt_by: wallet_address};
+        event e;
+
+        delete confirm_time[token_address][wallet_address];
+        delete pending_burn[token_address][wallet_address]
+      end
+    | None =>(* Branch never taken *)
+    end
+  | None =>
+  end
+end
+
+(* Update the burn allowance with allowance check *)
+procedure ProcessBurnTokensHelper(token_address: ByStr20,
+  wallet_address: ByStr20,
+  amount: Uint128,
+  pending_amount: Uint128)
+
+  burnable_balance <- allow_burn_tokens[token_address][wallet_address];
+  
+  match burnable_balance with
+  | Some bal =>
+      is_within_limit = uint128_le amount bal;
+      match is_within_limit with
+      | True =>
+          updated_amount = builtin sub bal amount;
+
+          is_zero = builtin eq updated_amount uint128_zero;
+
+          blk <- & BLOCKNUMBER;
+          cancelblocks <- burncancelblocks;
+          newconfirmtime = builtin badd blk cancelblocks;
+          newamount = builtin add amount pending_amount;
+          
+          pending_burn[token_address][wallet_address]:= newamount;
+          confirm_time[token_address][wallet_address]:= newconfirmtime;
+
+
+          match is_zero with
+          | True =>
+            (* Delete the address from the map if the burn allowance is now zero *)
+            delete allow_burn_tokens[token_address][wallet_address]
+          | False  =>
+            (* Update the burn allowance *)
+            allow_burn_tokens[token_address][wallet_address] := updated_amount
+          end
+
+      | False  =>
+          err = BurnAllowanceExceedForWallet;
+          ThrowError err
+      end
+  | None =>
+      err = BurnAllowanceNotSetForWallet;
+      ThrowError err
+  end
+
+end
+
+
+procedure ProcessBurnTokens(token_address: ByStr20,
+  wallet_address: ByStr20,
+  amount: Uint128)
+  FinaliseBurnHelper token_address wallet_address;
+  somependingburn <- pending_burn[token_address][wallet_address];
+  match somependingburn with
+  | Some pendingburn =>
+    ProcessBurnTokensHelper token_address wallet_address amount pendingburn
+  | None =>
+    ProcessBurnTokensHelper token_address wallet_address amount uint128_zero
+  end
+end
+
+(**************************************)
+(*             Transitions            *)
+(**************************************)
+
+(* @multi-sig *)
+(* Pause the contract - only owner or multi sig can call *)
+transition Pause(token_address: ByStr20)
+  IsOwner _sender;
+  paused_zrc2[token_address] := bool_paused;
+
+  e = {
+        _eventname: "PauseSuccess";
+        token_address: token_address;
+        paused_by: _sender
+      };
+  event e
+end
+
+(* @multi-sig *)
+(* Unpause the contract - only owner or multi sig can call *)
+transition UnPause(token_address: ByStr20)
+  IsOwner _sender;
+  delete paused_zrc2[token_address];
+
+  e = {
+        _eventname: "UnPauseSuccess";
+        token_address: token_address;
+        unpaused_by: _sender
+      };
+  event e
+end
+
+(* @multi-sig *)
+(* Pause the contract global flag - only owner or multi sig can call *)
+transition PauseAll()
+  IsOwner _sender;
+  paused := bool_paused;
+  e = {
+        _eventname: "PauseAllSuccess";
+        paused_by: _sender
+      };
+  event e
+end
+
+(* @multi-sig *)
+(* Unpause the contract global flag - only owner or multi sig can call *)
+transition UnPauseAll()
+  IsOwner _sender;
+  paused := bool_unpaused;
+  e = {
+        _eventname: "UnPauseAllSuccess";
+        unpaused_by: _sender
+      };
+  event e
+end
+
+
+(* @multi-sig *)
+(* Sets `to` as the contract ownership recipient. *)
+(* To reset `contract_ownership_recipient`, use `zero_address`. *)
+(* i.e., `0x0000000000000000000000000000000000000000` *)
+transition SetContractOwnershipRecipient(to: ByStr20)
+  IsOwner _sender;
+  RequireNotSelf to _sender;
+
+  contract_ownership_recipient := to;
+
+  e = {
+    _eventname: "SetContractOwnershipRecipient";
+    to: to
+  };
+  event e
+end
+
+(* @multi-sig *)
+(* Sets `contract_ownership_recipient` as the contract owner. *)
+transition AcceptContractOwnership()
+  recipient <- contract_ownership_recipient;
+
+  is_recipient = builtin eq _sender recipient;
+  match is_recipient with
+  | False =>
+    error = NotContractOwnershipRecipientError;
+    ThrowError error
+  | True =>
+    contract_owner := _sender;
+    contract_ownership_recipient := zero_address;
+
+    e = {
+      _eventname: "AcceptContractOwnership";
+      contract_owner: _sender
+    };
+    event e
+  end
+end
+
+(* Transition to set burn allowance for a wallet *)
+transition UpdateBurnAllowance(token_address: ByStr20, token_amount : Uint128)
+
+  (* Check that the contract is not paused *)
+  IsNotPaused token_address;
+
+  allow_burn_tokens[token_address][_sender] := token_amount;
+
+  (* Emit a success message *)
+  e = {_eventname: "UpdateBurnAllowanceSuccess"; token_address: token_address; 
+        token_amount: token_amount; updated_by: _sender};
+  event e
+
+end
+
+(* Cancels a scheduled burn and returns funds to sender *)
+transition CancelBurn(token:ByStr20)
+  IsNotPausedAll;
+  FinaliseBurnHelper token _sender;
+  somependingamount <- pending_burn[token][_sender];
+  match somependingamount with
+  | Some pendingamount =>
+    msg = {
+      _amount: uint128_zero;
+      _recipient: token;
+      _tag: "Transfer";
+      to: _sender;
+      amount: pendingamount
+    };
+    msgs = one_msg msg;
+    send msgs;
+    delete pending_burn[token][_sender];
+    delete confirm_time[token][_sender]
+    
+  | None =>
+  end
+end
+
+transition ChangeBurnCancelBlocks(new_cancel_blocks: Uint32)
+  IsOwner _sender;
+  burncancelblocks := new_cancel_blocks
+end
+
+transition FinaliseBurn(token_address : ByStr20, wallet_address : ByStr20)
+  IsNotPaused token_address;
+  FinaliseBurnHelper token_address wallet_address
+end
+
+(* Do checks inside callback transition - direct transfer "push" case *)
+transition RecipientAcceptTransfer(
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+
+  (* Check that the contract is not paused *)
+  IsNotPaused _sender;
+
+  (* The intended recipient has to be this contract *)
+  IsRecipientMatchContract recipient;
+
+  (* Process the burn from the sender account *)
+  ProcessBurnTokens _sender sender amount
+
+end
+
+(* Do checks inside callback transition - indirect transfer via allowance "pull" case *)
+transition RecipientAcceptTransferFrom(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+
+  (* Check that the contract is not paused *)
+  IsNotPaused _sender;
+
+  (* The intended recipient has to be this contract *)
+  IsRecipientMatchContract recipient;
+
+  (* Burn is treated as if sender initiated it for cancellation purposes *)
+  ProcessBurnTokens _sender sender amount
+
+end
+
+transition TransferSuccessCallBack(
+  sender: ByStr20,
+  recipient: ByStr20,
+  amount: Uint128)
+  (* Do nothing *)
+end
