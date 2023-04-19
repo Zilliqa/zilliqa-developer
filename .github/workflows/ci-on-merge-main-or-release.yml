@@ -15,7 +15,6 @@ on:
 
 jobs:
   build-docker:
-    needs: prepare
     strategy:
       matrix:
         app: [devex-apollo, neo-savant]
@@ -86,7 +85,6 @@ jobs:
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
   build-bazel:
-    needs: prepare
     strategy:
       matrix:
         app: [developer-portal, devex]
