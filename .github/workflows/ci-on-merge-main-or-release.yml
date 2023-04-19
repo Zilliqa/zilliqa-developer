@@ -69,11 +69,12 @@ jobs:
           git commit -m "Finish merge"
           python config/workspace-status.py
 
-      - name: set git env vars
+      - name: Set git environment variables
         id: git-env-vars
         run: |
-          echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_OUTPUT
-          echo "FULL_VERSION_URI=$FULL_VERSION_URI" >> $GITHUB_OUTPUT
+          echo "FULL_VERSION=$(python config/workspace-status.py | grep FULL_VERSION | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "FULL_VERSION_TAG=$(python config/workspace-status.py | grep FULL_VERSION_TAG | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "FULL_VERSION_URI=$(python config/workspace-status.py | grep FULL_VERSION_URI | awk '{print $2}')" >> $GITHUB_OUTPUT
           echo "GIT_COMMIT_HASH=$GIT_COMMIT_HASH" >> $GITHUB_OUTPUT
 
   build-docker:
@@ -114,7 +115,7 @@ jobs:
       - name: "Build and push ${{ matrix.app }} - staging"
         # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
-          VERSION=${{ needs.prepare.outputs.FULL_VERSION_URI }}
+          VERSION=${{ needs.prepare.outputs.FULL_VERSION_TAG }}
           docker build --build-arg DEPLOY_ENV="stg" -t ${{ matrix.app }}:local products/${{ matrix.app }}
           docker tag ${{ matrix.app }}:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
@@ -136,7 +137,7 @@ jobs:
       - name: "Build and push ${{ matrix.app }} - production"
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
-          VERSION=${{ needs.prepare.outputs.FULL_VERSION_URI }}
+          VERSION=${{ needs.prepare.outputs.FULL_VERSION_TAG }}
           docker build -t ${{ matrix.app }}:local products/${{ matrix.app }}
           docker tag ${{ matrix.app }}:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
@@ -187,6 +188,8 @@ jobs:
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/${{ matrix.app }}:push_image_staging
+        env:
+          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -208,7 +211,7 @@ jobs:
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/${{ matrix.app }}:push_image_production
 
   update-environment:
-    needs: [build-docker, build-bazel]
+    needs: [prepare, build-docker, build-bazel]
     permissions:
       id-token: write
       contents: write
@@ -245,6 +248,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
+          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
 
       - name: "Creating production update"
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -254,3 +258,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
+          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
