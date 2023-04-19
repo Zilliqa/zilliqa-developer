@@ -23,6 +23,7 @@ jobs:
     outputs:
       FULL_VERSION: ${{ steps.git-env-vars.outputs.FULL_VERSION }}
       FULL_VERSION_URI: ${{ steps.git-env-vars.outputs.FULL_VERSION_URI }}
+      FULL_VERSION_TAG: ${{ steps.git-env-vars.outputs.FULL_VERSION_TAG }}
       GIT_COMMIT_HASH: ${{ steps.git-env-vars.outputs.GIT_COMMIT_HASH }}}
     env:
       AWS_REGION: us-west-2
