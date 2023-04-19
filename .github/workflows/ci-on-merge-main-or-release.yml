@@ -250,7 +250,7 @@ jobs:
           key: ${{ runner.os }}-bazel-debug
 
       - name: "Creating staging update"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run //cd:update_staging
         env:
