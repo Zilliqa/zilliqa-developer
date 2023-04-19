@@ -31,6 +31,9 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      - name: print infra
+        run: ls -la .infra
+
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
@@ -76,6 +79,9 @@ jobs:
         with:
           path: ~/.cache/bazel/
           key: ${{ runner.os }}-bazel-debug
+
+      - name: print infra
+        run: ls -la .infra
 
   build-docker:
     needs: prepare
