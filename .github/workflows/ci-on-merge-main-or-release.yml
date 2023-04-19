@@ -229,6 +229,11 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      - name: Set git config args
+        run: |
+          git config --global user.email "bot@zilliqa.com"
+          git config --global user.name "Zilliqa Bot"
+
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
