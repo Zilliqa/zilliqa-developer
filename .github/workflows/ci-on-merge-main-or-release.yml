@@ -65,11 +65,6 @@ jobs:
           git commit -m "Finish merge"
           python config/workspace-status.py
 
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
-
       - name: Bazel cache
         id: cache-bazel-debug
         uses: actions/cache@v3.0.4
@@ -169,11 +164,6 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
-
       - name: Bazel cache
         id: cache-bazel-debug
         uses: actions/cache@v3.0.4
@@ -238,6 +228,11 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
       - name: Bazel cache
         id: cache-bazel-debug
