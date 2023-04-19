@@ -172,7 +172,7 @@ jobs:
           key: ${{ runner.os }}-bazel-debug
 
       - name: Configure AWS Credentials - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
@@ -180,17 +180,20 @@ jobs:
           oidc-role: ${{ secrets.OIDC_ROLE }}
 
       - name: Login to the registry - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: docker/login-action@v2
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push ${{ matrix.app }} - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/${{ matrix.app }}:push_image_staging
         env:
+          FULL_VERSION: ${{ needs.prepare.outputs.FULL_VERSION }}
           FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
+          FULL_VERSION_URI: ${{ needs.prepare.outputs.FULL_VERSION_URI }}
+          GIT_COMMIT_HASH: ${{ needs.prepare.outputs.GIT_COMMIT_HASH }}
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -210,6 +213,11 @@ jobs:
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/${{ matrix.app }}:push_image_production
+        env:
+          FULL_VERSION: ${{ needs.prepare.outputs.FULL_VERSION }}
+          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
+          FULL_VERSION_URI: ${{ needs.prepare.outputs.FULL_VERSION_URI }}
+          GIT_COMMIT_HASH: ${{ needs.prepare.outputs.GIT_COMMIT_HASH }}
 
   update-environment:
     needs: [prepare, build-docker, build-bazel]
