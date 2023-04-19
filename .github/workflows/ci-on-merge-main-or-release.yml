@@ -98,7 +98,7 @@ jobs:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           APP="devex-apollo"
           VERSION=$(cat VERSION)
