@@ -14,17 +14,12 @@ on:
     types: [created]
 
 jobs:
-  prepare:
+  build-docker:
     permissions:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    name: "Prepare"
-    outputs:
-      FULL_VERSION: ${{ steps.git-env-vars.outputs.FULL_VERSION }}
-      FULL_VERSION_TAG: ${{ steps.git-env-vars.outputs.FULL_VERSION_TAG }}
-      FULL_VERSION_URI: ${{ steps.git-env-vars.outputs.FULL_VERSION_URI }}
-      GIT_COMMIT_HASH: ${{ steps.git-env-vars.outputs.GIT_COMMIT_HASH }}}
+    name: "Build and deploy"
     env:
       AWS_REGION: us-west-2
       DEFAULT_BRANCH: main
@@ -70,184 +65,92 @@ jobs:
           git commit -m "Finish merge"
           python config/workspace-status.py
 
-      - name: Set git environment variables
-        id: git-env-vars
-        run: |
-          echo "FULL_VERSION="$(python config/workspace-status.py | grep FULL_VERSION | awk '{print $2}') >> $GITHUB_OUTPUT
-          echo "FULL_VERSION_TAG="$(python config/workspace-status.py | grep FULL_VERSION_TAG | awk '{print $2}') >> $GITHUB_OUTPUT
-          echo "FULL_VERSION_URI="$(python config/workspace-status.py | grep FULL_VERSION_URI | awk '{print $2}') >> $GITHUB_OUTPUT
-          echo "GIT_COMMIT_HASH="$GIT_COMMIT_HASH >> $GITHUB_OUTPUT
-
-  build-docker:
-    needs: [prepare]
-    strategy:
-      matrix:
-        app: [devex-apollo, neo-savant]
-    permissions:
-      id-token: write
-      contents: write
-    runs-on: ubuntu-22.04
-    name: "Build and push (Docker)"
-    env:
-      AWS_REGION: us-west-2
-      DEFAULT_BRANCH: main
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
-          fetch-depth: 0
-
-      - name: Configure AWS Credentials - staging
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
-          oidc-role: ${{ secrets.OIDC_ROLE }}
-
-      - name: Login to the registry - staging
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: docker/login-action@v2
-        with:
-          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
-
-      - name: "Build and push ${{ matrix.app }} - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          VERSION=${{ needs.prepare.outputs.FULL_VERSION_TAG }}
-          docker build --build-arg DEPLOY_ENV="stg" -t ${{ matrix.app }}:local products/${{ matrix.app }}
-          docker tag ${{ matrix.app }}:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
-          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
-
-      - name: Configure AWS Credentials - production
-        if: github.event_name == 'release' && github.event.action == 'created'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::298213327629:role/ecr-read-write
-          oidc-role: ${{ secrets.OIDC_ROLE }}
-
-      - name: Login to the registry - production
-        if: github.event_name == 'release' && github.event.action == 'created'
-        uses: docker/login-action@v2
-        with:
-          registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
-
-      - name: "Build and push ${{ matrix.app }} - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
-        run: |
-          VERSION=${{ needs.prepare.outputs.FULL_VERSION_TAG }}
-          docker build -t ${{ matrix.app }}:local products/${{ matrix.app }}
-          docker tag ${{ matrix.app }}:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
-          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/${{ matrix.app }}:$VERSION
-
-  build-bazel:
-    needs: [prepare]
-    strategy:
-      matrix:
-        app: [developer-portal, devex]
-    permissions:
-      id-token: write
-      contents: write
-    runs-on: ubuntu-22.04
-    name: "Build and push (Bazel)"
-    env:
-      AWS_REGION: us-west-2
-      DEFAULT_BRANCH: main
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
-          fetch-depth: 0
-
-      - name: Bazel cache
-        id: cache-bazel-debug
-        uses: actions/cache@v3.0.4
-        with:
-          path: ~/.cache/bazel/
-          key: ${{ runner.os }}-bazel-debug
-
-      - name: Configure AWS Credentials - staging
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
-          oidc-role: ${{ secrets.OIDC_ROLE }}
-
-      - name: Login to the registry - staging
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: docker/login-action@v2
-        with:
-          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
-
-      - name: "Build and push ${{ matrix.app }} - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/${{ matrix.app }}:push_image_staging
-        env:
-          FULL_VERSION: ${{ needs.prepare.outputs.FULL_VERSION }}
-          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
-          FULL_VERSION_URI: ${{ needs.prepare.outputs.FULL_VERSION_URI }}
-          GIT_COMMIT_HASH: ${{ needs.prepare.outputs.GIT_COMMIT_HASH }}
-
-      - name: Configure AWS Credentials - production
-        if: github.event_name == 'release' && github.event.action == 'created'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::298213327629:role/ecr-read-write
-          oidc-role: ${{ secrets.OIDC_ROLE }}
-
-      - name: Login to the registry - production
-        if: github.event_name == 'release' && github.event.action == 'created'
-        uses: docker/login-action@v2
-        with:
-          registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
-
-      - name: "Build and push ${{ matrix.app }} - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
-        run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/${{ matrix.app }}:push_image_production
-        env:
-          FULL_VERSION: ${{ needs.prepare.outputs.FULL_VERSION }}
-          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
-          FULL_VERSION_URI: ${{ needs.prepare.outputs.FULL_VERSION_URI }}
-          GIT_COMMIT_HASH: ${{ needs.prepare.outputs.GIT_COMMIT_HASH }}
-
-  update-environment:
-    needs: [prepare, build-docker, build-bazel]
-    permissions:
-      id-token: write
-      contents: write
-    runs-on: ubuntu-22.04
-    name: "Update environment"
-    env:
-      AWS_REGION: us-west-2
-      DEFAULT_BRANCH: main
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
-          fetch-depth: 0
-
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
-      - name: Bazel cache
-        id: cache-bazel-debug
-        uses: actions/cache@v3.0.4
+      - name: Get tag version
+        id: get-version
+        run: |
+          python config/workspace-status.py | grep FULL_VERSION_TAG | awk '{print $2}' > VERSION
+          cat VERSION
+
+      - name: Configure AWS Credentials - staging
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
-          path: ~/.cache/bazel/
-          key: ${{ runner.os }}-bazel-debug
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
+          oidc-role: ${{ secrets.OIDC_ROLE }}
+
+      - name: Login to the registry - staging
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        uses: docker/login-action@v2
+        with:
+          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
+
+      - name: "Build and push devex-apollo - staging"
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        run: |
+          APP="devex-apollo"
+          VERSION=$(cat VERSION)
+          docker build -t $APP:local products/$APP
+          docker tag $APP:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+
+      - name: "Build and push neo-savant - staging"
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        run: |
+          APP="neo-savant"
+          VERSION=$(cat VERSION)
+          docker build --build-arg DEPLOY_ENV="stg" -t $APP:local products/$APP
+          docker tag $APP:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+
+      - name: "Build and push Docker - staging"
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        run: |
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
+
+      - name: Configure AWS Credentials - production
+        if: github.event_name == 'release' && github.event.action == 'created'
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::298213327629:role/ecr-read-write
+          oidc-role: ${{ secrets.OIDC_ROLE }}
+
+      - name: Login to the registry - production
+        if: github.event_name == 'release' && github.event.action == 'created'
+        uses: docker/login-action@v2
+        with:
+          registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
+
+      - name: "Build and push devex-apollo - production"
+        if: github.event_name == 'release' && github.event.action == 'created'
+        run: |
+          APP="devex-apollo"
+          VERSION=$(cat VERSION)
+          docker build -t $APP:local products/$APP
+          docker tag $APP:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+
+      - name: "Build and push neo-savant - production"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        run: |
+          APP="neo-savant"
+          VERSION=$(cat VERSION)
+          docker build --build-arg DEPLOY_ENV="prd" -t $APP:local products/$APP
+          docker tag $APP:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+
+      - name: "Build and push Docker - production"
+        if: github.event_name == 'release' && github.event.action == 'created'
+        run: |
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
       - name: "Creating staging update"
         # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
@@ -257,7 +160,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
-          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
 
       - name: "Creating production update"
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -267,4 +169,3 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
-          FULL_VERSION_TAG: ${{ needs.prepare.outputs.FULL_VERSION_TAG }}
