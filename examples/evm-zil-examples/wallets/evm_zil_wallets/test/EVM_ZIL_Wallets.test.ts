@@ -112,7 +112,7 @@ describe("EVM_ZIL_Wallets_Test", () => {
 
   });
 
-  it("Transfer from EVM address to ZIL address", async () => {
+  it("Transfer from EVM address to EVM address", async () => {
 
     let ethAddr = web3.eth.accounts.privateKeyToAccount(adminpk);
     let ethAddrConverted = zcrypto.toChecksumAddress(ethAddr.address); // Zil checksum
@@ -196,7 +196,94 @@ describe("EVM_ZIL_Wallets_Test", () => {
 
       assert(
         Number(finalBalTo) == FUNDINQA,
-        "Half of balance should be transferred"
+        "Correct balance should be transferred"
+      );
+    }
+
+  });
+
+  it("Transfer from EVM address to ZIL address", async () => {
+
+    let ethAddr = web3.eth.accounts.privateKeyToAccount(adminpk);
+    let initialAccountBal = await web3.eth.getBalance(ethAddr.address);
+
+    let zilliqa = new Zilliqa(hre.getNetworkUrl());
+    zilliqa.wallet.addByPrivateKey(userpk);
+    const userAddress = zcrypto.getAddressFromPrivateKey(userpk).toLowerCase();
+    const walletbech32 = zcrypto.toBech32Address(userAddress)
+
+    const res = await zilliqa.blockchain.getBalance(userAddress);
+
+    if (res.error?.message) {
+      console.log("Error: ", res.error);
+      throw res.error
+    }
+
+    const balance = res.result.balance;
+
+    const userAddressEVM = web3.utils.toChecksumAddress(userAddress)
+
+    let initialAccountBalTo = await web3.eth.getBalance(userAddressEVM);
+
+    console.log("BEFORE TRANSFER")
+    console.log("EVM address From: ", ethAddr.address);
+    console.log("EVM account balance : ", initialAccountBal);
+    console.log("EVM address To: ", userAddressEVM);
+    console.log("EVM account balance : ", initialAccountBalTo);
+    console.log("ZIL address to send to: ", walletbech32);
+    console.log(`My ZIL account balance is: ${balance}`)
+
+    const FUNDINGWEI = ethers.utils.parseUnits("100000000000000", "gwei");
+    const FUNDINQA = 100000000000000000000000
+
+    {
+      // Sender private key
+      let privateKey = 'Please put your private key';
+
+      // Create a wallet instance
+      let ethFromWallet = new ethers.Wallet(adminpk, ethers.provider);
+
+      console.log("ethFromWallet: ", ethFromWallet.address);
+      console.log("ethToWallet: ", userAddressEVM);
+
+      // Ether amount to send
+
+      const gasPrice = await web3.eth.getGasPrice()
+      console.log("Gas Price is: ", gasPrice)
+      const res = await ethFromWallet.sendTransaction({
+        to: userAddressEVM,
+        value: FUNDINGWEI,
+        gasLimit: 21000,
+        gasPrice: 20000000000
+      });
+
+      console.log("The EVM transaction is: ", res)
+    }
+
+    {
+      const res = await zilliqa.blockchain.getBalance(userAddress);
+
+      if (res.error?.message) {
+        console.log("Error: ", res.error);
+        throw res.error
+      }
+
+      const newbalance = res.result.balance;
+
+      let finalBalFrom = await web3.eth.getBalance(ethAddr.address);
+      let finalBalTo = await web3.eth.getBalance(userAddressEVM);
+
+      console.log("AFTER TRANSFER")
+      console.log("EVM address From: ", ethAddr.address);
+      console.log("EVM account balance : ", finalBalFrom);
+      console.log("EVM address To: ", userAddressEVM);
+      console.log("EVM account balance : ", finalBalTo);
+      console.log("ZIL address receiver: ", walletbech32);
+      console.log(`ZIL account balance receiver: ${newbalance}`)
+
+      assert(
+        Number(newbalance) == (Number(balance) + FUNDINQA),
+        "Correct balance should be transferred"
       );
     }
 
