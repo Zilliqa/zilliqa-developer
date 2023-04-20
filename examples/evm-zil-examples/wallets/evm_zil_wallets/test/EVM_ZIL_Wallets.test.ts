@@ -47,6 +47,7 @@ const VERSION = bytes.pack(hre.getZilliqaChainId(), msgVersion);
 describe("EVM_ZIL_Wallets_Test", () => {
 
   it("Check EVM balance", async () => {
+
     let ethAddr = web3.eth.accounts.privateKeyToAccount(adminpk);
     console.log("ETH address: ", ethAddr.address);
     let ethAddrConverted = zcrypto.toChecksumAddress(ethAddr.address); // Zil checksum
@@ -54,7 +55,7 @@ describe("EVM_ZIL_Wallets_Test", () => {
     console.log("Account to send to (zil checksum): ", ethAddrConverted);
     console.log("Account to send to, initial balance : ", initialAccountBal);
 
-    let zilliqa = new Zilliqa(network_url);
+    let zilliqa = new Zilliqa(hre.getNetworkUrl());
     zilliqa.wallet.addByPrivateKey(adminpk);
     const address = zcrypto.getAddressFromPrivateKey(adminpk);
     const walletbech32 = zcrypto.toBech32Address(address)
@@ -71,31 +72,42 @@ describe("EVM_ZIL_Wallets_Test", () => {
 
     console.log(`My ZIL account balance is: ${balance}`)
 
-    const gasp = await web3.eth.getGasPrice();
-    const gasPrice = new BN(gasp);
+    {
 
-    const tx = await zilliqa.blockchain.createTransactionWithoutConfirm(
-      zilliqa.transactions.new(
-        {
-          version: VERSION,
-          toAddr: ethAddrConverted,
-          amount: new BN(balance).div(new BN(2)), // Sending an amount in Zil (1) and converting the amount to Qa
-          gasPrice: gasPrice, // Minimum gasPrice veries. Check the `GetMinimumGasPrice` on the blockchain
-          gasLimit: Long.fromNumber(2100)
-        },
-        false
-      )
-    );
+      // const gasp = await web3.eth.getGasPrice();
+      const gasp = 2000000000
+      const gasPrice = new BN(gasp);
+      console.log(`Gas Price is: ${gasp}`)
 
-    // process confirm
-    console.log(`The transaction id is:`, tx.id);
-    const confirmedTxn = await tx.confirm(tx.id);
+      const tx = await zilliqa.blockchain.createTransactionWithoutConfirm(
+        zilliqa.transactions.new(
+          {
+            version: VERSION,
+            toAddr: ethAddrConverted,
+            amount: new BN(balance).div(new BN(2)), // Sending an amount in Zil (1) and converting the amount to Qa
+            gasPrice: gasPrice, // Minimum gasPrice veries. Check the `GetMinimumGasPrice` on the blockchain
+            gasLimit: Long.fromNumber(2100)
+          },
+          false
+        )
+      );
 
-    console.log(`The transaction status is:`);
-    console.log(confirmedTxn.receipt);
+      // process confirm
+      console.log(`The transaction id is:`, tx.id);
+      const confirmedTxn = await tx.confirm(tx.id);
 
-    let finalBal = await web3.eth.getBalance(ethAddr.address);
-    console.log(`My new account balance is: ${finalBal}`);
+      console.log(`The transaction status is:`);
+      console.log(confirmedTxn.receipt);
+    }
+
+    {  
+      let finalBal = await web3.eth.getBalance(ethAddr.address);
+      console.log(`My new account balance is: ${finalBal}`);
+      assert(
+        finalBal == balance / 2,
+        "Half of balance should be transferred"
+      );
+    }
 
   });
 
