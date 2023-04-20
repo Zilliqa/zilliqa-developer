@@ -2,10 +2,11 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-web3";
 import clc from "cli-color";
 import "dotenv/config";
-import "hardhat-scilla-plugin";
+require("hardhat-scilla-plugin");
 const chai = require("chai");
-const { scillaChaiEventMatcher } = require("hardhat-scilla-plugin");
+const {scillaChaiEventMatcher} = require("hardhat-scilla-plugin");
 chai.use(scillaChaiEventMatcher);
+
 
 declare module "hardhat/types/config" {
   interface HardhatNetworkUserConfig {

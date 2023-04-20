@@ -1,7 +1,9 @@
+import hre, {web3} from "hardhat";
+import clc from "cli-color";
+
 import { ScillaContract, initZilliqa, setAccount } from "hardhat-scilla-plugin";
 import { Value } from "@zilliqa-js/contract";
 import { assert, expect } from "chai";
-import clc from "cli-color";
 import { loadZilliqaHardhatObject } from "hardhat-scilla-plugin/dist/src/ZilliqaHardhatObject";
 import * as zcrypto from "@zilliqa-js/crypto";
 import {bytes, Zilliqa} from "@zilliqa-js/zilliqa";
