@@ -1,4 +1,4 @@
-import hre, {web3} from "hardhat";
+import hre, {ethers as hh_ethers, web3} from "hardhat";
 import clc from "cli-color";
 
 import { ScillaContract, initZilliqa, setAccount } from "hardhat-scilla-plugin";
@@ -8,6 +8,7 @@ import { loadZilliqaHardhatObject } from "hardhat-scilla-plugin/dist/src/Zilliqa
 import * as zcrypto from "@zilliqa-js/crypto";
 import {bytes, Zilliqa} from "@zilliqa-js/zilliqa";
 const {BN, Long} = require("@zilliqa-js/util");
+import {ethers} from "hardhat";
 
 const newpk = zcrypto.schnorr.generatePrivateKey();
 
@@ -46,7 +47,7 @@ const VERSION = bytes.pack(hre.getZilliqaChainId(), msgVersion);
 
 describe("EVM_ZIL_Wallets_Test", () => {
 
-  it("Check EVM balance", async () => {
+  it("Transfer from ZIL address to EVM address", async () => {
 
     let ethAddr = web3.eth.accounts.privateKeyToAccount(adminpk);
     console.log("ETH address: ", ethAddr.address);
@@ -105,6 +106,96 @@ describe("EVM_ZIL_Wallets_Test", () => {
       console.log(`My new account balance is: ${finalBal}`);
       assert(
         finalBal == balance / 2,
+        "Half of balance should be transferred"
+      );
+    }
+
+  });
+
+  it("Transfer from EVM address to ZIL address", async () => {
+
+    let ethAddr = web3.eth.accounts.privateKeyToAccount(adminpk);
+    let ethAddrConverted = zcrypto.toChecksumAddress(ethAddr.address); // Zil checksum
+    let initialAccountBal = await web3.eth.getBalance(ethAddr.address);
+
+    let zilliqa = new Zilliqa(hre.getNetworkUrl());
+    zilliqa.wallet.addByPrivateKey(userpk);
+    const address = zcrypto.getAddressFromPrivateKey(userpk);
+    const walletbech32 = zcrypto.toBech32Address(address)
+
+    let ethAddrUser = web3.eth.accounts.privateKeyToAccount(userpk);
+    let ethAddrConvertedUser = zcrypto.toChecksumAddress(ethAddrUser.address); // Zil checksum
+
+    const res = await zilliqa.blockchain.getBalance(address);
+
+    if (res.error?.message) {
+      console.log("Error: ", res.error);
+      throw res.error
+    }
+
+    const balance = res.result.balance;
+
+    let initialAccountBalTo = await web3.eth.getBalance(ethAddrUser.address);
+
+    console.log("BEFORE TRANSFER")
+    console.log("EVM address From: ", ethAddr.address);
+    console.log("EVM account balance : ", initialAccountBal);
+    console.log("EVM address To: ", ethAddrUser.address);
+    console.log("EVM account balance : ", initialAccountBalTo);
+    console.log("ZIL address to send to: ", walletbech32);
+    console.log(`My ZIL account balance is: ${balance}`)
+
+    const FUNDINGWEI = ethers.utils.parseUnits("100000000000000", "gwei");
+    const FUNDINQA = 100000000000000000000000
+
+    {
+      // Sender private key
+      let privateKey = 'Please put your private key';
+
+      // Create a wallet instance
+      let ethFromWallet = new ethers.Wallet(adminpk, ethers.provider);
+      let ethToWallet = new ethers.Wallet(userpk, ethers.provider)
+
+      console.log("ethFromWallet: ", ethFromWallet.address);
+      console.log("ethToWallet: ", ethToWallet.address);
+
+      // Ether amount to send
+
+      const gasPrice = await web3.eth.getGasPrice()
+      console.log("Gas Price is: ", gasPrice)
+      const res = await ethFromWallet.sendTransaction({
+        to: ethToWallet.address,
+        value: FUNDINGWEI,
+        gasLimit: 21000,
+        gasPrice: 20000000000
+      });
+
+      console.log("The EVM transaction is: ", res)
+    }
+
+    {
+      const res = await zilliqa.blockchain.getBalance(address);
+
+      if (res.error?.message) {
+        console.log("Error: ", res.error);
+        throw res.error
+      }
+
+      const newbalance = res.result.balance;
+
+      let finalBalFrom = await web3.eth.getBalance(ethAddr.address);
+      let finalBalTo = await web3.eth.getBalance(ethAddrUser.address);
+
+      console.log("AFTER TRANSFER")
+      console.log("EVM address From: ", ethAddr.address);
+      console.log("EVM account balance : ", finalBalFrom);
+      console.log("EVM address To: ", ethAddrUser.address);
+      console.log("EVM account balance : ", finalBalTo);
+      console.log("ZIL address receiver: ", walletbech32);
+      console.log(`ZIL account balance receiver: ${newbalance}`)
+
+      assert(
+        Number(finalBalTo) == FUNDINQA,
         "Half of balance should be transferred"
       );
     }
