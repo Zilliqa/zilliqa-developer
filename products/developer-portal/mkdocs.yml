@@ -369,7 +369,9 @@ nav:
       - Scilla Tips and Tricks: scilla/scilla-tips-and-tricks.md
       - Scilla Trial: scilla/scilla-trial.md
       - Standard Library: scilla/stdlib.md
-  - ZILEVM:
+  - EVM:
+      - Architecture:
+          - Introduction: zilevm/architecture/zilevm-architecture.md
       - Getting Started:
           - Introduction: zilevm/getting-started/zilevm-introduction.md
       - Onboard:
@@ -384,6 +386,8 @@ nav:
       - Protocol:
           - Gas: zilevm/protocol/protocol-gas.md
           - OPCodes: zilevm/protocol/protocol-opcodes.md
+          - Precompiles: zilevm/protocol/protcol-precompiles.md
+          - Scilla/EVM Interwork: zilevm/protocol/protocol-interwork.md
           - RPC: zilevm/protocol/developer-rpc.md
   - Exchanges:
       - Exchange Integration:
@@ -468,3 +472,4 @@ nav:
               - Diagnostic Data: contributors/core-protocol-design/mitigation-measures/core-diagnostic-data.md
               - Status Server: contributors/core-protocol-design/mitigation-measures/core-status-server.md
   - Ecosystem: ecosystem/index.md
+  - FAQ: faq/faq-introduction.md
