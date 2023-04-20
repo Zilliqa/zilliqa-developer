@@ -1,10 +1,11 @@
 import { ScillaContract, initZilliqa, setAccount } from "hardhat-scilla-plugin";
 import { Value } from "@zilliqa-js/contract";
 import { assert, expect } from "chai";
-import hre, {web3} from "hardhat";
 import clc from "cli-color";
 import { loadZilliqaHardhatObject } from "hardhat-scilla-plugin/dist/src/ZilliqaHardhatObject";
 import * as zcrypto from "@zilliqa-js/crypto";
+import {bytes, Zilliqa} from "@zilliqa-js/zilliqa";
+const {BN, Long} = require("@zilliqa-js/util");
 
 const newpk = zcrypto.schnorr.generatePrivateKey();
 
@@ -38,16 +39,62 @@ console.log(adminwalletbech32)
 console.log(adminwallet)
 console.log(userwalletbech32)
 
-console.log("EVM format: ")
+const msgVersion = 1; // current msgVersion
+const VERSION = bytes.pack(hre.getZilliqaChainId(), msgVersion);
 
 describe("EVM_ZIL_Wallets_Test", () => {
 
   it("Check EVM balance", async () => {
     let ethAddr = web3.eth.accounts.privateKeyToAccount(adminpk);
+    console.log("ETH address: ", ethAddr.address);
     let ethAddrConverted = zcrypto.toChecksumAddress(ethAddr.address); // Zil checksum
     let initialAccountBal = await web3.eth.getBalance(ethAddr.address);
     console.log("Account to send to (zil checksum): ", ethAddrConverted);
     console.log("Account to send to, initial balance : ", initialAccountBal);
+
+    let zilliqa = new Zilliqa(network_url);
+    zilliqa.wallet.addByPrivateKey(adminpk);
+    const address = zcrypto.getAddressFromPrivateKey(adminpk);
+    const walletbech32 = zcrypto.toBech32Address(address)
+    console.log(`My ZIL account address is: ${walletbech32}`);
+
+    const res = await zilliqa.blockchain.getBalance(address);
+
+    if (res.error?.message) {
+      console.log("Error: ", res.error);
+      throw res.error
+    }
+
+    const balance = res.result.balance;
+
+    console.log(`My ZIL account balance is: ${balance}`)
+
+    const gasp = await web3.eth.getGasPrice();
+    const gasPrice = new BN(gasp);
+
+    const tx = await zilliqa.blockchain.createTransactionWithoutConfirm(
+      zilliqa.transactions.new(
+        {
+          version: VERSION,
+          toAddr: ethAddrConverted,
+          amount: new BN(balance).div(new BN(2)), // Sending an amount in Zil (1) and converting the amount to Qa
+          gasPrice: gasPrice, // Minimum gasPrice veries. Check the `GetMinimumGasPrice` on the blockchain
+          gasLimit: Long.fromNumber(2100)
+        },
+        false
+      )
+    );
+
+    // process confirm
+    console.log(`The transaction id is:`, tx.id);
+    const confirmedTxn = await tx.confirm(tx.id);
+
+    console.log(`The transaction status is:`);
+    console.log(confirmedTxn.receipt);
+
+    let finalBal = await web3.eth.getBalance(ethAddr.address);
+    console.log(`My new account balance is: ${finalBal}`);
+
   });
 
   
