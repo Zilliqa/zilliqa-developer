@@ -202,6 +202,18 @@ http_archive(
 )
 
 load(
+    "@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
+    docker_toolchain_configure = "toolchain_configure",
+)
+
+docker_toolchain_configure(
+    name = "docker_config",
+    # OPTIONAL: Path to the docker binary.
+    # Should be set explicitly for remote execution.
+    docker_path = "$BUILD_WORKSPACE_DIRECTORY/bin/docker.sh",
+)
+
+load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
     container_repositories = "repositories",
 )
