@@ -9,4 +9,4 @@ description: API EVM methods
 
 ---
 
-See our [EVM documentation](../../../zilevm/protocol/developer-rpc) for details of the supported EVM RPC methods.
+See our [EVM documentation](../../zilevm/protocol/developer-rpc.md) for details of the supported EVM RPC methods.
