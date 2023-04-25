@@ -266,4 +266,4 @@ The idea with keeping it all in one repository is as follows:
    version 5.2.1, this possibly leads to incompatibility between `devex` and the
    API component. By keeping the two together, we can ensure that releases are
    done simultaneously and that they rely on the same library version to avoid
-   tedious bugs that are hard to find.
+   tedious bugs that are hard to find..
