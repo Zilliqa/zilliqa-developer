@@ -7,12 +7,11 @@
 # which is so fascist that it's nearly impossible to satisfy it.
 
 import os
-import subprocess
 import sys
 
 try:
     exists = os.getcwd()
-except:
+except Exception:
     # nope!
     os.chdir("/tmp")
 os.execvp("/usr/bin/docker", sys.argv)
