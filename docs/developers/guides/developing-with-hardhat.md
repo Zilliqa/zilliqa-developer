@@ -32,7 +32,7 @@ git clone https://github.com/Zilliqa/scilla.git
 And follow the instructions in the `INSTALL.md`. This should leave you with the
 `scilla-checker` and `scilla-fmt` binaries in your path.
 
-### 1. Initialise a new hardhat project
+### 2. Initialise a new hardhat project
 
 ```sh
 mkdir contract_dev
@@ -116,7 +116,7 @@ end
 
 and a deployment script, `scripts/deploy.ts`:
 
-```javascript
+```typescript
 import { expect } from 'chai';
 import { ScillaContract, initZilliqa } from 'hardhat-scilla-plugin';
 import hre, { ethers } from 'hardhat';
