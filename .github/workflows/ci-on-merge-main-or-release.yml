@@ -100,25 +100,26 @@ jobs:
       - name: "Build and push devex-apollo - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
-          APP="devex-apollo"
           VERSION=$(cat VERSION)
-          docker build -t $APP:local products/$APP
-          docker tag $APP:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
-          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          docker build -t devex-apollo:local products/devex-apollo
+          docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
+          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build and push neo-savant - staging"
+      - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
-          APP="neo-savant"
-          VERSION=$(cat VERSION)
-          docker build --build-arg DEPLOY_ENV="stg" -t $APP:local products/$APP
-          docker tag $APP:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
-          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          cd products/neo-savant
+          mkdir -p savant-artifact/
+          docker build --build-arg DEPLOY_ENV="stg" -t "neo-savant:local" .
+          docker create --name extractstg "neo-savant:local"
+          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+          docker rm extractstg
 
       - name: "Build and push Docker - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
 
       - name: Configure AWS Credentials - production
@@ -138,25 +139,26 @@ jobs:
       - name: "Build and push devex-apollo - production"
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
-          APP="devex-apollo"
           VERSION=$(cat VERSION)
-          docker build -t $APP:local products/$APP
-          docker tag $APP:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
-          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          docker build -t devex-apollo:local products/devex-apollo
+          docker tag devex-apollo:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
+          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build and push neo-savant - production"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+      - name: "Build neo-savant - production"
+        if: github.event_name == 'release' && github.event.action == 'created'
         run: |
-          APP="neo-savant"
-          VERSION=$(cat VERSION)
-          docker build --build-arg DEPLOY_ENV="prd" -t $APP:local products/$APP
-          docker tag $APP:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
-          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
+          cd products/neo-savant
+          mkdir -p savant-artifact/
+          docker build --build-arg DEPLOY_ENV="prd" -t "neo-savant:local" .
+          docker create --name extractstg "neo-savant:local"
+          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
+          docker rm extractstg
 
       - name: "Build and push Docker - production"
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
+          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
       - name: "Creating staging update"
