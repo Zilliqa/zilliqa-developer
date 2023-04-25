@@ -34,6 +34,7 @@ read more about topics like this, see the
 - [Configuring Metamask for Zilliqa](../onboard/onboard-metamask.md)
 - [Developing Solidity contracts for Zilliqa](../developer-onboarding/dev-onboarding-introduction.md)
 - [API endpoints](../../api/introduction/api-endpoints.md)
+- [Developing with hardhat on Zilliqa](../../developers/guides/developing-with-hardhat.md)
 
 #### EVM testnet faucet
 

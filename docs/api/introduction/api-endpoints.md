@@ -11,7 +11,7 @@ description: Zilliqa API Endpoints
 ---
 
 You can use the following endpoints to interact with the Zilliqa API, either via EVM or the
-[Zilliqa JSON API](./api-introduction). Note that the EVM endpoint may change in the future.
+[Zilliqa JSON API](./api-introduction.md).
 
 | Chain(s)              | Zilliqa API Chain Id | EVM Chain Id | URL(s)                                                                                       |
 | --------------------- | -------------------- | ------------ | -------------------------------------------------------------------------------------------- |

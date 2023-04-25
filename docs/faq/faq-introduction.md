@@ -54,7 +54,7 @@ No. You can only restore Zilliqa accounts in a Zilliqa wallet (eg. ZilPay or Tor
 
 Not directly; you will be able to store them via our ERC-20-to-ZRC-2 gateway contract, which will let you see your ZRC-2 tokens as though they were ERC-20 tokens.
 
-The source code will be available in [https://github.com/zilliqa/zilliqa-developer](zilliqa-developer) shortly after launch and we will publish a directory of deployed contracts.
+The source code will be available in [zilliqa-developer](https://github.com/zilliqa/zilliqa-developer) shortly after launch and we will publish a directory of deployed contracts.
 
 #### Will I be able to store ZRC non-fungible tokens in Metamask?
 
@@ -109,8 +109,8 @@ This is trickier. Suppose you send some ZRC-2 tokens (such as `XCAD` or `ZWAP`) 
 
 In order to do so, you will need to call the ZRC-2 contract with `_sender` equal to your EVM address. But, in order to make that call you need to submit a Zilliqa API transaction from your EVM address, which we've just agreed you can't do. So your funds will be stuck.
 
-This is not optimal, and you can get out of it using [../zilevm/protocol/protocol-interwork.md](interwork) ; create a solidity contract which calls the Scilla contract using the `call scilla contract with _sender unchanged` precompile. You can now send a Scilla call from an EVM transaction, and there is a contract available in the
-[https://github.com/zilliqa/zilliqa-developer](zilliqa-developer) repository which does this by building an ERC-20 facade for ZRC-2 assets; we'll deploy this against the common ZRC-2s and publish a list once EVM is live on mainnet.
+This is not optimal, and you can get out of it using [interwork](../zilevm/protocol/protocol-interwork.md) ; create a solidity contract which calls the Scilla contract using the `call scilla contract with _sender unchanged` precompile. You can now send a Scilla call from an EVM transaction, and there is a contract available in the
+[zilliqa-developer](https://github.com/zilliqa/zilliqa-developer) repository which does this by building an ERC-20 facade for ZRC-2 assets; we'll deploy this against the common ZRC-2s and publish a list once EVM is live on mainnet.
 
 This will recover your funds, but might be quite tricky to operate for arbitrary contracts; our roadmap contains a more generic mechanism for arbitrary contracts (though you will still need to know what transition/calldata you need to call).
 
@@ -127,3 +127,7 @@ Please don't do that either! Rescuing trapped tokens in EVM contracts is signifi
 Whilst the interop mechanism can be used to transfer these back to EVM addresses, it is substantially harder to write the code to do so, and probably impossible unless you have the source code (or at least the interface) of the contract in question. Again, the maintainers of the dApp may be able to help, or if you are sophisticated, you may be able to do this yourself.
 
 We will try to provide assistance with the most common cases as they arise, but Zilliqa doesn't have the resources to support every use case.
+
+#### How do I get started with development using hardhat?
+
+See our [handy guide](../developers/guides/developing-with-hardhat.md) .

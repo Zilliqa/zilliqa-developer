@@ -47,7 +47,7 @@ Do not send Zilliqa NFTs or fungible tokens to EVM addresses and vice-versa. You
 
 #### Converting addresses
 
-Navigate to [https://devex.zilliqa.com/address/](https://devex.zilliqa.com/address/)address}` either using a ZIL bech32 address or a base16 address.
+Navigate to [https://devex.zilliqa.com/address/](https://devex.zilliqa.com/address/) to convert using either a ZIL bech32 address or a base16 address.
 
 By pressing the convert button, we can turn a bech32 address (zil...) into a base16 address(0x...), and vice-versa.
 
