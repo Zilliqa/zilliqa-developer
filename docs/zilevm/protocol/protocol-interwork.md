@@ -21,3 +21,7 @@ repository. We hope to improve on these in future versions.
 They consist of precompiles to call Scilla from EVM (either replacing
 or retaining the `sender`), and a precompile to read a fairly
 restricted subset of Scilla state from EVM.
+
+!!! info
+
+    This documentation is being prepared - please check back in a couple of days.
