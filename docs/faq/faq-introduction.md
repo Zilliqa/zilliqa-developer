@@ -10,6 +10,8 @@ description: Frequently asked questions
 
 ## Frequently asked questions
 
+<!-- markdownlint-disable MD001 -->
+
 #### What is the relationship between EVM ZIL and Zilliqa ZIL?
 
 They are the same, though EVM ZIL are scaled to accomodate the differing precisions of EVM and Zilliqa ZIL (18 vs 12 decimal places).

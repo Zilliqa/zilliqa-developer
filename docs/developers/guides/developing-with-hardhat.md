@@ -12,6 +12,8 @@ description: Getting started with Scilla and hardhat
 
 ---
 
+<!-- markdownlint-disable MD036 -->
+
 **Note that the Scilla hardhat plugin is currently experimental; use at your own risk**
 
 Developing, testing and deploying contracts for both Scilla and EVM is
@@ -23,7 +25,7 @@ To get this working:
 
 ### 1. Install the scilla tools
 
-```
+```sh
 git clone https://github.com/Zilliqa/scilla.git
 ```
 
@@ -50,13 +52,13 @@ yarn add git+https://github.com/zilliqa/hardhat-scilla-plugin
 
 and add the following to `hardhat.config.js`:
 
-```
+```sh
 import "hardhat-scilla-plugin"
 ```
 
 Now you can deploy a contract by adding the source code as `contracts/Hello.scilla`:
 
-```
+```scilla
 scilla_version 0
 
 library MetaSayHello
@@ -114,7 +116,7 @@ end
 
 and a deployment script, `scripts/deploy.ts`:
 
-```
+```javascript
 import { expect } from 'chai';
 import { ScillaContract, initZilliqa } from 'hardhat-scilla-plugin';
 import hre, { ethers } from 'hardhat';
@@ -138,13 +140,13 @@ describe("Hello", function () {
 
 Run your script:
 
-```
+```sh
 npx hardhat scripts/deploy.ts
 ```
 
 It's often useful to run:
 
-```
+```sh
 mitmweb --reverse:https://dev-api.zilliqa.com -p 8082
 ```
 
@@ -154,7 +156,7 @@ There are examples of this in [zilliqa-developer](https://github.com/zilliqa/zil
 
 Here is a sample `networks` stanza for your `hardhat.config.ts`; the keys configured for isolated server and other environments are the default test private keys, which are loaded with large balances at network startup:
 
-```
+```json
   networks: {
     isolated_server: {
       url: "http://localhost:5555/",
