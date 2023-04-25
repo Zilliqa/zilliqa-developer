@@ -16,7 +16,7 @@ Supporting EVM on Zilliqa involves:
 - Supporting a "sufficient" subset of the Ethereum API calls. This allows users to create EVM contracts, use common Ethereum tools like hardhat and truffle to write contracts, and interact with Zilliqa using Ethereum-standard software like Metamask.
 - Arranging to execute EVM transactions, and store EVM-style state.
 
-There are, inevitably, some differences from other EVM chains, which will be listed here and in the [FAQ](../../faq/faq-introduction).
+There are, inevitably, some differences from other EVM chains, which will be listed here and in the [FAQ](../../faq/faq-introduction.md).
 
 ### Execution engine
 
@@ -30,7 +30,7 @@ Because ETH and ZIL differ in the number of decimals they support, we
 scale EVM balances by 6 decimal places.
 
 If we maintained a 1-1 relationship between ethereum gas and ZIL gas
-(see [Gas](./protocol-gas)], EVM would be dramatically more expensive
+(see [Gas](./protocol-gas.md)], EVM would be dramatically more expensive
 than Scilla; in order to ameliorate this, we scale ethereum gas when
 charging and for technical reasons, the scaled value (ie. the
 scilla-equivalent gas price is what we track under the hood).
