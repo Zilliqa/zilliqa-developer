@@ -215,7 +215,9 @@ nav:
           - Gas: basics/zilliqa-architecture/basics-zil-gas.md
   - API:
       - Introduction:
-          - Api Introduction: api/introduction/api-introduction.md
+          - Introduction: api/introduction/api-introduction.md
+          - API Endpoints: api/introduction/api-endpoints.md
+          - EVM methods: api/introduction/evm-methods.md
       - Blockchain-related Methods:
           - Ds Block Listing: api/blockchain-related-methods/api-blockchain-ds-block-listing.md
           - Get Blockchain Info: api/blockchain-related-methods/api-blockchain-get-blockchain-info.md
@@ -370,14 +372,13 @@ nav:
       - Scilla Trial: scilla/scilla-trial.md
       - Standard Library: scilla/stdlib.md
   - EVM:
-      - Architecture:
-          - Introduction: zilevm/architecture/zilevm-architecture.md
       - Getting Started:
           - Introduction: zilevm/getting-started/zilevm-introduction.md
       - Onboard:
           - Configure Metamask: zilevm/onboard/onboard-metamask.md
       - Developer Onboarding:
           - Introduction: zilevm/developer-onboarding/dev-onboarding-introduction.md
+          - Quirks: zilevm/developer-onboarding/dev-quirks.md
           - Remix: zilevm/developer-onboarding/remix.md
           - Truffle: zilevm/developer-onboarding/truffle.md
           - HardHat: zilevm/developer-onboarding/hardhat.md
@@ -386,7 +387,7 @@ nav:
       - Protocol:
           - Gas: zilevm/protocol/protocol-gas.md
           - OPCodes: zilevm/protocol/protocol-opcodes.md
-          - Precompiles: zilevm/protocol/protcol-precompiles.md
+          - Precompiles: zilevm/protocol/protocol-precompiles.md
           - Scilla/EVM Interwork: zilevm/protocol/protocol-interwork.md
           - RPC: zilevm/protocol/developer-rpc.md
   - Exchanges:

@@ -14,39 +14,28 @@ for documentation, please see the #ethereum-virtual-machine channel on
 
 ## Getting Started with Zilliqa EVM
 
+The Zilliqa EVM implementation is written as an execution engine and state storage on top of the Zilliqa consensus protocol.
+
+The token for EVM operations is ZIL - there is no separate token for EVM
+APIs.
+
+However, because Zilliqa and EVM APIs have different ways of
+deriving an address from a private key, you will have _different addresses for EVM and Zilliqa APIs_.
+
+This means that you need to be careful when sending contract-bound
+tokens between them, because if you send ERC-20 tokens to your Zilliqa
+API address, or ZRC-2 tokens to your EVM adress, you will not be able
+to create contract calls from the "other" address to recover them. To
+read more about topics like this, see the
+[FAQ](../../faq/faq-introduction.md).
+
 ### Resources
 
-#### Quick connect guide
+- [Configuring Metamask for Zilliqa](../onboard/onboard-metamask.md)
+- [Developing Solidity contracts for Zilliqa](../developer-onboarding/dev-onboarding-introduction.md)
+- [API endpoints](../../api/introduction/api-endpoints.md)
 
-[Guide on configuring Metamask to ZILEVM](../onboard/onboard-metamask.md)
-
-#### Developer onboarding
-
-[Guides for developing Solidity contracts for ZILEVM](../developer-onboarding/dev-onboarding-introduction.md)
-
-##### Zilliqa Mainnet
-
-EVM is not yet available on Zilliqa Mainnet
-
-##### Developer testnet
-
-| Network Type | Network Name | Network RPC                                                        | ChainID | Currency Symbol | Block Explorer URL                                                                   |
-| ------------ | ------------ | ------------------------------------------------------------------ | ------- | --------------- | ------------------------------------------------------------------------------------ |
-| Testnet      | EVM Test     | [https://evm-api-dev.zilliqa.com](https://evm-api-dev.zilliqa.com) | 33101   | ZIL             | [https://zilliqa-testnet.tryethernal.com/](https://zilliqa-testnet.tryethernal.com/) |
-| Mainnet      |              |                                                                    |         |                 |                                                                                      |
-
-#### ZILEVM block explorers
-
-Use:
-
-- [Viewblock](https://viewblock.io/zilliqa?network=testnet)
-- [DevEx](https://devex.zilliqa.com/?network=https%3A%2F%2Fdev-api.zilliqa.com)
-
-In particular, DevEx is capable of translating between ethereum and Zilliqa
-style addresses (use the recycle button next to the address in the account
-page).
-
-#### ZILEVM testnet faucet
+#### EVM testnet faucet
 
 You can use the
 [testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add

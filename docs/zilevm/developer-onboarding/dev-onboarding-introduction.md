@@ -4,7 +4,7 @@ title: Developer Introduction
 keywords:
   - Developers
   - Dapps
-description: ZILEVM for developers
+description: Zilliqa EVM for developers
 ---
 
 ---

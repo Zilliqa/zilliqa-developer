@@ -16,7 +16,7 @@ They are the same, though EVM ZIL are scaled to accomodate the differing precisi
 
 #### Does this mean that transfers will produce dust?
 
-**_ TBD _**
+No. The internal representation of value is in ZIL, not EVM units, but dust may not transfer as you were expecting it to.
 
 #### Can I use the same address for EVM and ZIL API (eg. for Metamask and ZilPay/Torch)?
 
