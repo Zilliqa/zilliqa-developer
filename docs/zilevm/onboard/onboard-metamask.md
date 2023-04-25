@@ -38,7 +38,7 @@ Enter the below configuration:
 
 | Network Type | Network Name | Network RPC                                                | ChainID | Currency Symbol | Block Explorer URL                                           |
 | ------------ | ------------ | ---------------------------------------------------------- | ------- | --------------- | ------------------------------------------------------------ |
-| Testnet      | EVM Test     | [https://api-dev.zilliqa.com](https://api-dev.zilliqa.com) | 33101   | ZIL             | [https://evmx-dev.zilliqa.com](https://evmx-dev.zilliqa.com) |
+| Testnet      | EVM Test     | [https://dev-api.zilliqa.com](https://dev-api.zilliqa.com) | 33101   | ZIL             | [https://evmx-dev.zilliqa.com](https://evmx-dev.zilliqa.com) |
 | Mainnet      | EVM Mainnet  | [https://api.zilliqa.com](https://api.zilliqa.com)         | 32769   | ZIL             | [https://evmx.zilliqa.com](https://evmx.zilliqa.com)]        |
 
 ### Sending funds
