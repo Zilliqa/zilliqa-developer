@@ -43,7 +43,7 @@ Enter the below configuration:
 
 ### Sending funds
 
-Do not send Zilliqa NFTs or fungible tokens to EVM addresses and vice-versa. You will lose your assets - see the [FAQ](../../faq/faq-introduction).
+Do not send Zilliqa NFTs or fungible tokens to EVM addresses and vice-versa. You will lose your assets - see the [FAQ](../../faq/faq-introduction.md).
 
 #### Converting addresses
 

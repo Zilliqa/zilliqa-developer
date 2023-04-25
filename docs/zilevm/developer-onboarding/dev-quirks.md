@@ -30,7 +30,7 @@ Because ETH and ZIL differ in the number of decimals they support, we
 scale EVM balances by 6 decimal places.
 
 If we maintained a 1-1 relationship between ethereum gas and ZIL gas
-(see [Gas](./protocol-gas.md)], EVM would be dramatically more expensive
+(see [Gas](../protocol/protocol-gas.md)], EVM would be dramatically more expensive
 than Scilla; in order to ameliorate this, we scale ethereum gas when
 charging and for technical reasons, the scaled value (ie. the
 scilla-equivalent gas price is what we track under the hood).
