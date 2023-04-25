@@ -210,7 +210,7 @@ docker_toolchain_configure(
     name = "docker_config",
     # OPTIONAL: Path to the docker binary.
     # Should be set explicitly for remote execution.
-    docker_path = "$BUILD_WORKSPACE_DIRECTORY/bin/docker.sh",
+    docker_path = "$BUILD_WORKSPACE_DIRECTORY/bin/docker.py",
 )
 
 load(
