@@ -145,7 +145,7 @@ jobs:
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/$APP:$VERSION
 
       - name: "Build and push neo-savant - production"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.event_name == 'release' && github.event.action == 'created'
         run: |
           APP="neo-savant"
           VERSION=$(cat VERSION)
