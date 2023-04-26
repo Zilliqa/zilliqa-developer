@@ -1,6 +1,10 @@
 # build stage
 FROM node:14.17 as build-stage
 
+RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list \
+ && echo "deb http://archive.debian.org/debian stretch-proposed-updates main" >> /etc/apt/sources.list \
+ && echo "deb http://archive.debian.org/debian stretch-backports main" >> /etc/apt/sources.list
+
 ARG DEPLOY_ENV="dev"
 
 COPY . /savant-ide
