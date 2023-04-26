@@ -3,7 +3,7 @@
 `zilliqa-developer` is a Bazel based monorepo that contains SDKs, documentations
 and products used to develop solutions based on the Zilliqa ecosystem.
 
-This reposository is organised as follows:
+This repository is organised as follows:
 
 - `docs/`: Pure documentation in `md` or `mdx` format.
 - `examples/`: Reference material.
@@ -24,6 +24,11 @@ following table is a place holder:
 | `//products/neo-savant`       | ide.zilliqa.com    |                   |
 
 ## Building
+
+To disable our git queries on build, set the
+`DISABLE_WORKSPACE_STATUS` environment variable. This loses version
+information, but speeds builds and stops you having to touch your
+security key on every bazel run.
 
 ### Prerequisites
 
@@ -231,7 +236,8 @@ previous builds: `bazel clean --expunge`
 To get information about your current Bazel setup run `bazelisk info`.
 
 If you get bored with bazel constantly asking you for your password/to authenticate via your key, add
-`--workspace_status_command=echo` to your command line.
+`--workspace_status_command=echo` to your command line. Use `DISABLE_WORKSPACE_STATUS` with `ibazel`
+(since `ibazel` doesn't pass command line options on to `bazel`).
 
 ## Reasoning Behind Repository Organisation
 
@@ -260,4 +266,4 @@ The idea with keeping it all in one repository is as follows:
    version 5.2.1, this possibly leads to incompatibility between `devex` and the
    API component. By keeping the two together, we can ensure that releases are
    done simultaneously and that they rely on the same library version to avoid
-   tedious bugs that are hard to find.
+   tedious bugs that are hard to find..
