@@ -23,9 +23,10 @@ ZRC-2 `TransferFrom` mechanism:
 To burn ZRC2s:
 
 - Call `ZRC2Burn.UpdateBurnAllowance( ZRC2TokenAddress, token_amount)` from the wallet that wishes to burn the tokens.
-- Call `ZRC2TokenAddress.Transfer( ZRC2BurnAddress, token_amount)` to burn the tokens.
-- If you change your mind, call `ZRC2Burn.CancelBurn( ZRC2BurnAddress )` within `burncancelblocks` to change your mind. Your tokens will be returned.
-- Otherwise the burn becomes irrevocable.
+- Call `ZRC2TokenAddress.Transfer( ZRC2BurnAddress, token_amount)` to burn the tokens. This will start a cancel timer for `burncancelblocks` blocks.
+- If you change your mind, call `ZRC2Burn.CancelBurn( ZRC2BurnAddress )` before the timer expires (ie. within `burncancelblocks`) to change your mind. Your tokens will be returned.
+- If `Transfer()` or `TransferFrom()` is called again, a new timer will be started for all tokens waiting to be burned.
+- Otherwise the burn becomes irrevocable.,
 - Anyone can then call `ZRC2Burn.FinaliseBurn(token_address, wallet_address)` to finalise the burn.
 - Once the tokens are permanently burned, not even the `ZRC2Burn` contract owner can get them back.
 
@@ -33,11 +34,14 @@ To burn ZRC2 tokens via an allowance:
 
 - Call `ZRC2Burn.UpdateBurnAllowance( ZRC2TokenAddress, token_amount)` from the wallet that wishes to burn the tokens.
 - Call `ZRC2TokenAddress.IncreaseAllowance( AllowanceAddress, token_amount)` from the wallet that wishes to burn the tokens.
-- Have `AllowanceAddress` call `ZRC2TokenAddress.TransferFrom( WalletAddress, ZRC2Burn, token_amount)` to transfer the tokens.
-- If `WalletAddress` changes their mind within `burncancelblocks`, they can call `ZRC2Burn.CancelBurn( ZRC2BurnAddress )` to cancel.
+- Have `AllowanceAddress` call `ZRC2TokenAddress.TransferFrom( WalletAddress, ZRC2Burn, token_amount)` to transfer the tokens. This will start a cancel timer for `burncancelblocks` blocks.
+- If `WalletAddress` changes their mind before the timer expires (within `burncancelblocks`), they can call `ZRC2Burn.CancelBurn( ZRC2BurnAddress )` to cancel.
+- If `Transfer()` or `TransferFrom` is called again, a new timer will be started for all tokens waiting to be burned.
 - Otherwise the burn becomes irrevocable.
 - Anyone can then call `ZRC2Burn.FinaliseBurn(token_address, wallet_address)` to finalise the burn - this just updates internal data structures.
 - Once the tokens are permanently burned, not even the `ZRC2Burn` contract owner can get them back.
+
+`burncancelblocks` is sampled when the timer is started or restarted.
 
 ## Inspecting totals
 
