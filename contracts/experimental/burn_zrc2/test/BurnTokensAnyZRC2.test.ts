@@ -147,12 +147,42 @@ describe("BurnAnyTokenZRC2Test", () => {
   it("Should be possible to undo your burn before the timeout expires", async () => {
     setAccount(0);
     await zrc2contract.Transfer(useraddress, 100);
-    await burncontract.ChangeBurnCancelBlocks(20);
-
+    let burnCancelTx = await burncontract.ChangeBurnCancelBlocks(20);
+    expect(burnCancelTx).to.eventLogWithParams("ChangeBurnCancelBlocks", {
+      type: "Uint32",
+      vname: "new_cancel_blocks",
+      value: 20,
+    });
     setAccount(1);
     await burncontract.UpdateBurnAllowance(zrc2contract.address, 100);
     await zrc2contract.Transfer(burncontract.address!, 100);
-    await burncontract.CancelBurn(zrc2contract.address);
+    let burnTx = await burncontract.CancelBurn(zrc2contract.address);
+    expect(burnTx).to.eventLogWithParams(
+      "CancelBurn",
+      {
+        type: "ByStr20",
+        value: zrc2contract.address.toLowerCase(),
+        vname: "token",
+      },
+      {
+        type: "ByStr20",
+        value: hre.zilliqa.getAccounts()[1].address.toLowerCase(),
+        vname: "sender",
+      },
+      {
+        type: "Uint128",
+        vname: "token_amount",
+        value: {
+          _hex: "0x64",
+          _isBigNumber: true,
+        },
+      },
+      {
+        type: "Bool",
+        vname: "success",
+        value: true,
+      }
+    );
 
     const pending_burn = await burncontract.pending_burn();
     const balances = await zrc2contract.balances();
@@ -200,7 +230,35 @@ describe("BurnAnyTokenZRC2Test", () => {
     await burncontract.UpdateBurnAllowance(zrc2contract.address, 100);
 
     await zrc2contract.Transfer(burncontract.address!, 100);
-    await burncontract.CancelBurn(zrc2contract.address);
+    {
+      let burnTx = await burncontract.CancelBurn(zrc2contract.address);
+      expect(burnTx).to.eventLogWithParams(
+        "CancelBurn",
+        {
+          type: "ByStr20",
+          value: zrc2contract.address.toLowerCase(),
+          vname: "token",
+        },
+        {
+          type: "ByStr20",
+          value: hre.zilliqa.getAccounts()[1].address.toLowerCase(),
+          vname: "sender",
+        },
+        {
+          type: "Uint128",
+          vname: "token_amount",
+          value: {
+            _hex: "0x00",
+            _isBigNumber: true,
+          },
+        },
+        {
+          type: "Bool",
+          vname: "success",
+          value: false,
+        }
+      );
+    }
 
     const pending_burn = await burncontract.pending_burn();
     const balances = await zrc2contract.balances();

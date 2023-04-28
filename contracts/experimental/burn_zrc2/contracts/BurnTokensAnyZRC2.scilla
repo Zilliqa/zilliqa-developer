@@ -11,13 +11,14 @@ let zero_address = 0x0000000000000000000000000000000000000000
 let uint128_zero = Uint128 0
 let bool_paused = True
 let bool_unpaused = False
+let bool_succeeded = True
+let bool_failed = False
 
 (* Error events *)
 type Error =
 | CodeNotOwner
 | ContractIsPausedFailure
 | ContractAddressNoMatch
-| ZRC2AddressNoMatch
 | BurnAllowanceNotSetForWallet
 | BurnAllowanceExceedForWallet
 | SelfError
@@ -25,12 +26,11 @@ type Error =
 
 let make_error =
   fun (result : Error) =>
-    let result_code = 
+    let result_code =
       match result with
       | CodeNotOwner                  => Int32 -101
       | ContractIsPausedFailure       => Int32 -102
       | ContractAddressNoMatch        => Int32 -103
-      | ZRC2AddressNoMatch            => Int32 -104
       | BurnAllowanceNotSetForWallet  => Int32 -105
       | BurnAllowanceExceedForWallet  => Int32 -106
       | SelfError                     => Int32 -11
@@ -38,9 +38,9 @@ let make_error =
       end
     in
     { _exception : "Error"; code : result_code }
-    
-let one_msg = 
-  fun (msg : Message) => 
+
+let one_msg =
+  fun (msg : Message) =>
     let nil_msg = Nil {Message} in
     Cons {Message} msg nil_msg
 
@@ -134,7 +134,7 @@ procedure IsNotPaused(contract_address: ByStr20)
   IsNotPausedAll;
 
   paused_flag <- paused_zrc2[contract_address];
-  
+
   match paused_flag with
   | Some flag =>
       match flag with
@@ -150,7 +150,7 @@ end
 
 (* Does address match this contract *)
 procedure IsRecipientMatchContract(address: ByStr20)
-  
+
   is_match = builtin eq address _this_address;
 
   match is_match with
@@ -208,7 +208,7 @@ procedure ProcessBurnTokensHelper(token_address: ByStr20,
   pending_amount: Uint128)
 
   burnable_balance <- allow_burn_tokens[token_address][wallet_address];
-  
+
   match burnable_balance with
   | Some bal =>
       is_within_limit = uint128_le amount bal;
@@ -222,7 +222,7 @@ procedure ProcessBurnTokensHelper(token_address: ByStr20,
           cancelblocks <- burncancelblocks;
           newconfirmtime = builtin badd blk cancelblocks;
           newamount = builtin add amount pending_amount;
-          
+
           pending_burn[token_address][wallet_address]:= newamount;
           confirm_time[token_address][wallet_address]:= newconfirmtime;
 
@@ -379,6 +379,10 @@ transition CancelBurn(token:ByStr20)
   somependingamount <- pending_burn[token][_sender];
   match somependingamount with
   | Some pendingamount =>
+    delete pending_burn[token][_sender];
+    delete confirm_time[token][_sender];
+    e = { _eventname: "CancelBurn"; token: token; sender: _sender; token_amount: pendingamount; success: bool_succeeded};
+    event e;
     msg = {
       _amount: uint128_zero;
       _recipient: token;
@@ -387,17 +391,18 @@ transition CancelBurn(token:ByStr20)
       amount: pendingamount
     };
     msgs = one_msg msg;
-    send msgs;
-    delete pending_burn[token][_sender];
-    delete confirm_time[token][_sender]
-    
+    send msgs
   | None =>
+    e = { _eventname: "CancelBurn"; token: token; sender: _sender; token_amount: uint128_zero; success: bool_failed  };
+    event e
   end
 end
 
 transition ChangeBurnCancelBlocks(new_cancel_blocks: Uint32)
   IsOwner _sender;
-  burncancelblocks := new_cancel_blocks
+  burncancelblocks := new_cancel_blocks;
+  e = { _eventname: "ChangeBurnCancelBlocks"; new_cancel_blocks: new_cancel_blocks };
+  event e
 end
 
 transition FinaliseBurn(token_address : ByStr20, wallet_address : ByStr20)
