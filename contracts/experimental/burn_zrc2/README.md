@@ -69,6 +69,14 @@ It is not defined if the owner can interact with the
 contract whilst it is paused. The owner can reassign ownership and
 call the pause and unpause transitions whilst the contract is paused.
 
+## Quirks
+
+- When the contract is paused on only a particular ZRC2, you can cancel your burn, but not finalise it.
+  This is odd, but arises from the logic that we would really like you not to be able to cancel it either,
+  but we have to in case the timer expires on you. Thus, we protect the logic behind finalise with the
+  pause flag, but not that behind cancel. This provides us with better error coverage at the cost of
+  some more than slightly odd semantics.
+
 ## Tests and deployment instructions
 
 ### Tests
