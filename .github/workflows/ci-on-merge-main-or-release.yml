@@ -98,7 +98,7 @@ jobs:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -162,7 +162,7 @@ jobs:
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
 
       - name: "Creating staging update"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
           bazelisk run //cd:update_staging
         env:
