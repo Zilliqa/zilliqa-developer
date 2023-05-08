@@ -15,7 +15,7 @@ for f in glob.glob(f"{sys.argv[1]}/*.scilla"):
     sys.stdout.flush()
     total += 1
     if process.returncode != 0:
-        sys.stdout.write(f"[ FAILED ]\n")
+        sys.stdout.write("[ FAILED ]\n")
         sys.stdout.flush()
 
         print("Output:")
@@ -23,7 +23,7 @@ for f in glob.glob(f"{sys.argv[1]}/*.scilla"):
         print("")
         success += 1
     else:
-        sys.stdout.write(f"[   OK   ]\n")
+        sys.stdout.write("[   OK   ]\n")
         sys.stdout.flush()
         failed += 1
 
