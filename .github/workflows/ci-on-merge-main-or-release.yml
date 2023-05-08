@@ -31,6 +31,31 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      #### BEGIN PRODUCT CHANGES EVALUATION ####
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          dir_names: "true"
+          json: true
+          write_output_files: true
+
+      - name: "Analyse project changes"
+        id: project-changed
+        run: |
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" ]; then
+            echo "developer-portal=true" >> $GITHUB_OUTPUT
+          fi
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex') }}" = "true" ]; then
+            echo "devex=true" >> $GITHUB_OUTPUT
+          fi
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex-apollo') }}" = "true" ]; then
+            echo "devex-apollo=true" >> $GITHUB_OUTPUT
+          fi
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/neo-savant') }}" = "true" ]; then
+            echo "neo-savant=true" >> $GITHUB_OUTPUT
+          fi
+      #### END PRODUCT CHANGES EVALUATION ####
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
@@ -98,7 +123,7 @@ jobs:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex-apollo == 'true'
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -106,7 +131,7 @@ jobs:
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
           cd products/neo-savant
           mkdir -p savant-artifact/
@@ -115,11 +140,19 @@ jobs:
           docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
           docker rm extractstg
 
-      - name: "Build and push Docker - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+      - name: "Build and push Docker - developer-portal - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
+
+      - name: "Build and push Docker - neo-savant - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
+        run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
+
+      - name: "Build and push Docker - devex - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
+        run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
 
       - name: Configure AWS Credentials - production
@@ -137,7 +170,7 @@ jobs:
           registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex-apollo == 'true'
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -145,7 +178,7 @@ jobs:
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
           cd products/neo-savant
           mkdir -p savant-artifact/
@@ -154,12 +187,39 @@ jobs:
           docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
           docker rm extractstg
 
-      - name: "Build and push Docker - production"
-        if: github.event_name == 'release' && github.event.action == 'created'
+      - name: "Build and push Docker - developer-portal - production"
+        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
+
+      - name: "Build and push Docker - neo-savant - production"
+        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
+        run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
+
+      - name: "Build and push Docker - devex - production"
+        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex == 'true'
+        run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
+
+      ### BEGIN DEPLOYMENT STAGES
+      - name: "Create application.bzl"
+        run: |
+          echo 'APPLICATIONS = [' > cd/applications.bzl
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" ]; then
+            echo '    "//products/developer-portal",' >> cd/applications.bzl
+          fi
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex') }}" = "true" ]; then
+            echo '    "//products/devex",' >> cd/applications.bzl
+          fi
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex-apollo') }}" = "true" ]; then
+            echo '    "//products/devex-apollo",' >> cd/applications.bzl
+          fi
+          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/neo-savant') }}" = "true" ]; then
+            echo '    "//products/neo-savant",' >> cd/applications.bzl
+          fi
+          echo ']' >> cd/applications.bzl
+          cat cd/applications.bzl
 
       - name: "Creating staging update"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
