@@ -4,11 +4,11 @@ on:
   # Test run before merging
   pull_request:
     branches:
-      - main
+      - pipeline/enhance
   # On merged
   push:
     branches:
-      - main
+      - pipeline/enhance
   # On released
   release:
     types: [created]
@@ -22,7 +22,7 @@ jobs:
     name: "Build and deploy"
     env:
       AWS_REGION: us-west-2
-      DEFAULT_BRANCH: main
+      DEFAULT_BRANCH: pipeline/enhance
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
