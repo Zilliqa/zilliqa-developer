@@ -46,3 +46,6 @@ secret/*
 
 *_env
 **/*_env
+
+target/
+**/target/
