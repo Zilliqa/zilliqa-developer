@@ -3,7 +3,7 @@ extern crate lalrpop_util;
 pub mod ast;
 pub mod lexer;
 use crate::lexer::Lexer;
-use regex::Regex;
+
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -737,9 +737,6 @@ fn argument_pattern() {
 #[test]
 fn pattern_match_expression_clause() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
-
-    let lexer = lexer::Lexer::new("| Bar _ => Int32 -1");
-    println!("Tokens {:?}", lexer.collect::<Vec<_>>());
 
     assert!(bluebell::PatternMatchExpressionClauseParser::new()
         .parse(&mut errors, lexer::Lexer::new("| _ => Uint32 42"))
@@ -1532,13 +1529,10 @@ fn main() {
         .expect("Unable to read file");
 
     let lexer = Lexer::new(&script);
-    // for token in lexer {
-    //     println!("{:?}", token);
-    // }
 
     
     let parser = bluebell::ProgramParser::new();
-    match parser.parse(&mut errors,  lexer::Lexer::new(&script)) {
+    match parser.parse(&mut errors,  lexer) {
         Ok(ast) => println!("{:?}", ast),
         Err(error) => {
             let message = format!("Syntax error {:?}", error);

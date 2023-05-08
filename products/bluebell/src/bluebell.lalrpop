@@ -1,7 +1,4 @@
-use std::str::FromStr;
-
 use crate::ast::*;
-// use source::FileMap;
 use crate::lexer;
 
 grammar<'err, 'input>(errors: &'err mut Vec<lexer::ParseError>);

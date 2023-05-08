@@ -1,18 +1,4 @@
-use std::fmt::{Debug, Error, Formatter};
-
-#[derive(Clone)]
-pub enum NodeExpression {
-    SignedNumber(String),
-    String(String),
-
-    RegularId(String),
-    SpecialId(String),
-    CustomTypeId(String),
-    TemplateTypeId(String),
-
-    Op(Box<NodeExpression>, Operation, Box<NodeExpression>),
-    Error,
-}
+use std::fmt::{Debug};
 
 #[derive(Clone, Debug)]
 pub enum NodeByteStr {
@@ -416,40 +402,4 @@ pub enum NodeTypeMapValueArguments {
 pub enum NodeTypeMapValueAllowingTypeArguments {
     TypeMapValueNoArgs(NodeTypeMapValue),
     TypeMapValueWithArgs(NodeMetaIdentifier, Vec<NodeTypeMapValueArguments>),
-}
-
-#[derive(Copy, Clone)]
-pub enum Operation {
-    Mul,
-    Div,
-    Add,
-    Sub,
-}
-
-impl Debug for NodeExpression {
-    fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
-        use self::NodeExpression::*;
-        match *self {
-            SignedNumber(ref n) => write!(fmt, "{:?}i64", n),
-            String(ref n) => write!(fmt, "str:{:?}", n),
-            RegularId(ref n) => write!(fmt, "rid:{:?}", n),
-            SpecialId(ref n) => write!(fmt, "sid:{:?}", n),
-            CustomTypeId(ref n) => write!(fmt, "cid:{:?}", n),
-            TemplateTypeId(ref n) => write!(fmt, "tid:{:?}", n),
-            Op(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", l, op, r),
-            Error => write!(fmt, "error"),
-        }
-    }
-}
-
-impl Debug for Operation {
-    fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
-        use self::Operation::*;
-        match *self {
-            Mul => write!(fmt, "*"),
-            Div => write!(fmt, "/"),
-            Add => write!(fmt, "+"),
-            Sub => write!(fmt, "-"),
-        }
-    }
 }
