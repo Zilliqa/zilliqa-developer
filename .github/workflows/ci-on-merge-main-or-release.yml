@@ -56,7 +56,6 @@ jobs:
             echo "neo-savant=true" >> $GITHUB_OUTPUT
           fi
       #### END PRODUCT CHANGES EVALUATION ####
-
       - name: Preparing merged branches
         # Fetch the ref of the base branch, just the single commit.
         run: |
