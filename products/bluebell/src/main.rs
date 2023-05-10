@@ -12,7 +12,7 @@ lalrpop_mod!(pub bluebell);
 
 #[test]
 fn bytestring_parser() {
-    let mut errors: Vec<lexer::ParseError> = [].to_vec();
+    let mut errors: Vec<lexer::ParseError> = vec![];
 
     assert!(bluebell::ByteStringParser::new()
         .parse(&mut errors, lexer::Lexer::new("ByStr3"),)
