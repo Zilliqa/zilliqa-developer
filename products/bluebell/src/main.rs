@@ -306,322 +306,406 @@ fn test_address_type() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo with end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("ByStr42 with end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("ByStr42 with end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Event with end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Event with end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with contract field field1: Uint32, field field2: Uint32 end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("Foo with contract field field1: Uint32, field field2: Uint32 end")
+        )
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("ByStr42 with contract field field1: Uint32 end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("ByStr42 with contract field field1: Uint32 end")
+        )
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Event with contract end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Event with contract end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with library end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo with library end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("ByStr42 with library end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("ByStr42 with library end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Event with library end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Event with library end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with _foo end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo with _foo end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("ByStr42 with _foo end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("ByStr42 with _foo end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Event with _foo end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Event with _foo end"))
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with contract field field1: Uint32 end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("Foo with contract field field1: Uint32 end")
+        )
+        .is_ok());
     assert!(bluebell::AddressTypeParser::new().parse(&mut errors,  lexer::Lexer::new("ByStr42 with contract field field1: Uint32, field field2: Uint32, field field3: Uint32 end")).is_ok());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Event with contract field field1: Uint32 end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("Event with contract field field1: Uint32 end")
+        )
+        .is_ok());
 
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo with end")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo with end"))
+        .is_err());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with ")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("Foo with "))
+        .is_err());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with foo bar: Uint32 end")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("Foo with foo bar: Uint32 end")
+        )
+        .is_err());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with contract field1: Uint32, field2: Uint32")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("Foo with contract field1: Uint32, field2: Uint32")
+        )
+        .is_err());
     assert!(bluebell::AddressTypeParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with contract, end")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("Foo with contract, end"))
+        .is_err());
 }
 
 #[test]
 fn test_type_map_key() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::TypeMapKeyParser::new().parse(&mut errors,  lexer::Lexer::new("Foo")).is_ok());
-    assert!(bluebell::TypeMapKeyParser::new().parse(&mut errors,  lexer::Lexer::new("(Foo)")).is_ok());
     assert!(bluebell::TypeMapKeyParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo"))
+        .is_ok());
     assert!(bluebell::TypeMapKeyParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Foo with end)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(Foo)"))
+        .is_ok());
     assert!(bluebell::TypeMapKeyParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(ByStr42 with contract end)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo with end"))
+        .is_ok());
     assert!(bluebell::TypeMapKeyParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with library end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(Foo with end)"))
+        .is_ok());
+    assert!(bluebell::TypeMapKeyParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("(ByStr42 with contract end)")
+        )
+        .is_ok());
+    assert!(bluebell::TypeMapKeyParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo with library end"))
+        .is_ok());
 
-    assert!(bluebell::TypeMapKeyParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_err());
-    assert!(bluebell::TypeMapKeyParser::new().parse(&mut errors,  lexer::Lexer::new("Foo()")).is_err());
     assert!(bluebell::TypeMapKeyParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Foo with bar end)")
-        ).is_err());
-    assert!(bluebell::TypeMapKeyParser::new().parse(&mut errors,  lexer::Lexer::new("(42)")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_err());
+    assert!(bluebell::TypeMapKeyParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo()"))
+        .is_err());
+    assert!(bluebell::TypeMapKeyParser::new()
+        .parse(&mut errors, lexer::Lexer::new("(Foo with bar end)"))
+        .is_err());
+    assert!(bluebell::TypeMapKeyParser::new()
+        .parse(&mut errors, lexer::Lexer::new("(42)"))
+        .is_err());
 }
 
 #[test]
 fn type_map_value() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::TypeMapValueParser::new().parse(&mut errors,  lexer::Lexer::new("Uint32")).is_ok());
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Map Foo Bar")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Uint32"))
+        .is_ok());
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Uint32)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Map Foo Bar"))
+        .is_ok());
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Address with end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(Uint32)"))
+        .is_ok());
+    assert!(bluebell::TypeMapValueParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Address with end"))
+        .is_ok());
 
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo with contract field field1: Uint32 end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("Foo with contract field field1: Uint32 end")
+        )
+        .is_ok());
 
-    assert!(bluebell::TypeMapValueParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_err());
-    assert!(bluebell::TypeMapValueParser::new().parse(&mut errors,  lexer::Lexer::new("bystr1")).is_err());
-    assert!(bluebell::TypeMapValueParser::new().parse(&mut errors,  lexer::Lexer::new("event")).is_err());
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("map(foo, bar)")
-        ).is_err());
-    assert!(bluebell::TypeMapValueParser::new().parse(&mut errors,  lexer::Lexer::new("(42)")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_err());
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("address with")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("bystr1"))
+        .is_err());
     assert!(bluebell::TypeMapValueParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo with foo bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("event"))
+        .is_err());
+    assert!(bluebell::TypeMapValueParser::new()
+        .parse(&mut errors, lexer::Lexer::new("map(foo, bar)"))
+        .is_err());
+    assert!(bluebell::TypeMapValueParser::new()
+        .parse(&mut errors, lexer::Lexer::new("(42)"))
+        .is_err());
+    assert!(bluebell::TypeMapValueParser::new()
+        .parse(&mut errors, lexer::Lexer::new("address with"))
+        .is_err());
+    assert!(bluebell::TypeMapValueParser::new()
+        .parse(&mut errors, lexer::Lexer::new("foo with foo bar"))
+        .is_err());
 }
 
 #[test]
 fn type_map_value_arguments() {
-
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Uint32)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(Uint32)"))
+        .is_ok());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo"))
+        .is_ok());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Map Foo Bar")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Map Foo Bar"))
+        .is_ok());
 
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo Bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("Foo Bar"))
+        .is_err());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("map(foo, bar)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("map(foo, bar)"))
+        .is_err());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(42)()")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(42)()"))
+        .is_err());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Uint32")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(Uint32"))
+        .is_err());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Map(Foo)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("Map(Foo)"))
+        .is_err());
     assert!(bluebell::TypeMapValueArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Map(Foo, Bar)")
-        ).is_err());
-
+        .parse(&mut errors, lexer::Lexer::new("Map(Foo, Bar)"))
+        .is_err());
 }
 
 #[test]
 fn type_argument() {
-
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::TypeArgumentParser::new().parse(&mut errors,  lexer::Lexer::new("Foo")).is_ok());
-    assert!(bluebell::TypeArgumentParser::new().parse(&mut errors,  lexer::Lexer::new("(Bar)")).is_ok());
-    assert!(bluebell::TypeArgumentParser::new().parse(&mut errors,  lexer::Lexer::new("Uint32")).is_ok());
-    assert!(bluebell::TypeArgumentParser::new().parse(&mut errors,  lexer::Lexer::new("'A")).is_ok());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Uint32)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo"))
+        .is_ok());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Address with contract field field1: Uint32, field field2: Uint32 end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(Bar)"))
+        .is_ok());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Map Uint32 Bool")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Uint32"))
+        .is_ok());
+    assert!(bluebell::TypeArgumentParser::new()
+        .parse(&mut errors, lexer::Lexer::new("'A"))
+        .is_ok());
+    assert!(bluebell::TypeArgumentParser::new()
+        .parse(&mut errors, lexer::Lexer::new("(Uint32)"))
+        .is_ok());
+    assert!(bluebell::TypeArgumentParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(
+                "Address with contract field field1: Uint32, field field2: Uint32 end"
+            )
+        )
+        .is_ok());
+    assert!(bluebell::TypeArgumentParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Map Uint32 Bool"))
+        .is_ok());
 
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo bar")
-        ).is_err());
-    assert!(bluebell::TypeArgumentParser::new().parse(&mut errors,  lexer::Lexer::new("123")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo bar"))
+        .is_err());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo.bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("123"))
+        .is_err());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("mapUint32Uint32")
-        ).is_err());
-    assert!(bluebell::TypeArgumentParser::new().parse(&mut errors,  lexer::Lexer::new("'_A")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo.bar"))
+        .is_err());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(map(Int32, String))")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("mapUint32Uint32"))
+        .is_err());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo.bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("'_A"))
+        .is_err());
     assert!(bluebell::TypeArgumentParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Map(Int32, String, Bool)")
-        ).is_err());
-
+        .parse(&mut errors, lexer::Lexer::new("(map(Int32, String))"))
+        .is_err());
+    assert!(bluebell::TypeArgumentParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo.bar"))
+        .is_err());
+    assert!(bluebell::TypeArgumentParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Map(Int32, String, Bool)"))
+        .is_err());
 }
 
 #[test]
 fn full_expressions() {
-
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let x = Int32 42 in X")
-        ).is_ok()); // let-binding of a number
+        .parse(&mut errors, lexer::Lexer::new("let x = Int32 42 in X"))
+        .is_ok()); // let-binding of a number
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let x: Int32 = Int32 42 in X")
-        ).is_ok()); // let-binding of a typed number
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("let x: Int32 = Int32 42 in X")
+        )
+        .is_ok()); // let-binding of a typed number
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let x = Uint128 42 in builtin lt x x")
-        ).is_ok()); // let-binding of a number
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("let x = Uint128 42 in builtin lt x x")
+        )
+        .is_ok()); // let-binding of a number
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("fun (x: Int32) => builtin lt x x")
-        ).is_ok()); // lambda function that adds 1 to its argument
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("fun (x: Int32) => builtin lt x x")
+        )
+        .is_ok()); // lambda function that adds 1 to its argument
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("fun (x: Int32) => foo")
-        ).is_ok()); // lambda function that adds 1 to its argument
-    assert!(bluebell::FullExpressionParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_ok()); // single variable identifier
+        .parse(&mut errors, lexer::Lexer::new("fun (x: Int32) => foo"))
+        .is_ok()); // lambda function that adds 1 to its argument
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo bar baz")
-        ).is_ok()); // multiple variable identifiers
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_ok()); // single variable identifier
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("UInt32 42")
-        ).is_ok()); // number literal
-    assert!(bluebell::FullExpressionParser::new().parse(&mut errors,  lexer::Lexer::new("true")).is_ok()); // boolean literal
+        .parse(&mut errors, lexer::Lexer::new("foo bar baz"))
+        .is_ok()); // multiple variable identifiers
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("builtin blabla a b")
-        ).is_ok()); // builtin function call with arguments
+        .parse(&mut errors, lexer::Lexer::new("UInt32 42"))
+        .is_ok()); // number literal
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("{ foo: UInt32 42; bar: Int64 23 }")
-        ).is_ok()); // record literal
+        .parse(&mut errors, lexer::Lexer::new("true"))
+        .is_ok()); // boolean literal
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match foo with \n| False => True \n| _ => False \nend")
-        ).is_ok()); // match expression
-    assert!(bluebell::FullExpressionParser::new().parse(&mut errors,  lexer::Lexer::new("Foo")).is_ok()); // meta-identifier
+        .parse(&mut errors, lexer::Lexer::new("builtin blabla a b"))
+        .is_ok()); // builtin function call with arguments
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo  m  n")
-        ).is_ok()); // meta-identifier with arguments
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("{ foo: UInt32 42; bar: Int64 23 }")
+        )
+        .is_ok()); // record literal
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("tfun 'T => fun (x: 'T) => x")
-        ).is_ok()); // type-level function
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match foo with \n| False => True \n| _ => False \nend")
+        )
+        .is_ok()); // match expression
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("@foo Type")
-        ).is_ok()); // type-level function application
+        .parse(&mut errors, lexer::Lexer::new("Foo"))
+        .is_ok()); // meta-identifier
+    assert!(bluebell::FullExpressionParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo  m  n"))
+        .is_ok()); // meta-identifier with arguments
+    assert!(bluebell::FullExpressionParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("tfun 'T => fun (x: 'T) => x")
+        )
+        .is_ok()); // type-level function
+    assert!(bluebell::FullExpressionParser::new()
+        .parse(&mut errors, lexer::Lexer::new("@foo Type"))
+        .is_ok()); // type-level function application
 
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let 42 = x in x")
-        ).is_err()); // variable name cannot be a number
+        .parse(&mut errors, lexer::Lexer::new("let 42 = x in x"))
+        .is_err()); // variable name cannot be a number
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let x: = 42 in x")
-        ).is_err()); // missing type annotation after colon
+        .parse(&mut errors, lexer::Lexer::new("let x: = 42 in x"))
+        .is_err()); // missing type annotation after colon
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("fun x => x + 1")
-        ).is_err()); // missing type annotation in lambda function
+        .parse(&mut errors, lexer::Lexer::new("fun x => x + 1"))
+        .is_err()); // missing type annotation in lambda function
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("42foo")
-        ).is_err()); // variable identifier cannot start with a number
+        .parse(&mut errors, lexer::Lexer::new("42foo"))
+        .is_err()); // variable identifier cannot start with a number
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("42.foo")
-        ).is_err()); // variable identifier cannot start with a number
+        .parse(&mut errors, lexer::Lexer::new("42.foo"))
+        .is_err()); // variable identifier cannot start with a number
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("42.23")
-        ).is_err()); // invalid floating point literal
+        .parse(&mut errors, lexer::Lexer::new("42.23"))
+        .is_err()); // invalid floating point literal
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("builtin noop")
-        ).is_err()); // builtin function call without arguments
+        .parse(&mut errors, lexer::Lexer::new("builtin noop"))
+        .is_err()); // builtin function call without arguments
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("{ foo = 42; bar: 23 }")
-        ).is_err()); // missing colon in record field
+        .parse(&mut errors, lexer::Lexer::new("{ foo = 42; bar: 23 }"))
+        .is_err()); // missing colon in record field
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("{ foo: 42, bar = 23 }")
-        ).is_err()); // using equals sign instead of colon in record field
+        .parse(&mut errors, lexer::Lexer::new("{ foo: 42, bar = 23 }"))
+        .is_err()); // using equals sign instead of colon in record field
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("{ foo = 42, }")
-        ).is_err()); // trailing comma in record literal
+        .parse(&mut errors, lexer::Lexer::new("{ foo = 42, }"))
+        .is_err()); // trailing comma in record literal
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match foo with | 42 => true end")
-        ).is_err()); // missing 'else' clause in match expression
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match foo with | 42 => true end")
+        )
+        .is_err()); // missing 'else' clause in match expression
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo()")
-        ).is_err()); // invalid number of arguments for meta-identifier
+        .parse(&mut errors, lexer::Lexer::new("Foo()"))
+        .is_err()); // invalid number of arguments for meta-identifier
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("tfun T => Foo")
-        ).is_err()); // missing expression after type-level function
+        .parse(&mut errors, lexer::Lexer::new("tfun T => Foo"))
+        .is_err()); // missing expression after type-level function
     assert!(bluebell::FullExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("@foo()")
-        ).is_err()); // missing type argument in type-level function application
-
+        .parse(&mut errors, lexer::Lexer::new("@foo()"))
+        .is_err()); // missing type argument in type-level function application
 }
 
 #[test]
 fn atomic_expression() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::AtomicExpressionParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_ok());
     assert!(bluebell::AtomicExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Uint32 42")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_ok());
     assert!(bluebell::AtomicExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("0x123abc")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Uint32 42"))
+        .is_ok());
     assert!(bluebell::AtomicExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(r#""string""#)
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("0x123abc"))
+        .is_ok());
+    assert!(bluebell::AtomicExpressionParser::new()
+        .parse(&mut errors, lexer::Lexer::new(r#""string""#))
+        .is_ok());
 
     assert!(bluebell::AtomicExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(foo)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(foo)"))
+        .is_err());
     assert!(bluebell::AtomicExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("42.0")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("42.0"))
+        .is_err());
     assert!(bluebell::AtomicExpressionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("True")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("True"))
+        .is_err());
 }
 
 #[test]
@@ -629,109 +713,150 @@ fn value_literal() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ValueLiteralParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo123 42")
-        ).is_ok());
-    assert!(bluebell::ValueLiteralParser::new().parse(&mut errors,  lexer::Lexer::new("0x1234")).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Foo123 42"))
+        .is_ok());
     assert!(bluebell::ValueLiteralParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("\"hello world\"")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("0x1234"))
+        .is_ok());
     assert!(bluebell::ValueLiteralParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Emp Uint32 Uint32")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("\"hello world\""))
+        .is_ok());
     assert!(bluebell::ValueLiteralParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("ByStr20 123")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Emp Uint32 Uint32"))
+        .is_ok());
+    assert!(bluebell::ValueLiteralParser::new()
+        .parse(&mut errors, lexer::Lexer::new("ByStr20 123"))
+        .is_ok());
 
     assert!(bluebell::ValueLiteralParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo Bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("Foo Bar"))
+        .is_err());
     assert!(bluebell::ValueLiteralParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("ByStr hello")
-        ).is_err());
-    assert!(bluebell::ValueLiteralParser::new().parse(&mut errors,  lexer::Lexer::new("1 + 2")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("ByStr hello"))
+        .is_err());
+    assert!(bluebell::ValueLiteralParser::new()
+        .parse(&mut errors, lexer::Lexer::new("1 + 2"))
+        .is_err());
 }
 
 #[test]
 fn map_access() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[foo]"))
+        .is_ok());
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[bar123]"))
+        .is_ok());
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[_result]"))
+        .is_ok());
 
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[foo]")).is_ok());
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[bar123]")).is_ok());
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[_result]")).is_ok());
-
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[0x0232]")).is_err());
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new(r#"["xx"]"#)).is_err());
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[Foo]")).is_err());
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[]")).is_err());
-    assert!(bluebell::MapAccessParser::new().parse(&mut errors,  lexer::Lexer::new("[foo.bar]")).is_err());
-    
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[0x0232]"))
+        .is_err());
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new(r#"["xx"]"#))
+        .is_err());
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[Foo]"))
+        .is_err());
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[]"))
+        .is_err());
+    assert!(bluebell::MapAccessParser::new()
+        .parse(&mut errors, lexer::Lexer::new("[foo.bar]"))
+        .is_err());
 }
 
 #[test]
 fn pattern() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("_")).is_ok());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_ok());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("Bar42")).is_ok());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("Bar42 _")).is_ok());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("Bar42 hello")).is_ok());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("Bar42(_)")).is_ok());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("Bar42(Foo)")).is_ok());
     assert!(bluebell::PatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Bar42(Foo Bar)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("_"))
+        .is_ok());
     assert!(bluebell::PatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Bar42(ByStr42 Int32)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_ok());
     assert!(bluebell::PatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Bar42(Foo.Bar Bar.Baz)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("Bar42"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42 _"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42 hello"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42(_)"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42(Foo)"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42(Foo Bar)"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42(ByStr42 Int32)"))
+        .is_ok());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42(Foo.Bar Bar.Baz)"))
+        .is_ok());
 
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("_ _")).is_err());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("42Bar")).is_err());
-    assert!(bluebell::PatternParser::new().parse(&mut errors,  lexer::Lexer::new("foo bar")).is_err());
     assert!(bluebell::PatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo42(, Bar)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("_ _"))
+        .is_err());
     assert!(bluebell::PatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo42(Map, Bar)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("42Bar"))
+        .is_err());
     assert!(bluebell::PatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Bar42(Map ByStr42 Int32)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo bar"))
+        .is_err());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo42(, Bar)"))
+        .is_err());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo42(Map, Bar)"))
+        .is_err());
+    assert!(bluebell::PatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Bar42(Map ByStr42 Int32)"))
+        .is_err());
 }
 
 #[test]
 fn argument_pattern() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::ArgumentPatternParser::new().parse(&mut errors,  lexer::Lexer::new("_")).is_ok());
-    assert!(bluebell::ArgumentPatternParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_ok());
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("MyType")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("_"))
+        .is_ok());
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(baz)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_ok());
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(Bar42 _)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("MyType"))
+        .is_ok());
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("my_type")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(baz)"))
+        .is_ok());
+    assert!(bluebell::ArgumentPatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("(Bar42 _)"))
+        .is_ok());
+    assert!(bluebell::ArgumentPatternParser::new()
+        .parse(&mut errors, lexer::Lexer::new("my_type"))
+        .is_ok());
 
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("2bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("2bar"))
+        .is_err());
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("MyType()")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("MyType()"))
+        .is_err());
     assert!(bluebell::ArgumentPatternParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(2bar)")
-        ).is_err());
-
+        .parse(&mut errors, lexer::Lexer::new("(2bar)"))
+        .is_err());
 }
 
 #[test]
@@ -752,7 +877,7 @@ fn pattern_match_expression_clause() {
         .is_ok());
     assert!(bluebell::PatternMatchExpressionClauseParser::new()
         .parse(&mut errors, lexer::Lexer::new("| Bar _ => Int32 -1"))
-        .is_ok());    
+        .is_ok());
     assert!(bluebell::PatternMatchExpressionClauseParser::new()
         .parse(
             &mut errors,
@@ -782,60 +907,82 @@ fn message_entry() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::MessageEntryParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: Uint32 42")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo: Uint32 42"))
+        .is_ok());
     assert!(bluebell::MessageEntryParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: bar")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo: bar"))
+        .is_ok());
     assert!(bluebell::MessageEntryParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: 0x1337")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo: 0x1337"))
+        .is_ok());
 
-    assert!(bluebell::MessageEntryParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_err());
     assert!(bluebell::MessageEntryParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: bar: baz")
-        ).is_err());
-    assert!(bluebell::MessageEntryParser::new().parse(&mut errors,  lexer::Lexer::new(": 42")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_err());
+    assert!(bluebell::MessageEntryParser::new()
+        .parse(&mut errors, lexer::Lexer::new("foo: bar: baz"))
+        .is_err());
+    assert!(bluebell::MessageEntryParser::new()
+        .parse(&mut errors, lexer::Lexer::new(": 42"))
+        .is_err());
 }
 
 #[test]
 fn test_type_annotation() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::TypeAnnotationParser::new().parse(&mut errors,  lexer::Lexer::new(": Int")).is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": MyCustomType")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new(": Int"))
+        .is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": ByStr32")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new(": MyCustomType"))
+        .is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (Map ByStr32 Uint32)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new(": ByStr32"))
+        .is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (Map ByStr32 (Map ByStr32 Uint32))")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new(": (Map ByStr32 Uint32)"))
+        .is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (List MyCustomType)")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(": (Map ByStr32 (Map ByStr32 Uint32))")
+        )
+        .is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (Pair MyCustomType1 MyCustomType2)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new(": (List MyCustomType)"))
+        .is_ok());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (Pair (Pair Int Bool) (List MyCustomType))")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(": (Pair MyCustomType1 MyCustomType2)")
+        )
+        .is_ok());
+    assert!(bluebell::TypeAnnotationParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(": (Pair (Pair Int Bool) (List MyCustomType))")
+        )
+        .is_ok());
 
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": MyCustomType (")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new(": MyCustomType ("))
+        .is_err());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (Map MyCustomType)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new(": (Map MyCustomType)"))
+        .is_err());
     assert!(bluebell::TypeAnnotationParser::new()
-        .parse(&mut errors,  lexer::Lexer::new(": (Pair MyCustomType1 MyCustomType2")
-        ).is_err());
-    assert!(bluebell::TypeAnnotationParser::new().parse(&mut errors,  lexer::Lexer::new("Int")).is_err());
-    assert!(bluebell::TypeAnnotationParser::new().parse(&mut errors,  lexer::Lexer::new(": 42")).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(": (Pair MyCustomType1 MyCustomType2")
+        )
+        .is_err());
+    assert!(bluebell::TypeAnnotationParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Int"))
+        .is_err());
+    assert!(bluebell::TypeAnnotationParser::new()
+        .parse(&mut errors, lexer::Lexer::new(": 42"))
+        .is_err());
 }
 
 #[test]
@@ -843,94 +990,124 @@ fn typed_identifier() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::TypedIdentifierParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: Int")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo: Int"))
+        .is_ok());
     assert!(bluebell::TypedIdentifierParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("bar: ByStr20")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("bar: ByStr20"))
+        .is_ok());
     assert!(bluebell::TypedIdentifierParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("baz: (Int Bool)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("baz: (Int Bool)"))
+        .is_ok());
 
     assert!(bluebell::TypedIdentifierParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("1foo: Int")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("1foo: Int"))
+        .is_err());
     assert!(bluebell::TypedIdentifierParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: int")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo: int"))
+        .is_err());
     assert!(bluebell::TypedIdentifierParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: (,)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo: (,)"))
+        .is_err());
 }
 
 #[test]
 fn test_statement() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("foo <- bar")).is_ok()); // REGULAR_ID '<-' variableIdentifier
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("remoteFetchStatement")
-        ).is_ok()); // remoteFetchStatement
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("foo := bar")).is_ok()); // REGULAR_ID ':=' variableIdentifier
+        .parse(&mut errors, lexer::Lexer::new("foo <- bar"))
+        .is_ok()); // REGULAR_ID '<-' variableIdentifier
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo = Uint32 42")
-        ).is_ok()); // REGULAR_ID '=' fullExpression
+        .parse(&mut errors, lexer::Lexer::new("remoteFetchStatement"))
+        .is_ok()); // remoteFetchStatement
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo <- &Event")
-        ).is_ok()); // REGULAR_ID '<-' '&' (CUSTOM_TYPE_IDENTIFIER | BYSTR | 'Event') blockchainFetchArguments?
+        .parse(&mut errors, lexer::Lexer::new("foo := bar"))
+        .is_ok()); // REGULAR_ID ':=' variableIdentifier
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo <- qux[baz]")
-        ).is_ok()); // REGULAR_ID '<-' REGULAR_ID mapAccess+
+        .parse(&mut errors, lexer::Lexer::new("foo = Uint32 42"))
+        .is_ok()); // REGULAR_ID '=' fullExpression
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo <- exists baz[bar]")
-        ).is_ok()); // REGULAR_ID '<-' 'exists' REGULAR_ID mapAccess+
+        .parse(&mut errors, lexer::Lexer::new("foo <- &Event"))
+        .is_ok()); // REGULAR_ID '<-' '&' (CUSTOM_TYPE_IDENTIFIER | BYSTR | 'Event') blockchainFetchArguments?
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo[bar] := qux")
-        ).is_ok()); // REGULAR_ID mapAccess+ ':=' variableIdentifier
+        .parse(&mut errors, lexer::Lexer::new("foo <- qux[baz]"))
+        .is_ok()); // REGULAR_ID '<-' REGULAR_ID mapAccess+
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("delete foo[bar]")
-        ).is_ok()); // 'delete' REGULAR_ID mapAccess+
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("accept")).is_ok()); // 'accept'
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("send foo")).is_ok()); // 'send' variableIdentifier
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("event foo")).is_ok()); // 'event' variableIdentifier
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("throw")).is_ok()); // 'throw' variableIdentifier?
+        .parse(&mut errors, lexer::Lexer::new("foo <- exists baz[bar]"))
+        .is_ok()); // REGULAR_ID '<-' 'exists' REGULAR_ID mapAccess+
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match foo with | False => True | _ => False end")
-        ).is_ok()); // 'match' variableIdentifier 'with' patternMatchClause 'end'
+        .parse(&mut errors, lexer::Lexer::new("foo[bar] := qux"))
+        .is_ok()); // REGULAR_ID mapAccess+ ':=' variableIdentifier
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match foo with | _ => value end")
-        ).is_ok()); // 'match' variableIdentifier 'with' patternMatchClause 'end'
+        .parse(&mut errors, lexer::Lexer::new("delete foo[bar]"))
+        .is_ok()); // 'delete' REGULAR_ID mapAccess+
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Foo bar baz")
-        ).is_ok()); // componentId variableIdentifier*
+        .parse(&mut errors, lexer::Lexer::new("accept"))
+        .is_ok()); // 'accept'
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("forall foo Event")
-        ).is_ok()); // 'forall' variableIdentifier componentId
+        .parse(&mut errors, lexer::Lexer::new("send foo"))
+        .is_ok()); // 'send' variableIdentifier
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("event foo"))
+        .is_ok()); // 'event' variableIdentifier
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("throw"))
+        .is_ok()); // 'throw' variableIdentifier?
+    assert!(bluebell::StatementParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match foo with | False => True | _ => False end")
+        )
+        .is_ok()); // 'match' variableIdentifier 'with' patternMatchClause 'end'
+    assert!(bluebell::StatementParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match foo with | _ => value end")
+        )
+        .is_ok()); // 'match' variableIdentifier 'with' patternMatchClause 'end'
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo bar baz"))
+        .is_ok()); // componentId variableIdentifier*
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("forall foo Event"))
+        .is_ok()); // 'forall' variableIdentifier componentId
 
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("foo < bar")).is_err()); // should be '<-'
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("42 = foo")).is_err()); // invalid order of operands
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("&Event")).is_err()); // missing identifier
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo[] <- bar")
-        ).is_err()); // missing key
+        .parse(&mut errors, lexer::Lexer::new("foo < bar"))
+        .is_err()); // should be '<-'
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo <- exists")
-        ).is_err()); // missing identifier after 'exists'
+        .parse(&mut errors, lexer::Lexer::new("42 = foo"))
+        .is_err()); // invalid order of operands
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo[] := bar")
-        ).is_err()); // missing key
+        .parse(&mut errors, lexer::Lexer::new("&Event"))
+        .is_err()); // missing identifier
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo := qux[bar][baz]")
-        ).is_err()); // wrong assignment operator
+        .parse(&mut errors, lexer::Lexer::new("foo[] <- bar"))
+        .is_err()); // missing key
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo.delete[bar]")
-        ).is_err()); // missing operator between variable and method call
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("send")).is_err()); // missing identifier
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("event")).is_err()); // missing identifier
+        .parse(&mut errors, lexer::Lexer::new("foo <- exists"))
+        .is_err()); // missing identifier after 'exists'
     assert!(bluebell::StatementParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match with _ => 42 end")
-        ).is_err()); // missing variable
-    assert!(bluebell::StatementParser::new().parse(&mut errors,  lexer::Lexer::new("forall")).is_err()); // missing variable and component ID
+        .parse(&mut errors, lexer::Lexer::new("foo[] := bar"))
+        .is_err()); // missing key
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("foo := qux[bar][baz]"))
+        .is_err()); // wrong assignment operator
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("foo.delete[bar]"))
+        .is_err()); // missing operator between variable and method call
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("send"))
+        .is_err()); // missing identifier
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("event"))
+        .is_err()); // missing identifier
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("match with _ => 42 end"))
+        .is_err()); // missing variable
+    assert!(bluebell::StatementParser::new()
+        .parse(&mut errors, lexer::Lexer::new("forall"))
+        .is_err()); // missing variable and component ID
 }
 
 #[test]
@@ -938,33 +1115,33 @@ fn blockchain_fetch_arguments() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(foo bar)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(foo bar)"))
+        .is_ok());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(x)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(x)"))
+        .is_ok());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(y z a)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(y z a)"))
+        .is_ok());
 
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("()")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("()"))
+        .is_err());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(123)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(123)"))
+        .is_err());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(foo, 123)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(foo, 123)"))
+        .is_err());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo, bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo, bar"))
+        .is_err());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(foo; bar)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(foo; bar)"))
+        .is_err());
     assert!(bluebell::BlockchainFetchArgumentsParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_err());
 }
 
 #[test]
@@ -972,47 +1149,63 @@ fn statement_block() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("x <- y; z := a")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("x <- y; z := a"))
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("accept")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("accept"))
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("send x")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("send x"))
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("event myEvent")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("event myEvent"))
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match x with | _ => accept end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match x with | _ => accept end")
+        )
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match x with | _ => y <- z end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match x with | _ => y <- z end")
+        )
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("MyComponent y")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("MyComponent y"))
+        .is_ok());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("MyComponent y; forall foo Event ; match x with | _ => y <- z end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("MyComponent y; forall foo Event ; match x with | _ => y <- z end")
+        )
+        .is_ok());
 
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("x < y")
-        ).is_err());
-    assert!(bluebell::StatementBlockParser::new().parse(&mut errors,  lexer::Lexer::new("x <-")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("x < y"))
+        .is_err());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("accept event")
-        ).is_err());
-    assert!(bluebell::StatementBlockParser::new().parse(&mut errors,  lexer::Lexer::new("send")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("x <-"))
+        .is_err());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("match x with _ => accept end")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("accept event"))
+        .is_err());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("MyComponent X")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("send"))
+        .is_err());
     assert!(bluebell::StatementBlockParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("MyComponent y forall x")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("match x with _ => accept end")
+        )
+        .is_err());
+    assert!(bluebell::StatementBlockParser::new()
+        .parse(&mut errors, lexer::Lexer::new("MyComponent X"))
+        .is_err());
+    assert!(bluebell::StatementBlockParser::new()
+        .parse(&mut errors, lexer::Lexer::new("MyComponent y forall x"))
+        .is_err());
 }
 
 #[test]
@@ -1020,34 +1213,36 @@ fn parameter_pair() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: Uint32")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("foo: Uint32"))
+        .is_ok());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("bar: Bool")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("bar: Bool"))
+        .is_ok());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("baz: Address")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("baz: Address"))
+        .is_ok());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("qux: Map Uint32 Bool")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("qux: Map Uint32 Bool"))
+        .is_ok());
 
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo Uint32")
-        ).is_err());
-    assert!(bluebell::ParameterPairParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo Uint32"))
+        .is_err());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("123: Uint32")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_err());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: bar: Uint32")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("123: Uint32"))
+        .is_err());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: uint32")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo: bar: Uint32"))
+        .is_err());
     assert!(bluebell::ParameterPairParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("foo: mapUint32, Bool")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo: uint32"))
+        .is_err());
+    assert!(bluebell::ParameterPairParser::new()
+        .parse(&mut errors, lexer::Lexer::new("foo: mapUint32, Bool"))
+        .is_err());
 }
 
 #[test]
@@ -1055,31 +1250,52 @@ fn component_definition() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition myTransition(param1: Uint32, param2: Uint32) end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition myTransition(param1: Uint32, param2: Uint32) end")
+        )
+        .is_ok());
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure myProcedure(param: Uint32) end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure myProcedure(param: Uint32) end")
+        )
+        .is_ok());
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure myProcedure(param: Map ByStr32 ByStr32) param end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure myProcedure(param: Map ByStr32 ByStr32) param end")
+        )
+        .is_ok());
     assert!(bluebell::ComponentDefinitionParser::new().parse(&mut errors,  lexer::Lexer::new("transition myTransition(param: Bool) match param with | False => True | _ => False end end")).is_ok());
 
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition myTransition")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("transition myTransition"))
+        .is_err());
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure myProcedure() returns Uint32")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure myProcedure() returns Uint32")
+        )
+        .is_err());
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure myProcedure(param: Uint32) returns Uint32 {")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure myProcedure(param: Uint32) returns Uint32 {")
+        )
+        .is_err());
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition myTransition() { state_1 -> state_2 }")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition myTransition() { state_1 -> state_2 }")
+        )
+        .is_err());
     assert!(bluebell::ComponentDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition myTransition(param1: Uint32 param2: Uint32)")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition myTransition(param1: Uint32 param2: Uint32)")
+        )
+        .is_err());
 }
 
 #[test]
@@ -1087,27 +1303,36 @@ fn procedure_definition() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure foo() end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("procedure foo() end"))
+        .is_ok());
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure bar(x: Int32, y: Uint32) baz x y end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure bar(x: Int32, y: Uint32) baz x y end")
+        )
+        .is_ok());
 
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure 42() { }")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("procedure 42() { }"))
+        .is_err());
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure foo(x, y) { }")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("procedure foo(x, y) { }"))
+        .is_err());
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure foo(x: Int32, y: Uint32)")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure foo(x: Int32, y: Uint32)")
+        )
+        .is_err());
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure foo(x: Int32, y: Uint32) foo x y")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("procedure foo(x: Int32, y: Uint32) foo x y")
+        )
+        .is_err());
     assert!(bluebell::ProcedureDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("procedure foo() {}")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("procedure foo() {}"))
+        .is_err());
 }
 
 #[test]
@@ -1115,107 +1340,145 @@ fn transition_definition() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo()  bar end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("transition foo()  bar end"))
+        .is_ok());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition bar(x: Int32, y: Uint32) foo end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition bar(x: Int32, y: Uint32) foo end")
+        )
+        .is_ok());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition qux(bar: Bool) bar end")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition qux(bar: Bool) bar end")
+        )
+        .is_ok());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition empty() end")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("transition empty() end"))
+        .is_ok());
 
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition 123() { foo() }")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("transition 123() { foo() }"))
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo(bar) { foo() }")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition foo(bar) { foo() }")
+        )
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo() { foo(); bar() }")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition foo() { foo(); bar() }")
+        )
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transaction foo() { bar() }")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transaction foo() { bar() }")
+        )
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo() { bar }")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("transition foo() { bar }"))
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo() { bar( }")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("transition foo() { bar( }"))
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo() { bar() };")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("transition foo() { bar() };")
+        )
+        .is_err());
     assert!(bluebell::TransitionDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("transition foo() { ; }")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("transition foo() { ; }"))
+        .is_err());
 }
 
 #[test]
 fn component_id() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("MyType")).is_ok());
-    // TODO: assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("Event42")).is_ok());
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("Foo_Bar")).is_ok());
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("ByStr42")).is_ok());
     assert!(bluebell::ComponentIdParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("regular_id")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("MyType"))
+        .is_ok());
+    // TODO: assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("Event42")).is_ok());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("Foo_Bar"))
+        .is_ok());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("ByStr42"))
+        .is_ok());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("regular_id"))
+        .is_ok());
 
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("42Event")).is_err());
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("my type")).is_err());
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("event+")).is_err());
-    assert!(bluebell::ComponentIdParser::new().parse(&mut errors,  lexer::Lexer::new("ByStr")).is_err());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("42Event"))
+        .is_err());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("my type"))
+        .is_err());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("event+"))
+        .is_err());
+    assert!(bluebell::ComponentIdParser::new()
+        .parse(&mut errors, lexer::Lexer::new("ByStr"))
+        .is_err());
 }
 
 #[test]
 fn component_parameters() {
-
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("()")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("()"))
+        .is_ok());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: Int32)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(a: Int32)"))
+        .is_ok());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: Int32, b: Bool)")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("(a: Int32, b: Bool)"))
+        .is_ok());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: Int32, b: Bool, c: String)")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("(a: Int32, b: Bool, c: String)")
+        )
+        .is_ok());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: ByStr20, b: Map ByStr20 (Uint256))")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("(a: ByStr20, b: Map ByStr20 (Uint256))")
+        )
+        .is_ok());
 
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("a: Int32, b: Bool")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("a: Int32, b: Bool"))
+        .is_err());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: Int32")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(a: Int32"))
+        .is_err());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: Int32,, b: Bool)")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(a: Int32,, b: Bool)"))
+        .is_err());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(())")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(())"))
+        .is_err());
     assert!(bluebell::ComponentParametersParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("(a: )")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("(a: )"))
+        .is_err());
 }
 
 #[test]
 fn component_body() {
+    let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
-        let mut errors: Vec<lexer::ParseError> = [].to_vec();
-
-        assert!(bluebell::ComponentBodyParser::new()
-            .parse(&mut errors,  lexer::Lexer::new(
+    assert!(bluebell::ComponentBodyParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(
                 "
       RequireNotPaused;
       RequireContractOwner;
@@ -1229,10 +1492,13 @@ fn component_body() {
     end
             "
             )
-            ).is_ok());
+        )
+        .is_ok());
 
-        assert!(bluebell::ComponentBodyParser::new()
-            .parse(&mut errors,  lexer::Lexer::new(
+    assert!(bluebell::ComponentBodyParser::new()
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(
                 "
       RequirePaused;
       RequireContractOwner;
@@ -1246,9 +1512,10 @@ fn component_body() {
     end
     "
             )
-            ).is_ok());
+        )
+        .is_ok());
 
-        assert!(bluebell::ComponentBodyParser::new().parse(&mut errors,  lexer::Lexer::new("
+    assert!(bluebell::ComponentBodyParser::new().parse(&mut errors,  lexer::Lexer::new("
         current_init <-& init.dApp;
         xPointsDApp = \"xpoints\"; get_addr <-& current_init.dns[xPointsDApp]; addr = option_bystr20_value get_addr;
         is_xPoints = builtin eq _sender addr; match is_xPoints with
@@ -1263,27 +1530,33 @@ fn contract_fields() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field foo: Int32 = Int32 42")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("field foo: Int32 = Int32 42")
+        )
+        .is_ok());
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field bar: Map ByStr32 (List Uint32) = Emp ByStr32 (List Uint32)")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("field bar: Map ByStr32 (List Uint32) = Emp ByStr32 (List Uint32)")
+        )
+        .is_ok());
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field baz: Event = Event")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("field baz: Event = Event"))
+        .is_ok());
 
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field: Foo = Bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("field: Foo = Bar"))
+        .is_err());
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field bar = 42")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("field bar = 42"))
+        .is_err());
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field baz: Event = 42")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("field baz: Event = 42"))
+        .is_err());
     assert!(bluebell::ContractFieldParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("field qux = 'hello world'")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("field qux = 'hello world'"))
+        .is_err());
 }
 
 #[test]
@@ -1291,42 +1564,60 @@ fn test_with_constraint() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::WithConstraintParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("with builtin blt end_of_life =>")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("with builtin blt end_of_life =>")
+        )
+        .is_ok());
     assert!(bluebell::WithConstraintParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("with builtin add {UInt32} one  =>")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("with builtin add {UInt32} one  =>")
+        )
+        .is_ok());
     assert!(bluebell::WithConstraintParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("with true =>")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("with true =>"))
+        .is_ok());
     assert!(bluebell::WithConstraintParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("with variableIdentifier =>")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("with variableIdentifier =>"))
+        .is_ok());
 
-    assert!(bluebell::WithConstraintParser::new().parse(&mut errors,  lexer::Lexer::new("foo")).is_err());
     assert!(bluebell::WithConstraintParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("with variableIdentifier => foo")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("foo"))
+        .is_err());
     assert!(bluebell::WithConstraintParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("with =>")
-        ).is_err());
-    assert!(bluebell::WithConstraintParser::new().parse(&mut errors,  lexer::Lexer::new("with")).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("with variableIdentifier => foo")
+        )
+        .is_err());
+    assert!(bluebell::WithConstraintParser::new()
+        .parse(&mut errors, lexer::Lexer::new("with =>"))
+        .is_err());
+    assert!(bluebell::WithConstraintParser::new()
+        .parse(&mut errors, lexer::Lexer::new("with"))
+        .is_err());
 }
 
 #[test]
 fn contract_definition() {
-
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract()")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("contract MyContract()"))
+        .is_ok());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract(address: ByStr20)")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("contract MyContract(address: ByStr20)")
+        )
+        .is_ok());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract(address: ByStr20) with true =>")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("contract MyContract(address: ByStr20) with true =>")
+        )
+        .is_ok());
     assert!(bluebell::ContractDefinitionParser::new()
         .parse(&mut errors,  lexer::Lexer::new("contract MyContract(address: ByStr20) with true => field field1: Uint32 = Uint32 1")
         ).is_ok());
@@ -1344,33 +1635,45 @@ fn contract_definition() {
         end"#)).is_ok());
 
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("contract MyContract"))
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract end")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("contract MyContract end"))
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("Contract MyContract")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("Contract MyContract"))
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("contract"))
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract(address: ByStr20,) with (true =>)")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("contract MyContract(address: ByStr20,) with (true =>)")
+        )
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract(address: ByStr20) with true => field field1 = 1")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(
+                "contract MyContract(address: ByStr20) with true => field field1 = 1"
+            )
+        )
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("contract MyContract(address: ByStr20) with true => field field1: = 1")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(
+                "contract MyContract(address: ByStr20) with true => field field1: = 1"
+            )
+        )
+        .is_err());
     assert!(bluebell::ContractDefinitionParser::new().parse(&mut errors,  lexer::Lexer::new(
         "contract MyContract(address: ByStr20) with true => field field1: Uint32 = 1 field2: 10")).is_err());
     assert!(bluebell::ContractDefinitionParser::new().parse(&mut errors,  lexer::Lexer::new(
         "contract MyContract(address: ByStr20) with true => field field1: Uint32 = 1 transition a(Void) {}")).is_err());
     assert!(bluebell::ContractDefinitionParser::new().parse(&mut errors,  lexer::Lexer::new(
         "contract MyContract(address: ByStr20) with true => field field1: Uint32 = 1 procedure a(Void) {")).is_err());
-
 }
 
 #[test]
@@ -1406,30 +1709,30 @@ fn library_single_definition() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let foo = Int32 42")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("let foo = Int32 42"))
+        .is_ok());
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let foo: Int32 = Int32 42")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("let foo: Int32 = Int32 42"))
+        .is_ok());
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("type Foo")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("type Foo"))
+        .is_ok());
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("type Foo = | Bar | Baz")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("type Foo = | Bar | Baz"))
+        .is_ok());
 
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let = Int32 42")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("let = Int32 42"))
+        .is_err());
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("let foo: = 42")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("let foo: = 42"))
+        .is_err());
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("type Int32 42")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("type Int32 42"))
+        .is_err());
     assert!(bluebell::LibrarySingleDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("type Foo = | Bar Baz")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("type Foo = | Bar Baz"))
+        .is_err());
 }
 
 #[test]
@@ -1437,60 +1740,80 @@ fn library_definition() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("library Foo"))
+        .is_ok());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Bar let x = Int32 10")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("library Bar let x = Int32 10")
+        )
+        .is_ok());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Baz type Quux")
-        ).is_ok());
+        .parse(&mut errors, lexer::Lexer::new("library Baz type Quux"))
+        .is_ok());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Qux type Quux = | Event")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("library Qux type Quux = | Event")
+        )
+        .is_ok());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Quux type Quux = | Event of Uint256")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("library Quux type Quux = | Event of Uint256")
+        )
+        .is_ok());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Quuz type Quux = | Event of Uint256 | AnotherEvent of ByStr20")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new(
+                "library Quuz type Quux = | Event of Uint256 | AnotherEvent of ByStr20"
+            )
+        )
+        .is_ok());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Qoorx let x: Int32 = Int32 42")
-        ).is_ok());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("library Qoorx let x: Int32 = Int32 42")
+        )
+        .is_ok());
 
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo Bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo Bar"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo bar")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo bar"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo type")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo type"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo type = | Event")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo type = | Event"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo type Quux =")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo type Quux ="))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo type Quux = |")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo type Quux = |"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo type Quux = | Event of")
-        ).is_err());
+        .parse(
+            &mut errors,
+            lexer::Lexer::new("library Foo type Quux = | Event of")
+        )
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo let")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo let"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo let x")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo let x"))
+        .is_err());
     assert!(bluebell::LibraryDefinitionParser::new()
-        .parse(&mut errors,  lexer::Lexer::new("library Foo let = 42")
-        ).is_err());
+        .parse(&mut errors, lexer::Lexer::new("library Foo let = 42"))
+        .is_err());
 }
 
 #[derive(Debug)]
@@ -1530,16 +1853,16 @@ fn main() {
 
     let lexer = Lexer::new(&script);
 
-    
     let parser = bluebell::ProgramParser::new();
-    match parser.parse(&mut errors,  lexer) {
+    match parser.parse(&mut errors, lexer) {
         Ok(ast) => println!("{:?}", ast),
         Err(error) => {
             let message = format!("Syntax error {:?}", error);
-            let mut pos : Vec<usize> = [].to_vec();
-            error.map_location(|l|{
+            let mut pos: Vec<usize> = [].to_vec();
+            error.map_location(|l| {
                 pos.push(l);
-             l });
+                l
+            });
 
             let mut n = 0;
             let mut line_counter = 0;
@@ -1552,8 +1875,7 @@ fn main() {
                     if should_stop {
                         line_end = n;
                         break;
-                    }
-                    else {
+                    } else {
                         line_start = n + 1;
                     }
                 }
@@ -1562,8 +1884,7 @@ fn main() {
                 }
 
                 n += 1;
-                if !should_stop
-                {
+                if !should_stop {
                     char_counter += 1;
                 }
 
@@ -1579,12 +1900,15 @@ fn main() {
 
             let line = &script[line_start..line_end];
             println!("Line {},{}:{}", line_counter, char_counter, line);
-            print!("{}", " ".repeat(char_counter+ format!("Line {},{}:", line_counter, char_counter).len()));
+            print!(
+                "{}",
+                " ".repeat(char_counter + format!("Line {},{}:", line_counter, char_counter).len())
+            );
             println!("{}", "^".repeat(pos[1] - pos[0]));
 
             let my_error = ParserError {
                 message,
-                line:  0, //error.location_line(),
+                line: 0,   //error.location_line(),
                 column: 0, // err.location_column(),
             };
             println!("{}", my_error);
@@ -1592,5 +1916,4 @@ fn main() {
             process::exit(-1);
         }
     }
-
 }

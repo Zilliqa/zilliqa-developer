@@ -36,7 +36,6 @@ const KEYWORD_EVENT: &'static str = "event";
 const KEYWORD_EVENT_TYPE: &'static str = "Event";
 const KEYWORD_BYSTR: &'static str = "ByStr";
 
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token<S> {
     Plus,
@@ -172,7 +171,6 @@ impl<S: ToString> From<Token<S>> for String {
                 Token::EventType => KEYWORD_EVENT_TYPE,
                 Token::ByStr => KEYWORD_BYSTR,
 
-
                 Token::Whitespace => " ",
                 _ => "?", // Token::Unknown made as a wild card to avoid compiler complaining.
             }
@@ -215,23 +213,21 @@ impl<'input> Iterator for Lexer<'input> {
     // <(usize, Token, usize, usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-
-
         while let Some((start, ch)) = self.chars.next() {
-
             let (token, end): (Token<&'input str>, usize) = {
                 let look_ahead = self.chars.peek().map(|(_, next_ch)| *next_ch);
                 self.character += ch.len_utf8();
 
-                let next_is_alpha_num_under = match look_ahead.map(|c| c.is_alphanumeric() || c == '_') {
+                let next_is_alpha_num_under =
+                    match look_ahead.map(|c| c.is_alphanumeric() || c == '_') {
                         Some(true) => true,
-                        _ => false
+                        _ => false,
                     };
 
                 let next_is_numeric = match look_ahead.map(|c| c.is_numeric()) {
-                        Some(true) => true,
-                        _ => false
-                    };
+                    Some(true) => true,
+                    _ => false,
+                };
 
                 // Handle more complex tokens, whitespace, and comments
                 if ch.is_whitespace() {
@@ -247,13 +243,13 @@ impl<'input> Iterator for Lexer<'input> {
                     self.chars.next();
                     (Token::Arrow, start + 2 * ch.len_utf8())
                 } else if ch == '-' && !next_is_numeric {
-                    (Token::Minus, start + ch.len_utf8())               
+                    (Token::Minus, start + ch.len_utf8())
                 } else if ch == '<' && look_ahead == Some('-') {
                     self.chars.next();
                     (Token::LeftArrow, start + 2 * ch.len_utf8())
                 } else if ch == ':' && look_ahead == Some('=') {
                     self.chars.next();
-                    (Token::ColonEquals, start + 2 * ch.len_utf8()) 
+                    (Token::ColonEquals, start + 2 * ch.len_utf8())
                 } else if ch == '_' && !next_is_alpha_num_under {
                     (Token::Underscore, start + ch.len_utf8())
                 } else if ch == '(' && look_ahead == Some('*') {
@@ -263,7 +259,8 @@ impl<'input> Iterator for Lexer<'input> {
                     let mut comment = String::new();
 
                     while let Some((_, ch)) = self.chars.next() {
-                        if ch == '*' && self.chars.peek().map(|(_, next_ch)| *next_ch) == Some(')') {
+                        if ch == '*' && self.chars.peek().map(|(_, next_ch)| *next_ch) == Some(')')
+                        {
                             self.chars.next();
                             break;
                         } else {
@@ -271,15 +268,13 @@ impl<'input> Iterator for Lexer<'input> {
                         }
                     }
 
-
                     continue;
                     // TODO: Hack to avoid emitting comment. However, ideally these should be part of the AST or at least the token stream
                     // let len = comment.len();
                     // let end = start + len + 2 + 1; // +2: `*)`, +1: move to char beyond last
-                    // let s = &self.document[start + 2..end - 1]; // +2: skip `(*`        
+                    // let s = &self.document[start + 2..end - 1]; // +2: skip `(*`
                     // (Token::Comment(s), end)
                 } else {
-
                     let (token, end): (Token<&'input str>, usize) = match ch {
                         '+' => (Token::Plus, start + ch.len_utf8()),
                         '*' => (Token::Asterisk, start + ch.len_utf8()),
@@ -313,8 +308,7 @@ impl<'input> Iterator for Lexer<'input> {
                                 token_str
                             };
 
-                            let (token, end): (Token<&'input str>, usize) = match keyword_token
-                            {
+                            let (token, end): (Token<&'input str>, usize) = match keyword_token {
                                 KEYWORD_FORALL => {
                                     self.chars.nth(KEYWORD_FORALL.len() - 2);
                                     (Token::Forall, start + KEYWORD_FORALL.len())
@@ -426,9 +420,8 @@ impl<'input> Iterator for Lexer<'input> {
                                 KEYWORD_EVENT_TYPE => {
                                     self.chars.nth(KEYWORD_EVENT_TYPE.len() - 2);
                                     (Token::EventType, start + KEYWORD_EVENT_TYPE.len())
-                                }                                                
+                                }
                                 _ => {
-
                                     // Handle other cases here
                                     let bystr_with_size = Regex::new(r"^ByStr[0-9]+").unwrap();
 
@@ -446,10 +439,10 @@ impl<'input> Iterator for Lexer<'input> {
                                     if let Some(mat) = bystr_with_size.find(token_str) {
                                         let end = start + mat.end();
                                         let s = &self.document[start..end];
-                                                                                if mat.end() > 1 {
+                                        if mat.end() > 1 {
                                             self.chars.nth(end - start - 2); // -2, because we already consumed the first char
                                         }
-                                       
+
                                         (Token::ByStrWithSize(s), end)
                                     } else if token_str.starts_with(KEYWORD_BYSTR) {
                                         self.chars.nth(KEYWORD_BYSTR.len() - 2);
@@ -457,10 +450,10 @@ impl<'input> Iterator for Lexer<'input> {
                                     } else if let Some(mat) = hex_number.find(token_str) {
                                         let end = start + mat.end();
                                         let s = &self.document[start..end];
-                                                                                if mat.end() > 1 {
+                                        if mat.end() > 1 {
                                             self.chars.nth(end - start - 2); // -2, because we already consumed the first char
                                         }
-                                       
+
                                         (Token::HexNumber(s), end)
                                     } else if let Some(mat) = signed_integer.find(token_str) {
                                         let end = start + mat.end();
@@ -472,18 +465,18 @@ impl<'input> Iterator for Lexer<'input> {
                                     } else if let Some(mat) = string_literal.find(token_str) {
                                         let end = start + mat.end();
                                         let s = &self.document[start..end];
-                                                                                if mat.end() > 1 {
+                                        if mat.end() > 1 {
                                             self.chars.nth(end - start - 2); // -2, because we already consumed the first char
                                         }
-                                       
+
                                         (Token::StringLiteral(s), end)
                                     } else if let Some(mat) = regular_id.find(token_str) {
                                         let end = start + mat.end();
                                         let s = &self.document[start..end];
-                                                                                if mat.end() > 1 {
+                                        if mat.end() > 1 {
                                             self.chars.nth(end - start - 2); // -2, because we already consumed the first char
                                         }
-                                       
+
                                         (Token::Identifier(s), end)
                                     } else if let Some(mat) = template_type_id.find(token_str) {
                                         let end = start + mat.end();
@@ -491,7 +484,7 @@ impl<'input> Iterator for Lexer<'input> {
                                         if mat.end() > 1 {
                                             self.chars.nth(end - start - 2); // -2, because we already consumed the first char
                                         }
-                                       
+
                                         (Token::TemplateIdentifier(s), end)
                                     } else if let Some(mat) = custom_type_id.find(token_str) {
                                         let end = start + mat.end();
@@ -506,14 +499,13 @@ impl<'input> Iterator for Lexer<'input> {
                                         if mat.end() > 1 {
                                             self.chars.nth(end - start - 2); // -2, because we already consumed the first char
                                         }
-                                       
+
                                         (Token::SpecialIdentifier(s), end)
-                                    }  else {
+                                    } else {
                                         (Token::Unknown, start)
                                     }
                                 }
                             };
-
 
                             (token, end)
                         }
@@ -521,7 +513,6 @@ impl<'input> Iterator for Lexer<'input> {
                     (token, end)
                 }
             };
-
 
             return Some(Ok((start, token, end)));
         }
@@ -565,7 +556,6 @@ mod tests {
             "       ~~~~~~~~~~~~~~~~~~~" => Token::Comment("(*(* hello *(*("),
         };
     }
-
 
     // TODO: Add
     // (* Fish (* Soup *) *)
