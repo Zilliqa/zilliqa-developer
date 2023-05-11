@@ -1,4 +1,4 @@
-# Zilliqa Developer Tools & Documnentation
+# Zilliqa Developer Tools & Documentation
 
 `zilliqa-developer` is a Bazel based monorepo that contains SDKs, documentations
 and products used to develop solutions based on the Zilliqa ecosystem.
