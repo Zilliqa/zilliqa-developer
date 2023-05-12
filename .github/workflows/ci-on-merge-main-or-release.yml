@@ -19,6 +19,7 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: "Build and deploy"
     env:
       AWS_REGION: us-west-2
