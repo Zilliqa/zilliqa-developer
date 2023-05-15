@@ -13,7 +13,7 @@ There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupp
 `GetTotalCoinSupplyAsInt` Returns the total supply (ZIL) of coins in the network. This is represented as a
 `Rounded Number`.
 
-### Example Request
+### Example Request-1
 
 === "cURL"
 
@@ -74,7 +74,7 @@ There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupp
     }
     ```
 
-### Example Response
+### Example Response-1
 
 ```json
 {
@@ -84,7 +84,7 @@ There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupp
 }
 ```
 
-### Example Request
+### Example Request-2
 
 === "cURL"
 
@@ -97,7 +97,7 @@ There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupp
     }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
     ```
 
-### Example Response
+### Example Response-2
 
 ```json
 {
