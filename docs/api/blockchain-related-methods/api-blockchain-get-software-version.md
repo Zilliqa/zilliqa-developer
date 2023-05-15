@@ -5,7 +5,7 @@ title: GetVersion
 
 ---
 
-Returns the software version of the Zilliqa nodes. Additionally, returns a commit id if defined.
+Returns the software version of the Zilliqa node. Additionally, returns a commit id if defined.
 
 ### Example Request
 
