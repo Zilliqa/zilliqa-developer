@@ -5,8 +5,13 @@ title: GetTotalCoinSupply
 
 ---
 
-Returns the total supply (ZIL) of coins in the network. This is represented as a
+There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupplyAsInt`.
+
+`GetTotalCoinSupply` Returns the total supply (ZIL) of coins in the network. This is represented as a
 `String`.
+
+`GetTotalCoinSupplyAsInt` Returns the total supply (ZIL) of coins in the network. This is represented as a
+`Rounded Number`.
 
 ### Example Request
 
@@ -79,6 +84,33 @@ Returns the total supply (ZIL) of coins in the network. This is represented as a
 }
 ```
 
+### Example Request
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetTotalCoinSupplyAsInt",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+### Example Response
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": 13452081092
+}
+```
+
+!!! note
+
+    `GetTotalCoinSupplyAsInt` is not avaliable to call through SDKs.
+
 ### HTTP Request
 
 | Chain(s)              | URL(s)                                                                                       |
@@ -90,9 +122,9 @@ Returns the total supply (ZIL) of coins in the network. This is represented as a
 
 ### Arguments
 
-| Parameter | Type   | Required | Description            |
-| --------- | ------ | -------- | ---------------------- |
-| `id`      | string | Required | `"1"`                  |
-| `jsonrpc` | string | Required | `"2.0"`                |
-| `method`  | string | Required | `"GetTotalCoinSupply"` |
-| `params`  | string | Required | Empty string `""`      |
+| Parameter | Type   | Required | Description                                       |
+| --------- | ------ | -------- | ------------------------------------------------- |
+| `id`      | string | Required | `"1"`                                             |
+| `jsonrpc` | string | Required | `"2.0"`                                           |
+| `method`  | string | Required | `"GetTotalCoinSupply or GetTotalCoinSupplyAsint"` |
+| `params`  | string | Required | Empty string `""`                                 |
