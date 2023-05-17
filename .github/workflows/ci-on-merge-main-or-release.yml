@@ -144,7 +144,7 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - developer-portal - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
 
