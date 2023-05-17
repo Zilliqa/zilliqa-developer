@@ -2,12 +2,16 @@
 extern crate lalrpop_util;
 pub mod ast;
 pub mod lexer;
+pub mod type_inference;
 use crate::lexer::Lexer;
+use crate::type_inference::{infer_types, TypeInferenceState};
 
+use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::process;
+
 lalrpop_mod!(pub bluebell);
 
 macro_rules! check_ok {
@@ -977,6 +981,8 @@ impl std::fmt::Display for ParserError {
     }
 }
 // */
+// Add the parse_to_ast function that parses the code and returns a NodeProgram instance
+
 fn main() {
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
 
@@ -993,7 +999,10 @@ fn main() {
 
     let parser = bluebell::ProgramParser::new();
     match parser.parse(&mut errors, lexer) {
-        Ok(ast) => println!("{:?}", ast),
+        Ok(ast) => {
+            let _inferred_types = infer_types(&ast).unwrap();
+            // println!("{:?}", ast)
+        }
         Err(error) => {
             let message = format!("Syntax error {:?}", error);
             let mut pos: Vec<usize> = [].to_vec();

@@ -147,13 +147,15 @@ pub ImportDeclarations: NodeImportDeclarations = {
 	<prev:ImportDeclarations>
 	"import" <n:ImportedName> => {
 		let mut ret = NodeImportDeclarations {
-			import_list: prev.import_list.clone()
+			import_list: prev.import_list.clone(),
+            type_annotation: None
 		};
 		ret.import_list.push(n);
 		ret
 	},
 	"import" <n:ImportedName+> => NodeImportDeclarations {
-		import_list: n
+		import_list: n,
+        type_annotation: None
 	}	
 }
 
@@ -220,16 +222,19 @@ pub BuiltinArguments: NodeBuiltinArguments = {
 	<prev:BuiltinArguments>
 	<n:VariableIdentifier> => {
 		let mut ret = NodeBuiltinArguments {
-			arguments: prev.arguments.clone()
+			arguments: prev.arguments.clone(),
+            type_annotation: None
 		};
 		ret.arguments.push(n);
 		ret
 	},
 	<n:VariableIdentifier> => NodeBuiltinArguments {
-		arguments: vec![n]
+		arguments: vec![n],
+        type_annotation: None
 	},
     "(" ")" =>  NodeBuiltinArguments {
-		arguments: vec![]
+		arguments: vec![],
+        type_annotation: None
 	}	
 }
 
@@ -328,21 +333,25 @@ pub AddressType: NodeAddressType = {
         identifier: type_name,
         type_name: "".to_string(),
         address_fields: vec![],
+        type_annotation: None
     },
 	<type_name: TypeNameIdentifier> "with" "contract" <address_fields: AddressTypeFieldList?> "end" => NodeAddressType {
         identifier: type_name,
         type_name: "".to_string(),
         address_fields: address_fields.unwrap_or([].to_vec()),
+        type_annotation: None
     },
 	<type_name: TypeNameIdentifier> "with" "library" "end" => NodeAddressType {
         identifier: type_name,
         type_name: "".to_string(),
         address_fields: vec![],
+        type_annotation: None
     },
 	<type_name: TypeNameIdentifier> "with" <special_identifie:SpecialId> "end" => NodeAddressType {
         identifier: type_name,
         type_name: "".to_string(),
         address_fields: vec![],
+        type_annotation: None
     },
 };
 
@@ -377,7 +386,8 @@ pub AddressTypeField: NodeAddressTypeField = {
     "field" <identier_value:VariableIdentifier> ":" <type_name:ScillaType> => {
         NodeAddressTypeField { 
             identifier: identier_value, 
-            type_name: type_name 
+            type_name: type_name ,
+            type_annotation: None
         }
     }
 }
@@ -424,7 +434,7 @@ pub TypeMapKey: NodeTypeMapKey = {
 // @return A Scilla map value type as a custom type identifier, an address type, a map key and value type, or a type allowed as a map value and used in parentheses.
 pub TypeMapValue: NodeTypeMapValue = {
     <n:MetaIdentifier> => NodeTypeMapValue::MapValueCustomType(n),
-    "Map" <k:TypeMapKey> <v:TypeMapValue> => NodeTypeMapValue::MapKeyValue(Box::new(NodeTypeMapEntry { key: k, value: v })),
+    "Map" <k:TypeMapKey> <v:TypeMapValue> => NodeTypeMapValue::MapKeyValue(Box::new(NodeTypeMapEntry { key: k, value: v, type_annotation: None })),
     "(" <t:TypeMapValueAllowingTypeArguments> ")" => NodeTypeMapValue::MapValueParanthesizedType(Box::new(t)),
     <t:AddressType> => NodeTypeMapValue::MapValueAddressType(Box::new(t)),
 }
@@ -472,7 +482,8 @@ pub Program: NodeProgram = {
     <import_declarations:ImportDeclarations?>
     <library_definition:LibraryDefinition?>
     <contract_definition:ContractDefinition> => NodeProgram {
-        version, import_declarations, library_definition, contract_definition
+        version, import_declarations, library_definition, contract_definition,
+        type_annotation: None
     }
 }
 
@@ -497,6 +508,7 @@ pub LibraryDefinition: NodeLibraryDefinition = {
         NodeLibraryDefinition {
             name: l,
             definitions: d,
+            type_annotation: None
         }
     },
 }
@@ -549,8 +561,8 @@ pub LibrarySingleDefinition: NodeLibrarySingleDefinition = {
 // @return A typed identifier as an identifier name with an associated Scilla type annotation.
 pub TypedIdentifier: NodeTypedIdentifier = {
     <identifier_name: RegularId>
-    <type_annotation: TypeAnnotation>
-    => NodeTypedIdentifier {identifier_name, type_annotation}
+    <annotation: TypeAnnotation>
+    => NodeTypedIdentifier {identifier_name, annotation, type_annotation: None}
 };
 
 
@@ -565,7 +577,7 @@ pub TypedIdentifier: NodeTypedIdentifier = {
 // @syntax typeAnnotation
 // @return A Scilla type as a type annotation for a variable or field.
 pub TypeAnnotation: NodeTypeAnnotation = {
-":" <type_name:ScillaType> => NodeTypeAnnotation {type_name: type_name}
+":" <type_name:ScillaType> => NodeTypeAnnotation {type_name: type_name, type_annotation: None}
 }
 
 
@@ -617,7 +629,7 @@ pub TypeMapValueAllowingTypeArguments: NodeTypeMapValueAllowingTypeArguments = {
 // @syntax contractTypeArguments
 // @return A list of type arguments enclosed in braces. 
 pub ContractTypeArguments: NodeContractTypeArguments= {
-    "{" <type_arguments: TypeArgument*> "}" => NodeContractTypeArguments{ type_arguments: type_arguments }
+    "{" <type_arguments: TypeArgument*> "}" => NodeContractTypeArguments{ type_arguments: type_arguments, type_annotation: None }
 }
 
 
@@ -694,7 +706,7 @@ pub FullExpression : NodeFullExpression = {
 // @syntax patternMatchExpressionClause
 // @return A pattern match expression clause as a pattern expression with a corresponding full expression.
 pub PatternMatchExpressionClause: NodePatternMatchExpressionClause = {
-	"|" <p:Pattern> "=>" <e:FullExpression> => NodePatternMatchExpressionClause { pattern: p, expression: e }
+	"|" <p:Pattern> "=>" <e:FullExpression> => NodePatternMatchExpressionClause { pattern: p, expression: e, type_annotation: None }
 }
 
 
@@ -931,7 +943,8 @@ pub StatementBlock: NodeStatementBlock = {
             statements.push(stmt);
         }
 		NodeStatementBlock {
-			statements
+			statements,
+            type_annotation: None
 		}
 	}
 }
@@ -948,7 +961,7 @@ pub StatementBlock: NodeStatementBlock = {
 // @syntax blockchainFetchArguments
 // @return Scilla blockchain fetch arguments as a list of variable identifiers.
 pub BlockchainFetchArguments: NodeBlockchainFetchArguments = {
-    "(" <arguments:VariableIdentifier+> ")" => NodeBlockchainFetchArguments{ arguments }
+    "(" <arguments:VariableIdentifier+> ")" => NodeBlockchainFetchArguments{ arguments, type_annotation: None }
 }
 
 
@@ -988,7 +1001,8 @@ pub PatternMatchClause: NodePatternMatchClause = {
    "|" <pattern_expression:Pattern> "=>" <statement_block:StatementBlock?>
    => NodePatternMatchClause {
        pattern_expression: Box::new(pattern_expression),
-       statement_block: statement_block
+       statement_block: statement_block,
+       type_annotation: None
    }
 }
 
@@ -1071,7 +1085,7 @@ pub RemoteFetchStatement: NodeRemoteFetchStatement = {
 // @syntax mapAccess
 // @return A map access as a variable identifier name in a Scilla map.
 pub MapAccess: NodeMapAccess = {
-    "[" <identifier_name:VariableIdentifier> "]" => NodeMapAccess {identifier_name},
+    "[" <identifier_name:VariableIdentifier> "]" => NodeMapAccess {identifier_name, type_annotation:None},
 };
 
 
@@ -1087,7 +1101,7 @@ pub MapAccess: NodeMapAccess = {
 // @return A Scilla parameter pair with an identifier with type.
 pub ParameterPair: NodeParameterPair = {
     <identifier_with_type: TypedIdentifier>
-    => NodeParameterPair { identifier_with_type }
+    => NodeParameterPair { identifier_with_type, type_annotation: None }
 }
 
 
@@ -1120,7 +1134,7 @@ pub ComponentParameters : NodeComponentParameters = {
            parameters.push(p);
        }
 
-       NodeComponentParameters { parameters }
+       NodeComponentParameters { parameters, type_annotation: None }
    }
 };
 
@@ -1154,7 +1168,7 @@ pub ComponentDefinition: NodeComponentDefinition = {
 // @syntax transitionDefinition
 // @return A Scilla transition definition with a name, parameters, and body.
 pub TransitionDefinition : NodeTransitionDefinition = 
- "transition" <name:ComponentId> <parameters:ComponentParameters> <body:ComponentBody> => NodeTransitionDefinition{name, parameters, body};
+ "transition" <name:ComponentId> <parameters:ComponentParameters> <body:ComponentBody> => NodeTransitionDefinition{name, parameters, body, type_annotation: None};
 
 
 
@@ -1173,7 +1187,7 @@ pub ProcedureDefinition: NodeProcedureDefinition = {
     <name: ComponentId>
     <parameters:ComponentParameters>
     <body: ComponentBody>
-    => NodeProcedureDefinition{name,parameters,body} 
+    => NodeProcedureDefinition{name,parameters,body, type_annotation: None} 
 };
 
 
@@ -1188,7 +1202,7 @@ pub ProcedureDefinition: NodeProcedureDefinition = {
 // @syntax componentBody
 // @return A Scilla component body with an optional statement block.
 pub ComponentBody: NodeComponentBody = {
-    <statement_block:StatementBlock?> "end" => NodeComponentBody{ statement_block }
+    <statement_block:StatementBlock?> "end" => NodeComponentBody{ statement_block, type_annotation: None }
 }
 ;
 
@@ -1220,6 +1234,7 @@ pub ContractDefinition: NodeContractDefinition = {
         constraint,
         fields,
         components,
+        type_annotation: None,
     }
 };
 
@@ -1240,7 +1255,7 @@ pub ContractDefinition: NodeContractDefinition = {
 
 pub ContractField : NodeContractField = 
     "field" <typed_identifier:TypedIdentifier> "=" <right_hand_side:FullExpression>
-    => NodeContractField{ typed_identifier, right_hand_side};
+    => NodeContractField{ typed_identifier, right_hand_side, type_annotation: None };
 
 
 // The rule that defines a Scilla contract constraint.
@@ -1253,7 +1268,7 @@ pub ContractField : NodeContractField =
 //
 // @syntax withConstraint
 // @return A Scilla contract constraint with a boolean expression.
-pub WithConstraint: NodeWithConstraint = "with" <expression:FullExpression> "=>" => NodeWithConstraint { expression: Box::new(expression) };
+pub WithConstraint: NodeWithConstraint = "with" <expression:FullExpression> "=>" => NodeWithConstraint { expression: Box::new(expression), type_annotation: None };
 
 
 
