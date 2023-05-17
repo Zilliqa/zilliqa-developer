@@ -112,7 +112,7 @@ jobs:
           cat VERSION
 
       - name: Configure AWS Credentials - staging
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
@@ -120,13 +120,13 @@ jobs:
           oidc-role: ${{ secrets.OIDC_ROLE }}
 
       - name: Login to the registry - staging
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: docker/login-action@v2
         with:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex-apollo == 'true'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex-apollo == 'true'
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -134,7 +134,7 @@ jobs:
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
           cd products/neo-savant
           mkdir -p savant-artifact/
@@ -144,17 +144,17 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - developer-portal - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
 
       - name: "Build and push Docker - neo-savant - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
 
       - name: "Build and push Docker - devex - staging"
-        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
         run: |
           bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
 
