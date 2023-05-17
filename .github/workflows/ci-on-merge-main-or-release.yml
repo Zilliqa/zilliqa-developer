@@ -98,9 +98,9 @@ jobs:
 
       - name: Bazel cache
         id: cache-bazel-debug
-        uses: actions/cache@v3.0.4
+        uses: actions/cache@v3.3.1
         with:
-          path: ~/.cache/bazel/
+          path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-debug
 
       - name: Get tag version
