@@ -110,7 +110,15 @@ fn traverse_nodeimportdeclarations(
     type_inference_state: &mut TypeInferenceState,
 ) {
     for imported_name in &node.import_list {
-        // Perform traversal or type inference on the imported_name, if necessary
+        match imported_name {
+            NodeImportedName::RegularImport(type_name_id) => {
+                traverse_nodetypenameidentifier(type_name_id, type_inference_state);
+            }
+            NodeImportedName::AliasedImport(original_type_name_id, alias_type_name_id) => {
+                traverse_nodetypenameidentifier(original_type_name_id, type_inference_state);
+                traverse_nodetypenameidentifier(alias_type_name_id, type_inference_state);
+            }
+        }
     }
 }
 
@@ -125,13 +133,13 @@ fn traverse_nodelibrarydefinition(
                 type_annotation,
                 expression,
             } => {
-                // Perform traversal or type inference on the let definition elements, if necessary
+                // TODO: Perform traversal or type inference on the let definition elements, if necessary
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, alternative_clauses_opt) => {
-                // Perform traversal or type inference on the type definition elements, if necessary
+                // TODO: Perform traversal or type inference on the type definition elements, if necessary
                 if let Some(alternative_clauses) = alternative_clauses_opt {
                     for alternative_clause in alternative_clauses {
-                        // Perform traversal or type inference on the alternative_clause, if necessary
+                        // TODO: Perform traversal or type inference on the alternative_clause, if necessary
                     }
                 }
             }
@@ -178,14 +186,17 @@ fn traverse_nodewithconstraint(
     node: &NodeWithConstraint,
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the node's expression, if necessary
+    // Perform traversal or type inference on the node's expression
+    traverse_nodefull_expression(&node.expression, type_inference_state);
 }
 
 fn traverse_nodecontractfield(
     node: &NodeContractField,
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the node's elements, if necessary
+    // Perform traversal or type inference on the node's elements
+    // TODO: Function not found traverse_nodetyped_identifier(&node.typed_identifier, type_inference_state);
+    traverse_nodefull_expression(&node.right_hand_side, type_inference_state);
 }
 
 fn traverse_nodetransitiondefinition(
@@ -208,15 +219,18 @@ fn traverse_nodeparameterpair(
     node: &NodeParameterPair,
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the node's elements, if necessary
+    // Traverse the identifier_with_type field
     traverse_nodetypedidentifier(&node.identifier_with_type, type_inference_state);
+
+    // Traverse the annotation field
+    // TODO: Implement this
 }
 
 fn traverse_nodecomponentbody(
     node: &NodeComponentBody,
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the node's optional statement block, if necessary
+    // TODO: Perform traversal or type inference on the node's optional statement block, if necessary
     if let Some(statement_block) = &node.statement_block {
         traverse_nodestatementblock(statement_block, type_inference_state);
     }
@@ -226,7 +240,7 @@ fn traverse_nodetypedidentifier(
     node: &NodeTypedIdentifier,
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the node's elements, if necessary
+    // TODO: Perform traversal or type inference on the node's elements, if necessary
     traverse_nodetypeannotation(&node.annotation, type_inference_state);
 }
 
@@ -354,15 +368,15 @@ fn traverse_node_remote_fetch_statement(
     type_inference_state: &mut TypeInferenceState,
 ) {
     match node {
-        NodeRemoteFetchStatement::ReadStateMutable(_, _, _) => { /* Perform traversal or type inference */
+        NodeRemoteFetchStatement::ReadStateMutable(_, _, _) => { /* TODO: Perform traversal or type inference */
         }
-        NodeRemoteFetchStatement::ReadStateMutableSpecialId(_, _, _) => { /* Perform traversal or type inference */
+        NodeRemoteFetchStatement::ReadStateMutableSpecialId(_, _, _) => { /* TODO: Perform traversal or type inference */
         }
-        NodeRemoteFetchStatement::ReadStateMutableMapAccess(_, _, _, _) => { /* Perform traversal or type inference */
+        NodeRemoteFetchStatement::ReadStateMutableMapAccess(_, _, _, _) => { /* TODO: Perform traversal or type inference */
         }
-        NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(_, _, _, _) => { /* Perform traversal or type inference */
+        NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(_, _, _, _) => { /* TODO: Perform traversal or type inference */
         }
-        NodeRemoteFetchStatement::ReadStateMutableCastAddress(_, _, _) => { /* Perform traversal or type inference */
+        NodeRemoteFetchStatement::ReadStateMutableCastAddress(_, _, _) => { /* TODO: Perform traversal or type inference */
         }
     }
 }
@@ -371,14 +385,14 @@ fn traverse_pattern_match_expression_clause(
     node: &NodePatternMatchExpressionClause,
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the node's elements, if necessary
+    // TODO: Perform traversal or type inference on the node's elements, if necessary
 }
 
 fn traverse_arguments_list(
     node: &[NodeVariableIdentifier],
     type_inference_state: &mut TypeInferenceState,
 ) {
-    // Perform traversal or type inference on the elements of arguments list
+    // TODO: Perform traversal or type inference on the elements of arguments list
     for arg in node {
         traverse_node_variable_identifier(arg, type_inference_state);
     }
@@ -409,32 +423,32 @@ fn traverse_node_value_literal(
 fn traverse_nodescilla_type(node: &NodeScillaType, type_inference_state: &mut TypeInferenceState) {
     match node {
         NodeScillaType::GenericTypeWithArgs(meta_identifier, type_arguments) => {
-            // Perform traversal or type inference on meta_identifier and type_arguments
+            // TODO: Perform traversal or type inference on meta_identifier and type_arguments
             traverse_node_meta_identifier(meta_identifier, type_inference_state);
             for type_argument in type_arguments {
                 traverse_nodescilla_type_argument(type_argument, type_inference_state);
             }
         }
         NodeScillaType::MapType(map_key, map_value) => {
-            // Perform traversal or type inference on map_key and map_value
+            // TODO: Perform traversal or type inference on map_key and map_value
             traverse_nodetype_map_key(map_key, type_inference_state);
             traverse_nodetype_map_value(map_value, type_inference_state);
         }
         NodeScillaType::FunctionType(dom, codom) => {
-            // Perform traversal or type inference on dom and codom
+            // TODO: Perform traversal or type inference on dom and codom
             traverse_nodescilla_type(dom, type_inference_state);
             traverse_nodescilla_type(codom, type_inference_state);
         }
         NodeScillaType::EnclosedType(enclosed_type) => {
-            // Perform traversal or type inference on enclosed_type
+            // TODO: Perform traversal or type inference on enclosed_type
             traverse_nodescilla_type(enclosed_type, type_inference_state);
         }
         NodeScillaType::ScillaAddresseType(address_type) => {
-            // Perform traversal or type inference on address_type
+            // TODO: Perform traversal or type inference on address_type
             traverse_node_address_type(address_type, type_inference_state);
         }
         NodeScillaType::PolyFunctionType(_, inner_type) => {
-            // Perform traversal or type inference on inner_type
+            // TODO: Perform traversal or type inference on inner_type
             traverse_nodescilla_type(inner_type, type_inference_state);
         }
         NodeScillaType::TypeVarType(_) => {
@@ -450,13 +464,13 @@ fn traverse_node_variable_identifier(
 ) {
     match node {
         NodeVariableIdentifier::VariableName(name) => {
-            // Perform traversal or type inference on name if needed
+            // TODO: Perform traversal or type inference on name if needed
         }
         NodeVariableIdentifier::SpecialIdentifier(special_id) => {
-            // Perform traversal or type inference on special_id if needed
+            // TODO: Perform traversal or type inference on special_id if needed
         }
         NodeVariableIdentifier::VariableInNamespace(type_name_id, var_name) => {
-            // Perform traversal or type inference on type_name_id and var_name if needed
+            // TODO: Perform traversal or type inference on type_name_id and var_name if needed
             traverse_nodetypenameidentifier(type_name_id, type_inference_state);
         }
     }
@@ -557,7 +571,7 @@ fn traverse_nodetypenameidentifier(
 ) {
     match node {
         NodeTypeNameIdentifier::ByteStringType(byte_str) => {
-            // Perform traversal or type inference on byte_str, if needed
+            // TODO: Perform traversal or type inference on byte_str, if needed
         }
         // Add more match branches for other NodeTypeNameIdentifier variants as needed
         _ => (),
@@ -583,7 +597,7 @@ fn traverse_node_pattern(node: &NodePattern, type_inference_state: &mut TypeInfe
             // No traversal or type inference needed for Wildcard
         }
         NodePattern::Binder(binder_name) => {
-            // Perform traversal or type inference on binder_name, if needed
+            // TODO: Perform traversal or type inference on binder_name, if needed
         }
         NodePattern::Constructor(meta_identifier, argument_patterns) => {
             traverse_node_meta_identifier(meta_identifier, type_inference_state);
@@ -605,7 +619,7 @@ fn traverse_node_argument_pattern(
             // No traversal or type inference needed for WildcardArgument
         }
         NodeArgumentPattern::BinderArgument(binder_name) => {
-            // Perform traversal or type inference on binder_name, if needed
+            // TODO: Perform traversal or type inference on binder_name, if needed
         }
         NodeArgumentPattern::ConstructorArgument(meta_identifier) => {
             traverse_node_meta_identifier(meta_identifier, type_inference_state);
@@ -627,23 +641,23 @@ fn traverse_nodefull_expression(
             type_annotation,
             containing_expression,
         } => {
-            // Perform traversal or type inference on the elements, if necessary
+            // TODO: Perform traversal or type inference on the elements, if necessary
         }
         NodeFullExpression::FunctionDeclaration {
             identier_value,
             type_annotation,
             expression,
         } => {
-            // Perform traversal or type inference on the elements, if necessary
+            // TODO: Perform traversal or type inference on the elements, if necessary
         }
         NodeFullExpression::FunctionCall {
             function_name,
             argument_list,
         } => {
-            // Perform traversal or type inference on the elements, if necessary
+            // TODO: Perform traversal or type inference on the elements, if necessary
         }
         NodeFullExpression::ExpressionAtomic(atomic_expr) => {
-            // Perform traversal or type inference on atomic_expr
+            // TODO: Perform traversal or type inference on atomic_expr
             traverse_node_atomic_expression(atomic_expr, type_inference_state);
         }
         // Add more match arms for other NodeFullExpression variants
