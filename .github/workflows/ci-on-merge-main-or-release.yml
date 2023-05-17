@@ -112,7 +112,7 @@ jobs:
           cat VERSION
 
       - name: Configure AWS Credentials - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
