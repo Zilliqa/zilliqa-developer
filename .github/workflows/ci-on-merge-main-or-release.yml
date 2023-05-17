@@ -96,6 +96,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
+      - name: Bazel cache
+        id: cache-bazel-debug
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+
       - name: Get tag version
         id: get-version
         run: |
