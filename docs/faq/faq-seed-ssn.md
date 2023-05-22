@@ -23,7 +23,7 @@ The seed/ssn-specific configuration files are available on the [join page](https
 
 #### Where should I look for the instructions for running the node?
 
-You can follow the node installation instructions in the [exchange section](http://localhost/exchanges/exchange-integration/getting-started/exchange-introduction/). Note that the whitelisting of the node is only required for the new installation. For existing node installation, you can follow the `launch_docker.sh` instructions.
+You can follow the node installation instructions in the [exchange section](exchange-introduction). Note that the whitelisting of the node is only required for the new installation. For existing node installation, you can follow the `launch_docker.sh` instructions.
 If you need to run more than one node, you can launch with the same whitelisted public/private keypair.
 We highly recommend node operators use key whitelisting mode for running the seed/ssn node.
 
@@ -32,9 +32,9 @@ We highly recommend node operators use key whitelisting mode for running the see
 Please ensure the following:
 
 - You must be using the public IP of the machine when following launch_docker.sh instructions.
-- Kindly ensure that you are following the Minimum Hardware Requirements defined in the [Getting Started](http://localhost/exchanges/exchange-integration/getting-started/exchange-introduction/#ip-whitelisting-mode) page.
+- Kindly ensure that you are following the Minimum Hardware Requirements defined in the [Getting Started](ip-whitelisting-mode) page.
 
-- The inbound port should be open in the firewall. You can check by issuing the following command.
+- The inbound port should be open in the firewall. You can check by issuing the following command. Note that you may need to install the netcat tool for this.
 
   ```sh
       nc -vz <IP address of the machine>  <port>

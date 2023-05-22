@@ -22,15 +22,15 @@ The configuration files are available in the [join page](https://mainnet-join.zi
 
 #### Where should I look for the instructions for running the node?
 
-You can follow the node installation instructions in the [Miners Section](http://localhost/miners/mining/mining-zilclient/).
+You can follow the node installation instructions in the [Zilclient](mining-zilclient) section.
 
 #### What additional infrastructure checks I should do before starting the node?
 
 Please ensure the following.
 
-- Follow the Hardware [Requirements section](http://localhost/miners/mining/mining-zilclient/) doc.
+- Follow the Hardware [Requirements section](mining-zilclient) doc.
 - You must be using the public IP of the machine when following launch_docker.sh instructions.
-- The inbound port on 33133 should be open in the firewall. You can check by issuing the following command from any machine.
+- The inbound port on 33133 should be open in the firewall. You can check by issuing the following command from any machine. Note that you may need to install the netcat tool for this.
 
   ```sh
       nc -vz <IP address of the machine>  <port>
