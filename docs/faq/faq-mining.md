@@ -12,44 +12,30 @@ description: Frequently asked questions
 
 <!-- markdownlint-disable MD001 -->
 
-#### Do I need to upgrade the mining node after the Zilliqa upgrade?
+#### Do we have to upgrade the mining node after the Zilliqa upgrade?
 
-In almost every upgrade of zilliqa blockchain requires all seed or SSN node operators to upgrade their nodes immediately after the upgrade. The zilliqa team will always update the node operators with the instructions to upgrade the nodes through Telegram/Discord.
+Almost every major upgrade of the Zilliqa blockchain requires the miners to upgrade their nodes immediately after the upgrade. The Zilliqa team will continually inform the node operators with the instructions to upgrade the nodes through Telegram/Discord channels.
 
 #### Where can I find the configuration files to download?
 
-The configuration files are available in the [join page](https://mainnet-join.zilliqa.com/) in `configuration.tar.gz` file.
+The configuration files are available in the [join page](https://mainnet-join.zilliqa.com/) in the `configuration.tar.gz` file.
 
-#### Where should i look for the instructions for running the node ?
+#### Where should I look for the instructions for running the node?
 
-You can follow the node installation instructions given in the [Miners Section](http://localhost/miners/mining/mining-zilclient/).
-We highly recommend node operators to use key whitelisting mode for running the seed/ssn node.
+You can follow the node installation instructions in the [Miners Section](http://localhost/miners/mining/mining-zilclient/).
 
-#### What additional things i should check before starting the node ?
+#### What additional infrastructure checks I should do before starting the node?
 
 Please ensure the following.
-You must be using the public IP of the machine when following launch_docker.sh instructions.
-The IP inbound port should be open in firewall. You can check by issuing the following command.
 
-```sh
-nc -vz <IP address of the machine>  <port>
-```
+- Follow the Hardware [Requirements section](http://localhost/miners/mining/mining-zilclient/) doc.
+- You must be using the public IP of the machine when following launch_docker.sh instructions.
+- The inbound port on 33133 should be open in the firewall. You can check by issuing the following command from any machine.
 
-#### How do i check if the node is running fine ?
+  ```sh
+      nc -vz <IP address of the machine>  <port>
+  ```
 
-Generally node downloads the complete persistence(blockchain data and state) on the start which can be timeconsuming depending on the network bandwidth. It may take upto an hour. After the successful start, node will open 4201 API port. You can check the following.
-netstat -tnlp|grep 4201
+#### How do I check if the node is running fine?
 
-Additionally you can query the following API to check if the API is returning the latest block number and confirm the same with the [view block URL](https://viewblock.io/zilliqa).
-
-```sh
-curl --request POST \
-  --url http://localhost:4201/ \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "id": "1",
-    "jsonrpc": "2.0",
-    "method": "GetLatestTxBlock",
-    "params": [""]
-}'
-```
+Generally, a node downloads the complete persistence(blockchain data and state) at the start which can be time-consuming depending on the network bandwidth. It may take up to an hour. After the successful start, you should notice that port 33133 is opened by the application by checking netstat output through command `netstat -tnlp|grep 33133`.
