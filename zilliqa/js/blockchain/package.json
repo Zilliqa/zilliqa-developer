@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/blockchain",
-  "version": "3.3.4",
+  "version": "3.4.0",
   "description": "Class(es) for interacting with the Zilliqa blockchain.",
   "main": "dist/index.js",
   "node": "dist/index.js",
@@ -24,10 +24,10 @@
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@zilliqa-js/account": "^3.3.4",
-    "@zilliqa-js/core": "^3.3.4",
-    "@zilliqa-js/crypto": "^3.3.4",
-    "@zilliqa-js/util": "^3.3.4",
+    "@zilliqa-js/account": "workspace:*",
+    "@zilliqa-js/core": "workspace:*",
+    "@zilliqa-js/crypto": "workspace:*",
+    "@zilliqa-js/util": "workspace:*",
     "tslib": "2.3.1",
     "utility-types": "^3.4.1"
   },
@@ -38,8 +38,5 @@
     "LICENSE",
     "CHANGELOG.md",
     "README.md"
-  ],
-  "engines": {
-    "node": ">=12.0.0 <17"
-  }
+  ]
 }

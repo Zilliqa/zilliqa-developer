@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/core",
-  "version": "3.3.4",
+  "version": "3.4.0",
   "description": "Core abstractions that power the zilliqa JS client.",
   "main": "dist/index.js",
   "node": "dist/index.js",
@@ -35,8 +35,5 @@
     "LICENSE",
     "CHANGELOG.md",
     "README.md"
-  ],
-  "engines": {
-    "node": ">=12.0.0 <17"
-  }
+  ]
 }

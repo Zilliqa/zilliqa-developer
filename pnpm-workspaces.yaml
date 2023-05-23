@@ -1,0 +1,11 @@
+packages:
+  - "zilliqa/js/account"
+  - "zilliqa/js/blockchain"
+  - "zilliqa/js/contract"
+  - "zilliqa/js/core"
+  - "zilliqa/js/crypto"
+  - "zilliqa/js/proto"
+  - "zilliqa/js/subscriptions"
+  - "zilliqa/js/typings"
+  - "zilliqa/js/util"
+  - "zilliqa/js/zilliqa"
