@@ -12,6 +12,12 @@ export default {
   input: "src/index.ts",
   output: [
     {
+      file: "dist/cjs/bundle.js",
+      format: "cjs",
+      name: "@zilliqa-js/core",
+      sourcemap: !isProduction,
+    },
+    {
       file: "dist/umd/bundle.js",
       format: "umd",
       name: "@zilliqa-js/core",
@@ -28,6 +34,7 @@ export default {
     resolve(),
     commonjs(),
     builtins(),
+
     isProduction && terser(),
   ],
 };

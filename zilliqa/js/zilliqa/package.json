@@ -1,13 +1,13 @@
 {
   "name": "@zilliqa-js/zilliqa",
-  "version": "3.4.0-rc.1",
+  "version": "3.4.0-rc.2",
   "description": "Main entry point to the Zilliqa JS client.",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
   ],
-  "main": "dist/umd/bundle.js",
-  "browser": "dist/umd/bundle.js",
+  "main": "dist/cjs/bundle.js",
   "module": "dist/esm/bundle.js",
+  "browser": "dist/umd/bundle.js",
   "jsnext:main": "dist/esm/bundle.js",
   "types": "dist/types/src/index.d.ts",
   "typings": "dist/types/src/index.d.ts",
@@ -16,10 +16,11 @@
     "url": "https://github.com/Zilliqa/zilliqa-js/issues"
   },
   "scripts": {
-    "clean": "rimraf lib",
-    "build": "pnpm clean && pnpm build:ts && pnpm build:web",
-    "build:ts": "tsc -b tsconfig.json",
-    "build:web": "webpack --progress --config ../../../webpack.config.js"
+    "clean": "rimraf ./dist ./tsconfig.tsbuildinfo",
+    "build": "pnpm clean && pnpm build:cjs && pnpm build:esm && pnpm build:umd",
+    "build:esm": "tsc -b tsconfig.json",
+    "build:umd": "rollup -c",
+    "build:cjs": "tsc -b tsconfig.cjs.json"
   },
   "license": "GPL-3.0",
   "publishConfig": {
