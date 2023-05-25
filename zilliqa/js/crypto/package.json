@@ -24,11 +24,8 @@
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@types/elliptic": "^6.4.13",
-    "@types/uuid": "8.3.1",
     "@zilliqa-js/util": "workspace:*",
     "aes-js": "^3.1.1",
-    "bsert": "^0.0.4",
     "elliptic": "^6.5.0",
     "hash.js": "^1.1.5",
     "hmac-drbg": "^1.0.1",
@@ -39,6 +36,11 @@
     "tslib": "2.3.1",
     "uuid": "8.3.2",
     "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/elliptic": "^6.4.14",
+    "@types/uuid": "8.3.1"
   },
   "files": [
     "dist",

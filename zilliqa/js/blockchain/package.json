@@ -31,6 +31,14 @@
     "tslib": "2.3.1",
     "utility-types": "^3.4.1"
   },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/camelcase": "^4.1.0",
+    "@types/long": "^4.0.0",
+    "@types/node": "^12.20.55",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0"
+  },
   "files": [
     "dist",
     "node_modules",
