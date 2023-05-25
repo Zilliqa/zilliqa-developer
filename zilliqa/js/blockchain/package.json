@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/blockchain",
-  "version": "3.4.0",
+  "version": "3.4.0-rc.0",
   "description": "Class(es) for interacting with the Zilliqa blockchain.",
   "main": "dist/index.js",
   "node": "dist/index.js",
