@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ES5",
-    "declarationDir": "dist/types",
-    "outDir": "dist/esm"
+    "module": "commonjs"
   },
   "include": ["src", "../typings/**/*.d.ts"]
 }

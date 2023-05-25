@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/account",
-  "version": "3.4.0-rc.0",
+  "version": "3.4.0-rc.1",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
   ],
@@ -8,42 +8,42 @@
     "url": "https://github.com/Zilliqa/zilliqa-js/issues"
   },
   "description": "Used for signing transactions.",
-  "main": "dist/index.js",
-  "node": "dist/index.js",
-  "browser": "dist/index.umd.js",
-  "module": "dist/index.esm.js",
-  "jsnext:main": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
-  "typings": "dist/index.d.ts",
-  "repository": "https://github.com/Zilliqa/zilliqa-js",
+  "main": "dist/umd/bundle.js",
+  "browser": "dist/umd/bundle.js",
+  "module": "dist/esm/bundle.js",
+  "jsnext:main": "dist/esm/bundle.js",
+  "types": "dist/types/src/index.d.ts",
+  "typings": "dist/types/src/index.d.ts",
+  "repository": "https://github.com/Zilliqa/zilliqa-developer/",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo",
-    "build": "pnpm clean && pnpm build:ts && pnpm build:web",
-    "build:ts": "tsc -b tsconfig.json",
-    "build:web": "webpack --progress --config ../../../webpack.config.js"
+    "build": "pnpm clean && pnpm build:esm && pnpm build:umd",
+    "build:esm": "tsc -b tsconfig.json",
+    "build:umd": "rollup -c"
   },
   "dependencies": {
     "@types/bip39": "^2.4.0",
     "@types/hdkey": "^0.7.0",
-    "bip39": "^2.5.0",
-    "hdkey": "^1.1.0",
-    "tslib": "2.3.1",
-    "hash.js": "^1.1.7",
     "@zilliqa-js/core": "workspace:*",
     "@zilliqa-js/crypto": "workspace:*",
     "@zilliqa-js/proto": "workspace:*",
-    "@zilliqa-js/util": "workspace:*"
+    "@zilliqa-js/util": "workspace:*",
+    "bip39": "^2.5.0",
+    "hash.js": "^1.1.7",
+    "hdkey": "^1.1.0",
+    "tslib": "2.3.1"
   },
   "devDependencies": {
+    "@rollup/plugin-json": "^6.0.0",
     "@types/bn.js": "^5.1.0",
     "@types/camelcase": "^5.1.0",
     "@types/fancy-log": "^1.3.0",
     "@types/jest": "27.0.1",
-    "@types/node": "^18.7.18",
+    "@types/node": "^20.2.3",
     "@types/webpack": "^4.4.17",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
@@ -60,9 +60,11 @@
     "rollup-plugin-alias": "^1.4.0",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-json": "^3.1.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^3.4.0",
-    "rollup-plugin-typescript2": "0.17.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.34.1",
     "sodium-randbytes": "0.14.0",
     "ts-jest": "^27.1.3",
     "ts-loader": "8.0.4",
