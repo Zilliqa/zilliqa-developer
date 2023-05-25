@@ -183,7 +183,7 @@ export const performBatchRPC = async <
   T = RPCResponse<R, E>
 >(
   request: RPCRequest<D>,
-  handler: RPCResponseHandler<R, E, T>
+  handler: RPCResponseHandler<R, E, T> // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<T> => {
   try {
     const response = await fetch(request.url, {
