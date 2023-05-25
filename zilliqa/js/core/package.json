@@ -23,7 +23,7 @@
   "scripts": {
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo",
     "build": "pnpm clean && pnpm build:ts",
-    "build:ts": "tsc -b tsconfig.json",
+    "build:ts": "tsc -b tsconfig.pnpm.json",
     "build:web": "webpack --progress --config ../../../webpack.config.js"
   },
   "dependencies": {
