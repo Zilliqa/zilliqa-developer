@@ -13,6 +13,12 @@
   "bugs": {
     "url": "https://github.com/Zilliqa/zilliqa-js/issues"
   },
+  "scripts": {
+    "clean": "rimraf lib",
+    "build": "pnpm clean && pnpm build:ts && pnpm build:web",
+    "build:ts": "tsc -b tsconfig.json",
+    "build:web": "webpack --progress --config ../../../webpack.config.js"
+  },
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
