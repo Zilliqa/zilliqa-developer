@@ -22,6 +22,7 @@
   },
   "scripts": {
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo",
+    "prepare": "pnpm build",
     "build": "pnpm clean && tsc -b tsconfig.pnpm.json"
   },
   "dependencies": {
