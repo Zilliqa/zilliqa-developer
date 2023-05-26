@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/blockchain",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Class(es) for interacting with the Zilliqa blockchain.",
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/bundle.js",
