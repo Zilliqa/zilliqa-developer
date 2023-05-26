@@ -1,8 +1,8 @@
 {
   "name": "@zilliqa-js/blockchain",
-  "version": "3.4.0-rc.2",
+  "version": "3.4.0-rc.3",
   "description": "Class(es) for interacting with the Zilliqa blockchain.",
-  "main": "dist/cjs/bundle.js",
+  "main": "dist/cjs/src/index.js",
   "module": "dist/esm/bundle.js",
   "browser": "dist/umd/bundle.js",
   "jsnext:main": "dist/esm/bundle.js",

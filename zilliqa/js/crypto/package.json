@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/crypto",
-  "version": "3.4.0-rc.2",
+  "version": "3.4.0-rc.3",
   "description": "Core crypto utilities for signing/verification/hashing Zilliqa transactions.",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
@@ -8,7 +8,7 @@
   "bugs": {
     "url": "https://github.com/Zilliqa/zilliqa-js/issues"
   },
-  "main": "dist/cjs/bundle.js",
+  "main": "dist/cjs/src/index.js",
   "module": "dist/esm/bundle.js",
   "browser": "dist/umd/bundle.js",
   "jsnext:main": "dist/esm/bundle.js",

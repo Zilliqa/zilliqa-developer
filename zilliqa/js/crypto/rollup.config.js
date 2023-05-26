@@ -13,15 +13,9 @@ export default {
   input: "src/index.ts",
   output: [
     {
-      file: "dist/cjs/bundle.js",
-      format: "cjs",
-      name: "@zilliqa-js/core",
-      sourcemap: !isProduction,
-    },
-    {
       file: "dist/umd/bundle.js",
       format: "umd",
-      name: "@zilliqa-js/core",
+      name: "@zilliqa-js/crypto",
       sourcemap: !isProduction,
     },
     {

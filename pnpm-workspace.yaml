@@ -9,3 +9,4 @@ packages:
   - "zilliqa/js/typings"
   - "zilliqa/js/util"
   - "zilliqa/js/zilliqa"
+  - "examples/zilliqa-js/latest-block"
