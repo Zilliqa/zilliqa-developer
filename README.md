@@ -122,11 +122,24 @@ which is served on port `80`.
 
 Checkout out the repository. First ensure that tests are passing:
 
-```
+```sh
 bazelisk test //zilliqa/js/...
 ```
 
-Next navigate to the `zilliqa/js` foled
+Next navigate to the `zilliqa/js` folder and build all libraries:
+
+```sh
+pnpm -r build
+```
+
+Finally, publish:
+
+```sh
+pnpm -r publish
+```
+
+Add `--dry-run` in the event you want to test publish without publishing
+anything.
 
 #### Building and running Docker images
 
