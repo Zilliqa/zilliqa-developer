@@ -57,14 +57,20 @@
    }
    ```
 
-4. Create the source directory and `index.ts`:
+4. Install the `zilliqa` libraries
+
+   ```sh
+   npm install @zilliqa-js/zilliqa @zilliqa-js/crypto @zilliqa-js/util @zilliqa-js/core @zilliqa-js/account @zilliqa-js/contract @zilliqa-js/blockchain
+   ```
+
+5. Create the source directory and `index.ts`:
 
    ```sh
    mkdir src
    touch src/index.ts
    ```
 
-5. Update `index.ts` with:
+6. Update `index.ts` with:
 
    ```ts
    import { Zilliqa } from "@zilliqa-js/zilliqa";
@@ -77,7 +83,7 @@
    main();
    ```
 
-6. Compile and run:
+7. Compile and run:
 
    ```sh
    npx tsc
