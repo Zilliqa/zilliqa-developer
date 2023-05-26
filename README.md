@@ -25,10 +25,9 @@ following table is a place holder:
 
 ## Building
 
-To disable our git queries on build, set the
-`DISABLE_WORKSPACE_STATUS` environment variable. This loses version
-information, but speeds builds and stops you having to touch your
-security key on every bazel run.
+To disable our git queries on build, set the `DISABLE_WORKSPACE_STATUS`
+environment variable. This loses version information, but speeds builds and
+stops you having to touch your security key on every bazel run.
 
 ### Prerequisites
 
@@ -118,6 +117,29 @@ ibazel run //products/developer-portal:image
 which is served on port `80`.
 
 #### Building libraries
+
+#### Building and publishing `zilliqa-js`
+
+Checkout out the repository. First ensure that tests are passing:
+
+```sh
+bazelisk test //zilliqa/js/...
+```
+
+Next navigate to the `zilliqa/js` folder and build all libraries:
+
+```sh
+pnpm -r build
+```
+
+Finally, publish:
+
+```sh
+pnpm -r publish
+```
+
+Add `--dry-run` in the event you want to test publish without publishing
+anything.
 
 #### Building and running Docker images
 
@@ -235,9 +257,10 @@ previous builds: `bazel clean --expunge`
 
 To get information about your current Bazel setup run `bazelisk info`.
 
-If you get bored with bazel constantly asking you for your password/to authenticate via your key, add
-`--workspace_status_command=echo` to your command line. Use `DISABLE_WORKSPACE_STATUS` with `ibazel`
-(since `ibazel` doesn't pass command line options on to `bazel`).
+If you get bored with bazel constantly asking you for your password/to
+authenticate via your key, add `--workspace_status_command=echo` to your command
+line. Use `DISABLE_WORKSPACE_STATUS` with `ibazel` (since `ibazel` doesn't pass
+command line options on to `bazel`).
 
 ## Reasoning Behind Repository Organisation
 

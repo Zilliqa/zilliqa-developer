@@ -42,7 +42,7 @@ ts_project(
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
-    tsconfig = "tsconfig.json",
+    tsconfig = "tsconfig.bazel.json",
     visibility = ["//visibility:public"],
     deps = [
         "//:node_modules/@types/bn.js",

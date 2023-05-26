@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/proto",
-  "version": "3.3.4",
+  "version": "3.4.0-rc.3",
   "description": "Protobuf dependencies for message serialization",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
@@ -15,19 +15,54 @@
   "jsnext:main": "dist/index.js",
   "types": "dist/index.d.ts",
   "typings": "dist/index.d.ts",
-  "repository": "https://github.com/Zilliqa/zilliqa-js",
+  "repository": "https://github.com/Zilliqa/zilliqa-developer/",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "yarn clean && mkdir dist && yarn gen:js && yarn gen:ts",
+    "build": "pnpm clean && mkdir dist && pnpm gen:js && pnpm gen:ts",
     "gen:js": "pbjs --target static-module --wrap commonjs --out ./dist/index.js ./src/messages.proto",
     "gen:ts": "pbts --out ./dist/index.d.ts --name zproto ./dist/index.js",
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "protobufjs": "^6.8.8"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/camelcase": "^5.1.0",
+    "@types/fancy-log": "^1.3.0",
+    "@types/jest": "27.0.1",
+    "@types/node": "^20.2.3",
+    "@types/webpack": "^4.4.17",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "camelcase": "^5.0.0",
+    "eslint": "^7.32.0",
+    "fancy-log": "^1.3.2",
+    "husky": "^7.0.1",
+    "jest": "=26.6.0",
+    "jest-diff": "^29.3.1",
+    "jest-fetch-mock": "3.0.3",
+    "prettier": "^2.3.2",
+    "rimraf": "^2.6.2",
+    "rollup": "2.3.0",
+    "rollup-plugin-alias": "^1.4.0",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-json": "^3.1.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "sodium-randbytes": "0.14.0",
+    "ts-jest": "^27.1.3",
+    "ts-loader": "8.0.4",
+    "ts-node": "^7.0.1",
+    "typescript": "^4.8.4",
+    "webpack": "^5.76.0",
+    "webpack-command": "^0.4.1"
   },
   "files": [
     "dist",
@@ -36,8 +71,5 @@
     "LICENSE",
     "CHANGELOG.md",
     "README.md"
-  ],
-  "engines": {
-    "node": ">=12.0.0 <17"
-  }
+  ]
 }

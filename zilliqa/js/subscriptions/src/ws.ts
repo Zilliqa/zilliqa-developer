@@ -15,8 +15,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import mitt from 'mitt';
-import { w3cwebsocket as W3CWebsocket } from 'websocket';
+import mitt from "mitt";
+import * as websocket from "websocket";
 import {
   MessageType,
   NewBlockQuery,
@@ -27,14 +27,15 @@ import {
   StatusType,
   SubscriptionOption,
   Unsubscribe,
-} from './types';
-
+} from "./types";
+type W3CWebsocketType = websocket.w3cwebsocket;
+const W3CWebsocket = websocket.w3cwebsocket;
 export class WebSocketProvider {
   public static NewWebSocket(
     url: string,
-    options?: SubscriptionOption,
-  ): WebSocket | W3CWebsocket {
-    if (typeof window !== 'undefined' && (<any>window).WebSocket) {
+    options?: SubscriptionOption
+  ): WebSocket | W3CWebsocketType {
+    if (typeof window !== "undefined" && (<any>window).WebSocket) {
       return new WebSocket(url, options !== undefined ? options.protocol : []);
     } else {
       const headers = options !== undefined ? options.headers || {} : undefined;
@@ -46,8 +47,8 @@ export class WebSocketProvider {
         urlObject.password
       ) {
         const authToken = Buffer.from(
-          `${urlObject.username}:${urlObject.password}`,
-        ).toString('base64');
+          `${urlObject.username}:${urlObject.password}`
+        ).toString("base64");
         headers.authorization = `Basic ${authToken}`;
       }
 
@@ -57,7 +58,7 @@ export class WebSocketProvider {
         undefined,
         headers,
         undefined,
-        options !== undefined ? options.clientConfig : undefined,
+        options !== undefined ? options.clientConfig : undefined
       );
     }
   }
@@ -66,7 +67,7 @@ export class WebSocketProvider {
   options?: SubscriptionOption;
   emitter: mitt.Emitter;
   handlers: any = {};
-  websocket: WebSocket | W3CWebsocket;
+  websocket: WebSocket | W3CWebsocketType;
 
   subscriptions: any;
 
@@ -173,7 +174,7 @@ export class WebSocketProvider {
           } else if (value.query === MessageType.UNSUBSCRIBE) {
             this.emitter.emit(MessageType.UNSUBSCRIBE, value);
           } else {
-            throw new Error('unsupported value type');
+            throw new Error("unsupported value type");
           }
         }
       } else if (dataObj.query === QueryParam.NEW_BLOCK) {
@@ -195,10 +196,10 @@ export class WebSocketProvider {
       } else if (dataObj.query === QueryParam.UNSUBSCRIBE) {
         this.emitter.emit(MessageType.UNSUBSCRIBE, dataObj);
       } else {
-        throw new Error('unsupported message type');
+        throw new Error("unsupported message type");
       }
     } else {
-      throw new Error('message data is empty');
+      throw new Error("message data is empty");
     }
   }
 
