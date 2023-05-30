@@ -34,6 +34,7 @@
     "@zilliqa-js/proto": "workspace:*",
     "@zilliqa-js/util": "workspace:*",
     "bip39": "^2.5.0",
+    "buffer": "^6.0.3",
     "hash.js": "^1.1.7",
     "hdkey": "^1.1.0",
     "tslib": "2.3.1"

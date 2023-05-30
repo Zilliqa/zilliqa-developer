@@ -20,6 +20,7 @@ import { bytes, validation, Long } from "@zilliqa-js/util";
 import * as proto from "@zilliqa-js/proto";
 const ZilliqaMessage = proto.ZilliqaMessage;
 import { TxReceipt, TxParams } from "./types";
+import { Buffer } from "buffer";
 
 export const encodeTransactionProto = (tx: TxParams): Buffer => {
   const msg = {

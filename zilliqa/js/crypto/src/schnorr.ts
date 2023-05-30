@@ -29,6 +29,7 @@
  */
 
 import elliptic from "elliptic";
+import { Buffer } from "buffer";
 
 import hashjs from "hash.js";
 import DRBG from "hmac-drbg";
