@@ -10,3 +10,4 @@ packages:
   - "zilliqa/js/util"
   - "zilliqa/js/zilliqa"
   - "examples/zilliqa-js/latest-block"
+  - "examples/zilliqa-js/react-zilliqa-js"
