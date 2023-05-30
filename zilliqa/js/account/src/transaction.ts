@@ -39,6 +39,8 @@ import {
   TxStatus,
 } from "./types";
 import { encodeTransactionProto, sleep } from "./util";
+
+// @ts-ignore
 import { Buffer } from "buffer";
 
 import hashjs from "hash.js";

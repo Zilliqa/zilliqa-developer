@@ -16,7 +16,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as schnorr from "./schnorr";
-import { Buffer } from "buffer";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
 import { Signature } from "./signature";
 

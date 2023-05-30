@@ -20,7 +20,7 @@ import hashjs from "hash.js";
 import { pbkdf2Sync } from "pbkdf2";
 import scrypt from "scrypt-js";
 import { v4 as uuidv4 } from "uuid";
-import { Buffer } from "buffer";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
 import { bytes } from "@zilliqa-js/util";
 

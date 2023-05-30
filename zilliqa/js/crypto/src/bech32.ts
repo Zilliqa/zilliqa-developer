@@ -38,7 +38,7 @@ import { toChecksumAddress } from "./util";
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import { Buffer } from "buffer";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
 const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 const GENERATOR = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];

@@ -16,6 +16,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as zcrypto from "@zilliqa-js/crypto";
+
+// @ts-ignore
 import { Buffer } from "buffer";
 
 export class Account {

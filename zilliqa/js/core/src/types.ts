@@ -17,6 +17,8 @@
 
 import { RPCResponse } from "./net";
 import { Middleware } from "./util";
+
+// @ts-ignore
 import { Buffer } from "buffer";
 
 export type Subscriber = (event: any) => void;
