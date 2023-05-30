@@ -1,24 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import { Zilliqa, Transaction, toBech32Address } from "@zilliqa-js/zilliqa";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 
-class App extends React.Component<{}, { blockHashes: string[] }> {
-  constructor(props: {}) {
+type AppState = { blockHashes: string[] };
+type AppProps = Record<string, never>;
+class App extends React.Component<AppProps, AppState> {
+  constructor(props: AppProps) {
     super(props);
     this.state = {
       blockHashes: [],
     };
   }
 
-  async updateTxs() {
+  async updateTxs(): void {
     const count = 10;
     const provider = "https://api.zilliqa.com";
     const zilliqa = new Zilliqa(provider);
     const latestTxBlock = await zilliqa.blockchain.getNumTxBlocks();
 
     // Calculate the starting block to fetch transactions
-    const startBlock = parseInt(latestTxBlock.result!) - count;
+    const startBlock = parseInt(latestTxBlock.result || 0) - count;
 
     // Fetch latest transactions
     const hashes: string[] = [];
@@ -34,11 +36,11 @@ class App extends React.Component<{}, { blockHashes: string[] }> {
     this.setState({ blockHashes: hashes });
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.updateTxs();
   }
 
-  render() {
+  render(): JSX.Element {
     const { blockHashes } = this.state;
     return (
       <div className="App">
