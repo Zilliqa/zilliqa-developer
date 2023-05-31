@@ -1,8 +1,7 @@
-// rollup.config.js
-
-import commonjs from "rollup-plugin-commonjs";
-import builtins from "rollup-plugin-node-builtins";
-import resolve from "rollup-plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import json from "@rollup/plugin-json";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import polyfillNode from "rollup-plugin-polyfill-node";
 import { terser } from "rollup-plugin-terser";
 import typescript from "rollup-plugin-typescript2";
 
@@ -25,10 +24,12 @@ export default {
   ],
   plugins: [
     typescript(),
-    resolve(),
+    nodeResolve({
+      browser: true,
+    }),
     commonjs(),
-    builtins(),
-
+    polyfillNode(),
+    json(),
     isProduction && terser(),
   ],
 };

@@ -44,6 +44,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/subscriptions",
         "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/buffer",
         "//:node_modules/tslib",
     ],
     declaration = True,
@@ -71,6 +72,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/subscriptions",
         "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/buffer",
         "//:node_modules/tslib",
     ],
 )

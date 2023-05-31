@@ -15,14 +15,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { HTTPProvider, Provider } from '@zilliqa-js/core';
-import { TransactionFactory, Wallet } from '@zilliqa-js/account';
-import { Contracts } from '@zilliqa-js/contract';
-import { Blockchain, Network } from '@zilliqa-js/blockchain';
-import { SubscriptionBuilder } from '@zilliqa-js/subscriptions';
-export * from '@zilliqa-js/util';
-export * from '@zilliqa-js/crypto';
-export * from '@zilliqa-js/subscriptions';
+import { HTTPProvider, Provider } from "@zilliqa-js/core";
+import { TransactionFactory, Wallet } from "@zilliqa-js/account";
+import { Contracts } from "@zilliqa-js/contract";
+import { Blockchain, Network } from "@zilliqa-js/blockchain";
+import { SubscriptionBuilder } from "@zilliqa-js/subscriptions";
+export * from "@zilliqa-js/util";
+export * from "@zilliqa-js/crypto";
+export * from "@zilliqa-js/subscriptions";
+export * from "@zilliqa-js/account";
+export * from "@zilliqa-js/contract";
 
 export class Zilliqa {
   provider: Provider;

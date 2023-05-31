@@ -49,3 +49,5 @@ secret/*
 
 target/
 **/target/
+
+examples/zilliqa-js/react-zilliqa-js/build/

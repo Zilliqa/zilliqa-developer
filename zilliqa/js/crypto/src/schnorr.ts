@@ -29,6 +29,7 @@
  */
 
 import elliptic from "elliptic";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
 import hashjs from "hash.js";
 import DRBG from "hmac-drbg";

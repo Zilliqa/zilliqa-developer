@@ -34,6 +34,7 @@ ts_project(
         ":sources",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/aes-js",
+        "//:node_modules/buffer",
         "//:node_modules/elliptic",
         "//:node_modules/hash.js",
         "//:node_modules/hmac-drbg",

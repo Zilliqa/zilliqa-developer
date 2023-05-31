@@ -15,25 +15,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import aes from 'aes-js';
-import hashjs from 'hash.js';
-import { pbkdf2Sync } from 'pbkdf2';
-import scrypt from 'scrypt-js';
-import { v4 as uuidv4 } from 'uuid';
+import aes from "aes-js";
+import hashjs from "hash.js";
+import { pbkdf2Sync } from "pbkdf2";
+import scrypt from "scrypt-js";
+import { v4 as uuidv4 } from "uuid";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
-import { bytes } from '@zilliqa-js/util';
+import { bytes } from "@zilliqa-js/util";
 
-import { randomBytes } from './random';
+import { randomBytes } from "./random";
 import {
   KeystoreV3,
   KDF,
   KDFParams,
   PBKDF2Params,
   ScryptParams,
-} from './types';
-import { getAddressFromPrivateKey } from './util';
+} from "./types";
+import { getAddressFromPrivateKey } from "./util";
 
-const ALGO_IDENTIFIER = 'aes-128-ctr';
+const ALGO_IDENTIFIER = "aes-128-ctr";
 
 /**
  * getDerivedKey
@@ -49,22 +50,22 @@ const ALGO_IDENTIFIER = 'aes-128-ctr';
 async function getDerivedKey(
   key: Buffer,
   kdf: KDF,
-  params: KDFParams,
+  params: KDFParams
 ): Promise<Buffer> {
-  const salt = Buffer.from(params.salt, 'hex');
+  const salt = Buffer.from(params.salt, "hex");
 
-  if (kdf === 'pbkdf2') {
+  if (kdf === "pbkdf2") {
     const { c, dklen } = params as PBKDF2Params;
-    return pbkdf2Sync(key, salt, c, dklen, 'sha256');
+    return pbkdf2Sync(key, salt, c, dklen, "sha256");
   }
 
-  if (kdf === 'scrypt') {
+  if (kdf === "scrypt") {
     const { n, r, p, dklen } = params as ScryptParams;
     const derivedKeyInt8Array = scrypt.syncScrypt(key, salt, n, r, p, dklen);
     return Buffer.from(derivedKeyInt8Array);
   }
 
-  throw new Error('Only pbkdf2 and scrypt are supported');
+  throw new Error("Only pbkdf2 and scrypt are supported");
 }
 
 /**
@@ -86,11 +87,11 @@ async function getDerivedKey(
 export const encryptPrivateKey = async (
   kdf: KDF,
   privateKey: string,
-  passphrase: string,
+  passphrase: string
 ): Promise<string> => {
   const address = getAddressFromPrivateKey(privateKey);
   const salt = randomBytes(32);
-  const iv = Buffer.from(randomBytes(16), 'hex');
+  const iv = Buffer.from(randomBytes(16), "hex");
   const kdfparams = {
     salt,
     n: 8192,
@@ -103,14 +104,14 @@ export const encryptPrivateKey = async (
   const derivedKey = await getDerivedKey(
     Buffer.from(passphrase),
     kdf,
-    kdfparams,
+    kdfparams
   );
   const cipher = new aes.ModeOfOperation.ctr(
     derivedKey.slice(0, 16),
-    new aes.Counter(iv),
+    new aes.Counter(iv)
   );
   const ciphertext = Buffer.from(
-    cipher.encrypt(Buffer.from(privateKey, 'hex')),
+    cipher.encrypt(Buffer.from(privateKey, "hex"))
   );
 
   return JSON.stringify({
@@ -118,14 +119,14 @@ export const encryptPrivateKey = async (
     crypto: {
       cipher: ALGO_IDENTIFIER,
       cipherparams: {
-        iv: iv.toString('hex'),
+        iv: iv.toString("hex"),
       },
-      ciphertext: ciphertext.toString('hex'),
+      ciphertext: ciphertext.toString("hex"),
       kdf,
       kdfparams,
       mac: hashjs
         // @ts-ignore
-        .hmac(hashjs.sha256, derivedKey, 'hex')
+        .hmac(hashjs.sha256, derivedKey, "hex")
         .update(
           Buffer.concat([
             derivedKey.slice(16, 32),
@@ -133,9 +134,9 @@ export const encryptPrivateKey = async (
             iv,
             Buffer.from(ALGO_IDENTIFIER),
           ]),
-          'hex',
+          "hex"
         )
-        .digest('hex'),
+        .digest("hex"),
     },
     id: uuidv4({ random: bytes.hexToIntArray(randomBytes(16)) }),
     version: 3,
@@ -153,21 +154,21 @@ export const encryptPrivateKey = async (
  */
 export const decryptPrivateKey = async (
   passphrase: string,
-  keystore: KeystoreV3,
+  keystore: KeystoreV3
 ): Promise<string> => {
-  const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex');
-  const iv = Buffer.from(keystore.crypto.cipherparams.iv, 'hex');
+  const ciphertext = Buffer.from(keystore.crypto.ciphertext, "hex");
+  const iv = Buffer.from(keystore.crypto.cipherparams.iv, "hex");
   const kdfparams = keystore.crypto.kdfparams;
 
   const derivedKey = await getDerivedKey(
     Buffer.from(passphrase),
     keystore.crypto.kdf,
-    kdfparams,
+    kdfparams
   );
 
   const mac = hashjs
     // @ts-ignore
-    .hmac(hashjs.sha256, derivedKey, 'hex')
+    .hmac(hashjs.sha256, derivedKey, "hex")
     .update(
       Buffer.concat([
         derivedKey.slice(16, 32),
@@ -175,20 +176,20 @@ export const decryptPrivateKey = async (
         iv,
         Buffer.from(ALGO_IDENTIFIER),
       ]),
-      'hex',
+      "hex"
     )
-    .digest('hex');
+    .digest("hex");
 
   // we need to do a byte-by-byte comparison to avoid non-constant time side
   // channel attacks.
   if (!bytes.isEqual(mac.toUpperCase(), keystore.crypto.mac.toUpperCase())) {
-    return Promise.reject('Failed to decrypt.');
+    return Promise.reject("Failed to decrypt.");
   }
 
   const cipher = new aes.ModeOfOperation.ctr(
     derivedKey.slice(0, 16),
-    new aes.Counter(iv),
+    new aes.Counter(iv)
   );
 
-  return Buffer.from(cipher.decrypt(ciphertext)).toString('hex');
+  return Buffer.from(cipher.decrypt(ciphertext)).toString("hex");
 };

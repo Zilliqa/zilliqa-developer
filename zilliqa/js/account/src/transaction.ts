@@ -23,13 +23,13 @@ import {
   RPCResponse,
   Signable,
   TxBlockObj,
-} from '@zilliqa-js/core';
+} from "@zilliqa-js/core";
 import {
   getAddressFromPublicKey,
   normaliseAddress,
   toChecksumAddress,
-} from '@zilliqa-js/crypto';
-import { BN, Long } from '@zilliqa-js/util';
+} from "@zilliqa-js/crypto";
+import { BN, Long } from "@zilliqa-js/util";
 
 import {
   TxEventName,
@@ -37,10 +37,13 @@ import {
   TxParams,
   TxReceipt,
   TxStatus,
-} from './types';
-import { encodeTransactionProto, sleep } from './util';
+} from "./types";
+import { encodeTransactionProto, sleep } from "./util";
 
-import hashjs from 'hash.js';
+// @ts-ignore
+import { Buffer } from "buffer";
+
+import hashjs from "hash.js";
 
 /**
  * Transaction
@@ -88,8 +91,8 @@ export class Transaction implements Signable {
   private amount: BN;
   private gasPrice: BN;
   private gasLimit: Long;
-  private code: string = '';
-  private data: string = '';
+  private code: string = "";
+  private data: string = "";
   private receipt?: TxReceipt;
   private signature?: string;
 
@@ -98,8 +101,8 @@ export class Transaction implements Signable {
    * this can be identical returned by zilliqa network while calling CreateTransaction
    */
   get hash(): string {
-    const payload = this.bytes.toString('hex');
-    return hashjs.sha256().update(payload, 'hex').digest('hex');
+    const payload = this.bytes.toString("hex");
+    return hashjs.sha256().update(payload, "hex").digest("hex");
   }
 
   get bytes(): Buffer {
@@ -108,7 +111,7 @@ export class Transaction implements Signable {
 
   get senderAddress(): string {
     if (!this.pubKey) {
-      return '0'.repeat(40);
+      return "0".repeat(40);
     }
 
     return getAddressFromPublicKey(this.pubKey);
@@ -151,7 +154,7 @@ export class Transaction implements Signable {
     provider: Provider,
     status: TxStatus = TxStatus.Initialised,
     toDS: boolean = false,
-    enableSecureToAddress: boolean = true,
+    enableSecureToAddress: boolean = true
   ) {
     // private members
     this.version = params.version;
@@ -161,8 +164,8 @@ export class Transaction implements Signable {
     this.nonce = params.nonce;
     this.pubKey = params.pubKey;
     this.amount = params.amount;
-    this.code = params.code || '';
-    this.data = params.data || '';
+    this.code = params.code || "";
+    this.data = params.data || "";
     this.signature = params.signature;
     this.gasPrice = params.gasPrice;
     this.gasLimit = params.gasLimit;
@@ -257,7 +260,7 @@ export class Transaction implements Signable {
   async blockConfirm(
     txHash: string,
     maxblockCount: number = 4,
-    interval: number = 1000,
+    interval: number = 1000
   ) {
     this.status = TxStatus.Pending;
     const blockStart: BN = await this.getBlockNumber();
@@ -266,7 +269,7 @@ export class Transaction implements Signable {
       try {
         const blockLatest: BN = await this.getBlockNumber();
         const blockNext: BN = blockChecked.add(
-          new BN(attempt === 0 ? attempt : 1),
+          new BN(attempt === 0 ? attempt : 1)
         );
         if (blockLatest.gte(blockNext)) {
           blockChecked = blockLatest;
@@ -323,7 +326,7 @@ export class Transaction implements Signable {
   async confirm(
     txHash: string,
     maxAttempts = GET_TX_ATTEMPTS,
-    interval = 1000,
+    interval = 1000
   ): Promise<Transaction> {
     this.status = TxStatus.Pending;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -369,8 +372,8 @@ export class Transaction implements Signable {
     this.nonce = params.nonce;
     this.pubKey = params.pubKey;
     this.amount = params.amount;
-    this.code = params.code || '';
-    this.data = params.data || '';
+    this.code = params.code || "";
+    this.data = params.data || "";
     this.signature = params.signature;
     this.gasPrice = params.gasPrice;
     this.gasLimit = params.gasLimit;
@@ -380,7 +383,7 @@ export class Transaction implements Signable {
   private async trackTx(txHash: string): Promise<boolean> {
     const res: RPCResponse<TxIncluded, string> = await this.provider.send(
       RPCMethod.GetTransaction,
-      txHash,
+      txHash
     );
 
     if (res.error) {
@@ -404,13 +407,13 @@ export class Transaction implements Signable {
   private async getBlockNumber(): Promise<BN> {
     try {
       const res: RPCResponse<TxBlockObj, string> = await this.provider.send(
-        RPCMethod.GetLatestTxBlock,
+        RPCMethod.GetLatestTxBlock
       );
       if (res.error === undefined && res.result.header.BlockNum) {
         // if blockNumber is too high, we use BN to be safer
         return new BN(res.result.header.BlockNum);
       } else {
-        throw new Error('Can not get latest BlockNumber');
+        throw new Error("Can not get latest BlockNumber");
       }
     } catch (error) {
       throw error;
