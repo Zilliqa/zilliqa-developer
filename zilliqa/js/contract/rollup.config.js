@@ -16,11 +16,6 @@ export default {
       name: "@zilliqa-js/contract",
       sourcemap: !isProduction,
     },
-    {
-      file: "dist/esm/bundle.js",
-      format: "esm",
-      sourcemap: !isProduction,
-    },
   ],
   plugins: [
     typescript(),

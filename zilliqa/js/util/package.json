@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/util",
-  "version": "3.4.2",
+  "version": "3.4.3-rc.0",
   "description": "Utilities for working with Zilliqa.",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
@@ -9,7 +9,7 @@
     "url": "https://github.com/Zilliqa/zilliqa-js/issues"
   },
   "main": "dist/cjs/src/index.js",
-  "module": "dist/esm/bundle.js",
+  "module": "dist/esm/src/index.js",
   "browser": "dist/umd/bundle.js",
   "jsnext:main": "dist/esm/bundle.js",
   "types": "dist/types/src/index.d.ts",
