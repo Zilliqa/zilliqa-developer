@@ -13,7 +13,7 @@ class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  async updateTxs() {
+  async updateTxs(): Promise<void> {
     const count = 10;
     const provider = "https://api.zilliqa.com";
     const zilliqa = new Zilliqa(provider);
@@ -36,7 +36,7 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ blockHashes: hashes });
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.updateTxs();
   }
 
