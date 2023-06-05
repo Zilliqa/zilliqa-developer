@@ -1,667 +1,292 @@
 use crate::ast::*;
+use crate::type_classes::*;
 use std::collections::HashMap;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum TypeVariable {
-    Named(String),
-    Generated(usize),
+// Placeholder functions for the top-level type checking and inference
+
+pub fn type_of_stmt(
+    stmt: &NodeStatement,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    unimplemented!()
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum TypeInfo {
-    TypeVar(TypeVariable),
-    Function(Box<TypeInfo>, Box<TypeInfo>),
-    ScillaType(NodeScillaType),
+pub fn type_of_variable_identifier(
+    identifier: &NodeVariableIdentifier,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    match identifier {
+        NodeVariableIdentifier::VariableName(name) => {
+            match env.get(name) {
+                Some(t) => Ok(t.get_instance()), // Return the type of the variable if found in the environment
+                None => Err(format!("{} is not defined", name)), // Return an error if the variable is not defined in the environment
+            }
+        }
+        // You may need to add more match patterns once you add more enums to NodeVariableIdentifier
+        _ => Err(String::from("Unsupported NodeVariableIdentifier variant")),
+    }
 }
 
-pub type TypeEnvironment = HashMap<String, TypeInfo>;
-pub type Substitution = HashMap<TypeVariable, TypeInfo>;
-
-pub struct TypeInferenceState {
-    pub type_environment: TypeEnvironment,
-    pub substitution: Substitution,
-    pub counter: usize,
-}
-
-impl TypeInferenceState {
-    pub fn new() -> Self {
-        TypeInferenceState {
-            type_environment: TypeEnvironment::new(),
-            substitution: Substitution::new(),
-            counter: 1,
+pub fn type_of_node_scilla_type(
+    scilla_type: &NodeScillaType,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    match scilla_type {
+        NodeScillaType::GenericTypeWithArgs(meta_identifier, type_arguments) => {
+            // TODO: Handle GenericTypeWithArgs
+            unimplemented!()
+        }
+        NodeScillaType::MapType(map_key, map_value) => {
+            // TODO: Handle MapType
+            unimplemented!()
+        }
+        NodeScillaType::FunctionType(from_type, to_type) => {
+            // TODO: Handle FunctionType
+            unimplemented!()
+        }
+        NodeScillaType::EnclosedType(enclosed_type) => {
+            // TODO: Handle EnclosedType
+            unimplemented!()
+        }
+        NodeScillaType::ScillaAddresseType(address_type) => {
+            // TODO: Handle ScillaAddresseType
+            unimplemented!()
+        }
+        NodeScillaType::PolyFunctionType(template_name, poly_function_type) => {
+            // TODO: Handle PolyFunctionType
+            unimplemented!()
+        }
+        NodeScillaType::TypeVarType(type_var_type) => {
+            // TODO: Handle TypeVarType
+            unimplemented!()
         }
     }
 }
 
-/*
-fn unify(t1: &TypeInfo, t2: &TypeInfo, type_inference_state: &mut TypeInferenceState) -> Result<(), String> {
-    // Implement the unification algorithm here.
-    // Update the type_inference_state.substitution map accordingly.
-    // Return an error in case the types cannot be unified.
-}
-
-*/
-
-fn extend_type_environment(
-    identifier: &str,
-    type_info: TypeInfo,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    type_inference_state
-        .type_environment
-        .insert(identifier.to_owned(), type_info);
-}
-
-fn generate_fresh_type_variable(type_inference_state: &mut TypeInferenceState) -> TypeInfo {
-    let type_variable = TypeVariable::Generated(type_inference_state.counter);
-    type_inference_state.counter += 1;
-    TypeInfo::TypeVar(type_variable)
-}
-
-fn apply_substitutions(type_info: &TypeInfo, substitution: &Substitution) -> TypeInfo {
-    match type_info {
-        TypeInfo::TypeVar(type_variable) => {
-            substitution.get(type_variable).unwrap_or(type_info).clone()
+pub fn type_of_expression(
+    expr: &NodeFullExpression,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    match expr {
+        NodeFullExpression::LocalVariableDeclaration { .. } => {
+            unimplemented!()
+            // Handle the LocalVariableDeclaration case
         }
-        TypeInfo::Function(input, output) => TypeInfo::Function(
-            Box::new(apply_substitutions(input, substitution)),
-            Box::new(apply_substitutions(output, substitution)),
-        ),
-        _ => type_info.clone(),
+        NodeFullExpression::FunctionDeclaration { .. } => {
+            unimplemented!()
+            // Handle the FunctionDeclaration case
+        }
+        NodeFullExpression::FunctionCall { .. } => {
+            unimplemented!()
+            // Handle the FunctionCall case
+        }
+        // Add more cases for other variants of NodeFullExpression.
+        _ => unimplemented!(),
     }
 }
 
-// Apply substitutions and update the type_environment
-fn apply_substitutions_to_type_environment(type_inference_state: &mut TypeInferenceState) {
-    for (_, type_info) in type_inference_state.type_environment.iter_mut() {
-        *type_info = apply_substitutions(type_info, &type_inference_state.substitution);
-    }
-}
-
-pub fn infer_types(program: &NodeProgram) -> Result<TypeInferenceState, String> {
-    let mut type_inference_state = TypeInferenceState {
-        type_environment: HashMap::new(),
-        substitution: HashMap::new(),
-        counter: 0,
-    };
-
-    traverse_nodeprogram(program, &mut type_inference_state);
-
-    // Apply the substitutions to the type_environment
-    apply_substitutions_to_type_environment(&mut type_inference_state);
-
-    Ok(type_inference_state)
-}
-
-fn traverse_nodeprogram(node: &NodeProgram, type_inference_state: &mut TypeInferenceState) {
-    if let Some(import_declarations) = &node.import_declarations {
-        traverse_nodeimportdeclarations(import_declarations, type_inference_state);
-    }
-
-    if let Some(library_definition) = &node.library_definition {
-        traverse_nodelibrarydefinition(library_definition, type_inference_state);
-    }
-
-    traverse_nodecontractdefinition(&node.contract_definition, type_inference_state);
-}
-
-fn traverse_nodeimportdeclarations(
-    node: &NodeImportDeclarations,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    for imported_name in &node.import_list {
-        match imported_name {
-            NodeImportedName::RegularImport(type_name_id) => {
-                traverse_nodetypenameidentifier(type_name_id, type_inference_state);
-            }
-            NodeImportedName::AliasedImport(original_type_name_id, alias_type_name_id) => {
-                traverse_nodetypenameidentifier(original_type_name_id, type_inference_state);
-                traverse_nodetypenameidentifier(alias_type_name_id, type_inference_state);
-            }
+pub fn type_of_node_message_entry(
+    message_entry: &NodeMessageEntry,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    match message_entry {
+        NodeMessageEntry::MessageLiteral(variable_identifier, value_literal) => {
+            // Infer the types of the variable_identifier and value_literal.
+            // Check for compatibility of types and return the appropriate type.
+            unimplemented!()
+        }
+        NodeMessageEntry::MessageVariable(variable_identifier1, variable_identifier2) => {
+            // Infer the types of both variable_identifiers.
+            // Check for compatibility of types and return the appropriate type.
+            unimplemented!()
         }
     }
 }
 
-fn traverse_nodelibrarydefinition(
-    node: &NodeLibraryDefinition,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    for definition in &node.definitions {
-        match definition {
-            NodeLibrarySingleDefinition::LetDefinition {
-                variable_name,
-                type_annotation,
-                expression,
-            } => {
-                // TODO: Perform traversal or type inference on the let definition elements, if necessary
-            }
-            NodeLibrarySingleDefinition::TypeDefinition(name, alternative_clauses_opt) => {
-                // TODO: Perform traversal or type inference on the type definition elements, if necessary
-                if let Some(alternative_clauses) = alternative_clauses_opt {
-                    for alternative_clause in alternative_clauses {
-                        // TODO: Perform traversal or type inference on the alternative_clause, if necessary
-                    }
-                }
-            }
+pub fn type_of_node_pattern(
+    pattern: &NodePattern,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    match pattern {
+        NodePattern::Wildcard => {
+            // Handle Wildcard pattern
+            unimplemented!()
+        }
+        NodePattern::Binder(ref binder) => {
+            // Handle Binder pattern
+            unimplemented!()
+        }
+        NodePattern::Constructor(ref constructor, ref arg_patterns) => {
+            // Handle Constructor pattern
+            unimplemented!()
         }
     }
 }
 
-fn traverse_nodecontractdefinition(
-    node: &NodeContractDefinition,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    traverse_nodecomponentparameters(&node.parameters, type_inference_state);
-
-    if let Some(constraint) = &node.constraint {
-        traverse_nodewithconstraint(constraint, type_inference_state);
-    }
-
-    for field in &node.fields {
-        traverse_nodecontractfield(field, type_inference_state);
-    }
-
-    for component in &node.components {
-        match component {
-            NodeComponentDefinition::TransitionComponent(transition_definition) => {
-                traverse_nodetransitiondefinition(transition_definition, type_inference_state);
-            }
-            NodeComponentDefinition::ProcedureComponent(procedure_definition) => {
-                traverse_nodeproceduredefinition(procedure_definition, type_inference_state);
-            }
+pub fn type_of_node_statement(
+    stmt: &NodeStatement,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    match stmt {
+        NodeStatement::Accept => {
+            // Implement logic for the 'Accept' statement
+            unimplemented!()
         }
-    }
-}
-
-fn traverse_nodecomponentparameters(
-    node: &NodeComponentParameters,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    for parameter in &node.parameters {
-        traverse_nodeparameterpair(parameter, type_inference_state);
-    }
-}
-
-fn traverse_nodewithconstraint(
-    node: &NodeWithConstraint,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // Perform traversal or type inference on the node's expression
-    traverse_nodefull_expression(&node.expression, type_inference_state);
-}
-
-fn traverse_nodecontractfield(
-    node: &NodeContractField,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // Perform traversal or type inference on the node's elements
-    // TODO: Function not found traverse_nodetyped_identifier(&node.typed_identifier, type_inference_state);
-    traverse_nodefull_expression(&node.right_hand_side, type_inference_state);
-}
-
-fn traverse_nodetransitiondefinition(
-    node: &NodeTransitionDefinition,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    traverse_nodecomponentparameters(&node.parameters, type_inference_state);
-    traverse_nodecomponentbody(&node.body, type_inference_state);
-}
-
-fn traverse_nodeproceduredefinition(
-    node: &NodeProcedureDefinition,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    traverse_nodecomponentparameters(&node.parameters, type_inference_state);
-    traverse_nodecomponentbody(&node.body, type_inference_state);
-}
-
-fn traverse_nodeparameterpair(
-    node: &NodeParameterPair,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // Traverse the identifier_with_type field
-    traverse_nodetypedidentifier(&node.identifier_with_type, type_inference_state);
-
-    // Traverse the annotation field
-    // TODO: Implement this
-}
-
-fn traverse_nodecomponentbody(
-    node: &NodeComponentBody,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Perform traversal or type inference on the node's optional statement block, if necessary
-    if let Some(statement_block) = &node.statement_block {
-        traverse_nodestatementblock(statement_block, type_inference_state);
-    }
-}
-
-fn traverse_nodetypedidentifier(
-    node: &NodeTypedIdentifier,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Perform traversal or type inference on the node's elements, if necessary
-    traverse_nodetypeannotation(&node.annotation, type_inference_state);
-}
-
-// Traverse NodeTypeAnnotation and perform the necessary traversal or type inference
-fn traverse_nodetypeannotation(
-    node: &NodeTypeAnnotation,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    traverse_nodescilla_type(&node.type_name, type_inference_state);
-}
-
-fn traverse_nodestatementblock(
-    node: &NodeStatementBlock,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    for statement in &node.statements {
-        // TODO: Perform traversal or type inference on each statement, if necessary
-    }
-}
-
-// Add implementations for traversing the remaining AST nodes, following the same pattern
-
-fn traverse_node_statement(node: &NodeStatement, type_inference_state: &mut TypeInferenceState) {
-    match node {
+        NodeStatement::Send { identifier_name } => {
+            // Implement logic for the 'Send' statement using the variable identifier
+            let identifier_type = type_of_variable_identifier(identifier_name, &env)?;
+            // Handle type checking or inference for the 'Send' statement here
+            unimplemented!()
+        }
         NodeStatement::Load {
             left_hand_side,
             right_hand_side,
         } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::RemoteFetch(remote_fetch_statement) => {
-            traverse_node_remote_fetch_statement(remote_fetch_statement, type_inference_state);
-        }
-        NodeStatement::Store {
-            left_hand_side,
-            right_hand_side,
-        } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::Bind {
-            left_hand_side,
-            right_hand_side,
-        } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::ReadFromBC {
-            left_hand_side,
-            type_name,
-            arguments,
-        } => {
-            // TODO: Perform traversal or type inference here
-            if let Some(argument_list) = arguments {
-                traverse_arguments_list(&argument_list.arguments, type_inference_state);
+            // Implement logic for the 'Load' statement
+            /*
+            TODO: Not working
+            let lhs_type = type_of_variable_identifier(left_hand_side, &env)?;
+            let rhs_type = type_of_variable_identifier(right_hand_side, &env)?;
+            if lhs_type != rhs_type {
+                return Err(format!("Type mismatch: {:?} != {:?}", lhs_type, rhs_type));
             }
+            */
+            // Handle type checking or inference for the 'Load' statement here
+            unimplemented!()
         }
-        NodeStatement::MapGet {
-            left_hand_side,
-            keys,
-            right_hand_side,
-        } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::MapGetExists {
-            left_hand_side,
-            keys,
-            right_hand_side,
-        } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::MapUpdate {
-            left_hand_side,
-            keys,
-            right_hand_side,
-        } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::MapUpdateDelete {
-            left_hand_side,
-            keys,
-        } => {
-            // TODO: Perform traversal or type inference here
-        }
-        NodeStatement::Accept => {
-            // Nothing to do here, since Accept has no parameters
-        }
-        NodeStatement::Send { identifier_name } => {
-            // TODO: Perform traversal or type inference here
-            traverse_node_variable_identifier(identifier_name, type_inference_state);
-        }
-        NodeStatement::CreateEvnt { identifier_name } => {
-            // TODO: Perform traversal or type inference here
-            traverse_node_variable_identifier(identifier_name, type_inference_state);
-        }
-        NodeStatement::Throw { error_variable } => {
-            if let Some(error_var) = error_variable {
-                // TODO: Perform traversal or type inference here
-                traverse_node_variable_identifier(error_var, type_inference_state);
-            }
-        }
-        NodeStatement::MatchStmt { variable, clauses } => {
-            traverse_node_variable_identifier(variable, type_inference_state);
-            for clause in clauses {
-                traverse_node_pattern_match_clause(clause, type_inference_state);
-            }
-        }
-        NodeStatement::CallProc {
-            component_id,
-            arguments,
-        } => {
-            // TODO: Perform traversal or type inference here
-            traverse_arguments_list(arguments, type_inference_state);
-        }
-        NodeStatement::Iterate {
-            identifier_name,
-            component_id,
-        } => {
-            traverse_node_variable_identifier(identifier_name, type_inference_state);
-            // TODO: Perform traversal or type inference here for component_id if needed
-        }
+        _ => unimplemented!(), // Handle other statement types separately once you become comfortable with implementing the easier ones
     }
 }
 
-fn traverse_node_remote_fetch_statement(
-    node: &NodeRemoteFetchStatement,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeRemoteFetchStatement::ReadStateMutable(_, _, _) => { /* TODO: Perform traversal or type inference */
+pub fn type_check_func(func: &NodeProcedureDefinition) -> Result<FunType, String> {
+    // Create an environment mapping for argument names to their types
+
+    // TODO: Allocate this type: HashMap<String, Box<dyn BaseType>>
+    // let mut env = HashMap::new();
+    /*
+    TODO: Fix this
+    for (param, param_type) in &func.parameters {
+        env.insert(param.name.clone(), param_type.clone());
+    }
+    */
+
+    // Check the types of each statement in the function body
+    /*
+    TODO: Fix this
+    for stmt in &func.body.statement_block.statements {
+        let stmt_type = type_of_stmt(stmt, &env)?;
+        // Perform any additional type checks required for the statement here
+    }
+    */
+
+    // Determine the return type of the function by examining the (potentially) last return statement
+    /*
+    TODO: Fix this
+    let ret_type = if let Some(last_stmt) = func.body.statement_block.statements.last() {
+        match last_stmt {
+            NodeStatement::Return { value, .. } => type_of(value, &env)?,
+            _ => return Err("Function does not end with a return statement".to_string()),
         }
-        NodeRemoteFetchStatement::ReadStateMutableSpecialId(_, _, _) => { /* TODO: Perform traversal or type inference */
-        }
-        NodeRemoteFetchStatement::ReadStateMutableMapAccess(_, _, _, _) => { /* TODO: Perform traversal or type inference */
-        }
-        NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(_, _, _, _) => { /* TODO: Perform traversal or type inference */
-        }
-        NodeRemoteFetchStatement::ReadStateMutableCastAddress(_, _, _) => { /* TODO: Perform traversal or type inference */
+    } else {
+        return Err("Function body is empty".to_string());
+    };
+    */
+
+    /*
+    TODO: OK
+    Ok(FunType {
+        // Fill in the necessary fields for FunType struct based on the gathered information
+    })
+    */
+
+    unimplemented!();
+}
+
+pub fn type_check_transition(
+    transition: &NodeTransitionDefinition,
+    global_env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<(), String> {
+    /*
+    // Create an environment mapping for parameter names to their types
+    let mut env: HashMap<String, Box<dyn BaseType>> = transition
+        .parameters
+        .parameters
+        .iter()
+        .map(|param| (param.identifier_with_type.identifier_name.clone(), param.identifier_with_type.type_annotation.get_instance()))
+        .collect();
+
+    // Merge the local environment with the global environment
+    for (k, v) in global_env.iter() {
+        env.entry(k.clone()).or_insert(v.clone());
+    }
+
+    // Type check each statement in the transition
+    if let Some(statement_block) = &transition.body.statement_block {
+        for stmt in &statement_block.statements {
+            type_of_stmt(stmt, &env)?;
         }
     }
+    */
+    Ok(())
 }
 
-fn traverse_pattern_match_expression_clause(
-    node: &NodePatternMatchExpressionClause,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Perform traversal or type inference on the node's elements, if necessary
-}
+pub fn type_of(
+    expr: &dyn AnyKind,
+    env: &HashMap<String, Box<dyn BaseType>>,
+) -> Result<TypeAnnotation, String> {
+    let any = expr.to_any();
+    match any {
+        NodeAny::NodeByteStr(_) => unimplemented!(),
+        NodeAny::NodeTypeNameIdentifier(_) => unimplemented!(),
+        NodeAny::NodeImportedName(_) => unimplemented!(),
+        NodeAny::NodeImportDeclarations(_) => unimplemented!(),
+        NodeAny::NodeMetaIdentifier(_) => unimplemented!(),
+        NodeAny::NodeVariableIdentifier(_) => unimplemented!(),
+        NodeAny::NodeBuiltinArguments(_) => unimplemented!(),
+        NodeAny::NodeTypeMapKey(_) => unimplemented!(),
+        NodeAny::NodeTypeMapValue(_) => unimplemented!(),
+        NodeAny::NodeTypeArgument(_) => unimplemented!(),
+        NodeAny::NodeScillaType(_) => unimplemented!(),
+        NodeAny::NodeTypeMapEntry(_) => unimplemented!(),
 
-fn traverse_arguments_list(
-    node: &[NodeVariableIdentifier],
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Perform traversal or type inference on the elements of arguments list
-    for arg in node {
-        traverse_node_variable_identifier(arg, type_inference_state);
-    }
-}
-
-fn traverse_node_full_expression(
-    node: &NodeFullExpression,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Match each variant of NodeFullExpression and perform traversal or type inference
-}
-
-fn traverse_node_atomic_expression(
-    node: &NodeAtomicExpression,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Perform traversal or type inference on the elements of NodeAtomicExpression
-}
-
-fn traverse_node_value_literal(
-    node: &NodeValueLiteral,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    // TODO: Perform traversal or type inference on the elements of NodeValueLiteral
-}
-
-// Traverse NodeScillaType and perform the necessary traversal or type inference
-fn traverse_nodescilla_type(node: &NodeScillaType, type_inference_state: &mut TypeInferenceState) {
-    match node {
-        NodeScillaType::GenericTypeWithArgs(meta_identifier, type_arguments) => {
-            // TODO: Perform traversal or type inference on meta_identifier and type_arguments
-            traverse_node_meta_identifier(meta_identifier, type_inference_state);
-            for type_argument in type_arguments {
-                traverse_nodescilla_type_argument(type_argument, type_inference_state);
-            }
-        }
-        NodeScillaType::MapType(map_key, map_value) => {
-            // TODO: Perform traversal or type inference on map_key and map_value
-            traverse_nodetype_map_key(map_key, type_inference_state);
-            traverse_nodetype_map_value(map_value, type_inference_state);
-        }
-        NodeScillaType::FunctionType(dom, codom) => {
-            // TODO: Perform traversal or type inference on dom and codom
-            traverse_nodescilla_type(dom, type_inference_state);
-            traverse_nodescilla_type(codom, type_inference_state);
-        }
-        NodeScillaType::EnclosedType(enclosed_type) => {
-            // TODO: Perform traversal or type inference on enclosed_type
-            traverse_nodescilla_type(enclosed_type, type_inference_state);
-        }
-        NodeScillaType::ScillaAddresseType(address_type) => {
-            // TODO: Perform traversal or type inference on address_type
-            traverse_node_address_type(address_type, type_inference_state);
-        }
-        NodeScillaType::PolyFunctionType(_, inner_type) => {
-            // TODO: Perform traversal or type inference on inner_type
-            traverse_nodescilla_type(inner_type, type_inference_state);
-        }
-        NodeScillaType::TypeVarType(_) => {
-            // No traversal or type inference needed as there is no nested type
-        }
-    }
-}
-
-// Traverse NodeVariableIdentifier and perform the necessary traversal or type inference
-fn traverse_node_variable_identifier(
-    node: &NodeVariableIdentifier,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeVariableIdentifier::VariableName(name) => {
-            // TODO: Perform traversal or type inference on name if needed
-        }
-        NodeVariableIdentifier::SpecialIdentifier(special_id) => {
-            // TODO: Perform traversal or type inference on special_id if needed
-        }
-        NodeVariableIdentifier::VariableInNamespace(type_name_id, var_name) => {
-            // TODO: Perform traversal or type inference on type_name_id and var_name if needed
-            traverse_nodetypenameidentifier(type_name_id, type_inference_state);
-        }
-    }
-}
-
-// Traverse NodeScillaTypeArgument and perform the necessary traversal or type inference
-fn traverse_nodescilla_type_argument(
-    node: &NodeTypeArgument,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeTypeArgument::EnclosedTypeArgument(scilla_type) => {
-            traverse_nodescilla_type(scilla_type, type_inference_state);
-        }
-        NodeTypeArgument::GenericTypeArgument(meta_identifier) => {
-            traverse_node_meta_identifier(meta_identifier, type_inference_state);
-        }
-        NodeTypeArgument::TemplateTypeArgument(_)
-        | NodeTypeArgument::AddressTypeArgument(_)
-        | NodeTypeArgument::MapTypeArgument(_, _) => {
-            // If needed, handle template and address type arguments and map key-value type arguments
-        }
-    }
-}
-
-// Traverse NodeTypeMapKey and perform the necessary traversal or type inference
-fn traverse_nodetype_map_key(node: &NodeTypeMapKey, type_inference_state: &mut TypeInferenceState) {
-    match node {
-        NodeTypeMapKey::GenericMapKey(meta_identifier)
-        | NodeTypeMapKey::EnclosedGenericId(meta_identifier) => {
-            traverse_node_meta_identifier(meta_identifier, type_inference_state);
-        }
-        NodeTypeMapKey::EnclosedAddressMapKeyType(address_type)
-        | NodeTypeMapKey::AddressMapKeyType(address_type) => {
-            traverse_node_address_type(address_type, type_inference_state);
-        }
-    }
-}
-
-// Traverse NodeTypeMapValue and perform the necessary traversal or type inference
-fn traverse_nodetype_map_value(
-    node: &NodeTypeMapValue,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeTypeMapValue::MapValueCustomType(meta_identifier) => {
-            traverse_node_meta_identifier(meta_identifier, type_inference_state);
-        }
-        NodeTypeMapValue::MapKeyValue(entry) => {
-            traverse_nodetype_map_entry(entry, type_inference_state);
-        }
-        NodeTypeMapValue::MapValueParanthesizedType(value_type) => {
-            // TODO:            traverse_nodetype_map_value(value_type, type_inference_state);
-        }
-        NodeTypeMapValue::MapValueAddressType(address_type) => {
-            traverse_node_address_type(address_type, type_inference_state);
-        }
-    }
-}
-
-// Traverse NodeAddressType and perform the necessary traversal or type inference
-fn traverse_node_address_type(
-    node: &NodeAddressType,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    for field in &node.address_fields {
-        // TODO:        traverse_nodecontractfield(field, type_inference_state);
-    }
-}
-
-// Traverse NodeTypeMapEntry and perform the necessary traversal or type inference
-fn traverse_nodetype_map_entry(
-    node: &NodeTypeMapEntry,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    traverse_nodetype_map_key(&node.key, type_inference_state);
-    traverse_nodetype_map_value(&node.value, type_inference_state);
-}
-
-// Traverse NodeMetaIdentifier and perform the necessary traversal or type inference
-fn traverse_node_meta_identifier(
-    node: &NodeMetaIdentifier,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeMetaIdentifier::MetaName(type_name) => {
-            traverse_nodetypenameidentifier(type_name, type_inference_state)
-        }
-        // Add more match branches for other NodeMetaIdentifier variants as needed
-        _ => (),
-    }
-}
-
-// Traverse NodeTypeNameIdentifier and perform the necessary traversal or type inference
-fn traverse_nodetypenameidentifier(
-    node: &NodeTypeNameIdentifier,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeTypeNameIdentifier::ByteStringType(byte_str) => {
-            // TODO: Perform traversal or type inference on byte_str, if needed
-        }
-        // Add more match branches for other NodeTypeNameIdentifier variants as needed
-        _ => (),
-    }
-}
-
-// Traverse NodePatternMatchClause and perform the necessary traversal or type inference
-fn traverse_node_pattern_match_clause(
-    node: &NodePatternMatchClause,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    traverse_node_pattern(&node.pattern_expression, type_inference_state);
-
-    if let Some(statement_block) = &node.statement_block {
-        traverse_nodestatementblock(statement_block, type_inference_state);
-    }
-}
-
-// Traverse NodePattern and perform the necessary traversal or type inference
-fn traverse_node_pattern(node: &NodePattern, type_inference_state: &mut TypeInferenceState) {
-    match node {
-        NodePattern::Wildcard => {
-            // No traversal or type inference needed for Wildcard
-        }
-        NodePattern::Binder(binder_name) => {
-            // TODO: Perform traversal or type inference on binder_name, if needed
-        }
-        NodePattern::Constructor(meta_identifier, argument_patterns) => {
-            traverse_node_meta_identifier(meta_identifier, type_inference_state);
-
-            for arg_pattern in argument_patterns {
-                traverse_node_argument_pattern(arg_pattern, type_inference_state);
-            }
-        }
-    }
-}
-
-// Traverse NodeArgumentPattern and perform the necessary traversal or type inference
-fn traverse_node_argument_pattern(
-    node: &NodeArgumentPattern,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeArgumentPattern::WildcardArgument => {
-            // No traversal or type inference needed for WildcardArgument
-        }
-        NodeArgumentPattern::BinderArgument(binder_name) => {
-            // TODO: Perform traversal or type inference on binder_name, if needed
-        }
-        NodeArgumentPattern::ConstructorArgument(meta_identifier) => {
-            traverse_node_meta_identifier(meta_identifier, type_inference_state);
-        }
-        NodeArgumentPattern::PatternArgument(pattern) => {
-            traverse_node_pattern(pattern, type_inference_state);
-        }
-    }
-}
-
-fn traverse_nodefull_expression(
-    node: &NodeFullExpression,
-    type_inference_state: &mut TypeInferenceState,
-) {
-    match node {
-        NodeFullExpression::LocalVariableDeclaration {
-            identifier_name,
-            expression,
-            type_annotation,
-            containing_expression,
-        } => {
-            // TODO: Perform traversal or type inference on the elements, if necessary
-        }
-        NodeFullExpression::FunctionDeclaration {
-            identier_value,
-            type_annotation,
-            expression,
-        } => {
-            // TODO: Perform traversal or type inference on the elements, if necessary
-        }
-        NodeFullExpression::FunctionCall {
-            function_name,
-            argument_list,
-        } => {
-            // TODO: Perform traversal or type inference on the elements, if necessary
-        }
-        NodeFullExpression::ExpressionAtomic(atomic_expr) => {
-            // TODO: Perform traversal or type inference on atomic_expr
-            traverse_node_atomic_expression(atomic_expr, type_inference_state);
-        }
-        // Add more match arms for other NodeFullExpression variants
-        // and perform traversal or type inference as needed
-        _ => (),
+        NodeAny::NodeAddressTypeField(_) => unimplemented!(),
+        NodeAny::NodeAddressType(_) => unimplemented!(),
+        NodeAny::NodeFullExpression(full_expr) => match full_expr {
+            NodeFullExpression::LocalVariableDeclaration { .. } => unimplemented!(),
+            NodeFullExpression::FunctionDeclaration { .. } => unimplemented!(),
+            // ... More cases for other variants of NodeFullExpression
+            _ => unimplemented!(),
+        },
+        NodeAny::NodeMessageEntry(_) => unimplemented!(),
+        NodeAny::NodePatternMatchExpressionClause(_) => unimplemented!(),
+        NodeAny::NodeAtomicExpression(_) => unimplemented!(),
+        NodeAny::NodeContractTypeArguments(_) => unimplemented!(),
+        NodeAny::NodeValueLiteral(_) => unimplemented!(),
+        NodeAny::NodeMapAccess(_) => unimplemented!(),
+        NodeAny::NodePattern(_) => unimplemented!(),
+        NodeAny::NodeArgumentPattern(_) => unimplemented!(),
+        NodeAny::NodePatternMatchClause(_) => unimplemented!(),
+        NodeAny::NodeBlockchainFetchArguments(_) => unimplemented!(),
+        NodeAny::NodeStatement(_) => unimplemented!(),
+        NodeAny::NodeRemoteFetchStatement(_) => unimplemented!(),
+        NodeAny::NodeComponentId(_) => unimplemented!(),
+        NodeAny::NodeComponentParameters(_) => unimplemented!(),
+        NodeAny::NodeParameterPair(_) => unimplemented!(),
+        NodeAny::NodeComponentBody(_) => unimplemented!(),
+        NodeAny::NodeStatementBlock(_) => unimplemented!(),
+        NodeAny::NodeTypedIdentifier(_) => unimplemented!(),
+        NodeAny::NodeTypeAnnotation(_) => unimplemented!(),
+        NodeAny::NodeProgram(_) => unimplemented!(),
+        NodeAny::NodeLibraryDefinition(_) => unimplemented!(),
+        NodeAny::NodeLibrarySingleDefinition(_) => unimplemented!(),
+        NodeAny::NodeContractDefinition(_) => unimplemented!(),
+        NodeAny::NodeContractField(_) => unimplemented!(),
+        NodeAny::NodeWithConstraint(_) => unimplemented!(),
+        NodeAny::NodeComponentDefinition(_) => unimplemented!(),
+        NodeAny::NodeProcedureDefinition(_) => unimplemented!(),
+        NodeAny::NodeTransitionDefinition(_) => unimplemented!(),
+        NodeAny::NodeTypeAlternativeClause(_) => unimplemented!(),
+        NodeAny::NodeTypeMapValueArguments(_) => unimplemented!(),
+        NodeAny::NodeTypeMapValueAllowingTypeArguments(_) => unimplemented!(),
     }
 }

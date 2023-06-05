@@ -2,9 +2,10 @@
 extern crate lalrpop_util;
 pub mod ast;
 pub mod lexer;
+pub mod type_classes;
 pub mod type_inference;
 use crate::lexer::Lexer;
-use crate::type_inference::{infer_types, TypeInferenceState};
+use crate::type_inference::*;
 
 use std::collections::HashMap;
 use std::env;
@@ -1000,8 +1001,9 @@ fn main() {
     let parser = bluebell::ProgramParser::new();
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
-            let _inferred_types = infer_types(&ast).unwrap();
+            //let _inferred_types = infer_types(&ast).unwrap();
             // println!("{:?}", ast)
+            println!("Done");
         }
         Err(error) => {
             let message = format!("Syntax error {:?}", error);
