@@ -43,51 +43,51 @@ macro_rules! impl_base_type {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct FunType {
-    template_types: Vec<TypeAnnotation>,
-    arg_types: Vec<TypeAnnotation>,
-    to_type: Box<TypeAnnotation>,
-    symbol: String,
+    pub template_types: Vec<TypeAnnotation>,
+    pub arg_types: Vec<TypeAnnotation>,
+    pub to_type: Box<TypeAnnotation>,
+    pub symbol: String,
 }
 
 impl_base_type!(FunType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct TypeVar {
-    instance: Option<Box<TypeAnnotation>>,
-    symbol: String,
+    pub instance: Option<Box<TypeAnnotation>>,
+    pub symbol: String,
 }
 
 impl_base_type!(TypeVar);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct TemplateType {
-    name: String,
-    symbol: String,
+    pub name: String,
+    pub symbol: String,
 }
 
 impl_base_type!(TemplateType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct BuiltinType {
-    name: String,
-    symbol: String,
+    pub name: String,
+    pub symbol: String,
 }
 
 impl_base_type!(BuiltinType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct UnionType {
-    types: Vec<TypeAnnotation>,
-    symbol: String,
+    pub types: Vec<TypeAnnotation>,
+    pub symbol: String,
 }
 
 impl_base_type!(UnionType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct EnumType {
-    name: String,
-    values: Vec<String>,
-    symbol: String,
+    pub name: String,
+    pub values: Vec<String>,
+    pub symbol: String,
 }
 
 impl_base_type!(EnumType);

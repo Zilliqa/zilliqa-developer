@@ -161,44 +161,6 @@ pub fn type_of_node_statement(
 pub fn type_check_func(func: &NodeProcedureDefinition) -> Result<FunType, String> {
     // Create an environment mapping for argument names to their types
 
-    // TODO: Allocate this type: HashMap<String, Box<dyn BaseType>>
-    // let mut env = HashMap::new();
-    /*
-    TODO: Fix this
-    for (param, param_type) in &func.parameters {
-        env.insert(param.name.clone(), param_type.clone());
-    }
-    */
-
-    // Check the types of each statement in the function body
-    /*
-    TODO: Fix this
-    for stmt in &func.body.statement_block.statements {
-        let stmt_type = type_of_stmt(stmt, &env)?;
-        // Perform any additional type checks required for the statement here
-    }
-    */
-
-    // Determine the return type of the function by examining the (potentially) last return statement
-    /*
-    TODO: Fix this
-    let ret_type = if let Some(last_stmt) = func.body.statement_block.statements.last() {
-        match last_stmt {
-            NodeStatement::Return { value, .. } => type_of(value, &env)?,
-            _ => return Err("Function does not end with a return statement".to_string()),
-        }
-    } else {
-        return Err("Function body is empty".to_string());
-    };
-    */
-
-    /*
-    TODO: OK
-    Ok(FunType {
-        // Fill in the necessary fields for FunType struct based on the gathered information
-    })
-    */
-
     unimplemented!();
 }
 
@@ -206,28 +168,7 @@ pub fn type_check_transition(
     transition: &NodeTransitionDefinition,
     global_env: &HashMap<String, Box<dyn BaseType>>,
 ) -> Result<(), String> {
-    /*
-    // Create an environment mapping for parameter names to their types
-    let mut env: HashMap<String, Box<dyn BaseType>> = transition
-        .parameters
-        .parameters
-        .iter()
-        .map(|param| (param.identifier_with_type.identifier_name.clone(), param.identifier_with_type.type_annotation.get_instance()))
-        .collect();
-
-    // Merge the local environment with the global environment
-    for (k, v) in global_env.iter() {
-        env.entry(k.clone()).or_insert(v.clone());
-    }
-
-    // Type check each statement in the transition
-    if let Some(statement_block) = &transition.body.statement_block {
-        for stmt in &statement_block.statements {
-            type_of_stmt(stmt, &env)?;
-        }
-    }
-    */
-    Ok(())
+    unimplemented!()
 }
 
 pub fn type_of(
@@ -241,7 +182,7 @@ pub fn type_of(
         NodeAny::NodeImportedName(_) => unimplemented!(),
         NodeAny::NodeImportDeclarations(_) => unimplemented!(),
         NodeAny::NodeMetaIdentifier(_) => unimplemented!(),
-        NodeAny::NodeVariableIdentifier(_) => unimplemented!(),
+        NodeAny::NodeVariableIdentifier(v) => type_of_variable_identifier(v, env),
         NodeAny::NodeBuiltinArguments(_) => unimplemented!(),
         NodeAny::NodeTypeMapKey(_) => unimplemented!(),
         NodeAny::NodeTypeMapValue(_) => unimplemented!(),

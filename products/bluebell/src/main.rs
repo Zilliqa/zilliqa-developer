@@ -1,9 +1,15 @@
 #[macro_use]
 extern crate lalrpop_util;
 pub mod ast;
+pub mod formatter;
 pub mod lexer;
 pub mod type_classes;
 pub mod type_inference;
+
+#[cfg(test)]
+mod type_inference_tests;
+
+use crate::formatter::ScillaFormatter;
 use crate::lexer::Lexer;
 use crate::type_inference::*;
 
@@ -1002,8 +1008,8 @@ fn main() {
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
             //let _inferred_types = infer_types(&ast).unwrap();
-            // println!("{:?}", ast)
-            println!("Done");
+            let formatted_ast = ast.to_string(); // Call to_string on the top-level AST node to get formatted output
+            println!("{}", formatted_ast);
         }
         Err(error) => {
             let message = format!("Syntax error {:?}", error);
