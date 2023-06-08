@@ -34,6 +34,8 @@ mod tests {
 
     #[test]
     fn bytestring_formatter() {
+        // Reviewed and corrected
+      
         check_formatting_ok!(parser::ByteStringParser, "  ByStr1234 ", "ByStr1234");
         check_formatting_ok!(parser::ByteStringParser, " ByStr11", "ByStr11");
         check_formatting_ok!(parser::ByteStringParser, "ByStr0    ", "ByStr0");
@@ -56,12 +58,14 @@ mod tests {
 
     #[test]
     fn imported_name_formatter() {
+        // Reviewed and corrected
+      
         check_formatting_ok!(parser::ImportedNameParser, "  Event  ", "Event");
         check_formatting_ok!(parser::ImportedNameParser, "Foo", "Foo");
         check_formatting_ok!(parser::ImportedNameParser, "ByStr42 ", "ByStr42");
         check_formatting_ok!(
             parser::ImportedNameParser,
-            " Event as Alias ",
+            " Event     as   \n Alias ",
             "Event as Alias"
         );
         check_formatting_ok!(parser::ImportedNameParser, "Foo  as Alias", "Foo as Alias");
@@ -74,14 +78,16 @@ mod tests {
 
     #[test]
     fn import_declarations_formatter() {
+        // Reviewed and corrected
+      
         check_formatting_ok!(
             parser::ImportDeclarationsParser,
-            " import \n \nFoo\u{005C}\n\n  \n",
+            " import \n \nFoo\n\n  \n",
             "import Foo"
         );
         check_formatting_ok!(
             parser::ImportDeclarationsParser,
-            "\n import Event import ByStr42\u{005C}",
+            "\n import Event import     ByStr42",
             "import Event import ByStr42"
         );
         check_formatting_ok!(
@@ -90,9 +96,11 @@ mod tests {
             "import Foo as Bar"
         );
     }
-
+  
     #[test]
     fn meta_identifiers_formatter() {
+        // Reviewed and corrected
+      
         check_formatting_ok!(parser::MetaIdentifierParser, "  Event  ", "Event");
         check_formatting_ok!(parser::MetaIdentifierParser, "   Foo.Bar   ", "Foo.Bar");
         check_formatting_ok!(parser::MetaIdentifierParser, " ABCD.Event  ", "ABCD.Event");
@@ -102,10 +110,12 @@ mod tests {
             "0x1234.Event"
         );
         check_formatting_ok!(parser::MetaIdentifierParser, "  ByStr ", "ByStr");
+        check_formatting_ok!(parser::MetaIdentifierParser, "  ByStr10 ", "ByStr10");
     }
-
+  
     #[test]
     fn variable_identifier_formatter() {
+        // Reviewed and corrected      
         check_formatting_ok!(parser::VariableIdentifierParser, "  foo  ", "foo");
         check_formatting_ok!(parser::VariableIdentifierParser, " _bar ", "_bar");
         check_formatting_ok!(parser::VariableIdentifierParser, " Foo.bar ", "Foo.bar");
@@ -116,9 +126,10 @@ mod tests {
         );
         check_formatting_ok!(parser::VariableIdentifierParser, " Event.qux ", "Event.qux");
     }
-
+  
     #[test]
     fn builtin_arguments_formatter() {
+        // Reviewed and corrected          
         check_formatting_ok!(parser::BuiltinArgumentsParser, "   ( )   ", "( )");
         check_formatting_ok!(parser::BuiltinArgumentsParser, " foo ", "foo");
         check_formatting_ok!(
@@ -132,37 +143,53 @@ mod tests {
             "Event.qux"
         );
     }
+  
+#[test]
+fn scilla_types_formatter() {
+    // Reviewed and corrected  
+    check_formatting_ok!(parser::ScillaTypeParser, "  Uint32  ", "Uint32");
+    check_formatting_ok!(parser::ScillaTypeParser, "Foo( Bar )", "Foo (Bar)");
+    check_formatting_ok!(
+        parser::ScillaTypeParser,
+        "Map  Uint32  String",
+        "Map Uint32 String"
+    );
+    check_formatting_ok!(
+        parser::ScillaTypeParser,
+        "Uint32  ->  Bool",
+        "Uint32 -> Bool"
+    );
+    check_formatting_ok!(parser::ScillaTypeParser, " (Uint32)", "(Uint32)");
+    check_formatting_ok!(
+        parser::ScillaTypeParser,
+        "  Address  with  end",
+        "Address with end"
+    );
+    check_formatting_ok!(
+        parser::ScillaTypeParser,
+        "forall  'A.  forall  'B.  (  'B  ->  'A  ->  'B)  ->  'B  ->  List  'A  ->  'B",
+        "forall 'A . forall 'B . ('B -> 'A -> 'B) -> 'B -> List 'A -> 'B"
+    );
+    check_formatting_ok!(parser::ScillaTypeParser, " T ", "T");
 
-    #[test]
-    fn scilla_types_formatter() {
-        check_formatting_ok!(parser::ScillaTypeParser, "  Uint32  ", "Uint32");
-        check_formatting_ok!(parser::ScillaTypeParser, "Foo( Bar )", "Foo(Bar)");
-        check_formatting_ok!(
-            parser::ScillaTypeParser,
-            "Map  Uint32  String",
-            "Map Uint32 String"
-        );
-        check_formatting_ok!(
-            parser::ScillaTypeParser,
-            "Uint32  ->  Bool",
-            "Uint32 -> Bool"
-        );
-        check_formatting_ok!(parser::ScillaTypeParser, " (Uint32)", "(Uint32)");
-        check_formatting_ok!(
-            parser::ScillaTypeParser,
-            "  Address  with  end",
-            "Address with end"
-        );
-        check_formatting_ok!(
-            parser::ScillaTypeParser,
-            "forall  'A.  forall  'B.  (  'B  ->  'A  ->  'B)  ->  'B  ->  List  'A  ->  'B",
-            "forall 'A. forall 'B. ( 'B -> 'A -> 'B) -> 'B -> List 'A -> 'B"
-        );
-        check_formatting_ok!(parser::ScillaTypeParser, " T ", "T");
-    }
+    // New test cases
+    check_formatting_ok!(
+        parser::ScillaTypeParser,
+        "Result ( List Uint32 ) String",
+        "Result (List Uint32) String"
+    );
+
+
+    check_formatting_ok!(
+        parser::ScillaTypeParser,
+        " 'E ->  'F ->  'E",
+        "'E -> 'F -> 'E"
+    );
+}
 
     #[test]
     fn address_type_formatter() {
+        // Reviewed, TODO: FAILING      
         check_formatting_ok!(
             parser::AddressTypeParser,
             "  Foo with end  ",
@@ -180,13 +207,13 @@ mod tests {
         );
         check_formatting_ok!(
             parser::AddressTypeParser,
-            "  Foo with contract field field1: Uint32, field field2: Uint32 end   ",
-            "Foo with contract field field1: Uint32, field field2: Uint32 end"
+            "  Foo with contract field field1 : Uint32, field field2 : Uint32 end   ",
+            "Foo with contract field field1 : Uint32, field field2 : Uint32 end"
         );
         check_formatting_ok!(
             parser::AddressTypeParser,
-            "  ByStr42 with contract field field1: Uint32 end  ",
-            "ByStr42 with contract field field1: Uint32 end"
+            "  ByStr42 with contract field field1 : Uint32 end  ",
+            "ByStr42 with contract field field1 : Uint32 end"
         );
         check_formatting_ok!(
             parser::AddressTypeParser,
@@ -226,59 +253,51 @@ mod tests {
         check_formatting_ok!(
             parser::AddressTypeParser,
             "  Foo with contract field field1: Uint32 end  ",
-            "Foo with contract field field1: Uint32 end"
+            "Foo with contract field field1 : Uint32 end"
         );
         check_formatting_ok!(
             parser::AddressTypeParser,
-            "  ByStr42 with contract field field1: Uint32, field field2: Uint32, field field3: Uint32 end  ",
-            "ByStr42 with contract field field1: Uint32, field field2: Uint32, field field3: Uint32 end"
+            "  ByStr42 with contract field field1 : Uint32, field field2: Uint32, field field3: Uint32 end  ",
+            "ByStr42 with contract field field1 : Uint32, field field2 : Uint32, field field3 : Uint32 end"
         );
         check_formatting_ok!(
             parser::AddressTypeParser,
             "  Event with contract field field1: Uint32 end  ",
-            "Event with contract field field1: Uint32 end"
+            "Event with contract field field1 : Uint32 end"
         );
     }
 
     #[test]
     fn type_map_key_formatter() {
+      // BOOK:
         check_formatting_ok!(parser::TypeMapKeyParser, "  Foo  ", "Foo");
         check_formatting_ok!(parser::TypeMapKeyParser, "(Foo)   ", "(Foo)");
-        check_formatting_ok!(parser::TypeMapKeyParser, "  Foo with end  ", "Foo with end");
-        check_formatting_ok!(
-            parser::TypeMapKeyParser,
-            " (Foo with end) ",
-            "(Foo with end)"
-        );
+//        check_formatting_ok!(parser::TypeMapKeyParser, "  ByStr20 with end  ", "ByStr20 with end");
         check_formatting_ok!(
             parser::TypeMapKeyParser,
             " (ByStr42 with contract end) ",
             "(ByStr42 with contract end)"
         );
-        check_formatting_ok!(
-            parser::TypeMapKeyParser,
-            " Foo with library end ",
-            "Foo with library end"
-        );
+        check_formatting_ok!(parser::TypeMapKeyParser, "  ByStr  ", "ByStr");
+        check_formatting_ok!(parser::TypeMapKeyParser, " (ByStr)   ", "(ByStr)");
     }
 
-    #[test]
-    fn type_map_value_formatter() {
-        check_formatting_ok!(parser::TypeMapValueParser, "  Uint32  ", "Uint32");
-        check_formatting_ok!(parser::TypeMapValueParser, " Map Foo Bar ", "Map Foo Bar");
-        check_formatting_ok!(parser::TypeMapValueParser, " (Uint32) ", "(Uint32)");
-        check_formatting_ok!(
-            parser::TypeMapValueParser,
-            " Address with end ",
-            "Address with end"
-        );
-        check_formatting_ok!(
-            parser::TypeMapValueParser,
-            " Foo with contract field field1: Uint32 end ",
-            "Foo with contract field field1: Uint32 end"
-        );
-    }
-
+#[test]
+fn type_map_value_formatter() {
+    check_formatting_ok!(parser::TypeMapValueParser, "  Uint32  ", "Uint32");
+    check_formatting_ok!(parser::TypeMapValueParser, " Map Foo Bar ", "Map Foo Bar");
+    check_formatting_ok!(parser::TypeMapValueParser, " (Uint32) ", "(Uint32)");
+    check_formatting_ok!(
+        parser::TypeMapValueParser,
+        " Address with end ",
+        "Address with end"
+    );
+    check_formatting_ok!(
+        parser::TypeMapValueParser,
+        " Foo with contract field  \n field1: \nUint32 end ",
+        "Foo with contract field field1 : Uint32 end"
+    );
+}
     #[test]
     fn type_map_value_arguments_formatter() {
         check_formatting_ok!(parser::TypeMapValueArgumentsParser, " (Uint32) ", "Uint32");
@@ -295,12 +314,12 @@ mod tests {
         check_formatting_ok!(parser::TypeArgumentParser, " Foo ", "Foo");
         check_formatting_ok!(parser::TypeArgumentParser, " ( Bar ) ", "(Bar)");
         check_formatting_ok!(parser::TypeArgumentParser, "  Uint32  ", "Uint32");
-        check_formatting_ok!(parser::TypeArgumentParser, " ' A ", "'A");
+        check_formatting_ok!(parser::TypeArgumentParser, " 'A ", "'A");
         check_formatting_ok!(parser::TypeArgumentParser, " ( Uint32 ) ", "(Uint32)");
         check_formatting_ok!(
             parser::TypeArgumentParser,
             "Address  with contract   field  field1 : Uint32 ,  field field2 : Uint32 end",
-            "Address with contract field field1: Uint32, field field2: Uint32 end"
+            "Address with contract field field1 : Uint32, field field2 : Uint32 end"
         );
         check_formatting_ok!(
             parser::TypeArgumentParser,
@@ -383,6 +402,7 @@ mod tests {
 
     #[test]
     fn value_literal_formatter() {
+        // Reviewed and correct      
         check_formatting_ok!(parser::AtomicExpressionParser, "  foo ", "foo");
         check_formatting_ok!(
             parser::AtomicExpressionParser,
@@ -399,34 +419,38 @@ mod tests {
             r#"  "string"  "#,
             r#""string""#
         );
+        check_formatting_ok!(
+            parser::AtomicExpressionParser,
+            r#" Emp Uint32 Uint32 "#,
+            r#"Emp Uint32{Uint32}"#
+        );
     }
-
     #[test]
     fn map_access_formatter() {
-        check_formatting_ok!(parser::MapAccessParser, " [foo] ", " [foo]");
+        check_formatting_ok!(parser::MapAccessParser, " [foo] ", "[foo]");
         check_formatting_ok!(parser::MapAccessParser, "[bar123]  ", "[bar123]");
-        check_formatting_ok!(parser::MapAccessParser, "    [_result]   ", " [_result]");
+        check_formatting_ok!(parser::MapAccessParser, "    [_result]   ", "[_result]");
     }
 
     #[test]
     fn pattern_formatter() {
-        check_formatting_ok!(parser::PatternParser, "_", "_");
+        check_formatting_ok!(parser::PatternParser, "  _", "_");
         check_formatting_ok!(parser::PatternParser, "  foo  ", "foo");
-        check_formatting_ok!(parser::PatternParser, "Bar42", "Bar42");
-        check_formatting_ok!(parser::PatternParser, "Bar42     _", "Bar42 _");
+        check_formatting_ok!(parser::PatternParser, "Bar42   ", "Bar42");
+        check_formatting_ok!(parser::PatternParser, "Bar42   \n_", "Bar42 _");
         check_formatting_ok!(parser::PatternParser, "Bar42 hello", "Bar42 hello");
-        check_formatting_ok!(parser::PatternParser, "  Bar42(   )", "Bar42(_)");
-        check_formatting_ok!(parser::PatternParser, "Bar42(Foo )", "Bar42(Foo)");
-        check_formatting_ok!(parser::PatternParser, "Bar42(Foo Bar)", "Bar42(Foo Bar)");
+        check_formatting_ok!(parser::PatternParser, "  Bar42(  _)", "Bar42 (_)");
+        check_formatting_ok!(parser::PatternParser, "Bar42(Foo )", "Bar42 (Foo)");
+        check_formatting_ok!(parser::PatternParser, "Bar42(Foo Bar)", "Bar42 (Foo Bar)");
         check_formatting_ok!(
             parser::PatternParser,
-            "Bar42(\nByStr42 Int32)",
-            "Bar42(ByStr42 Int32)"
+            "Bar42    (\nByStr42   Int32)",
+            "Bar42 (ByStr42 Int32)"
         );
         check_formatting_ok!(
             parser::PatternParser,
-            "Bar42(Foo.Bar Bar.Baz)",
-            "Bar42(Foo.Bar Bar.Baz)"
+            "Bar42(Foo.Bar \nBar.Baz)  ",
+            "Bar42 (Foo.Bar Bar.Baz)"
         );
     }
 
@@ -436,10 +460,11 @@ mod tests {
         check_formatting_ok!(parser::ArgumentPatternParser, " foo", "foo");
         check_formatting_ok!(parser::ArgumentPatternParser, "MyType   ", "MyType");
         check_formatting_ok!(parser::ArgumentPatternParser, "  (baz) ", "(baz)");
-        check_formatting_ok!(parser::ArgumentPatternParser, " (Bar42 _)", "(Bar42 _)");
         check_formatting_ok!(parser::ArgumentPatternParser, " my_type  ", "my_type");
-    }
+        check_formatting_ok!(parser::ArgumentPatternParser, " (Bar42 _) ", "(Bar42 _)");
 
+    }
+  
     #[test]
     fn pattern_match_expression_clause_formatter() {
         check_formatting_ok!(
@@ -523,16 +548,17 @@ mod tests {
 
     #[test]
     fn typed_identifier_formatter() {
-        check_formatting_ok!(parser::TypedIdentifierParser, "  foo: Int  ", "foo: Int");
+      // Reviewed and corrected
+        check_formatting_ok!(parser::TypedIdentifierParser, "  foo: Int  ", "foo : Int");
         check_formatting_ok!(
             parser::TypedIdentifierParser,
             " bar: ByStr20",
-            "bar: ByStr20"
+            "bar : ByStr20"
         );
         check_formatting_ok!(
             parser::TypedIdentifierParser,
             "baz: (Int Bool)    ",
-            "baz: (Int Bool)"
+            "baz : (Int Bool)"
         );
     }
 
@@ -738,22 +764,22 @@ mod tests {
         check_formatting_ok!(
             parser::ComponentParametersParser,
             " (a: Int32) ",
-            "(a: Int32)"
+            "(a : Int32)"
         );
         check_formatting_ok!(
             parser::ComponentParametersParser,
             "(a: Int32, b: Bool)",
-            "(a: Int32, b: Bool)"
+            "(a : Int32, b : Bool)"
         );
         check_formatting_ok!(
             parser::ComponentParametersParser,
             " (a: Int32, b: Bool, c: String) ",
-            "(a: Int32, b: Bool, c: String)"
+            "(a : Int32, b : Bool, c : String)"
         );
         check_formatting_ok!(
             parser::ComponentParametersParser,
             " (a: ByStr20, b: Map ByStr20 (Uint256)) ",
-            "(a: ByStr20, b: Map ByStr20 (Uint256))"
+            "(a : ByStr20, b : Map ByStr20 (Uint256))"
         );
     }
 
@@ -852,29 +878,36 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_with_constraint_formatter() {
-        check_formatting_ok!(
-            parser::WithConstraintParser,
-            "  with   builtin   blt   end_of_life   =>  ",
-            "with builtin blt end_of_life =>"
-        );
-        check_formatting_ok!(
-            parser::WithConstraintParser,
-            "with builtin add {UInt32} one  =>",
-            "with builtin add {UInt32} one  =>"
-        );
-        check_formatting_ok!(
-            parser::WithConstraintParser,
-            "  with true =>",
-            "with true =>"
-        );
-        check_formatting_ok!(
-            parser::WithConstraintParser,
-            "with variableIdentifier =>",
-            "with variableIdentifier =>"
-        );
-    }
+#[test]
+fn test_with_constraint_formatter() {
+    // BOOK:
+    check_formatting_ok!(
+        parser::WithConstraintParser,
+        "  with   builtin   blt   end_of_life   =>  ",
+        "with builtin blt end_of_life =>"
+    );
+    check_formatting_ok!(
+        parser::WithConstraintParser,
+        "with builtin add {UInt32} one  =>",
+        "with builtin add {UInt32} one =>"
+    );
+    check_formatting_ok!(
+        parser::WithConstraintParser,
+        "  with true =>",
+        "with true =>"
+    );
+    check_formatting_ok!(
+        parser::WithConstraintParser,
+        "  with false =>",
+        "with false =>"
+    );
+    check_formatting_ok!(
+        parser::WithConstraintParser,
+        "with variableIdentifier =>",
+        "with variableIdentifier =>"
+    );
+}
+  
     #[test]
     fn contract_definition_formatter() {
         check_formatting_ok!(

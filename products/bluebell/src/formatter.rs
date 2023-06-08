@@ -43,6 +43,7 @@ impl ScillaFormatter for NodeByteStr {
 }
 
 impl ScillaFormatter for NodeTransitionDefinition {
+    // TODO: Review
     fn to_string_with_indent(&self, level: usize) -> String {
         let mut formatted = String::new();
         // Remove leading indentation, as the formatted string should not include any whitespace before "transition"
@@ -57,21 +58,22 @@ impl ScillaFormatter for NodeTransitionDefinition {
         formatted
     }
 }
+
 impl ScillaFormatter for NodeTypeAlternativeClause {
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
             NodeTypeAlternativeClause::ClauseType(name) => {
-                format!("{}{}", indentation(level), name.indent(level))
+                format!("{}| {}", indentation(level), name.indent(level))
             }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
                 let indented_args = args
                     .iter()
-                    .map(|arg| arg.to_string_with_indent(level + 1))
+                    .map(|arg| arg.to_string_with_indent(0))
                     .collect::<Vec<_>>()
                     .join(", ");
 
                 format!(
-                    "{}{}({})",
+                    "{}| {} of {}",
                     indentation(level),
                     name.indent(level),
                     indented_args
@@ -82,6 +84,7 @@ impl ScillaFormatter for NodeTypeAlternativeClause {
 }
 
 impl ScillaFormatter for NodeTypeMapValueArguments {
+    // TODO: Review
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
             NodeTypeMapValueArguments::EnclosedTypeMapValue(node) => {
@@ -93,13 +96,14 @@ impl ScillaFormatter for NodeTypeMapValueArguments {
             NodeTypeMapValueArguments::MapKeyValueType(key, value) => {
                 let key_str = key.to_string_with_indent(level);
                 let value_str = value.to_string_with_indent(level);
-                format!("{}:{}", key_str, value_str)
+                format!("Map {} {}", key_str, value_str)
             }
         }
     }
 }
 
 impl ScillaFormatter for NodeTypeMapValueAllowingTypeArguments {
+    // TODO: Review
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
             NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(node) => {
@@ -119,6 +123,7 @@ impl ScillaFormatter for NodeTypeMapValueAllowingTypeArguments {
 }
 
 impl ScillaFormatter for NodeImportedName {
+    // Reviewed
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
             NodeImportedName::RegularImport(type_name_identifier) => {
@@ -134,14 +139,17 @@ impl ScillaFormatter for NodeImportedName {
 }
 
 impl ScillaFormatter for NodeImportDeclarations {
+    // Reviewed and corrected  
+  
     fn to_string_with_indent(&self, level: usize) -> String {
-        let mut output = String::new();
+        let mut output = String::from("import");
 
         for (idx, import) in self.import_list.iter().enumerate() {
             if idx != 0 {
-                output.push('\n');
+                output.push_str(" import");
             }
-            write!(&mut output, "{}", import.to_string_with_indent(level)).unwrap();
+            output.push(' ');
+            output.push_str(&import.to_string_with_indent(level));            
         }
 
         output
@@ -149,6 +157,8 @@ impl ScillaFormatter for NodeImportDeclarations {
 }
 
 impl ScillaFormatter for NodeMetaIdentifier {
+    // Reviewed and corrected
+  
     fn to_string_with_indent(&self, level: usize) -> String {
         let ind = indentation(level);
         match self {
@@ -157,21 +167,22 @@ impl ScillaFormatter for NodeMetaIdentifier {
             }
             NodeMetaIdentifier::MetaNameInNamespace(namespace, name) => {
                 format!(
-                    "{}{}::{}",
+                    "{}{}.{}",
                     ind,
                     namespace.to_string_with_indent(0),
                     name.to_string_with_indent(0)
                 )
             }
             NodeMetaIdentifier::MetaNameInHexspace(hexspace, name) => {
-                format!("{}{}::{}", ind, hexspace, name.to_string_with_indent(0))
+                format!("{}{}.{}", ind, hexspace, name.to_string_with_indent(0))
             }
-            NodeMetaIdentifier::ByteString => format!("{}byte", ind),
+            NodeMetaIdentifier::ByteString => format!("{}ByStr", ind),
         }
     }
 }
 
 impl ScillaFormatter for NodeVariableIdentifier {
+    // Reviewed and corrected  
     fn to_string_with_indent(&self, level: usize) -> String {
         let indent = indentation(level);
         match self {
@@ -188,37 +199,38 @@ impl ScillaFormatter for NodeVariableIdentifier {
 }
 
 impl ScillaFormatter for NodeBuiltinArguments {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut formatted_str = String::new();
-        let indent = indentation(level);
-
-        for (i, arg) in self.arguments.iter().enumerate() {
-            formatted_str.push_str(&indent);
-            formatted_str.push_str(&arg.to_string_with_indent(level + 1));
-
-            if i < self.arguments.len() - 1 {
-                formatted_str.push_str(",\n");
+  // Reviewed and corrected    
+  fn to_string_with_indent(&self, level: usize) -> String {
+        if self.arguments.is_empty() {
+            "( )".to_owned()
+        } else {
+            let mut formatted_str = String::new();
+            for (i, arg) in self.arguments.iter().enumerate() {
+                formatted_str.push_str(&arg.to_string_with_indent(level));
+                if i < self.arguments.len() - 1 {
+                    formatted_str.push_str(" ");
+                }
             }
+            formatted_str
         }
-
-        formatted_str
     }
 }
 
 impl ScillaFormatter for NodeTypeMapKey {
-    fn to_string_with_indent(&self, level: usize) -> String {
+  // BOOK:
+    fn to_string_with_indent(&self, _level: usize) -> String {
         match self {
             NodeTypeMapKey::GenericMapKey(node_meta_identifier) => {
-                node_meta_identifier.to_string_with_indent(level)
+                node_meta_identifier.to_string()
             }
             NodeTypeMapKey::EnclosedGenericId(node_meta_identifier) => {
-                format!("{{{}}}", node_meta_identifier.to_string_with_indent(level))
+                format!("({})", node_meta_identifier.to_string())
             }
             NodeTypeMapKey::EnclosedAddressMapKeyType(node_address_type) => {
-                format!("{{{}}}", node_address_type.to_string_with_indent(level))
+                format!("({})", node_address_type.to_string())
             }
             NodeTypeMapKey::AddressMapKeyType(node_address_type) => {
-                node_address_type.to_string_with_indent(level)
+                node_address_type.to_string()
             }
         }
     }
@@ -234,7 +246,7 @@ impl ScillaFormatter for NodeTypeMapValue {
             }
             NodeTypeMapValue::MapKeyValue(node_type_map_entry) => {
                 format!(
-                    "{}{}",
+                    "{}Map {}",
                     indent,
                     node_type_map_entry.to_string_with_indent(level)
                 )
@@ -266,7 +278,7 @@ impl ScillaFormatter for NodeTypeArgument {
             }
             NodeTypeArgument::MapTypeArgument(map_key, map_value) => {
                 format!(
-                    "({} => {})",
+                    "Map {} {}",
                     map_key.to_string_with_indent(level),
                     map_value.to_string_with_indent(level)
                 )
@@ -279,42 +291,46 @@ impl ScillaFormatter for NodeScillaType {
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
             NodeScillaType::GenericTypeWithArgs(meta_identifier, type_args) => {
-                let type_args_str = type_args
-                    .iter()
-                    .map(|arg| arg.to_string_with_indent(level + 1))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!(
-                    "{}<{}>",
-                    meta_identifier.to_string_with_indent(level),
-                    type_args_str
-                )
+                if type_args.is_empty() {
+                    meta_identifier.to_string_with_indent(level)
+                } else {
+                    let type_args_str = type_args
+                        .iter()
+                        .map(|arg| arg.to_string())
+                        .collect::<Vec<_>>()
+                        .join(" ");
+                    format!(
+                        "{} {}",
+                        meta_identifier.to_string_with_indent(level),
+                        type_args_str
+                    )
+                }
             }
             NodeScillaType::MapType(map_key, map_value) => {
                 format!(
-                    "Map ({} -> {})",
-                    map_key.to_string_with_indent(level + 1),
-                    map_value.to_string_with_indent(level + 1)
+                    "Map {} {}",
+                    map_key.to_string(),
+                    map_value.to_string()
                 )
             }
             NodeScillaType::FunctionType(arg_type, return_type) => {
                 format!(
                     "{} -> {}",
-                    arg_type.to_string_with_indent(level),
-                    return_type.to_string_with_indent(level)
+                    arg_type.to_string(),
+                    return_type.to_string()
                 )
             }
             NodeScillaType::EnclosedType(inner_type) => {
-                format!("({})", inner_type.to_string_with_indent(level + 1))
+                format!("({})", inner_type.to_string())
             }
             NodeScillaType::ScillaAddresseType(address_type) => {
-                format!("{}", address_type.to_string_with_indent(level))
+                format!("{}", address_type.to_string())
             }
             NodeScillaType::PolyFunctionType(param, return_type) => {
                 format!(
                     "forall {} . {}",
                     param,
-                    return_type.to_string_with_indent(level)
+                    return_type.to_string()
                 )
             }
             NodeScillaType::TypeVarType(name) => name.clone(),
@@ -324,10 +340,10 @@ impl ScillaFormatter for NodeScillaType {
 
 impl ScillaFormatter for NodeTypeMapEntry {
     fn to_string_with_indent(&self, level: usize) -> String {
-        let key_string = self.key.to_string_with_indent(level + 1);
-        let value_string = self.value.to_string_with_indent(level + 1);
+        let key_string = self.key.to_string_with_indent(level);
+        let value_string = self.value.to_string_with_indent(level);
 
-        format!("{}{} : {}", indentation(level), key_string, value_string)
+        format!("{} {}", key_string, value_string)
     }
 }
 
@@ -341,23 +357,30 @@ impl ScillaFormatter for NodeAddressTypeField {
 }
 
 impl ScillaFormatter for NodeAddressType {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let id_str = self.identifier.to_string_with_indent(level);
-        let type_name_str = format!("({})", self.type_name);
+    // Reviewed and corrected
+    fn to_string_with_indent(&self, _: usize) -> String {
+        let id_str = self.identifier.to_string();
+
+        let construct_str = match self.type_name.as_str() {
+          "" => "".to_string(),
+          _ => format!(" {}", self.type_name),
+
+        };
 
         let fields_str = self
             .address_fields
             .iter()
-            .map(|field| field.to_string_with_indent(level + 1))
+            .map(|field| field.to_string())
             .collect::<Vec<String>>()
-            .join(",\n");
+            .join(", field ");
+
         let fields_str = if fields_str.is_empty() {
-            fields_str
+            "".to_string()
         } else {
-            format!("\n{}\n{}", indentation(level + 1), fields_str)
+            format!(" field {}", fields_str)
         };
 
-        format!("{}{}{}", id_str, type_name_str, fields_str)
+        format!("{} with{}{} end", id_str, construct_str, fields_str)
     }
 }
 
@@ -543,23 +566,24 @@ impl ScillaFormatter for NodeContractTypeArguments {
 }
 
 impl ScillaFormatter for NodeValueLiteral {
+    // Reviewed and correct
     fn to_string_with_indent(&self, level: usize) -> String {
         let indent = indentation(level);
         match self {
             NodeValueLiteral::LiteralInt(ty, value) => format!(
-                "{}{}_{}",
+                "{}{} {}",
                 indent,
-                ty.to_string_with_indent(level + 1),
+                ty.to_string_with_indent(0),
                 value
             ),
             NodeValueLiteral::LiteralHex(value) => format!("{}0x{}", indent, value),
             NodeValueLiteral::LiteralString(value) => format!("{}\"{}\"", indent, value),
             NodeValueLiteral::LiteralEmptyMap(key_ty, value_ty) => {
                 format!(
-                    "{}EmpMap {{{}: {}}}",
+                    "{}Emp {}{{{}}}",
                     indent,
-                    key_ty.to_string_with_indent(level + 1),
-                    value_ty.to_string_with_indent(level + 1)
+                    key_ty.to_string_with_indent(0),
+                    value_ty.to_string_with_indent(0)
                 )
             }
         }
@@ -568,15 +592,9 @@ impl ScillaFormatter for NodeValueLiteral {
 
 impl ScillaFormatter for NodeMapAccess {
     fn to_string_with_indent(&self, level: usize) -> String {
-        // 1. Use the `indentation` function to indent according to the given level
-        let indent = indentation(level);
-
-        // 2. Obtain the formatted string representation of the `identifier_name`
         let identifier_str = self.identifier_name.to_string_with_indent(level);
 
-        // 3. Since `type_annotation` is an internal variable, ignore it
-        // 4. Build the final output string
-        format!("{}{}", indent, identifier_str)
+        format!("[{}]",  identifier_str)
     }
 }
 
@@ -586,14 +604,12 @@ impl ScillaFormatter for NodePattern {
             NodePattern::Wildcard => "_".to_string(),
             NodePattern::Binder(b) => b.clone(),
             NodePattern::Constructor(meta_id, arg_patterns) => {
-                let mut formatted = format!("{}(", meta_id.to_string_with_indent(level));
+                let mut formatted =  meta_id.to_string_with_indent(level);
                 for (i, pattern) in arg_patterns.iter().enumerate() {
-                    if i > 0 {
-                        formatted.push_str(", ");
-                    }
-                    formatted.push_str(&pattern.to_string_with_indent(level + 1));
+                    formatted.push_str(" ");
+                    formatted.push_str(&pattern.to_string_with_indent(level));
                 }
-                formatted.push(')');
+
                 formatted
             }
         }
@@ -609,7 +625,7 @@ impl ScillaFormatter for NodeArgumentPattern {
                 constructor.to_string_with_indent(level)
             }
             NodeArgumentPattern::PatternArgument(pattern) => {
-                format!("({})", pattern.to_string_with_indent(level))
+                format!("({})", pattern.to_string_with_indent(level).trim_start())
             }
         }
     }
@@ -886,23 +902,20 @@ impl ScillaFormatter for NodeComponentId {
 }
 
 impl ScillaFormatter for NodeComponentParameters {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
+    fn to_string_with_indent(&self, _level: usize) -> String {
         let formatted_parameters = self
             .parameters
             .iter()
-            .map(|param| param.to_string_with_indent(level + 1))
+            .map(|param| param.to_string())
             .collect::<Vec<String>>()
-            .join(",\n");
+            .join(", ");
 
         if formatted_parameters.is_empty() {
-            format!("{}()", indent)
+            "()".to_string()
         } else {
             format!(
-                "{}(\n{}\n{})",
-                indent,
+                "({})",
                 formatted_parameters,
-                indentation(level)
             )
         }
     }
@@ -944,7 +957,8 @@ impl ScillaFormatter for NodeStatementBlock {
 }
 
 impl ScillaFormatter for NodeTypedIdentifier {
-    fn to_string_with_indent(&self, level: usize) -> String {
+  // Reviewed and corrected
+  fn to_string_with_indent(&self, level: usize) -> String {
         let id = &self.identifier_name;
         let annotation = self.annotation.to_string_with_indent(level);
         format!("{}{} : {}", indentation(level), id, annotation)
@@ -1087,10 +1101,10 @@ impl ScillaFormatter for NodeContractField {
 }
 
 impl ScillaFormatter for NodeWithConstraint {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-        let expression_string = self.expression.to_string_with_indent(level + 1);
-        format!("{}{}", indent, expression_string)
+    // BOOK:
+    fn to_string_with_indent(&self, _level: usize) -> String {
+        let expression_string = self.expression.to_string_with_indent(0);
+        format!("with {} =>", expression_string)
     }
 }
 

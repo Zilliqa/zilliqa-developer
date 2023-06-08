@@ -337,19 +337,19 @@ pub AddressType: NodeAddressType = {
     },
 	<type_name: TypeNameIdentifier> "with" "contract" <address_fields: AddressTypeFieldList?> "end" => NodeAddressType {
         identifier: type_name,
-        type_name: "".to_string(),
+        type_name: "contract".to_string(),
         address_fields: address_fields.unwrap_or([].to_vec()),
         type_annotation: None
     },
 	<type_name: TypeNameIdentifier> "with" "library" "end" => NodeAddressType {
         identifier: type_name,
-        type_name: "".to_string(),
+        type_name: "library".to_string(),
         address_fields: vec![],
         type_annotation: None
     },
 	<type_name: TypeNameIdentifier> "with" <special_identifie:SpecialId> "end" => NodeAddressType {
         identifier: type_name,
-        type_name: "".to_string(),
+        type_name: special_identifie,
         address_fields: vec![],
         type_annotation: None
     },
@@ -808,9 +808,9 @@ pub AtomicExpression: NodeAtomicExpression = {
 // @return A value literal as a signed or unsigned integer, a hexadecimal value, a string, or an empty map.
 pub ValueLiteral: NodeValueLiteral = {
 	<n: TypeNameIdentifier> <v: SignedInteger> => NodeValueLiteral::LiteralInt(n, v),
-	<h: HexNumber> => NodeValueLiteral::LiteralHex(h),
-	<s: StringLiteral> => NodeValueLiteral::LiteralString(s),
-	"Emp" <key_type: TypeMapKey>  <value_type: TypeMapValue> => {
+     <h: HexNumber> => NodeValueLiteral::LiteralHex(h.trim_start_matches("0x").to_string()),
+     <s: StringLiteral> => NodeValueLiteral::LiteralString(s[1..s.len() - 1].to_string()),
+     "Emp" <key_type: TypeMapKey>  <value_type: TypeMapValue> => {
 		NodeValueLiteral::LiteralEmptyMap(key_type, value_type)
 	},
 }; 
