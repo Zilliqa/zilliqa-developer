@@ -18,10 +18,11 @@ fn indentation(level: usize) -> String {
 }
 
 impl ScillaFormatter for NodeTypeNameIdentifier {
+    // Reviewed and corrected
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
             NodeTypeNameIdentifier::ByteStringType(byte_str) => {
-                format!("{}ByStr{}", indentation(level), byte_str.to_string())
+                format!("{}{}", indentation(level), byte_str.to_string())
             }
             NodeTypeNameIdentifier::EventType => format!("{}Event", indentation(level)),
             NodeTypeNameIdentifier::CustomType(custom_type) => {
@@ -32,6 +33,7 @@ impl ScillaFormatter for NodeTypeNameIdentifier {
 }
 
 impl ScillaFormatter for NodeByteStr {
+    // Reviewed and corrected
     fn to_string_with_indent(&self, _: usize) -> String {
         match self {
             NodeByteStr::Constant(s) => s.clone(),
@@ -40,24 +42,21 @@ impl ScillaFormatter for NodeByteStr {
     }
 }
 
-// Implement the trait for other nodes similarly...
-
 impl ScillaFormatter for NodeTransitionDefinition {
     fn to_string_with_indent(&self, level: usize) -> String {
         let mut formatted = String::new();
-
-        formatted.push_str(&indentation(level));
+        // Remove leading indentation, as the formatted string should not include any whitespace before "transition"
+        // formatted.push_str(&indentation(level));
         formatted.push_str("transition ");
         formatted.push_str(&self.name.to_string());
-        formatted.push_str(&self.parameters.to_string_with_indent(level));
+        formatted.push_str(&self.parameters.to_string_with_indent(0)); // No indentation for the parameters
         formatted.push_str(" ");
-
         formatted.push_str(&self.body.to_string_with_indent(level + 1));
-
+        // Add " end" to the end of the formatted string
+        formatted.push_str(" end");
         formatted
     }
 }
-
 impl ScillaFormatter for NodeTypeAlternativeClause {
     fn to_string_with_indent(&self, level: usize) -> String {
         match self {
