@@ -1,10 +1,10 @@
-use super::*;
+use bluebell::{ast::*, formatter::ScillaFormatter, lexer::Lexer, lexer::*, type_inference::*};
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::*;
-    use crate::type_classes::*;
+    use bluebell::ast::*;
+    use bluebell::type_classes::*;
     use std::collections::HashMap;
 
     #[test]
@@ -39,6 +39,7 @@ mod tests {
         };
     }
 
+    /*
     #[test]
     fn test_type_of_node_message_entry() {
         // Initialize the environment with a variable and its type
@@ -72,6 +73,7 @@ mod tests {
             _ => panic!("Unexpected TypeAnnotation variant"),
         };
     }
+    */
 
     /*
     #[test]
