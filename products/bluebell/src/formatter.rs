@@ -911,78 +911,212 @@ impl ScillaFormatter for NodeComponentParameters {
 
 impl ScillaFormatter for NodeParameterPair {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let indent = indentation(level);
+        let param_str = self.identifier_with_type.to_string_with_indent(level);
+
+        format!("{}{}", indent, param_str)
     }
 }
 
 impl ScillaFormatter for NodeComponentBody {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        match &self.statement_block {
+            Some(statement_block) => statement_block.to_string_with_indent(level),
+            None => String::new(),
+        }
     }
 }
 
 impl ScillaFormatter for NodeStatementBlock {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let mut formatted_statements = String::new();
+        for (i, statement) in self.statements.iter().enumerate() {
+            let mut formatted_statement = statement.to_string_with_indent(level);
+            if i > 0 {
+                // Properly separate statements with a newline
+                formatted_statements.push_str("\n");
+                // Indent the statements as needed
+                formatted_statements.push_str(&indentation(level));
+            }
+            formatted_statements.push_str(&formatted_statement);
+        }
+        formatted_statements
     }
 }
 
 impl ScillaFormatter for NodeTypedIdentifier {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let id = &self.identifier_name;
+        let annotation = self.annotation.to_string_with_indent(level);
+        format!("{}{} : {}", indentation(level), id, annotation)
     }
 }
 
 impl ScillaFormatter for NodeTypeAnnotation {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let mut output = String::new();
+        output.push_str(&indentation(level));
+        output.push_str(&self.type_name.to_string_with_indent(level));
+        // No need to handle `type_annotation` as mentioned in the instructions.
+        output
     }
 }
 
 impl ScillaFormatter for NodeProgram {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let mut formatted_code = format!("scilla_version {}\n", self.version);
+        if let Some(ref import_declarations) = self.import_declarations {
+            formatted_code.push_str(&import_declarations.to_string_with_indent(level));
+            formatted_code.push_str("\n");
+        }
+        if let Some(ref library_definition) = self.library_definition {
+            formatted_code.push_str(&library_definition.to_string_with_indent(level));
+            formatted_code.push_str("\n");
+        }
+        formatted_code.push_str(&self.contract_definition.to_string_with_indent(level));
+        formatted_code
     }
 }
 
 impl ScillaFormatter for NodeLibraryDefinition {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let mut result = String::new();
+        let indent = indentation(level);
+        // Add library keyword and name
+        result.push_str(&format!(
+            "{}library {}\n",
+            indent,
+            self.name.to_string_with_indent(level)
+        ));
+        // Add opening brace
+        result.push_str(&format!("{}{{\n", indent));
+        // Add definitions with proper indentation
+        let definition_strings: Vec<String> = self
+            .definitions
+            .iter()
+            .map(|definition| definition.to_string_with_indent(level + 1))
+            .collect();
+        result.push_str(&definition_strings.join("\n"));
+        // Add closing brace
+        result.push_str(&format!("\n{}}}", indent));
+        result
     }
 }
 
 impl ScillaFormatter for NodeLibrarySingleDefinition {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        match self {
+            NodeLibrarySingleDefinition::LetDefinition {
+                variable_name,
+                type_annotation: _,
+                expression,
+            } => {
+                format!(
+                    "{}let {} = {}\n",
+                    indentation(level),
+                    variable_name,
+                    expression.to_string_with_indent(level + 1)
+                )
+            }
+            NodeLibrarySingleDefinition::TypeDefinition(type_name, opt_type_alternatives) => {
+                let type_alternatives_str = match opt_type_alternatives {
+                    Some(type_alternatives) => type_alternatives
+                        .iter()
+                        .map(|alternative| alternative.to_string_with_indent(level + 1))
+                        .collect::<Vec<String>>()
+                        .join("\n"),
+                    None => "".to_string(),
+                };
+                format!(
+                    "{}type {}{}\n",
+                    indentation(level),
+                    type_name.to_string_with_indent(level + 1),
+                    if !type_alternatives_str.is_empty() {
+                        format!("\n{}", type_alternatives_str)
+                    } else {
+                        "".to_string()
+                    }
+                )
+            }
+        }
     }
 }
 
 impl ScillaFormatter for NodeContractDefinition {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let contract_name = self.contract_name.to_string_with_indent(level);
+        let parameters = self.parameters.to_string_with_indent(level);
+        let constraint = self
+            .constraint
+            .as_ref()
+            .map_or("".to_string(), |c| c.indent(level + 1));
+        let fields = self
+            .fields
+            .iter()
+            .map(|field| field.to_string_with_indent(level + 1))
+            .collect::<Vec<String>>()
+            .join("\n");
+        let components = self
+            .components
+            .iter()
+            .map(|component| component.to_string_with_indent(level + 1))
+            .collect::<Vec<String>>()
+            .join("\n");
+        let indent = indentation(level);
+        format!(
+            "{indent}contract {contract_name} ({parameters}){constraint}\n{indent}{{\n{fields}\n\n{components}\n{indent}}}",
+            indent=indent,
+            contract_name=contract_name,
+            parameters=parameters,
+            constraint=constraint,
+            fields=fields,
+            components=components,
+        )
     }
 }
 
 impl ScillaFormatter for NodeContractField {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let indent = indentation(level);
+        let typed_identifier_str = self.typed_identifier.to_string_with_indent(level);
+        let right_hand_side_str = self.right_hand_side.to_string_with_indent(level + 1);
+        format!(
+            "{}{} =\n{}",
+            indent, typed_identifier_str, right_hand_side_str
+        )
     }
 }
 
 impl ScillaFormatter for NodeWithConstraint {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let indent = indentation(level);
+        let expression_string = self.expression.to_string_with_indent(level + 1);
+        format!("{}{}", indent, expression_string)
     }
 }
 
 impl ScillaFormatter for NodeComponentDefinition {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        match self {
+            NodeComponentDefinition::TransitionComponent(transition_def) => {
+                transition_def.to_string_with_indent(level)
+            }
+            NodeComponentDefinition::ProcedureComponent(procedure_def) => {
+                procedure_def.to_string_with_indent(level)
+            }
+        }
     }
 }
 
 impl ScillaFormatter for NodeProcedureDefinition {
     fn to_string_with_indent(&self, level: usize) -> String {
-        unimplemented!()
+        let indent = indentation(level);
+        let name_str = self.name.to_string_with_indent(0);
+        let params_str = self.parameters.to_string_with_indent(0);
+        let body_str = self.body.to_string_with_indent(level + 1);
+        format!(
+            "{}procedure {} ({})\n{}=\n{}{}",
+            indent, name_str, params_str, indent, body_str, indent
+        )
     }
 }
