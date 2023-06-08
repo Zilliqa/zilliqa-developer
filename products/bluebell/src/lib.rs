@@ -5,11 +5,13 @@ pub mod formatter;
 pub mod lexer;
 pub mod type_classes;
 pub mod type_inference;
+lalrpop_mod!(pub parser);
+
 use crate::formatter::ScillaFormatter;
 use crate::lexer::Lexer;
 use crate::type_inference::*;
 use std::collections::HashMap;
-lalrpop_mod!(pub bluebell);
+
 #[derive(Debug)]
 pub struct ParserError {
     pub message: String,

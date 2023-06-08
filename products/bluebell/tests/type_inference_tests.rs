@@ -1,4 +1,6 @@
-use bluebell::{ast::*, formatter::ScillaFormatter, lexer::Lexer, lexer::*, type_inference::*};
+use bluebell::{
+    ast::*, formatter::ScillaFormatter, lexer::Lexer, lexer::*, parser::*, type_inference::*, *,
+};
 
 #[cfg(test)]
 mod tests {

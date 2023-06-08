@@ -1,9 +1,9 @@
-use bluebell::{ast::*, formatter::ScillaFormatter, lexer::Lexer, lexer::*, type_inference::*};
 #[cfg(test)]
 mod tests {
     use bluebell::formatter::ScillaFormatter;
+    use bluebell::lexer;
     use bluebell::lexer::Lexer;
-    use bluebell::lexer::*;
+    use bluebell::parser;
 
     use std::collections::HashMap;
     use std::env;
@@ -14,7 +14,7 @@ mod tests {
     macro_rules! get_ast {
         ($parser:ty, $result:expr) => {{
             let mut errors = vec![];
-            let ast = <$parser>::new().parse(&mut errors, crate::lexer::Lexer::new($result));
+            let ast = <$parser>::new().parse(&mut errors, lexer::Lexer::new($result));
             match ast {
                 Ok(parsed_ast) => parsed_ast,
                 Err(err) => panic!("Parsing error: {:?}", err),
@@ -24,7 +24,7 @@ mod tests {
 
     #[test]
     fn bytestring_formatter() {
-        let ast = get_ast!(bluebell::ByteStringParser, "ByStr1234");
+        let ast = get_ast!(parser::ByteStringParser, "ByStr1234");
         println!("{}", ast.to_string());
     }
 }

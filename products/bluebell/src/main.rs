@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use std::process;
 
+use bluebell::formatter::ScillaFormatter;
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;
 use bluebell::*;
@@ -21,7 +22,7 @@ fn main() {
 
     let lexer = Lexer::new(&script);
 
-    let parser = bluebell::ProgramParser::new();
+    let parser = parser::ProgramParser::new();
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
             //let _inferred_types = infer_types(&ast).unwrap();
