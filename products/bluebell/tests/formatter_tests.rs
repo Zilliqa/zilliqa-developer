@@ -19,7 +19,7 @@ mod tests {
             let formatted = $ast.to_string();
             assert_eq!(
                 formatted, $expected,
-                "Expected: {}, got: {}",
+                "\nExpected:\n\n`{}`\n\nFormatted code:\n\n`{}`\n\n",
                 $expected, formatted
             );
         };
@@ -35,7 +35,7 @@ mod tests {
     #[test]
     fn bytestring_formatter() {
         // Reviewed and corrected
-      
+
         check_formatting_ok!(parser::ByteStringParser, "  ByStr1234 ", "ByStr1234");
         check_formatting_ok!(parser::ByteStringParser, " ByStr11", "ByStr11");
         check_formatting_ok!(parser::ByteStringParser, "ByStr0    ", "ByStr0");
@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn imported_name_formatter() {
         // Reviewed and corrected
-      
+
         check_formatting_ok!(parser::ImportedNameParser, "  Event  ", "Event");
         check_formatting_ok!(parser::ImportedNameParser, "Foo", "Foo");
         check_formatting_ok!(parser::ImportedNameParser, "ByStr42 ", "ByStr42");
@@ -79,7 +79,7 @@ mod tests {
     #[test]
     fn import_declarations_formatter() {
         // Reviewed and corrected
-      
+
         check_formatting_ok!(
             parser::ImportDeclarationsParser,
             " import \n \nFoo\n\n  \n",
@@ -96,11 +96,11 @@ mod tests {
             "import Foo as Bar"
         );
     }
-  
+
     #[test]
     fn meta_identifiers_formatter() {
         // Reviewed and corrected
-      
+
         check_formatting_ok!(parser::MetaIdentifierParser, "  Event  ", "Event");
         check_formatting_ok!(parser::MetaIdentifierParser, "   Foo.Bar   ", "Foo.Bar");
         check_formatting_ok!(parser::MetaIdentifierParser, " ABCD.Event  ", "ABCD.Event");
@@ -112,10 +112,10 @@ mod tests {
         check_formatting_ok!(parser::MetaIdentifierParser, "  ByStr ", "ByStr");
         check_formatting_ok!(parser::MetaIdentifierParser, "  ByStr10 ", "ByStr10");
     }
-  
+
     #[test]
     fn variable_identifier_formatter() {
-        // Reviewed and corrected      
+        // Reviewed and corrected
         check_formatting_ok!(parser::VariableIdentifierParser, "  foo  ", "foo");
         check_formatting_ok!(parser::VariableIdentifierParser, " _bar ", "_bar");
         check_formatting_ok!(parser::VariableIdentifierParser, " Foo.bar ", "Foo.bar");
@@ -126,10 +126,10 @@ mod tests {
         );
         check_formatting_ok!(parser::VariableIdentifierParser, " Event.qux ", "Event.qux");
     }
-  
+
     #[test]
     fn builtin_arguments_formatter() {
-        // Reviewed and corrected          
+        // Reviewed and corrected
         check_formatting_ok!(parser::BuiltinArgumentsParser, "   ( )   ", "( )");
         check_formatting_ok!(parser::BuiltinArgumentsParser, " foo ", "foo");
         check_formatting_ok!(
@@ -143,53 +143,52 @@ mod tests {
             "Event.qux"
         );
     }
-  
-#[test]
-fn scilla_types_formatter() {
-    // Reviewed and corrected  
-    check_formatting_ok!(parser::ScillaTypeParser, "  Uint32  ", "Uint32");
-    check_formatting_ok!(parser::ScillaTypeParser, "Foo( Bar )", "Foo (Bar)");
-    check_formatting_ok!(
-        parser::ScillaTypeParser,
-        "Map  Uint32  String",
-        "Map Uint32 String"
-    );
-    check_formatting_ok!(
-        parser::ScillaTypeParser,
-        "Uint32  ->  Bool",
-        "Uint32 -> Bool"
-    );
-    check_formatting_ok!(parser::ScillaTypeParser, " (Uint32)", "(Uint32)");
-    check_formatting_ok!(
-        parser::ScillaTypeParser,
-        "  Address  with  end",
-        "Address with end"
-    );
-    check_formatting_ok!(
-        parser::ScillaTypeParser,
-        "forall  'A.  forall  'B.  (  'B  ->  'A  ->  'B)  ->  'B  ->  List  'A  ->  'B",
-        "forall 'A . forall 'B . ('B -> 'A -> 'B) -> 'B -> List 'A -> 'B"
-    );
-    check_formatting_ok!(parser::ScillaTypeParser, " T ", "T");
 
-    // New test cases
-    check_formatting_ok!(
-        parser::ScillaTypeParser,
-        "Result ( List Uint32 ) String",
-        "Result (List Uint32) String"
-    );
+    #[test]
+    fn scilla_types_formatter() {
+        // Reviewed and corrected
+        check_formatting_ok!(parser::ScillaTypeParser, "  Uint32  ", "Uint32");
+        check_formatting_ok!(parser::ScillaTypeParser, "Foo( Bar )", "Foo (Bar)");
+        check_formatting_ok!(
+            parser::ScillaTypeParser,
+            "Map  Uint32  String",
+            "Map Uint32 String"
+        );
+        check_formatting_ok!(
+            parser::ScillaTypeParser,
+            "Uint32  ->  Bool",
+            "Uint32 -> Bool"
+        );
+        check_formatting_ok!(parser::ScillaTypeParser, " (Uint32)", "(Uint32)");
+        check_formatting_ok!(
+            parser::ScillaTypeParser,
+            "  Address  with  end",
+            "Address with end"
+        );
+        check_formatting_ok!(
+            parser::ScillaTypeParser,
+            "forall  'A.  forall  'B.  (  'B  ->  'A  ->  'B)  ->  'B  ->  List  'A  ->  'B",
+            "forall 'A . forall 'B . ('B -> 'A -> 'B) -> 'B -> List 'A -> 'B"
+        );
+        check_formatting_ok!(parser::ScillaTypeParser, " T ", "T");
 
+        // New test cases
+        check_formatting_ok!(
+            parser::ScillaTypeParser,
+            "Result ( List Uint32 ) String",
+            "Result (List Uint32) String"
+        );
 
-    check_formatting_ok!(
-        parser::ScillaTypeParser,
-        " 'E ->  'F ->  'E",
-        "'E -> 'F -> 'E"
-    );
-}
+        check_formatting_ok!(
+            parser::ScillaTypeParser,
+            " 'E ->  'F ->  'E",
+            "'E -> 'F -> 'E"
+        );
+    }
 
     #[test]
     fn address_type_formatter() {
-        // Reviewed, TODO: FAILING      
+        // Reviewed, TODO: FAILING
         check_formatting_ok!(
             parser::AddressTypeParser,
             "  Foo with end  ",
@@ -269,10 +268,10 @@ fn scilla_types_formatter() {
 
     #[test]
     fn type_map_key_formatter() {
-      // BOOK:
+        // BOOK:
         check_formatting_ok!(parser::TypeMapKeyParser, "  Foo  ", "Foo");
         check_formatting_ok!(parser::TypeMapKeyParser, "(Foo)   ", "(Foo)");
-//        check_formatting_ok!(parser::TypeMapKeyParser, "  ByStr20 with end  ", "ByStr20 with end");
+        //        check_formatting_ok!(parser::TypeMapKeyParser, "  ByStr20 with end  ", "ByStr20 with end");
         check_formatting_ok!(
             parser::TypeMapKeyParser,
             " (ByStr42 with contract end) ",
@@ -282,22 +281,22 @@ fn scilla_types_formatter() {
         check_formatting_ok!(parser::TypeMapKeyParser, " (ByStr)   ", "(ByStr)");
     }
 
-#[test]
-fn type_map_value_formatter() {
-    check_formatting_ok!(parser::TypeMapValueParser, "  Uint32  ", "Uint32");
-    check_formatting_ok!(parser::TypeMapValueParser, " Map Foo Bar ", "Map Foo Bar");
-    check_formatting_ok!(parser::TypeMapValueParser, " (Uint32) ", "(Uint32)");
-    check_formatting_ok!(
-        parser::TypeMapValueParser,
-        " Address with end ",
-        "Address with end"
-    );
-    check_formatting_ok!(
-        parser::TypeMapValueParser,
-        " Foo with contract field  \n field1: \nUint32 end ",
-        "Foo with contract field field1 : Uint32 end"
-    );
-}
+    #[test]
+    fn type_map_value_formatter() {
+        check_formatting_ok!(parser::TypeMapValueParser, "  Uint32  ", "Uint32");
+        check_formatting_ok!(parser::TypeMapValueParser, " Map Foo Bar ", "Map Foo Bar");
+        check_formatting_ok!(parser::TypeMapValueParser, " (Uint32) ", "(Uint32)");
+        check_formatting_ok!(
+            parser::TypeMapValueParser,
+            " Address with end ",
+            "Address with end"
+        );
+        check_formatting_ok!(
+            parser::TypeMapValueParser,
+            " Foo with contract field  \n field1: \nUint32 end ",
+            "Foo with contract field field1 : Uint32 end"
+        );
+    }
     #[test]
     fn type_map_value_arguments_formatter() {
         check_formatting_ok!(parser::TypeMapValueArgumentsParser, " (Uint32) ", "Uint32");
@@ -402,7 +401,7 @@ fn type_map_value_formatter() {
 
     #[test]
     fn value_literal_formatter() {
-        // Reviewed and correct      
+        // Reviewed and correct
         check_formatting_ok!(parser::AtomicExpressionParser, "  foo ", "foo");
         check_formatting_ok!(
             parser::AtomicExpressionParser,
@@ -462,9 +461,8 @@ fn type_map_value_formatter() {
         check_formatting_ok!(parser::ArgumentPatternParser, "  (baz) ", "(baz)");
         check_formatting_ok!(parser::ArgumentPatternParser, " my_type  ", "my_type");
         check_formatting_ok!(parser::ArgumentPatternParser, " (Bar42 _) ", "(Bar42 _)");
-
     }
-  
+
     #[test]
     fn pattern_match_expression_clause_formatter() {
         check_formatting_ok!(
@@ -504,10 +502,10 @@ fn type_map_value_formatter() {
         check_formatting_ok!(
             parser::MessageEntryParser,
             " foo: Uint32 42 ",
-            "foo: Uint32 42"
+            "foo : Uint32 42"
         );
-        check_formatting_ok!(parser::MessageEntryParser, " foo: bar ", "foo: bar");
-        check_formatting_ok!(parser::MessageEntryParser, " foo: 0x1337 ", "foo: 0x1337");
+        check_formatting_ok!(parser::MessageEntryParser, " foo: bar ", "foo : bar");
+        check_formatting_ok!(parser::MessageEntryParser, " foo: 0x1337 ", "foo : 0x1337");
     }
 
     #[test]
@@ -548,7 +546,7 @@ fn type_map_value_formatter() {
 
     #[test]
     fn typed_identifier_formatter() {
-      // Reviewed and corrected
+        // Reviewed and corrected
         check_formatting_ok!(parser::TypedIdentifierParser, "  foo: Int  ", "foo : Int");
         check_formatting_ok!(
             parser::TypedIdentifierParser,
@@ -583,12 +581,12 @@ fn type_map_value_formatter() {
         );
         check_formatting_ok!(
             parser::StatementParser,
-            "foo <- qux[baz]  ",
+            "foo <-\n qux[baz]  ",
             "foo <- qux[baz]"
         );
         check_formatting_ok!(
             parser::StatementParser,
-            " foo <- exists baz[bar] ",
+            " foo <-        \n\t exists baz[bar] ",
             "foo <- exists baz[bar]"
         );
         check_formatting_ok!(
@@ -608,12 +606,12 @@ fn type_map_value_formatter() {
         check_formatting_ok!(
             parser::StatementParser,
             " match foo with | False => True | _ => False end ",
-            "match foo with | False => True | _ => False end"
+            "match foo with\n  | False => True\n  | _ => False\nend"
         );
         check_formatting_ok!(
             parser::StatementParser,
             "  match foo with | _ => value end  ",
-            "match foo with | _ => value end"
+            "match foo with\n  | _ => value\nend"
         );
         check_formatting_ok!(parser::StatementParser, " Foo\tbar\tbaz    ", "Foo bar baz");
         check_formatting_ok!(
@@ -642,8 +640,8 @@ fn type_map_value_formatter() {
     fn statement_block_formatter() {
         check_formatting_ok!(
             parser::StatementBlockParser,
-            " x<-y; z:= a",
-            "x <- y; z := a"
+            " x<-y;     z:= a",
+            "x <- y;\nz := a"
         );
         check_formatting_ok!(parser::StatementBlockParser, "  accept   ", "accept");
         check_formatting_ok!(parser::StatementBlockParser, "  send x  ", "send x");
@@ -655,12 +653,12 @@ fn type_map_value_formatter() {
         check_formatting_ok!(
             parser::StatementBlockParser,
             "  match x with | _ => accept end  ",
-            "match x with\n| _ => accept\nend"
+            "match x with\n  | _ => accept\nend"
         );
         check_formatting_ok!(
             parser::StatementBlockParser,
             "  match x with | _ => y <- z end ",
-            "match x with\n| _ => y <- z\nend"
+            "match x with\n  | _ => y <- z\nend"
         );
         check_formatting_ok!(
             parser::StatementBlockParser,
@@ -670,7 +668,7 @@ fn type_map_value_formatter() {
         check_formatting_ok!(
             parser::StatementBlockParser,
             "MyComponent y; forall foo Event ; match x with | _ => y <- z end",
-            "MyComponent y; forall foo Event; match x with\n| _ => y <- z\nend"
+            "MyComponent y;\nforall foo Event;\nmatch x with\n  | _ => y <- z\nend"
         );
     }
 
@@ -798,16 +796,15 @@ fn type_map_value_formatter() {
     event e
   end
   ",
-            "
-    RequireNotPaused;
-    RequireContractOwner;
-    is_paused := true;
-    e = {
-        _eventname: \"Pause\";
-        is_paused: true
-    };
-    event e
-    end"
+            "RequireNotPaused;
+RequireContractOwner;
+is_paused := true;
+e = {
+  _eventname : \"Pause\";
+  is_paused : true
+};
+event e
+end"
         );
         check_formatting_ok!(
             parser::ComponentBodyParser,
@@ -822,16 +819,15 @@ fn type_map_value_formatter() {
     event e
   end
   ",
-            "
-    RequirePaused;
-    RequireContractOwner;
-    is_paused := false;
-    e = {
-        _eventname: \"Unpause\";
-        is_paused: false
-    };
-    event e
-    end"
+            "RequirePaused;
+RequireContractOwner;
+is_paused := false;
+e = {
+  _eventname : \"Unpause\";
+  is_paused : false
+};
+event e
+end"
         );
         check_formatting_ok!(
         parser::ComponentBodyParser,
@@ -843,19 +839,26 @@ fn type_map_value_formatter() {
       get_xPoints <- xpoints[_origin]; x_points = option_uint128_value get_xPoints; IsSufficient x_points amount;
       new_bal = builtin sub x_points amount; xpoints[_origin] := new_bal end
   ",
-        "
-    current_init <-& init.dApp;
-    xPointsDApp = \"xpoints\"; get_addr <-& current_init.dns[xPointsDApp]; addr = option_bystr20_value get_addr;
-    is_xPoints = builtin eq _sender addr; match is_xPoints with
-    | True =>
-    | False =>
-        e = {
-            _exception: \"donate.tyron-WrongCaller\"
-        }; throw e
-    end;
-    get_xPoints <- xpoints[_origin]; x_points = option_uint128_value get_xPoints; IsSufficient x_points amount;
-    new_bal = builtin sub x_points amount; xpoints[_origin] := new_bal
-    end"
+        "current_init <-& init.dApp
+;
+xPointsDApp = \"xpoints\";
+get_addr <-& current_init.dns[  xPointsDApp]
+;
+addr = option_bystr20_value get_addr;
+is_xPoints = builtin eq _sender addr;
+match is_xPoints with
+  | True
+  | False => e = {
+  _exception : \"donate.tyron-WrongCaller\"
+};
+throw e
+end;
+get_xPoints <- xpoints[_origin];
+x_points = option_uint128_value get_xPoints;
+IsSufficient x_points amount;
+new_bal = builtin sub x_points amount;
+xpoints[_origin] := new_bal
+end"
     );
     }
 
@@ -864,50 +867,60 @@ fn type_map_value_formatter() {
         check_formatting_ok!(
             parser::ContractFieldParser,
             "field foo: Int32 = Int32 42",
-            "field foo: Int32 = Int32 42"
+            "field foo : Int32 = Int32 42" // Add a space before the colon
         );
         check_formatting_ok!(
             parser::ContractFieldParser,
             "field bar: Map ByStr32 (List Uint32) = Emp ByStr32 (List Uint32)",
-            "field bar: Map ByStr32 (List Uint32) = Emp ByStr32 (List Uint32)"
+            "field bar : Map ByStr32 (List Uint32) = Emp ByStr32 (List Uint32)" // Add a space before the colon
         );
         check_formatting_ok!(
             parser::ContractFieldParser,
             "field baz: Event = Event",
-            "field baz: Event = Event"
+            "field baz : Event = Event" // Add a space before the colon
+        );
+        // Additional test cases
+        check_formatting_ok!(
+            parser::ContractFieldParser,
+            "field nested_map: Map ByStr20 (Map Uint32 Bool) = Emp ByStr20 (Map Uint32 Bool)",
+            "field nested_map : Map ByStr20 (Map Uint32 Bool) = Emp ByStr20 (Map Uint32 Bool)" // Add a space before the colon
+        );
+        check_formatting_ok!(
+            parser::ContractFieldParser,
+            "field nested_list: List (List Uint32) = Cons (List Uint32) [(Uint32 1)] Nil (List (List Uint32))",
+            "field nested_list : List (List Uint32) = Cons (List Uint32) [(Uint32 1)] Nil (List (List Uint32))" // Add a space before the colon
+        );
+    }
+    #[test]
+    fn test_with_constraint_formatter() {
+        // BOOK:
+        check_formatting_ok!(
+            parser::WithConstraintParser,
+            "  with   builtin   blt   end_of_life   =>  ",
+            "with builtin blt end_of_life =>"
+        );
+        check_formatting_ok!(
+            parser::WithConstraintParser,
+            "with builtin add {UInt32} one  =>",
+            "with builtin add {UInt32} one =>"
+        );
+        check_formatting_ok!(
+            parser::WithConstraintParser,
+            "  with true =>",
+            "with true =>"
+        );
+        check_formatting_ok!(
+            parser::WithConstraintParser,
+            "  with false =>",
+            "with false =>"
+        );
+        check_formatting_ok!(
+            parser::WithConstraintParser,
+            "with variableIdentifier =>",
+            "with variableIdentifier =>"
         );
     }
 
-#[test]
-fn test_with_constraint_formatter() {
-    // BOOK:
-    check_formatting_ok!(
-        parser::WithConstraintParser,
-        "  with   builtin   blt   end_of_life   =>  ",
-        "with builtin blt end_of_life =>"
-    );
-    check_formatting_ok!(
-        parser::WithConstraintParser,
-        "with builtin add {UInt32} one  =>",
-        "with builtin add {UInt32} one =>"
-    );
-    check_formatting_ok!(
-        parser::WithConstraintParser,
-        "  with true =>",
-        "with true =>"
-    );
-    check_formatting_ok!(
-        parser::WithConstraintParser,
-        "  with false =>",
-        "with false =>"
-    );
-    check_formatting_ok!(
-        parser::WithConstraintParser,
-        "with variableIdentifier =>",
-        "with variableIdentifier =>"
-    );
-}
-  
     #[test]
     fn contract_definition_formatter() {
         check_formatting_ok!(
