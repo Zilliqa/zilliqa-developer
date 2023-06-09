@@ -2,6 +2,7 @@ use crate::ast::*;
 use std::fmt::Write;
 
 pub trait ScillaFormatter {
+
     fn to_string(&self) -> String {
         self.to_string_with_indent(0)
     }
@@ -394,11 +395,10 @@ impl ScillaFormatter for NodeFullExpression {
                 containing_expression,
                 ..
             } => format!(
-                "{}let {} = {}\n{}in {}",
+                "{}let {} = {} in {}",
                 ind,
                 identifier_name,
-                expression.to_string_with_indent(level + 1),
-                ind,
+                expression.to_string_with_indent(level),
                 containing_expression.to_string_with_indent(level)
             ),
             NodeFullExpression::FunctionDeclaration {
@@ -525,10 +525,10 @@ impl ScillaFormatter for NodeMessageEntry {
 impl ScillaFormatter for NodePatternMatchExpressionClause {
     fn to_string_with_indent(&self, level: usize) -> String {
         let indent = indentation(level);
-        let pattern_str = self.pattern.to_string_with_indent(level + 1);
-        let expression_str = self.expression.to_string_with_indent(level + 1);
+        let pattern_str = self.pattern.to_string_with_indent(level);
+        let expression_str = self.expression.to_string_with_indent(level);
 
-        format!("{}{} => {}", indent, pattern_str, expression_str)
+        format!("{}| {} => {}", indent, pattern_str, expression_str)
     }
 }
 
