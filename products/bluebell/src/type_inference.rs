@@ -28,9 +28,12 @@ impl TypeInference for NodeVariableIdentifier {
             NodeVariableIdentifier::VariableInNamespace(namespace, var_name) => {
                 // Assuming that the namespace implements the BaseType trait itself,
                 // otherwise, replace with an appropriate subtype or handle accordingly
-                unimplemented!();
-                /* TDODO:
-                match env.get(&namespace.to_string()) {
+                let name = match namespace {
+                    NodeTypeNameIdentifier::ByteStringType(bystr) => unimplemented!(),
+                    NodeTypeNameIdentifier::EventType => "Event".to_string(),
+                    NodeTypeNameIdentifier::CustomType(s) => s.to_string(),
+                };
+                match env.get(&name) {
                     Some(t) => {
                         let qualified_name = format!("{}.{}", t.to_string(), var_name);
                         match env.get(&qualified_name) {
@@ -38,9 +41,8 @@ impl TypeInference for NodeVariableIdentifier {
                             None => Err(format!("{} is not defined", qualified_name)),
                         }
                     }
-                    None =>Reading the code in Attachment #3 and Attachment #4, could you implement the type inference trait and its corresponding test?
+                    None => Err("TODO:".to_string()),
                 }
-                */
             }
         }
     }
@@ -92,10 +94,7 @@ impl TypeInference for NodeTransitionDefinition {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        // As the NodeTransitionDefinition itself does not have a type, let's infer the type
-        // of its body, since that's a meaningful subexpression.
-        unimplemented!();
-        // TODO: self.body.get_type(env)
+        self.body.get_type(env)
     }
 }
 
@@ -105,17 +104,18 @@ impl TypeInference for NodeTypeAlternativeClause {
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
         unimplemented!();
-
         /*
         match self {
             NodeTypeAlternativeClause::ClauseType(name) => {
-                match env.get(name) {
+                let name_string = String::from(name);
+                match env.get(&name_string) {
                     Some(t) => Ok(t.get_instance()),
-                    None => Err(format!("{} is not defined", name)),
+                    None => Err(format!("{:?} is not defined", name)),
                 }
             }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
-                match env.get(name) {
+                let name_string = String::from(name);
+                match env.get(&name_string) {
                     Some(t) => {
                         // Make sure the number of arguments matches.
                         let expected_arg_count = t.arg_types.len();
@@ -131,7 +131,7 @@ impl TypeInference for NodeTypeAlternativeClause {
                         }
                         Ok(t.get_instance())
                     },
-                    None => Err(format!("{} is not defined", name)),
+                    None => Err(format!("{:?} is not defined", name)),
                 }
             }
         }
@@ -144,14 +144,8 @@ impl TypeInference for NodeTypeMapValueArguments {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-
-        /*
-        TODO:
         match self {
-            NodeTypeMapValueArguments::EnclosedTypeMapValue(node) => {
-                node.get_type(env)
-            }
+            NodeTypeMapValueArguments::EnclosedTypeMapValue(node) => node.get_type(env),
             NodeTypeMapValueArguments::GenericMapValueArgument(identifier) => {
                 identifier.get_type(env)
             }
@@ -164,7 +158,6 @@ impl TypeInference for NodeTypeMapValueArguments {
                 }))
             }
         }
-        */
     }
 }
 
