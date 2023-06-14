@@ -1,4 +1,5 @@
 use crate::type_classes::TypeAnnotation;
+use std::fmt;
 
 pub enum NodeAny<'a> {
     NodeByteStr(&'a NodeByteStr),
@@ -71,6 +72,20 @@ pub enum NodeByteStr {
 
 impl_any_kind!(NodeByteStr);
 
+impl NodeByteStr {
+    pub fn to_string(&self) -> String {
+        match self {
+            NodeByteStr::Constant(s) => s.clone(),
+            NodeByteStr::Type(t) => t.clone(),
+        }
+    }
+}
+impl fmt::Display for NodeByteStr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeNameIdentifier {
     ByteStringType(NodeByteStr),
@@ -79,6 +94,25 @@ pub enum NodeTypeNameIdentifier {
 }
 
 impl_any_kind!(NodeTypeNameIdentifier);
+
+impl NodeTypeNameIdentifier {
+    pub fn to_string(&self) -> String {
+        match self {
+            NodeTypeNameIdentifier::ByteStringType(byte_str) => {
+                format!("{}", byte_str.to_string())
+            }
+            NodeTypeNameIdentifier::EventType => format!("Event"),
+            NodeTypeNameIdentifier::CustomType(custom_type) => {
+                format!("{}", custom_type.clone())
+            }
+        }
+    }
+}
+impl fmt::Display for NodeTypeNameIdentifier {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeImportedName {
@@ -103,6 +137,29 @@ pub enum NodeMetaIdentifier {
 }
 impl_any_kind!(NodeMetaIdentifier);
 
+impl NodeMetaIdentifier {
+    pub fn to_string(&self) -> String {
+        match self {
+            NodeMetaIdentifier::MetaName(name) => {
+                format!("{}", name)
+            }
+            NodeMetaIdentifier::MetaNameInNamespace(namespace, name) => {
+                format!("{}.{}", namespace, name)
+            }
+            NodeMetaIdentifier::MetaNameInHexspace(hexspace, name) => {
+                format!("{}.{}", hexspace, name)
+            }
+            NodeMetaIdentifier::ByteString => format!("ByStr"),
+        }
+    }
+}
+
+impl fmt::Display for NodeMetaIdentifier {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeVariableIdentifier {
     VariableName(String),
@@ -110,6 +167,24 @@ pub enum NodeVariableIdentifier {
     VariableInNamespace(NodeTypeNameIdentifier, String),
 }
 impl_any_kind!(NodeVariableIdentifier);
+
+impl NodeVariableIdentifier {
+    pub fn to_string(&self) -> String {
+        match self {
+            NodeVariableIdentifier::VariableName(name) => format!("{}", name),
+            NodeVariableIdentifier::SpecialIdentifier(id) => format!("{}", id),
+            NodeVariableIdentifier::VariableInNamespace(namespace, var_name) => {
+                format!("{}.{}", namespace.to_string(), var_name)
+            }
+        }
+    }
+}
+
+impl fmt::Display for NodeVariableIdentifier {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeBuiltinArguments {

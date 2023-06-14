@@ -10,7 +10,24 @@ pub trait TypeInference {
     ) -> Result<TypeAnnotation, String>;
 }
 
-// In `src/type_inference.rs`
+struct Workspace {
+    pub env: HashMap<String, Box<dyn BaseType>>,
+    pub namespace: String,
+}
+
+impl Clone for Workspace {
+    fn clone(&self) -> Self {
+        Workspace {
+            env: self
+                .env
+                .iter()
+                .map(|(key, val)| (key.clone(), val.clone_boxed()))
+                .collect(),
+            namespace: self.namespace.clone(),
+        }
+    }
+}
+
 impl TypeInference for NodeVariableIdentifier {
     fn get_type(
         &self,
@@ -26,22 +43,24 @@ impl TypeInference for NodeVariableIdentifier {
                 id
             )),
             NodeVariableIdentifier::VariableInNamespace(namespace, var_name) => {
-                // Assuming that the namespace implements the BaseType trait itself,
-                // otherwise, replace with an appropriate subtype or handle accordingly
                 let name = match namespace {
-                    NodeTypeNameIdentifier::ByteStringType(bystr) => unimplemented!(),
-                    NodeTypeNameIdentifier::EventType => "Event".to_string(),
+                    NodeTypeNameIdentifier::ByteStringType(bystr) => {
+                        return Err("Namespace cannot be a ByteStringType".to_string());
+                    }
+                    NodeTypeNameIdentifier::EventType => {
+                        return Err("Namespace cannot be an EventType".to_string());
+                    }
                     NodeTypeNameIdentifier::CustomType(s) => s.to_string(),
                 };
                 match env.get(&name) {
                     Some(t) => {
-                        let qualified_name = format!("{}.{}", t.to_string(), var_name);
+                        let qualified_name = format!("{}.{}", name, var_name);
                         match env.get(&qualified_name) {
                             Some(ty) => Ok(ty.get_instance()),
                             None => Err(format!("{} is not defined", qualified_name)),
                         }
                     }
-                    None => Err("TODO:".to_string()),
+                    None => Err(format!("Namespace {} is not defined", name)),
                 }
             }
         }
@@ -94,7 +113,8 @@ impl TypeInference for NodeTransitionDefinition {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        self.body.get_type(env)
+        unimplemented!()
+        // TODO: Implement TypeInference for NodeComponentBody then self.body.get_type(env)
     }
 }
 
@@ -103,26 +123,21 @@ impl TypeInference for NodeTypeAlternativeClause {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /*
         match self {
-            NodeTypeAlternativeClause::ClauseType(name) => {
-                let name_string = String::from(name);
-                match env.get(&name_string) {
-                    Some(t) => Ok(t.get_instance()),
-                    None => Err(format!("{:?} is not defined", name)),
-                }
-            }
+            NodeTypeAlternativeClause::ClauseType(name) => match env.get(&name.to_string()) {
+                Some(t) => Ok(t.get_instance()),
+                None => Err(format!("{:?} is not defined", name)),
+            },
             NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
-                let name_string = String::from(name);
-                match env.get(&name_string) {
+                unimplemented!()
+                /*
+                TODO: Deal with type arguments
+                match env.get(&name.to_string()) {
                     Some(t) => {
-                        // Make sure the number of arguments matches.
                         let expected_arg_count = t.arg_types.len();
                         if expected_arg_count != args.len() {
                             return Err(format!("Expected {} arguments, found {}", expected_arg_count, args.len()));
                         }
-                        // Check the types of the arguments.
                         for (expected_type, actual_node) in t.arg_types.iter().zip(args.iter()) {
                             let actual_type = actual_node.get_type(env)?;
                             if actual_type != *expected_type {
@@ -131,11 +146,11 @@ impl TypeInference for NodeTypeAlternativeClause {
                         }
                         Ok(t.get_instance())
                     },
-                    None => Err(format!("{:?} is not defined", name)),
+                    None => Err(format!("{:?} is not defined", name.to_string())),
                 }
+                */
             }
         }
-        */
     }
 }
 
@@ -161,52 +176,51 @@ impl TypeInference for NodeTypeMapValueArguments {
     }
 }
 
-// type_inference.rs
 impl TypeInference for NodeTypeMapValueAllowingTypeArguments {
     fn get_type(
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /* TODO:
         match self {
-            NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(node) => {
-                node.get_type(env)
-            }
+            NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(node) => node.get_type(env),
             NodeTypeMapValueAllowingTypeArguments::TypeMapValueWithArgs(identifier, args) => {
                 let id_type = identifier.get_type(env)?;
                 match id_type {
                     TypeAnnotation::TemplateType(template_type) => {
                         // Perform type inference for arguments
-                        args.iter()
+                        let arg_types = args
+                            .iter()
                             .map(|arg| arg.get_type(env))
                             .collect::<Result<Vec<TypeAnnotation>, String>>()
-                            .map_err(|err| format!("Error in type arguments: {}", err))
+                            .map_err(|err| format!("Error in type arguments: {}", err))?;
+                        // Do something with arg_types and template_type here.
+                        // For now, just return the template_type Annotation
+                        // TODO:
+                        Ok(TypeAnnotation::TemplateType(template_type)) // TODO: Placeholder until the new type is derived
                     }
-                    _ => Err(format!("Node {} expected to be a TemplateType but got {:?}", identifier, id_type)),
+                    _ => Err(format!(
+                        "Node {:?} expected to be a TemplateType but got {:?}",
+                        identifier, id_type
+                    )),
                 }
             }
         }
-        */
     }
 }
 
-// Add this to `src/type_inference.rs`
 impl TypeInference for NodeImportedName {
     fn get_type(
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!()
-        /*
-        TODO:
-         match self {
-            NodeImportedName::RegularImport(type_name_identifier) => type_name_identifier.get_type(env),
+        match self {
+            NodeImportedName::RegularImport(type_name_identifier) => {
+                type_name_identifier.get_type(env)
+            }
             NodeImportedName::AliasedImport(original_type_name, _alias_type_name) => {
                 original_type_name.get_type(env)
             }
         }
-        */
     }
 }
 
@@ -222,36 +236,53 @@ impl TypeInference for NodeImportDeclarations {
     }
 }
 
-// In `src/type_inference.rs`:
 impl TypeInference for NodeMetaIdentifier {
     fn get_type(
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /*
-        TODO:
         match self {
             NodeMetaIdentifier::MetaName(name) => {
-                name.get_type(env)
+                if let NodeTypeNameIdentifier::CustomType(n) = name {
+                    if let Some(t) = env.get(n) {
+                        Ok(t.get_instance())
+                    } else {
+                        Err(format!("type {} not found in environment", n))
+                    }
+                } else {
+                    Err(format!("expected CustomType, got {:?}", name))
+                }
             }
             NodeMetaIdentifier::MetaNameInNamespace(namespace, name) => {
-                // If the namespace and the name both have types in the environment,
-                // concatenate them with a dot as a symbol and return the result.
-                // Otherwise, return an error.
-                let namespace_type = namespace.get_type(env)?;
-                let name_type = name.get_type(env)?;
-                let symbol = format!("{}.{}", namespace.to_string(), name.to_string());
-                Ok(TypeAnnotation::TemplateType(TemplateType { name: symbol.clone(), symbol }))
+                let full_name = format!("{}.{}", namespace, name);
+                if let Some(t) = env.get(&full_name) {
+                    Ok(t.get_instance())
+                } else {
+                    Err(format!(
+                        "type {}.{} not found in environment",
+                        namespace, name
+                    ))
+                }
             }
-            NodeMetaIdentifier::MetaNameInHexspace(_, name) => {
-                name.get_type(env)
+            NodeMetaIdentifier::MetaNameInHexspace(hexspace, name) => {
+                let full_name = format!("{}::{}", hexspace, name);
+                if let Some(t) = env.get(&full_name) {
+                    Ok(t.get_instance())
+                } else {
+                    Err(format!(
+                        "type in hexspace {}.{} not found in environment",
+                        hexspace, name
+                    ))
+                }
             }
             NodeMetaIdentifier::ByteString => {
-                Ok(TypeAnnotation::BuiltinType(BuiltinType { name: "ByStr".to_string(), symbol: "ByStr".to_string() }))
+                if let Some(t) = env.get("ByteString") {
+                    Ok(t.get_instance())
+                } else {
+                    Err(format!("type ByteString not found in environment"))
+                }
             }
         }
-        */
     }
 }
 
@@ -273,8 +304,6 @@ impl TypeInference for NodeTypeMapKey {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /* TODO:
         match self {
             NodeTypeMapKey::GenericMapKey(node_meta_identifier) => {
                 node_meta_identifier.get_type(env)
@@ -285,11 +314,8 @@ impl TypeInference for NodeTypeMapKey {
             NodeTypeMapKey::EnclosedAddressMapKeyType(node_address_type) => {
                 node_address_type.get_type(env)
             }
-            NodeTypeMapKey::AddressMapKeyType(node_address_type) => {
-                node_address_type.get_type(env)
-            }
+            NodeTypeMapKey::AddressMapKeyType(node_address_type) => node_address_type.get_type(env),
         }
-        */
     }
 }
 
@@ -298,14 +324,9 @@ impl TypeInference for NodeTypeMapValue {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /*
-        TODO:
         match self {
             NodeTypeMapValue::MapValueCustomType(meta_id) => meta_id.get_type(env),
-            NodeTypeMapValue::MapKeyValue(node_type_map_entry) => {
-                node_type_map_entry.get_type(env)
-            }
+            NodeTypeMapValue::MapKeyValue(node_type_map_entry) => node_type_map_entry.get_type(env),
             NodeTypeMapValue::MapValueParanthesizedType(node_type_map_value) => {
                 node_type_map_value.get_type(env)
             }
@@ -313,7 +334,26 @@ impl TypeInference for NodeTypeMapValue {
                 node_address_type.get_type(env)
             }
         }
-        */
+    }
+}
+
+impl TypeInference for NodeTypeMapEntry {
+    fn get_type(
+        &self,
+        env: &mut HashMap<String, Box<dyn BaseType>>,
+    ) -> Result<TypeAnnotation, String> {
+        let key_type = self.key.get_type(env)?;
+        let value_type = self.value.get_type(env)?;
+        // Handling type inference error
+        if key_type != value_type {
+            return Err(format!(
+                "Type Error: expected key and value to have the same type but got {:?} and {:?}",
+                key_type, value_type
+            ));
+        }
+
+        unimplemented!()
+        // TODO: Implement MapType Ok(TypeAnnotation::MapType(key_type))
     }
 }
 
@@ -322,8 +362,6 @@ impl TypeInference for NodeTypeArgument {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /* TODO:
         match self {
             NodeTypeArgument::EnclosedTypeArgument(node_type) => node_type.get_type(env),
             NodeTypeArgument::GenericTypeArgument(meta_id) => meta_id.get_type(env),
@@ -331,7 +369,10 @@ impl TypeInference for NodeTypeArgument {
                 if let Some(ty) = env.get(template) {
                     Ok(ty.get_instance())
                 } else {
-                    Err(format!("Template type `{}` not found in the environment", template))
+                    Err(format!(
+                        "Template type `{}` not found in the environment",
+                        template
+                    ))
                 }
             }
             NodeTypeArgument::AddressTypeArgument(node_addr_type) => node_addr_type.get_type(env),
@@ -349,7 +390,6 @@ impl TypeInference for NodeTypeArgument {
                 }))
             }
         }
-        */
     }
 }
 
@@ -358,10 +398,11 @@ impl TypeInference for NodeScillaType {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!()
-        /* TODO:
         match self {
-            NodeScillaType::GenericTypeWithArgs(meta_identifier, _type_args) => meta_identifier.get_type(env),
+            NodeScillaType::GenericTypeWithArgs(meta_identifier, _type_args) => {
+                // TODO: Check the how to handle meta_identifier and type_args to determine type
+                unimplemented!()
+            }
             NodeScillaType::MapType(map_key, map_value) => {
                 let key_type = map_key.get_type(env)?;
                 let value_type = map_value.get_type(env)?;
@@ -385,9 +426,11 @@ impl TypeInference for NodeScillaType {
             NodeScillaType::EnclosedType(inner_type) => inner_type.get_type(env),
             NodeScillaType::ScillaAddresseType(address_type) => address_type.get_type(env),
             NodeScillaType::PolyFunctionType(_param, return_type) => return_type.get_type(env),
-            NodeScillaType::TypeVarType(name) => env.get(name).cloned().ok_or_else(|| format!("Type variable not found in the environment: {}", name)),
+            NodeScillaType::TypeVarType(name) => {
+                // TODO: Check the how to handle this case to determine type
+                unimplemented!()
+            }
         }
-        */
     }
 }
 
@@ -417,49 +460,54 @@ impl TypeInference for NodeFullExpression {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!();
-        /* TODO:
-          match self {
-                NodeFullExpression::LocalVariableDeclaration {
-                    expression,
-                    containing_expression,
-                    ..
-                } => containing_expression.get_type(env),
-                NodeFullExpression::FunctionDeclaration {
-                    type_annotation,
-                    ..
-                } => Ok(type_annotation.get_instance()),
-                NodeFullExpression::FunctionCall {
-                    function_name,
-                    ..
-                } => function_name.get_type(env),
-                NodeFullExpression::ExpressionAtomic(node) => node.get_type(env),
-                NodeFullExpression::ExpressionBuiltin { b, .. } => b.get_type(env),
-                NodeFullExpression::Message(entries) => {
-                    if let Some(first_entry) = entries.first() {
-                        first_entry.get_type(env)
-                    } else {
-                        Err(String::from("No entries in NodeFullExpression::Message"))
-                    }
-                }
-                NodeFullExpression::Match {
-                    match_expression,
-                    ..
-                } => match_expression.get_type(env),
-                NodeFullExpression::ConstructorCall {
-                    identifier_name,
-                    ..
-                } => identifier_name.get_type(env),
-                NodeFullExpression::TemplateFunction {
-                    expression,
-                    ..
-                } => expression.get_type(env),
-                NodeFullExpression::TApp {
-                    identifier_name,
-                    ..
-                } => identifier_name.get_type(env),
+        match self {
+            NodeFullExpression::LocalVariableDeclaration {
+                identifier_name,
+                expression,
+                containing_expression,
+                ..
+            } => {
+                // Assuming the expression has a type annotation
+                let expr_type = expression.get_type(env)?;
+                // Adding the expression type to the environment
+                env.insert(identifier_name.clone(), Box::new(expr_type.clone()));
+                // Returning the containing expression type
+                containing_expression.get_type(env)
             }
-        */
+            NodeFullExpression::FunctionDeclaration {
+                identier_value, // TODO: Miss-spelled - search and replace
+                type_annotation,
+                ..
+            } => {
+                unimplemented!()
+                /*
+                TODO: Does not compile
+                // Adding the type of the function to environment
+                if let TypeAnnotation::FunType(fun_type) = &type_annotation.type_name {
+                    env.insert(identifier_value.clone(), Box::new(fun_type.get_instance()));
+                }
+                // Returning the type annotation of the declared function
+                if let Some(fun_type) = env.get(identifier_value) {
+                    Ok(fun_type.get_instance())
+                } else {
+                    Err(String::from("Function type not found in environment"))
+                }
+                */
+            }
+            NodeFullExpression::FunctionCall { function_name, .. } => {
+                // Use identifier to_string() to print the function name as string
+                let function_name_str = function_name.to_string();
+                // If function is in the environment, return the function type
+                if let Some(function_type) = env.get(&function_name_str) {
+                    Ok(function_type.get_instance())
+                } else {
+                    Err(String::from("Function not found in environment"))
+                }
+            }
+            _ => Err(String::from(
+                "No type inference available for this node variant",
+            )),
+        }
     }
 }
 
@@ -469,16 +517,12 @@ impl TypeInference for NodeMessageEntry {
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
         match self {
-            NodeMessageEntry::MessageLiteral(_, value_literal) => {
-                unimplemented!()
-                // TODO: value_literal.get_type(env)
-            }
+            NodeMessageEntry::MessageLiteral(_, value_literal) => value_literal.get_type(env),
             NodeMessageEntry::MessageVariable(_, var2_id) => var2_id.get_type(env),
         }
     }
 }
 
-// Type Inference implementation for NodePatternMatchExpressionClause
 impl TypeInference for NodePatternMatchExpressionClause {
     fn get_type(
         &self,
@@ -496,10 +540,7 @@ impl TypeInference for NodeAtomicExpression {
     ) -> Result<TypeAnnotation, String> {
         match self {
             NodeAtomicExpression::AtomicSid(node) => node.get_type(env),
-            NodeAtomicExpression::AtomicLit(node) => {
-                unimplemented!();
-                // TODO: node.get_type(env)
-            }
+            NodeAtomicExpression::AtomicLit(node) => node.get_type(env),
         }
     }
 }
@@ -525,10 +566,7 @@ impl TypeInference for NodeValueLiteral {
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
         match self {
-            NodeValueLiteral::LiteralInt(ty, _value) => {
-                unimplemented!();
-                //ty.get_type(env)
-            }
+            NodeValueLiteral::LiteralInt(ty, _value) => ty.get_type(env),
             NodeValueLiteral::LiteralHex(_value) => Ok(TypeAnnotation::BuiltinType(BuiltinType {
                 name: "Uint128".to_string(),
                 symbol: "Uint128".to_string(),
@@ -540,13 +578,17 @@ impl TypeInference for NodeValueLiteral {
                 }))
             }
             NodeValueLiteral::LiteralEmptyMap(key_ty, value_ty) => {
-                unimplemented!();
-                /*
                 let key_ty_annotation = key_ty.get_type(env)?;
                 let value_ty_annotation = value_ty.get_type(env)?;
-                let map_symbol = format!("Map ({} : {})", key_ty.to_string_with_indent(0), value_ty.to_string_with_indent(0));
-                Ok(TypeAnnotation::BuiltinType(BuiltinType { name: map_symbol.clone(), symbol: map_symbol }))
-                */
+                let map_symbol = format!(
+                    "Map ({} : {})",
+                    key_ty_annotation.to_string(),
+                    value_ty_annotation.to_string()
+                );
+                Ok(TypeAnnotation::BuiltinType(BuiltinType {
+                    name: map_symbol.clone(),
+                    symbol: map_symbol,
+                }))
             }
         }
     }
@@ -563,11 +605,22 @@ impl TypeInference for NodeMapAccess {
                 ref name,
                 ref symbol,
             }) if symbol == "Map" => {
-                unimplemented!();
+                // parse the name which should contain a tuple (key type, value type) for maps.
+                let value_type = name // gets &(key_type, value_type)
+                    .trim_start_matches('(') // Remove '(' , get key_type, value_type)
+                    .trim_end_matches(')') // Remove ')' , get key_type, value_type
+                    .split(',') // Split by comma, get [key_type, value_type]
+                    .map(|s| s.trim()) // Trim the spaces, get [key_type, value_type]
+                    .collect::<Vec<&str>>()
+                    .get(1) // Fetch the second element value_type
+                    .ok_or_else(|| String::from("Error while parsing map type."))?; // Return error if unable to fetch the value type.
+                                                                                    // Assuming that `value_type` is a perfectly matchable string, we fetch the type out of `env`
+                unimplemented!()
                 /*
-                // Assuming name contains a tuple (key type, value type) for maps.
-                let (_, value_type) = name; // You may need to update this part based on your map representation
-                Ok(value_type.clone())      // Return the value type for map access
+                TODO: this is not compiling
+                env.get(value_type)
+                   .ok_or_else(|| format!("Undefined type {}", value_type))
+                   .map(|bt| bt.get_instance())  // Return the value type for map access
                 */
             }
             _ => Err(format!(
@@ -592,13 +645,10 @@ impl TypeInference for NodePattern {
                 None => Err(format!("{} is not defined", b)),
             },
             NodePattern::Constructor(meta_id, arg_patterns) => {
-                unimplemented!();
-                /*
                 match env.get(&meta_id.to_string()) {
                     Some(t) => Ok(t.get_instance()),
-                    None => Err(format!("{:?} is not defined", meta_id),
+                    None => Err(format!("{:?} is not defined", meta_id.to_string())),
                 }
-                */
             }
         }
     }
@@ -630,8 +680,7 @@ impl TypeInference for NodePatternMatchClause {
     ) -> Result<TypeAnnotation, String> {
         // Since a pattern match clause doesn't have a concrete type, we return the type of its statement block
         if let Some(ref statement_block) = self.statement_block {
-            unimplemented!()
-            // statement_block.get_type(env)
+            statement_block.get_type(env)
         } else {
             Err(String::from(
                 "Empty statement block in pattern match clause",
@@ -673,11 +722,13 @@ impl TypeInference for NodeStatement {
             | MapUpdate {
                 right_hand_side, ..
             } => right_hand_side.get_type(env),
-            RemoteFetch(inner) => unimplemented!(), // inner.get_type(env),
+            RemoteFetch(_inner) => {
+                Err("Type inference for RemoteFetch is not supported".to_string())
+            }
             Bind {
                 right_hand_side, ..
             } => right_hand_side.get_type(env),
-            ReadFromBC { type_name, .. } => unimplemented!(), // type_name.get_type(env),
+            ReadFromBC { type_name, .. } => type_name.get_type(env),
             MapGet { .. }
             | MapGetExists { .. }
             | MapUpdateDelete { .. }
@@ -686,7 +737,7 @@ impl TypeInference for NodeStatement {
             | CreateEvnt { .. }
             | Throw { .. } => Err("Type inference for this statement is not supported".to_string()),
             MatchStmt { variable, .. } => variable.get_type(env),
-            CallProc { component_id, .. } => unimplemented!(), //component_id.get_type(env),
+            CallProc { .. } => Err("Type inference for CallProc is not supported".to_string()),
             Iterate {
                 identifier_name, ..
             } => identifier_name.get_type(env),
@@ -719,8 +770,7 @@ impl TypeInference for NodeComponentId {
     ) -> Result<TypeAnnotation, String> {
         match self {
             NodeComponentId::WithTypeLikeName(type_name_identifier) => {
-                unimplemented!();
-                // type_name_identifier.get_type(env)
+                type_name_identifier.get_type(env)
             }
             NodeComponentId::WithRegularId(id_string) => match env.get(id_string) {
                 Some(t) => Ok(t.get_instance()),
@@ -751,8 +801,8 @@ impl TypeInference for NodeParameterPair {
         &self,
         env: &mut HashMap<String, Box<dyn BaseType>>,
     ) -> Result<TypeAnnotation, String> {
-        unimplemented!()
-        // self.identifier_with_type.get_type(env)
+        // Delegating the type inference process to the identifier_with_type
+        self.identifier_with_type.get_type(env)
     }
 }
 
@@ -821,8 +871,7 @@ impl TypeInference for NodeProgram {
         // influence the type. However, for consistency reasons,
         // we can get the type of the contract definition
         // and return it as the type of the NodeProgram.
-        // self.contract_definition.get_type(env)
-        unimplemented!();
+        self.contract_definition.get_type(env)
     }
 }
 
@@ -961,233 +1010,5 @@ impl TypeInference for NodeProcedureDefinition {
             }
             Err(err) => Err(err),
         }
-    }
-}
-
-pub fn type_of_stmt(
-    stmt: &NodeStatement,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    unimplemented!()
-}
-
-pub fn type_of_variable_identifier(
-    identifier: &NodeVariableIdentifier,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    match identifier {
-        NodeVariableIdentifier::VariableName(name) => {
-            match env.get(name) {
-                Some(t) => Ok(t.get_instance()), // Return the type of the variable if found in the environment
-                None => Err(format!("{} is not defined", name)), // Return an error if the variable is not defined in the environment
-            }
-        }
-        // You may need to add more match patterns once you add more enums to NodeVariableIdentifier
-        _ => Err(String::from("Unsupported NodeVariableIdentifier variant")),
-    }
-}
-
-pub fn type_of_node_scilla_type(
-    scilla_type: &NodeScillaType,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    match scilla_type {
-        NodeScillaType::GenericTypeWithArgs(meta_identifier, type_arguments) => {
-            // TODO: Handle GenericTypeWithArgs
-            unimplemented!()
-        }
-        NodeScillaType::MapType(map_key, map_value) => {
-            // TODO: Handle MapType
-            unimplemented!()
-        }
-        NodeScillaType::FunctionType(from_type, to_type) => {
-            // TODO: Handle FunctionType
-            unimplemented!()
-        }
-        NodeScillaType::EnclosedType(enclosed_type) => {
-            // TODO: Handle EnclosedType
-            unimplemented!()
-        }
-        NodeScillaType::ScillaAddresseType(address_type) => {
-            // TODO: Handle ScillaAddresseType
-            unimplemented!()
-        }
-        NodeScillaType::PolyFunctionType(template_name, poly_function_type) => {
-            // TODO: Handle PolyFunctionType
-            unimplemented!()
-        }
-        NodeScillaType::TypeVarType(type_var_type) => {
-            // TODO: Handle TypeVarType
-            unimplemented!()
-        }
-    }
-}
-
-pub fn type_of_expression(
-    expr: &NodeFullExpression,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    match expr {
-        NodeFullExpression::LocalVariableDeclaration { .. } => {
-            unimplemented!()
-            // Handle the LocalVariableDeclaration case
-        }
-        NodeFullExpression::FunctionDeclaration { .. } => {
-            unimplemented!()
-            // Handle the FunctionDeclaration case
-        }
-        NodeFullExpression::FunctionCall { .. } => {
-            unimplemented!()
-            // Handle the FunctionCall case
-        }
-        // Add more cases for other variants of NodeFullExpression.
-        _ => unimplemented!(),
-    }
-}
-
-pub fn type_of_node_message_entry(
-    message_entry: &NodeMessageEntry,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    match message_entry {
-        NodeMessageEntry::MessageLiteral(variable_identifier, value_literal) => {
-            // Infer the types of the variable_identifier and value_literal.
-            // Check for compatibility of types and return the appropriate type.
-            unimplemented!()
-        }
-        NodeMessageEntry::MessageVariable(variable_identifier1, variable_identifier2) => {
-            // Infer the types of both variable_identifiers.
-            // Check for compatibility of types and return the appropriate type.
-            unimplemented!()
-        }
-    }
-}
-
-pub fn type_of_node_pattern(
-    pattern: &NodePattern,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    match pattern {
-        NodePattern::Wildcard => {
-            // Handle Wildcard pattern
-            unimplemented!()
-        }
-        NodePattern::Binder(ref binder) => {
-            // Handle Binder pattern
-            unimplemented!()
-        }
-        NodePattern::Constructor(ref constructor, ref arg_patterns) => {
-            // Handle Constructor pattern
-            unimplemented!()
-        }
-    }
-}
-
-pub fn type_of_node_statement(
-    stmt: &NodeStatement,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    match stmt {
-        NodeStatement::Accept => {
-            // Implement logic for the 'Accept' statement
-            unimplemented!()
-        }
-        NodeStatement::Send { identifier_name } => {
-            // Implement logic for the 'Send' statement using the variable identifier
-            let identifier_type = type_of_variable_identifier(identifier_name, env)?;
-            // Handle type checking or inference for the 'Send' statement here
-            unimplemented!()
-        }
-        NodeStatement::Load {
-            left_hand_side,
-            right_hand_side,
-        } => {
-            // Implement logic for the 'Load' statement
-            /*
-            TODO: Not working
-            let lhs_type = type_of_variable_identifier(left_hand_side, &env)?;
-            let rhs_type = type_of_variable_identifier(right_hand_side, &env)?;
-            if lhs_type != rhs_type {
-                return Err(format!("Type mismatch: {:?} != {:?}", lhs_type, rhs_type));
-            }
-            */
-            // Handle type checking or inference for the 'Load' statement here
-            unimplemented!()
-        }
-        _ => unimplemented!(), // Handle other statement types separately once you become comfortable with implementing the easier ones
-    }
-}
-
-pub fn type_check_func(func: &NodeProcedureDefinition) -> Result<FunType, String> {
-    // Create an environment mapping for argument names to their types
-
-    unimplemented!();
-}
-
-pub fn type_check_transition(
-    transition: &NodeTransitionDefinition,
-    global_env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<(), String> {
-    unimplemented!()
-}
-
-pub fn type_of(
-    expr: &dyn AnyKind,
-    env: &mut HashMap<String, Box<dyn BaseType>>,
-) -> Result<TypeAnnotation, String> {
-    let any = expr.to_any();
-    match any {
-        NodeAny::NodeByteStr(_) => unimplemented!(),
-        NodeAny::NodeTypeNameIdentifier(_) => unimplemented!(),
-        NodeAny::NodeImportedName(_) => unimplemented!(),
-        NodeAny::NodeImportDeclarations(_) => unimplemented!(),
-        NodeAny::NodeMetaIdentifier(_) => unimplemented!(),
-        NodeAny::NodeVariableIdentifier(v) => type_of_variable_identifier(v, env),
-        NodeAny::NodeBuiltinArguments(_) => unimplemented!(),
-        NodeAny::NodeTypeMapKey(_) => unimplemented!(),
-        NodeAny::NodeTypeMapValue(_) => unimplemented!(),
-        NodeAny::NodeTypeArgument(_) => unimplemented!(),
-        NodeAny::NodeScillaType(_) => unimplemented!(),
-        NodeAny::NodeTypeMapEntry(_) => unimplemented!(),
-
-        NodeAny::NodeAddressTypeField(_) => unimplemented!(),
-        NodeAny::NodeAddressType(_) => unimplemented!(),
-        NodeAny::NodeFullExpression(full_expr) => match full_expr {
-            NodeFullExpression::LocalVariableDeclaration { .. } => unimplemented!(),
-            NodeFullExpression::FunctionDeclaration { .. } => unimplemented!(),
-            // ... More cases for other variants of NodeFullExpression
-            _ => unimplemented!(),
-        },
-        NodeAny::NodeMessageEntry(_) => unimplemented!(),
-        NodeAny::NodePatternMatchExpressionClause(_) => unimplemented!(),
-        NodeAny::NodeAtomicExpression(_) => unimplemented!(),
-        NodeAny::NodeContractTypeArguments(_) => unimplemented!(),
-        NodeAny::NodeValueLiteral(_) => unimplemented!(),
-        NodeAny::NodeMapAccess(_) => unimplemented!(),
-        NodeAny::NodePattern(_) => unimplemented!(),
-        NodeAny::NodeArgumentPattern(_) => unimplemented!(),
-        NodeAny::NodePatternMatchClause(_) => unimplemented!(),
-        NodeAny::NodeBlockchainFetchArguments(_) => unimplemented!(),
-        NodeAny::NodeStatement(_) => unimplemented!(),
-        NodeAny::NodeRemoteFetchStatement(_) => unimplemented!(),
-        NodeAny::NodeComponentId(_) => unimplemented!(),
-        NodeAny::NodeComponentParameters(_) => unimplemented!(),
-        NodeAny::NodeParameterPair(_) => unimplemented!(),
-        NodeAny::NodeComponentBody(_) => unimplemented!(),
-        NodeAny::NodeStatementBlock(_) => unimplemented!(),
-        NodeAny::NodeTypedIdentifier(_) => unimplemented!(),
-        NodeAny::NodeTypeAnnotation(_) => unimplemented!(),
-        NodeAny::NodeProgram(_) => unimplemented!(),
-        NodeAny::NodeLibraryDefinition(_) => unimplemented!(),
-        NodeAny::NodeLibrarySingleDefinition(_) => unimplemented!(),
-        NodeAny::NodeContractDefinition(_) => unimplemented!(),
-        NodeAny::NodeContractField(_) => unimplemented!(),
-        NodeAny::NodeWithConstraint(_) => unimplemented!(),
-        NodeAny::NodeComponentDefinition(_) => unimplemented!(),
-        NodeAny::NodeProcedureDefinition(_) => unimplemented!(),
-        NodeAny::NodeTransitionDefinition(_) => unimplemented!(),
-        NodeAny::NodeTypeAlternativeClause(_) => unimplemented!(),
-        NodeAny::NodeTypeMapValueArguments(_) => unimplemented!(),
-        NodeAny::NodeTypeMapValueAllowingTypeArguments(_) => unimplemented!(),
     }
 }
