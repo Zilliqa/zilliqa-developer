@@ -1,16 +1,14 @@
 use crate::ast::*;
+use crate::constants::*;
 use crate::type_classes::*;
 use std::collections::HashMap;
 
 // Placeholder functions for the top-level type checking and inference
 pub trait TypeInference {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String>;
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String>;
 }
 
-struct Workspace {
+pub struct Workspace {
     pub env: HashMap<String, Box<dyn BaseType>>,
     pub namespace: String,
 }
@@ -28,16 +26,47 @@ impl Clone for Workspace {
     }
 }
 
+fn resolve_qualified_name(
+    workspace: &mut Workspace,
+    basename: &String,
+) -> Option<Box<dyn BaseType>> {
+    let mut namespaces = workspace
+        .namespace
+        .split(NAMESPACE_SEPARATOR)
+        .collect::<Vec<&str>>();
+    while !namespaces.is_empty() {
+        let full_name = format!(
+            "{}{}{}",
+            namespaces.join(NAMESPACE_SEPARATOR),
+            NAMESPACE_SEPARATOR,
+            basename
+        );
+        println!("Trying name {} {}", full_name, workspace.namespace);
+        if let Some(var) = workspace.env.get(&full_name) {
+            println!("Found name {} {}", full_name, workspace.namespace);
+            return Some((*var).clone_boxed());
+        }
+        // Remove the last level of the namespace
+        namespaces.pop();
+    }
+    // Try with just the basename, with no namespace
+    if let Some(var) = workspace.env.get(basename) {
+        println!("Found name {}", basename);
+        return Some((*var).clone_boxed());
+    }
+    // If nothing was found, return None
+    None
+}
+
 impl TypeInference for NodeVariableIdentifier {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeVariableIdentifier::VariableName(name) => match env.get(name) {
-                Some(t) => Ok(t.get_instance()),
-                None => Err(format!("{} is not defined", name)),
-            },
+            NodeVariableIdentifier::VariableName(name) => {
+                match resolve_qualified_name(workspace, &name) {
+                    Some(t) => Ok(t.get_instance()),
+                    None => Err(format!("{} is not defined", name)),
+                }
+            }
             NodeVariableIdentifier::SpecialIdentifier(id) => Err(format!(
                 "Type inference for SpecialIdentifier '{}' not supported",
                 id
@@ -52,10 +81,10 @@ impl TypeInference for NodeVariableIdentifier {
                     }
                     NodeTypeNameIdentifier::CustomType(s) => s.to_string(),
                 };
-                match env.get(&name) {
+                match resolve_qualified_name(workspace, &name) {
                     Some(t) => {
-                        let qualified_name = format!("{}.{}", name, var_name);
-                        match env.get(&qualified_name) {
+                        let qualified_name = format!("{}{}{}", name, NAMESPACE_SEPARATOR, var_name);
+                        match workspace.env.get(&qualified_name) {
                             Some(ty) => Ok(ty.get_instance()),
                             None => Err(format!("{} is not defined", qualified_name)),
                         }
@@ -68,10 +97,7 @@ impl TypeInference for NodeVariableIdentifier {
 }
 
 impl TypeInference for NodeTypeNameIdentifier {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeTypeNameIdentifier::ByteStringType(byte_str) => {
                 Ok(TypeAnnotation::BuiltinType(BuiltinType {
@@ -83,7 +109,8 @@ impl TypeInference for NodeTypeNameIdentifier {
                 name: "Event".to_string(),
                 symbol: "Event".to_string(),
             })),
-            NodeTypeNameIdentifier::CustomType(custom_type) => match env.get(custom_type) {
+            NodeTypeNameIdentifier::CustomType(custom_type) => match workspace.env.get(custom_type)
+            {
                 Some(t) => Ok(t.get_instance()),
                 None => Err(format!("{} is not defined", custom_type)),
             },
@@ -92,15 +119,12 @@ impl TypeInference for NodeTypeNameIdentifier {
 }
 
 impl TypeInference for NodeByteStr {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeByteStr::Constant(_) => Err(String::from(
                 "TypeInference not supported for NodeByteStr::Constant",
             )),
-            NodeByteStr::Type(t) => match env.get(t) {
+            NodeByteStr::Type(t) => match workspace.env.get(t) {
                 Some(p) => Ok(p.get_instance()),
                 None => Err(format!("Type {} is not defined", t)),
             },
@@ -109,37 +133,33 @@ impl TypeInference for NodeByteStr {
 }
 
 impl TypeInference for NodeTransitionDefinition {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         unimplemented!()
-        // TODO: Implement TypeInference for NodeComponentBody then self.body.get_type(env)
+        // TODO: Implement TypeInference for NodeComponentBody then self.body.get_type(workspace)
     }
 }
 
 impl TypeInference for NodeTypeAlternativeClause {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeTypeAlternativeClause::ClauseType(name) => match env.get(&name.to_string()) {
-                Some(t) => Ok(t.get_instance()),
-                None => Err(format!("{:?} is not defined", name)),
-            },
+            NodeTypeAlternativeClause::ClauseType(name) => {
+                match workspace.env.get(&name.to_string()) {
+                    Some(t) => Ok(t.get_instance()),
+                    None => Err(format!("{:?} is not defined", name)),
+                }
+            }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
                 unimplemented!()
                 /*
                 TODO: Deal with type arguments
-                match env.get(&name.to_string()) {
+                match workspace.env.get(&name.to_string()) {
                     Some(t) => {
                         let expected_arg_count = t.arg_types.len();
                         if expected_arg_count != args.len() {
                             return Err(format!("Expected {} arguments, found {}", expected_arg_count, args.len()));
                         }
                         for (expected_type, actual_node) in t.arg_types.iter().zip(args.iter()) {
-                            let actual_type = actual_node.get_type(env)?;
+                            let actual_type = actual_node.get_type(workspace)?;
                             if actual_type != *expected_type {
                                 return Err(format!("Expected type {:?}, found {:?}", expected_type, actual_type));
                             }
@@ -155,18 +175,15 @@ impl TypeInference for NodeTypeAlternativeClause {
 }
 
 impl TypeInference for NodeTypeMapValueArguments {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeTypeMapValueArguments::EnclosedTypeMapValue(node) => node.get_type(env),
+            NodeTypeMapValueArguments::EnclosedTypeMapValue(node) => node.get_type(workspace),
             NodeTypeMapValueArguments::GenericMapValueArgument(identifier) => {
-                identifier.get_type(env)
+                identifier.get_type(workspace)
             }
             NodeTypeMapValueArguments::MapKeyValueType(key, value) => {
-                let key_type = key.get_type(env)?;
-                let value_type = value.get_type(env)?;
+                let key_type = key.get_type(workspace)?;
+                let value_type = value.get_type(workspace)?;
                 Ok(TypeAnnotation::TemplateType(TemplateType {
                     name: format!("Map[{}, {}]", key_type.to_string(), value_type.to_string()),
                     symbol: "Map".to_string(),
@@ -177,20 +194,19 @@ impl TypeInference for NodeTypeMapValueArguments {
 }
 
 impl TypeInference for NodeTypeMapValueAllowingTypeArguments {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(node) => node.get_type(env),
+            NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(node) => {
+                node.get_type(workspace)
+            }
             NodeTypeMapValueAllowingTypeArguments::TypeMapValueWithArgs(identifier, args) => {
-                let id_type = identifier.get_type(env)?;
+                let id_type = identifier.get_type(workspace)?;
                 match id_type {
                     TypeAnnotation::TemplateType(template_type) => {
                         // Perform type inference for arguments
                         let arg_types = args
                             .iter()
-                            .map(|arg| arg.get_type(env))
+                            .map(|arg| arg.get_type(workspace))
                             .collect::<Result<Vec<TypeAnnotation>, String>>()
                             .map_err(|err| format!("Error in type arguments: {}", err))?;
                         // Do something with arg_types and template_type here.
@@ -209,26 +225,20 @@ impl TypeInference for NodeTypeMapValueAllowingTypeArguments {
 }
 
 impl TypeInference for NodeImportedName {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeImportedName::RegularImport(type_name_identifier) => {
-                type_name_identifier.get_type(env)
+                type_name_identifier.get_type(workspace)
             }
             NodeImportedName::AliasedImport(original_type_name, _alias_type_name) => {
-                original_type_name.get_type(env)
+                original_type_name.get_type(workspace)
             }
         }
     }
 }
 
 impl TypeInference for NodeImportDeclarations {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         // Since import declarations do not have an explicit type, we return an error.
         Err(String::from(
             "Import declarations do not have an associated type",
@@ -237,14 +247,11 @@ impl TypeInference for NodeImportDeclarations {
 }
 
 impl TypeInference for NodeMetaIdentifier {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeMetaIdentifier::MetaName(name) => {
                 if let NodeTypeNameIdentifier::CustomType(n) = name {
-                    if let Some(t) = env.get(n) {
+                    if let Some(t) = workspace.env.get(n) {
                         Ok(t.get_instance())
                     } else {
                         Err(format!("type {} not found in environment", n))
@@ -255,7 +262,7 @@ impl TypeInference for NodeMetaIdentifier {
             }
             NodeMetaIdentifier::MetaNameInNamespace(namespace, name) => {
                 let full_name = format!("{}.{}", namespace, name);
-                if let Some(t) = env.get(&full_name) {
+                if let Some(t) = workspace.env.get(&full_name) {
                     Ok(t.get_instance())
                 } else {
                     Err(format!(
@@ -266,7 +273,7 @@ impl TypeInference for NodeMetaIdentifier {
             }
             NodeMetaIdentifier::MetaNameInHexspace(hexspace, name) => {
                 let full_name = format!("{}::{}", hexspace, name);
-                if let Some(t) = env.get(&full_name) {
+                if let Some(t) = workspace.env.get(&full_name) {
                     Ok(t.get_instance())
                 } else {
                     Err(format!(
@@ -276,7 +283,7 @@ impl TypeInference for NodeMetaIdentifier {
                 }
             }
             NodeMetaIdentifier::ByteString => {
-                if let Some(t) = env.get("ByteString") {
+                if let Some(t) = workspace.env.get("ByteString") {
                     Ok(t.get_instance())
                 } else {
                     Err(format!("type ByteString not found in environment"))
@@ -287,12 +294,9 @@ impl TypeInference for NodeMetaIdentifier {
 }
 
 impl TypeInference for NodeBuiltinArguments {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         if let Some(first_arg) = self.arguments.first() {
-            first_arg.get_type(env)
+            first_arg.get_type(workspace)
         } else {
             Err(String::from("No arguments in NodeBuiltinArguments"))
         }
@@ -300,50 +304,45 @@ impl TypeInference for NodeBuiltinArguments {
 }
 
 impl TypeInference for NodeTypeMapKey {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeTypeMapKey::GenericMapKey(node_meta_identifier) => {
-                node_meta_identifier.get_type(env)
+                node_meta_identifier.get_type(workspace)
             }
             NodeTypeMapKey::EnclosedGenericId(node_meta_identifier) => {
-                node_meta_identifier.get_type(env)
+                node_meta_identifier.get_type(workspace)
             }
             NodeTypeMapKey::EnclosedAddressMapKeyType(node_address_type) => {
-                node_address_type.get_type(env)
+                node_address_type.get_type(workspace)
             }
-            NodeTypeMapKey::AddressMapKeyType(node_address_type) => node_address_type.get_type(env),
+            NodeTypeMapKey::AddressMapKeyType(node_address_type) => {
+                node_address_type.get_type(workspace)
+            }
         }
     }
 }
 
 impl TypeInference for NodeTypeMapValue {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeTypeMapValue::MapValueCustomType(meta_id) => meta_id.get_type(env),
-            NodeTypeMapValue::MapKeyValue(node_type_map_entry) => node_type_map_entry.get_type(env),
+            NodeTypeMapValue::MapValueCustomType(meta_id) => meta_id.get_type(workspace),
+            NodeTypeMapValue::MapKeyValue(node_type_map_entry) => {
+                node_type_map_entry.get_type(workspace)
+            }
             NodeTypeMapValue::MapValueParanthesizedType(node_type_map_value) => {
-                node_type_map_value.get_type(env)
+                node_type_map_value.get_type(workspace)
             }
             NodeTypeMapValue::MapValueAddressType(node_address_type) => {
-                node_address_type.get_type(env)
+                node_address_type.get_type(workspace)
             }
         }
     }
 }
 
 impl TypeInference for NodeTypeMapEntry {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
-        let key_type = self.key.get_type(env)?;
-        let value_type = self.value.get_type(env)?;
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
+        let key_type = self.key.get_type(workspace)?;
+        let value_type = self.value.get_type(workspace)?;
         // Handling type inference error
         if key_type != value_type {
             return Err(format!(
@@ -358,15 +357,12 @@ impl TypeInference for NodeTypeMapEntry {
 }
 
 impl TypeInference for NodeTypeArgument {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeTypeArgument::EnclosedTypeArgument(node_type) => node_type.get_type(env),
-            NodeTypeArgument::GenericTypeArgument(meta_id) => meta_id.get_type(env),
+            NodeTypeArgument::EnclosedTypeArgument(node_type) => node_type.get_type(workspace),
+            NodeTypeArgument::GenericTypeArgument(meta_id) => meta_id.get_type(workspace),
             NodeTypeArgument::TemplateTypeArgument(template) => {
-                if let Some(ty) = env.get(template) {
+                if let Some(ty) = workspace.env.get(template) {
                     Ok(ty.get_instance())
                 } else {
                     Err(format!(
@@ -375,10 +371,12 @@ impl TypeInference for NodeTypeArgument {
                     ))
                 }
             }
-            NodeTypeArgument::AddressTypeArgument(node_addr_type) => node_addr_type.get_type(env),
+            NodeTypeArgument::AddressTypeArgument(node_addr_type) => {
+                node_addr_type.get_type(workspace)
+            }
             NodeTypeArgument::MapTypeArgument(map_key, map_value) => {
-                let key_type = map_key.get_type(env)?;
-                let value_type = map_value.get_type(env)?;
+                let key_type = map_key.get_type(workspace)?;
+                let value_type = map_value.get_type(workspace)?;
                 Ok(TypeAnnotation::FunType(FunType {
                     template_types: vec![],
                     arg_types: vec![key_type, value_type],
@@ -394,18 +392,15 @@ impl TypeInference for NodeTypeArgument {
 }
 
 impl TypeInference for NodeScillaType {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeScillaType::GenericTypeWithArgs(meta_identifier, _type_args) => {
                 // TODO: Check the how to handle meta_identifier and type_args to determine type
                 unimplemented!()
             }
             NodeScillaType::MapType(map_key, map_value) => {
-                let key_type = map_key.get_type(env)?;
-                let value_type = map_value.get_type(env)?;
+                let key_type = map_key.get_type(workspace)?;
+                let value_type = map_value.get_type(workspace)?;
                 Ok(TypeAnnotation::FunType(FunType {
                     template_types: vec![],
                     arg_types: vec![key_type],
@@ -414,8 +409,8 @@ impl TypeInference for NodeScillaType {
                 }))
             }
             NodeScillaType::FunctionType(arg_type, return_type) => {
-                let arg_type = arg_type.get_type(env)?;
-                let return_type = return_type.get_type(env)?;
+                let arg_type = arg_type.get_type(workspace)?;
+                let return_type = return_type.get_type(workspace)?;
                 Ok(TypeAnnotation::FunType(FunType {
                     template_types: vec![],
                     arg_types: vec![arg_type],
@@ -423,9 +418,11 @@ impl TypeInference for NodeScillaType {
                     symbol: "->".to_string(),
                 }))
             }
-            NodeScillaType::EnclosedType(inner_type) => inner_type.get_type(env),
-            NodeScillaType::ScillaAddresseType(address_type) => address_type.get_type(env),
-            NodeScillaType::PolyFunctionType(_param, return_type) => return_type.get_type(env),
+            NodeScillaType::EnclosedType(inner_type) => inner_type.get_type(workspace),
+            NodeScillaType::ScillaAddresseType(address_type) => address_type.get_type(workspace),
+            NodeScillaType::PolyFunctionType(_param, return_type) => {
+                return_type.get_type(workspace)
+            }
             NodeScillaType::TypeVarType(name) => {
                 // TODO: Check the how to handle this case to determine type
                 unimplemented!()
@@ -435,31 +432,26 @@ impl TypeInference for NodeScillaType {
 }
 
 impl TypeInference for NodeAddressTypeField {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
-        self.type_name.get_type(env)
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
+        self.type_name.get_type(workspace)
     }
 }
 
 impl TypeInference for NodeAddressType {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self.type_name.as_str() {
             "" => Err(String::from("No type name in NodeAddressType")),
-            _ => Ok(env.get(self.type_name.as_str()).unwrap().get_instance()),
+            _ => Ok(workspace
+                .env
+                .get(self.type_name.as_str())
+                .unwrap()
+                .get_instance()),
         }
     }
 }
 
 impl TypeInference for NodeFullExpression {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeFullExpression::LocalVariableDeclaration {
                 identifier_name,
@@ -468,11 +460,13 @@ impl TypeInference for NodeFullExpression {
                 ..
             } => {
                 // Assuming the expression has a type annotation
-                let expr_type = expression.get_type(env)?;
+                let expr_type = expression.get_type(workspace)?;
                 // Adding the expression type to the environment
-                env.insert(identifier_name.clone(), Box::new(expr_type.clone()));
+                workspace
+                    .env
+                    .insert(identifier_name.clone(), Box::new(expr_type.clone()));
                 // Returning the containing expression type
-                containing_expression.get_type(env)
+                containing_expression.get_type(workspace)
             }
             NodeFullExpression::FunctionDeclaration {
                 identier_value, // TODO: Miss-spelled - search and replace
@@ -484,10 +478,10 @@ impl TypeInference for NodeFullExpression {
                 TODO: Does not compile
                 // Adding the type of the function to environment
                 if let TypeAnnotation::FunType(fun_type) = &type_annotation.type_name {
-                    env.insert(identifier_value.clone(), Box::new(fun_type.get_instance()));
+                    workspace.env.insert(identifier_value.clone(), Box::new(fun_type.get_instance()));
                 }
                 // Returning the type annotation of the declared function
-                if let Some(fun_type) = env.get(identifier_value) {
+                if let Some(fun_type) = workspace.env.get(identifier_value) {
                     Ok(fun_type.get_instance())
                 } else {
                     Err(String::from("Function type not found in environment"))
@@ -498,7 +492,7 @@ impl TypeInference for NodeFullExpression {
                 // Use identifier to_string() to print the function name as string
                 let function_name_str = function_name.to_string();
                 // If function is in the environment, return the function type
-                if let Some(function_type) = env.get(&function_name_str) {
+                if let Some(function_type) = workspace.env.get(&function_name_str) {
                     Ok(function_type.get_instance())
                 } else {
                     Err(String::from("Function not found in environment"))
@@ -512,46 +506,34 @@ impl TypeInference for NodeFullExpression {
 }
 
 impl TypeInference for NodeMessageEntry {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeMessageEntry::MessageLiteral(_, value_literal) => value_literal.get_type(env),
-            NodeMessageEntry::MessageVariable(_, var2_id) => var2_id.get_type(env),
+            NodeMessageEntry::MessageLiteral(_, value_literal) => value_literal.get_type(workspace),
+            NodeMessageEntry::MessageVariable(_, var2_id) => var2_id.get_type(workspace),
         }
     }
 }
 
 impl TypeInference for NodePatternMatchExpressionClause {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         // Get the type of the expression inside the pattern match clause
-        self.expression.get_type(env)
+        self.expression.get_type(workspace)
     }
 }
 
 impl TypeInference for NodeAtomicExpression {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeAtomicExpression::AtomicSid(node) => node.get_type(env),
-            NodeAtomicExpression::AtomicLit(node) => node.get_type(env),
+            NodeAtomicExpression::AtomicSid(node) => node.get_type(workspace),
+            NodeAtomicExpression::AtomicLit(node) => node.get_type(workspace),
         }
     }
 }
 
 impl TypeInference for NodeContractTypeArguments {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         if let Some(first_arg) = self.type_arguments.first() {
-            first_arg.get_type(env)
+            first_arg.get_type(workspace)
         } else {
             Err(String::from(
                 "No type arguments in NodeContractTypeArguments",
@@ -561,12 +543,9 @@ impl TypeInference for NodeContractTypeArguments {
 }
 
 impl TypeInference for NodeValueLiteral {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeValueLiteral::LiteralInt(ty, _value) => ty.get_type(env),
+            NodeValueLiteral::LiteralInt(ty, _value) => ty.get_type(workspace),
             NodeValueLiteral::LiteralHex(_value) => Ok(TypeAnnotation::BuiltinType(BuiltinType {
                 name: "Uint128".to_string(),
                 symbol: "Uint128".to_string(),
@@ -578,8 +557,8 @@ impl TypeInference for NodeValueLiteral {
                 }))
             }
             NodeValueLiteral::LiteralEmptyMap(key_ty, value_ty) => {
-                let key_ty_annotation = key_ty.get_type(env)?;
-                let value_ty_annotation = value_ty.get_type(env)?;
+                let key_ty_annotation = key_ty.get_type(workspace)?;
+                let value_ty_annotation = value_ty.get_type(workspace)?;
                 let map_symbol = format!(
                     "Map ({} : {})",
                     key_ty_annotation.to_string(),
@@ -595,11 +574,8 @@ impl TypeInference for NodeValueLiteral {
 }
 
 impl TypeInference for NodeMapAccess {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
-        let map_identifier_type = self.identifier_name.get_type(env)?;
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
+        let map_identifier_type = self.identifier_name.get_type(workspace)?;
         match map_identifier_type {
             TypeAnnotation::BuiltinType(BuiltinType {
                 ref name,
@@ -618,7 +594,7 @@ impl TypeInference for NodeMapAccess {
                 unimplemented!()
                 /*
                 TODO: this is not compiling
-                env.get(value_type)
+                workspace.env.get(value_type)
                    .ok_or_else(|| format!("Undefined type {}", value_type))
                    .map(|bt| bt.get_instance())  // Return the value type for map access
                 */
@@ -632,20 +608,17 @@ impl TypeInference for NodeMapAccess {
 }
 
 impl TypeInference for NodePattern {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodePattern::Wildcard => {
                 Err("Wildcard pattern _ does not have a specific type".to_string())
             }
-            NodePattern::Binder(b) => match env.get(b) {
+            NodePattern::Binder(b) => match workspace.env.get(b) {
                 Some(t) => Ok(t.get_instance()),
                 None => Err(format!("{} is not defined", b)),
             },
             NodePattern::Constructor(meta_id, arg_patterns) => {
-                match env.get(&meta_id.to_string()) {
+                match workspace.env.get(&meta_id.to_string()) {
                     Some(t) => Ok(t.get_instance()),
                     None => Err(format!("{:?} is not defined", meta_id.to_string())),
                 }
@@ -655,32 +628,28 @@ impl TypeInference for NodePattern {
 }
 
 impl TypeInference for NodeArgumentPattern {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeArgumentPattern::WildcardArgument => {
                 Err("Type inference for WildcardArgument not supported".to_string())
             }
-            NodeArgumentPattern::BinderArgument(binder) => match env.get(binder) {
+            NodeArgumentPattern::BinderArgument(binder) => match workspace.env.get(binder) {
                 Some(t) => Ok(t.get_instance()),
                 None => Err(format!("{} is not defined", binder)),
             },
-            NodeArgumentPattern::ConstructorArgument(constructor) => constructor.get_type(env),
-            NodeArgumentPattern::PatternArgument(pattern) => pattern.get_type(env),
+            NodeArgumentPattern::ConstructorArgument(constructor) => {
+                constructor.get_type(workspace)
+            }
+            NodeArgumentPattern::PatternArgument(pattern) => pattern.get_type(workspace),
         }
     }
 }
 
 impl TypeInference for NodePatternMatchClause {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         // Since a pattern match clause doesn't have a concrete type, we return the type of its statement block
         if let Some(ref statement_block) = self.statement_block {
-            statement_block.get_type(env)
+            statement_block.get_type(workspace)
         } else {
             Err(String::from(
                 "Empty statement block in pattern match clause",
@@ -691,12 +660,9 @@ impl TypeInference for NodePatternMatchClause {
 
 // Add this implementation to your `/src/type_inference.rs`
 impl TypeInference for NodeBlockchainFetchArguments {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         for argument in &self.arguments {
-            argument.get_type(env)?; // Return an error if argument type can't be inferred
+            argument.get_type(workspace)?; // Return an error if argument type can't be inferred
         }
         // Assuming the type of NodeBlockchainFetchArguments is always BuiltinType, replace with the correct type if necessary
         Ok(TypeAnnotation::BuiltinType(BuiltinType {
@@ -707,10 +673,7 @@ impl TypeInference for NodeBlockchainFetchArguments {
 }
 
 impl TypeInference for NodeStatement {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         use NodeStatement::*;
         match self {
             Load {
@@ -721,14 +684,14 @@ impl TypeInference for NodeStatement {
             }
             | MapUpdate {
                 right_hand_side, ..
-            } => right_hand_side.get_type(env),
+            } => right_hand_side.get_type(workspace),
             RemoteFetch(_inner) => {
                 Err("Type inference for RemoteFetch is not supported".to_string())
             }
             Bind {
                 right_hand_side, ..
-            } => right_hand_side.get_type(env),
-            ReadFromBC { type_name, .. } => type_name.get_type(env),
+            } => right_hand_side.get_type(workspace),
+            ReadFromBC { type_name, .. } => type_name.get_type(workspace),
             MapGet { .. }
             | MapGetExists { .. }
             | MapUpdateDelete { .. }
@@ -736,24 +699,21 @@ impl TypeInference for NodeStatement {
             | Send { .. }
             | CreateEvnt { .. }
             | Throw { .. } => Err("Type inference for this statement is not supported".to_string()),
-            MatchStmt { variable, .. } => variable.get_type(env),
+            MatchStmt { variable, .. } => variable.get_type(workspace),
             CallProc { .. } => Err("Type inference for CallProc is not supported".to_string()),
             Iterate {
                 identifier_name, ..
-            } => identifier_name.get_type(env),
+            } => identifier_name.get_type(workspace),
         }
     }
 }
 
 impl TypeInference for NodeRemoteFetchStatement {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeRemoteFetchStatement::ReadStateMutable(_, _, var_id)
             | NodeRemoteFetchStatement::ReadStateMutableCastAddress(_, var_id, _) => {
-                var_id.get_type(env)
+                var_id.get_type(workspace)
             }
             _ => Err(format!(
                 "Type inference for NodeRemoteFetchStatement {:?} is not supported.",
@@ -764,15 +724,12 @@ impl TypeInference for NodeRemoteFetchStatement {
 }
 
 impl TypeInference for NodeComponentId {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeComponentId::WithTypeLikeName(type_name_identifier) => {
-                type_name_identifier.get_type(env)
+                type_name_identifier.get_type(workspace)
             }
-            NodeComponentId::WithRegularId(id_string) => match env.get(id_string) {
+            NodeComponentId::WithRegularId(id_string) => match workspace.env.get(id_string) {
                 Some(t) => Ok(t.get_instance()),
                 None => Err(format!("{} is not defined", id_string)),
             },
@@ -781,10 +738,7 @@ impl TypeInference for NodeComponentId {
 }
 
 impl TypeInference for NodeComponentParameters {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         if let Some(ref type_annotation) = self.type_annotation {
             Ok(type_annotation.clone())
         } else {
@@ -797,20 +751,14 @@ impl TypeInference for NodeComponentParameters {
 }
 
 impl TypeInference for NodeParameterPair {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         // Delegating the type inference process to the identifier_with_type
-        self.identifier_with_type.get_type(env)
+        self.identifier_with_type.get_type(workspace)
     }
 }
 
 impl TypeInference for NodeComponentBody {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match &self.type_annotation {
             Some(type_ann) => Ok(type_ann.clone()),
             None => Err("Type annotation not found for NodeComponentBody".to_string()),
@@ -819,13 +767,10 @@ impl TypeInference for NodeComponentBody {
 }
 
 impl TypeInference for NodeStatementBlock {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         let mut last_type_annotation = None;
         for statement in &self.statements {
-            last_type_annotation = Some(statement.get_type(env)?);
+            last_type_annotation = Some(statement.get_type(workspace)?);
         }
         match last_type_annotation {
             Some(annotation) => Ok(annotation),
@@ -835,10 +780,7 @@ impl TypeInference for NodeStatementBlock {
 }
 
 impl TypeInference for NodeTypedIdentifier {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match &self.type_annotation {
             Some(ty) => Ok(ty.clone()),
             None => Err(format!(
@@ -850,36 +792,27 @@ impl TypeInference for NodeTypedIdentifier {
 }
 
 impl TypeInference for NodeTypeAnnotation {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match &self.type_annotation {
             Some(ty) => Ok(ty.clone()),
-            None => self.type_name.get_type(env),
+            None => self.type_name.get_type(workspace),
         }
     }
 }
 
 impl TypeInference for NodeProgram {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         // Type inference for NodeProgram is not very meaningful
         // since it contains many elements that may or may not
         // influence the type. However, for consistency reasons,
         // we can get the type of the contract definition
         // and return it as the type of the NodeProgram.
-        self.contract_definition.get_type(env)
+        self.contract_definition.get_type(workspace)
     }
 }
 
 impl TypeInference for NodeLibraryDefinition {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match &self.type_annotation {
             Some(t) => Ok(t.clone()),
             None => Err(format!("Type not defined for library {:?}", self.name)),
@@ -888,24 +821,22 @@ impl TypeInference for NodeLibraryDefinition {
 }
 
 impl TypeInference for NodeLibrarySingleDefinition {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeLibrarySingleDefinition::LetDefinition {
                 variable_name,
                 type_annotation: _,
                 expression,
-            } => expression.get_type(env),
+            } => expression.get_type(workspace),
             NodeLibrarySingleDefinition::TypeDefinition(type_name, opt_type_alternatives) => {
-                let constructed_type = type_name.get_type(env)?;
+                let constructed_type = type_name.get_type(workspace)?;
                 if let Some(type_alternatives) = opt_type_alternatives {
                     let types = type_alternatives
                         .iter()
-                        .map(|ta| ta.get_type(env))
+                        .map(|ta| ta.get_type(workspace))
                         .collect::<Result<Vec<_>, _>>()?;
                     Ok(TypeAnnotation::UnionType(UnionType {
+                        name: type_name.to_string(),
                         types,
                         symbol: constructed_type.to_string(),
                     }))
@@ -918,10 +849,7 @@ impl TypeInference for NodeLibrarySingleDefinition {
 }
 
 impl TypeInference for NodeContractDefinition {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self.type_annotation {
             Some(ref annotation) => Ok(annotation.clone()),
             None => Err(format!(
@@ -933,56 +861,43 @@ impl TypeInference for NodeContractDefinition {
 }
 
 impl TypeInference for NodeContractField {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match &self.type_annotation {
             Some(t) => Ok(t.clone()),
-            None => self.typed_identifier.get_type(env),
+            None => self.typed_identifier.get_type(workspace),
         }
     }
 }
 
 impl TypeInference for NodeWithConstraint {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
-        self.expression.get_type(env)
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
+        self.expression.get_type(workspace)
     }
 }
 
 impl TypeInference for NodeComponentDefinition {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeComponentDefinition::TransitionComponent(transition_def) => {
-                transition_def.get_type(env)
+                transition_def.get_type(workspace)
             }
             NodeComponentDefinition::ProcedureComponent(procedure_def) => {
-                procedure_def.get_type(env)
+                procedure_def.get_type(workspace)
             }
         }
     }
 }
 
 impl TypeInference for NodeProcedureDefinition {
-    fn get_type(
-        &self,
-        env: &mut HashMap<String, Box<dyn BaseType>>,
-    ) -> Result<TypeAnnotation, String> {
-        let mut local_env = env
-            .iter()
-            .map(|(k, v)| (k.clone(), v.as_ref().clone_boxed()))
-            .collect::<HashMap<String, Box<dyn BaseType>>>();
+    fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
+        let mut local_workspace = workspace.clone();
         for param_pair in &self.parameters.parameters {
             let identifier = &param_pair.identifier_with_type.identifier_name;
             let ty = &param_pair.identifier_with_type.type_annotation;
             if let Some(type_annotation) = ty {
-                local_env.insert(identifier.to_string(), Box::new(type_annotation.clone()));
+                local_workspace
+                    .env
+                    .insert(identifier.to_string(), Box::new(type_annotation.clone()));
             } else {
                 return Err(format!(
                     "Type annotation not found for parameter '{}'",
@@ -990,7 +905,7 @@ impl TypeInference for NodeProcedureDefinition {
                 ));
             }
         }
-        match self.body.get_type(&mut local_env) {
+        match self.body.get_type(&mut local_workspace) {
             Ok(_) => {
                 let return_type = TypeAnnotation::FunType(FunType {
                     template_types: vec![],

@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate lalrpop_util;
 pub mod ast;
+pub mod constants;
 pub mod formatter;
 pub mod lexer;
 pub mod type_classes;
 pub mod type_inference;
+
 lalrpop_mod!(pub parser);
 
 use crate::formatter::ScillaFormatter;

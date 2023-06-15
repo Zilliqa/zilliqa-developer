@@ -63,6 +63,7 @@ pub trait BaseType {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum TypeAnnotation {
+    Void,
     FunType(FunType),
     TypeVar(TypeVar),
     TemplateType(TemplateType),
@@ -76,6 +77,7 @@ pub enum TypeAnnotation {
 impl BaseType for TypeAnnotation {
     fn get_instance(&self) -> TypeAnnotation {
         match self {
+            TypeAnnotation::Void => TypeAnnotation::Void,
             TypeAnnotation::FunType(fun_type) => fun_type.get_instance(),
             TypeAnnotation::TypeVar(type_var) => type_var.get_instance(),
             TypeAnnotation::TemplateType(template_type) => template_type.get_instance(),
@@ -89,6 +91,7 @@ impl BaseType for TypeAnnotation {
 
     fn to_string(&self) -> String {
         match self {
+            TypeAnnotation::Void => "Void".to_string(),
             TypeAnnotation::FunType(fun_type) => fun_type.to_string(),
             TypeAnnotation::TypeVar(type_var) => type_var.to_string(),
             TypeAnnotation::TemplateType(template_type) => template_type.to_string(),
@@ -102,6 +105,7 @@ impl BaseType for TypeAnnotation {
 
     fn clone_boxed(&self) -> Box<dyn BaseType> {
         match self {
+            TypeAnnotation::Void => Box::new(TypeAnnotation::Void),
             TypeAnnotation::FunType(fun_type) => fun_type.clone_boxed(),
             TypeAnnotation::TypeVar(type_var) => type_var.clone_boxed(),
             TypeAnnotation::TemplateType(template_type) => template_type.clone_boxed(),
@@ -181,6 +185,7 @@ impl_base_type!(BuiltinType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct UnionType {
+    pub name: String,
     pub types: Vec<TypeAnnotation>,
     pub symbol: String,
     // pub meta_data: HashMap<String, String>,
@@ -190,6 +195,7 @@ impl_base_type!(UnionType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct StructType {
+    pub name: String,
     pub fields: Vec<(String, TypeAnnotation)>, // Fields in the struct
     pub symbol: String,
     // pub meta_data: HashMap<String, String>,
@@ -198,6 +204,7 @@ impl_base_type!(StructType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct MapType {
+    pub name: String,
     // TODO: Implement
     // pub key_type: Box<dyn BaseType>, // The type of keys in the Map
     // pub value_type: Box<dyn BaseType>, // The type of values in the Map

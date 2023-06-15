@@ -6,12 +6,24 @@ use bluebell::{
 mod tests {
     use super::*;
     use bluebell::ast::*;
+    use bluebell::constants::*;
+    use bluebell::lexer;
+    use bluebell::parser;
     use bluebell::type_classes::*;
     use bluebell::type_inference::*;
     use std::collections::HashMap;
+    macro_rules! get_ast {
+        ($parser:ty, $result:expr) => {{
+            let mut errors = vec![];
+            let ast = <$parser>::new().parse(&mut errors, lexer::Lexer::new($result));
+            match ast {
+                Ok(parsed_ast) => parsed_ast,
+                Err(err) => panic!("Parsing error: {:?}", err),
+            }
+        }};
+    }
 
-    #[test]
-    fn type_inference_variable_identifier_test() {
+    fn setup_workspace() -> Workspace {
         let mut workspace = Workspace {
             env: HashMap::new(),
             namespace: "".to_string(),
@@ -30,7 +42,16 @@ mod tests {
                 symbol: "MyCustomType".to_string(),
             }),
         );
-        // Insert VariableInNamespace type
+        workspace.env.insert(
+            "MyNamespace".to_string(),
+            Box::new(UnionType {
+                // TODO: Come up with namespace type
+                name: "myCustomType".to_string(),
+                types: [].to_vec(),
+                symbol: "myCustomType".to_string(),
+            }),
+        );
+
         workspace.env.insert(
             "MyNamespace::MyCustomType".to_string(),
             Box::new(TemplateType {
@@ -38,7 +59,128 @@ mod tests {
                 symbol: "MyNamespace::MyCustomType".to_string(),
             }),
         );
-        let ident = NodeVariableIdentifier::VariableName("MyCustomType".to_string());
+        workspace.env.insert(
+            "ByStr1".to_string(),
+            Box::new(BuiltinType {
+                name: "ByStr1".to_string(),
+                symbol: "ByStr1".to_string(),
+            }),
+        );
+        workspace.env.insert(
+            "Event".to_string(),
+            Box::new(BuiltinType {
+                name: "Event".to_string(),
+                symbol: "Event".to_string(),
+            }),
+        );
+        workspace
+    }
+
+    #[test]
+    fn type_inference_variable_identifier_test() {
+        let mut workspace = setup_workspace();
+
+        // Non-existant type
+        let ident = get_ast!(parser::VariableIdentifierParser, "nonExistent");
+        let result = ident.get_type(&mut workspace);
+        assert!(
+            result.is_err(),
+            "Expected an error when parsing non-existent type"
+        );
+
+        // Base type resolution
+        let ident = get_ast!(parser::VariableIdentifierParser, "myCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::UnionType(UnionType {
+                name: "myCustomType".to_string(),
+                types: [].to_vec(),
+                symbol: "myCustomType".to_string(),
+            }),
+        );
+
+        // Base type resolution
+        let ident = get_ast!(parser::VariableIdentifierParser, "MyNamespace.myCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "myCustomType".to_string(),
+                symbol: "MyNamespace::myCustomType".to_string()
+            }),
+        );
+
+        // Type in namespace
+        workspace.namespace = "MyNamespace".to_string();
+
+        let ident = get_ast!(parser::VariableIdentifierParser, "myCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "myCustomType".to_string(),
+                symbol: "MyNamespace::myCustomType".to_string()
+            })
+        )
+
+        // TODO: add more cases to cover the different scenarios
+    }
+
+    #[test]
+    fn type_inference_variable_in_namespace_test() {
+        let mut workspace = Workspace {
+            env: HashMap::new(),
+            namespace: "".to_string(),
+        };
+        workspace.env.insert(
+            "MyModule".to_string(),
+            Box::new(BuiltinType {
+                name: "MyModule".to_string(),
+                symbol: "MyModule".to_string(),
+            }),
+        );
+        workspace.env.insert(
+            "MyModule::myType".to_string(),
+            Box::new(TemplateType {
+                name: "myType".to_string(),
+                symbol: "MyModule::myType".to_string(),
+            }),
+        );
+        // Type resolution within module
+        let ident = get_ast!(parser::VariableIdentifierParser, "MyModule.myType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "myType".to_string(),
+                symbol: "MyModule::myType".to_string(),
+            }),
+        );
+        // Non-existent type within module
+        let ident = get_ast!(parser::VariableIdentifierParser, "NonexistentModule.myType");
+        assert!(ident.get_type(&mut workspace).is_err());
+    }
+
+    #[test]
+    fn type_inference_node_type_name_identifier_test() {
+        let mut workspace = setup_workspace();
+        // ByteStr type resolution
+        let ident = get_ast!(parser::TypeNameIdentifierParser, "ByStr1");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr".to_string(),
+                symbol: "ByStr".to_string()
+            })
+        );
+        // Event type resolution
+        let ident = get_ast!(parser::TypeNameIdentifierParser, "Event");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Event".to_string(),
+                symbol: "Event".to_string()
+            })
+        );
+        // Custom type resolution
+        let ident = get_ast!(parser::TypeNameIdentifierParser, "MyCustomType");
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
@@ -46,78 +188,19 @@ mod tests {
                 symbol: "MyCustomType".to_string()
             })
         );
-        let ident = NodeVariableIdentifier::VariableName("NonexistentType".to_string());
-        assert!(ident.get_type(&mut workspace).is_err());
-        // Test VariableInNamespace
-        let ident = NodeVariableIdentifier::VariableInNamespace(
-            NodeTypeNameIdentifier::CustomType(String::from("MyNamespace")),
-            "MyCustomType".to_string(),
-        );
-        /*
-        TODO: Fix this
+        // Type in namespace
+        workspace.namespace = "MyNamespace".to_string();
+        let ident = get_ast!(parser::TypeNameIdentifierParser, "MyCustomType");
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
+                name: "myCustomType".to_string(),
                 symbol: "MyNamespace::MyCustomType".to_string()
             })
         );
-        */
-    }
-
-    /*
-    TODO: Replace
-    #[test]
-    fn type_inference_variable_in_namespace_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-        workspace.env.insert("Module".to_string(), Box::new(CustomType { name: "Module".to_string(), symbol: "Module".to_string() }));
-        workspace.env.insert("Module.Type".to_string(), Box::new(CustomType { name: "Module.Type".to_string(), symbol: "Module.Type".to_string() }));
-        let ident = NodeVariableIdentifier::VariableInNamespace(
-            Box::new(NodeVariableIdentifier::VariableName("Module".to_string())),
-            "Type".to_string()
-        );
-        assert_eq!(
-            ident.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::CustomType(CustomType { name: "Module.Type".to_string(), symbol: "Module.Type".to_string() })
-        );
-        let ident = NodeVariableIdentifier::VariableInNamespace(
-            Box::new(NodeVariableIdentifier::VariableName("NonexistentModule".to_string())),
-            "Type".to_string()
-        );
+        // Nonexistent type
+        let ident = get_ast!(parser::TypeNameIdentifierParser, "NonexistentType");
         assert!(ident.get_type(&mut workspace).is_err());
-    }
-    */
-
-    #[test]
-    fn type_inference_node_type_name_identifier_test() {
-        /*
-          let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-            workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-            workspace.env.insert("MyCustomType".to_string(), Box::new(TemplateType { name: "MyCustomType".to_string(), symbol: "MyCustomType".to_string() }));
-            let ident = NodeTypeNameIdentifier::ByteStringType(NodeByteStr { byte_size: 1 });
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::BuiltinType(BuiltinType { name: "ByStr".to_string(), symbol: "ByStr".to_string() })
-            );
-            let ident = NodeTypeNameIdentifier::EventType;
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::BuiltinType(BuiltinType { name: "Event".to_string(), symbol: "Event".to_string() })
-            );
-            let ident = NodeTypeNameIdentifier::CustomType("MyCustomType".to_string());
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::TemplateType(TemplateType { name: "MyCustomType".to_string(), symbol: "MyCustomType".to_string() })
-            );
-            let ident = NodeTypeNameIdentifier::CustomType("NonexistentType".to_string());
-            assert!(ident.get_type(&mut workspace).is_err());
-        */
     }
 
     #[test]
@@ -127,19 +210,27 @@ mod tests {
             namespace: "".to_string(),
         };
         workspace.env.insert(
-            "String".to_string(),
+            "Int32".to_string(),
             Box::new(BuiltinType {
-                name: "String".to_string(),
-                symbol: "String".to_string(),
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
             }),
         );
         workspace.env.insert(
-            "ByStr20".to_string(),
+            "Uint128".to_string(),
             Box::new(BuiltinType {
-                name: "ByStr20".to_string(),
-                symbol: "ByStr20".to_string(),
+                name: "Uint128".to_string(),
+                symbol: "Uint128".to_string(),
             }),
         );
+        workspace.env.insert(
+            "Uint32".to_string(),
+            Box::new(BuiltinType {
+                name: "Uint32".to_string(),
+                symbol: "Uint32".to_string(),
+            }),
+        );
+        // Check for valid ByteStr type, ByStr20
         let byte_str = NodeByteStr::Type("ByStr20".to_string());
         assert_eq!(
             byte_str.get_type(&mut workspace).unwrap(),
@@ -148,42 +239,104 @@ mod tests {
                 symbol: "ByStr20".to_string()
             })
         );
+        // Check for valid integer type, Int32
+        let byte_str = NodeByteStr::Type("Int32".to_string());
+        assert_eq!(
+            byte_str.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string()
+            })
+        );
+        // Check for valid Unsigned type, Uint128
+        let byte_str = NodeByteStr::Type("Uint128".to_string());
+        assert_eq!(
+            byte_str.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Uint128".to_string(),
+                symbol: "Uint128".to_string()
+            })
+        );
+        // Check for valid unsigned type, Uint32
+        let byte_str = NodeByteStr::Type("Uint32".to_string());
+        assert_eq!(
+            byte_str.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Uint32".to_string(),
+                symbol: "Uint32".to_string()
+            })
+        );
+        // Check for non-existent type
         let byte_str = NodeByteStr::Type("NonexistentType".to_string());
         assert!(byte_str.get_type(&mut workspace).is_err());
-        let byte_str = NodeByteStr::Constant("0x1234".to_string());
-        assert!(byte_str.get_type(&mut workspace).is_err());
     }
 
-    /*
-      TODO:
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-        use crate::type_classes::{BuiltinType, TemplateType};
-        #[test]
-        fn type_inference_transition_definition_test() {
-            // Some workspace.environment initialization for the test. Please adjust accordingly.
-            let mut workspace = Workspace {
-                env: HashMap::new(),
-                namespace: "".to_string()
-            };
-            workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-            workspace.env.insert("MyCustomType".to_string(), Box::new(TemplateType { name: "MyCustomType".to_string(), symbol: "MyCustomType".to_string() }));
-            // Define a NodeTransitionDefinition object for the test.
-            // You need to create/parse this object using your AST representation.
-            let transition_definition: NodeTransitionDefinition = ...
-            // Get the type of the transition_definition
-            let type_annotation = transition_definition.get_type(&mut workspace).unwrap();
-            // Test the inferred type.
-            // This assertion depends on the correct types to check against based on the transition_definition.
-            assert_eq!(
-                type_annotation,
-                TypeAnnotation::...
-            );
+    #[test]
+    fn type_inference_transition_definition_test() {
+        // Some workspace initialization for the test. Please adjust accordingly.
+        let mut workspace = Workspace {
+            env: HashMap::new(),
+            namespace: "".to_string(),
+        };
+        workspace.env.insert(
+            "Int32".to_string(),
+            Box::new(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            }),
+        );
+        workspace.env.insert(
+            "Uint32".to_string(),
+            Box::new(BuiltinType {
+                name: "Uint32".to_string(),
+                symbol: "Uint32".to_string(),
+            }),
+        );
+        workspace.env.insert(
+            "Bool".to_string(),
+            Box::new(BuiltinType {
+                name: "Bool".to_string(),
+                symbol: "Bool".to_string(),
+            }),
+        );
+        // Define a NodeTransitionDefinition object for the test. The choice of transitions is
+        // arbitrary as long as it's a valid syntax.
+        let transition_definition = get_ast!(
+            parser::TransitionDefinitionParser,
+            "transition foo(x: Int32, y: Uint32) x := 12; y := 13 end"
+        );
+        // Check the transition name
+        if let NodeComponentId::WithRegularId(ref identifier_value) = transition_definition.name {
+            assert_eq!(identifier_value, "foo");
+        } else {
+            panic!("Expected regular identifier for transition name");
         }
+        // Check the transition parameters
+        assert_eq!(transition_definition.parameters.parameters.len(), 2);
+        let param_x = transition_definition.parameters.parameters.get(0).unwrap();
+        let param_y = transition_definition.parameters.parameters.get(1).unwrap();
+        // TODO: Check the types of the parameters
+        assert_eq!(param_x.identifier_with_type.identifier_name, "x");
+        assert_eq!(param_y.identifier_with_type.identifier_name, "y");
+        // Check the transition body
+        let statements = transition_definition
+            .body
+            .statement_block
+            .as_ref() // Create a reference to the Option, instead of consuming it
+            .unwrap()
+            .statements
+            .clone(); // Add clone here if `statements` type implements `Clone`
+                      // TODO: Check the types of the statements
+        assert_eq!(statements.len(), 2);
+        // You need to write assertion for each statement in the transition body to
+        // confirm they are correct. For simplicity, I'm just checking the count here.
+        // Get the type of the transition_definition. In Scilla, transitions have Void type.
+        let type_annotation = transition_definition.get_type(&mut workspace).unwrap();
+        // Test the inferred type.
+        assert_eq!(type_annotation, TypeAnnotation::Void,);
     }
-    */
 
+    // BOOK: Continue here!
     /*
     #[test]
     fn type_inference_alternative_clause_test() {
