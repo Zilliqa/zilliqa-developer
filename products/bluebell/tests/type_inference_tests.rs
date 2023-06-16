@@ -336,377 +336,553 @@ mod tests {
         assert_eq!(type_annotation, TypeAnnotation::Void,);
     }
 
-    // BOOK: Continue here!
-    /*
     #[test]
-    fn type_inference_alternative_clause_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-        workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-        workspace.env.insert("Int".to_string(), Box::new(BuiltinType { name: "Int".to_string(), symbol: "Int".to_string() }));
-        let clause_simple = NodeTypeAlternativeClause::ClauseType("String".to_string());
+    fn type_inference_alternative_clause_test_extended_with_get_ast() {
+        let mut workspace = setup_workspace();
+        // Valid type String
+        let clause_simple = get_ast!(parser::TypeAlternativeClauseParser, "| String");
         assert_eq!(
             clause_simple.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::BuiltinType(BuiltinType { name: "String".to_string(), symbol: "String".to_string() })
-        );
-        let clause_with_args = NodeTypeAlternativeClause::ClauseTypeWithArgs(
-            "String".to_string(),
-            vec![Box::new(NodeTypeNameIdentifier::EventType)]
-        );
-        assert!(clause_with_args.get_type(&mut workspace).is_err());
-    }
-    */
-
-    /*
-    // In type_inference_tests.rs
-    #[test]
-    fn type_inference_map_value_arguments_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-        workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-        workspace.env.insert("Int32".to_string(), Box::new(BuiltinType { name: "Int32".to_string(), symbol: "Int32".to_string() }));
-        let key = NodeTypeMapValueArguments::GenericMapValueArgument(NodeTypeNameIdentifier::ByteStringType("String".to_string()));
-        let value = NodeTypeMapValueArguments::GenericMapValueArgument(NodeTypeNameIdentifier::ByteStringType("Int32".to_string()));
-        let map_key_value_type = NodeTypeMapValueArguments::MapKeyValueType(Box::new(key), Box::new(value));
-        assert_eq!(
-            map_key_value_type.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::TemplateType(TemplateType {
-                name: "Map[String, Int32]".to_string(),
-                symbol: "Map".to_string(),
-            }),
-        );
-    }
-    */
-    /*
-    // type_inference_tests.rs
-    #[test]
-    fn type_inference_map_value_allow_type_args_test() {
-        // Set up workspace.environment with required types
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-        workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-        // Implement test logic for both NodeTypeMapValueAllowingTypeArguments variants
-    }
-    */
-
-    // Add this to `tests/type_inference_tests.rs`
-    #[test]
-    fn type_inference_imported_name_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string(),
-        };
-        workspace.env.insert(
-            "String".to_string(),
-            Box::new(BuiltinType {
-                name: "String".to_string(),
-                symbol: "String".to_string(),
-            }),
-        );
-        workspace.env.insert(
-            "MyCustomType".to_string(),
-            Box::new(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
-            }),
-        );
-        let ident = NodeImportedName::RegularImport(NodeTypeNameIdentifier::CustomType(
-            "MyCustomType".to_string(),
-        ));
-        assert_eq!(
-            ident.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
-            })
-        );
-        /*
-        TODO:
-        let ident = NodeImportedName::AliasedImport(
-            NodeTypeNameIdentifier::CustomType("String".to_string()),
-            "StringAlias".to_string(),
-        );
-        assert_eq!(
-            ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::BuiltinType(BuiltinType {
                 name: "String".to_string(),
                 symbol: "String".to_string(),
             })
         );
-        */
+        // Valid type ByStr20
+        let clause_bystr20 = get_ast!(parser::TypeAlternativeClauseParser, "| ByStr20");
+        assert_eq!(
+            clause_bystr20.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr20".to_string(),
+                symbol: "ByStr20".to_string(),
+            })
+        );
+        // Invalid type, the function returns an error
+        let clause_invalid = get_ast!(parser::TypeAlternativeClauseParser, "| InvalidType");
+        assert!(clause_invalid.get_type(&mut workspace).is_err());
     }
 
     #[test]
-    fn type_inference_import_declarations_error_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string(),
-        };
-        let node_import_declarations = NodeImportDeclarations {
-            import_list: Vec::new(),
-            type_annotation: None,
-        };
-        assert!(node_import_declarations.get_type(&mut workspace).is_err());
-    }
-
-    // In `tests/type_inference_tests.rs`:
-    #[test]
-    fn type_inference_meta_identifier_test() {
-        /*
-        TODO:
-          let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-            workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-            workspace.env.insert("Namespace".to_string(), Box::new(TemplateType { name: "Namespace".to_string(), symbol: "Namespace".to_string() }));
-            let ident = NodeMetaIdentifier::MetaName(NodeVariableIdentifier::VariableName("String".to_string()));
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::BuiltinType(BuiltinType { name: "String".to_string(), symbol: "String".to_string() })
-            );
-            let ident = NodeMetaIdentifier::MetaNameInNamespace(
-                Box::new(NodeVariableIdentifier::VariableName("Namespace".to_string())),
-                Box::new(NodeVariableIdentifier::VariableName("String".to_string()))
-            );
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::TemplateType(TemplateType { name: "Namespace.String".to_string(), symbol: "Namespace.String".to_string() })
-            );
-            let ident = NodeMetaIdentifier::MetaNameInHexspace("0x".to_string(), Box::new(NodeVariableIdentifier::VariableName("String".to_string())));
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::BuiltinType(BuiltinType { name: "String".to_string(), symbol: "String".to_string() })
-            );
-            let ident = NodeMetaIdentifier::ByteString;
-            assert_eq!(
-                ident.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::BuiltinType(BuiltinType { name: "ByStr".to_string(), symbol: "ByStr".to_string() })
-            );
-            */
-    }
-
-    #[test]
-    fn type_inference_builtin_arguments_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string(),
-        };
-        workspace.env.insert(
-            "String".to_string(),
-            Box::new(BuiltinType {
+    fn type_inference_map_value_arguments_test() {
+        let mut workspace = setup_workspace();
+        let mut map_key_value_type;
+        // Parse and evaluate an Int32 ByteStringType
+        let key = get_ast!(parser::TypeMapValueArgumentsParser, "Int32");
+        assert_eq!(
+            key.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string()
+            }),
+        );
+        // Parse and evaluate a String ByteStringType
+        let value = get_ast!(parser::TypeMapValueArgumentsParser, "String");
+        assert_eq!(
+            value.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
                 name: "String".to_string(),
                 symbol: "String".to_string(),
             }),
         );
-        workspace.env.insert(
-            "MyCustomType".to_string(),
-            Box::new(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+        // Parse and evaluate a Map with key-value pairs
+        map_key_value_type = get_ast!(parser::TypeMapValueArgumentsParser, "Map Int32 String");
+        assert_eq!(
+            map_key_value_type.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "Map[Int32, String]".to_string(),
+                symbol: "Map".to_string(),
             }),
         );
+        // Parse and evaluate a Map with Nested key-value pairs
+        map_key_value_type = get_ast!(
+            parser::TypeMapValueArgumentsParser,
+            "Map Int32 Map String String"
+        );
+        assert_eq!(
+            map_key_value_type.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "Map[Int32, Map[String, String]]".to_string(),
+                symbol: "Map".to_string(),
+            }),
+        );
+    }
+
+    /*
+        #[test]
+        fn type_inference_map_value_allow_type_args_test() {
+            // Set up workspace.environment with required types
+            let mut workspace = Workspace {
+                env: HashMap::new(),
+                namespace: "".to_string()
+            };
+            workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
+            // Implement test logic for both NodeTypeMapValueAllowingTypeArguments variants
+        }
+    */
+
+    #[test]
+    fn type_inference_imported_name_test() {
+        let mut workspace = setup_workspace();
+        // Test imported name for custom type
+        let ident = get_ast!(parser::ImportedNameParser, "MyCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "MyCustomType".to_string(),
+                symbol: "MyCustomType".to_string(),
+            })
+        );
+        // Test imported name for event type
+        let ident = get_ast!(parser::ImportedNameParser, "Event");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Event".to_string(),
+                symbol: "Event".to_string(),
+            })
+        );
+        // Test imported aliasing. Aliases can be used to rename imported types.
+        let ident = get_ast!(parser::ImportedNameParser, "Event as MyEventType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Event".to_string(),
+                symbol: "MyEventType".to_string(),
+            })
+        );
+        // Test imported name for a namespace type, as a namespace is also valid for importing.
+        let ident = get_ast!(parser::ImportedNameParser, "MyNamespace::MyCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "MyCustomType".to_string(),
+                symbol: "MyNamespace::MyCustomType".to_string(),
+            })
+        );
+    }
+
+    #[test]
+    fn type_inference_import_declarations_test() {
+        // we reference our workspace setup function from Attachment #1
+        let mut workspace = setup_workspace();
+        // scenario: we have valid import declarations in our code
+        let node_import_declaration_str = r#"
+    import MyCustomType
+    import MyNamespace.MyCustomType
+    "#;
+        // getting the relevant AST Node => NodeImportDeclarations
+        let node_import_declarations = get_ast!(
+            parser::ImportDeclarationsParser,
+            node_import_declaration_str
+        );
+        // this should be successful as we imported valid types
+        assert!(node_import_declarations.get_type(&mut workspace).is_ok());
+        // Check the imported types
+        assert!(workspace.env.contains_key("MyCustomType"));
+        assert!(workspace.env.contains_key("MyNamespace::MyCustomType"));
+        // scenario: we have invalid import declaration in our code
+        let node_import_declaration_str = r#"
+    import NonExistentType
+    "#;
+        // getting the relevant AST Node => NodeImportDeclarations
+        let node_import_declarations = get_ast!(
+            parser::ImportDeclarationsParser,
+            node_import_declaration_str
+        );
+        // this should fail because we are trying to import a non-existent type
+        assert!(node_import_declarations.get_type(&mut workspace).is_err());
+        // Check that the invalid import didn't get added to the symbol table
+        assert!(!workspace.env.contains_key("NonExistentType"));
+    }
+
+    #[test]
+    fn type_inference_meta_identifier_test() {
+        // Set up the workspace
+        let mut workspace = setup_workspace();
+        // Parsing and inferring type for a base type
+        let ident = get_ast!(parser::MetaIdentifierParser, "String");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "String".to_string(),
+                symbol: "String".to_string()
+            })
+        );
+        // Parsing and inferring type in a namespace
+        let ident = get_ast!(parser::MetaIdentifierParser, "MyNamespace::MyCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "MyCustomType".to_string(),
+                symbol: "MyNamespace::MyCustomType".to_string()
+            })
+        );
+        // Parsing and inferring type in a Hexspace
+        workspace.namespace = "MyNamespace".to_string(); // Ensuring we are in the right namespace
+        let ident = get_ast!(parser::MetaIdentifierParser, "0x1234.MyCustomType");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "MyCustomType".to_string(),
+                symbol: "0x1234.MyCustomType".to_string()
+            })
+        );
+        // Parsing and inferring ByteString type
+        let ident = get_ast!(parser::MetaIdentifierParser, "ByStr1");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr1".to_string(),
+                symbol: "ByStr1".to_string()
+            })
+        );
+    }
+
+    #[test]
+    fn type_inference_builtin_arguments_test() {
+        let mut workspace = setup_workspace();
+        // Test BuiltinType argument
         let node_builtin_arguments = NodeBuiltinArguments {
-            arguments: vec![
-                NodeVariableIdentifier::VariableName("String".to_string()),
-                NodeVariableIdentifier::VariableName("MyCustomType".to_string()),
-            ],
+            arguments: vec![NodeVariableIdentifier::VariableName("String".to_string())],
             type_annotation: None,
         };
         assert_eq!(
             node_builtin_arguments.get_type(&mut workspace).unwrap(),
             TypeAnnotation::BuiltinType(BuiltinType {
                 name: "String".to_string(),
-                symbol: "String".to_string()
+                symbol: "String".to_string(),
             })
         );
+        // Test TemplateType argument
+        let node_builtin_arguments = NodeBuiltinArguments {
+            arguments: vec![NodeVariableIdentifier::VariableName(
+                "MyCustomType".to_string(),
+            )],
+            type_annotation: None,
+        };
+        assert_eq!(
+            node_builtin_arguments.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "MyCustomType".to_string(),
+                symbol: "MyCustomType".to_string(),
+            })
+        );
+        // Test for invalid/empty arguments
         let empty_builtin_arguments = NodeBuiltinArguments {
             arguments: vec![],
             type_annotation: None,
         };
         assert!(empty_builtin_arguments.get_type(&mut workspace).is_err());
+        // Test for non-existant type
+        let ident = get_ast!(parser::VariableIdentifierParser, "nonExistentType");
+        let result = ident.get_type(&mut workspace);
+        assert!(
+            result.is_err(),
+            "Expected an error when parsing non-existent type"
+        );
+        // Test for the type ByStr1
+        let ident = get_ast!(parser::VariableIdentifierParser, "ByStr1");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr1".to_string(),
+                symbol: "ByStr1".to_string(),
+            })
+        );
+        // Test for Event type
+        let ident = get_ast!(parser::VariableIdentifierParser, "Event");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Event".to_string(),
+                symbol: "Event".to_string(),
+            })
+        );
     }
 
     #[test]
     fn type_inference_node_type_map_key_test() {
-        /*
-        TODO:
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-          workspace.env.insert("NodeMetaIdentifier".to_string(), Box::new(SomeTypeForNodeMetaIdentifier { /* fields */ }));
-          workspace.env.insert("NodeAddressType".to_string(), Box::new(SomeTypeForNodeAddressType { /* fields */ }));
-          // Prepare examples of NodeTypeMapKey here, for instance:
-          let node_type_map_key_generic = NodeTypeMapKey::GenericMapKey( /* instantiate NodeMetaIdentifier */ );
-          let node_type_map_key_enclosed_generic = NodeTypeMapKey::EnclosedGenericId( /* instantiate NodeMetaIdentifier */ );
-          let node_type_map_key_enclosed_address = NodeTypeMapKey::EnclosedAddressMapKeyType( /* instantiate NodeAddressType */ );
-          let node_type_map_key_address = NodeTypeMapKey::AddressMapKeyType( /* instantiate NodeAddressType */ );
-          // Assert the expected types for each example
-          assert_eq!(
-              node_type_map_key_generic.get_type(&mut workspace).unwrap(),
-              TypeAnnotation::SomeAnnotationForNodeMetaIdentifier
-          );
-          assert_eq!(
-              node_type_map_key_enclosed_generic.get_type(&mut workspace).unwrap(),
-              TypeAnnotation::SomeAnnotationForNodeMetaIdentifier
-          );
-          assert_eq!(
-              node_type_map_key_enclosed_address.get_type(&mut workspace).unwrap(),
-              TypeAnnotation::SomeAnnotationForNodeAddressType
-          );
-          assert_eq!(
-              node_type_map_key_address.get_type(&mut workspace).unwrap(),
-              TypeAnnotation::SomeAnnotationForNodeAddressType
-          );
-        */
+        let mut workspace = setup_workspace();
+        // NodeTypeNameIdentifier test
+        let ident = get_ast!(parser::TypeMapKeyParser, "Foo");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::EnumType(EnumType {
+                name: "Foo".to_string(),
+                values: [].to_vec(),
+                symbol: "Foo".to_string(),
+            }),
+        );
+        // NodeMetaIdentifier test
+        let ident = get_ast!(parser::TypeMapKeyParser, "(MyNamespace::MyCustomType)");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
+                name: "MyCustomType".to_string(),
+                symbol: "MyNamespace::MyCustomType".to_string(),
+            }),
+        );
+        // NodeAddressType test
+        let ident = get_ast!(parser::TypeMapKeyParser, "(ByStr1 with end)");
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr1".to_string(),
+                symbol: "ByStr1".to_string(),
+            }),
+        );
+        // Non-existant type
+        let ident = get_ast!(parser::TypeMapKeyParser, "nonExistent");
+        let result = ident.get_type(&mut workspace);
+        assert!(
+            result.is_err(),
+            "Expected an error when parsing non-existent type"
+        );
     }
 
     #[test]
     fn type_inference_node_type_map_value_test() {
-        // TODO: Implement
+        let mut workspace = setup_workspace();
+        // Parse a NodeTypeNameIdentifier
+        let typenameident = get_ast!(parser::TypeNameIdentifierParser, "Uint32");
+        let result = typenameident.get_type(&mut workspace);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Uint32".to_string(),
+                symbol: "Uint32".to_string(),
+            }),
+            "Expected BuiltinType with name and symbol 'Uint32'"
+        );
+        // Parse a NodeTypeMapKey
+        let mapkey = get_ast!(parser::TypeMapKeyParser, "GenericMapKey Uint32");
+        let result = mapkey.get_type(&mut workspace);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "GenericMapKey".to_string(),
+                symbol: "Uint32".to_string(),
+            }),
+            "Expected BuiltinType definition for a generic map key of type 'GenericMapKey'"
+        );
+        // Parse a NodeAddressType
+        let addresstype = get_ast!(parser::AddressTypeParser, "Address with end");
+        let result = addresstype.get_type(&mut workspace);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Address".to_string(),
+                symbol: "Address".to_string(),
+            }),
+            "Expected BuiltinType 'Address'"
+        );
+        // Parse a NodeTypeMapValue
+        let mapvalue = get_ast!(parser::TypeMapValueParser, "MapValueCustomType Uint32");
+        let result = mapvalue.get_type(&mut workspace);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "MapValueCustomType".to_string(),
+                symbol: "Uint32".to_string(),
+            }),
+            "Expected 'MapValueCustomType' for a map value of custom type 'Uint32'"
+        );
+        // TODO: add more cases to cover the different scenarios
     }
 
     #[test]
     fn type_inference_node_type_argument_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string(),
-        };
-        workspace.env.insert(
-            "String".to_string(),
-            Box::new(BuiltinType {
-                name: "String".to_string(),
-                symbol: "String".to_string(),
+        let mut workspace = setup_workspace();
+        // Test generic type argument
+        let node = get_ast!(parser::TypeArgumentParser, "Uint32");
+        let result = node.get_type(&mut workspace).ok().expect("Expected a type");
+        assert_eq!(
+            result,
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Uint32".to_string(),
+                symbol: "Uint32".to_string(),
             }),
         );
-        workspace.env.insert(
-            "MyCustomType".to_string(),
-            Box::new(TemplateType {
+        // Test generic custom type argument
+        let node = get_ast!(parser::TypeArgumentParser, "MyCustomType");
+        let result = node.get_type(&mut workspace).ok().expect("Expected a type");
+        assert_eq!(
+            result,
+            TypeAnnotation::TemplateType(TemplateType {
                 name: "MyCustomType".to_string(),
                 symbol: "MyCustomType".to_string(),
             }),
         );
-        let node_type_argument = NodeTypeArgument::TemplateTypeArgument("String".to_string());
+        // Test Map type argument
+        let node = get_ast!(parser::TypeArgumentParser, "Map Uint32 Bool");
+        let result = node.get_type(&mut workspace).ok().expect("Expected a type");
         assert_eq!(
-            node_type_argument.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::BuiltinType(BuiltinType {
-                name: "String".to_string(),
-                symbol: "String".to_string()
-            })
+            result,
+            TypeAnnotation::MapType(MapType {
+                name: "Map".to_string(),
+                // Note: This is a simplified representation and in a real context,
+                // your application should correctly match key and value types.
+                symbol: "Map<Uint32, Bool>".to_string(),
+            }),
         );
-        let node_type_argument = NodeTypeArgument::TemplateTypeArgument("MyCustomType".to_string());
+        // Test address type argument
+        let node = get_ast!(parser::TypeArgumentParser, "'A");
+        let result = node
+            .get_type(&mut workspace)
+            .expect_err("Expected an error");
+        // TODO: Not working assert!(matches!(result, ParsingError::UnknownTypeError(_)), "Expected unknown type error");
+        // Test variable argument
+        let node = get_ast!(parser::TypeArgumentParser, "'A");
+        let _ = workspace.env.insert(
+            "'A".to_string(),
+            Box::new(TypeVar {
+                instance: None,
+                symbol: "'A".to_string(),
+            }),
+        );
+        let result = node.get_type(&mut workspace).ok().expect("Expected a type");
         assert_eq!(
-            node_type_argument.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string()
-            })
+            result,
+            TypeAnnotation::TypeVar(TypeVar {
+                instance: None,
+                symbol: "'A".to_string(),
+            }),
         );
-        let node_type_argument = NodeTypeArgument::TemplateTypeArgument("UnknownType".to_string());
-        assert!(node_type_argument.get_type(&mut workspace).is_err());
+        // Add more test cases according to syntax of Scilla
     }
 
     #[test]
     fn type_inference_node_scilla_type_test() {
-        // TODO: Implement
-    }
-
-    #[test]
-    fn type_inference_address_type_field_test() {
-        /*
-        TODO:
-            let mut workspace = Workspace {
-                env: HashMap::new(),
-                namespace: "".to_string()
-            };
-            workspace.env.insert("String".to_string(), Box::new(BuiltinType { name: "String".to_string(), symbol: "String".to_string() }));
-            workspace.env.insert("MyCustomType".to_string(), Box::new(TemplateType { name: "MyCustomType".to_string(), symbol: "MyCustomType".to_string() }));
-            let node_address_type_field = NodeAddressTypeField {
-                identifier: NodeVariableIdentifier::VariableName("field_name".to_string()),
-                type_name: NodeVariableIdentifier::VariableName("String".to_string()),
-                type_annotation: None
-            };
-            assert_eq!(
-                node_address_type_field.get_type(&mut workspace).unwrap(),
-                TypeAnnotation::BuiltinType(BuiltinType { name: "String".to_string(), symbol: "String".to_string() })
-            );
-            */
-    }
-
-    #[test]
-    fn type_inference_address_type_test() {
-        let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string(),
-        };
-        workspace.env.insert(
-            "String".to_string(),
-            Box::new(BuiltinType {
+        let mut workspace = setup_workspace();
+        // Case1: A simple type, type should be inferred as itself.
+        let ident = get_ast!(parser::ScillaTypeParser, "String"); // replace with a valid expression
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
                 name: "String".to_string(),
                 symbol: "String".to_string(),
             }),
         );
-        workspace.env.insert(
-            "MyCustomType".to_string(),
-            Box::new(TemplateType {
+        // Case2: Test Custom type Type inference
+        let ident = get_ast!(parser::ScillaTypeParser, "MyCustomType"); // replace with a valid expression
+        assert_eq!(
+            ident.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::TemplateType(TemplateType {
                 name: "MyCustomType".to_string(),
                 symbol: "MyCustomType".to_string(),
             }),
         );
-        let node_address_type = NodeAddressType {
-            identifier: NodeTypeNameIdentifier::CustomType("addr".to_string()),
-            type_name: "MyCustomType".to_string(),
-            address_fields: vec![],
-            type_annotation: None,
-        };
+        // Case3: A variable not present in the workspace, type inference should fail.
+        let ident = get_ast!(parser::ScillaTypeParser, "nonExistent"); // replace with an expression resulting to undefined type
+        assert!(
+            ident.get_type(&mut workspace).is_err(),
+            "Expected an error when parsing non-existent type"
+        );
+        // Case4: Test namespace Type inference
+        let ident = get_ast!(parser::ScillaTypeParser, "MyNamespace.myCustomType"); // replace with a valid expression
+        let result = ident.get_type(&mut workspace);
         assert_eq!(
-            node_address_type.get_type(&mut workspace).unwrap(),
+            result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string()
+                name: "myCustomType".to_string(),
+                symbol: "MyNamespace::MyCustomType".to_string()
+            }),
+        );
+        // TODO: check that all cases are cover and add if not
+    }
+
+    #[test]
+    fn type_inference_address_type_field_test() {
+        // TODO: Implement
+    }
+
+    #[test]
+    fn type_inference_address_type_test() {
+        // Set up workspace
+        let mut workspace = setup_workspace();
+        // Test ByStr20 address type.
+        let address_type = get_ast!(parser::AddressTypeParser, "ByStr20 with end");
+        assert_eq!(
+            address_type.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr20".to_string(),
+                symbol: "ByStr20".to_string(),
             })
         );
-        let empty_type_name = NodeAddressType {
-            type_name: "".to_string(),
-            ..node_address_type
-        };
-        assert!(empty_type_name.get_type(&mut workspace).is_err());
+        // Test ByStr33 address type with library end.
+        let address_type = get_ast!(parser::AddressTypeParser, "ByStr33 with library end");
+        assert_eq!(
+            address_type.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr33".to_string(),
+                symbol: "ByStr33".to_string(),
+            })
+        );
+        // Test name in namespace e.g ByStr20 with contract end.
+        workspace.namespace = "MyNamespace".to_string();
+        let address_type = get_ast!(parser::AddressTypeParser, "ByStr20 with contract end");
+        assert_eq!(
+            address_type.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr20".to_string(),
+                symbol: "MyNamespace::ByStr20".to_string(),
+            })
+        );
+        // TODO: add more cases to cover the different scenarios
     }
 
     #[test]
     fn type_inference_message_entry_test() {
-        /*
-        TODO:
-          let mut workspace = Workspace {
-            env: HashMap::new(),
-            namespace: "".to_string()
-        };
-          workspace.env.insert("Int32".to_string(), Box::new(BuiltinType { name: "Int32".to_string(), symbol: "Int32".to_string() }));
-          workspace.env.insert("MyCustomType".to_string(), Box::new(TemplateType { name: "MyCustomType".to_string(), symbol: "MyCustomType".to_string() }));
-          let msg_literal = NodeMessageEntry::MessageLiteral(
-              NodeVariableIdentifier::VariableName("msg_id".to_string()),
-              NodeLiteral::IntegerLiteral(42),
-          );
-          assert_eq!(
-              msg_literal.get_type(&mut workspace).unwrap(),
-              TypeAnnotation::BuiltinType(BuiltinType { name: "Int32".to_string(), symbol: "Int32".to_string() })
-          );
-          let msg_variable = NodeMessageEntry::MessageVariable(
-              NodeVariableIdentifier::VariableName("msg_id".to_string()),
-              NodeVariableIdentifier::VariableName("MyCustomType".to_string()),
-          );
-          assert_eq!(
-              msg_variable.get_type(&mut workspace).unwrap(),
-              TypeAnnotation::TemplateType(TemplateType { name: "MyCustomType".to_string(), symbol: "MyCustomType".to_string() })
-          );
-        */
+        let mut workspace = setup_workspace();
+        // get mut reference to workspace
+        let w = &mut workspace;
+        // Parse NodeMessageEntry with a LiteraInt and check its type
+        let msg_entry = get_ast!(parser::MessageEntryParser, "tag: Integer 42");
+        let result = msg_entry.get_type(w);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            }),
+        );
+        // Parse NodeMessageEntry with a LiteralString and check its type
+        let msg_entry = get_ast!(parser::MessageEntryParser, "label: String \"String Test\"");
+        let result = msg_entry.get_type(w);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "String".to_string(),
+                symbol: "String".to_string(),
+            }),
+        );
+        // Parse NodeMessageEntry with a LiteralHex and check its type
+        let msg_entry = get_ast!(parser::MessageEntryParser, "hash: 0xABC123");
+        let result = msg_entry.get_type(w);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr20".to_string(),
+                symbol: "ByStr20".to_string(),
+            }),
+        );
+        // Parse NodeMessageEntry with a NodeVariableIdentifier and associated type
+        w.env.insert(
+            "testVar".to_string(),
+            Box::new(BuiltinType {
+                name: "ByStr20".to_string(),
+                symbol: "ByStr20".to_string(),
+            }),
+        );
+        let msg_entry = get_ast!(parser::MessageEntryParser, "id: testVar");
+        let result = msg_entry.get_type(w);
+        assert_eq!(
+            result.unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "ByStr20".to_string(),
+                symbol: "ByStr20".to_string(),
+            }),
+        );
     }
 
     #[test]
