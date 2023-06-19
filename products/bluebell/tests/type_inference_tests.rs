@@ -35,6 +35,7 @@ mod tests {
                 symbol: "String".to_string(),
             }),
         );
+
         workspace.env.insert(
             "MyCustomType".to_string(),
             Box::new(TemplateType {
@@ -46,9 +47,9 @@ mod tests {
             "MyNamespace".to_string(),
             Box::new(UnionType {
                 // TODO: Come up with namespace type
-                name: "myCustomType".to_string(),
+                name: "MyCustomType".to_string(),
                 types: [].to_vec(),
-                symbol: "myCustomType".to_string(),
+                symbol: "MyCustomType".to_string(),
             }),
         );
 
@@ -59,6 +60,31 @@ mod tests {
                 symbol: "MyNamespace::MyCustomType".to_string(),
             }),
         );
+
+        workspace.env.insert(
+            "myVariable".to_string(),
+            Box::new(TypeVar {
+                instance: None,
+                symbol: "Map<String, String>".to_string(),
+            }),
+        );
+        workspace.env.insert(
+            "MyNamespace".to_string(),
+            Box::new(NamespaceType {
+                // TODO: Come up with namespace type
+                name: "MyCustomType".to_string(),
+                symbol: "MyCustomType".to_string(),
+            }),
+        );
+
+        workspace.env.insert(
+            "MyNamespace::myVariable".to_string(),
+            Box::new(TypeVar {
+                instance: None,
+                symbol: "Int32".to_string(),
+            }),
+        );
+
         workspace.env.insert(
             "ByStr1".to_string(),
             Box::new(BuiltinType {
@@ -89,37 +115,36 @@ mod tests {
         );
 
         // Base type resolution
-        let ident = get_ast!(parser::VariableIdentifierParser, "myCustomType");
+        let ident = get_ast!(parser::VariableIdentifierParser, "myVariable");
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::UnionType(UnionType {
-                name: "myCustomType".to_string(),
-                types: [].to_vec(),
-                symbol: "myCustomType".to_string(),
+            TypeAnnotation::TypeVar(TypeVar {
+                instance: None,
+                symbol: "Map<String, String>".to_string()
             }),
         );
 
         // Base type resolution
-        let ident = get_ast!(parser::VariableIdentifierParser, "MyNamespace.myCustomType");
+        let ident = get_ast!(parser::VariableIdentifierParser, "MyNamespace.myVariable");
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
-                symbol: "MyNamespace::myCustomType".to_string()
+            TypeAnnotation::TypeVar(TypeVar {
+                instance: None,
+                symbol: "Int32".to_string()
             }),
         );
 
         // Type in namespace
         workspace.namespace = "MyNamespace".to_string();
 
-        let ident = get_ast!(parser::VariableIdentifierParser, "myCustomType");
+        let ident = get_ast!(parser::VariableIdentifierParser, "myVariable");
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
-            TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
-                symbol: "MyNamespace::myCustomType".to_string()
-            })
-        )
+            TypeAnnotation::TypeVar(TypeVar {
+                instance: None,
+                symbol: "Int32".to_string()
+            }),
+        );
 
         // TODO: add more cases to cover the different scenarios
     }
@@ -194,7 +219,7 @@ mod tests {
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
+                name: "MyCustomType".to_string(),
                 symbol: "MyNamespace::MyCustomType".to_string()
             })
         );
@@ -779,12 +804,12 @@ mod tests {
             "Expected an error when parsing non-existent type"
         );
         // Case4: Test namespace Type inference
-        let ident = get_ast!(parser::ScillaTypeParser, "MyNamespace.myCustomType"); // replace with a valid expression
+        let ident = get_ast!(parser::ScillaTypeParser, "MyNamespace.MyCustomType"); // replace with a valid expression
         let result = ident.get_type(&mut workspace);
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
+                name: "MyCustomType".to_string(),
                 symbol: "MyNamespace::MyCustomType".to_string()
             }),
         );
@@ -891,15 +916,15 @@ mod tests {
         // Testing pattern match on variable of union type
         let ident = get_ast!(
             parser::PatternMatchExpressionClauseParser,
-            "| myCustomType Foo => Uint32 42"
+            "| MyCustomType Foo => Uint32 42"
         );
         let result = ident.get_type(&mut workspace);
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::UnionType(UnionType {
-                name: "myCustomType".to_string(),
+                name: "MyCustomType".to_string(),
                 types: [].to_vec(),
-                symbol: "myCustomType".to_string(),
+                symbol: "MyCustomType".to_string(),
             })
         );
         // Testing pattern match on variable of builtin type
@@ -925,7 +950,7 @@ mod tests {
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
+                name: "MyCustomType".to_string(),
                 symbol: "MyNamespace::MyCustomType".to_string(),
             })
         );
@@ -1737,7 +1762,7 @@ mod tests {
         // existing type
         let field_ast = get_ast!(
             parser::ContractFieldParser,
-            "field myCustomType: MyNamespace::MyCustomType = MyNamespace::MyCustomType"
+            "field MyCustomType: MyNamespace::MyCustomType = MyNamespace::MyCustomType"
         );
         // Now we can get the type of this AST node
         let result = field_ast.get_type(&mut workspace);
@@ -1745,8 +1770,8 @@ mod tests {
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
-                symbol: "MyNamespace::myCustomType".to_string(),
+                name: "MyCustomType".to_string(),
+                symbol: "MyNamespace::MyCustomType".to_string(),
             }),
         );
         // Non-existant type
@@ -1803,14 +1828,14 @@ mod tests {
             "Expected a boolean type"
         );
         // Use of with variableIdentifier
-        let test_str = "with myCustomType =>";
+        let test_str = "with MyCustomType =>";
         let with_constraint = get_ast!(parser::WithConstraintParser, test_str);
         let result = with_constraint.get_type(&mut workspace).unwrap();
         assert_eq!(
             result,
             TypeAnnotation::TemplateType(TemplateType {
-                name: "myCustomType".to_string(),
-                symbol: "MyNamespace::myCustomType".to_string()
+                name: "MyCustomType".to_string(),
+                symbol: "MyNamespace::MyCustomType".to_string()
             }),
             "Expected a template type"
         );

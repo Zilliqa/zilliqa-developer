@@ -68,6 +68,7 @@ pub enum TypeAnnotation {
     TypeVar(TypeVar),
     TemplateType(TemplateType),
     BuiltinType(BuiltinType),
+    NamespaceType(NamespaceType),
     UnionType(UnionType),
     EnumType(EnumType),
     StructType(StructType),
@@ -82,6 +83,7 @@ impl BaseType for TypeAnnotation {
             TypeAnnotation::TypeVar(type_var) => type_var.get_instance(),
             TypeAnnotation::TemplateType(template_type) => template_type.get_instance(),
             TypeAnnotation::BuiltinType(builtin_type) => builtin_type.get_instance(),
+            TypeAnnotation::NamespaceType(namespace_type) => namespace_type.get_instance(),
             TypeAnnotation::UnionType(union_type) => union_type.get_instance(),
             TypeAnnotation::EnumType(enum_type) => enum_type.get_instance(),
             TypeAnnotation::StructType(struct_type) => struct_type.get_instance(),
@@ -96,6 +98,7 @@ impl BaseType for TypeAnnotation {
             TypeAnnotation::TypeVar(type_var) => type_var.to_string(),
             TypeAnnotation::TemplateType(template_type) => template_type.to_string(),
             TypeAnnotation::BuiltinType(builtin_type) => builtin_type.to_string(),
+            TypeAnnotation::NamespaceType(namespace_type) => namespace_type.to_string(),
             TypeAnnotation::UnionType(union_type) => union_type.to_string(),
             TypeAnnotation::EnumType(enum_type) => enum_type.to_string(),
             TypeAnnotation::StructType(struct_type) => struct_type.to_string(),
@@ -110,6 +113,7 @@ impl BaseType for TypeAnnotation {
             TypeAnnotation::TypeVar(type_var) => type_var.clone_boxed(),
             TypeAnnotation::TemplateType(template_type) => template_type.clone_boxed(),
             TypeAnnotation::BuiltinType(builtin_type) => builtin_type.clone_boxed(),
+            TypeAnnotation::NamespaceType(namespace_type) => namespace_type.clone_boxed(),
             TypeAnnotation::UnionType(union_type) => union_type.clone_boxed(),
             TypeAnnotation::EnumType(enum_type) => enum_type.clone_boxed(),
             TypeAnnotation::StructType(struct_type) => struct_type.clone_boxed(),
@@ -182,6 +186,15 @@ pub struct BuiltinType {
 }
 
 impl_base_type!(BuiltinType);
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
+pub struct NamespaceType {
+    pub name: String,
+    pub symbol: String,
+    // pub meta_data: HashMap<String, String>,
+}
+
+impl_base_type!(NamespaceType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct UnionType {
