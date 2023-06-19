@@ -37,6 +37,30 @@ mod tests {
         );
 
         workspace.env.insert(
+            "keyValueStore".to_string(),
+            Box::new(MapType {
+                name: "keyValueStore".to_string(),
+                symbol: "Map<String, Map<String, Int32>>".to_string(),
+                key_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                    name: "String".to_string(),
+                    symbol: "String".to_string(),
+                }))),
+                value_type: Some(Box::new(TypeAnnotation::MapType(MapType {
+                    name: "".to_string(),
+                    symbol: "Map<String, Int32>".to_string(),
+                    key_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                        name: "String".to_string(),
+                        symbol: "String".to_string(),
+                    }))),
+                    value_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                        name: "Int32".to_string(),
+                        symbol: "Int32".to_string(),
+                    }))),
+                }))),
+            }),
+        );
+
+        workspace.env.insert(
             "MyCustomType".to_string(),
             Box::new(TemplateType {
                 name: "MyCustomType".to_string(),
@@ -745,6 +769,8 @@ mod tests {
             result,
             TypeAnnotation::MapType(MapType {
                 name: "Map".to_string(),
+                key_type: None,
+                value_type: None,
                 // Note: This is a simplified representation and in a real context,
                 // your application should correctly match key and value types.
                 symbol: "Map<Uint32, Bool>".to_string(),
@@ -1010,7 +1036,9 @@ mod tests {
             empty_map.get_type(&mut workspace).unwrap(),
             TypeAnnotation::MapType(MapType {
                 name: "Emp".to_string(),
-                symbol: "Emp::String::Uint32".to_string()
+                symbol: "Emp::String::Uint32".to_string(),
+                key_type: None,
+                value_type: None,
             }),
         );
         // TODO: Add more cases to cover other Scilla literal types
@@ -1018,44 +1046,12 @@ mod tests {
 
     #[test]
     fn type_inference_node_map_access_test() {
-        let mut workspace = setup_workspace(); // call the setup_workspace function to set initial state
-                                               // a valid fragment of Scillia code for map_access could be of the form
-                                               // let _ = foo[bar]
-                                               // Start by generating two VariableIdentifiers (for "foo" and "bar")
-        let map_ident = get_ast!(parser::VariableIdentifierParser, "foo");
-        let key_ident = get_ast!(parser::VariableIdentifierParser, "bar");
-        // Then generate a NodeMapAccess AST node
-        let map_access = NodeMapAccess {
-            identifier_name: map_ident,
-            type_annotation: None,
-        };
-        // Add type information for "foo" and "bar" to the workspace
-        workspace.env.insert(
-            "foo".to_string(),
-            Box::new(MapType {
-                name: "MapType".to_string(),
-                symbol: "MapType".to_string(),
-            }),
-        );
-        workspace.env.insert(
-            "bar".to_string(),
-            Box::new(BuiltinType {
-                name: "Bar".to_string(),
-                symbol: "Bar".to_string(),
-            }),
-        );
-        // Assume some additional function called get_type that infers the type from the AST node and the workspace
-        let result = map_access.get_type(&mut workspace);
-        // Assertions for expected outcome of the get_type method, for example the expected type
-        assert_eq!(
-            result.unwrap(),
-            TypeAnnotation::MapType(MapType {
-                name: "MapType".to_string(),
-                // in this case, the value type would need to be inferred through separate test cases
-                // for now, a placeholder is used
-                // value_type: "Unknown".to_string(),
-                symbol: "MapType".to_string()
-            })
+        let mut workspace = setup_workspace();
+        let map_ident = get_ast!(parser::MapAccessParser, "[myVariable]");
+        let result = map_ident.get_type(&mut workspace);
+        assert!(
+            result.is_err(),
+            "Expected an error when since MapAccess does not have a type in its own right."
         );
     }
 
@@ -1225,55 +1221,105 @@ mod tests {
     }
 
     #[test]
-    fn type_inference_node_statement_test() {
+    fn type_inference_node_statement_map_get_test() {
         let mut workspace = setup_workspace();
-        // Case: Variable assignment
-        let assign = get_ast!(parser::StatementParser, "foo = Uint32 42");
-        let result = assign.get_type(&mut workspace);
+        assert!(!workspace.env.contains_key("value1"));
+        assert!(!workspace.env.contains_key("value2"));
+
+        let access_map = get_ast!(parser::StatementParser, "value1 <- keyValueStore[key]");
+
         assert_eq!(
-            result.unwrap(),
+            access_map.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::MapType(MapType {
+                name: "".to_string(),
+                symbol: "Map<String, Int32>".to_string(),
+                key_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                    name: "String".to_string(),
+                    symbol: "String".to_string(),
+                }))),
+                value_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                    name: "Int32".to_string(),
+                    symbol: "Int32".to_string(),
+                }))),
+            })
+        );
+        assert!(workspace.env.contains_key("value1"));
+        assert!(!workspace.env.contains_key("value2"));
+        assert_eq!(
+            workspace.env.get("value1").unwrap().get_instance(),
+            TypeAnnotation::MapType(MapType {
+                name: "".to_string(),
+                symbol: "Map<String, Int32>".to_string(),
+                key_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                    name: "String".to_string(),
+                    symbol: "String".to_string(),
+                }))),
+                value_type: Some(Box::new(TypeAnnotation::BuiltinType(BuiltinType {
+                    name: "Int32".to_string(),
+                    symbol: "Int32".to_string(),
+                }))),
+            })
+        );
+
+        let access_map = get_ast!(
+            parser::StatementParser,
+            "value2 <- keyValueStore[key][key2]"
+        );
+        assert_eq!(
+            access_map.get_type(&mut workspace).unwrap(),
             TypeAnnotation::BuiltinType(BuiltinType {
-                name: "Uint32".to_string(),
-                symbol: "Uint32".to_string(),
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
             })
         );
-        // Case: Function call
-        let func_call = get_ast!(parser::StatementParser, "myFunction arg1 arg2");
-        let result = func_call.get_type(&mut workspace);
-        // Assuming "myFunction" is not in the workspace
-        assert!(result.is_err(), "Expected an error for undefined function");
-        // Add function type to workspace for next test
-        workspace.env.insert(
-            "myFunction".to_string(),
-            Box::new(FunType {
-                template_types: vec![],
-                arg_types: vec![TypeAnnotation::Void, TypeAnnotation::Void], // substitute actual arg types
-                to_type: Box::new(TypeAnnotation::Void), // substitute actual return type
-                symbol: "myFunction".to_string(),
-            }),
-        );
-        let func_call = get_ast!(parser::StatementParser, "myFunction arg1 arg2");
-        let result = func_call.get_type(&mut workspace);
+        assert!(workspace.env.contains_key("value1"));
+        assert!(workspace.env.contains_key("value2"));
         assert_eq!(
-            result.unwrap(),
-            TypeAnnotation::FunType(FunType {
-                template_types: vec![],
-                arg_types: vec![TypeAnnotation::Void, TypeAnnotation::Void],
-                to_type: Box::new(TypeAnnotation::Void),
-                symbol: "myFunction".to_string(),
-            })
-        );
-        // Case: Event creation
-        let event_create = get_ast!(parser::StatementParser, "event foo");
-        let result = event_create.get_type(&mut workspace);
-        assert_eq!(
-            result.unwrap(),
+            workspace.env.get("value2").unwrap().get_instance(),
             TypeAnnotation::BuiltinType(BuiltinType {
-                name: "Event".to_string(),
-                symbol: "Event".to_string(),
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
             })
         );
-        // More cases should be added to cover all the constructs of Scilla.
+
+        return;
+    }
+
+    #[test]
+    fn type_inference_node_statement_accept_test() {
+        let mut workspace = setup_workspace();
+        let accept_stmt = get_ast!(parser::StatementParser, "accept");
+        assert_eq!(
+            accept_stmt.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::Void
+        );
+    }
+    #[test]
+    fn type_inference_node_statement_send_test() {
+        let mut workspace = setup_workspace();
+        let send_stmt = get_ast!(parser::StatementParser, "send msgs");
+        assert_eq!(
+            send_stmt.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::Void
+        );
+    }
+    #[test]
+    fn type_inference_node_statement_create_evnt_test() {
+        let mut workspace = setup_workspace();
+        let create_evnt_stmt = get_ast!(parser::StatementParser, "event e");
+        assert_eq!(
+            create_evnt_stmt.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::Void
+        );
+    }
+    #[test]
+    fn type_inference_node_statement_throw_test() {
+        let mut workspace = setup_workspace();
+        let throw_stmt = get_ast!(parser::StatementParser, "throw error");
+        assert_eq!(
+            throw_stmt.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::Void
+        );
     }
 
     #[test]
@@ -1430,7 +1476,9 @@ mod tests {
             component_body.get_type(&mut workspace).unwrap(),
             TypeAnnotation::MapType(MapType {
                 name: "MapType".to_string(),
-                symbol: "MapType".to_string()
+                symbol: "MapType".to_string(),
+                key_type: None,
+                value_type: None
             })
         );
         // Parsing a Message constructor
@@ -1592,6 +1640,8 @@ mod tests {
             TypeAnnotation::MapType(MapType {
                 name: "(Map ByStr32 Uint32)".to_string(),
                 symbol: "(Map ByStr32 Uint32)".to_string(),
+                key_type: None,
+                value_type: None
             }),
         );
         // TODO: Add more types to cover all possible type annotations
@@ -1797,7 +1847,9 @@ mod tests {
             result.unwrap(),
             TypeAnnotation::MapType(MapType {
                 name: "".to_string(),
-                symbol: "Map<ByStr20, Uint128>".to_string() // Provide your expected result
+                symbol: "Map<ByStr20, Uint128>".to_string(), // Provide your expected result
+                key_type: None,
+                value_type: None
             }),
         );
     }

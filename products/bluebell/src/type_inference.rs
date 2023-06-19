@@ -575,35 +575,9 @@ impl TypeInference for NodeValueLiteral {
 
 impl TypeInference for NodeMapAccess {
     fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
-        let map_identifier_type = self.identifier_name.get_type(workspace)?;
-        match map_identifier_type {
-            TypeAnnotation::BuiltinType(BuiltinType {
-                ref name,
-                ref symbol,
-            }) if symbol == "Map" => {
-                // parse the name which should contain a tuple (key type, value type) for maps.
-                let value_type = name // gets &(key_type, value_type)
-                    .trim_start_matches('(') // Remove '(' , get key_type, value_type)
-                    .trim_end_matches(')') // Remove ')' , get key_type, value_type
-                    .split(',') // Split by comma, get [key_type, value_type]
-                    .map(|s| s.trim()) // Trim the spaces, get [key_type, value_type]
-                    .collect::<Vec<&str>>()
-                    .get(1) // Fetch the second element value_type
-                    .ok_or_else(|| String::from("Error while parsing map type."))?; // Return error if unable to fetch the value type.
-                                                                                    // Assuming that `value_type` is a perfectly matchable string, we fetch the type out of `env`
-                unimplemented!()
-                /*
-                TODO: this is not compiling
-                workspace.env.get(value_type)
-                   .ok_or_else(|| format!("Undefined type {}", value_type))
-                   .map(|bt| bt.get_instance())  // Return the value type for map access
-                */
-            }
-            _ => Err(format!(
-                "Identifier should be of type Map, but found {:?}",
-                map_identifier_type
-            )),
-        }
+        Err(format!(
+                "Internal error: attempted to get type of MapAccess {:?}, but this object does not have a type in its own right.",
+                self))
     }
 }
 
@@ -672,19 +646,93 @@ impl TypeInference for NodeBlockchainFetchArguments {
     }
 }
 
+fn resolve_map_access_type(
+    workspace: &mut Workspace,
+    right_hand_type: TypeAnnotation,
+    left_hand_side: &String,
+    keys: &Vec<NodeMapAccess>,
+) -> Result<TypeAnnotation, String> {
+    let mut resolved_type = right_hand_type;
+
+    let mut map_type = match &resolved_type {
+        TypeAnnotation::MapType(value) => value.clone(),
+        _ => return Err(format!("Expected Map type, but found {:?}", &resolved_type)),
+    };
+
+    for (i, key) in keys.iter().enumerate() {
+        // TODO: Check key type against supplied key type
+        // TODO: Use type_of_key(key.identifier_name.to_string()); in the event of multimap
+        resolved_type = match &map_type.value_type {
+            Some(v) => Ok(v.get_instance()),
+            None => Err(format!("Map '{:?}; does not have a value.", map_type)),
+        }?;
+        if i != keys.len() - 1 {
+            map_type = match &resolved_type {
+                TypeAnnotation::MapType(value) => value.clone(),
+                _ => {
+                    return Err(format!(
+                        "Expected Map type '{:?}', but found {:?}",
+                        &map_type, &resolved_type
+                    ))
+                }
+            };
+        }
+    }
+
+    if workspace.env.contains_key(left_hand_side) {
+        Err(format!("'{}' already defined", left_hand_side))
+    } else {
+        // TODO: Qualify with namespace?
+        workspace
+            .env
+            .insert(left_hand_side.to_string(), Box::new(resolved_type.clone()));
+        Ok(resolved_type)
+    }
+}
+
 impl TypeInference for NodeStatement {
     fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         use NodeStatement::*;
         match self {
-            Load {
-                right_hand_side, ..
+            MapUpdate {
+                left_hand_side,
+                keys,
+                right_hand_side,
+            } => {
+                let resolved_type = right_hand_side.get_type(workspace)?;
+                resolve_map_access_type(workspace, resolved_type, left_hand_side, keys)
             }
-            | Store {
-                right_hand_side, ..
+            MapGetExists {
+                left_hand_side,
+                keys,
+                right_hand_side,
             }
-            | MapUpdate {
-                right_hand_side, ..
-            } => right_hand_side.get_type(workspace),
+            | MapGet {
+                left_hand_side,
+                keys,
+                right_hand_side,
+            } => {
+                let resolved_type = match workspace.env.get(right_hand_side) {
+                    Some(t) => Ok(t.get_instance()),
+                    None => Err(format!("'{}' is not defined", right_hand_side)),
+                }?;
+
+                resolve_map_access_type(workspace, resolved_type, left_hand_side, keys)
+            }
+            Accept | Send { .. } | CreateEvnt { .. } | Throw { .. } =>
+            // TODO: Consider whether it is needed to visit the children
+            {
+                Ok(TypeAnnotation::Void)
+            }
+
+            // TODO: Implement those below
+            MapUpdateDelete { .. } => {
+                unimplemented!()
+            }
+
+            Load { .. } | Store { .. } => {
+                unimplemented!()
+            }
             RemoteFetch(_inner) => {
                 Err("Type inference for RemoteFetch is not supported".to_string())
             }
@@ -692,13 +740,7 @@ impl TypeInference for NodeStatement {
                 right_hand_side, ..
             } => right_hand_side.get_type(workspace),
             ReadFromBC { type_name, .. } => type_name.get_type(workspace),
-            MapGet { .. }
-            | MapGetExists { .. }
-            | MapUpdateDelete { .. }
-            | Accept
-            | Send { .. }
-            | CreateEvnt { .. }
-            | Throw { .. } => Err("Type inference for this statement is not supported".to_string()),
+
             MatchStmt { variable, .. } => variable.get_type(workspace),
             CallProc { .. } => Err("Type inference for CallProc is not supported".to_string()),
             Iterate {

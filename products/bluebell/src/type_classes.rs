@@ -43,6 +43,7 @@ pub trait Typed {
     fn get_element_type(&self) -> Option<Box<dyn BaseType>>;
     fn get_arg_types(&self) -> Vec<Box<dyn BaseType>>;
 }
+
 pub trait SizedType {
     fn size_of(&self) -> Option<usize>;
 }
@@ -73,6 +74,10 @@ pub enum TypeAnnotation {
     EnumType(EnumType),
     StructType(StructType),
     MapType(MapType),
+}
+
+pub trait IsIndexable {
+    fn type_of_key(&self, key: String) -> TypeAnnotation;
 }
 
 impl BaseType for TypeAnnotation {
@@ -215,15 +220,88 @@ pub struct StructType {
 }
 impl_base_type!(StructType);
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct MapType {
     pub name: String,
     // TODO: Implement
-    // pub key_type: Box<dyn BaseType>, // The type of keys in the Map
-    // pub value_type: Box<dyn BaseType>, // The type of values in the Map
+    pub key_type: Option<Box<dyn BaseType>>,
+    pub value_type: Option<Box<dyn BaseType>>,
     pub symbol: String,
     // pub meta_data: HashMap<String, String>,
 }
+
+impl IsIndexable for MapType {
+    fn type_of_key(&self, key: String) -> TypeAnnotation {
+        TypeAnnotation::Void
+    }
+}
+
+impl fmt::Debug for MapType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MapType")
+            .field("name", &self.name)
+            .field(
+                "key_type",
+                &self
+                    .key_type
+                    .as_ref()
+                    .map_or("None".to_string(), |k| k.to_string()),
+            )
+            .field(
+                "value_type",
+                &self
+                    .value_type
+                    .as_ref()
+                    .map_or("None".to_string(), |v| v.to_string()),
+            )
+            .field("symbol", &self.symbol)
+            .finish()
+    }
+}
+
+impl PartialEq for MapType {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+            && match (&self.key_type, &other.key_type) {
+                (Some(a), Some(b)) => a.to_string() == b.to_string(), // TODO: Implement eq for BaseTyep
+                (None, None) => true,
+                _ => false,
+            }
+            && match (&self.value_type, &other.value_type) {
+                (Some(a), Some(b)) => a.to_string() == b.to_string(), // TODO: Implement eq for BaseTyep
+                (None, None) => true,
+                _ => false,
+            }
+            && self.symbol == other.symbol
+    }
+}
+impl Eq for MapType {}
+impl PartialOrd for MapType {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for MapType {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.name.cmp(&other.name)
+    }
+}
+impl Clone for MapType {
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name.clone(),
+            key_type: match &self.key_type {
+                Some(x) => Some(x.clone_boxed()),
+                None => None,
+            },
+            value_type: match &self.value_type {
+                Some(x) => Some(x.clone_boxed()),
+                None => None,
+            },
+            symbol: self.symbol.clone(),
+        }
+    }
+}
+
 impl_base_type!(MapType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
