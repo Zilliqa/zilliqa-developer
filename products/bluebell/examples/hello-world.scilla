@@ -1,0 +1,11 @@
+scilla_version 0
+
+contract HelloWorld()
+
+transition main ()
+  e = {_eventname : "log.info"; message: "Hello world!"};
+  event e;
+
+  e = {_eventname : "log.warn"; message: "-- SPACE INVADERS COMING --"};
+  event e
+end

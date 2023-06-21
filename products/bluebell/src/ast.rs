@@ -1,76 +1,11 @@
 use crate::type_classes::TypeAnnotation;
 use std::fmt;
 
-pub enum NodeAny<'a> {
-    NodeByteStr(&'a NodeByteStr),
-    NodeTypeNameIdentifier(&'a NodeTypeNameIdentifier),
-    NodeImportedName(&'a NodeImportedName),
-    NodeImportDeclarations(&'a NodeImportDeclarations),
-    NodeMetaIdentifier(&'a NodeMetaIdentifier),
-    NodeVariableIdentifier(&'a NodeVariableIdentifier),
-    NodeBuiltinArguments(&'a NodeBuiltinArguments),
-    NodeTypeMapKey(&'a NodeTypeMapKey),
-    NodeTypeMapValue(&'a NodeTypeMapValue),
-    NodeTypeArgument(&'a NodeTypeArgument),
-    NodeScillaType(&'a NodeScillaType),
-    NodeTypeMapEntry(&'a NodeTypeMapEntry),
-    NodeAddressTypeField(&'a NodeAddressTypeField),
-    NodeAddressType(&'a NodeAddressType),
-    NodeFullExpression(&'a NodeFullExpression),
-    NodeMessageEntry(&'a NodeMessageEntry),
-    NodePatternMatchExpressionClause(&'a NodePatternMatchExpressionClause),
-    NodeAtomicExpression(&'a NodeAtomicExpression),
-    NodeContractTypeArguments(&'a NodeContractTypeArguments),
-    NodeValueLiteral(&'a NodeValueLiteral),
-    NodeMapAccess(&'a NodeMapAccess),
-    NodePattern(&'a NodePattern),
-    NodeArgumentPattern(&'a NodeArgumentPattern),
-    NodePatternMatchClause(&'a NodePatternMatchClause),
-    NodeBlockchainFetchArguments(&'a NodeBlockchainFetchArguments),
-    NodeStatement(&'a NodeStatement),
-    NodeRemoteFetchStatement(&'a NodeRemoteFetchStatement),
-    NodeComponentId(&'a NodeComponentId),
-    NodeComponentParameters(&'a NodeComponentParameters),
-    NodeParameterPair(&'a NodeParameterPair),
-    NodeComponentBody(&'a NodeComponentBody),
-    NodeStatementBlock(&'a NodeStatementBlock),
-    NodeTypedIdentifier(&'a NodeTypedIdentifier),
-    NodeTypeAnnotation(&'a NodeTypeAnnotation),
-    NodeProgram(&'a NodeProgram),
-    NodeLibraryDefinition(&'a NodeLibraryDefinition),
-    NodeLibrarySingleDefinition(&'a NodeLibrarySingleDefinition),
-    NodeContractDefinition(&'a NodeContractDefinition),
-    NodeContractField(&'a NodeContractField),
-    NodeWithConstraint(&'a NodeWithConstraint),
-    NodeComponentDefinition(&'a NodeComponentDefinition),
-    NodeProcedureDefinition(&'a NodeProcedureDefinition),
-    NodeTransitionDefinition(&'a NodeTransitionDefinition),
-    NodeTypeAlternativeClause(&'a NodeTypeAlternativeClause),
-    NodeTypeMapValueArguments(&'a NodeTypeMapValueArguments),
-    NodeTypeMapValueAllowingTypeArguments(&'a NodeTypeMapValueAllowingTypeArguments),
-}
-
-pub trait AnyKind {
-    fn to_any<'a>(&'a self) -> NodeAny<'a>;
-}
-
-macro_rules! impl_any_kind {
-    ($type_name:ident) => {
-        impl AnyKind for $type_name {
-            fn to_any<'a>(&'a self) -> NodeAny<'a> {
-                NodeAny::$type_name(self)
-            }
-        }
-    };
-}
-
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeByteStr {
     Constant(String),
     Type(String),
 }
-
-impl_any_kind!(NodeByteStr);
 
 impl NodeByteStr {
     pub fn to_string(&self) -> String {
@@ -92,8 +27,6 @@ pub enum NodeTypeNameIdentifier {
     EventType,
     CustomType(String),
 }
-
-impl_any_kind!(NodeTypeNameIdentifier);
 
 impl NodeTypeNameIdentifier {
     pub fn to_string(&self) -> String {
@@ -119,14 +52,12 @@ pub enum NodeImportedName {
     RegularImport(NodeTypeNameIdentifier),
     AliasedImport(NodeTypeNameIdentifier, NodeTypeNameIdentifier),
 }
-impl_any_kind!(NodeImportedName);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeImportDeclarations {
     pub import_list: Vec<NodeImportedName>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeImportDeclarations);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeMetaIdentifier {
@@ -135,7 +66,6 @@ pub enum NodeMetaIdentifier {
     MetaNameInHexspace(String, NodeTypeNameIdentifier),
     ByteString,
 }
-impl_any_kind!(NodeMetaIdentifier);
 
 impl NodeMetaIdentifier {
     pub fn to_string(&self) -> String {
@@ -166,7 +96,6 @@ pub enum NodeVariableIdentifier {
     SpecialIdentifier(String),
     VariableInNamespace(NodeTypeNameIdentifier, String),
 }
-impl_any_kind!(NodeVariableIdentifier);
 
 impl NodeVariableIdentifier {
     pub fn to_string(&self) -> String {
@@ -191,7 +120,6 @@ pub struct NodeBuiltinArguments {
     pub arguments: Vec<NodeVariableIdentifier>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeBuiltinArguments);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapKey {
@@ -200,7 +128,6 @@ pub enum NodeTypeMapKey {
     EnclosedAddressMapKeyType(NodeAddressType),
     AddressMapKeyType(NodeAddressType),
 }
-impl_any_kind!(NodeTypeMapKey);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValue {
@@ -209,7 +136,6 @@ pub enum NodeTypeMapValue {
     MapValueParanthesizedType(Box<NodeTypeMapValueAllowingTypeArguments>),
     MapValueAddressType(Box<NodeAddressType>),
 }
-impl_any_kind!(NodeTypeMapValue);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeArgument {
@@ -219,7 +145,6 @@ pub enum NodeTypeArgument {
     AddressTypeArgument(NodeAddressType),
     MapTypeArgument(NodeTypeMapKey, NodeTypeMapValue),
 }
-impl_any_kind!(NodeTypeArgument);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeScillaType {
@@ -231,7 +156,6 @@ pub enum NodeScillaType {
     PolyFunctionType(String, Box<NodeScillaType>),
     TypeVarType(String),
 }
-impl_any_kind!(NodeScillaType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypeMapEntry {
@@ -239,7 +163,6 @@ pub struct NodeTypeMapEntry {
     pub value: NodeTypeMapValue,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeTypeMapEntry);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeAddressTypeField {
@@ -247,7 +170,6 @@ pub struct NodeAddressTypeField {
     pub type_name: NodeScillaType,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeAddressTypeField);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeAddressType {
@@ -256,7 +178,6 @@ pub struct NodeAddressType {
     pub address_fields: Vec<NodeAddressTypeField>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeAddressType);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeFullExpression {
@@ -300,14 +221,12 @@ pub enum NodeFullExpression {
         type_arguments: Vec<NodeTypeArgument>,
     },
 }
-impl_any_kind!(NodeFullExpression);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeMessageEntry {
     MessageLiteral(NodeVariableIdentifier, NodeValueLiteral),
     MessageVariable(NodeVariableIdentifier, NodeVariableIdentifier),
 }
-impl_any_kind!(NodeMessageEntry);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodePatternMatchExpressionClause {
@@ -315,21 +234,18 @@ pub struct NodePatternMatchExpressionClause {
     pub expression: NodeFullExpression,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodePatternMatchExpressionClause);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeAtomicExpression {
     AtomicSid(NodeVariableIdentifier),
     AtomicLit(NodeValueLiteral),
 }
-impl_any_kind!(NodeAtomicExpression);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractTypeArguments {
     pub type_arguments: Vec<NodeTypeArgument>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeContractTypeArguments);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeValueLiteral {
@@ -338,14 +254,12 @@ pub enum NodeValueLiteral {
     LiteralString(String),
     LiteralEmptyMap(NodeTypeMapKey, NodeTypeMapValue),
 }
-impl_any_kind!(NodeValueLiteral);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeMapAccess {
     pub identifier_name: NodeVariableIdentifier,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeMapAccess);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodePattern {
@@ -353,7 +267,6 @@ pub enum NodePattern {
     Binder(String),
     Constructor(NodeMetaIdentifier, Vec<NodeArgumentPattern>),
 }
-impl_any_kind!(NodePattern);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeArgumentPattern {
@@ -362,7 +275,6 @@ pub enum NodeArgumentPattern {
     ConstructorArgument(NodeMetaIdentifier),
     PatternArgument(Box<NodePattern>),
 }
-impl_any_kind!(NodeArgumentPattern);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodePatternMatchClause {
@@ -370,14 +282,12 @@ pub struct NodePatternMatchClause {
     pub statement_block: Option<NodeStatementBlock>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodePatternMatchClause);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeBlockchainFetchArguments {
     pub arguments: Vec<NodeVariableIdentifier>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeBlockchainFetchArguments);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeStatement {
@@ -441,7 +351,6 @@ pub enum NodeStatement {
         component_id: NodeComponentId,
     },
 }
-impl_any_kind!(NodeStatement);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeRemoteFetchStatement {
@@ -451,42 +360,36 @@ pub enum NodeRemoteFetchStatement {
     ReadStateMutableMapAccessExists(String, String, String, Vec<NodeMapAccess>),
     ReadStateMutableCastAddress(String, NodeVariableIdentifier, NodeAddressType),
 }
-impl_any_kind!(NodeRemoteFetchStatement);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeComponentId {
     WithTypeLikeName(NodeTypeNameIdentifier),
     WithRegularId(String),
 }
-impl_any_kind!(NodeComponentId);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeComponentParameters {
     pub parameters: Vec<NodeParameterPair>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeComponentParameters);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeParameterPair {
     pub identifier_with_type: NodeTypedIdentifier,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeParameterPair);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeComponentBody {
     pub statement_block: Option<NodeStatementBlock>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeComponentBody);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeStatementBlock {
     pub statements: Vec<NodeStatement>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeStatementBlock);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypedIdentifier {
@@ -494,14 +397,12 @@ pub struct NodeTypedIdentifier {
     pub annotation: NodeTypeAnnotation,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeTypedIdentifier);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypeAnnotation {
     pub type_name: NodeScillaType,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeTypeAnnotation);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeProgram {
@@ -511,7 +412,6 @@ pub struct NodeProgram {
     pub contract_definition: NodeContractDefinition,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeProgram);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeLibraryDefinition {
@@ -519,7 +419,6 @@ pub struct NodeLibraryDefinition {
     pub definitions: Vec<NodeLibrarySingleDefinition>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeLibraryDefinition);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeLibrarySingleDefinition {
@@ -533,7 +432,6 @@ pub enum NodeLibrarySingleDefinition {
         Option<Vec<NodeTypeAlternativeClause>>,
     ),
 }
-impl_any_kind!(NodeLibrarySingleDefinition);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractDefinition {
@@ -544,7 +442,6 @@ pub struct NodeContractDefinition {
     pub components: Vec<NodeComponentDefinition>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeContractDefinition);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractField {
@@ -552,21 +449,18 @@ pub struct NodeContractField {
     pub right_hand_side: NodeFullExpression,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeContractField);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeWithConstraint {
     pub expression: Box<NodeFullExpression>,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeWithConstraint);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeComponentDefinition {
     TransitionComponent(Box<NodeTransitionDefinition>),
     ProcedureComponent(Box<NodeProcedureDefinition>),
 }
-impl_any_kind!(NodeComponentDefinition);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeProcedureDefinition {
@@ -575,7 +469,6 @@ pub struct NodeProcedureDefinition {
     pub body: NodeComponentBody,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeProcedureDefinition);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTransitionDefinition {
@@ -584,14 +477,12 @@ pub struct NodeTransitionDefinition {
     pub body: NodeComponentBody,
     pub type_annotation: Option<TypeAnnotation>,
 }
-impl_any_kind!(NodeTransitionDefinition);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeAlternativeClause {
     ClauseType(NodeTypeNameIdentifier),
     ClauseTypeWithArgs(NodeTypeNameIdentifier, Vec<NodeTypeArgument>),
 }
-impl_any_kind!(NodeTypeAlternativeClause);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValueArguments {
@@ -599,11 +490,9 @@ pub enum NodeTypeMapValueArguments {
     GenericMapValueArgument(NodeMetaIdentifier),
     MapKeyValueType(NodeTypeMapKey, NodeTypeMapValue),
 }
-impl_any_kind!(NodeTypeMapValueArguments);
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValueAllowingTypeArguments {
     TypeMapValueNoArgs(NodeTypeMapValue),
     TypeMapValueWithArgs(NodeMetaIdentifier, Vec<NodeTypeMapValueArguments>),
 }
-impl_any_kind!(NodeTypeMapValueAllowingTypeArguments);

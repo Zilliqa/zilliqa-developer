@@ -646,6 +646,22 @@ impl TypeInference for NodeBlockchainFetchArguments {
     }
 }
 
+fn register_type_in_workspace(
+    workspace: &mut Workspace,
+    left_hand_side: &String,
+    resolved_type: TypeAnnotation,
+) -> Result<TypeAnnotation, String> {
+    if workspace.env.contains_key(left_hand_side) {
+        Err(format!("'{}' already defined", left_hand_side))
+    } else {
+        // TODO: Should include namespace?
+        workspace
+            .env
+            .insert(left_hand_side.to_string(), Box::new(resolved_type.clone()));
+        Ok(resolved_type)
+    }
+}
+
 fn resolve_map_access_type(
     workspace: &mut Workspace,
     right_hand_type: TypeAnnotation,
@@ -679,15 +695,8 @@ fn resolve_map_access_type(
         }
     }
 
-    if workspace.env.contains_key(left_hand_side) {
-        Err(format!("'{}' already defined", left_hand_side))
-    } else {
-        // TODO: Qualify with namespace?
-        workspace
-            .env
-            .insert(left_hand_side.to_string(), Box::new(resolved_type.clone()));
-        Ok(resolved_type)
-    }
+    // TODO: Possibly only register if this is a let expression
+    register_type_in_workspace(workspace, &left_hand_side, resolved_type)
 }
 
 impl TypeInference for NodeStatement {
@@ -719,20 +728,36 @@ impl TypeInference for NodeStatement {
 
                 resolve_map_access_type(workspace, resolved_type, left_hand_side, keys)
             }
-            Accept | Send { .. } | CreateEvnt { .. } | Throw { .. } =>
+            Accept | Send { .. } | CreateEvnt { .. } | Throw { .. } | MapUpdateDelete { .. } =>
             // TODO: Consider whether it is needed to visit the children
             {
                 Ok(TypeAnnotation::Void)
             }
 
-            // TODO: Implement those below
-            MapUpdateDelete { .. } => {
-                unimplemented!()
+            Load {
+                left_hand_side,
+                right_hand_side,
+            }
+            | Store {
+                left_hand_side,
+                right_hand_side,
+            } => {
+                let right_hand_side = right_hand_side.to_string();
+                println!(
+                    "Deucing load or store {} <- {}",
+                    left_hand_side, right_hand_side
+                );
+
+                let resolved_type = match workspace.env.get(&right_hand_side) {
+                    Some(t) => Ok(t.get_instance()),
+                    None => Err(format!("'{}' is not defined", right_hand_side)),
+                }?;
+
+                // TODO: Possibly only let expressions should register the type
+                register_type_in_workspace(workspace, &left_hand_side, resolved_type)
             }
 
-            Load { .. } | Store { .. } => {
-                unimplemented!()
-            }
+            // TODO: Implement those below
             RemoteFetch(_inner) => {
                 Err("Type inference for RemoteFetch is not supported".to_string())
             }

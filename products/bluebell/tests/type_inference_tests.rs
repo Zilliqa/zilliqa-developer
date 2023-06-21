@@ -1128,6 +1128,7 @@ mod tests {
             }),
             "Expected correct type from argument pattern."
         );
+
         // Test for constructor pattern
         let argument_pattern = get_ast!(parser::ArgumentPatternParser, "(Pair _foobar _barfoo)");
         let result = argument_pattern.get_type(&mut workspace);
@@ -1319,6 +1320,76 @@ mod tests {
         assert_eq!(
             throw_stmt.get_type(&mut workspace).unwrap(),
             TypeAnnotation::Void
+        );
+    }
+
+    #[test]
+    fn type_inference_node_statement_load_test() {
+        let mut workspace = setup_workspace();
+        // Define a Scilla Load statement to test
+        let load_statement = get_ast!(parser::StatementParser, "y <- x");
+        // Assert that x and y are initially not in the workspace
+        assert!(!workspace.env.contains_key("x"));
+        assert!(!workspace.env.contains_key("y"));
+        // Add x to the workspace as an Int32
+        workspace.env.insert(
+            "x".to_string(),
+            Box::new(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            }),
+        );
+        // Assert that the load statement works as expected
+        assert_eq!(
+            load_statement.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            })
+        );
+        // Assert that y has been added to the workspace as a result of the load statement
+        assert!(workspace.env.contains_key("y"));
+        assert_eq!(
+            workspace.env.get("y").unwrap().get_instance(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            })
+        );
+    }
+    #[test]
+    fn type_inference_node_statement_store_test() {
+        let mut workspace = setup_workspace();
+        // Define a Scilla Store statement to test
+        let store_statement = get_ast!(parser::StatementParser, "x := y");
+        // Assert that x is initially not in the workspace
+        assert!(!workspace.env.contains_key("x"));
+        assert!(!workspace.env.contains_key("y"));
+
+        // Assert that the store statement works as expected
+        workspace.env.insert(
+            "y".to_string(),
+            Box::new(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            }),
+        );
+        // Assert that the load statement works as expected
+        assert_eq!(
+            store_statement.get_type(&mut workspace).unwrap(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            })
+        );
+        // Assert that y has been added to the workspace as a result of the load statement
+        assert!(workspace.env.contains_key("x"));
+        assert_eq!(
+            workspace.env.get("x").unwrap().get_instance(),
+            TypeAnnotation::BuiltinType(BuiltinType {
+                name: "Int32".to_string(),
+                symbol: "Int32".to_string(),
+            })
         );
     }
 

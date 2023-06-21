@@ -1,11 +1,13 @@
 #[macro_use]
 extern crate lalrpop_util;
 pub mod ast;
+pub mod code_emitter;
 pub mod constants;
 pub mod formatter;
 pub mod lexer;
 pub mod type_classes;
 pub mod type_inference;
+pub mod visitor;
 
 lalrpop_mod!(pub parser);
 
