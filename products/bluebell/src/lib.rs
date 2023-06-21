@@ -5,6 +5,7 @@ pub mod code_emitter;
 pub mod constants;
 pub mod formatter;
 pub mod lexer;
+pub mod ng_formatter;
 pub mod type_classes;
 pub mod type_inference;
 pub mod visitor;

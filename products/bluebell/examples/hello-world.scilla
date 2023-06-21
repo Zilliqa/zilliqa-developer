@@ -1,6 +1,7 @@
 scilla_version 0
 
-contract HelloWorld()
+contract HelloWorld(x: Int32, y: ByStr32)
+(* field welcome_msg : String = "" *)
 
 transition main ()
   e = {_eventname : "log.info"; message: "Hello world!"};

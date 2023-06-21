@@ -5,6 +5,7 @@ use std::process;
 
 use bluebell::formatter::ScillaFormatter;
 use bluebell::lexer::Lexer;
+use bluebell::ng_formatter::ScillaCodeEmitter;
 use bluebell::ParserError;
 use bluebell::*;
 
@@ -28,6 +29,10 @@ fn main() {
             //let _inferred_types = infer_types(&ast).unwrap();
             let formatted_ast = ast.to_string(); // Call to_string on the top-level AST node to get formatted output
             println!("{}", formatted_ast);
+
+            let mut formatter = ScillaCodeEmitter::new();
+            let mut ast2 = ast.clone();
+            formatter.emit(&mut ast2);
         }
         Err(error) => {
             let message = format!("Syntax error {:?}", error);

@@ -2,11 +2,11 @@ use crate::ast::*;
 use crate::code_emitter::{CodeEmitter, TraversalResult, TreeTraversalMode};
 
 pub trait Visitor {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult;
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult;
 }
 
 impl Visitor for NodeByteStr {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_byte_str(TreeTraversalMode::Enter, self);
 
         // No children
@@ -20,7 +20,7 @@ impl Visitor for NodeByteStr {
 }
 
 impl Visitor for NodeTypeNameIdentifier {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_name_identifier(TreeTraversalMode::Enter, self);
 
         let children_ret = if ret == TraversalResult::Ok {
@@ -41,7 +41,7 @@ impl Visitor for NodeTypeNameIdentifier {
 }
 
 impl Visitor for NodeImportedName {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_imported_name(TreeTraversalMode::Enter, self);
 
         let children_ret = if ret == TraversalResult::Ok {
@@ -65,10 +65,10 @@ impl Visitor for NodeImportedName {
 }
 
 impl Visitor for NodeImportDeclarations {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_import_declarations(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
-            for import in &mut self.import_list {
+            for import in &self.import_list {
                 match import.visit(emitter) {
                     TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
                     _ => (),
@@ -87,7 +87,7 @@ impl Visitor for NodeImportDeclarations {
 }
 
 impl Visitor for NodeMetaIdentifier {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_meta_identifier(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -111,7 +111,7 @@ impl Visitor for NodeMetaIdentifier {
 }
 
 impl Visitor for NodeVariableIdentifier {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_variable_identifier(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -134,14 +134,14 @@ impl Visitor for NodeVariableIdentifier {
 }
 
 impl Visitor for NodeBuiltinArguments {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         // Call the code emitter at the entry of the NodeBuiltinArguments
         let ret = emitter.emit_builtin_arguments(TreeTraversalMode::Enter, self);
         // Call the visitor on all children of NodeBuiltinArguments if ret == TraversalResult::Ok
         let children_ret = if ret == TraversalResult::Ok {
             // Visit each of the arguments
             self.arguments
-                .iter_mut()
+                .iter()
                 .map(|argument| argument.visit(emitter))
                 .find(|r| *r == TraversalResult::Fail(String::from("Failure")))
                 .unwrap_or(TraversalResult::Ok)
@@ -158,7 +158,7 @@ impl Visitor for NodeBuiltinArguments {
 }
 
 impl Visitor for NodeTypeMapKey {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_map_key(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -183,7 +183,7 @@ impl Visitor for NodeTypeMapKey {
 }
 
 impl Visitor for NodeTypeMapValue {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_map_value(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -204,17 +204,15 @@ impl Visitor for NodeTypeMapValue {
 }
 
 impl Visitor for NodeTypeArgument {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_argument(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
-                NodeTypeArgument::EnclosedTypeArgument(ref mut node) => {
-                    node.as_mut().visit(emitter)
-                }
-                NodeTypeArgument::GenericTypeArgument(ref mut node) => node.visit(emitter),
+                NodeTypeArgument::EnclosedTypeArgument(node) => node.visit(emitter),
+                NodeTypeArgument::GenericTypeArgument(node) => node.visit(emitter),
                 NodeTypeArgument::TemplateTypeArgument(_) => TraversalResult::Ok,
-                NodeTypeArgument::AddressTypeArgument(ref mut node) => node.visit(emitter),
-                NodeTypeArgument::MapTypeArgument(ref mut key_node, ref mut value_node) => {
+                NodeTypeArgument::AddressTypeArgument(node) => node.visit(emitter),
+                NodeTypeArgument::MapTypeArgument(key_node, value_node) => {
                     match key_node.visit(emitter) {
                         TraversalResult::Ok => value_node.visit(emitter),
                         TraversalResult::Fail(msg) => TraversalResult::Fail(msg),
@@ -234,7 +232,7 @@ impl Visitor for NodeTypeArgument {
 }
 
 impl Visitor for NodeScillaType {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_scilla_type(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -260,7 +258,7 @@ impl Visitor for NodeScillaType {
                 },
                 NodeScillaType::PolyFunctionType(_, t) => t.visit(emitter),
                 NodeScillaType::EnclosedType(t) => t.visit(emitter),
-                NodeScillaType::ScillaAddresseType(t) => t.as_mut().visit(emitter),
+                NodeScillaType::ScillaAddresseType(t) => t.visit(emitter),
                 NodeScillaType::TypeVarType(_) => TraversalResult::Ok,
             }
         } else {
@@ -275,7 +273,7 @@ impl Visitor for NodeScillaType {
 }
 
 impl Visitor for NodeTypeMapEntry {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_map_entry(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self.key.visit(emitter) {
@@ -294,7 +292,7 @@ impl Visitor for NodeTypeMapEntry {
 }
 
 impl Visitor for NodeAddressTypeField {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_address_type_field(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self.identifier.visit(emitter) {
@@ -313,11 +311,11 @@ impl Visitor for NodeAddressTypeField {
 }
 
 impl Visitor for NodeAddressType {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_address_type(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             let mut ret = self.identifier.visit(emitter);
-            for field in &mut self.address_fields {
+            for field in &self.address_fields {
                 match ret {
                     TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
                     _ => ret = field.visit(emitter),
@@ -336,7 +334,7 @@ impl Visitor for NodeAddressType {
 }
 
 impl Visitor for NodeFullExpression {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_full_expression(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -442,7 +440,7 @@ impl Visitor for NodeFullExpression {
 }
 
 impl Visitor for NodeMessageEntry {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_message_entry(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -471,7 +469,7 @@ impl Visitor for NodeMessageEntry {
 }
 
 impl Visitor for NodePatternMatchExpressionClause {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_pattern_match_expression_clause(TreeTraversalMode::Enter, self);
         let pattern_ret = if ret == TraversalResult::Ok {
             self.pattern.visit(emitter)
@@ -494,7 +492,7 @@ impl Visitor for NodePatternMatchExpressionClause {
 }
 
 impl Visitor for NodeAtomicExpression {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_atomic_expression(TreeTraversalMode::Enter, self);
         // Only visit children if entering was successful and did not result in skipping
         let children_ret = if ret == TraversalResult::Ok {
@@ -514,11 +512,11 @@ impl Visitor for NodeAtomicExpression {
 }
 
 impl Visitor for NodeContractTypeArguments {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_contract_type_arguments(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             self.type_arguments
-                .iter_mut()
+                .iter()
                 .map(|child| child.visit(emitter))
                 .find(|result| *result == TraversalResult::Fail("".into()))
                 .unwrap_or(TraversalResult::Ok)
@@ -536,7 +534,7 @@ impl Visitor for NodeContractTypeArguments {
 }
 
 impl Visitor for NodeValueLiteral {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_value_literal(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -561,7 +559,7 @@ impl Visitor for NodeValueLiteral {
 }
 
 impl Visitor for NodeMapAccess {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_map_access(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             self.identifier_name.visit(emitter)
@@ -577,7 +575,7 @@ impl Visitor for NodeMapAccess {
 }
 
 impl Visitor for NodePattern {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_pattern(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -610,7 +608,7 @@ impl Visitor for NodePattern {
 }
 
 impl Visitor for NodeArgumentPattern {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_argument_pattern(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -633,13 +631,13 @@ impl Visitor for NodeArgumentPattern {
 }
 
 impl Visitor for NodePatternMatchClause {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_pattern_match_clause(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self.pattern_expression.visit(emitter) {
                 TraversalResult::Fail(msg) => TraversalResult::Fail(msg),
-                _ => match self.statement_block {
-                    Some(ref mut stmt_block) => stmt_block.visit(emitter),
+                _ => match &self.statement_block {
+                    Some(stmt_block) => stmt_block.visit(emitter),
                     None => TraversalResult::Ok,
                 },
             }
@@ -655,11 +653,11 @@ impl Visitor for NodePatternMatchClause {
 }
 
 impl Visitor for NodeBlockchainFetchArguments {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_blockchain_fetch_arguments(TreeTraversalMode::Enter, self);
         if let TraversalResult::Ok = ret {
             // Visit each argument
-            for arg in &mut self.arguments {
+            for arg in &self.arguments {
                 match arg.visit(emitter) {
                     TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
                     _ => {}
@@ -677,7 +675,7 @@ impl Visitor for NodeBlockchainFetchArguments {
 }
 
 impl Visitor for NodeStatement {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_statement(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -779,7 +777,7 @@ impl Visitor for NodeStatement {
 }
 
 impl Visitor for NodeRemoteFetchStatement {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_remote_fetch_statement(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -824,7 +822,7 @@ impl Visitor for NodeRemoteFetchStatement {
 }
 
 impl Visitor for NodeComponentId {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         // Emit enter event
         let ret = emitter.emit_component_id(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
@@ -847,10 +845,10 @@ impl Visitor for NodeComponentId {
 }
 
 impl Visitor for NodeComponentParameters {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_component_parameters(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
-            for param in &mut self.parameters {
+            for param in &self.parameters {
                 match param.visit(emitter) {
                     TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
                     _ => {}
@@ -869,7 +867,7 @@ impl Visitor for NodeComponentParameters {
 }
 
 impl Visitor for NodeParameterPair {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_parameter_pair(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             self.identifier_with_type.visit(emitter)
@@ -885,10 +883,10 @@ impl Visitor for NodeParameterPair {
 }
 
 impl Visitor for NodeComponentBody {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_component_body(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
-            if let Some(statement_block) = &mut self.statement_block {
+            if let Some(statement_block) = &self.statement_block {
                 statement_block.visit(emitter)
             } else {
                 TraversalResult::Ok
@@ -905,11 +903,11 @@ impl Visitor for NodeComponentBody {
 }
 
 impl Visitor for NodeStatementBlock {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_statement_block(TreeTraversalMode::Enter, self);
         // Visit each statement if not skipping children
         let children_ret = if ret == TraversalResult::Ok {
-            for statement in &mut self.statements {
+            for statement in &self.statements {
                 match statement.visit(emitter) {
                     TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
                     _ => (),
@@ -928,7 +926,7 @@ impl Visitor for NodeStatementBlock {
 }
 
 impl Visitor for NodeTypedIdentifier {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_typed_identifier(TreeTraversalMode::Enter, self);
         // Visit the annotation child node if the enter phase didn't fail or skip children
         let children_ret = if ret == TraversalResult::Ok {
@@ -946,7 +944,7 @@ impl Visitor for NodeTypedIdentifier {
 }
 
 impl Visitor for NodeTypeAnnotation {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_annotation(TreeTraversalMode::Enter, self);
         // Child element: self.type_name
         let children_ret = if ret == TraversalResult::Ok {
@@ -963,21 +961,21 @@ impl Visitor for NodeTypeAnnotation {
 }
 
 impl Visitor for NodeProgram {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         // Emit enter event
         let ret = emitter.emit_program(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             // Visit children nodes
             let mut result = TraversalResult::Ok;
             // Visit import_declarations if it's not None
-            if let Some(ref mut import_declarations) = self.import_declarations {
+            if let Some(import_declarations) = &self.import_declarations {
                 result = import_declarations.visit(emitter);
                 if result != TraversalResult::Ok {
                     return result;
                 }
             }
             // Visit library_definition if it's not None
-            if let Some(ref mut library_definition) = self.library_definition {
+            if let Some(library_definition) = &self.library_definition {
                 result = library_definition.visit(emitter);
                 if result != TraversalResult::Ok {
                     return result;
@@ -1000,10 +998,10 @@ impl Visitor for NodeProgram {
 }
 
 impl Visitor for NodeLibraryDefinition {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_library_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
-            for definition in &mut self.definitions {
+            for definition in &self.definitions {
                 match definition.visit(emitter) {
                     TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
                     _ => continue,
@@ -1021,7 +1019,7 @@ impl Visitor for NodeLibraryDefinition {
     }
 }
 impl Visitor for NodeLibrarySingleDefinition {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_library_single_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -1060,23 +1058,25 @@ impl Visitor for NodeLibrarySingleDefinition {
     }
 }
 impl Visitor for NodeContractDefinition {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+        println!("Visiting contract!");
+
         let ret = emitter.emit_contract_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             if let TraversalResult::Fail(msg) = self.parameters.visit(emitter) {
                 return TraversalResult::Fail(msg);
             }
-            if let Some(constraint) = &mut self.constraint {
+            if let Some(constraint) = &self.constraint {
                 if let TraversalResult::Fail(msg) = constraint.visit(emitter) {
                     return TraversalResult::Fail(msg);
                 }
             }
-            for field in &mut self.fields {
+            for field in &self.fields {
                 if let TraversalResult::Fail(msg) = field.visit(emitter) {
                     return TraversalResult::Fail(msg);
                 }
             }
-            for component in &mut self.components {
+            for component in &self.components {
                 if let TraversalResult::Fail(msg) = component.visit(emitter) {
                     return TraversalResult::Fail(msg);
                 }
@@ -1094,7 +1094,7 @@ impl Visitor for NodeContractDefinition {
 }
 
 impl Visitor for NodeContractField {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_contract_field(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self.typed_identifier.visit(emitter) {
@@ -1112,7 +1112,7 @@ impl Visitor for NodeContractField {
     }
 }
 impl Visitor for NodeWithConstraint {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_with_constraint(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             self.expression.visit(emitter)
@@ -1127,7 +1127,7 @@ impl Visitor for NodeWithConstraint {
     }
 }
 impl Visitor for NodeComponentDefinition {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_component_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -1149,7 +1149,7 @@ impl Visitor for NodeComponentDefinition {
     }
 }
 impl Visitor for NodeProcedureDefinition {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_procedure_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self.name.visit(emitter) {
@@ -1170,7 +1170,7 @@ impl Visitor for NodeProcedureDefinition {
     }
 }
 impl Visitor for NodeTransitionDefinition {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_transition_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self.name.visit(emitter) {
@@ -1194,7 +1194,7 @@ impl Visitor for NodeTransitionDefinition {
 }
 
 impl Visitor for NodeTypeAlternativeClause {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         match emitter.emit_type_alternative_clause(TreeTraversalMode::Enter, self) {
             TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
             TraversalResult::SkipChildren => {
@@ -1220,13 +1220,16 @@ impl Visitor for NodeTypeAlternativeClause {
         };
         match children_ret {
             TraversalResult::Fail(msg) => TraversalResult::Fail(msg),
-            _ => emitter.emit_type_alternative_clause(TreeTraversalMode::Exit, self),
+            TraversalResult::Ok => {
+                emitter.emit_type_alternative_clause(TreeTraversalMode::Exit, self)
+            }
+            _ => TraversalResult::Ok,
         }
     }
 }
 
 impl Visitor for NodeTypeMapValueArguments {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret = emitter.emit_type_map_value_arguments(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
@@ -1257,7 +1260,7 @@ impl Visitor for NodeTypeMapValueArguments {
 }
 
 impl Visitor for NodeTypeMapValueAllowingTypeArguments {
-    fn visit(&mut self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
+    fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         let ret =
             emitter.emit_type_map_value_allowing_type_arguments(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
