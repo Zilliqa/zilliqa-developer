@@ -1197,9 +1197,7 @@ impl Visitor for NodeTypeAlternativeClause {
     fn visit(&self, emitter: &mut dyn CodeEmitter) -> TraversalResult {
         match emitter.emit_type_alternative_clause(TreeTraversalMode::Enter, self) {
             TraversalResult::Fail(msg) => return TraversalResult::Fail(msg),
-            TraversalResult::SkipChildren => {
-                return emitter.emit_type_alternative_clause(TreeTraversalMode::Exit, self)
-            }
+            TraversalResult::SkipChildren => return TraversalResult::Ok,
             TraversalResult::Ok => (),
         }
         let children_ret = match self {

@@ -13,6 +13,7 @@ lalrpop = "0.19.9"
 [dependencies]
 lalrpop-util = {version = "0.19", features = ["lexer"]}
 regex = "1"
+diffy = "0.3.0"
 
 
 [package.metadata.raze]
