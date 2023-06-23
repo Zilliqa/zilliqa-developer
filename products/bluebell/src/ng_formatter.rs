@@ -222,8 +222,14 @@ impl CodeEmitter for ScillaCodeEmitter {
     ) -> TraversalResult {
         match mode {
             TreeTraversalMode::Enter => match node {
+                NodeTypeArgument::MapTypeArgument(k, v) => {
+                    self.script.push_str("Map ");
+                }
                 NodeTypeArgument::EnclosedTypeArgument(_) => {
                     self.script.push_str("(");
+                }
+                NodeTypeArgument::TemplateTypeArgument(var) => {
+                    self.script.push_str(var);
                 }
                 _ => (),
             },
@@ -242,17 +248,41 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeScillaType,
     ) -> TraversalResult {
-        match mode {
-            TreeTraversalMode::Enter => match node {
-                _ => (),
-                NodeScillaType::TypeVarType(value)
-                | NodeScillaType::PolyFunctionType(value, ..) => {
-                    self.script.push_str(&value);
+        match node {
+            NodeScillaType::GenericTypeWithArgs(lead, args) => {
+                lead.visit(self);
+                for arg in args.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
                 }
-            },
-            _ => (),
-        }
-        TraversalResult::Ok
+            }
+            NodeScillaType::MapType(key, value) => {
+                self.script.push_str("Map ");
+                key.visit(self);
+                self.script.push_str(" ");
+                value.visit(self);
+            }
+            NodeScillaType::FunctionType(a, b) => {
+                (*a).visit(self);
+                (*b).visit(self);
+            }
+            NodeScillaType::EnclosedType(a) => {
+                self.script.push_str("( ");
+                (*a).visit(self);
+                self.script.push_str(" )");
+            }
+            NodeScillaType::ScillaAddresseType(a) => {
+                (*a).visit(self);
+            }
+            NodeScillaType::PolyFunctionType(name, a) => {
+                self.script.push_str(name);
+                (*a).visit(self);
+            }
+            NodeScillaType::TypeVarType(name) => {
+                self.script.push_str(name);
+            }
+        };
+        TraversalResult::SkipChildren
     }
 
     fn emit_type_map_entry(
@@ -260,6 +290,15 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeTypeMapEntry,
     ) -> TraversalResult {
+        /*
+        #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
+        pub struct NodeTypeMapEntry {
+            pub key: NodeTypeMapKey,
+            pub value: NodeTypeMapValue,
+            pub type_annotation: Option<TypeAnnotation>,
+        }
+        */
+
         unimplemented!()
     }
 
@@ -268,7 +307,11 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeAddressTypeField,
     ) -> TraversalResult {
-        unimplemented!()
+        self.script.push_str("field ");
+        node.identifier.visit(self);
+        self.script.push_str(" : ");
+        node.type_name.visit(self);
+        TraversalResult::SkipChildren
     }
 
     fn emit_address_type(
@@ -330,7 +373,7 @@ impl CodeEmitter for ScillaCodeEmitter {
                 self.script.push_str("(");
                 self.script.push_str(&identier_value);
                 type_annotation.visit(self);
-                self.script.push_str(") =>");
+                self.script.push_str(") => ");
 
                 (*expression).visit(self);
                 self.indent_level -= 1;
@@ -374,7 +417,17 @@ impl CodeEmitter for ScillaCodeEmitter {
                 match_expression,
                 clauses,
             } => {
-                unimplemented!();
+                self.add_newlines(1);
+                self.script.push_str("match ");
+                match_expression.visit(self);
+                self.script.push_str(" with ");
+                self.indent_level += 1;
+                for clause in clauses.iter() {
+                    clause.visit(self);
+                }
+                self.indent_level -= 1;
+                self.add_newlines(1);
+                self.script.push_str("end");
             }
             NodeFullExpression::ConstructorCall {
                 identifier_name,
@@ -395,13 +448,22 @@ impl CodeEmitter for ScillaCodeEmitter {
                 identifier_name,
                 expression,
             } => {
-                unimplemented!();
+                self.add_newlines(1);
+                self.script.push_str("tfun ");
+                self.script.push_str(identifier_name);
+                self.script.push_str(" => ");
+                expression.visit(self);
             }
             NodeFullExpression::TApp {
                 identifier_name,
                 type_arguments,
             } => {
-                unimplemented!();
+                self.script.push_str("@");
+                identifier_name.visit(self);
+                for arg in type_arguments.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
             }
         }
         TraversalResult::SkipChildren
@@ -434,7 +496,12 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodePatternMatchExpressionClause,
     ) -> TraversalResult {
-        unimplemented!()
+        self.add_newlines(1);
+        self.script.push_str("| ");
+        node.pattern.visit(self);
+        self.script.push_str(" => ");
+        node.expression.visit(self);
+        TraversalResult::SkipChildren
     }
 
     fn emit_atomic_expression(
@@ -499,11 +566,31 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeMapAccess,
     ) -> TraversalResult {
-        unimplemented!()
+        match mode {
+            TreeTraversalMode::Enter => self.script.push_str("["),
+            TreeTraversalMode::Exit => self.script.push_str("]"),
+        }
+        TraversalResult::Ok
     }
 
     fn emit_pattern(&mut self, mode: TreeTraversalMode, node: &NodePattern) -> TraversalResult {
-        unimplemented!()
+        match node {
+            NodePattern::Wildcard => {
+                self.script.push_str("_");
+            }
+            NodePattern::Binder(value) => {
+                self.script.push_str(value);
+            }
+            NodePattern::Constructor(identifier, args) => {
+                identifier.visit(self);
+
+                for arg in args.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
+            }
+        }
+        TraversalResult::SkipChildren
     }
 
     fn emit_argument_pattern(
@@ -511,7 +598,20 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeArgumentPattern,
     ) -> TraversalResult {
-        unimplemented!()
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeArgumentPattern::BinderArgument(s) => self.script.push_str(s),
+                NodeArgumentPattern::WildcardArgument => self.script.push_str("_"),
+                NodeArgumentPattern::PatternArgument(_) => self.script.push_str("("),
+                _ => (),
+            },
+            TreeTraversalMode::Exit => match node {
+                NodeArgumentPattern::PatternArgument(_) => self.script.push_str(")"),
+                _ => (),
+            },
+        }
+        // Pass through
+        TraversalResult::Ok
     }
 
     fn emit_pattern_match_clause(
@@ -519,7 +619,19 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodePatternMatchClause,
     ) -> TraversalResult {
-        unimplemented!()
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(1);
+                self.script.push_str("| ");
+                node.pattern_expression.visit(self);
+                self.script.push_str(" =>");
+                if let Some(stmt) = &node.statement_block {
+                    stmt.visit(self);
+                }
+            }
+            TreeTraversalMode::Exit => {}
+        }
+        TraversalResult::SkipChildren
     }
 
     fn emit_blockchain_fetch_arguments(
@@ -527,7 +639,13 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeBlockchainFetchArguments,
     ) -> TraversalResult {
-        unimplemented!()
+        self.script.push_str("(");
+        for arg in node.arguments.iter() {
+            self.script.push_str(" ");
+            arg.visit(self);
+        }
+        self.script.push_str(" )");
+        TraversalResult::SkipChildren
     }
 
     fn emit_statement(&mut self, mode: TreeTraversalMode, node: &NodeStatement) -> TraversalResult {
@@ -537,7 +655,9 @@ impl CodeEmitter for ScillaCodeEmitter {
                 left_hand_side,
                 right_hand_side,
             } => {
-                unimplemented!();
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" <- ");
+                right_hand_side.visit(self);
             }
             NodeStatement::RemoteFetch(fetch_statement) => {
                 (*fetch_statement).visit(self);
@@ -546,7 +666,9 @@ impl CodeEmitter for ScillaCodeEmitter {
                 left_hand_side,
                 right_hand_side,
             } => {
-                unimplemented!();
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" := ");
+                right_hand_side.visit(self);
             }
             NodeStatement::Bind {
                 left_hand_side,
@@ -561,7 +683,12 @@ impl CodeEmitter for ScillaCodeEmitter {
                 type_name,
                 arguments,
             } => {
-                unimplemented!();
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" <-& ");
+                type_name.visit(self);
+                if let Some(args) = arguments {
+                    args.visit(self);
+                }
             }
             NodeStatement::MapGet {
                 left_hand_side,
@@ -582,7 +709,12 @@ impl CodeEmitter for ScillaCodeEmitter {
                 keys,
                 right_hand_side,
             } => {
-                unimplemented!();
+                self.script.push_str(left_hand_side);
+                for key in keys.iter() {
+                    key.visit(self);
+                }
+                self.script.push_str(" := ");
+                right_hand_side.visit(self);
             }
             NodeStatement::MapUpdateDelete {
                 left_hand_side,
@@ -596,7 +728,8 @@ impl CodeEmitter for ScillaCodeEmitter {
                 identifier_name.visit(self);
             }
             NodeStatement::CreateEvnt { identifier_name } => {
-                unimplemented!();
+                self.script.push_str("event ");
+                identifier_name.visit(self);
             }
             NodeStatement::Throw { error_variable } => {
                 self.script.push_str("throw");
@@ -606,19 +739,35 @@ impl CodeEmitter for ScillaCodeEmitter {
                 }
             }
             NodeStatement::MatchStmt { variable, clauses } => {
-                unimplemented!();
+                self.script.push_str("match ");
+                variable.visit(self);
+                self.script.push_str(" with");
+                self.indent_level += 1;
+                for clause in clauses.iter() {
+                    clause.visit(self);
+                }
+                self.indent_level -= 1;
+                self.add_newlines(1);
+                self.script.push_str("end");
             }
             NodeStatement::CallProc {
                 component_id,
                 arguments,
             } => {
-                unimplemented!();
+                component_id.visit(self);
+                for arg in arguments.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
             }
             NodeStatement::Iterate {
                 identifier_name,
                 component_id,
             } => {
-                unimplemented!();
+                self.script.push_str("forall ");
+                identifier_name.visit(self);
+                self.script.push_str(" ");
+                component_id.visit(self);
             }
         }
 
@@ -737,13 +886,14 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeStatementBlock,
     ) -> TraversalResult {
+        self.indent_level += 1;
         for (i, stmt) in node.statements.iter().enumerate() {
             stmt.visit(self);
             if i != node.statements.len() - 1 {
                 self.script.push_str(";");
             }
         }
-        // TODO: Pass through for now
+        self.indent_level -= 1;
         TraversalResult::SkipChildren
     }
 
@@ -797,12 +947,8 @@ impl CodeEmitter for ScillaCodeEmitter {
                 // Add Indent
                 self.add_newlines(2);
                 self.script.push_str(&format!("library {}", node.name));
-
-                // self.indent_level += 1;
             }
-            _ => {
-                // self.indent_level -= 1;
-            }
+            _ => (),
         }
         TraversalResult::Ok
     }
@@ -865,11 +1011,8 @@ impl CodeEmitter for ScillaCodeEmitter {
                 // Add Contract definition, contract name and open parentheses
                 self.script
                     .push_str(&format!("contract {}", node.contract_name));
-                // self.indent_level += 1;
             }
-            _ => {
-                // self.indent_level -= 1;
-            }
+            _ => (),
         }
         TraversalResult::Ok
     }
@@ -922,7 +1065,17 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeProcedureDefinition,
     ) -> TraversalResult {
-        unimplemented!()
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(2);
+                self.script.push_str("procedure ");
+            }
+            TreeTraversalMode::Exit => {
+                self.add_newlines(1);
+                self.script.push_str("end");
+            }
+        }
+        TraversalResult::Ok
     }
 
     fn emit_transition_definition(
@@ -934,10 +1087,8 @@ impl CodeEmitter for ScillaCodeEmitter {
             TreeTraversalMode::Enter => {
                 self.add_newlines(2);
                 self.script.push_str("transition ");
-                self.indent_level += 1;
             }
             TreeTraversalMode::Exit => {
-                self.indent_level -= 1;
                 self.add_newlines(1);
                 self.script.push_str("end");
             }
@@ -983,6 +1134,7 @@ impl CodeEmitter for ScillaCodeEmitter {
         mode: TreeTraversalMode,
         node: &NodeTypeMapValueAllowingTypeArguments,
     ) -> TraversalResult {
-        unimplemented!()
+        // Pass through
+        TraversalResult::Ok
     }
 }

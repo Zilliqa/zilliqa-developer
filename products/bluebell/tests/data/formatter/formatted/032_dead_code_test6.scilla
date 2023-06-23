@@ -1,21 +1,20 @@
 scilla_version 0
 
 library Dead6
-
 (* OtherError is dead. *)
 type Error =
   | InternalError
   | OtherError
-
-let mk_error_event =
-  fun (err: Error) =>
-    let err_code =
-      match err with
+let mk_error_event = 
+  fun (err : Error) => 
+    let err_code = 
+      match err with 
         | InternalError => Uint32 1
         | OtherError => Uint32 2
-    end in
-    { _eventname: "Error"
-    ; err_code: err_code }
+      end in {
+        _eventname : "Error";
+        err_code : err_code
+      }
 
 contract Dead6()
 
@@ -26,8 +25,7 @@ procedure Event(err : Error)
   event err_e
 end
 
-transition dummy ()
+transition dummy()
   error = InternalError;
   Event error
 end
-
