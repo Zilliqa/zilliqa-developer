@@ -2,7 +2,7 @@ use crate::ast::*;
 use crate::code_emitter::{CodeEmitter, TraversalResult, TreeTraversalMode};
 use crate::visitor::Visitor;
 use inkwell::module::Module;
-use inkwell::types::{BasicType, FunctionType};
+use inkwell::types::{BasicType, BasicTypeEnum, FunctionType};
 use inkwell::values::IntValue;
 use inkwell::{
     basic_block::BasicBlock, builder::Builder, context::Context, values::BasicValueEnum,
@@ -42,6 +42,8 @@ impl<'ctx> Scope<'ctx> {
     }
 }
 
+type HandlerFunction<'ctx> = Box<dyn Fn(&'ctx Context) -> BasicTypeEnum<'ctx>>;
+
 pub struct LlvmEmitter<'ctx> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
@@ -49,12 +51,14 @@ pub struct LlvmEmitter<'ctx> {
     identifier_stack: Vec<Identifier>,
     global_values: HashMap<String, BasicValueEnum<'ctx>>,
     scope_stack: Vec<Scope<'ctx>>,
-    type_allocation_handler: HashMap<String, Box<dyn Fn(&'ctx Context) -> BasicTypeEnum<'ctx>>>,
+    type_allocation_handler: HashMap<String, HandlerFunction<'ctx>>,
 }
 impl<'ctx> LlvmEmitter<'ctx> {
     pub fn new(context: &'ctx Context) -> Self {
         let builder = context.create_builder();
         let module = context.create_module("main");
+        let type_allocation_handler: HashMap<String, HandlerFunction<'ctx>> = HashMap::new();
+
         LlvmEmitter {
             context,
             builder,
@@ -62,6 +66,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
             identifier_stack: [].to_vec(),
             global_values: HashMap::new(),
             scope_stack: Vec::new(),
+            type_allocation_handler,
         }
     }
 
