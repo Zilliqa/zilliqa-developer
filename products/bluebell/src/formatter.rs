@@ -1,5 +1,4 @@
 use crate::ast::*;
-use std::fmt::Write;
 // TODO: Use `to_string` from `ast.rs` where applicable
 pub trait ScillaFormatter {
     fn to_string(&self) -> String {

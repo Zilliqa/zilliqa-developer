@@ -1,5 +1,4 @@
 use std::clone::Clone;
-use std::collections::HashMap;
 use std::fmt;
 
 pub trait Named {

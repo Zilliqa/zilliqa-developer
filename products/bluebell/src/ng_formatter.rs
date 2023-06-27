@@ -33,7 +33,11 @@ impl ScillaCodeEmitter {
 }
 
 impl CodeEmitter for ScillaCodeEmitter {
-    fn emit_byte_str(&mut self, mode: TreeTraversalMode, node: &NodeByteStr) -> TraversalResult {
+    fn emit_byte_str(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeByteStr,
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeByteStr::Constant(s) => {
@@ -45,14 +49,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
             TreeTraversalMode::Exit => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_type_name_identifier(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeNameIdentifier,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeTypeNameIdentifier::ByteStringType(_) => (),
@@ -65,14 +69,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
             TreeTraversalMode::Exit => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_imported_name(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeImportedName,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
@@ -81,14 +85,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             TreeTraversalMode::Exit => (),
         }
 
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_import_declarations(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeImportDeclarations,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
@@ -96,27 +100,27 @@ impl CodeEmitter for ScillaCodeEmitter {
             TreeTraversalMode::Exit => (),
         }
 
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_meta_identifier(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeMetaIdentifier,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeMetaIdentifier::MetaNameInNamespace(l, r) => {
                     l.visit(self);
                     self.script.push_str(".");
                     r.visit(self);
-                    return TraversalResult::SkipChildren;
+                    return Ok(TraversalResult::SkipChildren);
                 }
                 NodeMetaIdentifier::MetaNameInHexspace(l, r) => {
                     self.script.push_str(&l);
                     self.script.push_str(".");
                     r.visit(self);
-                    return TraversalResult::SkipChildren;
+                    return Ok(TraversalResult::SkipChildren);
                 }
                 NodeMetaIdentifier::ByteString => {
                     self.script.push_str("ByStr");
@@ -125,14 +129,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
             TreeTraversalMode::Exit => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_variable_identifier(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeVariableIdentifier,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => match node {
@@ -144,14 +148,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 }
             },
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_builtin_arguments(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeBuiltinArguments,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         if node.arguments.len() == 0 {
             self.script.push_str("()");
         } else {
@@ -162,14 +166,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 arg.visit(self);
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_type_map_key(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeMapKey,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeMapKey::GenericMapKey(value) => {
                 value.visit(self);
@@ -188,14 +192,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 value.visit(self);
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_type_map_value(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeMapValue,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(value) => {
                 value.visit(self);
@@ -212,14 +216,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 (*value).visit(self);
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_type_argument(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeArgument,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeTypeArgument::MapTypeArgument(k, v) => {
@@ -240,14 +244,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 _ => (),
             },
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_scilla_type(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeScillaType,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
                 lead.visit(self);
@@ -282,14 +286,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 self.script.push_str(name);
             }
         };
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_type_map_entry(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeMapEntry,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         /*
         #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
         pub struct NodeTypeMapEntry {
@@ -306,19 +310,19 @@ impl CodeEmitter for ScillaCodeEmitter {
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeAddressTypeField,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.script.push_str("field ");
         node.identifier.visit(self);
         self.script.push_str(" : ");
         node.type_name.visit(self);
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_address_type(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeAddressType,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         node.identifier.visit(self);
         self.script.push_str(" with ");
 
@@ -334,14 +338,14 @@ impl CodeEmitter for ScillaCodeEmitter {
 
         self.script.push_str("end");
 
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_full_expression(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeFullExpression,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match node {
             NodeFullExpression::LocalVariableDeclaration {
                 identifier_name,
@@ -466,14 +470,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 }
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_message_entry(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeMessageEntry,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         match node {
             NodeMessageEntry::MessageLiteral(var, val) => {
@@ -489,35 +493,35 @@ impl CodeEmitter for ScillaCodeEmitter {
                 var2.visit(self);
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_pattern_match_expression_clause(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodePatternMatchExpressionClause,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         self.script.push_str("| ");
         node.pattern.visit(self);
         self.script.push_str(" => ");
         node.expression.visit(self);
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_atomic_expression(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeAtomicExpression,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         // Pass through
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_contract_type_arguments(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeContractTypeArguments,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.script.push_str("{");
         for (i, arg) in node.type_arguments.iter().enumerate() {
             if i != 0 {
@@ -528,14 +532,14 @@ impl CodeEmitter for ScillaCodeEmitter {
         }
         self.script.push_str("}");
 
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_value_literal(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeValueLiteral,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeValueLiteral::LiteralInt(n, v) => {
@@ -558,22 +562,26 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
             TreeTraversalMode::Exit => (),
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_map_access(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeMapAccess,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => self.script.push_str("["),
             TreeTraversalMode::Exit => self.script.push_str("]"),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
-    fn emit_pattern(&mut self, mode: TreeTraversalMode, node: &NodePattern) -> TraversalResult {
+    fn emit_pattern(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodePattern,
+    ) -> Result<TraversalResult, String> {
         match node {
             NodePattern::Wildcard => {
                 self.script.push_str("_");
@@ -590,14 +598,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 }
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_argument_pattern(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeArgumentPattern,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeArgumentPattern::BinderArgument(s) => self.script.push_str(s),
@@ -611,14 +619,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
         }
         // Pass through
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_pattern_match_clause(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodePatternMatchClause,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
@@ -631,24 +639,28 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
             TreeTraversalMode::Exit => {}
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_blockchain_fetch_arguments(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeBlockchainFetchArguments,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.script.push_str("(");
         for arg in node.arguments.iter() {
             self.script.push_str(" ");
             arg.visit(self);
         }
         self.script.push_str(" )");
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
-    fn emit_statement(&mut self, mode: TreeTraversalMode, node: &NodeStatement) -> TraversalResult {
+    fn emit_statement(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeStatement,
+    ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         match node {
             NodeStatement::Load {
@@ -771,14 +783,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
         }
 
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_remote_fetch_statement(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeRemoteFetchStatement,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match node {
             NodeRemoteFetchStatement::ReadStateMutable(lhs, address, identifier) => {
                 self.script.push_str(&format!("{} <-& {}.", lhs, address));
@@ -824,14 +836,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 address_type.visit(self);
             }
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_component_id(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeComponentId,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeComponentId::WithRegularId(name) => self.script.push_str(name),
@@ -839,14 +851,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
             _ => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_component_parameters(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeComponentParameters,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.script.push_str("(");
@@ -860,32 +872,32 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
             TreeTraversalMode::Exit => (),
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_parameter_pair(
         &mut self,
         _mode: TreeTraversalMode,
         _node: &NodeParameterPair,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         // Pass through
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_component_body(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeComponentBody,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         // Pass through
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_statement_block(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeStatementBlock,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.indent_level += 1;
         for (i, stmt) in node.statements.iter().enumerate() {
             stmt.visit(self);
@@ -894,14 +906,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
         }
         self.indent_level -= 1;
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_typed_identifier(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypedIdentifier,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 // Assuming that annotation type is of String
@@ -909,22 +921,26 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
             TreeTraversalMode::Exit => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_type_annotation(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeAnnotation,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => self.script.push_str(" : "),
             _ => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
-    fn emit_program(&mut self, mode: TreeTraversalMode, node: &NodeProgram) -> TraversalResult {
+    fn emit_program(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeProgram,
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.script
@@ -934,14 +950,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 self.script.push_str("\n");
             }
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_library_definition(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeLibraryDefinition,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 // Add Indent
@@ -950,14 +966,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
             _ => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_library_single_definition(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeLibrarySingleDefinition,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeLibrarySingleDefinition::LetDefinition {
@@ -995,14 +1011,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             },
             _ => {}
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_contract_definition(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeContractDefinition,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 // Add Indent
@@ -1014,14 +1030,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
             _ => (),
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_contract_field(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeContractField,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
@@ -1032,14 +1048,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             }
             _ => (),
         }
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_with_constraint(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeWithConstraint,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.script.push_str(" with ");
@@ -1048,23 +1064,23 @@ impl CodeEmitter for ScillaCodeEmitter {
                 self.script.push_str(" =>");
             }
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_component_definition(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeComponentDefinition,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         // Fall through to either Transition or Procedure
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_procedure_definition(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeProcedureDefinition,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.add_newlines(2);
@@ -1075,14 +1091,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 self.script.push_str("end");
             }
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_transition_definition(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTransitionDefinition,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
                 self.add_newlines(2);
@@ -1093,14 +1109,14 @@ impl CodeEmitter for ScillaCodeEmitter {
                 self.script.push_str("end");
             }
         }
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 
     fn emit_type_alternative_clause(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeAlternativeClause,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         self.script.push_str("| ");
         match node {
@@ -1118,14 +1134,14 @@ impl CodeEmitter for ScillaCodeEmitter {
             _ => (),
         }
 
-        TraversalResult::SkipChildren
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_type_map_value_arguments(
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeMapValueArguments,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         unimplemented!()
     }
 
@@ -1133,8 +1149,8 @@ impl CodeEmitter for ScillaCodeEmitter {
         &mut self,
         mode: TreeTraversalMode,
         node: &NodeTypeMapValueAllowingTypeArguments,
-    ) -> TraversalResult {
+    ) -> Result<TraversalResult, String> {
         // Pass through
-        TraversalResult::Ok
+        Ok(TraversalResult::Continue)
     }
 }

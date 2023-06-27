@@ -13,11 +13,6 @@ pub mod visitor;
 
 lalrpop_mod!(pub parser);
 
-use crate::formatter::ScillaFormatter;
-use crate::lexer::Lexer;
-use crate::type_inference::*;
-use std::collections::HashMap;
-
 #[derive(Debug)]
 pub struct ParserError {
     pub message: String,

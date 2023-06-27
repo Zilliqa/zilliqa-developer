@@ -3,8 +3,12 @@ scilla_version 0
 library Dead8
 
 type Bool = 
-  | True
   | False
+  | True
+
+type OptionalBool = 
+  | Boolean of Bool
+  | None
 
 contract Dead8()
 
