@@ -9,21 +9,48 @@ use inkwell::{
 };
 
 use std::collections::HashMap;
+
 #[derive(Debug, Clone)]
 enum Identifier {
     ComponentName(String),
     TypeName(String),
+    Enumarate(String),
     Event(String),
+}
+
+enum Literal {
+    String(String),
+    Bool(bool),
+    Int8(i8),
+    Int16(i16),
+    Int32(i32),
+    Int64(i64),
+    Uint8(u8),
+    Uint16(u16),
+    Uint32(u32),
+    Uint64(u64),
+    Float32(f32),
+    Float64(f64),
+    Char(char),
+    Bytes(Vec<u8>),
+}
+
+#[derive(Debug, Clone)]
+enum StackObject<'ctx> {
+    Identifier(Identifier),
+    LlvmValue(BasicValueEnum<'ctx>),
 }
 
 struct Scope<'ctx> {
     context: &'ctx Context,
     namespace: String,
-    llvm_value_stack: Vec<BasicValueEnum<'ctx>>,
-    llvm_value_map: HashMap<String, BasicValueEnum<'ctx>>,
+
+    local_values: HashMap<String, BasicValueEnum<'ctx>>,
+
     builder: Builder<'ctx>,
     basic_block: BasicBlock<'ctx>,
 }
+
 impl<'ctx> Scope<'ctx> {
     pub fn new(
         context: &'ctx Context,
@@ -34,39 +61,72 @@ impl<'ctx> Scope<'ctx> {
         Self {
             context,
             namespace,
-            llvm_value_stack: Vec::new(),
-            llvm_value_map: HashMap::new(),
+
+            local_values: HashMap::new(),
             builder,
             basic_block,
         }
     }
 }
 
-type HandlerFunction<'ctx> = Box<dyn Fn(&'ctx Context) -> BasicTypeEnum<'ctx>>;
+type TypeAllocatorFunction<'ctx> =
+    Box<dyn Fn(&'ctx Context, Vec<StackObject<'ctx>>) -> BasicTypeEnum<'ctx>>;
+type ValueAllocatorFunction<'ctx> =
+    Box<dyn Fn(&'ctx Context, Vec<StackObject<'ctx>>) -> BasicValueEnum<'ctx>>;
 
 pub struct LlvmEmitter<'ctx> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
     module: Module<'ctx>,
-    identifier_stack: Vec<Identifier>,
+
     global_values: HashMap<String, BasicValueEnum<'ctx>>,
-    scope_stack: Vec<Scope<'ctx>>,
-    type_allocation_handler: HashMap<String, HandlerFunction<'ctx>>,
+    stack: Vec<StackObject<'ctx>>,
+
+    type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>>,
+    value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
 }
 impl<'ctx> LlvmEmitter<'ctx> {
     pub fn new(context: &'ctx Context) -> Self {
         let builder = context.create_builder();
         let module = context.create_module("main");
-        let type_allocation_handler: HashMap<String, HandlerFunction<'ctx>> = HashMap::new();
+        let global_values: HashMap<String, BasicValueEnum<'ctx>> = HashMap::new();
+        let stack: Vec<StackObject<'ctx>> = Vec::new();
+        let mut type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>> =
+            HashMap::new();
+        let mut value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>> =
+            HashMap::new();
 
+        type_allocation_handler.insert(
+            "Int8".to_string(),
+            Box::new(
+                |ctx: &'ctx Context, _vec: Vec<StackObject<'ctx>>| -> BasicTypeEnum<'ctx> {
+                    ctx.i8_type().into()
+                },
+            ),
+        );
+
+        value_allocation_handler.insert(
+            "int8".to_string(),
+            Box::new(
+                |ctx: &'ctx Context, stack: Vec<StackObject<'ctx>>| -> BasicValueEnum<'ctx> {
+                    if let StackObject::LlvmValue(BasicValueEnum::IntValue(value)) =
+                        stack[0].clone()
+                    {
+                        return BasicValueEnum::IntValue(value);
+                    }
+                    panic!("Expecting a literal value to allocate.")
+                },
+            ),
+        );
+        // TODO: Repeat similar code for all literals
         LlvmEmitter {
             context,
             builder,
             module,
-            identifier_stack: [].to_vec(),
-            global_values: HashMap::new(),
-            scope_stack: Vec::new(),
+            global_values,
+            stack,
             type_allocation_handler,
+            value_allocation_handler,
         }
     }
 
@@ -74,7 +134,11 @@ impl<'ctx> LlvmEmitter<'ctx> {
         self.module.print_to_string().to_string()
     }
     pub fn emit(&mut self, node: &mut NodeProgram) -> String {
-        node.visit(self);
+        let result = node.visit(self);
+        match result {
+            TraversalResult::Fail(m) => panic!("{}", m),
+            _ => (),
+        }
         self.to_string()
     }
 }
@@ -92,12 +156,16 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             TreeTraversalMode::Enter => match node {
                 NodeTypeNameIdentifier::ByteStringType(_) => (),
                 NodeTypeNameIdentifier::EventType => {
-                    self.identifier_stack
-                        .push(Identifier::Event("Event".to_string()));
+                    self.stack.push(StackObject::Identifier(Identifier::Event(
+                        "Event".to_string(),
+                    )));
                 }
                 NodeTypeNameIdentifier::CustomType(n) => {
-                    self.identifier_stack
-                        .push(Identifier::TypeName(n.to_string()));
+                    if !self.type_allocation_handler.contains_key(n) {
+                        return TraversalResult::Fail(format!("Typename {} not defined.", n));
+                    }
+                    self.stack
+                        .push(StackObject::Identifier(Identifier::TypeName(n.to_string())));
                 }
             },
             TreeTraversalMode::Exit => (),
@@ -220,9 +288,12 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             } => {
                 unimplemented!();
             }
-            NodeFullExpression::ExpressionAtomic(expr) => {
-                unimplemented!();
-            }
+            NodeFullExpression::ExpressionAtomic(expr) => match &**expr {
+                NodeAtomicExpression::AtomicSid(_identifier) => unimplemented!(),
+                NodeAtomicExpression::AtomicLit(literal) => {
+                    literal.visit(self);
+                }
+            },
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
                 unimplemented!();
             }
@@ -240,9 +311,23 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 contract_type_arguments,
                 argument_list,
             } => {
+                println!("{:#?}", node);
                 let error_ret = identifier_name.visit(self);
-                let name = if let Some(identifier_name) = self.identifier_stack.pop() {
-                    match identifier_name {
+                match error_ret {
+                    TraversalResult::Fail(m) => return TraversalResult::Fail(m),
+                    _ => (),
+                }
+
+                let stack_name = if let Some(s) = self.stack.pop() {
+                    s
+                } else {
+                    return TraversalResult::Fail(
+                        "Expected typename, but found nothing.".to_string(),
+                    );
+                };
+
+                let name = match stack_name {
+                    StackObject::Identifier(identifier_name) => match identifier_name {
                         Identifier::TypeName(n) => n,
                         _ => {
                             return TraversalResult::Fail(format!(
@@ -250,16 +335,20 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                                 identifier_name
                             ))
                         }
+                    },
+                    _ => {
+                        return TraversalResult::Fail(format!(
+                            "Expected typename but found {:?}",
+                            stack_name
+                        ))
                     }
-                } else {
-                    return error_ret;
                 };
 
                 println!(
                     "{}:\n- {:#?}\n- {:#?}",
                     name, contract_type_arguments, argument_list
                 );
-                unimplemented!();
+                // unimplemented!();
             }
             NodeFullExpression::TemplateFunction {
                 identifier_name,
@@ -364,12 +453,16 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> TraversalResult {
         match node {
             NodeComponentId::WithRegularId(name) => {
-                self.identifier_stack
-                    .push(Identifier::ComponentName(name.to_string()));
+                self.stack
+                    .push(StackObject::Identifier(Identifier::ComponentName(
+                        name.to_string(),
+                    )));
             }
             NodeComponentId::WithTypeLikeName(n) => {
-                self.identifier_stack
-                    .push(Identifier::ComponentName(n.to_string()));
+                self.stack
+                    .push(StackObject::Identifier(Identifier::ComponentName(
+                        n.to_string(),
+                    )));
             }
         }
 
@@ -565,27 +658,44 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         match mode {
             TreeTraversalMode::Enter => {
                 // Generating component ID
-                let result = node.name.visit(self);
+                match node.name.visit(self) {
+                    TraversalResult::Fail(m) => {
+                        return TraversalResult::Fail(m);
+                    }
+                    _ => (),
+                }
 
-                if let Some(identifier) = self.identifier_stack.pop() {
-                    let function_name = match identifier {
-                        Identifier::ComponentName(s) => s,
+                let identifier = if let Some(identifier) = self.stack.pop() {
+                    match identifier {
+                        StackObject::Identifier(n) => n,
                         _ => {
                             return TraversalResult::Fail(format!(
-                                "Expected a component name, but {:?}",
+                                "Expected idenfier, but found {:?}.",
                                 identifier
                             ));
                         }
-                    };
-                    // TODO: Compute the correct function type
-                    let fn_type: FunctionType = self.context.void_type().fn_type(&[], false);
-
-                    let function = self.module.add_function(&function_name, fn_type, None);
-                    let basic_block = self.context.append_basic_block(function, "entry");
-                    self.builder.position_at_end(basic_block);
+                    }
                 } else {
-                    return result;
-                }
+                    return TraversalResult::Fail(
+                        "Expected transition name, but found nothing.".to_string(),
+                    );
+                };
+
+                let function_name = match identifier {
+                    Identifier::ComponentName(s) => s,
+                    _ => {
+                        return TraversalResult::Fail(format!(
+                            "Expected a component name, but {:?}",
+                            identifier
+                        ));
+                    }
+                };
+                // TODO: Compute the correct function type
+                let fn_type: FunctionType = self.context.void_type().fn_type(&[], false);
+
+                let function = self.module.add_function(&function_name, fn_type, None);
+                let basic_block = self.context.append_basic_block(function, "entry");
+                self.builder.position_at_end(basic_block);
             }
             TreeTraversalMode::Exit => {
                 // TODO: Move cursor out of the function

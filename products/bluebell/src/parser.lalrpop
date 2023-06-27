@@ -64,7 +64,6 @@ extern {
 
         r"ByStr[0-9]+" => lexer::Token::ByStrWithSize(<&'input str>), 
         
-
         r"[+-]?[0-9]+" => lexer::Token::Number(<&'input str>), 
         r"0(x|X)([a-fA-F0-9][a-fA-F0-9])*" => lexer::Token::HexNumber(<&'input str>), 
         r#""(?:\\.|[^"])*""# => lexer::Token::StringLiteral(<&'input str>), 
@@ -796,6 +795,7 @@ pub AtomicExpression: NodeAtomicExpression = {
 //
 // <valueLiteral> ::=  <identifierToken> <digit>+
 //                   | <hex>
+//                   | 'True' | 'False'
 //                   | <string>
 //                   | 'Emp' <typeMapKey> <typeMapValue>
 // TODO: Transalate regex
@@ -1342,4 +1342,5 @@ TemplateTypeId: String = {
 StringLiteral: String = {
 	r#""(?:\\.|[^"])*""# => String::from(<>)
 }
+
 
