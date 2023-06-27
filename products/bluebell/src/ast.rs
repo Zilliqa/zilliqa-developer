@@ -25,7 +25,7 @@ impl fmt::Display for NodeByteStr {
 pub enum NodeTypeNameIdentifier {
     ByteStringType(NodeByteStr),
     EventType,
-    CustomType(String),
+    TypeOrEnumLikeIdentifier(String),
 }
 
 impl NodeTypeNameIdentifier {
@@ -35,7 +35,7 @@ impl NodeTypeNameIdentifier {
                 format!("{}", byte_str.to_string())
             }
             NodeTypeNameIdentifier::EventType => format!("Event"),
-            NodeTypeNameIdentifier::CustomType(custom_type) => {
+            NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(custom_type) => {
                 format!("{}", custom_type.clone())
             }
         }
@@ -131,7 +131,7 @@ pub enum NodeTypeMapKey {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValue {
-    MapValueCustomType(NodeMetaIdentifier),
+    MapValueTypeOrEnumLikeIdentifier(NodeMetaIdentifier),
     MapKeyValue(Box<NodeTypeMapEntry>),
     MapValueParanthesizedType(Box<NodeTypeMapValueAllowingTypeArguments>),
     MapValueAddressType(Box<NodeAddressType>),

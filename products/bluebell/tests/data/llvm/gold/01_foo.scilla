@@ -2,6 +2,10 @@ scilla_version 0
 
 library Dead8
 
+type Bool = 
+  | True
+  | False
+
 contract Dead8()
 
 transition Foo()

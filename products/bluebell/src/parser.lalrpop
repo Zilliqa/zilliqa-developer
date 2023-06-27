@@ -109,7 +109,7 @@ pub ByteString : NodeByteStr = {
 pub TypeNameIdentifier: NodeTypeNameIdentifier = {
 	ByteString => NodeTypeNameIdentifier::ByteStringType(<>),
 	"Event" => NodeTypeNameIdentifier::EventType,
-    <n:CustomTypeId> => NodeTypeNameIdentifier::CustomType(n),	
+    <n:TypeOrEnumLikeIdentifierId> => NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(n),	
 }
 
 
@@ -190,10 +190,10 @@ pub MetaIdentifier : NodeMetaIdentifier = {
 //
 // <variableIdentifier> ::= <identiferRegular>
 //                       | <identiferSpecial> 
-//                       | (<typeCustomTypeName> | 'ByStr' <digit>+ | 'Event') '.' <identiferRegular>
+//                       | (<typeTypeOrEnumLikeIdentifierName> | 'ByStr' <digit>+ | 'Event') '.' <identiferRegular>
 // <identiferRegular> ::= <lowerCaseCharacterOrUnderscore><alphaNumericUnderscore>* 
 // <identiferSpecial> ::= "_" <alphaNumericUnderscore>*
-// <typeCustomTypeName> ::= <upperCaseCharacter><alphaNumericUnderscore>*
+// <typeTypeOrEnumLikeIdentifierName> ::= <upperCaseCharacter><alphaNumericUnderscore>*
 //
 // This rule allows for variable identifiers to be defined in a Scilla contract.
 //
@@ -432,7 +432,7 @@ pub TypeMapKey: NodeTypeMapKey = {
 // @syntax typeMapValue
 // @return A Scilla map value type as a custom type identifier, an address type, a map key and value type, or a type allowed as a map value and used in parentheses.
 pub TypeMapValue: NodeTypeMapValue = {
-    <n:MetaIdentifier> => NodeTypeMapValue::MapValueCustomType(n),
+    <n:MetaIdentifier> => NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(n),
     "Map" <k:TypeMapKey> <v:TypeMapValue> => NodeTypeMapValue::MapKeyValue(Box::new(NodeTypeMapEntry { key: k, value: v, type_annotation: None })),
     "(" <t:TypeMapValueAllowingTypeArguments> ")" => NodeTypeMapValue::MapValueParanthesizedType(Box::new(t)),
     <t:AddressType> => NodeTypeMapValue::MapValueAddressType(Box::new(t)),
@@ -827,7 +827,7 @@ pub ValueLiteral: NodeValueLiteral = {
 //     | <remoteFetchStatement>
 //     | <identifierRegular> ':=' <variableIdentifier>                                                    
 //     | <identifierRegular> '=' <fullExpression>
-//     | <identifierRegular> '<-' '&' (<typeCustomTypeName> | <typeByteStr> | <typeEvent>) [<blockchainFetchArguments>]    
+//     | <identifierRegular> '<-' '&' (<typeTypeOrEnumLikeIdentifierName> | <typeByteStr> | <typeEvent>) [<blockchainFetchArguments>]    
 //     | <identifierRegular> '<-' <identifierRegular> mapAccess+                    
 //     | <identifierRegular> '<-' 'exists' <identifierRegular> mapAccess+     
 //     | <identifierRegular> mapAccess+ ':=' <variableIdentifier>                                 
@@ -1325,13 +1325,13 @@ SpecialId: String = {
 // A custom type name is a user-defined type name in a Scilla contract.
 // A custom type name consists of a custom type identifier.
 //
-// <typeCustomTypeName> ::= <upperCaseCharacter> <alphaNumericUnderscore>* ;
+// <typeTypeOrEnumLikeIdentifierName> ::= <upperCaseCharacter> <alphaNumericUnderscore>* ;
 //
 // This rule allows for custom type names to be defined in a Scilla contract.
 //
-// @syntax typeCustomTypeName
+// @syntax typeTypeOrEnumLikeIdentifierName
 // @return A custom type name as a user-defined type name in a Scilla contract.
-CustomTypeId: String = {
+TypeOrEnumLikeIdentifierId: String = {
 	r"[A-Z][a-zA-Z0-9_]*" => String::from(<>)
 }
 

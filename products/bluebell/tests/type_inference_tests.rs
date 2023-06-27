@@ -61,27 +61,27 @@ mod tests {
         );
 
         workspace.env.insert(
-            "MyCustomType".to_string(),
+            "MyTypeOrEnumLikeIdentifier".to_string(),
             Box::new(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         workspace.env.insert(
             "MyNamespace".to_string(),
             Box::new(UnionType {
                 // TODO: Come up with namespace type
-                name: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
                 types: [].to_vec(),
-                symbol: "MyCustomType".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
 
         workspace.env.insert(
-            "MyNamespace::MyCustomType".to_string(),
+            "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             Box::new(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
 
@@ -96,8 +96,8 @@ mod tests {
             "MyNamespace".to_string(),
             Box::new(NamespaceType {
                 // TODO: Come up with namespace type
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
 
@@ -229,22 +229,28 @@ mod tests {
             })
         );
         // Custom type resolution
-        let ident = get_ast!(parser::TypeNameIdentifierParser, "MyCustomType");
+        let ident = get_ast!(
+            parser::TypeNameIdentifierParser,
+            "MyTypeOrEnumLikeIdentifier"
+        );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string()
             })
         );
         // Type in namespace
         workspace.namespace = "MyNamespace".to_string();
-        let ident = get_ast!(parser::TypeNameIdentifierParser, "MyCustomType");
+        let ident = get_ast!(
+            parser::TypeNameIdentifierParser,
+            "MyTypeOrEnumLikeIdentifier"
+        );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string()
             })
         );
         // Nonexistent type
@@ -473,12 +479,12 @@ mod tests {
     fn type_inference_imported_name_test() {
         let mut workspace = setup_workspace();
         // Test imported name for custom type
-        let ident = get_ast!(parser::ImportedNameParser, "MyCustomType");
+        let ident = get_ast!(parser::ImportedNameParser, "MyTypeOrEnumLikeIdentifier");
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             })
         );
         // Test imported name for event type
@@ -500,12 +506,15 @@ mod tests {
             })
         );
         // Test imported name for a namespace type, as a namespace is also valid for importing.
-        let ident = get_ast!(parser::ImportedNameParser, "MyNamespace::MyCustomType");
+        let ident = get_ast!(
+            parser::ImportedNameParser,
+            "MyNamespace::MyTypeOrEnumLikeIdentifier"
+        );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             })
         );
     }
@@ -516,8 +525,8 @@ mod tests {
         let mut workspace = setup_workspace();
         // scenario: we have valid import declarations in our code
         let node_import_declaration_str = r#"
-    import MyCustomType
-    import MyNamespace.MyCustomType
+    import MyTypeOrEnumLikeIdentifier
+    import MyNamespace.MyTypeOrEnumLikeIdentifier
     "#;
         // getting the relevant AST Node => NodeImportDeclarations
         let node_import_declarations = get_ast!(
@@ -527,8 +536,10 @@ mod tests {
         // this should be successful as we imported valid types
         assert!(node_import_declarations.get_type(&mut workspace).is_ok());
         // Check the imported types
-        assert!(workspace.env.contains_key("MyCustomType"));
-        assert!(workspace.env.contains_key("MyNamespace::MyCustomType"));
+        assert!(workspace.env.contains_key("MyTypeOrEnumLikeIdentifier"));
+        assert!(workspace
+            .env
+            .contains_key("MyNamespace::MyTypeOrEnumLikeIdentifier"));
         // scenario: we have invalid import declaration in our code
         let node_import_declaration_str = r#"
     import NonExistentType
@@ -558,22 +569,28 @@ mod tests {
             })
         );
         // Parsing and inferring type in a namespace
-        let ident = get_ast!(parser::MetaIdentifierParser, "MyNamespace::MyCustomType");
+        let ident = get_ast!(
+            parser::MetaIdentifierParser,
+            "MyNamespace::MyTypeOrEnumLikeIdentifier"
+        );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string()
             })
         );
         // Parsing and inferring type in a Hexspace
         workspace.namespace = "MyNamespace".to_string(); // Ensuring we are in the right namespace
-        let ident = get_ast!(parser::MetaIdentifierParser, "0x1234.MyCustomType");
+        let ident = get_ast!(
+            parser::MetaIdentifierParser,
+            "0x1234.MyTypeOrEnumLikeIdentifier"
+        );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "0x1234.MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "0x1234.MyTypeOrEnumLikeIdentifier".to_string()
             })
         );
         // Parsing and inferring ByteString type
@@ -605,15 +622,15 @@ mod tests {
         // Test TemplateType argument
         let node_builtin_arguments = NodeBuiltinArguments {
             arguments: vec![NodeVariableIdentifier::VariableName(
-                "MyCustomType".to_string(),
+                "MyTypeOrEnumLikeIdentifier".to_string(),
             )],
             type_annotation: None,
         };
         assert_eq!(
             node_builtin_arguments.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             })
         );
         // Test for invalid/empty arguments
@@ -663,12 +680,15 @@ mod tests {
             }),
         );
         // NodeMetaIdentifier test
-        let ident = get_ast!(parser::TypeMapKeyParser, "(MyNamespace::MyCustomType)");
+        let ident = get_ast!(
+            parser::TypeMapKeyParser,
+            "(MyNamespace::MyTypeOrEnumLikeIdentifier)"
+        );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // NodeAddressType test
@@ -726,15 +746,18 @@ mod tests {
             "Expected BuiltinType 'Address'"
         );
         // Parse a NodeTypeMapValue
-        let mapvalue = get_ast!(parser::TypeMapValueParser, "MapValueCustomType Uint32");
+        let mapvalue = get_ast!(
+            parser::TypeMapValueParser,
+            "MapValueTypeOrEnumLikeIdentifier Uint32"
+        );
         let result = mapvalue.get_type(&mut workspace);
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::BuiltinType(BuiltinType {
-                name: "MapValueCustomType".to_string(),
+                name: "MapValueTypeOrEnumLikeIdentifier".to_string(),
                 symbol: "Uint32".to_string(),
             }),
-            "Expected 'MapValueCustomType' for a map value of custom type 'Uint32'"
+            "Expected 'MapValueTypeOrEnumLikeIdentifier' for a map value of custom type 'Uint32'"
         );
         // TODO: add more cases to cover the different scenarios
     }
@@ -753,13 +776,13 @@ mod tests {
             }),
         );
         // Test generic custom type argument
-        let node = get_ast!(parser::TypeArgumentParser, "MyCustomType");
+        let node = get_ast!(parser::TypeArgumentParser, "MyTypeOrEnumLikeIdentifier");
         let result = node.get_type(&mut workspace).ok().expect("Expected a type");
         assert_eq!(
             result,
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // Test Map type argument
@@ -815,12 +838,12 @@ mod tests {
             }),
         );
         // Case2: Test Custom type Type inference
-        let ident = get_ast!(parser::ScillaTypeParser, "MyCustomType"); // replace with a valid expression
+        let ident = get_ast!(parser::ScillaTypeParser, "MyTypeOrEnumLikeIdentifier"); // replace with a valid expression
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // Case3: A variable not present in the workspace, type inference should fail.
@@ -830,13 +853,16 @@ mod tests {
             "Expected an error when parsing non-existent type"
         );
         // Case4: Test namespace Type inference
-        let ident = get_ast!(parser::ScillaTypeParser, "MyNamespace.MyCustomType"); // replace with a valid expression
+        let ident = get_ast!(
+            parser::ScillaTypeParser,
+            "MyNamespace.MyTypeOrEnumLikeIdentifier"
+        ); // replace with a valid expression
         let result = ident.get_type(&mut workspace);
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string()
             }),
         );
         // TODO: check that all cases are cover and add if not
@@ -942,15 +968,15 @@ mod tests {
         // Testing pattern match on variable of union type
         let ident = get_ast!(
             parser::PatternMatchExpressionClauseParser,
-            "| MyCustomType Foo => Uint32 42"
+            "| MyTypeOrEnumLikeIdentifier Foo => Uint32 42"
         );
         let result = ident.get_type(&mut workspace);
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::UnionType(UnionType {
-                name: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
                 types: [].to_vec(),
-                symbol: "MyCustomType".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             })
         );
         // Testing pattern match on variable of builtin type
@@ -970,14 +996,14 @@ mod tests {
         workspace.namespace = "MyNamespace".to_string();
         let ident = get_ast!(
             parser::PatternMatchExpressionClauseParser,
-            "| MyNamespace::MyCustomType _ => MyNamespace::MyCustomType _"
+            "| MyNamespace::MyTypeOrEnumLikeIdentifier _ => MyNamespace::MyTypeOrEnumLikeIdentifier _"
         );
         let result = ident.get_type(&mut workspace);
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             })
         );
         // Testing pattern match on variable of builtin type in a namespace
@@ -1073,12 +1099,12 @@ mod tests {
         );
         // Pattern: Constructor
         workspace.namespace = "MyNamespace".to_string();
-        let pattern = get_ast!(parser::PatternParser, "MyCustomType()");
+        let pattern = get_ast!(parser::PatternParser, "MyTypeOrEnumLikeIdentifier()");
         assert_eq!(
             pattern.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // ArgumentPattern: WildcardArgument
@@ -1095,21 +1121,24 @@ mod tests {
             "Expected an error when parsing a BinderArgument with unbounded name"
         );
         // ArgumentPattern: ConstructorArgument with namespace
-        let arg_pattern = get_ast!(parser::ArgumentPatternParser, "MyCustomType");
+        let arg_pattern = get_ast!(parser::ArgumentPatternParser, "MyTypeOrEnumLikeIdentifier");
         assert_eq!(
             arg_pattern.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // ArgumentPattern: PatternArgument
-        let arg_pattern = get_ast!(parser::ArgumentPatternParser, "MyCustomType()");
+        let arg_pattern = get_ast!(
+            parser::ArgumentPatternParser,
+            "MyTypeOrEnumLikeIdentifier()"
+        );
         assert_eq!(
             arg_pattern.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
     }
@@ -1451,8 +1480,11 @@ mod tests {
                 _ => panic!("Unexpected Component Parameter type"),
             }
         }
-        // Testing function call parameters involving custom types (x: MyCustomType)
-        let params = get_ast!(parser::ComponentParametersParser, "(x: MyCustomType)");
+        // Testing function call parameters involving custom types (x: MyTypeOrEnumLikeIdentifier)
+        let params = get_ast!(
+            parser::ComponentParametersParser,
+            "(x: MyTypeOrEnumLikeIdentifier)"
+        );
         let param = &params.parameters[0];
         let param_type = &param.identifier_with_type.annotation.type_name;
         match param_type {
@@ -1460,7 +1492,7 @@ mod tests {
                 let t = type_ident.get_type(&mut workspace).unwrap();
                 assert!(
                     matches!(t, TypeAnnotation::TemplateType(_)),
-                    "Expected MyCustomType annotation for Component Parameters"
+                    "Expected MyTypeOrEnumLikeIdentifier annotation for Component Parameters"
                 );
             }
             _ => panic!("Unexpected Component Parameter type"),
@@ -1500,13 +1532,13 @@ mod tests {
         // Namespace type resolution
         let ident = get_ast!(
             parser::ParameterPairParser,
-            "parameter: MyNamespace::MyCustomType"
+            "parameter: MyNamespace::MyTypeOrEnumLikeIdentifier"
         );
         assert_eq!(
             ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string()
             }),
         );
         // Non-existant type
@@ -1638,25 +1670,25 @@ mod tests {
         // Template type resolution
         let t_ident = get_ast!(
             parser::TypedIdentifierParser,
-            "templateIdentifier: MyCustomType"
+            "templateIdentifier: MyTypeOrEnumLikeIdentifier"
         );
         assert_eq!(
             t_ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // Type resolution with namespace
         let t_ident = get_ast!(
             parser::TypedIdentifierParser,
-            "identifierNamespace: MyNamespace::MyCustomType"
+            "identifierNamespace: MyNamespace::MyTypeOrEnumLikeIdentifier"
         );
         assert_eq!(
             t_ident.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             })
         );
         // Error case - non-existent type
@@ -1684,24 +1716,27 @@ mod tests {
             }),
         );
         // Custom type annotation
-        let custom_type = get_ast!(parser::TypeAnnotationParser, ": MyCustomType");
+        let custom_type = get_ast!(parser::TypeAnnotationParser, ": MyTypeOrEnumLikeIdentifier");
         assert_eq!(
             custom_type.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // Complex type annotation - List
-        let list_type = get_ast!(parser::TypeAnnotationParser, ": (List MyCustomType)");
+        let list_type = get_ast!(
+            parser::TypeAnnotationParser,
+            ": (List MyTypeOrEnumLikeIdentifier)"
+        );
         assert_eq!(
             list_type.get_type(&mut workspace).unwrap(),
             TypeAnnotation::TypeVar(TypeVar {
                 instance: Some(Box::new(TypeAnnotation::TemplateType(TemplateType {
-                    name: "MyCustomType".to_string(),
-                    symbol: "MyCustomType".to_string(),
+                    name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                    symbol: "MyTypeOrEnumLikeIdentifier".to_string(),
                 }))),
-                symbol: "(List MyCustomType)".to_string(),
+                symbol: "(List MyTypeOrEnumLikeIdentifier)".to_string(),
             }),
         );
         // Complex type annotation - Map
@@ -1738,7 +1773,7 @@ mod tests {
         // 3. Library defining a custom type
         let library_def = get_ast!(
             parser::LibraryDefinitionParser,
-            "library TypeLib type MyCustomType"
+            "library TypeLib type MyTypeOrEnumLikeIdentifier"
         );
         // TODO: assert_eq!(library_def.get_type(&mut workspace).unwrap(), LibraryDefinition {..., definitions: [TypeDefinition(..)]});
         // 4. Library defining a value
@@ -1761,7 +1796,7 @@ mod tests {
         // Test with 'let' definition
         let single_definition = get_ast!(
             parser::LibrarySingleDefinitionParser,
-            "let foo: MyCustomType = MyCustomType 42"
+            "let foo: MyTypeOrEnumLikeIdentifier = MyTypeOrEnumLikeIdentifier 42"
         );
         let result = single_definition.get_type(&mut workspace);
         assert!(
@@ -1771,8 +1806,8 @@ mod tests {
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // Test with 'type' definition without '=' operator
@@ -1813,7 +1848,7 @@ mod tests {
         // Invalid 'let' definition without a type
         let single_definition = get_ast!(
             parser::LibrarySingleDefinitionParser,
-            "let foo = MyCustomType 42"
+            "let foo = MyTypeOrEnumLikeIdentifier 42"
         );
         let result = single_definition.get_type(&mut workspace);
         assert!(
@@ -1883,16 +1918,16 @@ mod tests {
         // existing type
         let field_ast = get_ast!(
             parser::ContractFieldParser,
-            "field MyCustomType: MyNamespace::MyCustomType = MyNamespace::MyCustomType"
+            "field MyTypeOrEnumLikeIdentifier: MyNamespace::MyTypeOrEnumLikeIdentifier = MyNamespace::MyTypeOrEnumLikeIdentifier"
         );
         // Now we can get the type of this AST node
         let result = field_ast.get_type(&mut workspace);
-        // Check the type, assuming it should be of MyNamespace's MyCustomType.
+        // Check the type, assuming it should be of MyNamespace's MyTypeOrEnumLikeIdentifier.
         assert_eq!(
             result.unwrap(),
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string(),
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string(),
             }),
         );
         // Non-existant type
@@ -1951,14 +1986,14 @@ mod tests {
             "Expected a boolean type"
         );
         // Use of with variableIdentifier
-        let test_str = "with MyCustomType =>";
+        let test_str = "with MyTypeOrEnumLikeIdentifier =>";
         let with_constraint = get_ast!(parser::WithConstraintParser, test_str);
         let result = with_constraint.get_type(&mut workspace).unwrap();
         assert_eq!(
             result,
             TypeAnnotation::TemplateType(TemplateType {
-                name: "MyCustomType".to_string(),
-                symbol: "MyNamespace::MyCustomType".to_string()
+                name: "MyTypeOrEnumLikeIdentifier".to_string(),
+                symbol: "MyNamespace::MyTypeOrEnumLikeIdentifier".to_string()
             }),
             "Expected a template type"
         );
@@ -2008,7 +2043,7 @@ mod tests {
                                 identifier_name: "number".to_string(),
                                 annotation: NodeTypeAnnotation {
                                     type_name: NodeScillaType::GenericTypeWithArgs(NodeMetaIdentifier::MetaName(
-                                        NodeTypeNameIdentifier::CustomType("Int32".to_string())
+                                        NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier("Int32".to_string())
                                     ), vec![]),
                                     type_annotation: None,
                                 },

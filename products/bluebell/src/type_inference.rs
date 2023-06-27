@@ -79,7 +79,7 @@ impl TypeInference for NodeVariableIdentifier {
                     NodeTypeNameIdentifier::EventType => {
                         return Err("Namespace cannot be an EventType".to_string());
                     }
-                    NodeTypeNameIdentifier::CustomType(s) => s.to_string(),
+                    NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(s) => s.to_string(),
                 };
                 match resolve_qualified_name(workspace, &name) {
                     Some(t) => {
@@ -109,11 +109,12 @@ impl TypeInference for NodeTypeNameIdentifier {
                 name: "Event".to_string(),
                 symbol: "Event".to_string(),
             })),
-            NodeTypeNameIdentifier::CustomType(custom_type) => match workspace.env.get(custom_type)
-            {
-                Some(t) => Ok(t.get_instance()),
-                None => Err(format!("{} is not defined", custom_type)),
-            },
+            NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(custom_type) => {
+                match workspace.env.get(custom_type) {
+                    Some(t) => Ok(t.get_instance()),
+                    None => Err(format!("{} is not defined", custom_type)),
+                }
+            }
         }
     }
 }
@@ -250,14 +251,14 @@ impl TypeInference for NodeMetaIdentifier {
     fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
             NodeMetaIdentifier::MetaName(name) => {
-                if let NodeTypeNameIdentifier::CustomType(n) = name {
+                if let NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(n) = name {
                     if let Some(t) = workspace.env.get(n) {
                         Ok(t.get_instance())
                     } else {
                         Err(format!("type {} not found in environment", n))
                     }
                 } else {
-                    Err(format!("expected CustomType, got {:?}", name))
+                    Err(format!("expected TypeOrEnumLikeIdentifier, got {:?}", name))
                 }
             }
             NodeMetaIdentifier::MetaNameInNamespace(namespace, name) => {
@@ -325,7 +326,9 @@ impl TypeInference for NodeTypeMapKey {
 impl TypeInference for NodeTypeMapValue {
     fn get_type(&self, workspace: &mut Workspace) -> Result<TypeAnnotation, String> {
         match self {
-            NodeTypeMapValue::MapValueCustomType(meta_id) => meta_id.get_type(workspace),
+            NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(meta_id) => {
+                meta_id.get_type(workspace)
+            }
             NodeTypeMapValue::MapKeyValue(node_type_map_entry) => {
                 node_type_map_entry.get_type(workspace)
             }

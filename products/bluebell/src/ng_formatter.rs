@@ -59,7 +59,7 @@ impl CodeEmitter for ScillaCodeEmitter {
                 NodeTypeNameIdentifier::EventType => {
                     self.script.push_str("Event");
                 }
-                NodeTypeNameIdentifier::CustomType(n) => {
+                NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(n) => {
                     self.script.push_str(n);
                 }
             },
@@ -197,7 +197,7 @@ impl CodeEmitter for ScillaCodeEmitter {
         node: &NodeTypeMapValue,
     ) -> TraversalResult {
         match node {
-            NodeTypeMapValue::MapValueCustomType(value) => {
+            NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(value) => {
                 value.visit(self);
             }
             NodeTypeMapValue::MapKeyValue(value) => {

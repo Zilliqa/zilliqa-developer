@@ -436,28 +436,37 @@ mod tests {
     #[test]
     fn test_type_annotation() {
         check_ok!(parser::TypeAnnotationParser, ": Int");
-        check_ok!(parser::TypeAnnotationParser, ": MyCustomType");
+        check_ok!(parser::TypeAnnotationParser, ": MyTypeOrEnumLikeIdentifier");
         check_ok!(parser::TypeAnnotationParser, ": ByStr32");
         check_ok!(parser::TypeAnnotationParser, ": (Map ByStr32 Uint32)");
         check_ok!(
             parser::TypeAnnotationParser,
             ": (Map ByStr32 (Map ByStr32 Uint32))"
         );
-        check_ok!(parser::TypeAnnotationParser, ": (List MyCustomType)");
         check_ok!(
             parser::TypeAnnotationParser,
-            ": (Pair MyCustomType1 MyCustomType2)"
+            ": (List MyTypeOrEnumLikeIdentifier)"
         );
         check_ok!(
             parser::TypeAnnotationParser,
-            ": (Pair (Pair Int Bool) (List MyCustomType))"
+            ": (Pair MyTypeOrEnumLikeIdentifier1 MyTypeOrEnumLikeIdentifier2)"
+        );
+        check_ok!(
+            parser::TypeAnnotationParser,
+            ": (Pair (Pair Int Bool) (List MyTypeOrEnumLikeIdentifier))"
         );
 
-        check_err!(parser::TypeAnnotationParser, ": MyCustomType (");
-        check_err!(parser::TypeAnnotationParser, ": (Map MyCustomType)");
         check_err!(
             parser::TypeAnnotationParser,
-            ": (Pair MyCustomType1 MyCustomType2"
+            ": MyTypeOrEnumLikeIdentifier ("
+        );
+        check_err!(
+            parser::TypeAnnotationParser,
+            ": (Map MyTypeOrEnumLikeIdentifier)"
+        );
+        check_err!(
+            parser::TypeAnnotationParser,
+            ": (Pair MyTypeOrEnumLikeIdentifier1 MyTypeOrEnumLikeIdentifier2"
         );
         check_err!(parser::TypeAnnotationParser, "Int");
         check_err!(parser::TypeAnnotationParser, ": 42");

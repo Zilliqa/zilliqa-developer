@@ -36,10 +36,10 @@ mod tests {
                 let context = Context::create();
                 let mut formatter = LlvmEmitter::new(&context);
                 let mut ast2 = ast.clone();
+                println!("AST: {:#?}\n\n", ast2);
                 let formatted = formatter.emit(&mut ast2);
 
                 if formatted != script {
-                    println!("AST: {:#?}\n\n", ast2);
                     println!("Orignial:\n{}\n\n", script);
                     println!("Formatted:\n{}\n\n", formatted);
                     let diff = create_patch(&script, &formatted);

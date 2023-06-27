@@ -187,7 +187,9 @@ impl Visitor for NodeTypeMapValue {
         let ret = emitter.emit_type_map_value(TreeTraversalMode::Enter, self);
         let children_ret = if ret == TraversalResult::Ok {
             match self {
-                NodeTypeMapValue::MapValueCustomType(meta_id) => meta_id.visit(emitter),
+                NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(meta_id) => {
+                    meta_id.visit(emitter)
+                }
                 NodeTypeMapValue::MapKeyValue(entry) => entry.visit(emitter),
                 NodeTypeMapValue::MapValueParanthesizedType(value) => value.visit(emitter),
                 NodeTypeMapValue::MapValueAddressType(address_type) => address_type.visit(emitter),

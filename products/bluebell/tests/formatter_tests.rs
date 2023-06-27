@@ -516,8 +516,8 @@ mod tests {
         check_formatting_ok!(parser::TypeAnnotationParser, ": Int", ": Int");
         check_formatting_ok!(
             parser::TypeAnnotationParser,
-            " : MyCustomType",
-            ": MyCustomType"
+            " : MyTypeOrEnumLikeIdentifier",
+            ": MyTypeOrEnumLikeIdentifier"
         );
         check_formatting_ok!(parser::TypeAnnotationParser, ": ByStr32 ", ": ByStr32");
         check_formatting_ok!(
@@ -532,18 +532,18 @@ mod tests {
         );
         check_formatting_ok!(
             parser::TypeAnnotationParser,
-            " : (List MyCustomType)",
-            ": (List MyCustomType)"
+            " : (List MyTypeOrEnumLikeIdentifier)",
+            ": (List MyTypeOrEnumLikeIdentifier)"
         );
         check_formatting_ok!(
             parser::TypeAnnotationParser,
-            ": (Pair MyCustomType1 MyCustomType2 ) ",
-            ": (Pair MyCustomType1 MyCustomType2)"
+            ": (Pair MyTypeOrEnumLikeIdentifier1 MyTypeOrEnumLikeIdentifier2 ) ",
+            ": (Pair MyTypeOrEnumLikeIdentifier1 MyTypeOrEnumLikeIdentifier2)"
         );
         check_formatting_ok!(
             parser::TypeAnnotationParser,
-            " : (Pair (Pair Int Bool) (List MyCustomType))",
-            ": (Pair (Pair Int Bool) (List MyCustomType))"
+            " : (Pair (Pair Int Bool) (List MyTypeOrEnumLikeIdentifier))",
+            ": (Pair (Pair Int Bool) (List MyTypeOrEnumLikeIdentifier))"
         );
     }
 

@@ -11,10 +11,48 @@ use inkwell::{
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
+struct Variant {
+    name: Option<String>,
+    fields: Vec<(String, u64, Option<Box<Variant>>)>, // (name, id, data)
+}
+
+impl Variant {
+    // Constructor method for our struct
+    fn new(name: Option<String>) -> Self {
+        Self {
+            name,
+            fields: Vec::new(),
+        }
+    }
+    // Method to determine if the variant is primitive
+    fn is_primitive(&self) -> bool {
+        for (_, _, data) in self.fields.iter() {
+            if let Some(_) = data {
+                return false;
+            }
+        }
+        true
+    }
+    // Method to determine if the variant is anonymous
+    fn is_anonymous(&self) -> bool {
+        self.name.is_none()
+    }
+    // Method to add a field into our Variant struct
+    fn add_field(&mut self, name: String, value: Option<Box<Variant>>) {
+        let id: u64 = match self.fields.last() {
+            // if we have at least one field, use the id of the last field + 1
+            Some((_, id, _)) => id + 1,
+            // else this is the first field, so use 0
+            None => 0,
+        };
+        self.fields.push((name, id, value));
+    }
+}
+
+#[derive(Debug, Clone)]
 enum Identifier {
     ComponentName(String),
     TypeName(String),
-    Enumarate(String),
     Event(String),
 }
 
@@ -38,6 +76,7 @@ enum Literal {
 #[derive(Debug, Clone)]
 enum StackObject<'ctx> {
     Identifier(Identifier),
+    Variant(Variant),
     LlvmValue(BasicValueEnum<'ctx>),
 }
 
@@ -85,6 +124,7 @@ pub struct LlvmEmitter<'ctx> {
     type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>>,
     value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
 }
+
 impl<'ctx> LlvmEmitter<'ctx> {
     pub fn new(context: &'ctx Context) -> Self {
         let builder = context.create_builder();
@@ -160,10 +200,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                         "Event".to_string(),
                     )));
                 }
-                NodeTypeNameIdentifier::CustomType(n) => {
-                    if !self.type_allocation_handler.contains_key(n) {
-                        return TraversalResult::Fail(format!("Typename {} not defined.", n));
-                    }
+                NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(n) => {
                     self.stack
                         .push(StackObject::Identifier(Identifier::TypeName(n.to_string())));
                 }
@@ -690,6 +727,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                         ));
                     }
                 };
+
                 // TODO: Compute the correct function type
                 let fn_type: FunctionType = self.context.void_type().fn_type(&[], false);
 
@@ -710,7 +748,13 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         mode: TreeTraversalMode,
         node: &NodeTypeAlternativeClause,
     ) -> TraversalResult {
-        unimplemented!();
+        match node {
+            NodeTypeAlternativeClause::ClauseType(identifier) => {
+                identifier.visit(self);
+            }
+            NodeTypeAlternativeClause::ClauseTypeWithArgs(_, _) => unimplemented!(),
+        }
+        TraversalResult::SkipChildren
     }
     fn emit_type_map_value_arguments(
         &mut self,

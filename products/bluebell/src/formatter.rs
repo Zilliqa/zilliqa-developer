@@ -25,7 +25,7 @@ impl ScillaFormatter for NodeTypeNameIdentifier {
                 format!("{}{}", indentation(level), byte_str.to_string())
             }
             NodeTypeNameIdentifier::EventType => format!("{}Event", indentation(level)),
-            NodeTypeNameIdentifier::CustomType(custom_type) => {
+            NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(custom_type) => {
                 format!("{}{}", indentation(level), custom_type.clone())
             }
         }
@@ -237,7 +237,7 @@ impl ScillaFormatter for NodeTypeMapValue {
         let indent = indentation(level);
 
         match self {
-            NodeTypeMapValue::MapValueCustomType(meta_id) => {
+            NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(meta_id) => {
                 format!("{}{}", indent, meta_id.to_string_with_indent(level))
             }
             NodeTypeMapValue::MapKeyValue(node_type_map_entry) => {
