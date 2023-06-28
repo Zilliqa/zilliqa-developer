@@ -10,20 +10,21 @@ use inkwell::{
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-enum VariantOrReference {
-    _Variant(Box<Variant>), // This one will never be used, but is a placeholder for potential future extensions
+enum ReferenceOrDataType {
     Reference(String),
+    Tuple(Box<Tuple>),
+    _Variant(Box<Variant>), // This one will never be used, but is a placeholder for potential future extensions    
 }
 
 #[derive(Debug, Clone)]
 struct EnumValue {
     name: String,
     id: u64,
-    data: Option<VariantOrReference>,
+    data: Option<ReferenceOrDataType>,
 }
 
 impl EnumValue {
-    fn new(name: String, data: Option<VariantOrReference>) -> Self {
+    fn new(name: String, data: Option<ReferenceOrDataType>) -> Self {
         Self { name, id: 0, data }
     }
     fn set_id(&mut self, v: u64) {
@@ -32,16 +33,30 @@ impl EnumValue {
 }
 
 #[derive(Debug, Clone)]
+struct Tuple {
+    fields: Vec<ReferenceOrDataType>
+}
+impl Tuple {
+    fn new() -> Self {
+        Self {
+            fields: Vec::new(),
+        }
+    }
+
+    fn add_field(&mut self, value: ReferenceOrDataType) {
+        self.fields.push(value);
+    }
+}
+
+#[derive(Debug, Clone)]
 struct Variant {
-    name: Option<String>,
     fields: Vec<EnumValue>, // (name, id, data)
 }
 
 impl Variant {
     // Constructor method for our struct
-    fn new(name: Option<String>) -> Self {
+    fn new() -> Self {
         Self {
-            name,
             fields: Vec::new(),
         }
     }
@@ -54,10 +69,7 @@ impl Variant {
         }
         true
     }
-    // Method to determine if the variant is anonymous
-    fn is_anonymous(&self) -> bool {
-        self.name.is_none()
-    }
+
 
     // Method to add a field into our Variant struct
     fn add_field(&mut self, field: EnumValue) {
@@ -102,7 +114,7 @@ enum StackObject<'ctx> {
     Identifier(Identifier),
     Variant(Variant),
     EnumValue(EnumValue),
-    VariantOrReference(VariantOrReference),
+    ReferenceOrDataType(ReferenceOrDataType),
     LlvmValue(BasicValueEnum<'ctx>),
 }
 
@@ -139,17 +151,24 @@ type TypeAllocatorFunction<'ctx> =
 type ValueAllocatorFunction<'ctx> =
     Box<dyn Fn(&'ctx Context, Vec<StackObject<'ctx>>) -> BasicValueEnum<'ctx>>;
 
+#[derive(Debug, Clone)]
+enum ConcreteType {
+    Tuple { name: String, data_layout: Box<Tuple>},
+    Variant { name: String, data_layout: Box<Variant>}, 
+}
 pub struct LlvmEmitter<'ctx> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
     module: Module<'ctx>,
 
-    type_definitions: HashMap<String, Box<Variant>>,
+    type_definitions: Vec<ConcreteType>,
     global_values: HashMap<String, BasicValueEnum<'ctx>>,
     stack: Vec<StackObject<'ctx>>,
 
     type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>>,
     value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
+
+    anonymous_type_number: u64,
 }
 
 impl<'ctx> LlvmEmitter<'ctx> {
@@ -158,7 +177,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
         let module = context.create_module("main");
         let global_values: HashMap<String, BasicValueEnum<'ctx>> = HashMap::new();
         let stack: Vec<StackObject<'ctx>> = Vec::new();
-        let type_definitions = HashMap::new();
+        let type_definitions = Vec::new();
 
         let mut type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>> =
             HashMap::new();
@@ -197,6 +216,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
             type_definitions,
             type_allocation_handler,
             value_allocation_handler,
+            anonymous_type_number: 0
         }
     }
 
@@ -235,6 +255,30 @@ impl<'ctx> LlvmEmitter<'ctx> {
                 expected
             )),
         }
+    }
+
+    fn pop_reference_or_datatype(&mut self) -> Result<ReferenceOrDataType, String> {
+        let ret = if let Some(candidate) = self.stack.pop() {
+            match candidate {
+                StackObject::ReferenceOrDataType(n) => n,
+                _ => {
+                    return Err(format!("Expected data type, but found {:?}.", candidate));
+                }
+            }
+        } else {
+            return Err("Expected data type, but found nothing.".to_string());
+        };
+
+        Ok(ret)
+    }
+
+
+
+    fn generate_anonymous_type_id(&mut self, prefix: String) -> String
+    {
+        let n = self.anonymous_type_number;
+        self.anonymous_type_number += 1;
+        format!("{}{}", prefix, n)
     }
 
     pub fn to_string(&self) -> String {
@@ -348,8 +392,8 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 n.visit(self);
                 let type_name =
                     self.pop_identifier_expect(&Identifier::TypeName("".to_string()))?;
-                let reference = VariantOrReference::Reference(type_name);
-                self.stack.push(StackObject::VariantOrReference(reference))
+                let reference = ReferenceOrDataType::Reference(type_name);
+                self.stack.push(StackObject::ReferenceOrDataType(reference))
             }
             NodeTypeArgument::TemplateTypeArgument(n) => {
                 unimplemented!();
@@ -691,7 +735,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                 name.visit(self);
                 let name = self.pop_identifier_expect(&Identifier::TypeName("".to_string()))?;
-                let mut user_type = Variant::new(Some(name.clone()));
+                let mut user_type = Variant::new();
 
                 if let Some(clauses) = clauses {
                     for clause in clauses.iter() {
@@ -701,7 +745,10 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                     }
                 }
 
-                self.type_definitions.insert(name, Box::new(user_type));
+                self.type_definitions.push(ConcreteType::Variant {
+                    name,
+                    data_layout: Box::new(user_type)
+                });
             }
         }
 
@@ -811,11 +858,24 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 let member_name =
                     self.pop_identifier_expect(&Identifier::TypeName("".to_string()))?;
 
+                let mut tuple = Tuple::new();
                 for child in children.iter() {
                     let x = child.visit(self)?;
+                    let item = self.pop_reference_or_datatype()?;
+                    tuple.add_field(item)
                 }
-                println!("Variant arg: {:?}", self.stack);
-                unimplemented!()
+                println!("Variant arg: {:?}", tuple);
+                let refid = self.generate_anonymous_type_id("Tuple".to_string());
+
+                self.type_definitions.push(ConcreteType::Tuple {
+                    name: refid.clone(), 
+                    data_layout: Box::new(tuple)
+                });
+                // TOOD: Add tuple to type list
+                let reference = ReferenceOrDataType::Reference(refid);
+
+                self.stack
+                    .push(StackObject::EnumValue(EnumValue::new(member_name, Some(reference))));
             }
         }
         Ok(TraversalResult::SkipChildren)
