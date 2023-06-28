@@ -2,29 +2,25 @@ use crate::ast::*;
 use crate::code_emitter::{CodeEmitter, TraversalResult, TreeTraversalMode};
 use crate::visitor::Visitor;
 use inkwell::module::Module;
+use inkwell::types::{AnyTypeEnum, StructType};
 use inkwell::types::{BasicType, BasicTypeEnum, FunctionType};
 use inkwell::{
-    basic_block::BasicBlock, builder::Builder, context::Context, values::BasicValueEnum,
+    basic_block::BasicBlock,
+    builder::Builder,
+    context::Context,
+    values::{BasicValue, BasicValueEnum},
 };
-
 use std::collections::HashMap;
-
-#[derive(Debug, Clone)]
-enum ReferenceOrDataType {
-    Reference(String),
-    Tuple(Box<Tuple>),
-    _Variant(Box<Variant>), // This one will never be used, but is a placeholder for potential future extensions    
-}
 
 #[derive(Debug, Clone)]
 struct EnumValue {
     name: String,
     id: u64,
-    data: Option<ReferenceOrDataType>,
+    data: Option<String>,
 }
 
 impl EnumValue {
-    fn new(name: String, data: Option<ReferenceOrDataType>) -> Self {
+    fn new(name: String, data: Option<String>) -> Self {
         Self { name, id: 0, data }
     }
     fn set_id(&mut self, v: u64) {
@@ -34,16 +30,14 @@ impl EnumValue {
 
 #[derive(Debug, Clone)]
 struct Tuple {
-    fields: Vec<ReferenceOrDataType>
+    fields: Vec<String>,
 }
 impl Tuple {
     fn new() -> Self {
-        Self {
-            fields: Vec::new(),
-        }
+        Self { fields: Vec::new() }
     }
 
-    fn add_field(&mut self, value: ReferenceOrDataType) {
+    fn add_field(&mut self, value: String) {
         self.fields.push(value);
     }
 }
@@ -56,12 +50,10 @@ struct Variant {
 impl Variant {
     // Constructor method for our struct
     fn new() -> Self {
-        Self {
-            fields: Vec::new(),
-        }
+        Self { fields: Vec::new() }
     }
     // Method to determine if the variant is primitive
-    fn is_primitive(&self) -> bool {
+    fn is_pure_enum(&self) -> bool {
         for field in self.fields.iter() {
             if let Some(_) = field.data {
                 return false;
@@ -69,7 +61,6 @@ impl Variant {
         }
         true
     }
-
 
     // Method to add a field into our Variant struct
     fn add_field(&mut self, field: EnumValue) {
@@ -114,7 +105,7 @@ enum StackObject<'ctx> {
     Identifier(Identifier),
     Variant(Variant),
     EnumValue(EnumValue),
-    ReferenceOrDataType(ReferenceOrDataType),
+    DataTypeReference(String),
     LlvmValue(BasicValueEnum<'ctx>),
 }
 
@@ -153,8 +144,14 @@ type ValueAllocatorFunction<'ctx> =
 
 #[derive(Debug, Clone)]
 enum ConcreteType {
-    Tuple { name: String, data_layout: Box<Tuple>},
-    Variant { name: String, data_layout: Box<Variant>}, 
+    Tuple {
+        name: String,
+        data_layout: Box<Tuple>,
+    },
+    Variant {
+        name: String,
+        data_layout: Box<Variant>,
+    },
 }
 pub struct LlvmEmitter<'ctx> {
     context: &'ctx Context,
@@ -172,6 +169,173 @@ pub struct LlvmEmitter<'ctx> {
 }
 
 impl<'ctx> LlvmEmitter<'ctx> {
+    fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
+        match name {
+            "Uint8" => Ok(self.context.i8_type().into()),
+            "Uint16" => Ok(self.context.i16_type().into()),
+            "Uint32" => Ok(self.context.i32_type().into()),
+            "Uint64" => Ok(self.context.i64_type().into()),
+            "Int8" => Ok(self.context.i8_type().into()),
+            "Int16" => Ok(self.context.i16_type().into()),
+            "Int32" => Ok(self.context.i32_type().into()),
+            "Int64" => Ok(self.context.i64_type().into()),
+            // "Unit" => Ok(self.context.void_type().into()),
+            _ => {
+                // Get the struct type from the module if it exists
+                let val = self.module.get_struct_type(name);
+                match val {
+                    Some(val) => Ok(BasicTypeEnum::StructType(val)),
+                    None => Err(format!("Type '{}' not defined.", name)),
+                }
+            }
+        }
+    }
+
+    pub fn get_constructor_name(&self, name: &String) -> String {
+        format!("_construct_{}", name).to_string()
+    }
+
+    pub fn write_type_definitions_to_module(&mut self) -> Result<u32, String> {
+        for concrete_type in self.type_definitions.iter() {
+            match concrete_type {
+                ConcreteType::Tuple { name, data_layout } => {
+                    let mut field_types = Vec::new();
+                    for field in &data_layout.fields {
+                        let field_type = self.get_type_definition(field)?;
+                        field_types.push(field_type);
+                    }
+
+                    let tuple_struct_type = self.context.opaque_struct_type(name);
+                    tuple_struct_type.set_body(&field_types[..], false);
+                    // let tuple_struct_type = self.context.struct_type(&field_types[..], false);
+
+                    let func_type = tuple_struct_type.fn_type(
+                        &field_types
+                            .into_iter()
+                            .map(|t| t.into())
+                            .collect::<Vec<_>>(),
+                        false,
+                    );
+
+                    // TODO: Clean up: Streamline internal naming here
+                    let constructor_name = self.get_constructor_name(name);
+                    let func_val = self.module.add_function(&constructor_name, func_type, None);
+                    let block = self.context.append_basic_block(func_val, "entry");
+                    self.builder.position_at_end(block);
+                    let struct_val = self
+                        .builder
+                        .build_alloca(tuple_struct_type, "struct_alloca");
+                    for (index, param) in func_val.get_param_iter().enumerate() {
+                        let ptr = self
+                            .builder
+                            .build_struct_gep(
+                                tuple_struct_type,
+                                struct_val,
+                                index as u32,
+                                &format!("field{}", index),
+                            )
+                            .unwrap();
+                        self.builder.build_store(ptr, param);
+                    }
+
+                    self.builder.build_return(Some(&struct_val));
+                }
+                ConcreteType::Variant { name, data_layout } => {
+                    if data_layout.is_pure_enum() {
+                        let integer_type = self.context.i32_type();
+
+                        for (i, field) in data_layout.fields.iter().enumerate() {
+                            let const_enum_val = integer_type.const_int(i as u64, false);
+                            let _ = self.module.add_global(
+                                const_enum_val.get_type(),
+                                None,
+                                &format!("{}_{}", name, field.name),
+                            );
+                        }
+                        // TODO: You might want to generate also some enum helper functions.
+                    } else {
+                        println!("Creating {}:\n{:?}", name, data_layout);
+                        let mut variant_fields = Vec::new();
+                        for field in &data_layout.fields {
+                            println!("- Attempting to get {:?}", field);
+                            if let Some(typename) = &field.data {
+                                println!(" ---> Resolving {}", typename);
+                                let typevalue = self.get_type_definition(&typename)?;
+                                variant_fields.push(typevalue);
+                            }
+                            /*
+                            if let Some(type_) = field.data.as_ref().and_then(|t| self.get_type_definition(t)) {
+                                println!(" ---> FOUND");
+                                variant_fields.push(type_);
+                            }
+                            */
+                        }
+
+                        // let tuple_struct_type = self.context.struct_type(&field_types[..], false);
+
+                        let union_variant = self.context.struct_type(&variant_fields, true); // union type
+                                                                                             // let variant_struct_type = self.context.struct_type(&[self.context.i32_type().into(), union_variant.into()], false);
+
+                        let variant_struct_type = self.context.opaque_struct_type(name);
+                        variant_struct_type.set_body(
+                            &[self.context.i32_type().into(), union_variant.into()],
+                            false,
+                        );
+
+                        for (i, field) in data_layout.fields.iter().enumerate() {
+                            if let Some(typename) = &field.data {
+                                let typevalue = self.get_type_definition(&typename)?;
+                                println!("------ @@@ WAS HERE?");
+                                let func_type = variant_struct_type.fn_type(
+                                    &[typevalue.into()], // variant_fields.into_iter().map(|_| type_.into()).collect::<Vec<_>>(),
+                                    false,
+                                );
+                                let constructor_name = format!("{}_construct_{}", name, field.name);
+                                let func_val =
+                                    self.module.add_function(&constructor_name, func_type, None);
+                                let block = self.context.append_basic_block(func_val, "entry");
+                                self.builder.position_at_end(block);
+                                let struct_val = self
+                                    .builder
+                                    .build_alloca(variant_struct_type, "struct_alloca");
+                                let variant_val =
+                                    self.builder.build_alloca(union_variant, "variant_alloca");
+                                for (index, param) in func_val.get_param_iter().enumerate() {
+                                    let ptr = self
+                                        .builder
+                                        .build_struct_gep(
+                                            union_variant,
+                                            variant_val,
+                                            index as u32,
+                                            &format!("field{}", index),
+                                        )
+                                        .unwrap();
+                                    self.builder.build_store(ptr, param);
+                                }
+                                let union_ptr = self
+                                    .builder
+                                    .build_struct_gep(variant_struct_type, struct_val, 1, "union")
+                                    .unwrap();
+                                let id_ptr = self
+                                    .builder
+                                    .build_struct_gep(variant_struct_type, struct_val, 0, "id")
+                                    .unwrap();
+                                self.builder.build_store(
+                                    id_ptr,
+                                    self.context.i32_type().const_int(i as u64, false),
+                                );
+                                self.builder.build_store(union_ptr, variant_val);
+                                self.builder.build_return(Some(&struct_val));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(0)
+    }
+
     pub fn new(context: &'ctx Context) -> Self {
         let builder = context.create_builder();
         let module = context.create_module("main");
@@ -216,7 +380,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
             type_definitions,
             type_allocation_handler,
             value_allocation_handler,
-            anonymous_type_number: 0
+            anonymous_type_number: 0,
         }
     }
 
@@ -257,10 +421,10 @@ impl<'ctx> LlvmEmitter<'ctx> {
         }
     }
 
-    fn pop_reference_or_datatype(&mut self) -> Result<ReferenceOrDataType, String> {
+    fn pop_datatype_reference(&mut self) -> Result<String, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
             match candidate {
-                StackObject::ReferenceOrDataType(n) => n,
+                StackObject::DataTypeReference(n) => n,
                 _ => {
                     return Err(format!("Expected data type, but found {:?}.", candidate));
                 }
@@ -272,10 +436,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
         Ok(ret)
     }
 
-
-
-    fn generate_anonymous_type_id(&mut self, prefix: String) -> String
-    {
+    fn generate_anonymous_type_id(&mut self, prefix: String) -> String {
         let n = self.anonymous_type_number;
         self.anonymous_type_number += 1;
         format!("{}{}", prefix, n)
@@ -284,15 +445,17 @@ impl<'ctx> LlvmEmitter<'ctx> {
     pub fn to_string(&self) -> String {
         self.module.print_to_string().to_string()
     }
-    pub fn emit(&mut self, node: &mut NodeProgram) -> String {
+    pub fn emit(&mut self, node: &mut NodeProgram) -> Result<String, String> {
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
             _ => (),
         }
-        println!("\n\nDefined types:{:#?}\n\n", self.type_definitions);
 
-        self.to_string()
+        println!("\n\nDefined types:{:#?}\n\n", self.type_definitions);
+        self.write_type_definitions_to_module()?;
+
+        Ok(self.to_string())
     }
 }
 
@@ -392,8 +555,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 n.visit(self);
                 let type_name =
                     self.pop_identifier_expect(&Identifier::TypeName("".to_string()))?;
-                let reference = ReferenceOrDataType::Reference(type_name);
-                self.stack.push(StackObject::ReferenceOrDataType(reference))
+                self.stack.push(StackObject::DataTypeReference(type_name))
             }
             NodeTypeArgument::TemplateTypeArgument(n) => {
                 unimplemented!();
@@ -747,7 +909,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
 
                 self.type_definitions.push(ConcreteType::Variant {
                     name,
-                    data_layout: Box::new(user_type)
+                    data_layout: Box::new(user_type),
                 });
             }
         }
@@ -861,21 +1023,21 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 let mut tuple = Tuple::new();
                 for child in children.iter() {
                     let x = child.visit(self)?;
-                    let item = self.pop_reference_or_datatype()?;
+                    let item = self.pop_datatype_reference()?;
                     tuple.add_field(item)
                 }
                 println!("Variant arg: {:?}", tuple);
                 let refid = self.generate_anonymous_type_id("Tuple".to_string());
 
                 self.type_definitions.push(ConcreteType::Tuple {
-                    name: refid.clone(), 
-                    data_layout: Box::new(tuple)
+                    name: refid.clone(),
+                    data_layout: Box::new(tuple),
                 });
-                // TOOD: Add tuple to type list
-                let reference = ReferenceOrDataType::Reference(refid);
 
-                self.stack
-                    .push(StackObject::EnumValue(EnumValue::new(member_name, Some(reference))));
+                self.stack.push(StackObject::EnumValue(EnumValue::new(
+                    member_name,
+                    Some(refid),
+                )));
             }
         }
         Ok(TraversalResult::SkipChildren)

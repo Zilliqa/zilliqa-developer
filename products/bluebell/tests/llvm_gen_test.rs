@@ -39,16 +39,23 @@ mod tests {
                 println!("AST: {:#?}\n\n", ast2);
                 let formatted = formatter.emit(&mut ast2);
 
-                if formatted != script {
-                    println!("Orignial:\n{}\n\n", script);
-                    println!("Formatted:\n{}\n\n", formatted);
-                    let diff = create_patch(&script, &formatted);
-                    let f = PatchFormatter::new().with_color();
-                    println!("Diff:\n{}\n\n", f.fmt_patch(&diff));
-                    println!("Filename: {}\n\n", path)
+                if let Ok(formatted) = formatted {
+                    if formatted != script {
+                        println!("Orignial:\n{}\n\n", script);
+                        println!("Formatted:\n{}\n\n", formatted);
+                        let diff = create_patch(&script, &formatted);
+                        let f = PatchFormatter::new().with_color();
+                        println!("Diff:\n{}\n\n", f.fmt_patch(&diff));
+                        println!("Filename: {}\n\n", path)
+                    }
+                    assert_eq!(formatted, script);
+                    formatted == script
+                } else {
+                    if let Err(message) = formatted {
+                        panic!("{}", message);
+                    }
+                    false
                 }
-                assert_eq!(formatted, script);
-                formatted == script
             }
             Err(error) => {
                 let ret = error.clone();

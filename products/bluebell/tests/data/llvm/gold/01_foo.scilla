@@ -7,8 +7,8 @@ type Bool =
   | True
 
 type OptionalBool = 
-  | Boolean of Bool Int32 Int32
-  | None
+  | Boolean of Int32 Int32
+  | Int8
 
 contract Dead8()
 
