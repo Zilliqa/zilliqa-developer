@@ -153,15 +153,52 @@ enum ConcreteType {
         data_layout: Box<Variant>,
     },
 }
+
+#[derive(Debug, Clone)]
+struct FunctionArgument {
+    name: String,
+    typename: String,
+}
+
+#[derive(Debug, Clone)]
+enum Operation {
+    Jump,
+    ConditionalJump,
+    MemLoad,
+    MemStore,
+}
+
+#[derive(Debug, Clone)]
+struct Instruction {
+    ssa_name: Option<String>,
+    typename: String,
+    operation: Operation,
+}
+
+#[derive(Debug, Clone)]
+struct FunctionBlock {
+    name: String,
+    instructions: Vec<Instruction>,
+}
+
+#[derive(Debug, Clone)]
+struct ConcreteFunction {
+    return_type: Option<String>,
+    arguments: Vec<FunctionArgument>,
+    blocks: Vec<FunctionBlock>,
+}
+
 pub struct LlvmEmitter<'ctx> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
     module: Module<'ctx>,
 
     type_definitions: Vec<ConcreteType>,
-    global_values: HashMap<String, BasicValueEnum<'ctx>>,
+    function_definitions: Vec<ConcreteFunction>,
     stack: Vec<StackObject<'ctx>>,
 
+    // TODO: not used atm
+    global_values: HashMap<String, BasicValueEnum<'ctx>>,
     type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>>,
     value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
 
@@ -169,6 +206,56 @@ pub struct LlvmEmitter<'ctx> {
 }
 
 impl<'ctx> LlvmEmitter<'ctx> {
+    pub fn new(context: &'ctx Context) -> Self {
+        let builder = context.create_builder();
+        let module = context.create_module("main");
+        let global_values: HashMap<String, BasicValueEnum<'ctx>> = HashMap::new();
+        let stack: Vec<StackObject<'ctx>> = Vec::new();
+        let type_definitions = Vec::new();
+        let function_definitions = Vec::new();
+
+        let mut type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>> =
+            HashMap::new();
+        let mut value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>> =
+            HashMap::new();
+
+        type_allocation_handler.insert(
+            "Int8".to_string(),
+            Box::new(
+                |ctx: &'ctx Context, _vec: Vec<StackObject<'ctx>>| -> BasicTypeEnum<'ctx> {
+                    ctx.i8_type().into()
+                },
+            ),
+        );
+
+        value_allocation_handler.insert(
+            "int8".to_string(),
+            Box::new(
+                |ctx: &'ctx Context, stack: Vec<StackObject<'ctx>>| -> BasicValueEnum<'ctx> {
+                    if let StackObject::LlvmValue(BasicValueEnum::IntValue(value)) =
+                        stack[0].clone()
+                    {
+                        return BasicValueEnum::IntValue(value);
+                    }
+                    panic!("Expecting a literal value to allocate.")
+                },
+            ),
+        );
+        // TODO: Repeat similar code for all literals
+        LlvmEmitter {
+            context,
+            builder,
+            module,
+            global_values,
+            stack,
+            type_definitions,
+            function_definitions,
+            type_allocation_handler,
+            value_allocation_handler,
+            anonymous_type_number: 0,
+        }
+    }
+
     fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
         match name {
             "Uint8" => Ok(self.context.i8_type().into()),
@@ -193,6 +280,125 @@ impl<'ctx> LlvmEmitter<'ctx> {
 
     pub fn get_constructor_name(&self, name: &String) -> String {
         format!("_construct_{}", name).to_string()
+    }
+
+    pub fn get_enum_constructor_name(&self, enum_name: &String, name: &String) -> String {
+        format!("{}_construct_{}", enum_name, name).to_string()
+    }
+
+    fn build_variant(&self, data_layout: &Variant, name: &str) -> AnyTypeEnum<'ctx> {
+        let mut variant_fields = Vec::new();
+        let mut data_size = 0;
+        for field in &data_layout.fields {
+            if let Some(typename) = field.data.as_ref() {
+                let typevalue = self.get_type_definition(&typename).unwrap();
+                let size = match typevalue.size_of() {
+                    Some(s) => s,
+                    _ => unimplemented!(), // Add the remaining enums as per your implementation.
+                };
+                let size = match size.get_sign_extended_constant() {
+                    Some(s) => s,
+                    None => 100, // TODO: This needs fixing for structs - get the size
+                                 /*{
+                                     println!("Failed to convert {:?}", size);
+                                     println!("- Type: {:?}", typevalue);
+                                     unimplemented!()
+                                 }*/
+                };
+                if size > data_size {
+                    data_size = size;
+                }
+                variant_fields.push(typevalue);
+            }
+        }
+
+        // Creating Tag Type
+        let data_size = data_size as u32;
+        let max_tag_value = data_layout.fields.len() as u32;
+        let required_bits = 32 - max_tag_value.leading_zeros();
+        let tag_type = self.context.custom_width_int_type(required_bits);
+        // tag_type.set_name("TagType");
+
+        // Type erased container
+        let i8_type = self.context.i8_type();
+        let variant_struct_type = self.context.opaque_struct_type(name);
+
+        let type_erased_container = i8_type.array_type(data_size);
+        if data_size == 0 {
+            variant_struct_type.set_body(&[tag_type.into()], false);
+        } else {
+            variant_struct_type.set_body(&[tag_type.into(), type_erased_container.into()], false);
+        }
+
+        for (i, field) in data_layout.fields.iter().enumerate() {
+            let constructor_name = self.get_enum_constructor_name(&name.to_string(), &field.name);
+
+            let (func_val, concrete_field_type) = match &field.data {
+                None => {
+                    // Creating constructor
+                    let func_type = variant_struct_type.fn_type(&[], false);
+                    let func_val = self.module.add_function(&constructor_name, func_type, None);
+                    let block = self.context.append_basic_block(func_val, "entry");
+                    self.builder.position_at_end(block);
+
+                    (func_val, variant_struct_type)
+                }
+                Some(typename) => {
+                    // Enum value with associated data
+                    let inner_value_type = self.get_type_definition(&typename).unwrap();
+
+                    // Defining the concrete type
+                    let concrete_field_type = self
+                        .context
+                        .opaque_struct_type(&format!("{}_{}", name, field.name));
+                    concrete_field_type
+                        .set_body(&[tag_type.into(), inner_value_type.into()], false);
+
+                    // TODO: Add padding if the type is less then max value
+
+                    // Creating constructor
+                    let func_type = variant_struct_type.fn_type(&[inner_value_type.into()], false);
+                    let func_val = self.module.add_function(&constructor_name, func_type, None);
+                    let block = self.context.append_basic_block(func_val, "entry");
+                    self.builder.position_at_end(block);
+
+                    (func_val, concrete_field_type)
+                }
+            };
+
+            // Allocating the contrete type and populating its fields
+            let ret_value = self.builder.build_alloca(
+                concrete_field_type,
+                &format!("{}_value", field.name.to_lowercase()),
+            );
+
+            if data_size != 0 {
+                if let Some(data_value) = func_val.get_param_iter().last() {
+                    let data_ptr = self
+                        .builder
+                        .build_struct_gep(concrete_field_type, ret_value, 1, "data_ptr")
+                        .unwrap();
+                    self.builder.build_store(data_ptr, data_value);
+                } else {
+                    // TODO: Store zeros in concrete field type to avoid uninitalised memory?
+                }
+            }
+
+            // Getting the pointers to storage
+            let id_ptr = self
+                .builder
+                .build_struct_gep(concrete_field_type, ret_value, 0, "id")
+                .unwrap();
+            self.builder
+                .build_store(id_ptr, self.context.i32_type().const_int(i as u64, false));
+
+            // Converting the concrete value to a type-erased version
+            let erased_ret =
+                self.builder
+                    .build_bitcast(ret_value, variant_struct_type, "erased_ret");
+            self.builder.build_return(Some(&erased_ret));
+        }
+        variant_struct_type.into()
     }
 
     pub fn write_type_definitions_to_module(&mut self) -> Result<u32, String> {
@@ -241,147 +447,12 @@ impl<'ctx> LlvmEmitter<'ctx> {
                     self.builder.build_return(Some(&struct_val));
                 }
                 ConcreteType::Variant { name, data_layout } => {
-                    if data_layout.is_pure_enum() {
-                        let integer_type = self.context.i32_type();
-
-                        for (i, field) in data_layout.fields.iter().enumerate() {
-                            let const_enum_val = integer_type.const_int(i as u64, false);
-                            let _ = self.module.add_global(
-                                const_enum_val.get_type(),
-                                None,
-                                &format!("{}_{}", name, field.name),
-                            );
-                        }
-                        // TODO: You might want to generate also some enum helper functions.
-                    } else {
-                        println!("Creating {}:\n{:?}", name, data_layout);
-                        let mut variant_fields = Vec::new();
-                        for field in &data_layout.fields {
-                            println!("- Attempting to get {:?}", field);
-                            if let Some(typename) = &field.data {
-                                println!(" ---> Resolving {}", typename);
-                                let typevalue = self.get_type_definition(&typename)?;
-                                variant_fields.push(typevalue);
-                            }
-                            /*
-                            if let Some(type_) = field.data.as_ref().and_then(|t| self.get_type_definition(t)) {
-                                println!(" ---> FOUND");
-                                variant_fields.push(type_);
-                            }
-                            */
-                        }
-
-                        // let tuple_struct_type = self.context.struct_type(&field_types[..], false);
-
-                        let union_variant = self.context.struct_type(&variant_fields, true); // union type
-                                                                                             // let variant_struct_type = self.context.struct_type(&[self.context.i32_type().into(), union_variant.into()], false);
-
-                        let variant_struct_type = self.context.opaque_struct_type(name);
-                        variant_struct_type.set_body(
-                            &[self.context.i32_type().into(), union_variant.into()],
-                            false,
-                        );
-
-                        for (i, field) in data_layout.fields.iter().enumerate() {
-                            if let Some(typename) = &field.data {
-                                let typevalue = self.get_type_definition(&typename)?;
-                                println!("------ @@@ WAS HERE?");
-                                let func_type = variant_struct_type.fn_type(
-                                    &[typevalue.into()], // variant_fields.into_iter().map(|_| type_.into()).collect::<Vec<_>>(),
-                                    false,
-                                );
-                                let constructor_name = format!("{}_construct_{}", name, field.name);
-                                let func_val =
-                                    self.module.add_function(&constructor_name, func_type, None);
-                                let block = self.context.append_basic_block(func_val, "entry");
-                                self.builder.position_at_end(block);
-                                let struct_val = self
-                                    .builder
-                                    .build_alloca(variant_struct_type, "struct_alloca");
-                                let variant_val =
-                                    self.builder.build_alloca(union_variant, "variant_alloca");
-                                for (index, param) in func_val.get_param_iter().enumerate() {
-                                    let ptr = self
-                                        .builder
-                                        .build_struct_gep(
-                                            union_variant,
-                                            variant_val,
-                                            index as u32,
-                                            &format!("field{}", index),
-                                        )
-                                        .unwrap();
-                                    self.builder.build_store(ptr, param);
-                                }
-                                let union_ptr = self
-                                    .builder
-                                    .build_struct_gep(variant_struct_type, struct_val, 1, "union")
-                                    .unwrap();
-                                let id_ptr = self
-                                    .builder
-                                    .build_struct_gep(variant_struct_type, struct_val, 0, "id")
-                                    .unwrap();
-                                self.builder.build_store(
-                                    id_ptr,
-                                    self.context.i32_type().const_int(i as u64, false),
-                                );
-                                self.builder.build_store(union_ptr, variant_val);
-                                self.builder.build_return(Some(&struct_val));
-                            }
-                        }
-                    }
+                    self.build_variant(data_layout, name);
                 }
             }
         }
 
         Ok(0)
-    }
-
-    pub fn new(context: &'ctx Context) -> Self {
-        let builder = context.create_builder();
-        let module = context.create_module("main");
-        let global_values: HashMap<String, BasicValueEnum<'ctx>> = HashMap::new();
-        let stack: Vec<StackObject<'ctx>> = Vec::new();
-        let type_definitions = Vec::new();
-
-        let mut type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>> =
-            HashMap::new();
-        let mut value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>> =
-            HashMap::new();
-
-        type_allocation_handler.insert(
-            "Int8".to_string(),
-            Box::new(
-                |ctx: &'ctx Context, _vec: Vec<StackObject<'ctx>>| -> BasicTypeEnum<'ctx> {
-                    ctx.i8_type().into()
-                },
-            ),
-        );
-
-        value_allocation_handler.insert(
-            "int8".to_string(),
-            Box::new(
-                |ctx: &'ctx Context, stack: Vec<StackObject<'ctx>>| -> BasicValueEnum<'ctx> {
-                    if let StackObject::LlvmValue(BasicValueEnum::IntValue(value)) =
-                        stack[0].clone()
-                    {
-                        return BasicValueEnum::IntValue(value);
-                    }
-                    panic!("Expecting a literal value to allocate.")
-                },
-            ),
-        );
-        // TODO: Repeat similar code for all literals
-        LlvmEmitter {
-            context,
-            builder,
-            module,
-            global_values,
-            stack,
-            type_definitions,
-            type_allocation_handler,
-            value_allocation_handler,
-            anonymous_type_number: 0,
-        }
     }
 
     fn pop_enum_value(&mut self) -> Result<EnumValue, String> {
@@ -916,6 +987,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
 
         Ok(TraversalResult::SkipChildren)
     }
+
     fn emit_contract_definition(
         &mut self,
         mode: TreeTraversalMode,

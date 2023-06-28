@@ -6,10 +6,15 @@ type Bool =
   | False
   | True
 
-type OptionalBool = 
-  | Boolean of Int32 Int32
-  | Int8
+type Action = 
+  | MoveTo of Int32 Int32
+  | Draw of Int8 Int64
+  | Test of Bool
+  | Flush  
 
+type Action = 
+  | True
+    
 contract Dead8()
 
 transition Foo()
