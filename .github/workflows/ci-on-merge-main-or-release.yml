@@ -32,6 +32,22 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service_account: "${{ secrets.GCP_PRD_GITHUB_SA_GCS_CACHE }}"
+          create_credentials_file: true
+
+      - name: Configure bazel GCS cache
+        run: |
+          export BAZEL_REMOTE_CACHE_CREDENTIALS_JSON='${{ steps.auth.outputs.credentials_file_path }}'
+          export BAZEL_REMOTE_CACHE_ENDPOINT='${{ vars.BAZEL_REMOTE_CACHE_ENDPOINT }}'
+          python config/gcp_cs_cache.py
+        shell: bash
+
       #### BEGIN PRODUCT CHANGES EVALUATION ####
       - name: Get changed files
         id: changed-files
@@ -96,15 +112,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET_KET_MANIFESTS }}
 
-      - name: Bazel cache
-        id: cache-bazel-debug
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel', 'workflows') }}
-          restore-keys: |
-            ${{ runner.os }}-bazel-
-
       - name: Get tag version
         id: get-version
         run: |
@@ -146,17 +153,17 @@ jobs:
       - name: "Build and push Docker - developer-portal - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_staging
+          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_staging
 
       - name: "Build and push Docker - neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_staging
+          bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_staging
 
       - name: "Build and push Docker - devex - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_staging
+          bazelisk run --test_output=all --keep_going //products/devex:push_image_staging
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -193,17 +200,17 @@ jobs:
       - name: "Build and push Docker - developer-portal - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/developer-portal:push_image_production
+          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_production
 
       - name: "Build and push Docker - neo-savant - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/neo-savant:push_image_production
+          bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_production
 
       - name: "Build and push Docker - devex - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //products/devex:push_image_production
+          bazelisk run --test_output=all --keep_going //products/devex:push_image_production
 
       ### BEGIN DEPLOYMENT STAGES
       - name: "Create application.bzl"
