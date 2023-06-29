@@ -17,7 +17,21 @@ type Action =
     
 contract Dead8()
 
-transition Foo()
-  alive = True;
-  dead = alive
+transition DynamicTypes(x: Uint32, y: Bool)
+  magic = Uint32 0;
+  get_meaning_of_life = builtin eq magic x;
+
+  value = match get_meaning_of_life with
+    | True =>
+         Uint32 42
+    | False =>
+        Uint32 0
+  end;
+
+  e = {
+    _eventname: "MeaningOfLife";
+    answer: value
+  };
+
+  event e 
 end
