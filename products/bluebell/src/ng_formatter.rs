@@ -1,13 +1,13 @@
 use crate::ast::*;
-use crate::code_emitter::{CodeEmitter, TraversalResult, TreeTraversalMode};
-use crate::visitor::Visitor;
+use crate::ast_converting::{AstConverting, TraversalResult, TreeTraversalMode};
+use crate::ast_visitor::AstVisitor;
 
-pub struct ScillaCodeEmitter {
+pub struct ScillaAstConverting {
     indent_level: usize,
     script: String,
 }
 
-impl ScillaCodeEmitter {
+impl ScillaAstConverting {
     pub fn new() -> Self {
         Self {
             indent_level: 0,
@@ -32,7 +32,7 @@ impl ScillaCodeEmitter {
     }
 }
 
-impl CodeEmitter for ScillaCodeEmitter {
+impl AstConverting for ScillaAstConverting {
     fn emit_byte_str(
         &mut self,
         mode: TreeTraversalMode,

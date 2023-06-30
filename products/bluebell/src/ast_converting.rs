@@ -10,7 +10,7 @@ pub enum TraversalResult {
     SkipChildren, // Returned when the visitor should skip the children and exit traversal
 }
 
-pub trait CodeEmitter {
+pub trait AstConverting {
     fn emit_byte_str(
         &mut self,
         mode: TreeTraversalMode,

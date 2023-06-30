@@ -1,6 +1,7 @@
 use crate::ast::*;
-use crate::code_emitter::{CodeEmitter, TraversalResult, TreeTraversalMode};
-use crate::visitor::Visitor;
+use crate::ast_converting::{AstConverting, TraversalResult, TreeTraversalMode};
+use crate::ast_visitor::AstVisitor;
+use crate::ir::*;
 use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
 use inkwell::types::{BasicType, BasicTypeEnum};
@@ -15,226 +16,6 @@ Things that need renaming:
 AtomicSid -> ????
 EventType -> AutoType ;; Essentially a JSON dict
 */
-
-#[derive(Debug, Clone, PartialEq)]
-enum SymbolKind {
-    FunctionName,
-    TransitionName,
-    ProcedureName,
-    ExternalFunctionName,
-
-    TypeName,
-    ComponentName,
-    Event,
-    Namespace,
-
-    Intermediate,
-    Block,
-
-    // More info needed to derive kind
-    VariableOrSsaName,
-    Unknown,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-struct SymbolName {
-    unresolved: String,
-    resolved: Option<String>,
-    kind: SymbolKind,
-}
-
-impl SymbolName {
-    fn qualified_name(&self) -> Result<String, String> {
-        // TODO: Change to resolved or throw
-        Ok(self.unresolved.clone())
-    }
-}
-
-#[derive(Debug, Clone)]
-struct EnumValue {
-    name: SymbolName,
-    id: u64,
-    data: Option<SymbolName>,
-}
-
-impl EnumValue {
-    fn new(name: SymbolName, data: Option<SymbolName>) -> Self {
-        Self { name, id: 0, data }
-    }
-    fn set_id(&mut self, v: u64) {
-        self.id = v
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Tuple {
-    fields: Vec<SymbolName>,
-}
-impl Tuple {
-    fn new() -> Self {
-        Self { fields: Vec::new() }
-    }
-
-    fn add_field(&mut self, value: SymbolName) {
-        self.fields.push(value);
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Variant {
-    fields: Vec<EnumValue>, // (name, id, data)
-}
-
-impl Variant {
-    // Constructor method for our struct
-    fn new() -> Self {
-        Self { fields: Vec::new() }
-    }
-    // Method to determine if the variant is primitive
-    fn is_pure_enum(&self) -> bool {
-        for field in self.fields.iter() {
-            if let Some(_) = field.data {
-                return false;
-            }
-        }
-        true
-    }
-
-    // Method to add a field into our Variant struct
-    fn add_field(&mut self, field: EnumValue) {
-        let id: u64 = match self.fields.last() {
-            // if we have at least one field, use the id of the last field + 1
-            Some(enum_value) => enum_value.id + 1,
-            // else this is the first field, so use 0
-            None => 0,
-        };
-        let mut field = field.clone();
-        field.set_id(id);
-        self.fields.push(field);
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-enum Identifier {
-    // TODO: Replace with symbol reference
-    ComponentName(String),
-    TypeName(String),
-    Event(String),
-}
-
-impl SymbolName {
-    fn new(unresolved: String, kind: SymbolKind) -> Self {
-        Self {
-            unresolved,
-            resolved: None,
-            kind,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct VariableDeclaration {
-    name: String,
-    typename: SymbolName,
-}
-
-impl VariableDeclaration {
-    fn new_stack_object(name: String, typename: SymbolName) -> StackObject<'static> {
-        StackObject::VariableDeclaration(Self { name, typename })
-    }
-}
-
-#[derive(Debug, Clone)]
-enum Operation {
-    Jump(SymbolName),
-    ConditionalJump {
-        expression: SymbolName,
-        on_success: SymbolName,
-        on_failure: SymbolName,
-    },
-    MemLoad,
-    MemStore,
-    IsEqual {
-        left: SymbolName,
-        right: SymbolName,
-    },
-    CallExternalFunction {
-        name: SymbolName,
-        arguments: Vec<SymbolName>,
-    },
-    CallFunction {
-        name: SymbolName,
-        arguments: Vec<SymbolName>,
-    },
-    CallStaticFunction {
-        name: SymbolName,
-        owner: Option<SymbolName>,
-        arguments: Vec<SymbolName>,
-    },
-    CallMemberFunction {
-        name: SymbolName,
-        owner: SymbolName,
-        arguments: Vec<SymbolName>,
-    },
-    ResolveSymbol {
-        symbol: SymbolName,
-    },
-    Literal {
-        data: String,
-        typename: SymbolName,
-    },
-    AcceptTransfer,
-    PhiNode(Vec<SymbolName>),
-}
-
-#[derive(Debug, Clone)]
-struct Instruction {
-    ssa_name: Option<SymbolName>,
-    result_type: Option<SymbolName>,
-    operation: Operation,
-}
-
-#[derive(Debug, Clone)]
-struct FunctionBlock {
-    name: SymbolName,
-    instructions: Vec<Box<Instruction>>,
-    terminated: bool,
-}
-
-impl FunctionBlock {
-    fn new(name: String) -> Box<Self> {
-        Self::new_from_symbol(SymbolName {
-            unresolved: name,
-            resolved: None,
-            kind: SymbolKind::Block,
-        })
-    }
-
-    fn new_from_symbol(name: SymbolName) -> Box<Self> {
-        Box::new(Self {
-            name,
-            instructions: Vec::new(),
-            terminated: false,
-        })
-    }
-    fn new_stack_object(name: String) -> StackObject<'static> {
-        StackObject::FunctionBlock(Self::new(name))
-    }
-}
-
-#[derive(Debug, Clone)]
-struct FunctionBody {
-    blocks: Vec<Box<FunctionBlock>>,
-}
-
-impl FunctionBody {
-    fn new() -> Box<Self> {
-        Box::new(Self { blocks: Vec::new() })
-    }
-    fn new_stack_object() -> StackObject<'static> {
-        StackObject::FunctionBody(Box::new(Self { blocks: Vec::new() }))
-    }
-}
 
 #[derive(Debug, Clone)]
 enum StackObject<'ctx> {
@@ -286,41 +67,11 @@ type TypeAllocatorFunction<'ctx> =
 type ValueAllocatorFunction<'ctx> =
     Box<dyn Fn(&'ctx Context, Vec<StackObject<'ctx>>) -> BasicValueEnum<'ctx>>;
 
-#[derive(Debug, Clone)]
-enum ConcreteType {
-    Tuple {
-        name: SymbolName,
-        data_layout: Box<Tuple>,
-    },
-    Variant {
-        name: SymbolName,
-        data_layout: Box<Variant>,
-    },
-}
-
-#[derive(Debug, Clone)]
-enum FunctionKind {
-    Procedure,
-    Transition,
-    Function,
-}
-
-#[derive(Debug, Clone)]
-struct ConcreteFunction {
-    name: SymbolName,
-    function_kind: FunctionKind,
-    return_type: Option<String>,
-    arguments: Vec<VariableDeclaration>,
-    body: Box<FunctionBody>,
-}
-
 pub struct LlvmEmitter<'ctx> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
     module: Module<'ctx>,
 
-    type_definitions: Vec<ConcreteType>,
-    function_definitions: Vec<ConcreteFunction>,
     stack: Vec<StackObject<'ctx>>,
 
     // TODO: not used atm
@@ -335,6 +86,8 @@ pub struct LlvmEmitter<'ctx> {
     ///
     current_block: Box<FunctionBlock>,
     current_body: Box<FunctionBody>,
+
+    ir: HighlevelIr,
 }
 
 impl<'ctx> LlvmEmitter<'ctx> {
@@ -343,8 +96,6 @@ impl<'ctx> LlvmEmitter<'ctx> {
         let module = context.create_module("main");
         let global_values: HashMap<String, BasicValueEnum<'ctx>> = HashMap::new();
         let stack: Vec<StackObject<'ctx>> = Vec::new();
-        let type_definitions = Vec::new();
-        let function_definitions = Vec::new();
 
         let mut type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>> =
             HashMap::new();
@@ -383,8 +134,6 @@ impl<'ctx> LlvmEmitter<'ctx> {
             module,
             global_values,
             stack,
-            type_definitions,
-            function_definitions,
             type_allocation_handler,
             value_allocation_handler,
             anonymous_type_number: 0,
@@ -392,6 +141,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
             block_counter: 0,
             current_block,
             current_body,
+            ir: HighlevelIr::new(),
         }
     }
 
@@ -590,7 +340,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
     }
 
     pub fn write_type_definitions_to_module(&mut self) -> Result<u32, String> {
-        for concrete_type in self.type_definitions.iter() {
+        for concrete_type in self.ir.type_definitions.iter() {
             match concrete_type {
                 ConcreteType::Tuple { name, data_layout } => {
                     let mut field_types = Vec::new();
@@ -645,7 +395,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
     }
 
     fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
-        println!("Functions: {:#?}", self.function_definitions);
+        println!("Functions: {:#?}", self.ir.function_definitions);
 
         Ok(0)
     }
@@ -786,7 +536,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
             _ => (),
         }
 
-        println!("\n\nDefined types:{:#?}\n\n", self.type_definitions);
+        println!("\n\nDefined types:{:#?}\n\n", self.ir.type_definitions);
         // self.write_type_definitions_to_module()?;
         self.write_function_definitions_to_module()?;
 
@@ -794,7 +544,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
     }
 }
 
-impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
+impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
     fn emit_byte_str(
         &mut self,
         mode: TreeTraversalMode,
@@ -1557,8 +1307,8 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         assert!(typename.kind == SymbolKind::Unknown);
         typename.kind = SymbolKind::TypeName;
 
-        self.stack
-            .push(VariableDeclaration::new_stack_object(name, typename));
+        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, typename));
+        self.stack.push(s);
 
         Ok(TraversalResult::SkipChildren)
     }
@@ -1650,7 +1400,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                     }
                 }
 
-                self.type_definitions.push(ConcreteType::Variant {
+                self.ir.type_definitions.push(ConcreteType::Variant {
                     name,
                     data_layout: Box::new(user_type),
                 });
@@ -1752,7 +1502,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             body,
         };
 
-        self.function_definitions.push(function);
+        self.ir.function_definitions.push(function);
 
         Ok(TraversalResult::SkipChildren)
     }
@@ -1791,7 +1541,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
 
                 let refid = self.generate_anonymous_type_id("Tuple".to_string());
 
-                self.type_definitions.push(ConcreteType::Tuple {
+                self.ir.type_definitions.push(ConcreteType::Tuple {
                     name: refid.clone(),
                     data_layout: Box::new(tuple),
                 });
