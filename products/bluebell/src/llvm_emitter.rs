@@ -63,14 +63,14 @@ impl EnumValue {
 
 #[derive(Debug, Clone)]
 struct Tuple {
-    fields: Vec<String>,
+    fields: Vec<SymbolName>,
 }
 impl Tuple {
     fn new() -> Self {
         Self { fields: Vec::new() }
     }
 
-    fn add_field(&mut self, value: String) {
+    fn add_field(&mut self, value: SymbolName) {
         self.fields.push(value);
     }
 }
@@ -127,20 +127,7 @@ impl SymbolName {
     }
 }
 
-enum Literal {
-    String(String),
-    Bool(bool),
-    Int8(i8),
-    Int16(i16),
-    Int32(i32),
-    Int64(i64),
-    Uint8(u8),
-    Uint16(u16),
-    Uint32(u32),
-    Uint64(u64),
-    Char(char),
-    Bytes(Vec<u8>),
-}
+
 
 #[derive(Debug, Clone)]
 struct VariableDeclaration {
@@ -160,6 +147,10 @@ enum Operation {
     ConditionalJump,
     MemLoad,
     MemStore,
+    CallExternalFunction {
+        name: SymbolName,
+        arguments: Vec<SymbolName>,
+    },
     CallFunction {
         name: SymbolName,
         arguments: Vec<SymbolName>,
@@ -177,6 +168,10 @@ enum Operation {
     ResolveSymbol {
         symbol: SymbolName,
     },
+    Literal {
+        data: String,
+        typename: SymbolName
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -313,6 +308,9 @@ pub struct LlvmEmitter<'ctx> {
     value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
 
     anonymous_type_number: u64,
+
+    ///
+    current_block: Box<FunctionBlock>;
 }
 
 impl<'ctx> LlvmEmitter<'ctx> {
@@ -351,6 +349,8 @@ impl<'ctx> LlvmEmitter<'ctx> {
                 },
             ),
         );
+
+        let current_block = Box::new(FunctionBlock);
         // TODO: Repeat similar code for all literals
         LlvmEmitter {
             context,
@@ -363,6 +363,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
             type_allocation_handler,
             value_allocation_handler,
             anonymous_type_number: 0,
+            current_block
         }
     }
 
@@ -527,7 +528,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
                 ConcreteType::Tuple { name, data_layout } => {
                     let mut field_types = Vec::new();
                     for field in &data_layout.fields {
-                        let field_type = self.get_type_definition(field)?;
+                        let field_type = self.get_type_definition(&field.qualified_name()?)?;
                         field_types.push(field_type);
                     }
 
@@ -696,27 +697,6 @@ impl<'ctx> LlvmEmitter<'ctx> {
         Ok(ret)
     }
 
-    fn pop_identifier_expect(&mut self, expected: &Identifier) -> Result<String, String> {
-        let identifier = if let Some(identifier) = self.stack.pop() {
-            match identifier {
-                StackObject::Identifier(n) => n,
-                _ => {
-                    return Err(format!("Expected identifier, but found {:?}.", identifier));
-                }
-            }
-        } else {
-            return Err("Expected identifier, but found nothing.".to_string());
-        };
-        match (identifier, expected) {
-            (Identifier::ComponentName(s), Identifier::ComponentName(_)) => Ok(s),
-            (Identifier::TypeName(s), Identifier::TypeName(_)) => Ok(s),
-            (Identifier::Event(s), Identifier::Event(_)) => Ok(s),
-            _ => Err(format!(
-                "Expected a variant of {:?}, but found different variant",
-                expected
-            )),
-        }
-    }
 
     fn pop_datatype_reference(&mut self) -> Result<String, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
@@ -872,10 +852,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 unimplemented!();
             }
             NodeTypeArgument::GenericTypeArgument(n) => {
-                n.visit(self);
-                let type_name =
-                    self.pop_identifier_expect(&Identifier::TypeName("".to_string()))?;
-                self.stack.push(StackObject::DataTypeReference(type_name))
+                let _ = n.visit(self)?;                
             }
             NodeTypeArgument::TemplateTypeArgument(n) => {
                 unimplemented!();
@@ -896,35 +873,35 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
-                lead.visit(self)?;
+                let _ = lead.visit(self)?;
                 if args.len() > 0 {
                     // TODO: Deal with arguments
                     unimplemented!()
                 }
             }
             NodeScillaType::MapType(key, value) => {
-                key.visit(self);
-                value.visit(self);
+                let _ = key.visit(self)?;
+                let _ = value.visit(self)?;
                 // TODO: Pop the two and create type Map<X,Y>
                 unimplemented!()
             }
             NodeScillaType::FunctionType(a, b) => {
-                (*a).visit(self);
-                (*b).visit(self);
+                let _ = (*a).visit(self)?;
+                let _ = (*b).visit(self)?;
                 // TODO: Implement the function type
                 unimplemented!()
             }
 
             NodeScillaType::PolyFunctionType(name, a) => {
                 // TODO: What to do with name
-                (*a).visit(self);
+                let _ = (*a).visit(self)?;
                 unimplemented!()
             }
             NodeScillaType::EnclosedType(a) => {
-                (*a).visit(self);
+                let _ = (*a).visit(self)?;
             }
             NodeScillaType::ScillaAddresseType(a) => {
-                (*a).visit(self);
+                let _ = (*a).visit(self)?;
             }
             NodeScillaType::TypeVarType(name) => {
                 self.stack
@@ -988,13 +965,35 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             }
             NodeFullExpression::ExpressionAtomic(expr) => match &**expr {
                 NodeAtomicExpression::AtomicSid(identifier) => {
-                    identifier.visit(self)?;
+                    let _ = identifier.visit(self)?;
                 }
                 NodeAtomicExpression::AtomicLit(literal) => {
-                    literal.visit(self);
+                    let _ = literal.visit(self)?;
                 }
             },
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
+                println!("Builtin expression {:#?}\n{:#?}\n{:#?}", b, targs, xs);
+                println!("- {:#?}", self.stack.last());
+
+                if let Some(targs) = targs {
+                    unimplemented!();
+                }
+
+                let mut arguments: Vec<SymbolName> = [].to_vec();
+
+                for  arg in xs.arguments.iter() { // TODO: xs should be rename .... not clear what this is, but it means function arguments
+                    let _ = arg.visit(self)?;
+                    let instruction = self.pop_instruction()?;
+
+                    println!("- {:#?}", self.stack.last());
+                }
+
+                /*
+                let operation = Operation::CallExternalFunction {
+                    name: b,
+                    arguments
+                };
+                */
                 unimplemented!();
             }
             NodeFullExpression::Message(entries) => {
@@ -1011,7 +1010,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 contract_type_arguments,
                 argument_list,
             } => {
-                identifier_name.visit(self)?;
+                let _ = identifier_name.visit(self)?;
 
                 // Expecting function name symbol
                 let mut name = self.pop_symbol_name()?;
@@ -1093,11 +1092,20 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeValueLiteral::LiteralInt(typename, value) => {
-                typename.visit(self)?;
-                println!("Stack: {:#?}", self.stack.last());
-                println!("Typename: {:#?}", typename);
-                println!("Value: {:#?}", value);
-                unimplemented!();
+                let _ = typename.visit(self)?;
+                let mut typename = self.pop_symbol_name()?;
+                assert!(typename.kind == SymbolKind::Unknown);
+                typename.kind = SymbolKind::TypeName;
+                let operation = Operation::Literal {
+                    data: value.to_string(),
+                    typename,
+                };
+                let instr = Box::new(Instruction { 
+                    ssa_name: None,
+                    result_type: None,
+                    operation
+                });
+                self.stack.push(StackObject::Instruction(instr));
             }
             NodeValueLiteral::LiteralHex(value) => {
                 unimplemented!();
@@ -1174,7 +1182,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 right_hand_side,
             } => {
                 // Generating instruction and setting its name
-                right_hand_side.visit(self)?;
+                let _ = right_hand_side.visit(self)?;
                 println!("RHS: {:#?}", right_hand_side);
                 println!("Stack: {:#?}", self.stack);
                 let mut right_hand_side = self.pop_instruction()?;
@@ -1306,7 +1314,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         self.stack.push(FunctionBody::new_stack_object());
 
         if let Some(block) = &node.statement_block {
-            block.visit(self)?;
+            let _ = block.visit(self)?;
         }
 
         let last_block = self.pop_function_block()?;
@@ -1323,10 +1331,14 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
-                self.stack
-                    .push(FunctionBlock::new_stack_object("entry".to_string()));
+                self.stack.push( FunctionBlock::new_stack_object("entry".to_string()) );
+                // self.stack
+                //     .push(self.current_block);
+                // self.current_block = FunctionBlock::new_stack_object("entry".to_string());
             }
-            _ => (),
+            _ => {
+                // self.current_block = self.pop_function_body()?;
+            }
         }
 
         Ok(TraversalResult::Continue)
@@ -1337,7 +1349,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         node: &NodeTypedIdentifier,
     ) -> Result<TraversalResult, String> {
         let name = node.identifier_name.clone();
-        node.annotation.visit(self)?;
+        let _ = node.annotation.visit(self)?;
 
         let mut typename = self.pop_symbol_name()?;
         assert!(typename.kind == SymbolKind::Unknown);
@@ -1421,7 +1433,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 unimplemented!();
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
-                name.visit(self);
+                let _ = name.visit(self)?;
                 let mut name = self.pop_symbol_name()?;
                 assert!(name.kind == SymbolKind::Unknown);
                 name.kind = SymbolKind::TypeName;
@@ -1430,7 +1442,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
 
                 if let Some(clauses) = clauses {
                     for clause in clauses.iter() {
-                        clause.visit(self);
+                        let _ = clause.visit(self)?;
                         let field = self.pop_enum_value()?;
                         user_type.add_field(field);
                     }
@@ -1510,17 +1522,17 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         node: &NodeTransitionDefinition,
     ) -> Result<TraversalResult, String> {
         // Enter
-        node.name.visit(self)?;
+        let _ = node.name.visit(self)?;
 
         let mut arguments: Vec<VariableDeclaration> = [].to_vec();
         for arg in node.parameters.parameters.iter() {
-            arg.visit(self)?;
+            let _ = arg.visit(self)?;
             let ir_arg = self.pop_variable_declaration()?;
             arguments.push(ir_arg);
         }
 
         // Function body
-        node.body.visit(self)?;
+        let _ = node.body.visit(self)?;
 
         // Exit
         let mut body = self.pop_function_body()?;
@@ -1550,7 +1562,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
-                identifier.visit(self);
+                let _ = identifier.visit(self)?;
                 let mut enum_name = self.pop_symbol_name()?;
                 assert!(enum_name.kind == SymbolKind::Unknown);
                 enum_name.kind = SymbolKind::TypeName;
@@ -1559,15 +1571,19 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                     .push(StackObject::EnumValue(EnumValue::new(enum_name, None)));
             }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
-                identifier.visit(self);
+                let _ = identifier.visit(self)?;
                 let mut member_name = self.pop_symbol_name()?;
                 assert!(member_name.kind == SymbolKind::Unknown);
                 member_name.kind = SymbolKind::TypeName;
 
                 let mut tuple = Tuple::new();
                 for child in children.iter() {
-                    let x = child.visit(self)?;
-                    let item = self.pop_datatype_reference()?;
+                    let _ = child.visit(self)?;
+    
+                    let mut item = self.pop_symbol_name()?;
+                    assert!(item.kind == SymbolKind::Unknown);
+                    item.kind = SymbolKind::TypeName;
+
                     tuple.add_field(item)
                 }
 

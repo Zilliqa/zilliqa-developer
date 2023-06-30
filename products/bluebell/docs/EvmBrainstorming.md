@@ -83,3 +83,38 @@ EVM's stack-based architecture to LLVM's register-based one and may not be the
 optimal way to implement EVM on LLVM. There can be more optimal ways to map
 EVM's semantics onto LLVM, especially when it comes to memory and storage
 access.
+
+## Transform to stack-based VM
+
+Thoughts on transform from LLVM IR to a stack based VM
+
+```
+%c = add i64 %a, i64 %b
+
+=>
+
+push(i64 %a)
+push(i64 %b)
+%c = evm_add_from_stack(%Context)
+
+.
+.
+.
+push(%c)
+
+=>
+
+push(i64 %a)
+push(i64 %b)
+
+.
+.
+. ;; Instruction cannot pass any push operation
+%c = evm_add_from_stack(%Context)
+push(%c)
+
+=>
+
+```
+
+Important: The order of pushes cannot change.
