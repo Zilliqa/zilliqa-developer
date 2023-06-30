@@ -34,7 +34,7 @@ mod tests {
         match parser.parse(&mut errors, lexer) {
             Ok(ast) => {
                 let context = Context::create();
-                let mut formatter = HighlevelIrEmitter::new(&context);
+                let mut formatter = HighlevelIrEmitter::new();
                 let mut ast2 = ast.clone();
                 println!("AST: {:#?}\n\n", ast2);
                 let formatted = formatter.emit(&mut ast2);

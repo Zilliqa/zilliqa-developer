@@ -1,6 +1,12 @@
 use crate::type_classes::TypeAnnotation;
 use std::fmt;
 
+/*
+Things that need renaming:
+AtomicSid -> ????
+EventType -> AutoType ;; Essentially a JSON dict
+*/
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeByteStr {
     Constant(String),
