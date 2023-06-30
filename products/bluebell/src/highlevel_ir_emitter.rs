@@ -6,12 +6,10 @@ use std::mem;
 
 #[derive(Debug, Clone)]
 enum StackObject {
-    Variant(Variant),
     EnumValue(EnumValue),
 
     IrIdentifier(IrIdentifier),
     Instruction(Box<Instruction>),
-    DataTypeReference(String),
 
     VariableDeclaration(VariableDeclaration),
     FunctionBody(Box<FunctionBody>),
@@ -187,21 +185,6 @@ impl HighlevelIrEmitter {
         Ok(ret)
     }
 
-    fn pop_datatype_reference(&mut self) -> Result<String, String> {
-        let ret = if let Some(candidate) = self.stack.pop() {
-            match candidate {
-                StackObject::DataTypeReference(n) => n,
-                _ => {
-                    return Err(format!("Expected data type, but found {:?}.", candidate));
-                }
-            }
-        } else {
-            return Err("Expected data type, but found nothing.".to_string());
-        };
-
-        Ok(ret)
-    }
-
     fn generate_anonymous_type_id(&mut self, prefix: String) -> IrIdentifier {
         let n = self.anonymous_type_number;
         self.anonymous_type_number += 1;
@@ -237,7 +220,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeByteStr,
+        _node: &NodeByteStr,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -270,21 +253,21 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_imported_name(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeImportedName,
+        _node: &NodeImportedName,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_import_declarations(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeImportDeclarations,
+        _node: &NodeImportDeclarations,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_meta_identifier(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeMetaIdentifier,
+        _node: &NodeMetaIdentifier,
     ) -> Result<TraversalResult, String> {
         // TODO:
         Ok(TraversalResult::Continue)
@@ -307,8 +290,8 @@ impl AstConverting for HighlevelIrEmitter {
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeVariableIdentifier::SpecialIdentifier(String) => unimplemented!(),
-            NodeVariableIdentifier::VariableInNamespace(NodeTypeNameIdentifier, String) => {
+            NodeVariableIdentifier::SpecialIdentifier(_identifier) => unimplemented!(),
+            NodeVariableIdentifier::VariableInNamespace(_namespace, _identifier) => {
                 unimplemented!()
             }
         }
@@ -317,21 +300,21 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_builtin_arguments(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeBuiltinArguments,
+        _node: &NodeBuiltinArguments,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_type_map_key(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeTypeMapKey,
+        _node: &NodeTypeMapKey,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_type_map_value(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeTypeMapValue,
+        _node: &NodeTypeMapValue,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -341,16 +324,16 @@ impl AstConverting for HighlevelIrEmitter {
         node: &NodeTypeArgument,
     ) -> Result<TraversalResult, String> {
         match node {
-            NodeTypeArgument::EnclosedTypeArgument(n) => {
+            NodeTypeArgument::EnclosedTypeArgument(_) => {
                 unimplemented!();
             }
             NodeTypeArgument::GenericTypeArgument(n) => {
                 let _ = n.visit(self)?;
             }
-            NodeTypeArgument::TemplateTypeArgument(n) => {
+            NodeTypeArgument::TemplateTypeArgument(_) => {
                 unimplemented!();
             }
-            NodeTypeArgument::AddressTypeArgument(n) => {
+            NodeTypeArgument::AddressTypeArgument(_) => {
                 unimplemented!();
             }
             NodeTypeArgument::MapTypeArgument(_, _) => {
@@ -385,7 +368,7 @@ impl AstConverting for HighlevelIrEmitter {
                 unimplemented!()
             }
 
-            NodeScillaType::PolyFunctionType(name, a) => {
+            NodeScillaType::PolyFunctionType(_name, a) => {
                 // TODO: What to do with name
                 let _ = (*a).visit(self)?;
                 unimplemented!()
@@ -396,7 +379,7 @@ impl AstConverting for HighlevelIrEmitter {
             NodeScillaType::ScillaAddresseType(a) => {
                 let _ = (*a).visit(self)?;
             }
-            NodeScillaType::TypeVarType(name) => {
+            NodeScillaType::TypeVarType(_name) => {
                 /*
                 self.stack
                     .push(StackObject::Identifier(Identifier::TypeName(
@@ -412,21 +395,21 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_type_map_entry(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeTypeMapEntry,
+        _node: &NodeTypeMapEntry,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_address_type_field(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeAddressTypeField,
+        _node: &NodeAddressTypeField,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_address_type(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeAddressType,
+        _node: &NodeAddressType,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -438,23 +421,23 @@ impl AstConverting for HighlevelIrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeFullExpression::LocalVariableDeclaration {
-                identifier_name,
-                expression,
-                type_annotation,
-                containing_expression,
+                identifier_name: _,
+                expression: _,
+                type_annotation: _,
+                containing_expression: _,
             } => {
                 unimplemented!();
             }
             NodeFullExpression::FunctionDeclaration {
-                identier_value, // TODO: Missing spelling - global replacement
-                type_annotation,
-                expression,
+                identier_value: _, // TODO: Missing spelling - global replacement
+                type_annotation: _,
+                expression: _,
             } => {
                 unimplemented!();
             }
             NodeFullExpression::FunctionCall {
-                function_name,
-                argument_list,
+                function_name: _,
+                argument_list: _,
             } => {
                 unimplemented!();
             }
@@ -499,7 +482,7 @@ impl AstConverting for HighlevelIrEmitter {
 
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeFullExpression::Message(entries) => {
+            NodeFullExpression::Message(_entries) => {
                 unimplemented!();
             }
             NodeFullExpression::Match {
@@ -530,7 +513,7 @@ impl AstConverting for HighlevelIrEmitter {
                 for clause in clauses.iter() {
                     match &clause.pattern {
                         NodePattern::Wildcard => continue,
-                        NodePattern::Binder(name) => {
+                        NodePattern::Binder(_name) => {
                             unimplemented!()
                         }
                         NodePattern::Constructor(name, args) => {
@@ -664,14 +647,14 @@ impl AstConverting for HighlevelIrEmitter {
                 self.stack.push(StackObject::Instruction(instr));
             }
             NodeFullExpression::TemplateFunction {
-                identifier_name,
-                expression,
+                identifier_name: _,
+                expression: _,
             } => {
                 unimplemented!();
             }
             NodeFullExpression::TApp {
-                identifier_name,
-                type_arguments,
+                identifier_name: _,
+                type_arguments: _,
             } => {
                 unimplemented!();
             }
@@ -682,21 +665,21 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_message_entry(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeMessageEntry,
+        _node: &NodeMessageEntry,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_pattern_match_expression_clause(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodePatternMatchExpressionClause,
+        _node: &NodePatternMatchExpressionClause,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_atomic_expression(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeAtomicExpression,
+        _node: &NodeAtomicExpression,
     ) -> Result<TraversalResult, String> {
         // TODO:
         Ok(TraversalResult::Continue)
@@ -705,7 +688,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_contract_type_arguments(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeContractTypeArguments,
+        _node: &NodeContractTypeArguments,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -731,13 +714,13 @@ impl AstConverting for HighlevelIrEmitter {
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeValueLiteral::LiteralHex(value) => {
+            NodeValueLiteral::LiteralHex(_value) => {
                 unimplemented!();
             }
-            NodeValueLiteral::LiteralString(value) => {
+            NodeValueLiteral::LiteralString(_value) => {
                 unimplemented!();
             }
-            NodeValueLiteral::LiteralEmptyMap(key, value) => {
+            NodeValueLiteral::LiteralEmptyMap(_key, _value) => {
                 unimplemented!();
             }
         }
@@ -746,14 +729,14 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_map_access(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeMapAccess,
+        _node: &NodeMapAccess,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_pattern(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodePattern,
+        _node: &NodePattern,
     ) -> Result<TraversalResult, String> {
         /*
         match node {
@@ -765,21 +748,21 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_argument_pattern(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeArgumentPattern,
+        _node: &NodeArgumentPattern,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_pattern_match_clause(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodePatternMatchClause,
+        _node: &NodePatternMatchClause,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_blockchain_fetch_arguments(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeBlockchainFetchArguments,
+        _node: &NodeBlockchainFetchArguments,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -791,17 +774,17 @@ impl AstConverting for HighlevelIrEmitter {
     ) -> Result<TraversalResult, String> {
         let instr = match node {
             NodeStatement::Load {
-                left_hand_side,
-                right_hand_side,
+                left_hand_side: _,
+                right_hand_side: _,
             } => {
                 unimplemented!()
             }
-            NodeStatement::RemoteFetch(remote_stmt) => {
+            NodeStatement::RemoteFetch(_remote_stmt) => {
                 unimplemented!()
             }
             NodeStatement::Store {
-                left_hand_side,
-                right_hand_side,
+                left_hand_side: _,
+                right_hand_side: _,
             } => {
                 unimplemented!()
             }
@@ -823,36 +806,36 @@ impl AstConverting for HighlevelIrEmitter {
                 right_hand_side
             }
             NodeStatement::ReadFromBC {
-                left_hand_side,
-                type_name,
-                arguments,
+                left_hand_side: _,
+                type_name: _,
+                arguments: _,
             } => {
                 unimplemented!()
             }
             NodeStatement::MapGet {
-                left_hand_side,
-                keys,
-                right_hand_side,
+                left_hand_side: _,
+                keys: _,
+                right_hand_side: _,
             } => {
                 unimplemented!()
             }
             NodeStatement::MapGetExists {
-                left_hand_side,
-                keys,
-                right_hand_side,
+                left_hand_side: _,
+                keys: _,
+                right_hand_side: _,
             } => {
                 unimplemented!()
             }
             NodeStatement::MapUpdate {
-                left_hand_side,
-                keys,
-                right_hand_side,
+                left_hand_side: _,
+                keys: _,
+                right_hand_side: _,
             } => {
                 unimplemented!()
             }
             NodeStatement::MapUpdateDelete {
-                left_hand_side,
-                keys,
+                left_hand_side: _,
+                keys: _,
             } => {
                 unimplemented!()
             }
@@ -861,27 +844,30 @@ impl AstConverting for HighlevelIrEmitter {
                 result_type: None,
                 operation: Operation::AcceptTransfer,
             }),
-            NodeStatement::Send { identifier_name } => {
+            NodeStatement::Send { identifier_name: _ } => {
                 unimplemented!()
             }
-            NodeStatement::CreateEvnt { identifier_name } => {
+            NodeStatement::CreateEvnt { identifier_name: _ } => {
                 unimplemented!()
             }
-            NodeStatement::Throw { error_variable } => {
+            NodeStatement::Throw { error_variable: _ } => {
                 unimplemented!()
             }
-            NodeStatement::MatchStmt { variable, clauses } => {
+            NodeStatement::MatchStmt {
+                variable: _,
+                clauses: _,
+            } => {
                 unimplemented!()
             }
             NodeStatement::CallProc {
-                component_id,
-                arguments,
+                component_id: _,
+                arguments: _,
             } => {
                 unimplemented!()
             }
             NodeStatement::Iterate {
-                identifier_name,
-                component_id,
+                identifier_name: _,
+                component_id: _,
             } => {
                 unimplemented!()
             }
@@ -894,7 +880,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_remote_fetch_statement(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeRemoteFetchStatement,
+        _node: &NodeRemoteFetchStatement,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -926,7 +912,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_component_parameters(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeComponentParameters,
+        _node: &NodeComponentParameters,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
         // TODO:        unimplemented!();
@@ -1009,7 +995,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_type_annotation(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeTypeAnnotation,
+        _node: &NodeTypeAnnotation,
     ) -> Result<TraversalResult, String> {
         // Pass through
         Ok(TraversalResult::Continue)
@@ -1075,9 +1061,9 @@ impl AstConverting for HighlevelIrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeLibrarySingleDefinition::LetDefinition {
-                variable_name,
-                type_annotation,
-                expression,
+                variable_name: _,
+                type_annotation: _,
+                expression: _,
             } => {
                 unimplemented!();
             }
@@ -1140,21 +1126,21 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_contract_field(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeContractField,
+        _node: &NodeContractField,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_with_constraint(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeWithConstraint,
+        _node: &NodeWithConstraint,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_component_definition(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeComponentDefinition,
+        _node: &NodeComponentDefinition,
     ) -> Result<TraversalResult, String> {
         // TODO:
         Ok(TraversalResult::Continue)
@@ -1163,7 +1149,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_procedure_definition(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeProcedureDefinition,
+        _node: &NodeProcedureDefinition,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
@@ -1257,14 +1243,14 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_type_map_value_arguments(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeTypeMapValueArguments,
+        _node: &NodeTypeMapValueArguments,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
     fn emit_type_map_value_allowing_type_arguments(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeTypeMapValueAllowingTypeArguments,
+        _node: &NodeTypeMapValueAllowingTypeArguments,
     ) -> Result<TraversalResult, String> {
         unimplemented!();
     }
