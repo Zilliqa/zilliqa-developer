@@ -8,6 +8,7 @@ use inkwell::{
     basic_block::BasicBlock, builder::Builder, context::Context, values::BasicValueEnum,
 };
 use std::collections::HashMap;
+use std::mem;
 
 /*
 Things that need renaming:
@@ -20,11 +21,15 @@ enum SymbolKind {
     FunctionName,
     TransitionName,
     ProcedureName,
+    ExternalFunctionName,
 
     TypeName,
     ComponentName,
     Event,
     Namespace,
+
+    Intermediate,
+    Block,
 
     // More info needed to derive kind
     VariableOrSsaName,
@@ -127,8 +132,6 @@ impl SymbolName {
     }
 }
 
-
-
 #[derive(Debug, Clone)]
 struct VariableDeclaration {
     name: String,
@@ -143,10 +146,18 @@ impl VariableDeclaration {
 
 #[derive(Debug, Clone)]
 enum Operation {
-    Jump,
-    ConditionalJump,
+    Jump(SymbolName),
+    ConditionalJump {
+        expression: SymbolName,
+        on_success: SymbolName,
+        on_failure: SymbolName,
+    },
     MemLoad,
     MemStore,
+    IsEqual {
+        left: SymbolName,
+        right: SymbolName,
+    },
     CallExternalFunction {
         name: SymbolName,
         arguments: Vec<SymbolName>,
@@ -170,34 +181,44 @@ enum Operation {
     },
     Literal {
         data: String,
-        typename: SymbolName
-    }
+        typename: SymbolName,
+    },
+    AcceptTransfer,
+    PhiNode(Vec<SymbolName>),
 }
 
 #[derive(Debug, Clone)]
 struct Instruction {
-    ssa_name: Option<String>,
+    ssa_name: Option<SymbolName>,
     result_type: Option<SymbolName>,
     operation: Operation,
 }
 
 #[derive(Debug, Clone)]
 struct FunctionBlock {
-    name: String,
+    name: SymbolName,
     instructions: Vec<Box<Instruction>>,
     terminated: bool,
 }
 
 impl FunctionBlock {
-    fn new(name: String) -> Self {
-        Self {
+    fn new(name: String) -> Box<Self> {
+        Self::new_from_symbol(SymbolName {
+            unresolved: name,
+            resolved: None,
+            kind: SymbolKind::Block,
+        })
+    }
+
+    fn new_from_symbol(name: SymbolName) -> Box<Self> {
+        Box::new(Self {
             name,
             instructions: Vec::new(),
             terminated: false,
-        }
+        })
     }
     fn new_stack_object(name: String) -> StackObject<'static> {
-        StackObject::FunctionBlock(Box::new(Self::new(name)))
+        StackObject::FunctionBlock(Self::new(name))
     }
 }
 
@@ -207,8 +228,8 @@ struct FunctionBody {
 }
 
 impl FunctionBody {
-    fn new() -> Self {
-        Self { blocks: Vec::new() }
+    fn new() -> Box<Self> {
+        Box::new(Self { blocks: Vec::new() })
     }
     fn new_stack_object() -> StackObject<'static> {
         StackObject::FunctionBody(Box::new(Self { blocks: Vec::new() }))
@@ -308,9 +329,12 @@ pub struct LlvmEmitter<'ctx> {
     value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
 
     anonymous_type_number: u64,
+    intermediate_counter: u64,
+    block_counter: u64,
 
     ///
-    current_block: Box<FunctionBlock>;
+    current_block: Box<FunctionBlock>,
+    current_body: Box<FunctionBody>,
 }
 
 impl<'ctx> LlvmEmitter<'ctx> {
@@ -350,7 +374,8 @@ impl<'ctx> LlvmEmitter<'ctx> {
             ),
         );
 
-        let current_block = Box::new(FunctionBlock);
+        let current_block = FunctionBlock::new("dummy".to_string());
+        let current_body = FunctionBody::new();
         // TODO: Repeat similar code for all literals
         LlvmEmitter {
             context,
@@ -363,10 +388,32 @@ impl<'ctx> LlvmEmitter<'ctx> {
             type_allocation_handler,
             value_allocation_handler,
             anonymous_type_number: 0,
-            current_block
+            intermediate_counter: 0,
+            block_counter: 0,
+            current_block,
+            current_body,
         }
     }
 
+    fn new_intermediate(&mut self) -> SymbolName {
+        let n = self.intermediate_counter;
+        self.intermediate_counter += 1;
+        SymbolName {
+            unresolved: format!("__imm_{}", n),
+            resolved: None,
+            kind: SymbolKind::Intermediate,
+        }
+    }
+
+    fn new_block_label(&mut self, prefix: &str) -> SymbolName {
+        let n = self.block_counter;
+        self.block_counter += 1;
+        SymbolName {
+            unresolved: format!("{}_{}", prefix, n),
+            resolved: None,
+            kind: SymbolKind::Intermediate,
+        }
+    }
     fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
         match name {
             "Uint8" => Ok(self.context.i8_type().into()),
@@ -395,6 +442,26 @@ impl<'ctx> LlvmEmitter<'ctx> {
 
     pub fn get_enum_constructor_name(&self, enum_name: &String, name: &String) -> String {
         format!("{}_construct_{}", enum_name, name).to_string()
+    }
+
+    fn convert_instruction_to_symbol(&mut self, mut instruction: Box<Instruction>) -> SymbolName {
+        // Optimisation: If previous instruction was "ResolveSymbol",
+        // we avoid creating an intermediate
+        let symbol = match instruction.operation {
+            Operation::ResolveSymbol { symbol } => symbol,
+            _ => {
+                let symbol = if let Some(s) = instruction.ssa_name {
+                    s
+                } else {
+                    self.new_intermediate()
+                };
+                instruction.ssa_name = Some(symbol.clone());
+                self.current_block.instructions.push(instruction);
+                symbol
+            }
+        };
+
+        symbol
     }
 
     fn build_variant(
@@ -583,16 +650,19 @@ impl<'ctx> LlvmEmitter<'ctx> {
         Ok(0)
     }
 
-    fn pop_block(&mut self) -> Result<Box<FunctionBlock>, String> {
+    fn pop_function_block(&mut self) -> Result<Box<FunctionBlock>, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
             match candidate {
                 StackObject::FunctionBlock(n) => n,
                 _ => {
-                    return Err(format!("Expected instruction, but found {:?}.", candidate));
+                    return Err(format!(
+                        "Expected function block, but found {:?}.",
+                        candidate
+                    ));
                 }
             }
         } else {
-            return Err("Expected instruction, but found nothing.".to_string());
+            return Err("Expected function block, but found nothing.".to_string());
         };
 
         Ok(ret)
@@ -679,25 +749,6 @@ impl<'ctx> LlvmEmitter<'ctx> {
         Ok(ret)
     }
 
-    fn pop_function_block(&mut self) -> Result<Box<FunctionBlock>, String> {
-        let ret = if let Some(candidate) = self.stack.pop() {
-            match candidate {
-                StackObject::FunctionBlock(n) => n,
-                _ => {
-                    return Err(format!(
-                        "Expected function block, but found {:?}.",
-                        candidate
-                    ));
-                }
-            }
-        } else {
-            return Err("Expected function block, but found nothing.".to_string());
-        };
-
-        Ok(ret)
-    }
-
-
     fn pop_datatype_reference(&mut self) -> Result<String, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
             match candidate {
@@ -736,7 +787,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
         }
 
         println!("\n\nDefined types:{:#?}\n\n", self.type_definitions);
-        self.write_type_definitions_to_module()?;
+        // self.write_type_definitions_to_module()?;
         self.write_function_definitions_to_module()?;
 
         Ok(self.to_string())
@@ -852,7 +903,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 unimplemented!();
             }
             NodeTypeArgument::GenericTypeArgument(n) => {
-                let _ = n.visit(self)?;                
+                let _ = n.visit(self)?;
             }
             NodeTypeArgument::TemplateTypeArgument(n) => {
                 unimplemented!();
@@ -972,29 +1023,37 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 }
             },
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
-                println!("Builtin expression {:#?}\n{:#?}\n{:#?}", b, targs, xs);
-                println!("- {:#?}", self.stack.last());
-
                 if let Some(targs) = targs {
                     unimplemented!();
                 }
 
                 let mut arguments: Vec<SymbolName> = [].to_vec();
 
-                for  arg in xs.arguments.iter() { // TODO: xs should be rename .... not clear what this is, but it means function arguments
+                for arg in xs.arguments.iter() {
+                    // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
                     let instruction = self.pop_instruction()?;
 
-                    println!("- {:#?}", self.stack.last());
+                    let symbol = self.convert_instruction_to_symbol(instruction);
+
+                    arguments.push(symbol);
                 }
 
-                /*
-                let operation = Operation::CallExternalFunction {
-                    name: b,
-                    arguments
+                let name = SymbolName {
+                    unresolved: b.to_string(),
+                    resolved: None,
+                    kind: SymbolKind::ExternalFunctionName,
                 };
-                */
-                unimplemented!();
+
+                let operation = Operation::CallExternalFunction { name, arguments };
+
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                });
+
+                self.stack.push(StackObject::Instruction(instr));
             }
             NodeFullExpression::Message(entries) => {
                 unimplemented!();
@@ -1003,7 +1062,128 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 match_expression,
                 clauses,
             } => {
-                unimplemented!();
+                let _ = match_expression.visit(self)?;
+                let expression = self.pop_instruction()?;
+
+                let main_expression_symbol = self.convert_instruction_to_symbol(expression);
+
+                let finally_exit_label = self.new_block_label("match_finally");
+
+                // Checking for catch all
+                let mut catch_all: Option<&NodePatternMatchExpressionClause> = None;
+                for clause in clauses.iter() {
+                    match clause.pattern {
+                        NodePattern::Wildcard => {
+                            catch_all = Some(clause);
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+
+                let mut phi_results: Vec<SymbolName> = Vec::new();
+
+                for clause in clauses.iter() {
+                    match &clause.pattern {
+                        NodePattern::Wildcard => continue,
+                        NodePattern::Binder(name) => {
+                            unimplemented!()
+                        }
+                        NodePattern::Constructor(name, args) => {
+                            if args.len() > 0 {
+                                println!("Name: {:#?}", name);
+                                println!("Args: {:#?}", args);
+
+                                unimplemented!();
+                            }
+
+                            let _ = name.visit(self);
+                        }
+                    }
+
+                    /// Creating compare instruction
+                    // TODO: Pop instruction or symbol
+                    let expected_value = self.pop_symbol_name()?;
+                    let compare_instr = Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: Operation::IsEqual {
+                            left: main_expression_symbol.clone(),
+                            right: expected_value,
+                        },
+                    });
+                    let case = self.convert_instruction_to_symbol(compare_instr);
+
+                    // Blocks for success and fail
+                    let fail_label = self.new_block_label("match_fail");
+
+                    let success_label = self.new_block_label("match_success");
+                    let mut success_block = FunctionBlock::new_from_symbol(fail_label.clone());
+
+                    // Terminating current block
+                    let op = Operation::ConditionalJump {
+                        expression: case,
+                        on_success: success_label,
+                        on_failure: fail_label.clone(),
+                    };
+                    self.current_block.instructions.push(Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: op,
+                    }));
+                    self.current_block.terminated = true;
+
+                    // Finishing current_block and moving it onto
+                    // to the current body while preparing the success block
+                    // as current
+                    mem::swap(&mut success_block, &mut self.current_block);
+                    self.current_body.blocks.push(success_block);
+
+                    let _ = clause.expression.visit(self)?;
+                    let expr_instr = self.pop_instruction()?;
+                    let result_sym = self.convert_instruction_to_symbol(expr_instr);
+                    phi_results.push(result_sym);
+
+                    let exit_instruction = Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: Operation::Jump(finally_exit_label.clone()),
+                    });
+                    self.current_block.instructions.push(exit_instruction);
+
+                    // Pushing sucess block and creating fail block
+
+                    let mut fail_block = FunctionBlock::new_from_symbol(fail_label.clone());
+                    mem::swap(&mut fail_block, &mut self.current_block);
+                    self.current_body.blocks.push(fail_block);
+
+                    // let fail_label = self.new_block_label("match_case");
+                    // let fail_block = FunctionBlock::new_from_symbol(fail_label);
+                }
+
+                // Currently in the last fail block
+                // TODO: Catch all if needed
+
+                let exit_instruction = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::Jump(finally_exit_label.clone()),
+                });
+                self.current_block.instructions.push(exit_instruction);
+
+                // Attaching exit block
+                let mut finally_exit_block =
+                    FunctionBlock::new_from_symbol(finally_exit_label.clone());
+                mem::swap(&mut finally_exit_block, &mut self.current_block);
+                self.current_body.blocks.push(finally_exit_block);
+
+                self.stack
+                    .push(StackObject::Instruction(Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: Operation::PhiNode(phi_results),
+                    })));
+                // unimplemented!();
             }
             NodeFullExpression::ConstructorCall {
                 identifier_name,
@@ -1100,10 +1280,10 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                     data: value.to_string(),
                     typename,
                 };
-                let instr = Box::new(Instruction { 
+                let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
-                    operation
+                    operation,
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -1117,7 +1297,6 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 unimplemented!();
             }
         }
-        println!("Value: {:#?}", node);
         Ok(TraversalResult::SkipChildren)
     }
     fn emit_map_access(
@@ -1132,6 +1311,11 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         mode: TreeTraversalMode,
         node: &NodePattern,
     ) -> Result<TraversalResult, String> {
+        /*
+        match node {
+
+        }
+        */
         unimplemented!();
     }
     fn emit_argument_pattern(
@@ -1161,7 +1345,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         mode: TreeTraversalMode,
         node: &NodeStatement,
     ) -> Result<TraversalResult, String> {
-        match node {
+        let instr = match node {
             NodeStatement::Load {
                 left_hand_side,
                 right_hand_side,
@@ -1183,15 +1367,16 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             } => {
                 // Generating instruction and setting its name
                 let _ = right_hand_side.visit(self)?;
-                println!("RHS: {:#?}", right_hand_side);
-                println!("Stack: {:#?}", self.stack);
-                let mut right_hand_side = self.pop_instruction()?;
-                (*right_hand_side).ssa_name = Some(left_hand_side.to_string());
 
-                // Adding the instruction to the current block we are building
-                let mut block = self.pop_block()?;
-                block.instructions.push(right_hand_side);
-                self.stack.push(StackObject::FunctionBlock(block));
+                let mut right_hand_side = self.pop_instruction()?;
+                let symbol = SymbolName {
+                    unresolved: left_hand_side.to_string(),
+                    resolved: None,
+                    kind: SymbolKind::Unknown,
+                };
+                (*right_hand_side).ssa_name = Some(symbol);
+
+                right_hand_side
             }
             NodeStatement::ReadFromBC {
                 left_hand_side,
@@ -1227,9 +1412,11 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             } => {
                 unimplemented!()
             }
-            NodeStatement::Accept => {
-                unimplemented!()
-            }
+            NodeStatement::Accept => Box::new(Instruction {
+                ssa_name: None,
+                result_type: None,
+                operation: Operation::AcceptTransfer,
+            }),
             NodeStatement::Send { identifier_name } => {
                 unimplemented!()
             }
@@ -1254,7 +1441,9 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
             } => {
                 unimplemented!()
             }
-        }
+        };
+
+        self.current_block.instructions.push(instr);
         Ok(TraversalResult::SkipChildren)
     }
 
@@ -1272,16 +1461,18 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeComponentId::WithRegularId(name) => {
-                self.stack
-                    .push(StackObject::Identifier(Identifier::ComponentName(
-                        name.to_string(),
-                    )));
+                self.stack.push(StackObject::SymbolName(SymbolName {
+                    unresolved: name.to_string(),
+                    resolved: None,
+                    kind: SymbolKind::ComponentName,
+                }));
             }
-            NodeComponentId::WithTypeLikeName(n) => {
-                self.stack
-                    .push(StackObject::Identifier(Identifier::ComponentName(
-                        n.to_string(),
-                    )));
+            NodeComponentId::WithTypeLikeName(name) => {
+                self.stack.push(StackObject::SymbolName(SymbolName {
+                    unresolved: name.to_string(), // TODO: Travese the tree first and then construct the name
+                    resolved: None,
+                    kind: SymbolKind::ComponentName,
+                }));
             }
         }
 
@@ -1311,19 +1502,27 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         mode: TreeTraversalMode,
         node: &NodeComponentBody,
     ) -> Result<TraversalResult, String> {
-        self.stack.push(FunctionBody::new_stack_object());
+        // Creating a new function body
+        let mut new_body = FunctionBody::new();
+        mem::swap(&mut new_body, &mut self.current_body);
+        self.stack.push(StackObject::FunctionBody(new_body));
 
+        // Visiting blocks
         if let Some(block) = &node.statement_block {
             let _ = block.visit(self)?;
         }
 
         let last_block = self.pop_function_block()?;
+        // Restoring the old body as current
         let mut body = self.pop_function_body()?;
-        (*body).blocks.push(last_block);
+        mem::swap(&mut body, &mut self.current_body);
 
+        // Pushing the current body onto the stack
+        (*body).blocks.push(last_block);
         self.stack.push(StackObject::FunctionBody(body));
         Ok(TraversalResult::SkipChildren)
     }
+
     fn emit_statement_block(
         &mut self,
         mode: TreeTraversalMode,
@@ -1331,13 +1530,16 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
-                self.stack.push( FunctionBlock::new_stack_object("entry".to_string()) );
-                // self.stack
-                //     .push(self.current_block);
-                // self.current_block = FunctionBlock::new_stack_object("entry".to_string());
+                // self.stack.push( FunctionBlock::new_stack_object("entry".to_string()) );
+                let mut new_entry = FunctionBlock::new("entry".to_string());
+                mem::swap(&mut new_entry, &mut self.current_block);
+                self.stack.push(StackObject::FunctionBlock(new_entry));
             }
             _ => {
-                // self.current_block = self.pop_function_body()?;
+                // Restoring the current block and pushing the WiP onto the stack
+                let mut body = self.pop_function_block()?;
+                mem::swap(&mut body, &mut self.current_block);
+                self.stack.push(StackObject::FunctionBlock(body));
             }
         }
 
@@ -1537,7 +1739,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
         // Exit
         let mut body = self.pop_function_body()?;
         let mut function_name = self.pop_symbol_name()?;
-        assert!(function_name.kind == SymbolKind::Unknown);
+        assert!(function_name.kind == SymbolKind::ComponentName);
         function_name.kind = SymbolKind::TransitionName;
 
         // TODO: Decude return type from body
@@ -1579,7 +1781,7 @@ impl<'ctx> CodeEmitter for LlvmEmitter<'ctx> {
                 let mut tuple = Tuple::new();
                 for child in children.iter() {
                     let _ = child.visit(self)?;
-    
+
                     let mut item = self.pop_symbol_name()?;
                     assert!(item.kind == SymbolKind::Unknown);
                     item.kind = SymbolKind::TypeName;
