@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
+    use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
-    use bluebell::llvm_emitter::LlvmEmitter;
     use bluebell::parser;
     use bluebell::ParserError;
     use bluebell::*;
@@ -34,7 +34,7 @@ mod tests {
         match parser.parse(&mut errors, lexer) {
             Ok(ast) => {
                 let context = Context::create();
-                let mut formatter = LlvmEmitter::new(&context);
+                let mut formatter = HighlevelIrEmitter::new(&context);
                 let mut ast2 = ast.clone();
                 println!("AST: {:#?}\n\n", ast2);
                 let formatted = formatter.emit(&mut ast2);

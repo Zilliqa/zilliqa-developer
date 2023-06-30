@@ -3,9 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use std::process;
 
-use bluebell::formatter::ScillaFormatter;
+use bluebell::formatter::BluebellFormatter;
 use bluebell::lexer::Lexer;
-use bluebell::ng_formatter::ScillaAstConverting;
 use bluebell::ParserError;
 use bluebell::*;
 
@@ -27,10 +26,12 @@ fn main() {
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
             //let _inferred_types = infer_types(&ast).unwrap();
-            let formatted_ast = ast.to_string(); // Call to_string on the top-level AST node to get formatted output
+            let mut formatter = BluebellFormatter::new();
+            let mut ast2 = ast.clone();
+            let formatted_ast = formatter.emit(&mut ast2); // Call to_string on the top-level AST node to get formatted output
             println!("{}", formatted_ast);
 
-            let mut formatter = ScillaAstConverting::new();
+            let mut formatter = BluebellFormatter::new();
             let mut ast2 = ast.clone();
             formatter.emit(&mut ast2);
         }

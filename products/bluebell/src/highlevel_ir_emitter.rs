@@ -1,7 +1,7 @@
 use crate::ast::*;
 use crate::ast_converting::{AstConverting, TraversalResult, TreeTraversalMode};
 use crate::ast_visitor::AstVisitor;
-use crate::ir::*;
+use crate::highlevel_ir::*;
 use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
 use inkwell::types::{BasicType, BasicTypeEnum};
@@ -19,11 +19,11 @@ EventType -> AutoType ;; Essentially a JSON dict
 
 #[derive(Debug, Clone)]
 enum StackObject<'ctx> {
-    Identifier(Identifier),
+    //    Identifier(Identifier),
     Variant(Variant),
     EnumValue(EnumValue),
 
-    SymbolName(SymbolName),
+    IrIdentifier(IrIdentifier),
     Instruction(Box<Instruction>),
     DataTypeReference(String),
 
@@ -34,50 +34,12 @@ enum StackObject<'ctx> {
     LlvmValue(BasicValueEnum<'ctx>),
 }
 
-struct Scope<'ctx> {
-    context: &'ctx Context,
-    namespace: String,
-
-    local_values: HashMap<String, BasicValueEnum<'ctx>>,
-
-    builder: Builder<'ctx>,
-    basic_block: BasicBlock<'ctx>,
-}
-
-impl<'ctx> Scope<'ctx> {
-    pub fn new(
-        context: &'ctx Context,
-        namespace: String,
-        builder: Builder<'ctx>,
-        basic_block: BasicBlock<'ctx>,
-    ) -> Self {
-        Self {
-            context,
-            namespace,
-
-            local_values: HashMap::new(),
-            builder,
-            basic_block,
-        }
-    }
-}
-
-type TypeAllocatorFunction<'ctx> =
-    Box<dyn Fn(&'ctx Context, Vec<StackObject<'ctx>>) -> BasicTypeEnum<'ctx>>;
-type ValueAllocatorFunction<'ctx> =
-    Box<dyn Fn(&'ctx Context, Vec<StackObject<'ctx>>) -> BasicValueEnum<'ctx>>;
-
-pub struct LlvmEmitter<'ctx> {
+pub struct HighlevelIrEmitter<'ctx> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
     module: Module<'ctx>,
 
     stack: Vec<StackObject<'ctx>>,
-
-    // TODO: not used atm
-    global_values: HashMap<String, BasicValueEnum<'ctx>>,
-    type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>>,
-    value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>>,
 
     anonymous_type_number: u64,
     intermediate_counter: u64,
@@ -87,55 +49,23 @@ pub struct LlvmEmitter<'ctx> {
     current_block: Box<FunctionBlock>,
     current_body: Box<FunctionBody>,
 
-    ir: HighlevelIr,
+    ir: HighlevelIr, // TODO: Box
 }
 
-impl<'ctx> LlvmEmitter<'ctx> {
+impl<'ctx> HighlevelIrEmitter<'ctx> {
     pub fn new(context: &'ctx Context) -> Self {
         let builder = context.create_builder();
         let module = context.create_module("main");
-        let global_values: HashMap<String, BasicValueEnum<'ctx>> = HashMap::new();
         let stack: Vec<StackObject<'ctx>> = Vec::new();
-
-        let mut type_allocation_handler: HashMap<String, TypeAllocatorFunction<'ctx>> =
-            HashMap::new();
-        let mut value_allocation_handler: HashMap<String, ValueAllocatorFunction<'ctx>> =
-            HashMap::new();
-
-        type_allocation_handler.insert(
-            "Int8".to_string(),
-            Box::new(
-                |ctx: &'ctx Context, _vec: Vec<StackObject<'ctx>>| -> BasicTypeEnum<'ctx> {
-                    ctx.i8_type().into()
-                },
-            ),
-        );
-
-        value_allocation_handler.insert(
-            "int8".to_string(),
-            Box::new(
-                |ctx: &'ctx Context, stack: Vec<StackObject<'ctx>>| -> BasicValueEnum<'ctx> {
-                    if let StackObject::LlvmValue(BasicValueEnum::IntValue(value)) =
-                        stack[0].clone()
-                    {
-                        return BasicValueEnum::IntValue(value);
-                    }
-                    panic!("Expecting a literal value to allocate.")
-                },
-            ),
-        );
 
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         // TODO: Repeat similar code for all literals
-        LlvmEmitter {
+        HighlevelIrEmitter {
             context,
             builder,
             module,
-            global_values,
             stack,
-            type_allocation_handler,
-            value_allocation_handler,
             anonymous_type_number: 0,
             intermediate_counter: 0,
             block_counter: 0,
@@ -145,23 +75,23 @@ impl<'ctx> LlvmEmitter<'ctx> {
         }
     }
 
-    fn new_intermediate(&mut self) -> SymbolName {
+    fn new_intermediate(&mut self) -> IrIdentifier {
         let n = self.intermediate_counter;
         self.intermediate_counter += 1;
-        SymbolName {
+        IrIdentifier {
             unresolved: format!("__imm_{}", n),
             resolved: None,
-            kind: SymbolKind::Intermediate,
+            kind: IrIndentifierKind::VirtualRegisterIntermediate,
         }
     }
 
-    fn new_block_label(&mut self, prefix: &str) -> SymbolName {
+    fn new_block_label(&mut self, prefix: &str) -> IrIdentifier {
         let n = self.block_counter;
         self.block_counter += 1;
-        SymbolName {
+        IrIdentifier {
             unresolved: format!("{}_{}", prefix, n),
             resolved: None,
-            kind: SymbolKind::Intermediate,
+            kind: IrIndentifierKind::VirtualRegisterIntermediate,
         }
     }
     fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
@@ -194,7 +124,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
         format!("{}_construct_{}", enum_name, name).to_string()
     }
 
-    fn convert_instruction_to_symbol(&mut self, mut instruction: Box<Instruction>) -> SymbolName {
+    fn convert_instruction_to_symbol(&mut self, mut instruction: Box<Instruction>) -> IrIdentifier {
         // Optimisation: If previous instruction was "ResolveSymbol",
         // we avoid creating an intermediate
         let symbol = match instruction.operation {
@@ -418,10 +348,10 @@ impl<'ctx> LlvmEmitter<'ctx> {
         Ok(ret)
     }
 
-    fn pop_symbol_name(&mut self) -> Result<SymbolName, String> {
+    fn pop_symbol_name(&mut self) -> Result<IrIdentifier, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
             match candidate {
-                StackObject::SymbolName(n) => n,
+                StackObject::IrIdentifier(n) => n,
                 _ => {
                     return Err(format!("Expected symbol name, but found {:?}.", candidate));
                 }
@@ -514,14 +444,14 @@ impl<'ctx> LlvmEmitter<'ctx> {
         Ok(ret)
     }
 
-    fn generate_anonymous_type_id(&mut self, prefix: String) -> SymbolName {
+    fn generate_anonymous_type_id(&mut self, prefix: String) -> IrIdentifier {
         let n = self.anonymous_type_number;
         self.anonymous_type_number += 1;
 
-        SymbolName {
+        IrIdentifier {
             unresolved: format!("{}{}", prefix, n).to_string(),
             resolved: None,
-            kind: SymbolKind::TypeName,
+            kind: IrIndentifierKind::TypeName,
         }
     }
 
@@ -544,7 +474,7 @@ impl<'ctx> LlvmEmitter<'ctx> {
     }
 }
 
-impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
+impl<'ctx> AstConverting for HighlevelIrEmitter<'ctx> {
     fn emit_byte_str(
         &mut self,
         mode: TreeTraversalMode,
@@ -561,14 +491,17 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
             TreeTraversalMode::Enter => match node {
                 NodeTypeNameIdentifier::ByteStringType(_) => (),
                 NodeTypeNameIdentifier::EventType => {
+                    /*
                     self.stack.push(StackObject::Identifier(Identifier::Event(
                         "Event".to_string(),
                     )));
+                    */
+                    unimplemented!()
                 }
                 NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(name) => {
-                    let symbol = SymbolName::new(name.to_string(), SymbolKind::Unknown);
+                    let symbol = IrIdentifier::new(name.to_string(), IrIndentifierKind::Unknown);
 
-                    self.stack.push(StackObject::SymbolName(symbol));
+                    self.stack.push(StackObject::IrIdentifier(symbol));
                 }
             },
             TreeTraversalMode::Exit => (),
@@ -606,7 +539,7 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
         match node {
             NodeVariableIdentifier::VariableName(name) => {
                 let operation = Operation::ResolveSymbol {
-                    symbol: SymbolName::new(name.to_string(), SymbolKind::VariableOrSsaName),
+                    symbol: IrIdentifier::new(name.to_string(), IrIndentifierKind::VirtualRegister),
                 };
                 let instr = Box::new(Instruction {
                     ssa_name: None,
@@ -705,10 +638,12 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
                 let _ = (*a).visit(self)?;
             }
             NodeScillaType::TypeVarType(name) => {
+                /*
                 self.stack
                     .push(StackObject::Identifier(Identifier::TypeName(
                         name.to_string(),
                     )));
+                    */
                 unimplemented!()
             }
         };
@@ -777,7 +712,7 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
                     unimplemented!();
                 }
 
-                let mut arguments: Vec<SymbolName> = [].to_vec();
+                let mut arguments: Vec<IrIdentifier> = [].to_vec();
 
                 for arg in xs.arguments.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
@@ -789,10 +724,10 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
                     arguments.push(symbol);
                 }
 
-                let name = SymbolName {
+                let name = IrIdentifier {
                     unresolved: b.to_string(),
                     resolved: None,
-                    kind: SymbolKind::ExternalFunctionName,
+                    kind: IrIndentifierKind::ExternalFunctionName,
                 };
 
                 let operation = Operation::CallExternalFunction { name, arguments };
@@ -831,7 +766,7 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
                     }
                 }
 
-                let mut phi_results: Vec<SymbolName> = Vec::new();
+                let mut phi_results: Vec<IrIdentifier> = Vec::new();
 
                 for clause in clauses.iter() {
                     match &clause.pattern {
@@ -944,10 +879,10 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
 
                 // Expecting function name symbol
                 let mut name = self.pop_symbol_name()?;
-                assert!(name.kind == SymbolKind::Unknown);
-                name.kind = SymbolKind::FunctionName;
+                assert!(name.kind == IrIndentifierKind::Unknown);
+                name.kind = IrIndentifierKind::FunctionName;
 
-                let arguments: Vec<SymbolName> = [].to_vec();
+                let arguments: Vec<IrIdentifier> = [].to_vec();
 
                 if let Some(test) = contract_type_arguments {
                     unimplemented!()
@@ -1024,8 +959,8 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
             NodeValueLiteral::LiteralInt(typename, value) => {
                 let _ = typename.visit(self)?;
                 let mut typename = self.pop_symbol_name()?;
-                assert!(typename.kind == SymbolKind::Unknown);
-                typename.kind = SymbolKind::TypeName;
+                assert!(typename.kind == IrIndentifierKind::Unknown);
+                typename.kind = IrIndentifierKind::TypeName;
                 let operation = Operation::Literal {
                     data: value.to_string(),
                     typename,
@@ -1119,10 +1054,10 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
                 let _ = right_hand_side.visit(self)?;
 
                 let mut right_hand_side = self.pop_instruction()?;
-                let symbol = SymbolName {
+                let symbol = IrIdentifier {
                     unresolved: left_hand_side.to_string(),
                     resolved: None,
-                    kind: SymbolKind::Unknown,
+                    kind: IrIndentifierKind::Unknown,
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
 
@@ -1211,17 +1146,17 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeComponentId::WithRegularId(name) => {
-                self.stack.push(StackObject::SymbolName(SymbolName {
+                self.stack.push(StackObject::IrIdentifier(IrIdentifier {
                     unresolved: name.to_string(),
                     resolved: None,
-                    kind: SymbolKind::ComponentName,
+                    kind: IrIndentifierKind::ComponentName,
                 }));
             }
             NodeComponentId::WithTypeLikeName(name) => {
-                self.stack.push(StackObject::SymbolName(SymbolName {
+                self.stack.push(StackObject::IrIdentifier(IrIdentifier {
                     unresolved: name.to_string(), // TODO: Travese the tree first and then construct the name
                     resolved: None,
-                    kind: SymbolKind::ComponentName,
+                    kind: IrIndentifierKind::ComponentName,
                 }));
             }
         }
@@ -1304,8 +1239,8 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
         let _ = node.annotation.visit(self)?;
 
         let mut typename = self.pop_symbol_name()?;
-        assert!(typename.kind == SymbolKind::Unknown);
-        typename.kind = SymbolKind::TypeName;
+        assert!(typename.kind == IrIndentifierKind::Unknown);
+        typename.kind = IrIndentifierKind::TypeName;
 
         let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, typename));
         self.stack.push(s);
@@ -1387,8 +1322,8 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                 let _ = name.visit(self)?;
                 let mut name = self.pop_symbol_name()?;
-                assert!(name.kind == SymbolKind::Unknown);
-                name.kind = SymbolKind::TypeName;
+                assert!(name.kind == IrIndentifierKind::Unknown);
+                name.kind = IrIndentifierKind::TypeName;
 
                 let mut user_type = Variant::new();
 
@@ -1489,8 +1424,8 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
         // Exit
         let mut body = self.pop_function_body()?;
         let mut function_name = self.pop_symbol_name()?;
-        assert!(function_name.kind == SymbolKind::ComponentName);
-        function_name.kind = SymbolKind::TransitionName;
+        assert!(function_name.kind == IrIndentifierKind::ComponentName);
+        function_name.kind = IrIndentifierKind::TransitionName;
 
         // TODO: Decude return type from body
 
@@ -1516,8 +1451,8 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
                 let _ = identifier.visit(self)?;
                 let mut enum_name = self.pop_symbol_name()?;
-                assert!(enum_name.kind == SymbolKind::Unknown);
-                enum_name.kind = SymbolKind::TypeName;
+                assert!(enum_name.kind == IrIndentifierKind::Unknown);
+                enum_name.kind = IrIndentifierKind::TypeName;
 
                 self.stack
                     .push(StackObject::EnumValue(EnumValue::new(enum_name, None)));
@@ -1525,16 +1460,16 @@ impl<'ctx> AstConverting for LlvmEmitter<'ctx> {
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
                 let _ = identifier.visit(self)?;
                 let mut member_name = self.pop_symbol_name()?;
-                assert!(member_name.kind == SymbolKind::Unknown);
-                member_name.kind = SymbolKind::TypeName;
+                assert!(member_name.kind == IrIndentifierKind::Unknown);
+                member_name.kind = IrIndentifierKind::TypeName;
 
                 let mut tuple = Tuple::new();
                 for child in children.iter() {
                     let _ = child.visit(self)?;
 
                     let mut item = self.pop_symbol_name()?;
-                    assert!(item.kind == SymbolKind::Unknown);
-                    item.kind = SymbolKind::TypeName;
+                    assert!(item.kind == IrIndentifierKind::Unknown);
+                    item.kind = IrIndentifierKind::TypeName;
 
                     tuple.add_field(item)
                 }

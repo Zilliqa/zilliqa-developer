@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
+    use bluebell::formatter::BluebellFormatter;
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
-    use bluebell::ng_formatter::ScillaCodeEmitter;
     use bluebell::parser;
     use bluebell::ParserError;
     use bluebell::*;
@@ -35,7 +35,7 @@ mod tests {
 
         match parser.parse(&mut errors, lexer) {
             Ok(ast) => {
-                let mut formatter = ScillaCodeEmitter::new();
+                let mut formatter = BluebellFormatter::new();
                 let mut ast2 = ast.clone();
                 let formatted = formatter.emit(&mut ast2);
 

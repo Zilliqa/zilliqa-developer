@@ -1,5 +1,13 @@
+use inkwell::module::Module;
+use inkwell::types::AnyTypeEnum;
+use inkwell::types::{BasicType, BasicTypeEnum};
+use inkwell::{
+    basic_block::BasicBlock, builder::Builder, context::Context, values::BasicValueEnum,
+};
+use std::collections::HashMap;
+
 #[derive(Debug, Clone, PartialEq)]
-pub enum SymbolKind {
+pub enum IrIndentifierKind {
     FunctionName,
     TransitionName,
     ProcedureName,
@@ -10,22 +18,22 @@ pub enum SymbolKind {
     Event,
     Namespace,
 
-    Intermediate,
     Block,
+    VirtualRegister,
+    VirtualRegisterIntermediate,
 
     // More info needed to derive kind
-    VariableOrSsaName,
     Unknown,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SymbolName {
+pub struct IrIdentifier {
     pub unresolved: String,
     pub resolved: Option<String>,
-    pub kind: SymbolKind,
+    pub kind: IrIndentifierKind,
 }
 
-impl SymbolName {
+impl IrIdentifier {
     pub fn qualified_name(&self) -> Result<String, String> {
         // TODO: Change to resolved or throw
         Ok(self.unresolved.clone())
@@ -34,13 +42,13 @@ impl SymbolName {
 
 #[derive(Debug, Clone)]
 pub struct EnumValue {
-    pub name: SymbolName,
+    pub name: IrIdentifier,
     pub id: u64,
-    pub data: Option<SymbolName>,
+    pub data: Option<IrIdentifier>,
 }
 
 impl EnumValue {
-    pub fn new(name: SymbolName, data: Option<SymbolName>) -> Self {
+    pub fn new(name: IrIdentifier, data: Option<IrIdentifier>) -> Self {
         Self { name, id: 0, data }
     }
     pub fn set_id(&mut self, v: u64) {
@@ -50,7 +58,7 @@ impl EnumValue {
 
 #[derive(Debug, Clone)]
 pub struct Tuple {
-    pub fields: Vec<SymbolName>,
+    pub fields: Vec<IrIdentifier>,
 }
 
 impl Tuple {
@@ -58,7 +66,7 @@ impl Tuple {
         Self { fields: Vec::new() }
     }
 
-    pub fn add_field(&mut self, value: SymbolName) {
+    pub fn add_field(&mut self, value: IrIdentifier) {
         self.fields.push(value);
     }
 }
@@ -72,15 +80,6 @@ impl Variant {
     // Constructor method for our struct
     pub fn new() -> Self {
         Self { fields: Vec::new() }
-    }
-    // Method to determine if the variant is primitive
-    pub fn is_pure_enum(&self) -> bool {
-        for field in self.fields.iter() {
-            if let Some(_) = field.data {
-                return false;
-            }
-        }
-        true
     }
 
     // Method to add a field into our Variant struct
@@ -105,8 +104,8 @@ pub enum Identifier {
     Event(String),
 }
 
-impl SymbolName {
-    pub fn new(unresolved: String, kind: SymbolKind) -> Self {
+impl IrIdentifier {
+    pub fn new(unresolved: String, kind: IrIndentifierKind) -> Self {
         Self {
             unresolved,
             resolved: None,
@@ -118,82 +117,82 @@ impl SymbolName {
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
     pub name: String,
-    pub typename: SymbolName,
+    pub typename: IrIdentifier,
 }
 
 impl VariableDeclaration {
-    pub fn new(name: String, typename: SymbolName) -> Self {
+    pub fn new(name: String, typename: IrIdentifier) -> Self {
         Self { name, typename }
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum Operation {
-    Jump(SymbolName),
+    Jump(IrIdentifier),
     ConditionalJump {
-        expression: SymbolName,
-        on_success: SymbolName,
-        on_failure: SymbolName,
+        expression: IrIdentifier,
+        on_success: IrIdentifier,
+        on_failure: IrIdentifier,
     },
     MemLoad,
     MemStore,
     IsEqual {
-        left: SymbolName,
-        right: SymbolName,
+        left: IrIdentifier,
+        right: IrIdentifier,
     },
     CallExternalFunction {
-        name: SymbolName,
-        arguments: Vec<SymbolName>,
+        name: IrIdentifier,
+        arguments: Vec<IrIdentifier>,
     },
     CallFunction {
-        name: SymbolName,
-        arguments: Vec<SymbolName>,
+        name: IrIdentifier,
+        arguments: Vec<IrIdentifier>,
     },
     CallStaticFunction {
-        name: SymbolName,
-        owner: Option<SymbolName>,
-        arguments: Vec<SymbolName>,
+        name: IrIdentifier,
+        owner: Option<IrIdentifier>,
+        arguments: Vec<IrIdentifier>,
     },
     CallMemberFunction {
-        name: SymbolName,
-        owner: SymbolName,
-        arguments: Vec<SymbolName>,
+        name: IrIdentifier,
+        owner: IrIdentifier,
+        arguments: Vec<IrIdentifier>,
     },
     ResolveSymbol {
-        symbol: SymbolName,
+        symbol: IrIdentifier,
     },
     Literal {
         data: String,
-        typename: SymbolName,
+        typename: IrIdentifier,
     },
     AcceptTransfer,
-    PhiNode(Vec<SymbolName>),
+    PhiNode(Vec<IrIdentifier>),
 }
 
 #[derive(Debug, Clone)]
 pub struct Instruction {
-    pub ssa_name: Option<SymbolName>,
-    pub result_type: Option<SymbolName>,
+    pub ssa_name: Option<IrIdentifier>,
+    pub result_type: Option<IrIdentifier>,
     pub operation: Operation,
 }
 
 #[derive(Debug, Clone)]
 pub struct FunctionBlock {
-    pub name: SymbolName,
+    pub name: IrIdentifier,
     pub instructions: Vec<Box<Instruction>>,
     pub terminated: bool,
 }
 
 impl FunctionBlock {
     pub fn new(name: String) -> Box<Self> {
-        Self::new_from_symbol(SymbolName {
+        Self::new_from_symbol(IrIdentifier {
             unresolved: name,
             resolved: None,
-            kind: SymbolKind::Block,
+            kind: IrIndentifierKind::Block,
         })
     }
 
-    pub fn new_from_symbol(name: SymbolName) -> Box<Self> {
+    pub fn new_from_symbol(name: IrIdentifier) -> Box<Self> {
         Box::new(Self {
             name,
             instructions: Vec::new(),
@@ -216,11 +215,11 @@ impl FunctionBody {
 #[derive(Debug, Clone)]
 pub enum ConcreteType {
     Tuple {
-        name: SymbolName,
+        name: IrIdentifier,
         data_layout: Box<Tuple>,
     },
     Variant {
-        name: SymbolName,
+        name: IrIdentifier,
         data_layout: Box<Variant>,
     },
 }
@@ -234,7 +233,7 @@ pub enum FunctionKind {
 
 #[derive(Debug, Clone)]
 pub struct ConcreteFunction {
-    pub name: SymbolName,
+    pub name: IrIdentifier,
     pub function_kind: FunctionKind,
     pub return_type: Option<String>,
     pub arguments: Vec<VariableDeclaration>,
@@ -255,21 +254,77 @@ impl HighlevelIr {
     }
 }
 
-/// TODO: possible
-pub trait HighLevelIrEmitter {
-    fn emit_symbol_kind(&mut self, symbol_kind: &SymbolKind);
-    fn emit_symbol_name(&mut self, symbol_name: &SymbolName);
-    fn emit_enum_value(&mut self, enum_value: &EnumValue);
-    fn emit_tuple(&mut self, tuple: &Tuple);
-    fn emit_variant(&mut self, variant: &Variant);
-    fn emit_identifier(&mut self, identifier: &Identifier);
-    fn emit_variable_declaration(&mut self, var_dec: &VariableDeclaration);
-    fn emit_operation(&mut self, operation: &Operation);
-    fn emit_instruction(&mut self, instruction: &Instruction);
-    fn emit_function_block(&mut self, function_block: &FunctionBlock);
-    fn emit_function_body(&mut self, function_body: &FunctionBody);
-    fn emit_concrete_type(&mut self, con_type: &ConcreteType);
-    fn emit_function_kind(&mut self, function_kind: &FunctionKind);
-    fn emit_concrete_function(&mut self, con_function: &ConcreteFunction);
-    fn emit(&mut self, highlevel_ir: &HighlevelIr);
+pub trait IrLowering {
+    fn lower_concrete_type(&mut self, con_type: &ConcreteType);
+    fn lower_concrete_function(&mut self, con_function: &ConcreteFunction);
+    fn lower(&mut self, highlevel_ir: &HighlevelIr);
+}
+
+struct LlvmIrGenerator<'ctx> {
+    context: &'ctx Context,
+    builder: Builder<'ctx>,
+    module: Module<'ctx>,
+    ir: Box<HighlevelIr>, // TODO: Add any members needed for the generation here
+}
+
+impl<'ctx> LlvmIrGenerator<'ctx> {
+    pub fn new(context: &'ctx Context, ir: Box<HighlevelIr>) -> Self {
+        let builder = context.create_builder();
+        let module = context.create_module("main");
+
+        LlvmIrGenerator {
+            context,
+            builder,
+            module,
+            ir,
+        }
+    }
+}
+
+impl<'ctx> IrLowering for LlvmIrGenerator<'ctx> {
+    // Lower a single concrete type from HighlevelIr to LLVM IR.
+    fn lower_concrete_type(&mut self, con_type: &ConcreteType) {
+        match con_type {
+            ConcreteType::Tuple { name, data_layout } => {
+                // provide functionality to handle tuple type
+                unimplemented!()
+            }
+            ConcreteType::Variant { name, data_layout } => {
+                // provide functionality to handle variant type
+                unimplemented!()
+            }
+        }
+    }
+    // Lower a single concrete function from HighlevelIr to LLVM IR.
+    fn lower_concrete_function(&mut self, con_function: &ConcreteFunction) {
+        let func_name = &con_function
+            .name
+            .resolved
+            .as_ref()
+            .unwrap_or(&con_function.name.unresolved);
+        match con_function.function_kind {
+            FunctionKind::Procedure => {
+                // provide functionality for procedure kind
+                unimplemented!()
+            }
+            FunctionKind::Transition => {
+                // provide functionality for Transition kind
+                unimplemented!()
+            }
+            FunctionKind::Function => {
+                // provide functionality for function kind
+                unimplemented!()
+            }
+        }
+    }
+    // Lower the entire HighLevelIr to LLVM IR.
+    fn lower(&mut self, highlevel_ir: &HighlevelIr) {
+        for con_type in &highlevel_ir.type_definitions {
+            self.lower_concrete_type(con_type);
+        }
+        for con_function in &highlevel_ir.function_definitions {
+            self.lower_concrete_function(con_function);
+        }
+        // After lowering all elements, perform a final step.
+    }
 }

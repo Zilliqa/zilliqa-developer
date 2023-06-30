@@ -1,1112 +1,1156 @@
 use crate::ast::*;
-// TODO: Use `to_string` from `ast.rs` where applicable
-pub trait ScillaFormatter {
-    fn to_string(&self) -> String {
-        self.to_string_with_indent(0)
-    }
+use crate::ast_converting::{AstConverting, TraversalResult, TreeTraversalMode};
+use crate::ast_visitor::AstVisitor;
 
-    fn indent(&self, level: usize) -> String {
-        self.to_string_with_indent(level)
-    }
-
-    fn to_string_with_indent(&self, level: usize) -> String;
+pub struct BluebellFormatter {
+    indent_level: usize,
+    script: String,
 }
 
-fn indentation(level: usize) -> String {
-    "  ".repeat(level)
-}
-
-impl ScillaFormatter for NodeTypeNameIdentifier {
-    // Reviewed and corrected
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeTypeNameIdentifier::ByteStringType(byte_str) => {
-                format!("{}{}", indentation(level), byte_str.to_string())
-            }
-            NodeTypeNameIdentifier::EventType => format!("{}Event", indentation(level)),
-            NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(custom_type) => {
-                format!("{}{}", indentation(level), custom_type.clone())
-            }
+impl BluebellFormatter {
+    pub fn new() -> Self {
+        Self {
+            indent_level: 0,
+            script: "".to_string(),
         }
     }
+
+    pub fn to_string(&self) -> String {
+        self.script.clone()
+    }
+
+    pub fn add_newlines(&mut self, count: usize) {
+        self.script.push_str(&"\n".repeat(count));
+        self.script.push_str(&" ".repeat(self.indent_level * 2));
+    }
+
+    pub fn emit(&mut self, node: &mut NodeProgram) -> String {
+        self.script = "".to_string();
+        node.visit(self);
+
+        self.script.clone()
+    }
 }
 
-impl ScillaFormatter for NodeByteStr {
-    // Reviewed and corrected
-    fn to_string_with_indent(&self, _: usize) -> String {
-        match self {
-            NodeByteStr::Constant(s) => s.clone(),
-            NodeByteStr::Type(t) => t.clone(),
+impl AstConverting for BluebellFormatter {
+    fn emit_byte_str(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeByteStr,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeByteStr::Constant(s) => {
+                    self.script.push_str(&format!("\"{}\"", s)); // Push a constant byte string to the script
+                }
+                NodeByteStr::Type(s) => {
+                    self.script.push_str(&format!("{}", s)); // Push a byte string type definition to the script
+                }
+            },
+            TreeTraversalMode::Exit => (),
         }
+        Ok(TraversalResult::Continue)
     }
-}
 
-impl ScillaFormatter for NodeTransitionDefinition {
-    // TODO: Review
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut formatted = String::new();
-        // Remove leading indentation, as the formatted string should not include any whitespace before "transition"
-        // formatted.push_str(&indentation(level));
-        formatted.push_str("transition ");
-        formatted.push_str(&self.name.to_string());
-        formatted.push_str(&self.parameters.to_string_with_indent(0)); // No indentation for the parameters
-        formatted.push_str(" ");
-        formatted.push_str(&self.body.to_string_with_indent(level + 1));
-        // Add " end" to the end of the formatted string
-        formatted.push_str(" end");
-        formatted
-    }
-}
-
-impl ScillaFormatter for NodeTypeAlternativeClause {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeTypeAlternativeClause::ClauseType(name) => {
-                format!("{}| {}", indentation(level), name.indent(level))
-            }
-            NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
-                let indented_args = args
-                    .iter()
-                    .map(|arg| arg.to_string_with_indent(0))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-
-                format!(
-                    "{}| {} of {}",
-                    indentation(level),
-                    name.indent(level),
-                    indented_args
-                )
-            }
+    fn emit_type_name_identifier(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeNameIdentifier,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeTypeNameIdentifier::ByteStringType(_) => (),
+                NodeTypeNameIdentifier::EventType => {
+                    self.script.push_str("Event");
+                }
+                NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(n) => {
+                    self.script.push_str(n);
+                }
+            },
+            TreeTraversalMode::Exit => (),
         }
+        Ok(TraversalResult::Continue)
     }
-}
 
-impl ScillaFormatter for NodeTypeMapValueArguments {
-    // TODO: Review
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeTypeMapValueArguments::EnclosedTypeMapValue(node) => {
-                node.to_string_with_indent(level)
+    fn emit_imported_name(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeImportedName,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(1);
+                self.script.push_str("import ");
             }
-            NodeTypeMapValueArguments::GenericMapValueArgument(identifier) => {
-                identifier.to_string_with_indent(level)
-            }
-            NodeTypeMapValueArguments::MapKeyValueType(key, value) => {
-                let key_str = key.to_string_with_indent(level);
-                let value_str = value.to_string_with_indent(level);
-                format!("Map {} {}", key_str, value_str)
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeTypeMapValueAllowingTypeArguments {
-    // TODO: Review
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(node) => {
-                node.to_string_with_indent(level)
-            }
-            NodeTypeMapValueAllowingTypeArguments::TypeMapValueWithArgs(identifier, args) => {
-                let id_str = identifier.to_string_with_indent(level);
-                let args_str = args
-                    .iter()
-                    .map(|arg| arg.to_string_with_indent(level + 1))
-                    .collect::<Vec<String>>()
-                    .join(", ");
-                format!("{}({}, {})", id_str, args_str, indentation(level))
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeImportedName {
-    // Reviewed
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeImportedName::RegularImport(type_name_identifier) => {
-                type_name_identifier.to_string_with_indent(level)
-            }
-            NodeImportedName::AliasedImport(original_type_name, alias_type_name) => {
-                let original = original_type_name.to_string_with_indent(level);
-                let alias = alias_type_name.to_string_with_indent(level);
-                format!("{} as {}", original, alias)
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeImportDeclarations {
-    // Reviewed and corrected
-
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut output = String::from("import");
-
-        for (idx, import) in self.import_list.iter().enumerate() {
-            if idx != 0 {
-                output.push_str(" import");
-            }
-            output.push(' ');
-            output.push_str(&import.to_string_with_indent(level));
+            TreeTraversalMode::Exit => (),
         }
 
-        output
+        Ok(TraversalResult::Continue)
     }
-}
 
-impl ScillaFormatter for NodeMetaIdentifier {
-    // Reviewed and corrected
-
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let ind = indentation(level);
-        match self {
-            NodeMetaIdentifier::MetaName(name) => {
-                format!("{}{}", ind, name.to_string_with_indent(0))
+    fn emit_import_declarations(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeImportDeclarations,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(1);
             }
-            NodeMetaIdentifier::MetaNameInNamespace(namespace, name) => {
-                format!(
-                    "{}{}.{}",
-                    ind,
-                    namespace.to_string_with_indent(0),
-                    name.to_string_with_indent(0)
-                )
-            }
-            NodeMetaIdentifier::MetaNameInHexspace(hexspace, name) => {
-                format!("{}{}.{}", ind, hexspace, name.to_string_with_indent(0))
-            }
-            NodeMetaIdentifier::ByteString => format!("{}ByStr", ind),
+            TreeTraversalMode::Exit => (),
         }
-    }
-}
 
-impl ScillaFormatter for NodeVariableIdentifier {
-    // Reviewed and corrected
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-        match self {
-            NodeVariableIdentifier::VariableName(name) => format!("{}{}", indent, name),
-            NodeVariableIdentifier::SpecialIdentifier(id) => format!("{}{}", indent, id),
-            NodeVariableIdentifier::VariableInNamespace(namespace, var_name) => format!(
-                "{}{}.{}",
-                indent,
-                namespace.to_string_with_indent(level),
-                var_name
-            ),
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_meta_identifier(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeMetaIdentifier,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeMetaIdentifier::MetaNameInNamespace(l, r) => {
+                    l.visit(self);
+                    self.script.push_str(".");
+                    r.visit(self);
+                    return Ok(TraversalResult::SkipChildren);
+                }
+                NodeMetaIdentifier::MetaNameInHexspace(l, r) => {
+                    self.script.push_str(&l);
+                    self.script.push_str(".");
+                    r.visit(self);
+                    return Ok(TraversalResult::SkipChildren);
+                }
+                NodeMetaIdentifier::ByteString => {
+                    self.script.push_str("ByStr");
+                }
+                NodeMetaIdentifier::MetaName(_) => (),
+            },
+            TreeTraversalMode::Exit => (),
         }
+        Ok(TraversalResult::Continue)
     }
-}
 
-impl ScillaFormatter for NodeBuiltinArguments {
-    // Reviewed and corrected
-    fn to_string_with_indent(&self, level: usize) -> String {
-        if self.arguments.is_empty() {
-            "( )".to_owned()
+    fn emit_variable_identifier(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeVariableIdentifier,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => (),
+            TreeTraversalMode::Exit => match node {
+                NodeVariableIdentifier::VariableName(v) => self.script.push_str(v),
+                NodeVariableIdentifier::SpecialIdentifier(v) => self.script.push_str(v),
+                NodeVariableIdentifier::VariableInNamespace(_, v) => {
+                    self.script.push_str(".");
+                    self.script.push_str(v);
+                }
+            },
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_builtin_arguments(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeBuiltinArguments,
+    ) -> Result<TraversalResult, String> {
+        if node.arguments.len() == 0 {
+            self.script.push_str("()");
         } else {
-            let mut formatted_str = String::new();
-            for (i, arg) in self.arguments.iter().enumerate() {
-                formatted_str.push_str(&arg.to_string_with_indent(level));
-                if i < self.arguments.len() - 1 {
-                    formatted_str.push_str(" ");
+            for (i, arg) in node.arguments.iter().enumerate() {
+                if i != 0 {
+                    self.script.push_str(" ");
+                }
+                arg.visit(self);
+            }
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_type_map_key(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeMapKey,
+    ) -> Result<TraversalResult, String> {
+        match node {
+            NodeTypeMapKey::GenericMapKey(value) => {
+                value.visit(self);
+            }
+            NodeTypeMapKey::EnclosedGenericId(value) => {
+                self.script.push_str("(");
+                value.visit(self);
+                self.script.push_str(")");
+            }
+            NodeTypeMapKey::EnclosedAddressMapKeyType(value) => {
+                self.script.push_str("(");
+                value.visit(self);
+                self.script.push_str(")");
+            }
+            NodeTypeMapKey::AddressMapKeyType(value) => {
+                value.visit(self);
+            }
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_type_map_value(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeMapValue,
+    ) -> Result<TraversalResult, String> {
+        match node {
+            NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(value) => {
+                value.visit(self);
+            }
+            NodeTypeMapValue::MapKeyValue(value) => {
+                (*value).visit(self);
+            }
+            NodeTypeMapValue::MapValueParanthesizedType(value) => {
+                self.script.push_str("(");
+                (*value).visit(self);
+                self.script.push_str(")");
+            }
+            NodeTypeMapValue::MapValueAddressType(value) => {
+                (*value).visit(self);
+            }
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_type_argument(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeArgument,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeTypeArgument::MapTypeArgument(k, v) => {
+                    self.script.push_str("Map ");
+                }
+                NodeTypeArgument::EnclosedTypeArgument(_) => {
+                    self.script.push_str("(");
+                }
+                NodeTypeArgument::TemplateTypeArgument(var) => {
+                    self.script.push_str(var);
+                }
+                _ => (),
+            },
+            TreeTraversalMode::Exit => match node {
+                NodeTypeArgument::EnclosedTypeArgument(_) => {
+                    self.script.push_str(")");
+                }
+                _ => (),
+            },
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_scilla_type(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeScillaType,
+    ) -> Result<TraversalResult, String> {
+        match node {
+            NodeScillaType::GenericTypeWithArgs(lead, args) => {
+                lead.visit(self);
+                for arg in args.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
                 }
             }
-            formatted_str
-        }
-    }
-}
-
-impl ScillaFormatter for NodeTypeMapKey {
-    // BOOK:
-    fn to_string_with_indent(&self, _level: usize) -> String {
-        match self {
-            NodeTypeMapKey::GenericMapKey(node_meta_identifier) => node_meta_identifier.to_string(),
-            NodeTypeMapKey::EnclosedGenericId(node_meta_identifier) => {
-                format!("({})", node_meta_identifier.to_string())
+            NodeScillaType::MapType(key, value) => {
+                self.script.push_str("Map ");
+                key.visit(self);
+                self.script.push_str(" ");
+                value.visit(self);
             }
-            NodeTypeMapKey::EnclosedAddressMapKeyType(node_address_type) => {
-                format!("({})", node_address_type.to_string())
+            NodeScillaType::FunctionType(a, b) => {
+                (*a).visit(self);
+                (*b).visit(self);
             }
-            NodeTypeMapKey::AddressMapKeyType(node_address_type) => node_address_type.to_string(),
-        }
-    }
-}
-
-impl ScillaFormatter for NodeTypeMapValue {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-
-        match self {
-            NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(meta_id) => {
-                format!("{}{}", indent, meta_id.to_string_with_indent(level))
+            NodeScillaType::EnclosedType(a) => {
+                self.script.push_str("( ");
+                (*a).visit(self);
+                self.script.push_str(" )");
             }
-            NodeTypeMapValue::MapKeyValue(node_type_map_entry) => {
-                format!(
-                    "{}Map {}",
-                    indent,
-                    node_type_map_entry.to_string_with_indent(level)
-                )
+            NodeScillaType::ScillaAddresseType(a) => {
+                (*a).visit(self);
             }
-            NodeTypeMapValue::MapValueParanthesizedType(node_type_map_value) => {
-                format!("({})", node_type_map_value.to_string_with_indent(level))
+            NodeScillaType::PolyFunctionType(name, a) => {
+                self.script.push_str(name);
+                (*a).visit(self);
             }
-            NodeTypeMapValue::MapValueAddressType(node_address_type) => {
-                format!(
-                    "{}{}",
-                    indent,
-                    node_address_type.to_string_with_indent(level)
-                )
+            NodeScillaType::TypeVarType(name) => {
+                self.script.push_str(name);
             }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeTypeArgument {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeTypeArgument::EnclosedTypeArgument(node_type) => {
-                format!("({})", node_type.to_string_with_indent(level))
-            }
-            NodeTypeArgument::GenericTypeArgument(meta_id) => meta_id.to_string_with_indent(level),
-            NodeTypeArgument::TemplateTypeArgument(template) => format!("{}", template),
-            NodeTypeArgument::AddressTypeArgument(node_addr_type) => {
-                node_addr_type.to_string_with_indent(level)
-            }
-            NodeTypeArgument::MapTypeArgument(map_key, map_value) => {
-                format!(
-                    "Map {} {}",
-                    map_key.to_string_with_indent(level),
-                    map_value.to_string_with_indent(level)
-                )
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeScillaType {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeScillaType::GenericTypeWithArgs(meta_identifier, type_args) => {
-                if type_args.is_empty() {
-                    meta_identifier.to_string_with_indent(level)
-                } else {
-                    let type_args_str = type_args
-                        .iter()
-                        .map(|arg| arg.to_string())
-                        .collect::<Vec<_>>()
-                        .join(" ");
-                    format!(
-                        "{} {}",
-                        meta_identifier.to_string_with_indent(level),
-                        type_args_str
-                    )
-                }
-            }
-            NodeScillaType::MapType(map_key, map_value) => {
-                format!("Map {} {}", map_key.to_string(), map_value.to_string())
-            }
-            NodeScillaType::FunctionType(arg_type, return_type) => {
-                format!("{} -> {}", arg_type.to_string(), return_type.to_string())
-            }
-            NodeScillaType::EnclosedType(inner_type) => {
-                format!("({})", inner_type.to_string())
-            }
-            NodeScillaType::ScillaAddresseType(address_type) => {
-                format!("{}", address_type.to_string())
-            }
-            NodeScillaType::PolyFunctionType(param, return_type) => {
-                format!("forall {} . {}", param, return_type.to_string())
-            }
-            NodeScillaType::TypeVarType(name) => name.clone(),
-        }
-    }
-}
-
-impl ScillaFormatter for NodeTypeMapEntry {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let key_string = self.key.to_string_with_indent(level);
-        let value_string = self.value.to_string_with_indent(level);
-
-        format!("{} {}", key_string, value_string)
-    }
-}
-
-impl ScillaFormatter for NodeAddressTypeField {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let id_str = self.identifier.to_string_with_indent(level);
-        let type_str = self.type_name.to_string_with_indent(level);
-
-        format!("{} : {}", id_str, type_str)
-    }
-}
-
-impl ScillaFormatter for NodeAddressType {
-    // Reviewed and corrected
-    fn to_string_with_indent(&self, _: usize) -> String {
-        let id_str = self.identifier.to_string();
-
-        let construct_str = match self.type_name.as_str() {
-            "" => "".to_string(),
-            _ => format!(" {}", self.type_name),
         };
-
-        let fields_str = self
-            .address_fields
-            .iter()
-            .map(|field| field.to_string())
-            .collect::<Vec<String>>()
-            .join(", field ");
-
-        let fields_str = if fields_str.is_empty() {
-            "".to_string()
-        } else {
-            format!(" field {}", fields_str)
-        };
-
-        format!("{} with{}{} end", id_str, construct_str, fields_str)
+        Ok(TraversalResult::SkipChildren)
     }
-}
 
-impl ScillaFormatter for NodeFullExpression {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let ind = indentation(level);
-        match self {
+    fn emit_type_map_entry(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeMapEntry,
+    ) -> Result<TraversalResult, String> {
+        /*
+        #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
+        pub struct NodeTypeMapEntry {
+            pub key: NodeTypeMapKey,
+            pub value: NodeTypeMapValue,
+            pub type_annotation: Option<TypeAnnotation>,
+        }
+        */
+
+        unimplemented!()
+    }
+
+    fn emit_address_type_field(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeAddressTypeField,
+    ) -> Result<TraversalResult, String> {
+        self.script.push_str("field ");
+        node.identifier.visit(self);
+        self.script.push_str(" : ");
+        node.type_name.visit(self);
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_address_type(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeAddressType,
+    ) -> Result<TraversalResult, String> {
+        node.identifier.visit(self);
+        self.script.push_str(" with ");
+
+        if node.type_name.len() > 0 {
+            self.script.push_str(&node.type_name);
+            self.script.push_str(" ");
+        }
+
+        for field in node.address_fields.iter() {
+            field.visit(self);
+            self.script.push_str(" ");
+        }
+
+        self.script.push_str("end");
+
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_full_expression(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeFullExpression,
+    ) -> Result<TraversalResult, String> {
+        match node {
             NodeFullExpression::LocalVariableDeclaration {
                 identifier_name,
                 expression,
+                type_annotation,
                 containing_expression,
-                ..
-            } => format!(
-                "{}let {} = {} in {}",
-                ind,
-                identifier_name,
-                expression.to_string_with_indent(level),
-                containing_expression.to_string_with_indent(level)
-            ),
+            } => {
+                self.add_newlines(1);
+                self.script.push_str("let ");
+                self.script.push_str(&identifier_name);
+                self.indent_level += 1;
+                if let Some(t) = type_annotation {
+                    t.visit(self);
+                }
+                self.script.push_str(" = ");
+                (*expression).visit(self);
+                self.script.push_str(" in ");
+                (*containing_expression).visit(self);
+                self.indent_level -= 1;
+            }
             NodeFullExpression::FunctionDeclaration {
-                identier_value,
+                identier_value, // TODO: Missing spelling - global replacement
                 type_annotation,
                 expression,
-            } => format!(
-                "{}fun {} {} => {}",
-                ind,
-                identier_value,
-                type_annotation.to_string(),
-                expression.to_string_with_indent(level + 1)
-            ),
+            } => {
+                self.add_newlines(1);
+                self.script.push_str("fun ");
+                self.indent_level += 1;
+                self.script.push_str("(");
+                self.script.push_str(&identier_value);
+                type_annotation.visit(self);
+                self.script.push_str(") => ");
+
+                (*expression).visit(self);
+                self.indent_level -= 1;
+            }
             NodeFullExpression::FunctionCall {
                 function_name,
                 argument_list,
             } => {
-                let args = argument_list
-                    .iter()
-                    .map(|x| x.to_string())
-                    .collect::<Vec<String>>()
-                    .join(" ");
-                let args = if args.is_empty() {
-                    args
-                } else {
-                    format!(" {}", args)
-                };
-                format!("{}{}{}", ind, function_name.to_string(), args)
+                function_name.visit(self);
+                for arg in argument_list.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
             }
-            NodeFullExpression::ExpressionAtomic(node) => node.to_string_with_indent(level),
+            NodeFullExpression::ExpressionAtomic(expr) => {
+                expr.visit(self);
+            }
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
-                format!("{}builtin {} {}", ind, b, xs.to_string_with_indent(level))
+                self.script.push_str("builtin ");
+                self.script.push_str(b);
+                if let Some(args) = targs {
+                    args.visit(self);
+                }
+                self.script.push_str(" ");
+                xs.visit(self);
             }
             NodeFullExpression::Message(entries) => {
-                let ind2 = indentation(level + 1);
-                format!(
-                    "{}{{\n{}{}\n{}}}",
-                    ind,
-                    ind2,
-                    entries
-                        .iter()
-                        .map(|entry| entry.to_string_with_indent(level + 2))
-                        .collect::<Vec<String>>()
-                        .join(&format!(";\n{}", ind2)),
-                    ind
-                )
+                self.script.push_str("{");
+                self.indent_level += 1;
+                for (i, message) in entries.iter().enumerate() {
+                    message.visit(self);
+                    if i != entries.len() - 1 {
+                        self.script.push_str(";")
+                    }
+                }
+                self.indent_level -= 1;
+                self.add_newlines(1);
+                self.script.push_str("}");
             }
             NodeFullExpression::Match {
                 match_expression,
                 clauses,
-            } => format!(
-                "{}match {} with\n{}\nend",
-                ind,
-                match_expression.to_string(),
-                clauses
-                    .iter()
-                    .map(|clause| clause.to_string_with_indent(level + 1))
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            ),
+            } => {
+                self.add_newlines(1);
+                self.script.push_str("match ");
+                match_expression.visit(self);
+                self.script.push_str(" with ");
+                self.indent_level += 1;
+                for clause in clauses.iter() {
+                    clause.visit(self);
+                }
+                self.indent_level -= 1;
+                self.add_newlines(1);
+                self.script.push_str("end");
+            }
             NodeFullExpression::ConstructorCall {
                 identifier_name,
                 contract_type_arguments,
                 argument_list,
             } => {
-                let type_args = match contract_type_arguments {
-                    Some(args) => format!("<{}>", args.to_string()),
-                    None => "".to_string(),
-                };
-
-                format!(
-                    "{}{}{}({})",
-                    ind,
-                    identifier_name.to_string(),
-                    type_args,
-                    argument_list
-                        .iter()
-                        .map(|x| x.to_string())
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                )
+                identifier_name.visit(self);
+                if let Some(cta) = contract_type_arguments {
+                    self.script.push_str(" ");
+                    cta.visit(self);
+                }
+                for a in argument_list.iter() {
+                    self.script.push_str(" ");
+                    a.visit(self);
+                }
             }
             NodeFullExpression::TemplateFunction {
                 identifier_name,
                 expression,
-            } => format!(
-                "{}tfun {} => {}",
-                ind,
-                identifier_name,
-                expression.to_string_with_indent(level + 1)
-            ),
+            } => {
+                self.add_newlines(1);
+                self.script.push_str("tfun ");
+                self.script.push_str(identifier_name);
+                self.script.push_str(" => ");
+                expression.visit(self);
+            }
             NodeFullExpression::TApp {
                 identifier_name,
                 type_arguments,
-            } => format!(
-                "{}{}<{}>",
-                ind,
-                identifier_name.to_string(),
-                type_arguments
-                    .iter()
-                    .map(|ta| ta.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            ),
-        }
-    }
-}
-
-impl ScillaFormatter for NodeMessageEntry {
-    fn to_string_with_indent(&self, _level: usize) -> String {
-        match self {
-            NodeMessageEntry::MessageLiteral(var_id, value_literal) => {
-                format!("{} : {}", var_id.to_string(), value_literal.to_string())
-            }
-            NodeMessageEntry::MessageVariable(var1_id, var2_id) => {
-                format!("{} : {}", var1_id.to_string(), var2_id.to_string())
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodePatternMatchExpressionClause {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-        let pattern_str = self.pattern.to_string_with_indent(level);
-        let expression_str = self.expression.to_string_with_indent(level);
-
-        format!("{}| {} => {}", indent, pattern_str, expression_str)
-    }
-}
-
-impl ScillaFormatter for NodeAtomicExpression {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeAtomicExpression::AtomicSid(node) => {
-                // No need to increase the indentation level since it's an atomic expression
-                node.to_string_with_indent(level)
-            }
-            NodeAtomicExpression::AtomicLit(node) => {
-                // No need to increase the indentation level since it's an atomic expression
-                node.to_string_with_indent(level)
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeContractTypeArguments {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        // To get proper indentation string for the current level
-        let indent_str = indentation(level);
-
-        // Traversing Vec<NodeTypeArgument> and invoking to_string_with_indent for each element
-        let type_arg_strings = self
-            .type_arguments
-            .iter()
-            .map(|arg| arg.to_string_with_indent(level + 1))
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        // Returning the formatted string
-        format!("{}TypeArguments:\n{}", indent_str, type_arg_strings)
-    }
-}
-
-impl ScillaFormatter for NodeValueLiteral {
-    // Reviewed and correct
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-        match self {
-            NodeValueLiteral::LiteralInt(ty, value) => {
-                format!("{}{} {}", indent, ty.to_string_with_indent(0), value)
-            }
-            NodeValueLiteral::LiteralHex(value) => format!("{}0x{}", indent, value),
-            NodeValueLiteral::LiteralString(value) => format!("{}\"{}\"", indent, value),
-            NodeValueLiteral::LiteralEmptyMap(key_ty, value_ty) => {
-                format!(
-                    "{}Emp {}{{{}}}",
-                    indent,
-                    key_ty.to_string_with_indent(0),
-                    value_ty.to_string_with_indent(0)
-                )
-            }
-        }
-    }
-}
-
-impl ScillaFormatter for NodeMapAccess {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let identifier_str = self.identifier_name.to_string_with_indent(level);
-
-        format!("[{}]", identifier_str)
-    }
-}
-
-impl ScillaFormatter for NodePattern {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodePattern::Wildcard => "_".to_string(),
-            NodePattern::Binder(b) => b.clone(),
-            NodePattern::Constructor(meta_id, arg_patterns) => {
-                let mut formatted = meta_id.to_string_with_indent(level);
-                for (i, pattern) in arg_patterns.iter().enumerate() {
-                    formatted.push_str(" ");
-                    formatted.push_str(&pattern.to_string_with_indent(level));
+            } => {
+                self.script.push_str("@");
+                identifier_name.visit(self);
+                for arg in type_arguments.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
                 }
-
-                formatted
             }
         }
+        Ok(TraversalResult::SkipChildren)
     }
-}
 
-impl ScillaFormatter for NodeArgumentPattern {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeArgumentPattern::WildcardArgument => "_".to_string(),
-            NodeArgumentPattern::BinderArgument(binder) => binder.clone(),
-            NodeArgumentPattern::ConstructorArgument(constructor) => {
-                constructor.to_string_with_indent(level)
+    fn emit_message_entry(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeMessageEntry,
+    ) -> Result<TraversalResult, String> {
+        self.add_newlines(1);
+        match node {
+            NodeMessageEntry::MessageLiteral(var, val) => {
+                // Converting the variable and value literals into Scilla code
+                // Assuming the emit_variable_identifier and emit_value_literal are implemented
+                var.visit(self);
+                self.script.push_str(" : ");
+                val.visit(self);
             }
-            NodeArgumentPattern::PatternArgument(pattern) => {
-                format!("({})", pattern.to_string_with_indent(level).trim_start())
+            NodeMessageEntry::MessageVariable(var1, var2) => {
+                var1.visit(self);
+                self.script.push_str(" : ");
+                var2.visit(self);
             }
         }
+        Ok(TraversalResult::SkipChildren)
     }
-}
+    fn emit_pattern_match_expression_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodePatternMatchExpressionClause,
+    ) -> Result<TraversalResult, String> {
+        self.add_newlines(1);
+        self.script.push_str("| ");
+        node.pattern.visit(self);
+        self.script.push_str(" => ");
+        node.expression.visit(self);
+        Ok(TraversalResult::SkipChildren)
+    }
 
-impl ScillaFormatter for NodePatternMatchClause {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut formatted: String = String::new();
-        formatted.push_str(&indentation(level));
-        formatted.push_str("| ");
-        formatted.push_str(&self.pattern_expression.to_string());
+    fn emit_atomic_expression(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeAtomicExpression,
+    ) -> Result<TraversalResult, String> {
+        // Pass through
+        Ok(TraversalResult::Continue)
+    }
 
-        if let Some(ref statement_block) = self.statement_block {
-            formatted.push_str(" => ");
-            formatted.push_str(&statement_block.to_string());
+    fn emit_contract_type_arguments(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeContractTypeArguments,
+    ) -> Result<TraversalResult, String> {
+        self.script.push_str("{");
+        for (i, arg) in node.type_arguments.iter().enumerate() {
+            if i != 0 {
+                self.script.push_str(" ");
+            }
+
+            arg.visit(self);
         }
+        self.script.push_str("}");
 
-        formatted
+        Ok(TraversalResult::SkipChildren)
     }
-}
 
-impl ScillaFormatter for NodeBlockchainFetchArguments {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let args = self
-            .arguments
-            .iter()
-            .map(|arg| arg.to_string_with_indent(level))
-            .collect::<Vec<_>>()
-            .join(" ");
-        format!("({})", args) // Use parentheses instead of curly braces
+    fn emit_value_literal(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeValueLiteral,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeValueLiteral::LiteralInt(n, v) => {
+                    n.visit(self);
+                    self.script.push_str(" ");
+                    self.script.push_str(&v);
+                }
+                NodeValueLiteral::LiteralHex(h) => {
+                    self.script.push_str(&format!("0x{}", h)); // Push the literal hexadecimal type definition to the script
+                }
+                NodeValueLiteral::LiteralString(s) => {
+                    self.script.push_str(&format!("\"{}\"", s)); // Push the literal string type definition to the script
+                }
+                NodeValueLiteral::LiteralEmptyMap(key_type, value_type) => {
+                    self.script.push_str("Emp ");
+                    key_type.visit(self);
+                    self.script.push_str(" ");
+                    value_type.visit(self);
+                }
+            },
+            TreeTraversalMode::Exit => (),
+        }
+        Ok(TraversalResult::SkipChildren)
     }
-}
 
-impl ScillaFormatter for NodeStatement {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        use NodeStatement::*;
-        let indent = indentation(level);
-        match self {
-            Load {
+    fn emit_map_access(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeMapAccess,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => self.script.push_str("["),
+            TreeTraversalMode::Exit => self.script.push_str("]"),
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_pattern(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodePattern,
+    ) -> Result<TraversalResult, String> {
+        match node {
+            NodePattern::Wildcard => {
+                self.script.push_str("_");
+            }
+            NodePattern::Binder(value) => {
+                self.script.push_str(value);
+            }
+            NodePattern::Constructor(identifier, args) => {
+                identifier.visit(self);
+
+                for arg in args.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
+            }
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_argument_pattern(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeArgumentPattern,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeArgumentPattern::BinderArgument(s) => self.script.push_str(s),
+                NodeArgumentPattern::WildcardArgument => self.script.push_str("_"),
+                NodeArgumentPattern::PatternArgument(_) => self.script.push_str("("),
+                _ => (),
+            },
+            TreeTraversalMode::Exit => match node {
+                NodeArgumentPattern::PatternArgument(_) => self.script.push_str(")"),
+                _ => (),
+            },
+        }
+        // Pass through
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_pattern_match_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodePatternMatchClause,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(1);
+                self.script.push_str("| ");
+                node.pattern_expression.visit(self);
+                self.script.push_str(" =>");
+                if let Some(stmt) = &node.statement_block {
+                    stmt.visit(self);
+                }
+            }
+            TreeTraversalMode::Exit => {}
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_blockchain_fetch_arguments(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeBlockchainFetchArguments,
+    ) -> Result<TraversalResult, String> {
+        self.script.push_str("(");
+        for arg in node.arguments.iter() {
+            self.script.push_str(" ");
+            arg.visit(self);
+        }
+        self.script.push_str(" )");
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_statement(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeStatement,
+    ) -> Result<TraversalResult, String> {
+        self.add_newlines(1);
+        match node {
+            NodeStatement::Load {
                 left_hand_side,
                 right_hand_side,
             } => {
-                format!(
-                    "{}{} <- {}",
-                    indent,
-                    left_hand_side,
-                    right_hand_side.to_string()
-                )
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" <- ");
+                right_hand_side.visit(self);
             }
-            RemoteFetch(inner) => {
-                format!("{}{}\n", indent, inner.to_string_with_indent(level))
+            NodeStatement::RemoteFetch(fetch_statement) => {
+                (*fetch_statement).visit(self);
             }
-            Store {
+            NodeStatement::Store {
                 left_hand_side,
                 right_hand_side,
             } => {
-                format!(
-                    "{}{} := {}",
-                    indent,
-                    left_hand_side,
-                    right_hand_side.to_string()
-                )
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" := ");
+                right_hand_side.visit(self);
             }
-            Bind {
+            NodeStatement::Bind {
                 left_hand_side,
                 right_hand_side,
             } => {
-                format!(
-                    "{}{} = {}",
-                    indent,
-                    left_hand_side,
-                    right_hand_side.to_string_with_indent(level)
-                )
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" = ");
+                right_hand_side.visit(self);
             }
-            ReadFromBC {
+            NodeStatement::ReadFromBC {
                 left_hand_side,
                 type_name,
                 arguments,
             } => {
-                let args = match arguments {
-                    Some(arg) => arg.to_string_with_indent(level),
-                    None => "".to_string(),
-                };
-                let args = if args.is_empty() {
-                    args
-                } else {
-                    format!(" {}", args)
-                };
-                format!(
-                    "{}{} <- &{}{}",
-                    indent,
-                    left_hand_side,
-                    type_name.to_string(),
-                    args
-                )
+                self.script.push_str(left_hand_side);
+                self.script.push_str(" <-& ");
+                type_name.visit(self);
+                if let Some(args) = arguments {
+                    args.visit(self);
+                }
             }
-            MapGet {
+            NodeStatement::MapGet {
                 left_hand_side,
                 keys,
                 right_hand_side,
             } => {
-                let key_str = keys
-                    .iter()
-                    .map(|k| k.to_string_with_indent(level))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!(
-                    "{}{} <- {}{}",
-                    indent, left_hand_side, right_hand_side, key_str
-                )
+                unimplemented!();
             }
-            MapGetExists {
+            NodeStatement::MapGetExists {
                 left_hand_side,
                 keys,
                 right_hand_side,
             } => {
-                let key_str = keys
-                    .iter()
-                    .map(|k| k.to_string_with_indent(level))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!(
-                    "{}{} <- exists {}{}",
-                    indent, left_hand_side, right_hand_side, key_str
-                )
+                unimplemented!();
             }
-            MapUpdate {
+            NodeStatement::MapUpdate {
                 left_hand_side,
                 keys,
                 right_hand_side,
             } => {
-                let key_str = keys
-                    .iter()
-                    .map(|k| k.to_string_with_indent(level))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!(
-                    "{}{}{} := {}",
-                    indent,
-                    left_hand_side,
-                    key_str,
-                    right_hand_side.to_string()
-                )
+                self.script.push_str(left_hand_side);
+                for key in keys.iter() {
+                    key.visit(self);
+                }
+                self.script.push_str(" := ");
+                right_hand_side.visit(self);
             }
-            MapUpdateDelete {
+            NodeStatement::MapUpdateDelete {
                 left_hand_side,
                 keys,
             } => {
-                let key_str = keys
-                    .iter()
-                    .map(|k| k.to_string_with_indent(level))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!("{}delete {}{}", indent, left_hand_side, key_str)
+                unimplemented!();
             }
-            Accept => format!("{}accept", indent),
-            Send { identifier_name } => {
-                format!("{}send {}", indent, identifier_name.to_string())
+            NodeStatement::Accept => self.script.push_str("accept"),
+            NodeStatement::Send { identifier_name } => {
+                self.script.push_str("send ");
+                identifier_name.visit(self);
             }
-            CreateEvnt { identifier_name } => {
-                format!("{}event {}", indent, identifier_name.to_string())
+            NodeStatement::CreateEvnt { identifier_name } => {
+                self.script.push_str("event ");
+                identifier_name.visit(self);
             }
-            Throw { error_variable } => {
-                let error_var = error_variable
-                    .as_ref()
-                    .map_or("".to_string(), |v| v.to_string());
-                let error_var = if error_var.is_empty() {
-                    error_var
-                } else {
-                    format!(" {}", error_var)
-                };
-                format!("{}throw{}", indent, error_var)
+            NodeStatement::Throw { error_variable } => {
+                self.script.push_str("throw");
+                if let Some(e) = error_variable {
+                    self.script.push_str(" ");
+                    e.visit(self);
+                }
             }
-            MatchStmt { variable, clauses } => {
-                let clause_str = clauses
-                    .iter()
-                    .map(|c| c.to_string_with_indent(level + 1))
-                    .collect::<Vec<_>>()
-                    .join("\n");
-                format!(
-                    "{}match {} with\n{}\n{}end",
-                    indent,
-                    variable.to_string(),
-                    clause_str,
-                    indent
-                )
+            NodeStatement::MatchStmt { variable, clauses } => {
+                self.script.push_str("match ");
+                variable.visit(self);
+                self.script.push_str(" with");
+                self.indent_level += 1;
+                for clause in clauses.iter() {
+                    clause.visit(self);
+                }
+                self.indent_level -= 1;
+                self.add_newlines(1);
+                self.script.push_str("end");
             }
-            CallProc {
+            NodeStatement::CallProc {
                 component_id,
                 arguments,
             } => {
-                let args_str = arguments
-                    .iter()
-                    .map(|a| a.to_string())
-                    .collect::<Vec<_>>()
-                    .join(" ");
-                let args_str = if args_str.is_empty() {
-                    args_str
-                } else {
-                    format!(" {}", args_str)
-                };
-                format!("{}{}{}", indent, component_id.to_string(), args_str)
+                component_id.visit(self);
+                for arg in arguments.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
             }
-            Iterate {
+            NodeStatement::Iterate {
                 identifier_name,
                 component_id,
             } => {
-                format!(
-                    "{}forall {} {}",
-                    indent,
-                    identifier_name.to_string(),
-                    component_id.to_string()
-                )
+                self.script.push_str("forall ");
+                identifier_name.visit(self);
+                self.script.push_str(" ");
+                component_id.visit(self);
             }
         }
-    }
-}
 
-impl ScillaFormatter for NodeRemoteFetchStatement {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let ind = indentation(level);
-        match self {
-            NodeRemoteFetchStatement::ReadStateMutable(id1, id2, var_id) => {
-                format!("{}{} <-& {}.{}", ind, id1, id2, var_id.to_string())
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_remote_fetch_statement(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeRemoteFetchStatement,
+    ) -> Result<TraversalResult, String> {
+        match node {
+            NodeRemoteFetchStatement::ReadStateMutable(lhs, address, identifier) => {
+                self.script.push_str(&format!("{} <-& {}.", lhs, address));
+                identifier.visit(self);
             }
-            NodeRemoteFetchStatement::ReadStateMutableSpecialId(id1, id2, id3) => {
-                format!("{}fetch {}: {} {}\n", ind, id1, id2, id3)
+            NodeRemoteFetchStatement::ReadStateMutableSpecialId(lhs, address, identifier) => {
+                self.script
+                    .push_str(&format!("{} <-& {}.{}", lhs, address, identifier));
             }
-            NodeRemoteFetchStatement::ReadStateMutableMapAccess(id1, id2, id3, map_accesses) => {
-                let accesses_str = map_accesses
-                    .iter()
-                    .map(|access| access.to_string_with_indent(level + 1))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!("{}{} <-& {}.{}{}", ind, id1, id2, id3, accesses_str)
-            }
-            NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(
-                id1,
-                id2,
-                id3,
+            NodeRemoteFetchStatement::ReadStateMutableMapAccess(
+                lhs,
+                address,
+                member_id,
                 map_accesses,
             ) => {
-                let accesses_str = map_accesses
-                    .iter()
-                    .map(|access| access.to_string_with_indent(level + 1))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!(
-                    "{}fetch {}: {}[{}]<-(exists {})\n",
-                    ind, id1, id2, id3, accesses_str
-                )
+                self.script
+                    .push_str(&format!("{} <-& {}.{} ", lhs, address, member_id));
+                for access in map_accesses.iter() {
+                    access.visit(self);
+                }
             }
-            NodeRemoteFetchStatement::ReadStateMutableCastAddress(id1, var_id, addr_type) => {
-                format!(
-                    "{}fetch {}: {} := {} {}\n",
-                    ind,
-                    id1,
-                    var_id.to_string_with_indent(level),
-                    "cast_to",
-                    addr_type.to_string_with_indent(level)
-                )
+            NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(
+                lhs,
+                address,
+                member_id,
+                map_accesses,
+            ) => {
+                self.script
+                    .push_str(&format!("{} <-& exists {}.{} ", lhs, address, member_id));
+                for access in map_accesses.iter() {
+                    access.visit(self);
+                }
             }
-        }
-    }
-}
+            NodeRemoteFetchStatement::ReadStateMutableCastAddress(
+                lhs,
+                address_id,
+                address_type,
+            ) => {
+                self.script.push_str(&format!("{} <-& ", lhs));
+                address_id.visit(self);
+                self.script.push_str(" as ");
 
-impl ScillaFormatter for NodeComponentId {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeComponentId::WithTypeLikeName(type_name_identifier) => {
-                type_name_identifier.to_string_with_indent(level)
-            }
-            NodeComponentId::WithRegularId(id_string) => {
-                let indented_string = indentation(level);
-                format!("{}{}", indented_string, id_string)
+                address_type.visit(self);
             }
         }
+        Ok(TraversalResult::SkipChildren)
     }
-}
 
-impl ScillaFormatter for NodeComponentParameters {
-    fn to_string_with_indent(&self, _level: usize) -> String {
-        let formatted_parameters = self
-            .parameters
-            .iter()
-            .map(|param| param.to_string())
-            .collect::<Vec<String>>()
-            .join(", ");
-
-        if formatted_parameters.is_empty() {
-            "()".to_string()
-        } else {
-            format!("({})", formatted_parameters,)
+    fn emit_component_id(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeComponentId,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeComponentId::WithRegularId(name) => self.script.push_str(name),
+                _ => (),
+            },
+            _ => (),
         }
+        Ok(TraversalResult::Continue)
     }
-}
 
-impl ScillaFormatter for NodeParameterPair {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-        let param_str = self.identifier_with_type.to_string_with_indent(level);
-
-        format!("{}{}", indent, param_str)
-    }
-}
-
-impl ScillaFormatter for NodeComponentBody {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match &self.statement_block {
-            Some(statement_block) => {
-                format!("{}\nend", statement_block.to_string_with_indent(level))
-            }
-            None => String::new(),
-        }
-    }
-}
-
-impl ScillaFormatter for NodeStatementBlock {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut formatted_statements = String::new();
-        let indent = indentation(level);
-        for (i, statement) in self.statements.iter().enumerate() {
-            if i > 0 {
-                formatted_statements.push(';');
-                // Properly separate statements with a newline
-                formatted_statements.push_str("\n");
-            }
-            // Indent the statements as needed
-            formatted_statements.push_str(&indent);
-            let formatted_statement = statement.to_string_with_indent(level);
-            formatted_statements.push_str(&formatted_statement);
-        }
-        formatted_statements
-    }
-}
-
-impl ScillaFormatter for NodeTypedIdentifier {
-    // Reviewed and corrected
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let id = &self.identifier_name;
-        let annotation = self.annotation.to_string_with_indent(level);
-        format!("{}{} {}", indentation(level), id, annotation)
-    }
-}
-
-impl ScillaFormatter for NodeTypeAnnotation {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut output = String::new();
-        output.push_str(&indentation(level));
-        output.push_str(": "); // Adding the colon and space here
-        output.push_str(&self.type_name.to_string_with_indent(level));
-        output
-    }
-}
-impl ScillaFormatter for NodeProgram {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut formatted_code = format!("scilla_version {}\n", self.version);
-        if let Some(ref import_declarations) = self.import_declarations {
-            formatted_code.push_str(&import_declarations.to_string_with_indent(level));
-            formatted_code.push_str("\n");
-        }
-        if let Some(ref library_definition) = self.library_definition {
-            formatted_code.push_str(&library_definition.to_string_with_indent(level));
-            formatted_code.push_str("\n");
-        }
-        formatted_code.push_str(&self.contract_definition.to_string_with_indent(level));
-        formatted_code
-    }
-}
-
-impl ScillaFormatter for NodeLibraryDefinition {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let mut result = String::new();
-        let indent = indentation(level);
-        // Add library keyword and name
-        result.push_str(&format!(
-            "{}library {}\n",
-            indent,
-            self.name.to_string_with_indent(level)
-        ));
-        // Add opening brace
-        result.push_str(&format!("{}{{\n", indent));
-        // Add definitions with proper indentation
-        let definition_strings: Vec<String> = self
-            .definitions
-            .iter()
-            .map(|definition| definition.to_string_with_indent(level + 1))
-            .collect();
-        result.push_str(&definition_strings.join("\n"));
-        // Add closing brace
-        result.push_str(&format!("\n{}}}", indent));
-        result
-    }
-}
-
-impl ScillaFormatter for NodeLibrarySingleDefinition {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeLibrarySingleDefinition::LetDefinition {
-                variable_name,
-                type_annotation: _,
-                expression,
-            } => {
-                format!(
-                    "{}let {} = {}\n",
-                    indentation(level),
-                    variable_name,
-                    expression.to_string_with_indent(level + 1)
-                )
-            }
-            NodeLibrarySingleDefinition::TypeDefinition(type_name, opt_type_alternatives) => {
-                let type_alternatives_str = match opt_type_alternatives {
-                    Some(type_alternatives) => type_alternatives
-                        .iter()
-                        .map(|alternative| alternative.to_string_with_indent(level + 1))
-                        .collect::<Vec<String>>()
-                        .join("\n"),
-                    None => "".to_string(),
-                };
-                format!(
-                    "{}type {}{}\n",
-                    indentation(level),
-                    type_name.to_string_with_indent(level + 1),
-                    if !type_alternatives_str.is_empty() {
-                        format!("\n{}", type_alternatives_str)
-                    } else {
-                        "".to_string()
+    fn emit_component_parameters(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeComponentParameters,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.script.push_str("(");
+                for (i, parameter) in node.parameters.iter().enumerate() {
+                    if i > 0 {
+                        self.script.push_str(", ");
                     }
-                )
+                    parameter.visit(self);
+                }
+                self.script.push_str(")");
+            }
+            TreeTraversalMode::Exit => (),
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_parameter_pair(
+        &mut self,
+        _mode: TreeTraversalMode,
+        _node: &NodeParameterPair,
+    ) -> Result<TraversalResult, String> {
+        // Pass through
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_component_body(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeComponentBody,
+    ) -> Result<TraversalResult, String> {
+        // Pass through
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_statement_block(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeStatementBlock,
+    ) -> Result<TraversalResult, String> {
+        self.indent_level += 1;
+        for (i, stmt) in node.statements.iter().enumerate() {
+            stmt.visit(self);
+            if i != node.statements.len() - 1 {
+                self.script.push_str(";");
             }
         }
+        self.indent_level -= 1;
+        Ok(TraversalResult::SkipChildren)
     }
-}
 
-impl ScillaFormatter for NodeContractDefinition {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let contract_name = self.contract_name.to_string_with_indent(level);
-        let parameters = self.parameters.to_string_with_indent(level);
-        let constraint = self
-            .constraint
-            .as_ref()
-            .map_or("".to_string(), |c| c.indent(level + 1));
-        let fields = self
-            .fields
-            .iter()
-            .map(|field| field.to_string_with_indent(level + 1))
-            .collect::<Vec<String>>()
-            .join("\n");
-        let components = self
-            .components
-            .iter()
-            .map(|component| component.to_string_with_indent(level + 1))
-            .collect::<Vec<String>>()
-            .join("\n");
-        let indent = indentation(level);
-        format!(
-            "{indent}contract {contract_name} ({parameters}){constraint}\n{indent}{{\n{fields}\n\n{components}\n{indent}}}",
-            indent=indent,
-            contract_name=contract_name,
-            parameters=parameters,
-            constraint=constraint,
-            fields=fields,
-            components=components,
-        )
-    }
-}
-
-impl ScillaFormatter for NodeContractField {
-    fn to_string_with_indent(&self, _level: usize) -> String {
-        let typed_identifier_str = self.typed_identifier.to_string_with_indent(0);
-        let right_hand_side_str = self.right_hand_side.to_string_with_indent(0);
-        format!("field {} = {}", typed_identifier_str, right_hand_side_str)
-    }
-}
-
-impl ScillaFormatter for NodeWithConstraint {
-    // BOOK:
-    fn to_string_with_indent(&self, _level: usize) -> String {
-        let expression_string = self.expression.to_string_with_indent(0);
-        format!("with {} =>", expression_string)
-    }
-}
-
-impl ScillaFormatter for NodeComponentDefinition {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        match self {
-            NodeComponentDefinition::TransitionComponent(transition_def) => {
-                transition_def.to_string_with_indent(level)
+    fn emit_typed_identifier(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypedIdentifier,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                // Assuming that annotation type is of String
+                self.script.push_str(&node.identifier_name);
             }
-            NodeComponentDefinition::ProcedureComponent(procedure_def) => {
-                procedure_def.to_string_with_indent(level)
+            TreeTraversalMode::Exit => (),
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_type_annotation(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeAnnotation,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => self.script.push_str(" : "),
+            _ => (),
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_program(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeProgram,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.script
+                    .push_str(&format!("scilla_version {}", node.version));
+            }
+            TreeTraversalMode::Exit => {
+                self.script.push_str("\n");
             }
         }
+        Ok(TraversalResult::Continue)
     }
-}
 
-impl ScillaFormatter for NodeProcedureDefinition {
-    fn to_string_with_indent(&self, level: usize) -> String {
-        let indent = indentation(level);
-        let name_str = self.name.to_string_with_indent(0);
-        let params_str = self.parameters.to_string_with_indent(0);
-        let body_str = self.body.to_string_with_indent(level + 1);
-        format!(
-            "{}procedure {} ({})\n{}=\n{}{}",
-            indent, name_str, params_str, indent, body_str, indent
-        )
+    fn emit_library_definition(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeLibraryDefinition,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                // Add Indent
+                self.add_newlines(2);
+                self.script.push_str(&format!("library {}", node.name));
+            }
+            _ => (),
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_library_single_definition(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeLibrarySingleDefinition,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => match node {
+                NodeLibrarySingleDefinition::LetDefinition {
+                    variable_name,
+                    type_annotation,
+                    expression,
+                } => {
+                    self.add_newlines(1);
+                    self.script.push_str("let ");
+                    self.script.push_str(&variable_name);
+                    self.indent_level += 1;
+                    if let Some(v) = type_annotation {
+                        v.visit(self);
+                    }
+                    self.script.push_str(" = ");
+                    expression.visit(self);
+                    self.indent_level -= 1;
+                }
+                NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
+                    self.add_newlines(1);
+                    self.script.push_str("type ");
+                    name.visit(self);
+                    match clauses {
+                        Some(clauses) => {
+                            self.script.push_str(" =");
+                            self.indent_level += 1;
+                            for clause in clauses.iter() {
+                                clause.visit(self);
+                            }
+                            self.indent_level -= 1;
+                        }
+                        None => (),
+                    }
+                }
+            },
+            _ => {}
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_contract_definition(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeContractDefinition,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                // Add Indent
+                self.add_newlines(2);
+
+                // Add Contract definition, contract name and open parentheses
+                self.script
+                    .push_str(&format!("contract {}", node.contract_name));
+            }
+            _ => (),
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_contract_field(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeContractField,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(1);
+                self.script.push_str("field ");
+                node.typed_identifier.visit(self);
+                self.script.push_str(" = ");
+                node.right_hand_side.visit(self);
+            }
+            _ => (),
+        }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_with_constraint(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeWithConstraint,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.script.push_str(" with ");
+            }
+            _ => {
+                self.script.push_str(" =>");
+            }
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_component_definition(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeComponentDefinition,
+    ) -> Result<TraversalResult, String> {
+        // Fall through to either Transition or Procedure
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_procedure_definition(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeProcedureDefinition,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(2);
+                self.script.push_str("procedure ");
+            }
+            TreeTraversalMode::Exit => {
+                self.add_newlines(1);
+                self.script.push_str("end");
+            }
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_transition_definition(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTransitionDefinition,
+    ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => {
+                self.add_newlines(2);
+                self.script.push_str("transition ");
+            }
+            TreeTraversalMode::Exit => {
+                self.add_newlines(1);
+                self.script.push_str("end");
+            }
+        }
+        Ok(TraversalResult::Continue)
+    }
+
+    fn emit_type_alternative_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeAlternativeClause,
+    ) -> Result<TraversalResult, String> {
+        self.add_newlines(1);
+        self.script.push_str("| ");
+        match node {
+            NodeTypeAlternativeClause::ClauseType(v) => {
+                v.visit(self);
+            }
+            NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
+                name.visit(self);
+                self.script.push_str(" of");
+                for arg in args.iter() {
+                    self.script.push_str(" ");
+                    arg.visit(self);
+                }
+            }
+            _ => (),
+        }
+
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn emit_type_map_value_arguments(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeMapValueArguments,
+    ) -> Result<TraversalResult, String> {
+        unimplemented!()
+    }
+
+    fn emit_type_map_value_allowing_type_arguments(
+        &mut self,
+        mode: TreeTraversalMode,
+        node: &NodeTypeMapValueAllowingTypeArguments,
+    ) -> Result<TraversalResult, String> {
+        // Pass through
+        Ok(TraversalResult::Continue)
     }
 }

@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use bluebell::formatter::ScillaFormatter;
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
     use bluebell::parser;
