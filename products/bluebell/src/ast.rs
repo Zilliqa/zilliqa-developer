@@ -1,4 +1,3 @@
-use crate::type_classes::TypeAnnotation;
 use std::fmt;
 
 /*
@@ -62,7 +61,6 @@ pub enum NodeImportedName {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeImportDeclarations {
     pub import_list: Vec<NodeImportedName>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -124,7 +122,6 @@ impl fmt::Display for NodeVariableIdentifier {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeBuiltinArguments {
     pub arguments: Vec<NodeVariableIdentifier>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -167,14 +164,12 @@ pub enum NodeScillaType {
 pub struct NodeTypeMapEntry {
     pub key: NodeTypeMapKey,
     pub value: NodeTypeMapValue,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeAddressTypeField {
     pub identifier: NodeVariableIdentifier,
     pub type_name: NodeScillaType,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -182,7 +177,6 @@ pub struct NodeAddressType {
     pub identifier: NodeTypeNameIdentifier,
     pub type_name: String,
     pub address_fields: Vec<NodeAddressTypeField>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -238,7 +232,6 @@ pub enum NodeMessageEntry {
 pub struct NodePatternMatchExpressionClause {
     pub pattern: NodePattern,
     pub expression: NodeFullExpression,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -250,7 +243,6 @@ pub enum NodeAtomicExpression {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractTypeArguments {
     pub type_arguments: Vec<NodeTypeArgument>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -264,7 +256,6 @@ pub enum NodeValueLiteral {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeMapAccess {
     pub identifier_name: NodeVariableIdentifier,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -286,13 +277,11 @@ pub enum NodeArgumentPattern {
 pub struct NodePatternMatchClause {
     pub pattern_expression: Box<NodePattern>,
     pub statement_block: Option<NodeStatementBlock>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeBlockchainFetchArguments {
     pub arguments: Vec<NodeVariableIdentifier>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -376,38 +365,32 @@ pub enum NodeComponentId {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeComponentParameters {
     pub parameters: Vec<NodeParameterPair>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeParameterPair {
     pub identifier_with_type: NodeTypedIdentifier,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeComponentBody {
     pub statement_block: Option<NodeStatementBlock>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeStatementBlock {
     pub statements: Vec<NodeStatement>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypedIdentifier {
     pub identifier_name: String,
     pub annotation: NodeTypeAnnotation,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypeAnnotation {
     pub type_name: NodeScillaType,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -416,14 +399,12 @@ pub struct NodeProgram {
     pub import_declarations: Option<NodeImportDeclarations>,
     pub library_definition: Option<NodeLibraryDefinition>,
     pub contract_definition: NodeContractDefinition,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeLibraryDefinition {
     pub name: NodeTypeNameIdentifier,
     pub definitions: Vec<NodeLibrarySingleDefinition>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -446,20 +427,17 @@ pub struct NodeContractDefinition {
     pub constraint: Option<NodeWithConstraint>,
     pub fields: Vec<NodeContractField>,
     pub components: Vec<NodeComponentDefinition>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractField {
     pub typed_identifier: NodeTypedIdentifier,
     pub right_hand_side: NodeFullExpression,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeWithConstraint {
     pub expression: Box<NodeFullExpression>,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -473,7 +451,6 @@ pub struct NodeProcedureDefinition {
     pub name: NodeComponentId,
     pub parameters: NodeComponentParameters,
     pub body: NodeComponentBody,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -481,7 +458,6 @@ pub struct NodeTransitionDefinition {
     pub name: NodeComponentId,
     pub parameters: NodeComponentParameters,
     pub body: NodeComponentBody,
-    pub type_annotation: Option<TypeAnnotation>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]

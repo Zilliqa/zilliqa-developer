@@ -4,13 +4,12 @@ pub mod ast;
 pub mod ast_converting;
 pub mod ast_visitor;
 pub mod constants;
-// pub mod formatter;
 pub mod formatter;
 pub mod highlevel_ir;
 pub mod highlevel_ir_emitter;
 pub mod lexer;
-pub mod type_classes;
-pub mod type_inference;
+// pub mod type_classes;
+// pub mod type_inference;
 
 lalrpop_mod!(pub parser);
 

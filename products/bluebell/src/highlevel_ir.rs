@@ -1,10 +1,7 @@
 use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::{
-    basic_block::BasicBlock, builder::Builder, context::Context, values::BasicValueEnum,
-};
-use std::collections::HashMap;
+use inkwell::{builder::Builder, context::Context};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum IrIndentifierKind {

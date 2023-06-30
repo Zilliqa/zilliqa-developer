@@ -26,7 +26,10 @@ impl BluebellFormatter {
 
     pub fn emit(&mut self, node: &mut NodeProgram) -> String {
         self.script = "".to_string();
-        node.visit(self);
+        // TODO: Handle errors
+        // Consider adding an error logger and be greedy
+        // when collecting errors
+        let _ = node.visit(self);
 
         self.script.clone()
     }
@@ -75,7 +78,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_imported_name(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeImportedName,
+        __node: &NodeImportedName,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -91,7 +94,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_import_declarations(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeImportDeclarations,
+        __node: &NodeImportDeclarations,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -111,15 +114,15 @@ impl AstConverting for BluebellFormatter {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeMetaIdentifier::MetaNameInNamespace(l, r) => {
-                    l.visit(self);
+                    let _ = l.visit(self)?;
                     self.script.push_str(".");
-                    r.visit(self);
+                    let _ = r.visit(self)?;
                     return Ok(TraversalResult::SkipChildren);
                 }
                 NodeMetaIdentifier::MetaNameInHexspace(l, r) => {
                     self.script.push_str(&l);
                     self.script.push_str(".");
-                    r.visit(self);
+                    let _ = r.visit(self)?;
                     return Ok(TraversalResult::SkipChildren);
                 }
                 NodeMetaIdentifier::ByteString => {
@@ -153,7 +156,7 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_builtin_arguments(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeBuiltinArguments,
     ) -> Result<TraversalResult, String> {
         if node.arguments.len() == 0 {
@@ -163,7 +166,7 @@ impl AstConverting for BluebellFormatter {
                 if i != 0 {
                     self.script.push_str(" ");
                 }
-                arg.visit(self);
+                let _ = arg.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -171,25 +174,25 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_type_map_key(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeTypeMapKey,
     ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeMapKey::GenericMapKey(value) => {
-                value.visit(self);
+                let _ = value.visit(self)?;
             }
             NodeTypeMapKey::EnclosedGenericId(value) => {
                 self.script.push_str("(");
-                value.visit(self);
+                let _ = value.visit(self)?;
                 self.script.push_str(")");
             }
             NodeTypeMapKey::EnclosedAddressMapKeyType(value) => {
                 self.script.push_str("(");
-                value.visit(self);
+                let _ = value.visit(self)?;
                 self.script.push_str(")");
             }
             NodeTypeMapKey::AddressMapKeyType(value) => {
-                value.visit(self);
+                let _ = value.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -197,23 +200,23 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_type_map_value(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeTypeMapValue,
     ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(value) => {
-                value.visit(self);
+                let _ = value.visit(self)?;
             }
             NodeTypeMapValue::MapKeyValue(value) => {
-                (*value).visit(self);
+                let _ = (*value).visit(self)?;
             }
             NodeTypeMapValue::MapValueParanthesizedType(value) => {
                 self.script.push_str("(");
-                (*value).visit(self);
+                let _ = (*value).visit(self)?;
                 self.script.push_str(")");
             }
             NodeTypeMapValue::MapValueAddressType(value) => {
-                (*value).visit(self);
+                let _ = (*value).visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -226,7 +229,7 @@ impl AstConverting for BluebellFormatter {
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
-                NodeTypeArgument::MapTypeArgument(k, v) => {
+                NodeTypeArgument::MapTypeArgument(_, _) => {
                     self.script.push_str("Map ");
                 }
                 NodeTypeArgument::EnclosedTypeArgument(_) => {
@@ -249,38 +252,38 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_scilla_type(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeScillaType,
     ) -> Result<TraversalResult, String> {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
-                lead.visit(self);
+                let _ = lead.visit(self)?;
                 for arg in args.iter() {
                     self.script.push_str(" ");
-                    arg.visit(self);
+                    let _ = arg.visit(self)?;
                 }
             }
             NodeScillaType::MapType(key, value) => {
                 self.script.push_str("Map ");
-                key.visit(self);
+                let _ = key.visit(self)?;
                 self.script.push_str(" ");
-                value.visit(self);
+                let _ = value.visit(self)?;
             }
             NodeScillaType::FunctionType(a, b) => {
-                (*a).visit(self);
-                (*b).visit(self);
+                let _ = (*a).visit(self)?;
+                let _ = (*b).visit(self)?;
             }
             NodeScillaType::EnclosedType(a) => {
                 self.script.push_str("( ");
-                (*a).visit(self);
+                let _ = (*a).visit(self)?;
                 self.script.push_str(" )");
             }
             NodeScillaType::ScillaAddresseType(a) => {
-                (*a).visit(self);
+                let _ = (*a).visit(self)?;
             }
             NodeScillaType::PolyFunctionType(name, a) => {
                 self.script.push_str(name);
-                (*a).visit(self);
+                let _ = (*a).visit(self)?;
             }
             NodeScillaType::TypeVarType(name) => {
                 self.script.push_str(name);
@@ -291,8 +294,8 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_type_map_entry(
         &mut self,
-        mode: TreeTraversalMode,
-        node: &NodeTypeMapEntry,
+        _mode: TreeTraversalMode,
+        __node: &NodeTypeMapEntry,
     ) -> Result<TraversalResult, String> {
         /*
         #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -308,22 +311,22 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_address_type_field(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeAddressTypeField,
     ) -> Result<TraversalResult, String> {
         self.script.push_str("field ");
-        node.identifier.visit(self);
+        let _ = node.identifier.visit(self)?;
         self.script.push_str(" : ");
-        node.type_name.visit(self);
+        let _ = node.type_name.visit(self)?;
         Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_address_type(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeAddressType,
     ) -> Result<TraversalResult, String> {
-        node.identifier.visit(self);
+        let _ = node.identifier.visit(self)?;
         self.script.push_str(" with ");
 
         if node.type_name.len() > 0 {
@@ -332,7 +335,7 @@ impl AstConverting for BluebellFormatter {
         }
 
         for field in node.address_fields.iter() {
-            field.visit(self);
+            let _ = field.visit(self)?;
             self.script.push_str(" ");
         }
 
@@ -343,7 +346,7 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_full_expression(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeFullExpression,
     ) -> Result<TraversalResult, String> {
         match node {
@@ -358,12 +361,12 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(&identifier_name);
                 self.indent_level += 1;
                 if let Some(t) = type_annotation {
-                    t.visit(self);
+                    let _ = t.visit(self)?;
                 }
                 self.script.push_str(" = ");
-                (*expression).visit(self);
+                let _ = (*expression).visit(self)?;
                 self.script.push_str(" in ");
-                (*containing_expression).visit(self);
+                let _ = (*containing_expression).visit(self)?;
                 self.indent_level -= 1;
             }
             NodeFullExpression::FunctionDeclaration {
@@ -376,39 +379,39 @@ impl AstConverting for BluebellFormatter {
                 self.indent_level += 1;
                 self.script.push_str("(");
                 self.script.push_str(&identier_value);
-                type_annotation.visit(self);
+                let _ = type_annotation.visit(self)?;
                 self.script.push_str(") => ");
 
-                (*expression).visit(self);
+                let _ = (*expression).visit(self)?;
                 self.indent_level -= 1;
             }
             NodeFullExpression::FunctionCall {
                 function_name,
                 argument_list,
             } => {
-                function_name.visit(self);
+                let _ = function_name.visit(self)?;
                 for arg in argument_list.iter() {
                     self.script.push_str(" ");
-                    arg.visit(self);
+                    let _ = arg.visit(self)?;
                 }
             }
             NodeFullExpression::ExpressionAtomic(expr) => {
-                expr.visit(self);
+                let _ = expr.visit(self)?;
             }
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
                 self.script.push_str("builtin ");
                 self.script.push_str(b);
                 if let Some(args) = targs {
-                    args.visit(self);
+                    let _ = args.visit(self)?;
                 }
                 self.script.push_str(" ");
-                xs.visit(self);
+                let _ = xs.visit(self)?;
             }
             NodeFullExpression::Message(entries) => {
                 self.script.push_str("{");
                 self.indent_level += 1;
                 for (i, message) in entries.iter().enumerate() {
-                    message.visit(self);
+                    let _ = message.visit(self)?;
                     if i != entries.len() - 1 {
                         self.script.push_str(";")
                     }
@@ -423,11 +426,11 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.add_newlines(1);
                 self.script.push_str("match ");
-                match_expression.visit(self);
+                let _ = match_expression.visit(self)?;
                 self.script.push_str(" with ");
                 self.indent_level += 1;
                 for clause in clauses.iter() {
-                    clause.visit(self);
+                    let _ = clause.visit(self)?;
                 }
                 self.indent_level -= 1;
                 self.add_newlines(1);
@@ -438,14 +441,14 @@ impl AstConverting for BluebellFormatter {
                 contract_type_arguments,
                 argument_list,
             } => {
-                identifier_name.visit(self);
+                let _ = identifier_name.visit(self)?;
                 if let Some(cta) = contract_type_arguments {
                     self.script.push_str(" ");
-                    cta.visit(self);
+                    let _ = cta.visit(self)?;
                 }
                 for a in argument_list.iter() {
                     self.script.push_str(" ");
-                    a.visit(self);
+                    let _ = a.visit(self)?;
                 }
             }
             NodeFullExpression::TemplateFunction {
@@ -456,17 +459,17 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str("tfun ");
                 self.script.push_str(identifier_name);
                 self.script.push_str(" => ");
-                expression.visit(self);
+                let _ = expression.visit(self)?;
             }
             NodeFullExpression::TApp {
                 identifier_name,
                 type_arguments,
             } => {
                 self.script.push_str("@");
-                identifier_name.visit(self);
+                let _ = identifier_name.visit(self)?;
                 for arg in type_arguments.iter() {
                     self.script.push_str(" ");
-                    arg.visit(self);
+                    let _ = arg.visit(self)?;
                 }
             }
         }
@@ -475,7 +478,7 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_message_entry(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeMessageEntry,
     ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
@@ -483,35 +486,35 @@ impl AstConverting for BluebellFormatter {
             NodeMessageEntry::MessageLiteral(var, val) => {
                 // Converting the variable and value literals into Scilla code
                 // Assuming the emit_variable_identifier and emit_value_literal are implemented
-                var.visit(self);
+                let _ = var.visit(self)?;
                 self.script.push_str(" : ");
-                val.visit(self);
+                let _ = val.visit(self)?;
             }
             NodeMessageEntry::MessageVariable(var1, var2) => {
-                var1.visit(self);
+                let _ = var1.visit(self)?;
                 self.script.push_str(" : ");
-                var2.visit(self);
+                let _ = var2.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
     }
     fn emit_pattern_match_expression_clause(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodePatternMatchExpressionClause,
     ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         self.script.push_str("| ");
-        node.pattern.visit(self);
+        let _ = node.pattern.visit(self)?;
         self.script.push_str(" => ");
-        node.expression.visit(self);
+        let _ = node.expression.visit(self)?;
         Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_atomic_expression(
         &mut self,
-        mode: TreeTraversalMode,
-        node: &NodeAtomicExpression,
+        _mode: TreeTraversalMode,
+        _node: &NodeAtomicExpression,
     ) -> Result<TraversalResult, String> {
         // Pass through
         Ok(TraversalResult::Continue)
@@ -519,7 +522,7 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_contract_type_arguments(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeContractTypeArguments,
     ) -> Result<TraversalResult, String> {
         self.script.push_str("{");
@@ -528,7 +531,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(" ");
             }
 
-            arg.visit(self);
+            let _ = arg.visit(self)?;
         }
         self.script.push_str("}");
 
@@ -543,7 +546,7 @@ impl AstConverting for BluebellFormatter {
         match mode {
             TreeTraversalMode::Enter => match node {
                 NodeValueLiteral::LiteralInt(n, v) => {
-                    n.visit(self);
+                    let _ = n.visit(self)?;
                     self.script.push_str(" ");
                     self.script.push_str(&v);
                 }
@@ -555,9 +558,9 @@ impl AstConverting for BluebellFormatter {
                 }
                 NodeValueLiteral::LiteralEmptyMap(key_type, value_type) => {
                     self.script.push_str("Emp ");
-                    key_type.visit(self);
+                    let _ = key_type.visit(self)?;
                     self.script.push_str(" ");
-                    value_type.visit(self);
+                    let _ = value_type.visit(self)?;
                 }
             },
             TreeTraversalMode::Exit => (),
@@ -568,7 +571,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_map_access(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeMapAccess,
+        _node: &NodeMapAccess,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => self.script.push_str("["),
@@ -579,7 +582,7 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_pattern(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodePattern,
     ) -> Result<TraversalResult, String> {
         match node {
@@ -590,11 +593,11 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(value);
             }
             NodePattern::Constructor(identifier, args) => {
-                identifier.visit(self);
+                let _ = identifier.visit(self)?;
 
                 for arg in args.iter() {
                     self.script.push_str(" ");
-                    arg.visit(self);
+                    let _ = arg.visit(self)?;
                 }
             }
         }
@@ -631,10 +634,10 @@ impl AstConverting for BluebellFormatter {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
                 self.script.push_str("| ");
-                node.pattern_expression.visit(self);
+                let _ = node.pattern_expression.visit(self)?;
                 self.script.push_str(" =>");
                 if let Some(stmt) = &node.statement_block {
-                    stmt.visit(self);
+                    let _ = stmt.visit(self)?;
                 }
             }
             TreeTraversalMode::Exit => {}
@@ -644,13 +647,13 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_blockchain_fetch_arguments(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeBlockchainFetchArguments,
     ) -> Result<TraversalResult, String> {
         self.script.push_str("(");
         for arg in node.arguments.iter() {
             self.script.push_str(" ");
-            arg.visit(self);
+            let _ = arg.visit(self)?;
         }
         self.script.push_str(" )");
         Ok(TraversalResult::SkipChildren)
@@ -658,7 +661,7 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_statement(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeStatement,
     ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
@@ -669,10 +672,10 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(left_hand_side);
                 self.script.push_str(" <- ");
-                right_hand_side.visit(self);
+                let _ = right_hand_side.visit(self)?;
             }
             NodeStatement::RemoteFetch(fetch_statement) => {
-                (*fetch_statement).visit(self);
+                let _ = (*fetch_statement).visit(self)?;
             }
             NodeStatement::Store {
                 left_hand_side,
@@ -680,7 +683,7 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(left_hand_side);
                 self.script.push_str(" := ");
-                right_hand_side.visit(self);
+                let _ = right_hand_side.visit(self)?;
             }
             NodeStatement::Bind {
                 left_hand_side,
@@ -688,7 +691,7 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(left_hand_side);
                 self.script.push_str(" = ");
-                right_hand_side.visit(self);
+                let _ = right_hand_side.visit(self)?;
             }
             NodeStatement::ReadFromBC {
                 left_hand_side,
@@ -697,22 +700,22 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(left_hand_side);
                 self.script.push_str(" <-& ");
-                type_name.visit(self);
+                let _ = type_name.visit(self)?;
                 if let Some(args) = arguments {
-                    args.visit(self);
+                    let _ = args.visit(self)?;
                 }
             }
             NodeStatement::MapGet {
-                left_hand_side,
-                keys,
-                right_hand_side,
+                left_hand_side: _,
+                keys: _,
+                right_hand_side: _,
             } => {
                 unimplemented!();
             }
             NodeStatement::MapGetExists {
-                left_hand_side,
-                keys,
-                right_hand_side,
+                left_hand_side: _,
+                keys: _,
+                right_hand_side: _,
             } => {
                 unimplemented!();
             }
@@ -723,40 +726,40 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(left_hand_side);
                 for key in keys.iter() {
-                    key.visit(self);
+                    let _ = key.visit(self)?;
                 }
                 self.script.push_str(" := ");
-                right_hand_side.visit(self);
+                let _ = right_hand_side.visit(self)?;
             }
             NodeStatement::MapUpdateDelete {
-                left_hand_side,
-                keys,
+                left_hand_side: _,
+                keys: _,
             } => {
                 unimplemented!();
             }
             NodeStatement::Accept => self.script.push_str("accept"),
             NodeStatement::Send { identifier_name } => {
                 self.script.push_str("send ");
-                identifier_name.visit(self);
+                let _ = identifier_name.visit(self)?;
             }
             NodeStatement::CreateEvnt { identifier_name } => {
                 self.script.push_str("event ");
-                identifier_name.visit(self);
+                let _ = identifier_name.visit(self)?;
             }
             NodeStatement::Throw { error_variable } => {
                 self.script.push_str("throw");
                 if let Some(e) = error_variable {
                     self.script.push_str(" ");
-                    e.visit(self);
+                    let _ = e.visit(self)?;
                 }
             }
             NodeStatement::MatchStmt { variable, clauses } => {
                 self.script.push_str("match ");
-                variable.visit(self);
+                let _ = variable.visit(self)?;
                 self.script.push_str(" with");
                 self.indent_level += 1;
                 for clause in clauses.iter() {
-                    clause.visit(self);
+                    let _ = clause.visit(self)?;
                 }
                 self.indent_level -= 1;
                 self.add_newlines(1);
@@ -766,10 +769,10 @@ impl AstConverting for BluebellFormatter {
                 component_id,
                 arguments,
             } => {
-                component_id.visit(self);
+                let _ = component_id.visit(self)?;
                 for arg in arguments.iter() {
                     self.script.push_str(" ");
-                    arg.visit(self);
+                    let _ = arg.visit(self)?;
                 }
             }
             NodeStatement::Iterate {
@@ -777,9 +780,9 @@ impl AstConverting for BluebellFormatter {
                 component_id,
             } => {
                 self.script.push_str("forall ");
-                identifier_name.visit(self);
+                let _ = identifier_name.visit(self)?;
                 self.script.push_str(" ");
-                component_id.visit(self);
+                let _ = component_id.visit(self)?;
             }
         }
 
@@ -788,13 +791,13 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_remote_fetch_statement(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeRemoteFetchStatement,
     ) -> Result<TraversalResult, String> {
         match node {
             NodeRemoteFetchStatement::ReadStateMutable(lhs, address, identifier) => {
                 self.script.push_str(&format!("{} <-& {}.", lhs, address));
-                identifier.visit(self);
+                let _ = identifier.visit(self)?;
             }
             NodeRemoteFetchStatement::ReadStateMutableSpecialId(lhs, address, identifier) => {
                 self.script
@@ -809,7 +812,7 @@ impl AstConverting for BluebellFormatter {
                 self.script
                     .push_str(&format!("{} <-& {}.{} ", lhs, address, member_id));
                 for access in map_accesses.iter() {
-                    access.visit(self);
+                    let _ = access.visit(self)?;
                 }
             }
             NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(
@@ -821,7 +824,7 @@ impl AstConverting for BluebellFormatter {
                 self.script
                     .push_str(&format!("{} <-& exists {}.{} ", lhs, address, member_id));
                 for access in map_accesses.iter() {
-                    access.visit(self);
+                    let _ = access.visit(self)?;
                 }
             }
             NodeRemoteFetchStatement::ReadStateMutableCastAddress(
@@ -830,10 +833,10 @@ impl AstConverting for BluebellFormatter {
                 address_type,
             ) => {
                 self.script.push_str(&format!("{} <-& ", lhs));
-                address_id.visit(self);
+                let _ = address_id.visit(self)?;
                 self.script.push_str(" as ");
 
-                address_type.visit(self);
+                let _ = address_type.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -866,7 +869,7 @@ impl AstConverting for BluebellFormatter {
                     if i > 0 {
                         self.script.push_str(", ");
                     }
-                    parameter.visit(self);
+                    let _ = parameter.visit(self)?;
                 }
                 self.script.push_str(")");
             }
@@ -877,8 +880,8 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_parameter_pair(
         &mut self,
-        _mode: TreeTraversalMode,
-        _node: &NodeParameterPair,
+        __mode: TreeTraversalMode,
+        __node: &NodeParameterPair,
     ) -> Result<TraversalResult, String> {
         // Pass through
         Ok(TraversalResult::Continue)
@@ -886,8 +889,8 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_component_body(
         &mut self,
-        mode: TreeTraversalMode,
-        node: &NodeComponentBody,
+        _mode: TreeTraversalMode,
+        _node: &NodeComponentBody,
     ) -> Result<TraversalResult, String> {
         // Pass through
         Ok(TraversalResult::Continue)
@@ -895,12 +898,12 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_statement_block(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeStatementBlock,
     ) -> Result<TraversalResult, String> {
         self.indent_level += 1;
         for (i, stmt) in node.statements.iter().enumerate() {
-            stmt.visit(self);
+            let _ = stmt.visit(self)?;
             if i != node.statements.len() - 1 {
                 self.script.push_str(";");
             }
@@ -927,7 +930,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_type_annotation(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeTypeAnnotation,
+        _node: &NodeTypeAnnotation,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => self.script.push_str(" : "),
@@ -986,22 +989,22 @@ impl AstConverting for BluebellFormatter {
                     self.script.push_str(&variable_name);
                     self.indent_level += 1;
                     if let Some(v) = type_annotation {
-                        v.visit(self);
+                        let _ = v.visit(self)?;
                     }
                     self.script.push_str(" = ");
-                    expression.visit(self);
+                    let _ = expression.visit(self)?;
                     self.indent_level -= 1;
                 }
                 NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                     self.add_newlines(1);
                     self.script.push_str("type ");
-                    name.visit(self);
+                    let _ = name.visit(self)?;
                     match clauses {
                         Some(clauses) => {
                             self.script.push_str(" =");
                             self.indent_level += 1;
                             for clause in clauses.iter() {
-                                clause.visit(self);
+                                let _ = clause.visit(self)?;
                             }
                             self.indent_level -= 1;
                         }
@@ -1042,9 +1045,9 @@ impl AstConverting for BluebellFormatter {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
                 self.script.push_str("field ");
-                node.typed_identifier.visit(self);
+                let _ = node.typed_identifier.visit(self)?;
                 self.script.push_str(" = ");
-                node.right_hand_side.visit(self);
+                let _ = node.right_hand_side.visit(self)?;
             }
             _ => (),
         }
@@ -1054,7 +1057,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_with_constraint(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeWithConstraint,
+        _node: &NodeWithConstraint,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -1069,8 +1072,8 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_component_definition(
         &mut self,
-        mode: TreeTraversalMode,
-        node: &NodeComponentDefinition,
+        _mode: TreeTraversalMode,
+        _node: &NodeComponentDefinition,
     ) -> Result<TraversalResult, String> {
         // Fall through to either Transition or Procedure
         Ok(TraversalResult::Continue)
@@ -1079,7 +1082,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_procedure_definition(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeProcedureDefinition,
+        _node: &NodeProcedureDefinition,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -1097,7 +1100,7 @@ impl AstConverting for BluebellFormatter {
     fn emit_transition_definition(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeTransitionDefinition,
+        _node: &NodeTransitionDefinition,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -1114,24 +1117,23 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_type_alternative_clause(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeTypeAlternativeClause,
     ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         self.script.push_str("| ");
         match node {
             NodeTypeAlternativeClause::ClauseType(v) => {
-                v.visit(self);
+                let _ = v.visit(self)?;
             }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(name, args) => {
-                name.visit(self);
+                let _ = name.visit(self)?;
                 self.script.push_str(" of");
                 for arg in args.iter() {
                     self.script.push_str(" ");
-                    arg.visit(self);
+                    let _ = arg.visit(self)?;
                 }
             }
-            _ => (),
         }
 
         Ok(TraversalResult::SkipChildren)
@@ -1139,16 +1141,16 @@ impl AstConverting for BluebellFormatter {
 
     fn emit_type_map_value_arguments(
         &mut self,
-        mode: TreeTraversalMode,
-        node: &NodeTypeMapValueArguments,
+        _mode: TreeTraversalMode,
+        _node: &NodeTypeMapValueArguments,
     ) -> Result<TraversalResult, String> {
         unimplemented!()
     }
 
     fn emit_type_map_value_allowing_type_arguments(
         &mut self,
-        mode: TreeTraversalMode,
-        node: &NodeTypeMapValueAllowingTypeArguments,
+        _mode: TreeTraversalMode,
+        _node: &NodeTypeMapValueAllowingTypeArguments,
     ) -> Result<TraversalResult, String> {
         // Pass through
         Ok(TraversalResult::Continue)

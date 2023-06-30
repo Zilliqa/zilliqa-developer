@@ -964,25 +964,23 @@ impl AstVisitor for NodeProgram {
         // Emit enter event
         let ret = emitter.emit_program(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            // Visit children nodes
-            let mut result = Ok(TraversalResult::Continue);
             // Visit import_declarations if it's not None
             if let Some(import_declarations) = &self.import_declarations {
-                result = import_declarations.visit(emitter);
+                let result = import_declarations.visit(emitter);
                 if result != Ok(TraversalResult::Continue) {
                     return result;
                 }
             }
             // Visit library_definition if it's not None
             if let Some(library_definition) = &self.library_definition {
-                result = library_definition.visit(emitter);
+                let result = library_definition.visit(emitter);
                 if result != Ok(TraversalResult::Continue) {
                     return result;
                 }
             }
             // Visit contract_definition
 
-            result = self.contract_definition.visit(emitter);
+            let result = self.contract_definition.visit(emitter);
             result
         } else {
             ret
@@ -1023,10 +1021,14 @@ impl AstVisitor for NodeLibrarySingleDefinition {
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self {
                 NodeLibrarySingleDefinition::LetDefinition {
-                    variable_name,
-                    type_annotation,
+                    variable_name: _,
+                    type_annotation: _,
                     expression,
-                } => expression.visit(emitter),
+                } => {
+                    // TODO: Unused variables aboce
+                    expression.visit(emitter);
+                    unimplemented!()
+                }
                 NodeLibrarySingleDefinition::TypeDefinition(name, option_clause) => {
                     match name.visit(emitter) {
                         Err(msg) => Err(msg),
