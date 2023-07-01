@@ -1,3 +1,15 @@
+// Enums used in various routines
+pub enum TreeTraversalMode {
+    Enter, // Used when emit_... is invoked before children are visited
+    Exit,  // User after children were visited
+}
+
+#[derive(PartialEq, Eq)]
+pub enum TraversalResult {
+    Continue,     // Returned when the visitor should continue tree traversal
+    SkipChildren, // Returned when the visitor should skip the children and exit traversal
+}
+
 // Symbol constant: These are the constants we use when representing types and instances
 // internally.
 pub const GLOBAL_VAR_PREFIX: &str = "@"; // prefix for global variables and functions

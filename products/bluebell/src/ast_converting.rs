@@ -1,14 +1,5 @@
 use crate::ast::*;
-pub enum TreeTraversalMode {
-    Enter, // Used when emit_... is invoked before children are visited
-    Exit,  // User after children were visited
-}
-
-#[derive(PartialEq, Eq)]
-pub enum TraversalResult {
-    Continue,     // Returned when the visitor should continue tree traversal
-    SkipChildren, // Returned when the visitor should skip the children and exit traversal
-}
+use crate::constants::{TreeTraversalMode,TraversalResult};
 
 pub trait AstConverting {
     fn emit_byte_str(

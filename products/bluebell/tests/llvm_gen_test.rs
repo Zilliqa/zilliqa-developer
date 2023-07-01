@@ -1,7 +1,11 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
+    use bluebell::highlevel_ir::IrLowering;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
+    use bluebell::highlevel_ir_string::HighlevelIrStringGenerator;
+    use bluebell::llvm_ir_generator::LlvmIrGenerator;
+
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
     use bluebell::parser;
@@ -33,29 +37,25 @@ mod tests {
 
         match parser.parse(&mut errors, lexer) {
             Ok(ast) => {
-                let context = Context::create();
-                let mut formatter = HighlevelIrEmitter::new();
+                let mut generator = HighlevelIrEmitter::new();
                 let mut ast2 = ast.clone();
                 println!("AST: {:#?}\n\n", ast2);
-                let formatted = formatter.emit(&mut ast2);
+                let ir = generator
+                    .emit(&mut ast2)
+                    .expect("Failed generating highlevel IR");
+                println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
+                println!("\n\nDefined functions:\n{:#?}\n\n", ir.function_definitions);
 
-                if let Ok(formatted) = formatted {
-                    if formatted != script {
-                        // println!("Orignial:\n{}\n\n", script);
-                        println!("LLVM IR:\n{}\n\n", formatted);
-                        // let diff = create_patch(&script, &formatted);
-                        // let f = PatchFormatter::new().with_color();
-                        // println!("Diff:\n{}\n\n", f.fmt_patch(&diff));
-                        println!("Filename: {}\n\n", path)
-                    }
-                    assert_eq!(formatted, script);
-                    formatted == script
-                } else {
-                    if let Err(message) = formatted {
-                        panic!("{}", message);
-                    }
-                    false
-                }
+                // let context = Context::create();
+                // let mut generator = LlvmIrGenerator::new(&context, ir);
+                // generator.write_function_definitions_to_module();
+
+                let mut generator = HighlevelIrStringGenerator::new();
+                generator.lower(&ir);
+                println!("SCRIPT:\n{}", generator.value());
+
+                assert!(false);
+                true
             }
             Err(error) => {
                 let ret = error.clone();

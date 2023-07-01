@@ -1,5 +1,6 @@
 use crate::ast::*;
-use crate::ast_converting::{AstConverting, TraversalResult, TreeTraversalMode};
+use crate::ast_converting::AstConverting;
+use crate::constants::{TreeTraversalMode,TraversalResult};
 use crate::ast_visitor::AstVisitor;
 use crate::highlevel_ir::*;
 use std::mem;
@@ -27,7 +28,7 @@ pub struct HighlevelIrEmitter {
     current_block: Box<FunctionBlock>,
     current_body: Box<FunctionBody>,
 
-    ir: HighlevelIr, // TODO: Box
+    ir: Box<HighlevelIr>,
 }
 
 impl HighlevelIrEmitter {
@@ -42,7 +43,7 @@ impl HighlevelIrEmitter {
             block_counter: 0,
             current_block,
             current_body,
-            ir: HighlevelIr::new(),
+            ir: Box::new(HighlevelIr::new()),
         }
     }
 
@@ -52,6 +53,7 @@ impl HighlevelIrEmitter {
         IrIdentifier {
             unresolved: format!("__imm_{}", n),
             resolved: None,
+            type_reference: None,
             kind: IrIndentifierKind::VirtualRegisterIntermediate,
         }
     }
@@ -62,6 +64,7 @@ impl HighlevelIrEmitter {
         IrIdentifier {
             unresolved: format!("{}_{}", prefix, n),
             resolved: None,
+            type_reference: None,
             kind: IrIndentifierKind::VirtualRegisterIntermediate,
         }
     }
@@ -192,27 +195,29 @@ impl HighlevelIrEmitter {
         IrIdentifier {
             unresolved: format!("{}{}", prefix, n).to_string(),
             resolved: None,
+            type_reference: None,
             kind: IrIndentifierKind::TypeName,
         }
     }
 
-    pub fn emit(&mut self, node: &mut NodeProgram) -> Result<String, String> {
+    pub fn emit(&mut self, node: &mut NodeProgram) -> Result<Box<HighlevelIr>, String> {
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
             _ => (),
         }
 
-        println!("\n\nDefined types:\n{:#?}\n\n", self.ir.type_definitions);
-        println!(
-            "\n\nDefined functions:\n{:#?}\n\n",
-            self.ir.function_definitions
-        );
+        // Creating type table
 
-        // self.write_type_definitions_to_module()?;
-        // self.write_function_definitions_to_module()?;
 
-        Ok("TODO:".to_string())
+        // Annotating symbols with types
+
+
+        // Returning
+        let mut ret = Box::new(HighlevelIr::new());
+        mem::swap(&mut self.ir, &mut ret);
+
+        Ok(ret)
     }
 }
 
@@ -469,6 +474,7 @@ impl AstConverting for HighlevelIrEmitter {
                 let name = IrIdentifier {
                     unresolved: b.to_string(),
                     resolved: None,
+                    type_reference: None,
                     kind: IrIndentifierKind::ExternalFunctionName,
                 };
 
@@ -545,7 +551,7 @@ impl AstConverting for HighlevelIrEmitter {
                     let fail_label = self.new_block_label("match_fail");
 
                     let success_label = self.new_block_label("match_success");
-                    let mut success_block = FunctionBlock::new_from_symbol(fail_label.clone());
+                    let mut success_block = FunctionBlock::new_from_symbol(success_label.clone());
 
                     // Terminating current block
                     let op = Operation::ConditionalJump {
@@ -799,6 +805,7 @@ impl AstConverting for HighlevelIrEmitter {
                 let symbol = IrIdentifier {
                     unresolved: left_hand_side.to_string(),
                     resolved: None,
+                    type_reference: None,
                     kind: IrIndentifierKind::Unknown,
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
@@ -892,8 +899,9 @@ impl AstConverting for HighlevelIrEmitter {
         match node {
             NodeComponentId::WithRegularId(name) => {
                 self.stack.push(StackObject::IrIdentifier(IrIdentifier {
-                    unresolved: name.to_string(),
+                    unresolved: name.to_string(),                    
                     resolved: None,
+                    type_reference: None,                    
                     kind: IrIndentifierKind::ComponentName,
                 }));
             }
@@ -901,6 +909,7 @@ impl AstConverting for HighlevelIrEmitter {
                 self.stack.push(StackObject::IrIdentifier(IrIdentifier {
                     unresolved: name.to_string(), // TODO: Travese the tree first and then construct the name
                     resolved: None,
+                    type_reference: None,                    
                     kind: IrIndentifierKind::ComponentName,
                 }));
             }

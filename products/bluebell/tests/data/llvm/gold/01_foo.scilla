@@ -26,13 +26,16 @@ transition DynamicTypes(x: Uint32, y: Bool)
     | False =>
         Uint32 0
   end;
+  
+  accept
   (*
   e = {
     _eventname: "MeaningOfLife";
     answer: value
   };
 
+  accept;
+
   event e 
   *)
-  accept
 end

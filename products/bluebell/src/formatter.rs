@@ -1,6 +1,7 @@
 use crate::ast::*;
-use crate::ast_converting::{AstConverting, TraversalResult, TreeTraversalMode};
+use crate::ast_converting::AstConverting;
 use crate::ast_visitor::AstVisitor;
+use crate::constants::{TreeTraversalMode,TraversalResult};
 
 pub struct BluebellFormatter {
     indent_level: usize,
