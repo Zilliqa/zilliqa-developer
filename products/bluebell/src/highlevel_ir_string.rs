@@ -2,7 +2,7 @@ use crate::highlevel_ir::Instruction;
 use crate::highlevel_ir::{
     Operation, ConcreteFunction, ConcreteType, FunctionKind, HighlevelIr, IrLowering, Variant,
 };
-
+// TODO: Rewrite as a pass and consider making it a printer.
 pub struct HighlevelIrStringGenerator {
     script: String,
 }
