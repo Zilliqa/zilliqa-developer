@@ -149,7 +149,7 @@ pub enum Operation {
     },
     CallMemberFunction {
         name: IrIdentifier,
-        owner: IrIdentifier,
+        owner: Option<IrIdentifier>,
         arguments: Vec<IrIdentifier>,
     },
     ResolveSymbol {
