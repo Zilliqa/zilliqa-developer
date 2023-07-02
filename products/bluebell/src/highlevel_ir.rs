@@ -11,8 +11,10 @@ pub enum IrIndentifierKind {
     Namespace,
     BlockLabel,
 
+    // Storage and reference
     VirtualRegister,
     VirtualRegisterIntermediate,
+    Memory,
 
     // More info needed to derive kind
     Unknown,
@@ -112,13 +114,25 @@ impl IrIdentifier {
 
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
-    pub name: String, // TODO: Should be IrIdentifier
+    pub name: IrIdentifier,
     pub typename: IrIdentifier,
+    pub mutable: bool,
 }
 
 impl VariableDeclaration {
-    pub fn new(name: String, typename: IrIdentifier) -> Self {
-        Self { name, typename }
+    pub fn new(name: String, mutable: bool, typename: IrIdentifier) -> Self {
+        Self { name: IrIdentifier {
+            unresolved: name,
+            resolved: None,
+            type_reference: None,
+            kind: if mutable { 
+                IrIndentifierKind::Memory
+            } else {
+                IrIndentifierKind::VirtualRegister                
+            }
+        }, 
+        typename,
+        mutable }
     }
 }
 

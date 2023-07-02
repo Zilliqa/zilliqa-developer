@@ -8,10 +8,12 @@ pub mod formatter;
 pub mod highlevel_ir;
 pub mod highlevel_ir_pass;
 pub mod highlevel_ir_pass_executor;
+pub mod highlevel_ir_type_collection;
+
 // pub mod highlevel_ir_pass_manager;
 
 pub mod highlevel_ir_emitter;
-pub mod highlevel_ir_string;
+pub mod highlevel_ir_debug_printer;
 pub mod lexer;
 pub mod llvm_ir_generator;
 

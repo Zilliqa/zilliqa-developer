@@ -990,7 +990,7 @@ impl AstConverting for HighlevelIrEmitter {
         assert!(typename.kind == IrIndentifierKind::Unknown);
         typename.kind = IrIndentifierKind::TypeName;
 
-        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, typename));
+        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, false, typename));
         self.stack.push(s);
 
         Ok(TraversalResult::SkipChildren)

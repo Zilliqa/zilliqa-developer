@@ -4,7 +4,9 @@ mod tests {
     use bluebell::highlevel_ir::IrLowering;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
-    use bluebell::highlevel_ir_string::HighlevelIrStringGenerator;
+    use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
+    use bluebell::highlevel_ir_type_collection::HighlevelIrTypeCollection;
+
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
 
     use bluebell::lexer;
@@ -51,10 +53,10 @@ mod tests {
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
                 // generator.write_function_definitions_to_module();
 
-                let mut string_pass = HighlevelIrStringGenerator::new();
-                ir.visit(&mut string_pass);
-
-                println!("SCRIPT:\n{}", string_pass.value());
+                let mut type_collector = HighlevelIrTypeCollection::new();
+                ir.visit(&mut type_collector);
+                let mut debug_printer = HighlevelIrDebugPrinter::new();
+                ir.visit(&mut debug_printer);
 
                 assert!(false);
                 true
