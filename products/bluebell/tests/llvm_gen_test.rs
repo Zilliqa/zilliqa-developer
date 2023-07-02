@@ -3,6 +3,7 @@ mod tests {
     extern crate diffy;
     use bluebell::highlevel_ir::IrLowering;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
+    use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
     use bluebell::highlevel_ir_string::HighlevelIrStringGenerator;
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
 
@@ -40,7 +41,7 @@ mod tests {
                 let mut generator = HighlevelIrEmitter::new();
                 let mut ast2 = ast.clone();
                 println!("AST: {:#?}\n\n", ast2);
-                let ir = generator
+                let mut ir = generator
                     .emit(&mut ast2)
                     .expect("Failed generating highlevel IR");
                 println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
@@ -50,9 +51,10 @@ mod tests {
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
                 // generator.write_function_definitions_to_module();
 
-                let mut generator = HighlevelIrStringGenerator::new();
-                generator.lower(&ir);
-                println!("SCRIPT:\n{}", generator.value());
+                let mut string_pass = HighlevelIrStringGenerator::new();
+                ir.visit(&mut string_pass);
+
+                println!("SCRIPT:\n{}", string_pass.value());
 
                 assert!(false);
                 true

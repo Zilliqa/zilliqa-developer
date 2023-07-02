@@ -1,7 +1,6 @@
 use crate::ast::*;
 use crate::ast_converting::AstConverting;
-use crate::constants::{TreeTraversalMode,TraversalResult};
-
+use crate::constants::{TraversalResult, TreeTraversalMode};
 
 pub trait AstVisitor {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String>;

@@ -1,7 +1,7 @@
 use crate::ast::*;
 use crate::ast_converting::AstConverting;
-use crate::constants::{TreeTraversalMode,TraversalResult};
 use crate::ast_visitor::AstVisitor;
+use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::highlevel_ir::*;
 use std::mem;
 
@@ -61,12 +61,8 @@ impl HighlevelIrEmitter {
     fn new_block_label(&mut self, prefix: &str) -> IrIdentifier {
         let n = self.block_counter;
         self.block_counter += 1;
-        IrIdentifier {
-            unresolved: format!("{}_{}", prefix, n),
-            resolved: None,
-            type_reference: None,
-            kind: IrIndentifierKind::VirtualRegisterIntermediate,
-        }
+        let label = format!("{}_{}", prefix, n);
+        FunctionBlock::new_label(label)
     }
 
     fn convert_instruction_to_symbol(&mut self, mut instruction: Box<Instruction>) -> IrIdentifier {
@@ -209,9 +205,7 @@ impl HighlevelIrEmitter {
 
         // Creating type table
 
-
         // Annotating symbols with types
-
 
         // Returning
         let mut ret = Box::new(HighlevelIr::new());
@@ -899,9 +893,9 @@ impl AstConverting for HighlevelIrEmitter {
         match node {
             NodeComponentId::WithRegularId(name) => {
                 self.stack.push(StackObject::IrIdentifier(IrIdentifier {
-                    unresolved: name.to_string(),                    
+                    unresolved: name.to_string(),
                     resolved: None,
-                    type_reference: None,                    
+                    type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
                 }));
             }
@@ -909,7 +903,7 @@ impl AstConverting for HighlevelIrEmitter {
                 self.stack.push(StackObject::IrIdentifier(IrIdentifier {
                     unresolved: name.to_string(), // TODO: Travese the tree first and then construct the name
                     resolved: None,
-                    type_reference: None,                    
+                    type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
                 }));
             }

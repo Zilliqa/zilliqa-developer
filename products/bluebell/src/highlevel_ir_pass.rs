@@ -27,11 +27,7 @@ pub trait HighlevelIrPass {
         mode: TreeTraversalMode,
         variant: &mut Variant,
     ) -> Result<TraversalResult, String>;
-    fn visit_identifier(
-        &mut self,
-        mode: TreeTraversalMode,
-        identifier: &mut Identifier,
-    ) -> Result<TraversalResult, String>;
+
     fn visit_variable_declaration(
         &mut self,
         mode: TreeTraversalMode,
@@ -45,7 +41,7 @@ pub trait HighlevelIrPass {
     fn visit_instruction(
         &mut self,
         mode: TreeTraversalMode,
-        instruction: &mut  Instruction,
+        instruction: &mut Instruction,
     ) -> Result<TraversalResult, String>;
     fn visit_function_block(
         &mut self,
@@ -75,6 +71,6 @@ pub trait HighlevelIrPass {
     fn visit_highlevel_ir(
         &mut self,
         mode: TreeTraversalMode,
-        highlevel_ir:&mut  HighlevelIr,
+        highlevel_ir: &mut HighlevelIr,
     ) -> Result<TraversalResult, String>;
 }

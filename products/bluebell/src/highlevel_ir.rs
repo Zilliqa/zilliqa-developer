@@ -9,8 +9,8 @@ pub enum IrIndentifierKind {
     ComponentName,
     Event,
     Namespace,
+    BlockLabel,
 
-    Block,
     VirtualRegister,
     VirtualRegisterIntermediate,
 
@@ -89,6 +89,7 @@ impl Variant {
     }
 }
 
+/*
 #[derive(Debug, Clone, PartialEq)]
 pub enum Identifier {
     // TODO: Replace with symbol reference
@@ -96,6 +97,7 @@ pub enum Identifier {
     TypeName(String),
     Event(String),
 }
+*/
 
 impl IrIdentifier {
     pub fn new(unresolved: String, kind: IrIndentifierKind) -> Self {
@@ -110,7 +112,7 @@ impl IrIdentifier {
 
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
-    pub name: String,
+    pub name: String, // TODO: Should be IrIdentifier
     pub typename: IrIdentifier,
 }
 
@@ -179,12 +181,7 @@ pub struct FunctionBlock {
 
 impl FunctionBlock {
     pub fn new(name: String) -> Box<Self> {
-        Self::new_from_symbol(IrIdentifier {
-            unresolved: name,
-            resolved: None,
-            type_reference: None,
-            kind: IrIndentifierKind::Block,
-        })
+        Self::new_from_symbol(Self::new_label(name))
     }
 
     pub fn new_from_symbol(name: IrIdentifier) -> Box<Self> {
@@ -193,6 +190,15 @@ impl FunctionBlock {
             instructions: Vec::new(),
             terminated: false,
         })
+    }
+
+    pub fn new_label(label: String) -> IrIdentifier {
+        IrIdentifier {
+            unresolved: label.clone(),
+            resolved: Some(label), // Label is immediately resolved as it is unrelated to globals and garantueed to be non-conflicting
+            type_reference: None,
+            kind: IrIndentifierKind::BlockLabel,
+        }
     }
 }
 
@@ -230,7 +236,7 @@ pub enum FunctionKind {
 pub struct ConcreteFunction {
     pub name: IrIdentifier,
     pub function_kind: FunctionKind,
-    pub return_type: Option<String>,
+    pub return_type: Option<String>, // TODO: Should be Identifier
     pub arguments: Vec<VariableDeclaration>,
     pub body: Box<FunctionBody>,
 }
@@ -250,9 +256,6 @@ impl HighlevelIr {
         }
     }
 }
-
-
-
 
 pub trait IrLowering {
     fn lower_concrete_type(&mut self, con_type: &ConcreteType);

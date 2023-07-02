@@ -1,5 +1,5 @@
 use crate::ast::*;
-use crate::constants::{TreeTraversalMode,TraversalResult};
+use crate::constants::{TraversalResult, TreeTraversalMode};
 
 pub trait AstConverting {
     fn emit_byte_str(
