@@ -205,7 +205,7 @@ jobs:
 
       - name: "Build and push devex-apollo - production"
         if: |
-          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name == 'release' }} &&
           ${{ github.event.action == 'created' }} &&
           ${{ steps.condition-check.outputs.devex-apollo == 'true' }}
         run: |
@@ -216,7 +216,7 @@ jobs:
 
       - name: "Build neo-savant - production"
         if: |
-          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name == 'release' }} &&
           ${{ github.event.action == 'created' }} &&
           ${{ steps.condition-check.outputs.neo-savant == 'true' }}        
         run: |
@@ -229,7 +229,7 @@ jobs:
 
       - name: "Build and push Docker - developer-portal - production"
         if: |
-          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name == 'release' }} &&
           ${{ github.event.action == 'created' }} &&
           ${{ steps.condition-check.outputs.developer-portal == 'true' }}        
         run: |
@@ -237,7 +237,7 @@ jobs:
 
       - name: "Build and push Docker - neo-savant - production"
         if: |
-          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name == 'release' }} &&
           ${{ github.event.action == 'created' }} &&
           ${{ steps.condition-check.outputs.neo-savant == 'true' }}         
         run: |
@@ -245,7 +245,7 @@ jobs:
 
       - name: "Build and push Docker - devex - production"
         if: |
-          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name == 'release' }} &&
           ${{ github.event.action == 'created' }} &&
           ${{ steps.condition-check.outputs.devex == 'true' }}         
         run: |
