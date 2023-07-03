@@ -27,7 +27,7 @@ lint:
   ignore:
     - linters: [gitleaks]
       paths:
-        - products/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
+        - zilliqa/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
     - linters: [eslint]
       paths:
