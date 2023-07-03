@@ -170,17 +170,25 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name != 'release' }} &&
+          ${{ steps.condition-check.outputs.neo-savant == 'true' }}
         run: |
           bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_staging
 
       - name: "Build and push Docker - devex - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name != 'release' }} &&
+          ${{ steps.condition-check.outputs.devex == 'true' }}
         run: |
           bazelisk run --test_output=all --keep_going //products/devex:push_image_staging
 
       - name: Configure AWS Credentials - production
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: |
+          ${{ github.event_name == 'release' }} &&
+          ${{ github.event.action == 'created' }}
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@main
         with:
           aws-region: us-west-2
@@ -188,7 +196,9 @@ jobs:
           oidc-role: ${{ secrets.OIDC_ROLE }}
 
       - name: Login to the registry - production
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: |
+          ${{ github.event_name == 'release' }} &&
+          ${{ github.event.action == 'created' }}
         uses: docker/login-action@v2
         with:
           registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
