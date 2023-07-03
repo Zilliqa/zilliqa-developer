@@ -8,12 +8,10 @@ pub trait HighlevelIrPassExecutor {
 
 impl HighlevelIrPassExecutor for IrIndentifierKind {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_symbol_kind(TreeTraversalMode::Enter, &mut self.clone())?;
+        let ret = emitter.visit_symbol_kind(TreeTraversalMode::Enter, self)?;
 
         match ret {
-            TraversalResult::Continue => {
-                emitter.visit_symbol_kind(TreeTraversalMode::Exit, &mut self.clone())
-            }
+            TraversalResult::Continue => emitter.visit_symbol_kind(TreeTraversalMode::Exit, self),
             _ => Ok(TraversalResult::Continue),
         }
     }
@@ -21,7 +19,7 @@ impl HighlevelIrPassExecutor for IrIndentifierKind {
 
 impl HighlevelIrPassExecutor for IrIdentifier {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_symbol_name(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_symbol_name(TreeTraversalMode::Enter, self);
 
         // TODO: visit children, if 'ret' is TraversalResult::Continuen
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
@@ -32,9 +30,7 @@ impl HighlevelIrPassExecutor for IrIdentifier {
         }?;
 
         match children_ret {
-            TraversalResult::Continue => {
-                emitter.visit_symbol_name(TreeTraversalMode::Exit, &mut self.clone())
-            }
+            TraversalResult::Continue => emitter.visit_symbol_name(TreeTraversalMode::Exit, self),
             _ => Ok(TraversalResult::Continue),
         }
     }
@@ -42,7 +38,7 @@ impl HighlevelIrPassExecutor for IrIdentifier {
 
 impl HighlevelIrPassExecutor for EnumValue {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_enum_value(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_enum_value(TreeTraversalMode::Enter, self);
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             self.name.visit(emitter);
             if let Some(data) = &mut self.data {
@@ -54,9 +50,7 @@ impl HighlevelIrPassExecutor for EnumValue {
             ret
         }?;
         match children_ret {
-            TraversalResult::Continue => {
-                emitter.visit_enum_value(TreeTraversalMode::Exit, &mut self.clone())
-            }
+            TraversalResult::Continue => emitter.visit_enum_value(TreeTraversalMode::Exit, self),
             _ => Ok(TraversalResult::Continue),
         }
     }
@@ -64,7 +58,7 @@ impl HighlevelIrPassExecutor for EnumValue {
 
 impl HighlevelIrPassExecutor for Tuple {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_tuple(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_tuple(TreeTraversalMode::Enter, self);
         // visit children, if 'ret' is TraversalResult::Continue
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             for field in self.fields.iter_mut() {
@@ -76,9 +70,7 @@ impl HighlevelIrPassExecutor for Tuple {
             ret
         }?;
         match children_ret {
-            TraversalResult::Continue => {
-                emitter.visit_tuple(TreeTraversalMode::Exit, &mut self.clone())
-            }
+            TraversalResult::Continue => emitter.visit_tuple(TreeTraversalMode::Exit, self),
             _ => Ok(TraversalResult::Continue),
         }
     }
@@ -86,7 +78,7 @@ impl HighlevelIrPassExecutor for Tuple {
 
 impl HighlevelIrPassExecutor for Variant {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_variant(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_variant(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             for field in &mut self.fields {
                 let result = field.visit(emitter);
@@ -99,17 +91,16 @@ impl HighlevelIrPassExecutor for Variant {
             ret
         };
         if let Ok(TraversalResult::Continue) = children_ret {
-            emitter.visit_variant(TreeTraversalMode::Exit, &mut self.clone())
+            emitter.visit_variant(TreeTraversalMode::Exit, self)
         } else {
             Ok(TraversalResult::SkipChildren)
         }
     }
 }
 
-
 impl HighlevelIrPassExecutor for VariableDeclaration {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_variable_declaration(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_variable_declaration(TreeTraversalMode::Enter, self);
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             self.typename.visit(emitter)
         } else {
@@ -117,7 +108,7 @@ impl HighlevelIrPassExecutor for VariableDeclaration {
         }?;
         match children_ret {
             TraversalResult::Continue => {
-                emitter.visit_variable_declaration(TreeTraversalMode::Exit, &mut self.clone())
+                emitter.visit_variable_declaration(TreeTraversalMode::Exit, self)
             }
             _ => Ok(TraversalResult::Continue),
         }
@@ -128,6 +119,7 @@ use std::error::Error;
 impl HighlevelIrPassExecutor for Operation {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
         let ret = emitter.visit_operation(TreeTraversalMode::Enter, self);
+
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             match self {
                 Operation::Jump(identifier) => identifier.visit(emitter),
@@ -197,7 +189,7 @@ impl HighlevelIrPassExecutor for Operation {
 
 impl HighlevelIrPassExecutor for Instruction {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_instruction(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_instruction(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             if let Some(ssa) = &mut self.ssa_name {
                 ssa.visit(emitter)?;
@@ -212,9 +204,7 @@ impl HighlevelIrPassExecutor for Instruction {
             ret
         }?;
         match children_ret {
-            TraversalResult::Continue => {
-                emitter.visit_instruction(TreeTraversalMode::Exit, &mut self.clone())
-            }
+            TraversalResult::Continue => emitter.visit_instruction(TreeTraversalMode::Exit, self),
             _ => Ok(TraversalResult::Continue),
         }
     }
@@ -222,7 +212,7 @@ impl HighlevelIrPassExecutor for Instruction {
 
 impl HighlevelIrPassExecutor for FunctionBlock {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_function_block(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_function_block(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             self.name.visit(emitter)?;
             for instr in self.instructions.iter_mut() {
@@ -234,7 +224,7 @@ impl HighlevelIrPassExecutor for FunctionBlock {
         }?;
         match children_ret {
             TraversalResult::Continue => {
-                emitter.visit_function_block(TreeTraversalMode::Exit, &mut self.clone())
+                emitter.visit_function_block(TreeTraversalMode::Exit, self)
             }
             _ => Ok(TraversalResult::Continue),
         }
@@ -242,7 +232,7 @@ impl HighlevelIrPassExecutor for FunctionBlock {
 }
 impl HighlevelIrPassExecutor for FunctionBody {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_function_body(TreeTraversalMode::Enter, &mut self.clone());
+        let ret = emitter.visit_function_body(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             for block in self.blocks.iter_mut() {
                 block.visit(emitter)?;
@@ -253,7 +243,7 @@ impl HighlevelIrPassExecutor for FunctionBody {
         };
         match children_ret {
             Ok(TraversalResult::Continue) => {
-                emitter.visit_function_body(TreeTraversalMode::Exit, &mut self.clone())
+                emitter.visit_function_body(TreeTraversalMode::Exit, self)
             }
             _ => children_ret,
         }
@@ -262,16 +252,27 @@ impl HighlevelIrPassExecutor for FunctionBody {
 
 impl HighlevelIrPassExecutor for ConcreteType {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
-        let ret = emitter.visit_concrete_type(TreeTraversalMode::Enter, &mut self.clone())?;
+        let ret = emitter.visit_concrete_type(TreeTraversalMode::Enter, self)?;
         let ret = if let TraversalResult::Continue = ret {
             // visit children
             match self {
-                ConcreteType::Tuple { name, data_layout } => {
+                ConcreteType::Tuple {
+                    name,
+                    namespace,
+                    data_layout,
+                } => {
                     name.visit(emitter)?;
+                    namespace.visit(emitter)?;
                     data_layout.visit(emitter)?;
                 }
-                ConcreteType::Variant { name, data_layout } => {
+                ConcreteType::Variant {
+                    name,
+                    namespace,
+                    data_layout,
+                } => {
                     name.visit(emitter)?;
+                    namespace.visit(emitter)?;
+
                     data_layout.visit(emitter)?;
                 }
             }
@@ -280,9 +281,7 @@ impl HighlevelIrPassExecutor for ConcreteType {
             ret
         };
         match ret {
-            TraversalResult::Continue => {
-                emitter.visit_concrete_type(TreeTraversalMode::Exit, &mut self.clone())
-            }
+            TraversalResult::Continue => emitter.visit_concrete_type(TreeTraversalMode::Exit, self),
             _ => Ok(TraversalResult::Continue),
         }
     }
@@ -305,12 +304,18 @@ impl HighlevelIrPassExecutor for ConcreteFunction {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
         let ret = emitter.visit_concrete_function(TreeTraversalMode::Enter, self)?;
         let children_ret = if ret == TraversalResult::Continue {
-            // Visit the children here, example given for arguments vector
-            for arg in &mut self.arguments {
-                arg.visit(emitter)?;
+            let _ = self.name.visit(emitter)?;
+            let _ = self.namespace.visit(emitter)?;
+            let _ = self.function_kind.visit(emitter)?;
+            if let Some(rt) = &mut self.return_type {
+                // TODO: Change when rt is an IrIdentifier let _ = rt.visit(emitter)?;
             }
-            // If you want to visit the body too, uncomment the following line
-            // self.body.visit(emitter)?;
+            for (i, arg) in self.arguments.iter_mut().enumerate() {
+                let _ = arg.visit(emitter)?;
+            }
+
+            let _ = self.body.visit(emitter)?;
+
             TraversalResult::Continue
         } else {
             ret

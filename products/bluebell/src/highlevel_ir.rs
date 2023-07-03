@@ -26,12 +26,17 @@ pub struct IrIdentifier {
     pub resolved: Option<String>,
     pub type_reference: Option<String>,
     pub kind: IrIndentifierKind,
+    pub is_definition: bool,
 }
 
 impl IrIdentifier {
     pub fn qualified_name(&self) -> Result<String, String> {
         // TODO: Change to resolved or throw
-        Ok(self.unresolved.clone())
+        if let Some(resolved) = &self.resolved {
+            Ok(resolved.clone())
+        } else {
+            Ok(format!("[{}]", self.unresolved).to_string())
+        }
     }
 }
 
@@ -108,6 +113,7 @@ impl IrIdentifier {
             resolved: None,
             type_reference: None,
             kind,
+            is_definition: false,
         }
     }
 }
@@ -121,18 +127,21 @@ pub struct VariableDeclaration {
 
 impl VariableDeclaration {
     pub fn new(name: String, mutable: bool, typename: IrIdentifier) -> Self {
-        Self { name: IrIdentifier {
-            unresolved: name,
-            resolved: None,
-            type_reference: None,
-            kind: if mutable { 
-                IrIndentifierKind::Memory
-            } else {
-                IrIndentifierKind::VirtualRegister                
-            }
-        }, 
-        typename,
-        mutable }
+        Self {
+            name: IrIdentifier {
+                unresolved: name,
+                resolved: None,
+                type_reference: None,
+                kind: if mutable {
+                    IrIndentifierKind::Memory
+                } else {
+                    IrIndentifierKind::VirtualRegister
+                },
+                is_definition: true,
+            },
+            typename,
+            mutable,
+        }
     }
 }
 
@@ -212,6 +221,7 @@ impl FunctionBlock {
             resolved: Some(label), // Label is immediately resolved as it is unrelated to globals and garantueed to be non-conflicting
             type_reference: None,
             kind: IrIndentifierKind::BlockLabel,
+            is_definition: true,
         }
     }
 }
@@ -231,10 +241,12 @@ impl FunctionBody {
 pub enum ConcreteType {
     Tuple {
         name: IrIdentifier,
+        namespace: IrIdentifier,
         data_layout: Box<Tuple>,
     },
     Variant {
         name: IrIdentifier,
+        namespace: IrIdentifier,
         data_layout: Box<Variant>,
     },
 }
@@ -249,6 +261,7 @@ pub enum FunctionKind {
 #[derive(Debug, Clone)]
 pub struct ConcreteFunction {
     pub name: IrIdentifier,
+    pub namespace: IrIdentifier,
     pub function_kind: FunctionKind,
     pub return_type: Option<String>, // TODO: Should be Identifier
     pub arguments: Vec<VariableDeclaration>,

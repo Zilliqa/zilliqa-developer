@@ -172,7 +172,11 @@ impl<'ctx> LlvmIrGenerator<'ctx> {
     pub fn write_type_definitions_to_module(&mut self) -> Result<u32, String> {
         for concrete_type in self.ir.type_definitions.iter() {
             match concrete_type {
-                ConcreteType::Tuple { name, data_layout } => {
+                ConcreteType::Tuple {
+                    name,
+                    data_layout,
+                    namespace,
+                } => {
                     let mut field_types = Vec::new();
                     for field in &data_layout.fields {
                         let field_type = self.get_type_definition(&field.qualified_name()?)?;
@@ -215,7 +219,11 @@ impl<'ctx> LlvmIrGenerator<'ctx> {
 
                     self.builder.build_return(Some(&struct_val));
                 }
-                ConcreteType::Variant { name, data_layout } => {
+                ConcreteType::Variant {
+                    name,
+                    data_layout,
+                    namespace,
+                } => {
                     self.build_variant(data_layout, &name.qualified_name()?);
                 }
             }
@@ -247,11 +255,19 @@ impl<'ctx> IrLowering for LlvmIrGenerator<'ctx> {
     // Lower a single concrete type from HighlevelIr to LLVM IR.
     fn lower_concrete_type(&mut self, con_type: &ConcreteType) {
         match con_type {
-            ConcreteType::Tuple { name, data_layout } => {
+            ConcreteType::Tuple {
+                name,
+                data_layout,
+                namespace,
+            } => {
                 // provide functionality to handle tuple type
                 unimplemented!()
             }
-            ConcreteType::Variant { name, data_layout } => {
+            ConcreteType::Variant {
+                name,
+                data_layout,
+                namespace,
+            } => {
                 // provide functionality to handle variant type
                 unimplemented!()
             }

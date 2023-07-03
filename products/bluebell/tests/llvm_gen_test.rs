@@ -2,9 +2,9 @@
 mod tests {
     extern crate diffy;
     use bluebell::highlevel_ir::IrLowering;
+    use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
-    use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
     use bluebell::highlevel_ir_type_collection::HighlevelIrTypeCollection;
 
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
@@ -42,12 +42,10 @@ mod tests {
             Ok(ast) => {
                 let mut generator = HighlevelIrEmitter::new();
                 let mut ast2 = ast.clone();
-                println!("AST: {:#?}\n\n", ast2);
+                // println!("AST: {:#?}\n\n", ast2);
                 let mut ir = generator
                     .emit(&mut ast2)
                     .expect("Failed generating highlevel IR");
-                println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
-                println!("\n\nDefined functions:\n{:#?}\n\n", ir.function_definitions);
 
                 // let context = Context::create();
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
@@ -55,8 +53,16 @@ mod tests {
 
                 let mut type_collector = HighlevelIrTypeCollection::new();
                 ir.visit(&mut type_collector);
+
+                // println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
+                // println!("\n\nDefined functions:\n{:#?}\n\n", ir.function_definitions);
+
                 let mut debug_printer = HighlevelIrDebugPrinter::new();
                 ir.visit(&mut debug_printer);
+
+                // let context = Context::create();
+                // let mut generator = LlvmIrGenerator::new(&context, ir);
+                // generator.write_function_definitions_to_module();
 
                 assert!(false);
                 true

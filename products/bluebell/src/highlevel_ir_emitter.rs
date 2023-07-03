@@ -27,6 +27,8 @@ pub struct HighlevelIrEmitter {
     ///
     current_block: Box<FunctionBlock>,
     current_body: Box<FunctionBody>,
+    current_namespace: IrIdentifier,
+    namespace_stack: Vec<IrIdentifier>,
 
     ir: Box<HighlevelIr>,
 }
@@ -35,6 +37,13 @@ impl HighlevelIrEmitter {
     pub fn new() -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
+        let ns = IrIdentifier {
+            unresolved: "".to_string(),
+            resolved: None,
+            type_reference: None,
+            kind: IrIndentifierKind::Namespace,
+            is_definition: false,
+        };
         // TODO: Repeat similar code for all literals
         HighlevelIrEmitter {
             stack: Vec::new(),
@@ -43,7 +52,25 @@ impl HighlevelIrEmitter {
             block_counter: 0,
             current_block,
             current_body,
+            current_namespace: ns.clone(),
+            namespace_stack: [ns].to_vec(),
             ir: Box::new(HighlevelIr::new()),
+        }
+    }
+
+    fn push_namespace(&mut self, mut ns: IrIdentifier) {
+        // TODO: Update ns to use nested namespaces
+        ns.kind = IrIndentifierKind::Namespace;
+        self.namespace_stack.push(ns.clone());
+        self.current_namespace = ns;
+    }
+
+    fn pop_namespace(&mut self) {
+        self.namespace_stack.pop();
+        if let Some(ns) = self.namespace_stack.last() {
+            self.current_namespace = ns.clone();
+        } else {
+            panic!("Namespace stack is empty.");
         }
     }
 
@@ -55,6 +82,7 @@ impl HighlevelIrEmitter {
             resolved: None,
             type_reference: None,
             kind: IrIndentifierKind::VirtualRegisterIntermediate,
+            is_definition: true,
         }
     }
 
@@ -103,7 +131,7 @@ impl HighlevelIrEmitter {
         Ok(ret)
     }
 
-    fn pop_symbol_name(&mut self) -> Result<IrIdentifier, String> {
+    fn pop_ir_identifier(&mut self) -> Result<IrIdentifier, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
             match candidate {
                 StackObject::IrIdentifier(n) => n,
@@ -193,6 +221,7 @@ impl HighlevelIrEmitter {
             resolved: None,
             type_reference: None,
             kind: IrIndentifierKind::TypeName,
+            is_definition: true,
         }
     }
 
@@ -470,6 +499,7 @@ impl AstConverting for HighlevelIrEmitter {
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::ExternalFunctionName,
+                    is_definition: false,
                 };
 
                 let operation = Operation::CallExternalFunction { name, arguments };
@@ -530,7 +560,7 @@ impl AstConverting for HighlevelIrEmitter {
 
                     // Creating compare instruction
                     // TODO: Pop instruction or symbol
-                    let expected_value = self.pop_symbol_name()?;
+                    let expected_value = self.pop_ir_identifier()?;
                     let compare_instr = Box::new(Instruction {
                         ssa_name: None,
                         result_type: None,
@@ -620,7 +650,7 @@ impl AstConverting for HighlevelIrEmitter {
                 let _ = identifier_name.visit(self)?;
 
                 // Expecting function name symbol
-                let mut name = self.pop_symbol_name()?;
+                let mut name = self.pop_ir_identifier()?;
                 assert!(name.kind == IrIndentifierKind::Unknown);
                 name.kind = IrIndentifierKind::FunctionName;
 
@@ -700,7 +730,7 @@ impl AstConverting for HighlevelIrEmitter {
         match node {
             NodeValueLiteral::LiteralInt(typename, value) => {
                 let _ = typename.visit(self)?;
-                let mut typename = self.pop_symbol_name()?;
+                let mut typename = self.pop_ir_identifier()?;
                 assert!(typename.kind == IrIndentifierKind::Unknown);
                 typename.kind = IrIndentifierKind::TypeName;
                 let operation = Operation::Literal {
@@ -801,6 +831,7 @@ impl AstConverting for HighlevelIrEmitter {
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::Unknown,
+                    is_definition: false,
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
 
@@ -897,6 +928,7 @@ impl AstConverting for HighlevelIrEmitter {
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
+                    is_definition: false,
                 }));
             }
             NodeComponentId::WithTypeLikeName(name) => {
@@ -905,6 +937,7 @@ impl AstConverting for HighlevelIrEmitter {
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
+                    is_definition: false,
                 }));
             }
         }
@@ -986,7 +1019,7 @@ impl AstConverting for HighlevelIrEmitter {
         let name = node.identifier_name.clone();
         let _ = node.annotation.visit(self)?;
 
-        let mut typename = self.pop_symbol_name()?;
+        let mut typename = self.pop_ir_identifier()?;
         assert!(typename.kind == IrIndentifierKind::Unknown);
         typename.kind = IrIndentifierKind::TypeName;
 
@@ -1046,15 +1079,16 @@ impl AstConverting for HighlevelIrEmitter {
         mode: TreeTraversalMode,
         node: &NodeLibraryDefinition,
     ) -> Result<TraversalResult, String> {
-        match mode {
-            TreeTraversalMode::Enter => {
-                // TODO: Push namespace: node.name
-            }
-            TreeTraversalMode::Exit => {
-                // TODO: Pop namespace
-            }
+        let _ = node.name.visit(self)?;
+        let ns = self.pop_ir_identifier()?;
+
+        self.push_namespace(ns);
+        for def in node.definitions.iter() {
+            let _ = def.visit(self)?;
         }
-        Ok(TraversalResult::Continue)
+
+        self.pop_namespace();
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_library_single_definition(
@@ -1072,22 +1106,27 @@ impl AstConverting for HighlevelIrEmitter {
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                 let _ = name.visit(self)?;
-                let mut name = self.pop_symbol_name()?;
+                let mut name = self.pop_ir_identifier()?;
                 assert!(name.kind == IrIndentifierKind::Unknown);
                 name.kind = IrIndentifierKind::TypeName;
-
+                // The name itself is being defined here
+                name.is_definition = true;
                 let mut user_type = Variant::new();
 
                 if let Some(clauses) = clauses {
                     for clause in clauses.iter() {
                         let _ = clause.visit(self)?;
-                        let field = self.pop_enum_value()?;
+                        let mut field = self.pop_enum_value()?;
+
+                        // And the field names are being defined as well
+                        field.name.is_definition = true;
                         user_type.add_field(field);
                     }
                 }
 
                 self.ir.type_definitions.push(ConcreteType::Variant {
                     name,
+                    namespace: self.current_namespace.clone(),
                     data_layout: Box::new(user_type),
                 });
             }
@@ -1101,29 +1140,28 @@ impl AstConverting for HighlevelIrEmitter {
         mode: TreeTraversalMode,
         node: &NodeContractDefinition,
     ) -> Result<TraversalResult, String> {
-        match mode {
-            TreeTraversalMode::Enter => {
-                /*
-                TODO: Move to LLVM emitter
-                let void_type = self.context.void_type();
-                let fn_type = void_type.fn_type(&[], false);
-                let contract_initiator_name =
-                    format!("Initiator_{}", &node.contract_name.to_string());
-                // TODO: Add annotations to indidate that this is a contract constructor
-                let function =
-                    self.module
-                        .add_function(&contract_initiator_name.to_string(), fn_type, None);
-                let basic_block = self.context.append_basic_block(function, "entry");
-                self.builder.position_at_end(basic_block);
-                // TODO - you have to implement the contract definition here
-                // in the form of IR instructions for LLVM. Also replace the return type or parameters in fn_type
-                // if your contract requires different types
-                // ...
-                */
-            }
-            _ => {}
+        // TODO: Decide whether the namespace should be distinct
+        let _ = node.contract_name.visit(self)?;
+        let ns = self.pop_ir_identifier()?;
+
+        self.push_namespace(ns);
+
+        let _ = node.parameters.visit(self)?;
+
+        if let Some(constraint) = &node.constraint {
+            let _ = constraint.visit(self)?;
         }
-        Ok(TraversalResult::Continue)
+
+        for field in node.fields.iter() {
+            let _ = field.visit(self)?;
+        }
+
+        for component in node.components.iter() {
+            let _ = component.visit(self)?;
+        }
+
+        self.pop_namespace();
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn emit_contract_field(
@@ -1177,7 +1215,7 @@ impl AstConverting for HighlevelIrEmitter {
 
         // Exit
         let mut body = self.pop_function_body()?;
-        let mut function_name = self.pop_symbol_name()?;
+        let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
         function_name.kind = IrIndentifierKind::TransitionName;
 
@@ -1185,6 +1223,7 @@ impl AstConverting for HighlevelIrEmitter {
 
         let function = ConcreteFunction {
             name: function_name,
+            namespace: self.current_namespace.clone(),
             function_kind: FunctionKind::Transition,
             return_type: None, // TODO: Pop of the stack
             arguments,
@@ -1204,7 +1243,7 @@ impl AstConverting for HighlevelIrEmitter {
         match node {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
                 let _ = identifier.visit(self)?;
-                let mut enum_name = self.pop_symbol_name()?;
+                let mut enum_name = self.pop_ir_identifier()?;
                 assert!(enum_name.kind == IrIndentifierKind::Unknown);
                 enum_name.kind = IrIndentifierKind::TypeName;
 
@@ -1213,7 +1252,7 @@ impl AstConverting for HighlevelIrEmitter {
             }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
                 let _ = identifier.visit(self)?;
-                let mut member_name = self.pop_symbol_name()?;
+                let mut member_name = self.pop_ir_identifier()?;
                 assert!(member_name.kind == IrIndentifierKind::Unknown);
                 member_name.kind = IrIndentifierKind::TypeName;
 
@@ -1221,7 +1260,7 @@ impl AstConverting for HighlevelIrEmitter {
                 for child in children.iter() {
                     let _ = child.visit(self)?;
 
-                    let mut item = self.pop_symbol_name()?;
+                    let mut item = self.pop_ir_identifier()?;
                     assert!(item.kind == IrIndentifierKind::Unknown);
                     item.kind = IrIndentifierKind::TypeName;
 
@@ -1232,6 +1271,7 @@ impl AstConverting for HighlevelIrEmitter {
 
                 self.ir.type_definitions.push(ConcreteType::Tuple {
                     name: refid.clone(),
+                    namespace: self.current_namespace.clone(),
                     data_layout: Box::new(tuple),
                 });
 

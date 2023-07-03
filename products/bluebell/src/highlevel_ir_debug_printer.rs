@@ -64,13 +64,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
                 self.script.push_str(" ");
             }
             TreeTraversalMode::Exit => {
-                if let Some(name) = &symbol.resolved {
-                    self.script.push_str(&name);
-                } else {
-                    self.script.push_str("[");
-                    self.script.push_str(&symbol.unresolved);
-                    self.script.push_str("]");
-                }
+                self.script.push_str(&symbol.qualified_name()?);
             }
         }
         Ok(TraversalResult::Continue)
@@ -254,14 +248,22 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         con_type: &mut ConcreteType,
     ) -> Result<TraversalResult, String> {
         match con_type {
-            ConcreteType::Tuple { name, data_layout } => {
+            ConcreteType::Tuple {
+                name,
+                data_layout,
+                namespace,
+            } => {
                 self.script.push_str("tuple ");
                 name.visit(self)?;
                 self.script.push_str(" = (\n");
                 data_layout.visit(self);
                 self.script.push_str(")\n");
             }
-            ConcreteType::Variant { name, data_layout } => {
+            ConcreteType::Variant {
+                name,
+                data_layout,
+                namespace,
+            } => {
                 self.script.push_str("tagged_union ");
                 name.visit(self)?;
                 self.script.push_str(" = {\n");
@@ -352,5 +354,3 @@ impl HighlevelIrDebugPrinter {
         self.script.clone()
     }
 }
-
-

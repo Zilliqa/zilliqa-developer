@@ -1,6 +1,6 @@
 scilla_version 0
 
-library Dead8
+library TheLibraryPart
 
 type Bool = 
   | False
@@ -15,7 +15,7 @@ type Action =
 type Action = 
   | True
     
-contract Dead8()
+contract TheContractPart()
 
 transition DynamicTypes(x: Uint32, y: Bool)
   magic = Uint32 0;
