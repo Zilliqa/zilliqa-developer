@@ -22,6 +22,7 @@ pub struct HighlevelIrTypeCollection {
 impl HighlevelIrTypeCollection {
     pub fn new() -> Self {
         let mut type_of = HashMap::new();
+
         type_of.insert("Int32".to_string(), "Int32".to_string());
         type_of.insert("Uint32".to_string(), "Uint32".to_string());
 
@@ -36,13 +37,7 @@ impl HighlevelIrTypeCollection {
 
     fn resolve_qualified_name(&self, basename: &String) -> Option<String> {
         match &self.current_namespace {
-            None => {
-                if let Some(var) = self.type_of.get(basename) {
-                    return Some(basename.to_string());
-                }
-
-                None
-            }
+            None => (),
             Some(namespace) => {
                 let mut namespaces = namespace.split(NAMESPACE_SEPARATOR).collect::<Vec<&str>>();
 
@@ -60,21 +55,27 @@ impl HighlevelIrTypeCollection {
                         &full_name
                     };
 
-                    if let Some(var) = self.type_of.get(full_name) {
+                    if let Some(_) = self.type_of.get(full_name) {
                         return Some(full_name.to_string());
                     }
+
                     // Remove the last level of the namespace
                     namespaces.pop();
                 }
-
-                if let Some(var) = self.type_of.get(basename) {
-                    return Some(basename.to_string());
-                }
-
-                // If nothing was found, return None
-                None
             }
         }
+
+        let lookup = if let Some(aliased_name) = self.aliases.get(basename) {
+            aliased_name
+        } else {
+            basename
+        };
+
+        if let Some(_) = self.type_of.get(lookup) {
+            return Some(lookup.to_string());
+        }
+
+        None
     }
 
     fn push_namespace(&mut self, namespace: String) {
@@ -112,6 +113,11 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
                 self.type_of
                     .insert(qualified_name.clone(), qualified_name.clone());
 
+                // Backgwards compatibility support
+                // TODO: Enable and disable this with flag
+                self.aliases
+                    .insert(name.unresolved.clone(), qualified_name.clone());
+
                 self.current_type = Some(qualified_name);
                 let _ = data_layout.visit(self)?;
 
@@ -131,6 +137,11 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
                 let qualified_name = name.qualified_name()?;
                 self.type_of
                     .insert(qualified_name.clone(), qualified_name.clone());
+
+                // Backgwards compatibility support
+                // TODO: Enable and disable this with flag
+                self.aliases
+                    .insert(name.unresolved.clone(), qualified_name.clone());
 
                 self.current_type = Some(qualified_name);
                 let _ = data_layout.visit(self)?;
@@ -236,9 +247,16 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
 
     fn visit_highlevel_ir(
         &mut self,
-        _mode: TreeTraversalMode,
+        mode: TreeTraversalMode,
         _highlevel_ir: &mut HighlevelIr,
     ) -> Result<TraversalResult, String> {
+        match mode {
+            TreeTraversalMode::Enter => (),
+            TreeTraversalMode::Exit => {
+                println!("Types: {:#?}\n\n", self.type_of);
+                println!("Aliases: {:#?}\n\n", self.aliases);
+            }
+        }
         Ok(TraversalResult::Continue)
     }
 
