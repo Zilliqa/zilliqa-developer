@@ -61,7 +61,8 @@ jobs:
         id: project-changed
         run: |
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" ]; then
-            echo "developer-portal=true" >> $GITHUB_OUTPUT
+            echo "::set-output name=developer-portal::true"
+            #echo "developer-portal=true" >> $GITHUB_OUTPUT
           fi
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex') }}" = "true" ]; then
             echo "devex=true" >> $GITHUB_OUTPUT
@@ -120,7 +121,7 @@ jobs:
 
       - name: Configure AWS Credentials - staging
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@main
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
@@ -133,7 +134,10 @@ jobs:
           registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex-apollo == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name != 'release' }} &&
+          ${{ steps.condition-check.outputs.devex-apollo == 'true' }}
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -141,7 +145,10 @@ jobs:
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name != 'release' }} &&
+          ${{ steps.condition-check.outputs.neo-savant == 'true' }}
         run: |
           cd products/neo-savant
           mkdir -p savant-artifact/
@@ -151,7 +158,10 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - developer-portal - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event_name != 'release' }} &&
+          ${{ steps.condition-check.outputs.developer-portal == 'true' }}
         run: |
           bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_staging
 
@@ -167,7 +177,7 @@ jobs:
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
+        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@main
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::298213327629:role/ecr-read-write
@@ -180,7 +190,10 @@ jobs:
           registry: 298213327629.dkr.ecr.us-west-2.amazonaws.com
 
       - name: "Build and push devex-apollo - production"
-        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex-apollo == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event.action == 'created' }} &&
+          ${{ steps.condition-check.outputs.devex-apollo == 'true' }}
         run: |
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
@@ -188,7 +201,10 @@ jobs:
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - production"
-        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event.action == 'created' }} &&
+          ${{ steps.condition-check.outputs.neo-savant == 'true' }}        
         run: |
           cd products/neo-savant
           mkdir -p savant-artifact/
@@ -198,17 +214,26 @@ jobs:
           docker rm extractstg
 
       - name: "Build and push Docker - developer-portal - production"
-        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.developer-portal == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event.action == 'created' }} &&
+          ${{ steps.condition-check.outputs.developer-portal == 'true' }}        
         run: |
           bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_production
 
       - name: "Build and push Docker - neo-savant - production"
-        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event.action == 'created' }} &&
+          ${{ steps.condition-check.outputs.neo-savant == 'true' }}         
         run: |
           bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_production
 
       - name: "Build and push Docker - devex - production"
-        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex == 'true'
+        if: |
+          ${{ github.ref == github.event.repository.default_branch }} &&
+          ${{ github.event.action == 'created' }} &&
+          ${{ steps.condition-check.outputs.devex == 'true' }}         
         run: |
           bazelisk run --test_output=all --keep_going //products/devex:push_image_production
 

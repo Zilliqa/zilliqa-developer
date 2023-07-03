@@ -3,7 +3,7 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 load(":defs.bzl", "mkdocs_html")
 
-# TODO:
+## TODO:
 # mkdocs_collect(
 #     name = "collect",
 #     srcs = [
