@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/account",
-  "version": "3.4.2-rc.0",
+  "version": "3.4.3",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
   ],
@@ -9,7 +9,7 @@
   },
   "description": "Used for signing transactions.",
   "main": "dist/cjs/src/index.js",
-  "module": "dist/esm/bundle.js",
+  "module": "dist/esm/src/index.js",
   "browser": "dist/umd/bundle.js",
   "jsnext:main": "dist/esm/bundle.js",
   "types": "dist/types/src/index.d.ts",

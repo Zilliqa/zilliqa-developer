@@ -13,14 +13,14 @@ class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  async updateTxs(): void {
+  async updateTxs(): Promise<void> {
     const count = 10;
     const provider = "https://api.zilliqa.com";
     const zilliqa = new Zilliqa(provider);
     const latestTxBlock = await zilliqa.blockchain.getNumTxBlocks();
 
     // Calculate the starting block to fetch transactions
-    const startBlock = parseInt(latestTxBlock.result || 0) - count;
+    const startBlock = parseInt(latestTxBlock.result || "0") - count;
 
     // Fetch latest transactions
     const hashes: string[] = [];

@@ -1,9 +1,9 @@
 {
   "name": "@zilliqa-js/core",
-  "version": "3.4.2-rc.0",
+  "version": "3.4.3",
   "description": "Core abstractions that power the zilliqa JS client.",
   "main": "dist/cjs/src/index.js",
-  "module": "dist/esm/bundle.js",
+  "module": "dist/esm/src/index.js",
   "browser": "dist/umd/bundle.js",
   "jsnext:main": "dist/esm/bundle.js",
   "types": "dist/types/src/index.d.ts",
