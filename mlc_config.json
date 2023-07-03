@@ -1,6 +1,9 @@
 {
   "ignorePatterns": [
     {
+      "pattern": "^https://evm-api-filters.zilliqa.com"
+    },
+    {
       "pattern": "^https://opensource.org/licenses/gpl-license"
     },
     {
