@@ -28,11 +28,7 @@ feature-filled [Scilla IDE](https://ide.zilliqa.com/#/)
 
 ## Setting Up
 
-## Available Scripts
-
-- `yarn install` to install dependencies
-- `yarn start` to run the app on `localhost:3000`
-- `yarn build` to build the app for production
+Use `bazel` to build devex; don't attempt to use yarn/pnpm directly, since this will fail.
 
 ## Preloading Networks
 

@@ -1,5 +1,7 @@
 # Devex Apollo
 
+Note that this package only builds via docker (invoked from bazel via `BUILD`). There are no local development targets at the moment.
+
 ## Introduction
 
 Devex Apollo uses [Apollo Data Graph Platform](https://www.apollographql.com/) to enable querying of blockkchain data using GraphQL qquery.
