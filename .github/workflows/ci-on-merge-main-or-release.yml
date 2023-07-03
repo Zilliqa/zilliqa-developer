@@ -271,7 +271,9 @@ jobs:
           cat cd/applications.bzl
 
       - name: "Creating staging update"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        if: |
+          ${{ github.ref_name == env.DEFAULT_BRANCH }} &&
+          ${{ github.event_name != 'release' }}
         run: |
           bazelisk run //cd:update_staging
         env:
@@ -280,7 +282,9 @@ jobs:
           BUILD_URI_SUFFIX: ${{ github.head_ref }}
 
       - name: "Creating production update"
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: |
+          ${{ github.event_name == 'release' }} &&
+          ${{ github.event.action == 'created' }}
         run: |
           bazelisk run //cd:update_production
         env:
