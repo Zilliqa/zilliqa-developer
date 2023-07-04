@@ -138,7 +138,6 @@ jobs:
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
           docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
-          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
@@ -153,17 +152,17 @@ jobs:
       - name: "Build and push Docker - developer-portal - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_staging
+          echo run
 
       - name: "Build and push Docker - neo-savant - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_staging
+          echo run
 
       - name: "Build and push Docker - devex - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_staging
+          echo run
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -185,7 +184,6 @@ jobs:
           VERSION=$(cat VERSION)
           docker build -t devex-apollo:local products/devex-apollo
           docker tag devex-apollo:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
-          docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
       - name: "Build neo-savant - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
@@ -200,17 +198,17 @@ jobs:
       - name: "Build and push Docker - developer-portal - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.developer-portal == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_production
+          echo run
 
       - name: "Build and push Docker - neo-savant - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.neo-savant == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_production
+          echo run
 
       - name: "Build and push Docker - devex - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_production
+          echo run
 
       ### BEGIN DEPLOYMENT STAGES
       - name: "Create application.bzl"
@@ -234,7 +232,7 @@ jobs:
       - name: "Creating staging update"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         run: |
-          bazelisk run //cd:update_staging
+          echo run
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
@@ -243,7 +241,7 @@ jobs:
       - name: "Creating production update"
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
-          bazelisk run //cd:update_production
+          echo run
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
