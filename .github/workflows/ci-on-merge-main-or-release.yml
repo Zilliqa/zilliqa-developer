@@ -228,6 +228,9 @@ jobs:
           fi
           echo ']' >> cd/applications.bzl
           cat cd/applications.bzl
+          echo ${{ github.ref_name }}
+          echo ${{ github.event_name }}
+          echo ${{ steps.project-changed.outputs.devex }}
 
       - name: "Creating staging update"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
