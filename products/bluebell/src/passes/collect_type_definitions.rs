@@ -3,35 +3,27 @@ use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::highlevel_ir::Instruction;
 use crate::highlevel_ir::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    HighlevelIr, IrIdentifier, IrIndentifierKind, IrLowering, Operation, Tuple,
-    VariableDeclaration, Variant,
+    HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
 };
 use crate::highlevel_ir_pass::HighlevelIrPass;
 use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
-use std::collections::HashMap;
+use crate::symbol_table::SymbolTable;
 
-pub struct HighlevelIrTypeCollection {
+pub struct CollectTypeDefinitionsPass<'symtab> {
     namespace_stack: Vec<String>,
     current_namespace: Option<String>,
     current_type: Option<String>,
 
-    aliases: HashMap<String, String>,
-    type_of: HashMap<String, String>,
+    symbol_table: &'symtab mut SymbolTable,
 }
 
-impl HighlevelIrTypeCollection {
-    pub fn new() -> Self {
-        let mut type_of = HashMap::new();
-
-        type_of.insert("Int32".to_string(), "Int32".to_string());
-        type_of.insert("Uint32".to_string(), "Uint32".to_string());
-
-        HighlevelIrTypeCollection {
+impl<'symtab> CollectTypeDefinitionsPass<'symtab> {
+    pub fn new(symbol_table: &'symtab mut SymbolTable) -> Self {
+        CollectTypeDefinitionsPass {
             namespace_stack: Vec::new(),
             current_namespace: None,
             current_type: None,
-            aliases: HashMap::new(),
-            type_of,
+            symbol_table,
         }
     }
 
@@ -49,13 +41,14 @@ impl HighlevelIrTypeCollection {
                         basename
                     );
 
-                    let full_name = if let Some(aliased_name) = self.aliases.get(&full_name) {
-                        aliased_name
-                    } else {
-                        &full_name
-                    };
+                    let full_name =
+                        if let Some(aliased_name) = self.symbol_table.aliases.get(&full_name) {
+                            aliased_name
+                        } else {
+                            &full_name
+                        };
 
-                    if let Some(_) = self.type_of.get(full_name) {
+                    if let Some(_) = self.symbol_table.type_of.get(full_name) {
                         return Some(full_name.to_string());
                     }
 
@@ -65,13 +58,13 @@ impl HighlevelIrTypeCollection {
             }
         }
 
-        let lookup = if let Some(aliased_name) = self.aliases.get(basename) {
+        let lookup = if let Some(aliased_name) = self.symbol_table.aliases.get(basename) {
             aliased_name
         } else {
             basename
         };
 
-        if let Some(_) = self.type_of.get(lookup) {
+        if let Some(_) = self.symbol_table.type_of.get(lookup) {
             return Some(lookup.to_string());
         }
 
@@ -93,10 +86,10 @@ impl HighlevelIrTypeCollection {
     }
 }
 
-impl HighlevelIrPass for HighlevelIrTypeCollection {
+impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
     fn visit_concrete_type(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         con_type: &mut ConcreteType,
     ) -> Result<TraversalResult, String> {
         match con_type {
@@ -110,12 +103,14 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
 
                 let _ = name.visit(self)?;
                 let qualified_name = name.qualified_name()?;
-                self.type_of
+                self.symbol_table
+                    .type_of
                     .insert(qualified_name.clone(), qualified_name.clone());
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
-                self.aliases
+                self.symbol_table
+                    .aliases
                     .insert(name.unresolved.clone(), qualified_name.clone());
 
                 self.current_type = Some(qualified_name);
@@ -135,12 +130,14 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
 
                 let _ = name.visit(self)?;
                 let qualified_name = name.qualified_name()?;
-                self.type_of
+                self.symbol_table
+                    .type_of
                     .insert(qualified_name.clone(), qualified_name.clone());
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
-                self.aliases
+                self.symbol_table
+                    .aliases
                     .insert(name.unresolved.clone(), qualified_name.clone());
 
                 self.current_type = Some(qualified_name);
@@ -155,7 +152,7 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
 
     fn visit_enum_value(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         enum_value: &mut EnumValue,
     ) -> Result<TraversalResult, String> {
         if let Some(typescope) = &self.current_type {
@@ -179,16 +176,16 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
 
     fn visit_tuple(
         &mut self,
-        mode: TreeTraversalMode,
-        tuple: &mut Tuple,
+        _mode: TreeTraversalMode,
+        _tuple: &mut Tuple,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
 
     fn visit_variant(
         &mut self,
-        mode: TreeTraversalMode,
-        variant: &mut Variant,
+        _mode: TreeTraversalMode,
+        _variant: &mut Variant,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -207,6 +204,7 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
         _mode: TreeTraversalMode,
         _fnc: &mut ConcreteFunction,
     ) -> Result<TraversalResult, String> {
+        // TODO: collect type of function
         Ok(TraversalResult::Continue)
     }
 
@@ -220,7 +218,7 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
 
     fn visit_symbol_name(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         symbol: &mut IrIdentifier,
     ) -> Result<TraversalResult, String> {
         match symbol.kind {
@@ -230,10 +228,10 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
             _ => {
                 if symbol.is_definition {
                     if let Some(namespace) = &self.current_namespace {
-                        symbol.resolved = Some(
+                        let typename =
                             format!("{}{}{}", namespace, NAMESPACE_SEPARATOR, symbol.unresolved)
-                                .to_string(),
-                        );
+                                .to_string();
+                        symbol.resolved = Some(typename.clone());
                     }
                 } else if let Some(resolved_name) = self.resolve_qualified_name(&symbol.unresolved)
                 {
@@ -253,8 +251,8 @@ impl HighlevelIrPass for HighlevelIrTypeCollection {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => {
-                println!("Types: {:#?}\n\n", self.type_of);
-                println!("Aliases: {:#?}\n\n", self.aliases);
+                println!("Types: {:#?}\n\n", self.symbol_table.type_of);
+                println!("Aliases: {:#?}\n\n", self.symbol_table.aliases);
             }
         }
         Ok(TraversalResult::Continue)

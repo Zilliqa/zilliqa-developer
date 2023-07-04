@@ -1,31 +1,22 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
-    use bluebell::highlevel_ir::IrLowering;
     use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
-    use bluebell::highlevel_ir_type_collection::HighlevelIrTypeCollection;
+    use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
+    use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 
-    use bluebell::llvm_ir_generator::LlvmIrGenerator;
+    use bluebell::symbol_table::SymbolTable;
 
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
     use bluebell::parser;
     use bluebell::ParserError;
-    use bluebell::*;
-    use diffy::{create_patch, PatchFormatter};
-    use inkwell::context::Context;
+
     use std::fs;
     use std::fs::File;
     use std::io::Read;
-    use std::process::Command;
-
-    fn strip_comments(input: &str) -> String {
-        let re = regex::Regex::new(r"[ ]*\(\*([^*]|\*+[^*)])*\*+\)\n*").unwrap();
-        let result = re.replace_all(input, "");
-        result.to_string()
-    }
 
     fn parse_and_emit(path: String) -> bool {
         let mut file = File::open(&path).expect("Unable to open file");
@@ -51,14 +42,23 @@ mod tests {
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
                 // generator.write_function_definitions_to_module();
 
-                let mut type_collector = HighlevelIrTypeCollection::new();
-                ir.visit(&mut type_collector);
+                let mut symbol_table = SymbolTable::new();
+
+                let mut type_collector = CollectTypeDefinitionsPass::new(&mut symbol_table);
+                if let Err(err) = ir.visit(&mut type_collector) {
+                    panic!("{}", err);
+                }
+
+                let mut type_annotator = AnnotateBaseTypes::new(&mut symbol_table);
+                if let Err(err) = ir.visit(&mut type_annotator) {
+                    panic!("{}", err);
+                }
 
                 // println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
                 // println!("\n\nDefined functions:\n{:#?}\n\n", ir.function_definitions);
 
                 let mut debug_printer = HighlevelIrDebugPrinter::new();
-                ir.visit(&mut debug_printer);
+                let _ = ir.visit(&mut debug_printer);
 
                 // let context = Context::create();
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
@@ -68,7 +68,7 @@ mod tests {
                 true
             }
             Err(error) => {
-                let ret = error.clone();
+                let _ret = error.clone();
                 let message = format!("Syntax error {:?}", error);
                 let mut pos: Vec<usize> = [].to_vec();
                 error.map_location(|l| {

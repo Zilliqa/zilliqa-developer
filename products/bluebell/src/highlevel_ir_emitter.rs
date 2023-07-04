@@ -478,7 +478,7 @@ impl AstConverting for HighlevelIrEmitter {
                 }
             },
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
-                if let Some(targs) = targs {
+                if let Some(_targs) = targs {
                     unimplemented!();
                 }
 
@@ -628,6 +628,10 @@ impl AstConverting for HighlevelIrEmitter {
                 });
                 self.current_block.instructions.push(exit_instruction);
 
+                if let Some(_) = catch_all {
+                    unimplemented!();
+                }
+
                 // Attaching exit block
                 let mut finally_exit_block =
                     FunctionBlock::new_from_symbol(finally_exit_label.clone());
@@ -656,7 +660,7 @@ impl AstConverting for HighlevelIrEmitter {
 
                 let arguments: Vec<IrIdentifier> = [].to_vec();
 
-                if let Some(test) = contract_type_arguments {
+                if let Some(_test) = contract_type_arguments {
                     unimplemented!()
                 }
                 if argument_list.len() > 0 {
@@ -957,7 +961,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_parameter_pair(
         &mut self,
         _mode: TreeTraversalMode,
-        node: &NodeParameterPair,
+        _node: &NodeParameterPair,
     ) -> Result<TraversalResult, String> {
         // Delibarate pass through
         Ok(TraversalResult::Continue)
@@ -992,7 +996,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_statement_block(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeStatementBlock,
+        _node: &NodeStatementBlock,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -1041,7 +1045,7 @@ impl AstConverting for HighlevelIrEmitter {
     fn emit_program(
         &mut self,
         mode: TreeTraversalMode,
-        node: &NodeProgram,
+        _node: &NodeProgram,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -1076,7 +1080,7 @@ impl AstConverting for HighlevelIrEmitter {
 
     fn emit_library_definition(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeLibraryDefinition,
     ) -> Result<TraversalResult, String> {
         let _ = node.name.visit(self)?;
@@ -1137,7 +1141,7 @@ impl AstConverting for HighlevelIrEmitter {
 
     fn emit_contract_definition(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         node: &NodeContractDefinition,
     ) -> Result<TraversalResult, String> {
         // TODO: Decide whether the namespace should be distinct
@@ -1214,7 +1218,7 @@ impl AstConverting for HighlevelIrEmitter {
         let _ = node.body.visit(self)?;
 
         // Exit
-        let mut body = self.pop_function_body()?;
+        let body = self.pop_function_body()?;
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
         function_name.kind = IrIndentifierKind::TransitionName;

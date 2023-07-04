@@ -1027,7 +1027,7 @@ impl AstVisitor for NodeLibrarySingleDefinition {
                     expression,
                 } => {
                     // TODO: Unused variables aboce
-                    expression.visit(emitter);
+                    let _ = expression.visit(emitter)?;
                     unimplemented!()
                 }
                 NodeLibrarySingleDefinition::TypeDefinition(name, option_clause) => {

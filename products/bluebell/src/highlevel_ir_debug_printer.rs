@@ -2,8 +2,7 @@ use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::highlevel_ir::Instruction;
 use crate::highlevel_ir::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    HighlevelIr, IrIdentifier, IrIndentifierKind, IrLowering, Operation, Tuple,
-    VariableDeclaration, Variant,
+    HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
 };
 use crate::highlevel_ir_pass::HighlevelIrPass;
 use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
@@ -72,15 +71,15 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_enum_value(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         enum_value: &mut EnumValue,
     ) -> Result<TraversalResult, String> {
         self.script.push_str("    ");
-        enum_value.name.visit(self);
+        let _ = enum_value.name.visit(self)?;
 
         if let Some(data) = &mut enum_value.data {
             self.script.push_str(" : ");
-            data.visit(self);
+            let _ = data.visit(self)?;
         }
 
         self.script.push_str(",\n");
@@ -89,12 +88,12 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_tuple(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         tuple: &mut Tuple,
     ) -> Result<TraversalResult, String> {
         for field in tuple.fields.iter_mut() {
             self.script.push_str("    ");
-            field.visit(self);
+            let _ = field.visit(self)?;
             self.script.push_str(",\n");
         }
         Ok(TraversalResult::SkipChildren)
@@ -102,8 +101,8 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_variant(
         &mut self,
-        mode: TreeTraversalMode,
-        variant: &mut Variant,
+        _mode: TreeTraversalMode,
+        _variant: &mut Variant,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -115,14 +114,14 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         var_dec: &mut VariableDeclaration,
     ) -> Result<TraversalResult, String> {
         var_dec.name.visit(self)?;
-        self.script.push_str(":");
+        self.script.push_str(" : ");
         var_dec.typename.visit(self)?;
         Ok(TraversalResult::SkipChildren)
     }
 
     fn visit_operation(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         operation: &mut Operation,
     ) -> Result<TraversalResult, String> {
         match operation {
@@ -164,16 +163,16 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
             }
 
             Operation::CallStaticFunction {
-                name,
-                owner,
-                arguments,
+                name: _,
+                owner: _,
+                arguments: _,
             } => self.script.push_str("call stat [TODO]"),
             Operation::CallMemberFunction {
-                name,
-                owner,
-                arguments,
+                name: _,
+                owner: _,
+                arguments: _,
             } => unimplemented!(),
-            Operation::ResolveSymbol { symbol } => unimplemented!(),
+            Operation::ResolveSymbol { symbol: _ } => unimplemented!(),
             Operation::Literal { data, typename } => {
                 typename.visit(self)?;
                 self.script.push_str(" ");
@@ -196,7 +195,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_instruction(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         instr: &mut Instruction,
     ) -> Result<TraversalResult, String> {
         self.script.push_str("    ");
@@ -210,7 +209,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
             self.script.push_str(" ");
         }
 
-        instr.operation.visit(self);
+        let _ = instr.operation.visit(self)?;
 
         self.script.push_str("\n");
 
@@ -219,7 +218,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_function_block(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         block: &mut FunctionBlock,
     ) -> Result<TraversalResult, String> {
         block.name.visit(self)?;
@@ -244,30 +243,30 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_concrete_type(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         con_type: &mut ConcreteType,
     ) -> Result<TraversalResult, String> {
         match con_type {
             ConcreteType::Tuple {
                 name,
                 data_layout,
-                namespace,
+                namespace: _,
             } => {
                 self.script.push_str("tuple ");
-                name.visit(self)?;
+                let _ = name.visit(self)?;
                 self.script.push_str(" = (\n");
-                data_layout.visit(self);
+                let _ = data_layout.visit(self)?;
                 self.script.push_str(")\n");
             }
             ConcreteType::Variant {
                 name,
                 data_layout,
-                namespace,
+                namespace: _,
             } => {
                 self.script.push_str("tagged_union ");
-                name.visit(self)?;
+                let _ = name.visit(self)?;
                 self.script.push_str(" = {\n");
-                data_layout.visit(self);
+                let _ = data_layout.visit(self)?;
                 self.script.push_str("}\n");
             }
         }
@@ -296,19 +295,19 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
 
     fn visit_concrete_function(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         fnc: &mut ConcreteFunction,
     ) -> Result<TraversalResult, String> {
-        fnc.function_kind.visit(self);
+        let _ = fnc.function_kind.visit(self)?;
 
         self.script.push_str(" ");
-        fnc.name.visit(self);
+        let _ = fnc.name.visit(self)?;
         self.script.push_str("(");
         for (i, arg) in fnc.arguments.iter_mut().enumerate() {
             if i > 0 {
                 self.script.push_str(", ");
             }
-            arg.visit(self);
+            let _ = arg.visit(self)?;
         }
         self.script.push_str(") : ");
         if let Some(rt) = &mut fnc.return_type {
@@ -328,7 +327,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
     fn visit_highlevel_ir(
         &mut self,
         mode: TreeTraversalMode,
-        highlevel_ir: &mut HighlevelIr,
+        _highlevel_ir: &mut HighlevelIr,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {

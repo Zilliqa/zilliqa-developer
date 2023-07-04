@@ -40,7 +40,7 @@ impl HighlevelIrPassExecutor for EnumValue {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
         let ret = emitter.visit_enum_value(TreeTraversalMode::Enter, self);
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
-            self.name.visit(emitter);
+            let _ = self.name.visit(emitter)?;
             if let Some(data) = &mut self.data {
                 data.visit(emitter)
             } else {
@@ -115,7 +115,6 @@ impl HighlevelIrPassExecutor for VariableDeclaration {
     }
 }
 
-use std::error::Error;
 impl HighlevelIrPassExecutor for Operation {
     fn visit(&mut self, emitter: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
         let ret = emitter.visit_operation(TreeTraversalMode::Enter, self);
@@ -307,10 +306,10 @@ impl HighlevelIrPassExecutor for ConcreteFunction {
             let _ = self.name.visit(emitter)?;
             let _ = self.namespace.visit(emitter)?;
             let _ = self.function_kind.visit(emitter)?;
-            if let Some(rt) = &mut self.return_type {
+            if let Some(_rt) = &mut self.return_type {
                 // TODO: Change when rt is an IrIdentifier let _ = rt.visit(emitter)?;
             }
-            for (i, arg) in self.arguments.iter_mut().enumerate() {
+            for (_i, arg) in self.arguments.iter_mut().enumerate() {
                 let _ = arg.visit(emitter)?;
             }
 
