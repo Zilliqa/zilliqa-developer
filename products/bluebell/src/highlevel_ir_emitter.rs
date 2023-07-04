@@ -561,6 +561,8 @@ impl AstConverting for HighlevelIrEmitter {
                     // Creating compare instruction
                     // TODO: Pop instruction or symbol
                     let expected_value = self.pop_ir_identifier()?;
+                    assert!(expected_value.kind == IrIndentifierKind::Unknown);
+
                     let compare_instr = Box::new(Instruction {
                         ssa_name: None,
                         result_type: None,
@@ -834,7 +836,7 @@ impl AstConverting for HighlevelIrEmitter {
                     unresolved: left_hand_side.to_string(),
                     resolved: None,
                     type_reference: None,
-                    kind: IrIndentifierKind::Unknown,
+                    kind: IrIndentifierKind::VirtualRegister,
                     is_definition: false,
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
@@ -1084,7 +1086,9 @@ impl AstConverting for HighlevelIrEmitter {
         node: &NodeLibraryDefinition,
     ) -> Result<TraversalResult, String> {
         let _ = node.name.visit(self)?;
-        let ns = self.pop_ir_identifier()?;
+        let mut ns = self.pop_ir_identifier()?;
+        assert!(ns.kind == IrIndentifierKind::Unknown);
+        ns.kind = IrIndentifierKind::Namespace;
 
         self.push_namespace(ns);
         for def in node.definitions.iter() {
@@ -1146,7 +1150,9 @@ impl AstConverting for HighlevelIrEmitter {
     ) -> Result<TraversalResult, String> {
         // TODO: Decide whether the namespace should be distinct
         let _ = node.contract_name.visit(self)?;
-        let ns = self.pop_ir_identifier()?;
+        let mut ns = self.pop_ir_identifier()?;
+        assert!(ns.kind == IrIndentifierKind::Unknown);
+        ns.kind = IrIndentifierKind::Namespace;
 
         self.push_namespace(ns);
 

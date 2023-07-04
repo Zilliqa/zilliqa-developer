@@ -163,12 +163,29 @@ impl<'symtab> HighlevelIrPass for AnnotateBaseTypes<'symtab> {
         symbol: &mut IrIdentifier,
     ) -> Result<TraversalResult, String> {
         match symbol.kind {
-            IrIndentifierKind::TypeName => (),
-            _ => {
+            IrIndentifierKind::BlockLabel => (),
+            IrIndentifierKind::FunctionName
+            | IrIndentifierKind::TransitionName
+            | IrIndentifierKind::ProcedureName
+            | IrIndentifierKind::VirtualRegister
+            | IrIndentifierKind::VirtualRegisterIntermediate
+            | IrIndentifierKind::Memory => {
                 if let Some(ns) = &self.namespace {
                     symbol.resolved = Some(
                         format!("{}{}{}", ns, NAMESPACE_SEPARATOR, symbol.unresolved).to_string(),
                     );
+                }
+            }
+            _ => {
+                println!("Skipping: {:#?}", symbol);
+                if symbol.unresolved == "True".to_string() {
+                    if symbol.resolved == None {
+                        panic!("Symbol should be resolved at this point.");
+                    }
+                    symbol.type_reference = self.type_of(symbol);
+                    if symbol.type_reference == None {
+                        panic!("Symbol should be resolved at this point.");
+                    }
                 }
             }
         }
@@ -232,8 +249,11 @@ impl<'symtab> HighlevelIrPass for AnnotateBaseTypes<'symtab> {
             Operation::MemLoad => "TODO".to_string(),
             Operation::MemStore => "TODO".to_string(),
             Operation::IsEqual { left, right } => {
+                println!("Visiting right and left");
+                println!("Main Instruction {:#?}", right);
                 left.visit(self)?;
                 right.visit(self)?;
+                panic!("Failed");
                 "Int8".to_string()
             }
             Operation::CallExternalFunction { name, arguments } => {
@@ -325,7 +345,7 @@ impl<'symtab> HighlevelIrPass for AnnotateBaseTypes<'symtab> {
             }
         };
 
-        println!(" ?? SHould set: {:?}", instr.ssa_name);
+        println!("{:#?}", instr);
         if let Some(ssa) = &mut instr.ssa_name {
             ssa.visit(self)?;
             if let Some(symbol_name) = &ssa.resolved {

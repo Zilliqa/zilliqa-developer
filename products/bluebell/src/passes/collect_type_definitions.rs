@@ -155,15 +155,39 @@ impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
         _mode: TreeTraversalMode,
         enum_value: &mut EnumValue,
     ) -> Result<TraversalResult, String> {
-        if let Some(typescope) = &self.current_type {
-            self.push_namespace(typescope.to_string());
+        if let Some(typescope) = self.current_type.clone() {
+            self.push_namespace(typescope.clone().to_string());
             let _ = enum_value.name.visit(self)?;
+
+            let resolved_name = if let Some(resolved_name) = &enum_value.name.resolved {
+                resolved_name.to_string()
+            } else {
+                return Err(format!(
+                    "Could not resolve symbol for {}",
+                    enum_value.name.unresolved
+                ));
+            };
+
+            // Creating alias for legacy reasons
+            self.symbol_table
+                .aliases
+                .insert(enum_value.name.unresolved.clone(), resolved_name.clone());
+
             self.pop_namespace();
 
             // TODO: Work out whehter we should attempt to resolve the type right away?
+            let mut signature: String = "(".to_string();
             if let Some(data) = &mut enum_value.data {
                 let _ = data.visit(self)?;
+                if let Some(resolved_type) = &data.resolved {
+                    signature.push_str(&resolved_type)
+                }
             }
+            signature.push_str(") -> ");
+            signature.push_str(&typescope);
+
+            self.symbol_table.type_of.insert(resolved_name, signature);
+            // TODO: Set the constructor function signature and alias
 
             Ok(TraversalResult::SkipChildren)
         } else {
