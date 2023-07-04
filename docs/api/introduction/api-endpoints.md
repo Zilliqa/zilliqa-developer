@@ -33,3 +33,4 @@ You can use the following block explorers for the various networks
 | **Isolated server**   | [Isolated server explorer](https://devex.zilliqa.com/?network=https%3A%2F%2Fzilliqa-isolated-server.zilliqa.com) |
 
 You can use the [testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add ZIL to your account.
+
