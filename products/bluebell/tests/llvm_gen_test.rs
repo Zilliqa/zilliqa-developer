@@ -4,6 +4,7 @@ mod tests {
     use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
+    use bluebell::intermediate_name_generator::IntermediateNameGenerator;
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 
@@ -31,7 +32,9 @@ mod tests {
 
         match parser.parse(&mut errors, lexer) {
             Ok(ast) => {
-                let mut generator = HighlevelIrEmitter::new();
+                let mut name_generator = IntermediateNameGenerator::new();
+
+                let mut generator = HighlevelIrEmitter::new(&mut name_generator);
                 let mut ast2 = ast.clone();
                 // println!("AST: {:#?}\n\n", ast2);
                 let mut ir = generator
@@ -42,7 +45,7 @@ mod tests {
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
                 // generator.write_function_definitions_to_module();
 
-                let mut symbol_table = SymbolTable::new();
+                let mut symbol_table = SymbolTable::new(&mut name_generator);
 
                 let mut type_collector = CollectTypeDefinitionsPass::new(&mut symbol_table);
                 if let Err(err) = ir.visit(&mut type_collector) {

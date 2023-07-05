@@ -175,6 +175,7 @@ impl HighlevelIrPassExecutor for Operation {
                     typename.visit(emitter)?;
                     Ok(TraversalResult::Continue)
                 }
+                Operation::Noop => Ok(TraversalResult::Continue),
             }
         } else {
             ret

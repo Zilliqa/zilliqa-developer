@@ -1,8 +1,10 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum IrIndentifierKind {
     FunctionName,
+    StaticFunctionName,
     TransitionName,
     ProcedureName,
+    TemplateFunctionName,
     ExternalFunctionName,
 
     TypeName,
@@ -30,6 +32,16 @@ pub struct IrIdentifier {
 }
 
 impl IrIdentifier {
+    pub fn new(unresolved: String, kind: IrIndentifierKind) -> Self {
+        Self {
+            unresolved,
+            resolved: None,
+            type_reference: None,
+            kind,
+            is_definition: false,
+        }
+    }
+
     pub fn qualified_name(&self) -> Result<String, String> {
         // TODO: Change to resolved or throw
         if let Some(resolved) = &self.resolved {
@@ -106,18 +118,6 @@ pub enum Identifier {
 }
 */
 
-impl IrIdentifier {
-    pub fn new(unresolved: String, kind: IrIndentifierKind) -> Self {
-        Self {
-            unresolved,
-            resolved: None,
-            type_reference: None,
-            kind,
-            is_definition: false,
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
     pub name: IrIdentifier,
@@ -147,6 +147,7 @@ impl VariableDeclaration {
 
 #[derive(Debug, Clone)]
 pub enum Operation {
+    Noop,
     Jump(IrIdentifier),
     ConditionalJump {
         expression: IrIdentifier,
@@ -268,10 +269,46 @@ pub struct ConcreteFunction {
     pub body: Box<FunctionBody>,
 }
 
+#[derive(Debug, Clone)]
+pub struct TemplateFunction {
+    pub template_arguments: Vec<String>,
+    pub base: ConcreteFunction,
+}
+
+impl TemplateFunction {
+    pub fn get_concrete_name(&self, types: Vec<String>) -> Result<String, String> {
+        let mut basename = if let Some(n) = &self.base.name.resolved {
+            n.clone()
+        } else {
+            return Err("Internal error: Base function does not have a resolved name".to_string());
+        };
+
+        if types.len() != self.template_arguments.len() {
+            return Err(format!(
+                "Template function expected {} arguments, but found {} arguments",
+                self.template_arguments.len(),
+                types.len()
+            ));
+        }
+
+        basename.push_str("<");
+        for (i, arg) in types.iter().enumerate() {
+            if i > 0 {
+                basename.push_str(", ");
+            }
+            basename.push_str(arg);
+        }
+        basename.push_str(">");
+
+        Ok(basename)
+    }
+}
+
 pub struct HighlevelIr {
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,
     pub function_definitions: Vec<ConcreteFunction>,
+    pub template_functions: Vec<TemplateFunction>,
 }
 
 impl HighlevelIr {
@@ -280,6 +317,7 @@ impl HighlevelIr {
             version: "".to_string(),
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
+            template_functions: Vec::new(),
         }
     }
 }

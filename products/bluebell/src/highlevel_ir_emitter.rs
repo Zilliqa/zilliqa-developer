@@ -3,6 +3,7 @@ use crate::ast_converting::AstConverting;
 use crate::ast_visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::highlevel_ir::*;
+use crate::intermediate_name_generator::IntermediateNameGenerator;
 use std::mem;
 
 #[derive(Debug, Clone)]
@@ -17,12 +18,10 @@ enum StackObject {
     FunctionBlock(Box<FunctionBlock>),
 }
 
-pub struct HighlevelIrEmitter {
+pub struct HighlevelIrEmitter<'generator> {
     stack: Vec<StackObject>,
 
-    anonymous_type_number: u64,
-    intermediate_counter: u64,
-    block_counter: u64,
+    name_generator: &'generator mut IntermediateNameGenerator,
 
     ///
     current_block: Box<FunctionBlock>,
@@ -33,8 +32,8 @@ pub struct HighlevelIrEmitter {
     ir: Box<HighlevelIr>,
 }
 
-impl HighlevelIrEmitter {
-    pub fn new() -> Self {
+impl<'generator> HighlevelIrEmitter<'generator> {
+    pub fn new(name_generator: &'generator mut IntermediateNameGenerator) -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         let ns = IrIdentifier {
@@ -46,10 +45,8 @@ impl HighlevelIrEmitter {
         };
         // TODO: Repeat similar code for all literals
         HighlevelIrEmitter {
+            name_generator,
             stack: Vec::new(),
-            anonymous_type_number: 0,
-            intermediate_counter: 0,
-            block_counter: 0,
             current_block,
             current_body,
             current_namespace: ns.clone(),
@@ -73,26 +70,6 @@ impl HighlevelIrEmitter {
             panic!("Namespace stack is empty.");
         }
     }
-
-    fn new_intermediate(&mut self) -> IrIdentifier {
-        let n = self.intermediate_counter;
-        self.intermediate_counter += 1;
-        IrIdentifier {
-            unresolved: format!("__imm_{}", n),
-            resolved: None,
-            type_reference: None,
-            kind: IrIndentifierKind::VirtualRegisterIntermediate,
-            is_definition: true,
-        }
-    }
-
-    fn new_block_label(&mut self, prefix: &str) -> IrIdentifier {
-        let n = self.block_counter;
-        self.block_counter += 1;
-        let label = format!("{}_{}", prefix, n);
-        FunctionBlock::new_label(label)
-    }
-
     fn convert_instruction_to_symbol(&mut self, mut instruction: Box<Instruction>) -> IrIdentifier {
         // Optimisation: If previous instruction was "ResolveSymbol",
         // we avoid creating an intermediate
@@ -102,7 +79,7 @@ impl HighlevelIrEmitter {
                 let symbol = if let Some(s) = instruction.ssa_name {
                     s
                 } else {
-                    self.new_intermediate()
+                    self.name_generator.new_intermediate()
                 };
                 instruction.ssa_name = Some(symbol.clone());
                 self.current_block.instructions.push(instruction);
@@ -212,19 +189,6 @@ impl HighlevelIrEmitter {
         Ok(ret)
     }
 
-    fn generate_anonymous_type_id(&mut self, prefix: String) -> IrIdentifier {
-        let n = self.anonymous_type_number;
-        self.anonymous_type_number += 1;
-
-        IrIdentifier {
-            unresolved: format!("{}{}", prefix, n).to_string(),
-            resolved: None,
-            type_reference: None,
-            kind: IrIndentifierKind::TypeName,
-            is_definition: true,
-        }
-    }
-
     pub fn emit(&mut self, node: &mut NodeProgram) -> Result<Box<HighlevelIr>, String> {
         let result = node.visit(self);
         match result {
@@ -244,7 +208,7 @@ impl HighlevelIrEmitter {
     }
 }
 
-impl AstConverting for HighlevelIrEmitter {
+impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
@@ -483,7 +447,6 @@ impl AstConverting for HighlevelIrEmitter {
                 }
 
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
-
                 for arg in xs.arguments.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
@@ -495,10 +458,10 @@ impl AstConverting for HighlevelIrEmitter {
                 }
 
                 let name = IrIdentifier {
-                    unresolved: b.to_string(),
+                    unresolved: format!("std::{}<T>", b).to_string(), // TODO: Use name generator
                     resolved: None,
                     type_reference: None,
-                    kind: IrIndentifierKind::ExternalFunctionName,
+                    kind: IrIndentifierKind::TemplateFunctionName,
                     is_definition: false,
                 };
 
@@ -524,7 +487,7 @@ impl AstConverting for HighlevelIrEmitter {
 
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
-                let finally_exit_label = self.new_block_label("match_finally");
+                let finally_exit_label = self.name_generator.new_block_label("match_finally");
 
                 // Checking for catch all
                 let mut catch_all: Option<&NodePatternMatchExpressionClause> = None;
@@ -574,9 +537,9 @@ impl AstConverting for HighlevelIrEmitter {
                     let case = self.convert_instruction_to_symbol(compare_instr);
 
                     // Blocks for success and fail
-                    let fail_label = self.new_block_label("match_fail");
+                    let fail_label = self.name_generator.new_block_label("match_fail");
 
-                    let success_label = self.new_block_label("match_success");
+                    let success_label = self.name_generator.new_block_label("match_success");
                     let mut success_block = FunctionBlock::new_from_symbol(success_label.clone());
 
                     // Terminating current block
@@ -616,7 +579,7 @@ impl AstConverting for HighlevelIrEmitter {
                     mem::swap(&mut fail_block, &mut self.current_block);
                     self.current_body.blocks.push(fail_block);
 
-                    // let fail_label = self.new_block_label("match_case");
+                    // let fail_label = self.name_generator.new_block_label("match_case");
                     // let fail_block = FunctionBlock::new_from_symbol(fail_label);
                 }
 
@@ -1255,8 +1218,7 @@ impl AstConverting for HighlevelIrEmitter {
                 let _ = identifier.visit(self)?;
                 let mut enum_name = self.pop_ir_identifier()?;
                 assert!(enum_name.kind == IrIndentifierKind::Unknown);
-                enum_name.kind = IrIndentifierKind::TypeName;
-
+                enum_name.kind = IrIndentifierKind::StaticFunctionName;
                 self.stack
                     .push(StackObject::EnumValue(EnumValue::new(enum_name, None)));
             }
@@ -1264,7 +1226,7 @@ impl AstConverting for HighlevelIrEmitter {
                 let _ = identifier.visit(self)?;
                 let mut member_name = self.pop_ir_identifier()?;
                 assert!(member_name.kind == IrIndentifierKind::Unknown);
-                member_name.kind = IrIndentifierKind::TypeName;
+                member_name.kind = IrIndentifierKind::StaticFunctionName;
 
                 let mut tuple = Tuple::new();
                 for child in children.iter() {
@@ -1277,7 +1239,9 @@ impl AstConverting for HighlevelIrEmitter {
                     tuple.add_field(item)
                 }
 
-                let refid = self.generate_anonymous_type_id("Tuple".to_string());
+                let refid = self
+                    .name_generator
+                    .generate_anonymous_type_id("Tuple".to_string());
 
                 self.ir.type_definitions.push(ConcreteType::Tuple {
                     name: refid.clone(),

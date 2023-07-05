@@ -531,6 +531,9 @@ pub LibrarySingleDefinition: NodeLibrarySingleDefinition = {
 	},
 	"type" <type_name: TypeNameIdentifier> => NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
 	"type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> => NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations))
+    // TODO: Langauge addition for review
+    // "type" <type_name: TypeNameIdentifier> <template_args:> => NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
+    // "type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> => NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations))    
 }
 
 

@@ -18,6 +18,8 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         kind: &mut IrIndentifierKind,
     ) -> Result<TraversalResult, String> {
         match kind {
+            IrIndentifierKind::TemplateFunctionName => self.script.push_str("!!"),
+            IrIndentifierKind::StaticFunctionName => self.script.push_str("@!"),
             IrIndentifierKind::FunctionName => self.script.push_str("@"),
             IrIndentifierKind::TransitionName => self.script.push_str("@"),
             IrIndentifierKind::ProcedureName => self.script.push_str("@"),
@@ -44,6 +46,8 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
             TreeTraversalMode::Enter => {
                 match symbol.kind {
                     IrIndentifierKind::FunctionName
+                    | IrIndentifierKind::TemplateFunctionName
+                    | IrIndentifierKind::StaticFunctionName
                     | IrIndentifierKind::TransitionName
                     | IrIndentifierKind::ProcedureName
                     | IrIndentifierKind::ExternalFunctionName
@@ -125,6 +129,9 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         operation: &mut Operation,
     ) -> Result<TraversalResult, String> {
         match operation {
+            Operation::Noop => {
+                self.script.push_str("noop");
+            }
             Operation::Jump(identifier) => {
                 self.script.push_str("jmp ");
                 identifier.visit(self)?;
@@ -153,20 +160,35 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
             | Operation::CallExternalFunction { name, arguments } => {
                 self.script.push_str("call ");
                 name.visit(self)?;
-                self.script.push_str(" ");
+                self.script.push_str("( ");
                 for (i, arg) in arguments.iter_mut().enumerate() {
                     if i > 0 {
                         self.script.push_str(", ");
                     }
                     arg.visit(self)?;
                 }
+                self.script.push_str(" )");
             }
 
             Operation::CallStaticFunction {
-                name: _,
+                name,
                 owner: _,
-                arguments: _,
-            } => self.script.push_str("call stat [TODO]"),
+                arguments,
+            } => {
+                // TODO: Support for owner
+
+                self.script.push_str("call ");
+                name.visit(self)?;
+                self.script.push_str("( ");
+
+                for (i, arg) in arguments.iter_mut().enumerate() {
+                    if i > 0 {
+                        self.script.push_str(", ");
+                    }
+                    arg.visit(self)?;
+                }
+                self.script.push_str(" )");
+            }
             Operation::CallMemberFunction {
                 name: _,
                 owner: _,

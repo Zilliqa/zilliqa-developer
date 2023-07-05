@@ -9,16 +9,16 @@ use crate::highlevel_ir_pass::HighlevelIrPass;
 use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
 use crate::symbol_table::SymbolTable;
 
-pub struct CollectTypeDefinitionsPass<'symtab> {
+pub struct CollectTypeDefinitionsPass<'symtab, 'generator> {
     namespace_stack: Vec<String>,
     current_namespace: Option<String>,
     current_type: Option<String>,
 
-    symbol_table: &'symtab mut SymbolTable,
+    symbol_table: &'symtab mut SymbolTable<'generator>,
 }
 
-impl<'symtab> CollectTypeDefinitionsPass<'symtab> {
-    pub fn new(symbol_table: &'symtab mut SymbolTable) -> Self {
+impl<'symtab, 'generator> CollectTypeDefinitionsPass<'symtab, 'generator> {
+    pub fn new(symbol_table: &'symtab mut SymbolTable<'generator>) -> Self {
         CollectTypeDefinitionsPass {
             namespace_stack: Vec::new(),
             current_namespace: None,
@@ -48,7 +48,7 @@ impl<'symtab> CollectTypeDefinitionsPass<'symtab> {
                             &full_name
                         };
 
-                    if let Some(_) = self.symbol_table.type_of.get(full_name) {
+                    if let Some(_) = self.symbol_table.typename_of(full_name) {
                         return Some(full_name.to_string());
                     }
 
@@ -64,7 +64,7 @@ impl<'symtab> CollectTypeDefinitionsPass<'symtab> {
             basename
         };
 
-        if let Some(_) = self.symbol_table.type_of.get(lookup) {
+        if let Some(_) = self.symbol_table.typename_of(lookup) {
             return Some(lookup.to_string());
         }
 
@@ -86,7 +86,7 @@ impl<'symtab> CollectTypeDefinitionsPass<'symtab> {
     }
 }
 
-impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
+impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab, 'generator> {
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
@@ -103,15 +103,11 @@ impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
 
                 let _ = name.visit(self)?;
                 let qualified_name = name.qualified_name()?;
-                self.symbol_table
-                    .type_of
-                    .insert(qualified_name.clone(), qualified_name.clone());
+
+                self.symbol_table.declare_type(&qualified_name)?;
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
-                self.symbol_table
-                    .aliases
-                    .insert(name.unresolved.clone(), qualified_name.clone());
 
                 self.current_type = Some(qualified_name);
                 let _ = data_layout.visit(self)?;
@@ -130,15 +126,13 @@ impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
 
                 let _ = name.visit(self)?;
                 let qualified_name = name.qualified_name()?;
-                self.symbol_table
-                    .type_of
-                    .insert(qualified_name.clone(), qualified_name.clone());
+
+                self.symbol_table.declare_type(&qualified_name)?;
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
                 self.symbol_table
-                    .aliases
-                    .insert(name.unresolved.clone(), qualified_name.clone());
+                    .declare_alias(&name.unresolved, &qualified_name);
 
                 self.current_type = Some(qualified_name);
                 let _ = data_layout.visit(self)?;
@@ -155,8 +149,8 @@ impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
         _mode: TreeTraversalMode,
         enum_value: &mut EnumValue,
     ) -> Result<TraversalResult, String> {
-        if let Some(typescope) = self.current_type.clone() {
-            self.push_namespace(typescope.clone().to_string());
+        if let Some(return_type) = self.current_type.clone() {
+            self.push_namespace(return_type.clone().to_string());
             let _ = enum_value.name.visit(self)?;
 
             let resolved_name = if let Some(resolved_name) = &enum_value.name.resolved {
@@ -176,17 +170,17 @@ impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
             self.pop_namespace();
 
             // TODO: Work out whehter we should attempt to resolve the type right away?
-            let mut signature: String = "(".to_string();
+            let mut arguments: Vec<String> = Vec::new();
             if let Some(data) = &mut enum_value.data {
                 let _ = data.visit(self)?;
                 if let Some(resolved_type) = &data.resolved {
-                    signature.push_str(&resolved_type)
+                    arguments.push(resolved_type.to_string());
                 }
             }
-            signature.push_str(") -> ");
-            signature.push_str(&typescope);
 
-            self.symbol_table.type_of.insert(resolved_name, signature);
+            self.symbol_table
+                .declare_constructor(&resolved_name, &arguments, &return_type)?;
+
             // TODO: Set the constructor function signature and alias
 
             Ok(TraversalResult::SkipChildren)
@@ -275,7 +269,7 @@ impl<'symtab> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab> {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => {
-                println!("Types: {:#?}\n\n", self.symbol_table.type_of);
+                println!("Types: {:#?}\n\n", self.symbol_table.type_of_table);
                 println!("Aliases: {:#?}\n\n", self.symbol_table.aliases);
             }
         }

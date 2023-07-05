@@ -14,6 +14,7 @@ pub mod passes;
 
 pub mod highlevel_ir_debug_printer;
 pub mod highlevel_ir_emitter;
+pub mod intermediate_name_generator;
 pub mod lexer;
 pub mod llvm_ir_generator;
 pub mod symbol_table;
