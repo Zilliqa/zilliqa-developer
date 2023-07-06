@@ -2,6 +2,28 @@ scilla_version 0
 
 library TheLibraryPart
 
+(*
+let is_equal =
+  tfun 'A =>
+  fun (a: 'A) =>
+  fun (b: 'A) =>
+  builtin eq a b
+*)
+
+let test =
+  fun (a: Int32) => 
+    let x = fun(b: Int32) => builtin add b b in
+    x a
+
+let is_equal = 
+  fun (a: Int32) =>
+  fun (b: Int32) =>
+  let x = Int32 2 in 
+  let z = builtin add a b in
+  builtin eq x z
+
+
+
 type Bool = 
   | False
   | True
