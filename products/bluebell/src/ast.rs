@@ -415,6 +415,7 @@ pub enum NodeLibrarySingleDefinition {
         expression: NodeFullExpression,
     },
     TypeDefinition(
+        // TODO: Enum definition
         NodeTypeNameIdentifier,
         Option<Vec<NodeTypeAlternativeClause>>,
     ),

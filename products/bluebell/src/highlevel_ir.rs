@@ -270,12 +270,16 @@ pub struct ConcreteFunction {
 }
 
 #[derive(Debug, Clone)]
-pub struct TemplateFunction {
-    pub template_arguments: Vec<String>,
-    pub base: ConcreteFunction,
+pub struct LambdaFunctionSingleArgument {
+    pub name: IrIdentifier,
+    pub capture: Box<Tuple>,
+    pub argument: VariableDeclaration,
+    pub return_type: Option<String>,
+    pub block: FunctionBlock,
 }
 
-impl TemplateFunction {
+/*
+impl ComputableState {
     pub fn get_concrete_name(&self, types: Vec<String>) -> Result<String, String> {
         let mut basename = if let Some(n) = &self.base.name.resolved {
             n.clone()
@@ -303,12 +307,13 @@ impl TemplateFunction {
         Ok(basename)
     }
 }
+*/
 
 pub struct HighlevelIr {
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,
     pub function_definitions: Vec<ConcreteFunction>,
-    pub template_functions: Vec<TemplateFunction>,
+    pub lambda_functions: Vec<LambdaFunctionSingleArgument>,
 }
 
 impl HighlevelIr {
@@ -317,7 +322,7 @@ impl HighlevelIr {
             version: "".to_string(),
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
-            template_functions: Vec::new(),
+            lambda_functions: Vec::new(),
         }
     }
 }

@@ -531,7 +531,26 @@ pub LibrarySingleDefinition: NodeLibrarySingleDefinition = {
 	},
 	"type" <type_name: TypeNameIdentifier> => NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
 	"type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> => NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations))
-    // TODO: Langauge addition for review
+
+    // TODO: Langauge extension for review
+    // // Struct
+    // "type" <type_name: TypeNameIdentifier> '=' '{' 
+    //     <p:ParameterPair?> <next_params:NextParameterPair*>
+    // '}' => {
+    //        let mut parameters: Vec<NodeParameterPair> = Vec::new();
+    //        if let Some(pair) = p {
+    //             parameters.push(pair);
+    //        }
+    //        
+    //        for p in next_params {
+    //            parameters.push(p);
+    //        }
+    //        
+    //        NodeLibrarySingleDefinition::StructDefinition(type_name, parameters) 
+    //     }    
+    // }
+
+
     // "type" <type_name: TypeNameIdentifier> <template_args:> => NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
     // "type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> => NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations))    
 }
@@ -589,6 +608,8 @@ pub TypeAlternativeClause: NodeTypeAlternativeClause = {
 		NodeTypeAlternativeClause::ClauseTypeWithArgs(n, t)	
 	}
 }
+
+
 
 
 

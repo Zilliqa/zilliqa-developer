@@ -1,14 +1,18 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
+    use bluebell::contract_executor::{UnsafeContractExecutor, UnsafeLlvmTestExecutor};
     use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
     use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
     use bluebell::intermediate_name_generator::IntermediateNameGenerator;
+    use bluebell::llvm_ir_generator::LlvmIrGenerator;
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
-
     use bluebell::symbol_table::SymbolTable;
+    use inkwell::context::Context;
+    use inkwell::targets::{InitializationConfig, Target};
+    use inkwell::OptimizationLevel;
 
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
@@ -63,9 +67,72 @@ mod tests {
                 let mut debug_printer = HighlevelIrDebugPrinter::new();
                 let _ = ir.visit(&mut debug_printer);
 
-                // let context = Context::create();
-                // let mut generator = LlvmIrGenerator::new(&context, ir);
-                // generator.write_function_definitions_to_module();
+                let context = Context::create();
+                let mut generator = LlvmIrGenerator::new(&context, ir);
+                /*
+                let module = match generator.build_module() {
+                    Err(e) => {
+                        panic!("Error: {:?}",e);
+                    }
+                    Ok(module) => {
+                        let llvm_str = module.print_to_string();
+                        let _output = llvm_str.to_str().expect("Failed converting to UTF8");
+                        // println!("{}", output);
+                        module
+                    }
+                };
+                */
+
+                println!("A");
+                println!("B");
+                extern "C" fn sumf(a: f64, b: f64) -> f64 {
+                    a + b
+                }
+
+                Target::initialize_native(&InitializationConfig::default()).unwrap();
+
+                let mut module = context.create_module("test");
+                let builder = context.create_builder();
+
+                let ft = context.f64_type();
+                let fnt = ft.fn_type(&[], false);
+
+                let f = module.add_function("test_fn", fnt, None);
+                let b = context.append_basic_block(f, "entry");
+
+                builder.position_at_end(b);
+
+                let extf =
+                    module.add_function("sumf", ft.fn_type(&[ft.into(), ft.into()], false), None);
+
+                let argf = ft.const_float(64.);
+                let call_site_value = builder.build_call(extf, &[argf.into(), argf.into()], "retv");
+                let retv = call_site_value
+                    .try_as_basic_value()
+                    .left()
+                    .unwrap()
+                    .into_float_value();
+
+                builder.build_return(Some(&retv));
+
+                let llvm_str = module.print_to_string();
+                let output = llvm_str.to_str().expect("Failed converting to UTF8");
+                println!("{}", output);
+
+                let contract_executor = UnsafeLlvmTestExecutor::new(&mut module);
+                unsafe {
+                    contract_executor.link_symbol("sumf", sumf as usize);
+                    let result = contract_executor.execute("test_fn");
+                    println!("{:?}", result);
+                }
+                /*
+                let ee = module.create_jit_execution_engine(OptimizationLevel::None).unwrap();
+                ee.add_global_mapping(&extf, sumf as usize);
+
+                let result = unsafe { ee.run_function(f, &[]) }.as_float(&ft);
+                */
+                // let result = unsafe { execution_engine.run_function(f, &[]) }.as_float(&float32);
+                // println!("Result: {:?}", result);
 
                 assert!(false);
                 true

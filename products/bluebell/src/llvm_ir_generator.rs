@@ -5,6 +5,7 @@ use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
 use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::{builder::Builder, context::Context};
+use std::mem;
 
 pub struct LlvmIrGenerator<'ctx> {
     context: &'ctx Context,
@@ -16,6 +17,7 @@ pub struct LlvmIrGenerator<'ctx> {
 impl<'ctx> LlvmIrGenerator<'ctx> {
     pub fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
         match name {
+            // TODO: Collect this into a single module
             "Uint8" => Ok(self.context.i8_type().into()),
             "Uint16" => Ok(self.context.i16_type().into()),
             "Uint32" => Ok(self.context.i32_type().into()),
@@ -236,6 +238,17 @@ impl<'ctx> LlvmIrGenerator<'ctx> {
         println!("Functions: {:#?}", self.ir.function_definitions);
 
         Ok(0)
+    }
+
+    pub fn build_module(&mut self) -> Result<Module<'ctx>, String> {
+        self.write_type_definitions_to_module()?;
+        self.write_function_definitions_to_module()?;
+
+        let mut module = self.context.create_module("main");
+        mem::swap(&mut module, &mut self.module);
+        self.builder = self.context.create_builder();
+
+        Ok(module)
     }
 
     pub fn new(context: &'ctx Context, ir: Box<HighlevelIr>) -> Self {

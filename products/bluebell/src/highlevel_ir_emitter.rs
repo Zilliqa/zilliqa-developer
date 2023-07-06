@@ -28,8 +28,7 @@ pub struct HighlevelIrEmitter<'generator> {
     current_body: Box<FunctionBody>,
 
     // Used for let function declarations
-    current_function: Option< Box< TemplateFunction > >,
-
+    //    current_state: Option< Box< ComputableState > >,
 
     // Other
     current_namespace: IrIdentifier,
@@ -57,7 +56,7 @@ impl<'generator> HighlevelIrEmitter<'generator> {
             current_body,
             current_namespace: ns.clone(),
             namespace_stack: [ns].to_vec(),
-            current_function: None,
+            /// current_function: None,
             ir: Box::new(HighlevelIr::new()),
         }
     }
@@ -420,39 +419,30 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeFullExpression::LocalVariableDeclaration {
-                identifier_name: _,
-                expression: _,
+                identifier_name,
+                expression,
                 type_annotation: _,
-                containing_expression: _,
+                containing_expression,
             } => {
+                println!("Expression:\n{:#?}\n\n", expression);
+                expression.visit(self)?;
+                println!("Stack: {} = {:#?}", identifier_name, self.stack.last());
+
+                println!("----->");
+                containing_expression.visit(self)?;
+                println!(">{} Stack: {:#?}", identifier_name, self.stack.last());
+
                 unimplemented!();
             }
             NodeFullExpression::FunctionDeclaration {
-                identier_value, // TODO: Missing spelling - global replacement
+                identier_value: _, // TODO: Missing spelling - global replacement
                 type_annotation,
                 expression,
             } => {
-                let declaration_start = match self.current_function {
-                    Some(_) => true,
-                    None => false
-                };
-
-                if declaration_start {
-                    // TODO: self.current_function
-                }
-
-                println!("Stack size: {}", self.stack.len());
-
-                println!("{:#?}", identier_value);
-                println!("{:#?}", type_annotation);
-                println!("{:#?}", expression);
                 // identier_value.visit(self)?;
                 type_annotation.visit(self)?;
                 expression.visit(self)?;
-                println!("{:#?}", expression);
 
-                println!("Stack size: {}", self.stack.len());
-                println!("{:#?}", self.stack);
                 unimplemented!();
             }
             NodeFullExpression::FunctionCall {
@@ -1097,13 +1087,33 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeLibrarySingleDefinition::LetDefinition {
-                variable_name: _,
-                type_annotation: _,
+                variable_name,
+                type_annotation,
                 expression,
             } => {
+                /*
+                let declaration_start = match self.current_function {
+                    Some(_) => true,
+                    None => false
+                };
+
+                if declaration_start {
+                    // TODO: self.current_function
+                }
+                */
+                println!("Stack size: {}", self.stack.len());
+
+                println!("{:#?}", variable_name);
+                println!("{:#?}", type_annotation);
+                println!("{:#?}", expression);
+
                 println!("Expression:\n{:#?}\n\n", expression);
                 expression.visit(self)?;
 
+                println!("{:#?}", expression);
+
+                println!("Stack size: {}", self.stack.len());
+                println!("{:#?}", self.stack);
 
                 println!("Pop stack and push whatever is defined");
                 unimplemented!();

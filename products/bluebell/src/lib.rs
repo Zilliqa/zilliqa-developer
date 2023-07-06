@@ -4,6 +4,7 @@ pub mod ast;
 pub mod ast_converting;
 pub mod ast_visitor;
 pub mod constants;
+pub mod contract_executor;
 pub mod formatter;
 pub mod highlevel_ir;
 pub mod highlevel_ir_pass;
