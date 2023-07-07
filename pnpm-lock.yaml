@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 packageExtensionsChecksum: 9dc1d9a9f36cc677d4731dfbd58b6aa1
 
 importers:
@@ -280,8 +284,8 @@ importers:
         specifier: ^0.11.10
         version: 0.11.10
       protobufjs:
-        specifier: 6.11.3
-        version: 6.11.3
+        specifier: 7.2.4
+        version: 7.2.4
       rc-steps:
         specifier: ^3.3.1
         version: 3.6.0
@@ -1280,8 +1284,8 @@ importers:
   zilliqa/js/proto:
     dependencies:
       protobufjs:
-        specifier: ^6.8.8
-        version: 6.11.3
+        specifier: ^7.2.4
+        version: 7.2.4
     devDependencies:
       '@types/bn.js':
         specifier: ^5.1.0
@@ -4605,6 +4609,23 @@ packages:
       '@babel/parser': 7.21.9
       '@babel/types': 7.21.5
 
+  /@babel/traverse@7.21.2:
+    resolution: {integrity: sha512-ts5FFU/dSUPS13tv8XiEObDu9K+iagEKME9kAbaP7r0Y9KtZJZ+NGndDvWoRAYNpeWafbpFeki3q9QoMD6gxyw==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      '@babel/code-frame': 7.21.4
+      '@babel/generator': 7.21.9
+      '@babel/helper-environment-visitor': 7.21.5
+      '@babel/helper-function-name': 7.21.0
+      '@babel/helper-hoist-variables': 7.18.6
+      '@babel/helper-split-export-declaration': 7.18.6
+      '@babel/parser': 7.21.9
+      '@babel/types': 7.21.5
+      debug: 4.3.4(supports-color@6.1.0)
+      globals: 11.12.0
+    transitivePeerDependencies:
+      - supports-color
+
   /@babel/traverse@7.21.2(supports-color@5.5.0):
     resolution: {integrity: sha512-ts5FFU/dSUPS13tv8XiEObDu9K+iagEKME9kAbaP7r0Y9KtZJZ+NGndDvWoRAYNpeWafbpFeki3q9QoMD6gxyw==}
     engines: {node: '>=6.9.0'}
@@ -4621,6 +4642,7 @@ packages:
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /@babel/traverse@7.21.5:
     resolution: {integrity: sha512-AhQoI3YjWi6u/y/ntv7k48mcrCXmus0t79J9qPNlk/lAsFlCiJ047RmbfMOawySTHtywXhbXgpx/8nXMYd+oFw==}
@@ -5273,7 +5295,7 @@ packages:
       '@babel/preset-typescript': 7.21.0(@babel/core@7.21.0)
       '@babel/runtime': 7.21.0
       '@babel/runtime-corejs3': 7.21.0
-      '@babel/traverse': 7.21.2(supports-color@5.5.0)
+      '@babel/traverse': 7.21.2
       '@docusaurus/cssnano-preset': 2.3.1
       '@docusaurus/logger': 2.3.1
       '@docusaurus/mdx-loader': 2.3.1(@docusaurus/types@2.3.1)(esbuild@0.14.7)(react-dom@18.2.0)(react@18.2.0)(webpack-cli@3.3.12)
@@ -8265,7 +8287,7 @@ packages:
     resolution: {integrity: sha512-A27RDExpAf3rdDjIrHKiJK6x8kqqJ4CmoChwtipfhVAn1p7+wviQFFP7dppn8FslSbHtQeVPvi8wNKkDjSYjHw==}
     deprecated: This is a stub types definition for protobufjs (https://github.com/dcodeIO/ProtoBuf.js). protobufjs provides its own type definitions, so you don't need @types/protobufjs installed!
     dependencies:
-      protobufjs: 6.11.3
+      protobufjs: 7.2.4
     dev: true
 
   /@types/q@1.5.5:
@@ -10519,7 +10541,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.18.6
       '@babel/parser': 7.21.2
-      '@babel/traverse': 7.21.2(supports-color@5.5.0)
+      '@babel/traverse': 7.21.2
       '@babel/types': 7.21.2
       eslint: 7.32.0
       eslint-visitor-keys: 1.3.0
@@ -13402,6 +13424,7 @@ packages:
     dependencies:
       ms: 2.1.2
       supports-color: 5.5.0
+    dev: false
 
   /debug@4.3.4(supports-color@6.1.0):
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
@@ -19804,6 +19827,10 @@ packages:
 
   /long@4.0.0:
     resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
+    dev: false
+
+  /long@5.2.3:
+    resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
 
   /longest@2.0.1:
     resolution: {integrity: sha512-Ajzxb8CM6WAnFjgiloPsI3bF+WCxcvhdIG3KNA2KN962+tdBsHcuQ4k4qX/EcS/2CRkcc0iAkR956Nib6aXU/Q==}
@@ -23484,9 +23511,9 @@ packages:
       xtend: 4.0.2
     dev: false
 
-  /protobufjs@6.11.3:
-    resolution: {integrity: sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==}
-    hasBin: true
+  /protobufjs@7.2.4:
+    resolution: {integrity: sha512-AT+RJgD2sH8phPmCf7OUZR8xGdcJRga4+1cOaXJ64hvcSkVhNcRHOwIxUatPH15+nj59WAGTDv3LSGZPEQbJaQ==}
+    engines: {node: '>=12.0.0'}
     requiresBuild: true
     dependencies:
       '@protobufjs/aspromise': 1.1.2
@@ -23499,7 +23526,6 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/long': 4.0.2
       '@types/node': 20.2.4
       chalk: 4.1.2
       escodegen: 1.14.3
@@ -23507,7 +23533,7 @@ packages:
       estraverse: 5.3.0
       glob: 7.2.3
       jsdoc: 3.6.11
-      long: 4.0.0
+      long: 5.2.3
       minimist: 1.2.8
       semver: 7.5.2
       tmp: 0.2.1
