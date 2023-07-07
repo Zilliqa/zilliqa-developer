@@ -465,18 +465,23 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
                 }
 
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
-                for arg in xs.arguments.iter() {
+                let mut args_str = "".to_string();
+                for (i, arg) in xs.arguments.iter().enumerate() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
                     let instruction = self.pop_instruction()?;
 
                     let symbol = self.convert_instruction_to_symbol(instruction);
 
+                    if i > 0 {
+                        args_str.push_str("_");
+                    }
+                    args_str.push_str(&symbol.unresolved.to_lowercase());
                     arguments.push(symbol);
                 }
 
                 let name = IrIdentifier {
-                    unresolved: format!("std::{}<T>", b).to_string(), // TODO: Use name generator
+                    unresolved: format!("builtin__{}<{}>", b, args_str).to_string(), // TODO: Use name generator
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::TemplateFunctionName,
@@ -734,8 +739,18 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
             NodeValueLiteral::LiteralHex(_value) => {
                 unimplemented!();
             }
-            NodeValueLiteral::LiteralString(_value) => {
-                unimplemented!();
+            NodeValueLiteral::LiteralString(value) => {
+                let typename = self.name_generator.string_type();
+                let operation = Operation::Literal {
+                    data: value.to_string(),
+                    typename,
+                };
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                });
+                self.stack.push(StackObject::Instruction(instr));
             }
             NodeValueLiteral::LiteralEmptyMap(_key, _value) => {
                 unimplemented!();

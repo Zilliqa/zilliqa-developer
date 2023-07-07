@@ -1,0 +1,134 @@
+scilla_version 0
+
+library TheLibraryPart
+
+(*
+let is_equal =
+  tfun 'A =>
+  fun (a: 'A) =>
+  fun (b: 'A) =>
+  builtin eq a b
+
+type PairType 'A 'B  =
+  | Pair of 'A 'B
+
+type Option 'A = 
+  | Some of 'A
+  | None
+
+*)
+
+(*
+let test = 
+  let x = Int32 0 in 
+  let y = Int32 2 in 
+    builtin add x y
+*)
+
+(*
+let test =
+  fun (param: Int32) => 
+    let y = Int32 12 in
+    let r = fun (b: Int32) =>
+      let c = builtin add y param in
+      builtin add b c in
+    let nil = Nil {(Int32 -> Int32)} in
+      Cons {(Int32 -> Int32)} nil r
+*)
+
+(*
+let test =
+    fun (a: Int32) => 
+    let y = Int32 0 in
+    let r = fun (b: Int32) =>
+      let c = builtin add y a in
+      builtin add b c
+    r
+    *)
+(*
+  struct Closure { 
+    a: Int32,
+    y: Int32,
+    b: Int32
+  }
+
+  fn test(closure) {
+
+  }
+
+  test_arg1(a: Int32) -> Tuple<Int32>
+  test_arg2(closure: Closure, a: Int32) -> Tuple<Int32, Int32>
+  test_arg3(closure: Closure, b: Int32) -> Int32
+
+*)
+
+(*
+let is_equal = 
+  fun (a: Int32) =>
+  fun (b: Int32) =>
+  let x = Int32 2 in 
+  let z = builtin add a b in
+  builtin eq x z
+*)
+
+
+type Bool = 
+  | False
+  | True
+
+type Action = 
+  | MoveTo of Int32 Int32
+  | Draw of Int8 Int64
+  | Test of Bool
+  | Flush  
+
+type Action = 
+  | True
+    
+contract TheContractPart()
+
+transition DynamicTypes(x: Uint32, y: Bool)
+  magic = Uint32 0;
+  get_meaning_of_life = builtin eq magic x;
+  value = match get_meaning_of_life with
+    | True =>
+         Uint32 42
+    | False =>
+        Uint32 0
+  end;
+  
+
+
+(*
+    y = let x = Int32 0 in 
+        let y = Int32 4 in        
+        builtin add x y;
+
+
+    y = let x = Int32 0 in 
+        let y = Int32 4 in
+        let adder = fun(a:Int32) => 
+            builtin add a y
+        in
+        adder x;
+
+    y = let x = Int32 0 in 
+        let adder = fun(a:Int32) => 
+            let y = Int32 4 in        
+            builtin add a y
+        in
+        adder x;
+*)
+
+  accept
+  (*
+  e = {
+    _eventname: "MeaningOfLife";
+    answer: value
+  };
+
+  accept;
+
+  event e 
+  *)
+end

@@ -7,11 +7,22 @@ pub struct IntermediateNameGenerator {
 }
 
 impl IntermediateNameGenerator {
+    // TODO: Rename to NameManager or the like
     pub fn new() -> Self {
         Self {
             anonymous_type_number: 0,
             intermediate_counter: 0,
             block_counter: 0,
+        }
+    }
+
+    pub fn string_type(&self) -> IrIdentifier {
+        IrIdentifier {
+            unresolved: "String".to_string(),
+            resolved: None,
+            type_reference: None,
+            kind: IrIndentifierKind::TypeName,
+            is_definition: false,
         }
     }
 

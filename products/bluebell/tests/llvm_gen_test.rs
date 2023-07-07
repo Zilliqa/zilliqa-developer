@@ -10,9 +10,10 @@ mod tests {
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
     use bluebell::symbol_table::SymbolTable;
+    use core::ffi::c_char;
+    use core::ffi::CStr;
     use inkwell::context::Context;
     use inkwell::targets::{InitializationConfig, Target};
-    use inkwell::OptimizationLevel;
 
     use bluebell::lexer;
     use bluebell::lexer::Lexer;
@@ -38,6 +39,21 @@ mod tests {
             Ok(ast) => {
                 let mut name_generator = IntermediateNameGenerator::new();
 
+                /****** Runtime *****/
+                ///////
+                // Declaring runtime
+                let context = Context::create();
+                let mut module = context.create_module("main");
+
+                let ft = context.f64_type();
+                module.add_function("sumf", ft.fn_type(&[ft.into(), ft.into()], false), None);
+                let i8_ptr_type = context.i8_type().ptr_type(inkwell::AddressSpace::default());
+                let fn_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
+                module.add_function("builtin__print<msg>", fn_type, None);
+                /// TODO: Load `ll` file instead
+                /*** Parsing ***/
+                /////
+                // AST -> Highlevel IR
                 let mut generator = HighlevelIrEmitter::new(&mut name_generator);
                 let mut ast2 = ast.clone();
                 // println!("AST: {:#?}\n\n", ast2);
@@ -49,13 +65,18 @@ mod tests {
                 // let mut generator = LlvmIrGenerator::new(&context, ir);
                 // generator.write_function_definitions_to_module();
 
-                let mut symbol_table = SymbolTable::new(&mut name_generator);
+                /*** Analysis ***/
 
+                /////
+                // Creating type symbols in symbol table
+                let mut symbol_table = SymbolTable::new(&mut name_generator);
                 let mut type_collector = CollectTypeDefinitionsPass::new(&mut symbol_table);
                 if let Err(err) = ir.visit(&mut type_collector) {
                     panic!("{}", err);
                 }
 
+                /////
+                // Annotate with types
                 let mut type_annotator = AnnotateBaseTypes::new(&mut symbol_table);
                 if let Err(err) = ir.visit(&mut type_annotator) {
                     panic!("{}", err);
@@ -64,75 +85,61 @@ mod tests {
                 // println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
                 // println!("\n\nDefined functions:\n{:#?}\n\n", ir.function_definitions);
 
+                /////
+                // Debug pass
                 let mut debug_printer = HighlevelIrDebugPrinter::new();
                 let _ = ir.visit(&mut debug_printer);
 
-                let context = Context::create();
-                let mut generator = LlvmIrGenerator::new(&context, ir);
-                /*
-                let module = match generator.build_module() {
+                /*** IR generation ***/
+
+                ///////
+                // Generating IR
+                let mut generator = LlvmIrGenerator::new(&context, ir, &mut module);
+
+                match generator.build_module() {
                     Err(e) => {
-                        panic!("Error: {:?}",e);
-                    }
-                    Ok(module) => {
                         let llvm_str = module.print_to_string();
-                        let _output = llvm_str.to_str().expect("Failed converting to UTF8");
-                        // println!("{}", output);
-                        module
+                        let output = llvm_str.to_str().expect("Failed converting to UTF8");
+                        println!("{}", output);
+
+                        panic!("Error: {:?}", e);
                     }
+                    Ok(_) => (),
                 };
-                */
-
-                println!("A");
-                println!("B");
-                extern "C" fn sumf(a: f64, b: f64) -> f64 {
-                    a + b
-                }
-
-                Target::initialize_native(&InitializationConfig::default()).unwrap();
-
-                let mut module = context.create_module("test");
-                let builder = context.create_builder();
-
-                let ft = context.f64_type();
-                let fnt = ft.fn_type(&[], false);
-
-                let f = module.add_function("test_fn", fnt, None);
-                let b = context.append_basic_block(f, "entry");
-
-                builder.position_at_end(b);
-
-                let extf =
-                    module.add_function("sumf", ft.fn_type(&[ft.into(), ft.into()], false), None);
-
-                let argf = ft.const_float(64.);
-                let call_site_value = builder.build_call(extf, &[argf.into(), argf.into()], "retv");
-                let retv = call_site_value
-                    .try_as_basic_value()
-                    .left()
-                    .unwrap()
-                    .into_float_value();
-
-                builder.build_return(Some(&retv));
 
                 let llvm_str = module.print_to_string();
                 let output = llvm_str.to_str().expect("Failed converting to UTF8");
                 println!("{}", output);
 
+                println!("A");
+                println!("B");
+
+                /****** Execution *****/
+                //////
+                // Initializing
+                Target::initialize_native(&InitializationConfig::default()).unwrap();
+
+                //////
+                // Defining runtime
+
+                extern "C" fn sumf(a: f64, b: f64) -> f64 {
+                    a + b
+                }
+                extern "C" fn print_string(s: *const c_char) {
+                    let c_str = unsafe { CStr::from_ptr(s) };
+                    let str_slice: &str = c_str.to_str().unwrap();
+                    println!("{}", str_slice);
+                }
+
+                //////
+                // Executing
                 let contract_executor = UnsafeLlvmTestExecutor::new(&mut module);
                 unsafe {
                     contract_executor.link_symbol("sumf", sumf as usize);
-                    let result = contract_executor.execute("test_fn");
+                    contract_executor.link_symbol("builtin__print<msg>", print_string as usize);
+                    let result = contract_executor.execute("TheContractPart::Main");
                     println!("{:?}", result);
                 }
-                /*
-                let ee = module.create_jit_execution_engine(OptimizationLevel::None).unwrap();
-                ee.add_global_mapping(&extf, sumf as usize);
-
-                let result = unsafe { ee.run_function(f, &[]) }.as_float(&ft);
-                */
-                // let result = unsafe { execution_engine.run_function(f, &[]) }.as_float(&float32);
-                // println!("Result: {:?}", result);
 
                 assert!(false);
                 true

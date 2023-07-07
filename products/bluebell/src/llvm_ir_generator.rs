@@ -1,3 +1,4 @@
+use crate::highlevel_ir::Operation;
 use crate::highlevel_ir::{
     ConcreteFunction, ConcreteType, FunctionKind, HighlevelIr, IrLowering, Variant,
 };
@@ -5,16 +6,19 @@ use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
 use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::{builder::Builder, context::Context};
-use std::mem;
+use std::collections::HashMap;
 
-pub struct LlvmIrGenerator<'ctx> {
+type Scope<'a> = HashMap<String, inkwell::values::BasicValueEnum<'a>>;
+
+pub struct LlvmIrGenerator<'ctx, 'module> {
     context: &'ctx Context,
     builder: Builder<'ctx>,
-    module: Module<'ctx>,
+    module: &'module mut Module<'ctx>,
     ir: Box<HighlevelIr>, // TODO: Add any members needed for the generation here
+    scopes: Vec<Scope<'ctx>>,
 }
 
-impl<'ctx> LlvmIrGenerator<'ctx> {
+impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
     pub fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
         match name {
             // TODO: Collect this into a single module
@@ -235,36 +239,177 @@ impl<'ctx> LlvmIrGenerator<'ctx> {
     }
 
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
-        println!("Functions: {:#?}", self.ir.function_definitions);
+        for func in &self.ir.function_definitions {
+            let scope = Scope::new();
+
+            let arg_types: Vec<_> = func
+                .arguments
+                .iter()
+                .map(|arg| self.get_type_definition(&arg.typename.unresolved).unwrap())
+                .collect();
+            let func_type = match func.return_type.as_ref() {
+                Some(return_type) => {
+                    let return_type = self.get_type_definition(&return_type).unwrap();
+                    return_type.fn_type(
+                        &arg_types
+                            .clone()
+                            .into_iter()
+                            .map(|t| t.into())
+                            .collect::<Vec<_>>(),
+                        false,
+                    )
+                }
+                None => self.context.void_type().fn_type(
+                    &arg_types
+                        .clone()
+                        .into_iter()
+                        .map(|t| t.into())
+                        .collect::<Vec<_>>(),
+                    false,
+                ),
+            };
+            let function = self.module.add_function(
+                &func
+                    .name
+                    .qualified_name()
+                    .unwrap_or(func.name.unresolved.clone()),
+                func_type,
+                None,
+            );
+            for (i, param) in function.get_param_iter().enumerate() {
+                param.set_name(&func.arguments[i].name.unresolved);
+            }
+            let basic_block = self.context.append_basic_block(function, "entry");
+            self.builder.position_at_end(basic_block);
+            for (i, arg) in func.arguments.iter().enumerate() {
+                let alloca = self
+                    .builder
+                    .build_alloca(arg_types[i], &arg.name.unresolved);
+                self.builder
+                    .build_store(alloca, function.get_nth_param(i as u32).unwrap());
+            }
+            let last_instruction_was_return = false;
+            for instr in func.body.blocks.iter().flat_map(|x| x.instructions.iter()) {
+                match instr.operation {
+                    // Add handling for all operations defined in the Operation enum here.
+                    // For now, we only implement the CallExternalFunction Operation.
+                    Operation::CallExternalFunction {
+                        ref name,
+                        ref arguments,
+                    } => {
+                        // Get function value from module
+                        let function_name = match &name.resolved {
+                            Some(n) => n,
+                            None => {
+                                // return Err(format!("Encountered unresolved function name {}", name.unresolved))
+                                // TODO: Fix this
+                                &name.unresolved
+                            }
+                        };
+                        let called_function = self.module.get_function(&function_name);
+                        let called_function = match called_function {
+                            Some(called_function) => called_function,
+                            None => {
+                                return Err(format!("Unable to find function {}", function_name));
+                            }
+                        };
+
+                        let argument_values: Vec<_> = arguments
+                            .iter()
+                            .map(|arg| {
+                                // Assuming all arguments are defined in the current function
+                                let name = match &arg.resolved {
+                                    Some(n) => n,
+                                    None => {
+                                        // TODO: Properly propagate error message
+                                        panic!("Encountered unresolved symbol {}", arg.unresolved);
+                                    }
+                                };
+                                self.scopes
+                                    .iter()
+                                    .rev()
+                                    .filter_map(|s| s.get(name))
+                                    .next()
+                                    .expect(&format!("Failed to find {}", name))
+                            })
+                            .collect();
+                        let _ = self.builder.build_call(
+                            called_function,
+                            &argument_values
+                                .into_iter()
+                                .map(|t| (*t).into())
+                                .collect::<Vec<_>>(),
+                            "calltmp",
+                        );
+                    }
+                    Operation::Literal {
+                        ref data,
+                        ref typename,
+                    } => {
+                        match typename.qualified_name()?.as_str() {
+                            "String" => {
+                                let ssa_name = instr.ssa_name.clone().unwrap().qualified_name()?;
+                                let string_type =
+                                    self.context.i8_type().array_type(data.len() as u32);
+                                let global_string =
+                                    self.module
+                                        .add_global(string_type, None, &ssa_name.as_str());
+                                global_string.set_initializer(
+                                    &self.context.const_string(data.as_bytes(), false),
+                                );
+                                if let Some(scope) = self.scopes.last_mut() {
+                                    let pointer_val = global_string.as_pointer_value();
+                                    scope.insert(ssa_name, pointer_val.into());
+                                }
+                            }
+                            // TODO: add cases for other types of literals here if needed
+                            _ => {
+                                return Err(format!(
+                                    "Unhandled literal type: {:?}",
+                                    typename.qualified_name()?
+                                ));
+                            }
+                        }
+                    }
+                    _ => {
+                        println!("Unhandled instruction: {:#?}", instr);
+                        unimplemented!() // Add handling for other operations here
+                    }
+                }
+            }
+            if !last_instruction_was_return {
+                self.builder.build_return(None);
+            };
+        }
+        Ok(0)
+    }
+
+    pub fn build_module(&mut self) -> Result<u32, String> {
+        self.write_type_definitions_to_module()?;
+        self.write_function_definitions_to_module()?;
 
         Ok(0)
     }
 
-    pub fn build_module(&mut self) -> Result<Module<'ctx>, String> {
-        self.write_type_definitions_to_module()?;
-        self.write_function_definitions_to_module()?;
-
-        let mut module = self.context.create_module("main");
-        mem::swap(&mut module, &mut self.module);
-        self.builder = self.context.create_builder();
-
-        Ok(module)
-    }
-
-    pub fn new(context: &'ctx Context, ir: Box<HighlevelIr>) -> Self {
+    pub fn new(
+        context: &'ctx Context,
+        ir: Box<HighlevelIr>,
+        module: &'module mut Module<'ctx>,
+    ) -> Self {
         let builder = context.create_builder();
-        let module = context.create_module("main");
-
+        let mut scopes = Vec::new();
+        scopes.push(Scope::new());
         LlvmIrGenerator {
             context,
             builder,
             module,
             ir,
+            scopes,
         }
     }
 }
 
-impl<'ctx> IrLowering for LlvmIrGenerator<'ctx> {
+impl<'ctx, 'module> IrLowering for LlvmIrGenerator<'ctx, 'module> {
     // Lower a single concrete type from HighlevelIr to LLVM IR.
     fn lower_concrete_type(&mut self, con_type: &ConcreteType) {
         match con_type {

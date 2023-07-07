@@ -47,6 +47,7 @@ impl<'generator> SymbolTable<'generator> {
         let _ = ret.declare_type("Uint16");
         let _ = ret.declare_type("Uint32");
         let _ = ret.declare_type("Uint64");
+        let _ = ret.declare_type("String");
 
         ret
     }
