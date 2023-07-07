@@ -15,7 +15,8 @@ lalrpop-util = {version = "0.19", features = ["lexer"]}
 regex = "1"
 diffy = "0.3.0"
 inkwell = {version = "0.2.0", features= ["llvm16-0"]}
-lazy_static = "1.4"
+clap = { version = "4.3.11", features = ["derive"] }
+
 
 
 [package.metadata.raze]

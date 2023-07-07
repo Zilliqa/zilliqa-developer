@@ -39,7 +39,7 @@ mod tests {
             Ok(ast) => {
                 let mut name_generator = IntermediateNameGenerator::new();
 
-                /****** Runtime *****/
+                /****** Executable *****/
                 ///////
                 // Declaring runtime
                 let context = Context::create();
