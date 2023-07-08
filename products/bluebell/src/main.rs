@@ -18,6 +18,7 @@ use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
 use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 use bluebell::symbol_table::SymbolTable;
+use bluebell::highlevel_ir_pass_manager::HighlevelIrPassManager;
 
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;
@@ -93,27 +94,12 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     // generator.write_function_definitions_to_module();
 
     /*** Analysis ***/
+    let mut pass_manager = HighlevelIrPassManager::default_pipeline();
 
-    /////
-    // Creating type symbols in symbol table
-
-    let mut type_collector = CollectTypeDefinitionsPass::new();
-    if let Err(err) = ir.run_pass(&mut type_collector) {
-        panic!("{}", err);
+    if let Err(err) = pass_manager.run(&mut ir) {
+        panic!("{}", err);        
     }
 
-    /////
-    // Annotate with types
-    let mut type_annotator = AnnotateBaseTypes::new();
-    if let Err(err) = ir.run_pass(&mut type_annotator) {
-        panic!("{}", err);
-    }
-
-    // println!("\n\nDefined types:\n{:#?}\n\n", ir.type_definitions);
-    // println!("\n\nDefined functions:\n{:#?}\n\n", ir.function_definitions);
-
-    /////
-    // Debug pass
     let mut debug_printer = HighlevelIrDebugPrinter::new();
     let _ = ir.run_pass(&mut debug_printer);
 
