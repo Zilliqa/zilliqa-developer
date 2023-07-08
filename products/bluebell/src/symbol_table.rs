@@ -21,20 +21,20 @@ impl TypeInfo {
     }
 }
 
-pub struct SymbolTable<'generator> {
+pub struct SymbolTable {
     pub aliases: HashMap<String, String>,
     pub type_of_table: HashMap<String, Box<TypeInfo>>,
-    pub name_generator: &'generator mut IntermediateNameGenerator,
+    pub name_generator: IntermediateNameGenerator,
 }
 
-impl<'generator> SymbolTable<'generator> {
-    pub fn new(name_generator: &'generator mut IntermediateNameGenerator) -> Self {
+impl SymbolTable {
+    pub fn new() -> Self {
         let type_of_table = HashMap::new();
 
         let mut ret = SymbolTable {
             aliases: HashMap::new(),
             type_of_table,
-            name_generator,
+            name_generator: IntermediateNameGenerator::new(),
         };
 
         // TODO: Get types from RuntimeModule
@@ -50,6 +50,10 @@ impl<'generator> SymbolTable<'generator> {
         let _ = ret.declare_type("String");
 
         ret
+    }
+
+    pub fn get_name_generator(&mut self) -> &mut IntermediateNameGenerator {
+        &mut self.name_generator
     }
 
     pub fn create_plain_typename(&self, typename: &str) -> Box<TypeInfo> {

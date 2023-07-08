@@ -11,34 +11,34 @@ use crate::symbol_table::SymbolTable;
 use crate::symbol_table::TypeInfo;
 use std::mem;
 
-pub struct AnnotateBaseTypes<'symtab, 'generator> {
-    symbol_table: &'symtab mut SymbolTable<'generator>,
+pub struct AnnotateBaseTypes {
     previous_namespaces: Vec<String>,
     namespace: Option<String>,
     current_block: Option<FunctionBlock>,
 }
 
-impl<'symtab, 'generator> AnnotateBaseTypes<'symtab, 'generator> {
-    pub fn new(symbol_table: &'symtab mut SymbolTable<'generator>) -> Self {
+impl AnnotateBaseTypes {
+    pub fn new() -> Self {
         AnnotateBaseTypes {
-            symbol_table,
             previous_namespaces: Vec::new(),
             namespace: None,
             current_block: None,
         }
     }
 
-    pub fn typename_of(&self, symbol: &IrIdentifier) -> Option<String> {
+    // TODO: Make Symbol table member
+    pub fn typename_of(&self, symbol: &IrIdentifier, symbol_table: &mut SymbolTable) -> Option<String> {
         if let Some(name) = &symbol.resolved {
-            self.symbol_table.typename_of(name)
+            symbol_table.typename_of(name)
         } else {
             None
         }
     }
 
-    pub fn type_of(&self, symbol: &IrIdentifier) -> Option<Box<TypeInfo>> {
+    // TODO: Make Symbol table member
+    pub fn type_of(&self, symbol: &IrIdentifier, symbol_table: &mut SymbolTable) -> Option<Box<TypeInfo>> {
         if let Some(name) = &symbol.resolved {
-            self.symbol_table.type_of(name)
+            symbol_table.type_of(name)
         } else {
             None
         }
@@ -61,11 +61,12 @@ impl<'symtab, 'generator> AnnotateBaseTypes<'symtab, 'generator> {
 
 // TODO: Rename to AnnotateTypesDeclarations
 
-impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'generator> {
+impl HighlevelIrPass for AnnotateBaseTypes {
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
         _con_type: &mut ConcreteType,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::SkipChildren)
     }
@@ -74,6 +75,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _enum_value: &mut EnumValue,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -82,6 +84,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _tuple: &mut Tuple,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -90,6 +93,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _variant: &mut Variant,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -99,14 +103,15 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         var_dec: &mut VariableDeclaration,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         if let Some(typename) = &var_dec.typename.resolved {
-            let _ = var_dec.name.visit(self)?;
+            let _ = var_dec.name.visit(self, symbol_table)?;
             var_dec.name.type_reference = Some(typename.clone());
 
             if let Some(symbol) = &var_dec.name.resolved {
                 // TODO: Check that symbol is unique
-                self.symbol_table.declare_type_of(&symbol, typename)?;
+                symbol_table.declare_type_of(&symbol, typename)?;
 
                 Ok(TraversalResult::SkipChildren)
             } else {
@@ -128,6 +133,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         fnc: &mut ConcreteFunction,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         let namespace = match &fnc.namespace.resolved {
             Some(ns) => ns.clone(),
@@ -140,15 +146,15 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         };
 
         self.push_namespace(namespace);
-        fnc.name.visit(self)?;
+        fnc.name.visit(self, symbol_table)?;
 
         self.push_namespace(fnc.name.unresolved.clone());
 
         for arg in fnc.arguments.iter_mut() {
-            arg.visit(self)?;
+            arg.visit(self, symbol_table)?;
         }
 
-        fnc.body.visit(self)?;
+        fnc.body.visit(self, symbol_table)?;
 
         self.pop_namespace();
         self.pop_namespace();
@@ -161,6 +167,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _kind: &mut IrIndentifierKind,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -169,10 +176,11 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         symbol: &mut IrIdentifier,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match symbol.kind {
             IrIndentifierKind::Unknown => {
-                if let Some(typeinfo) = self.type_of(symbol) {
+                if let Some(typeinfo) = self.type_of(symbol, symbol_table) {
                     symbol.type_reference = Some(typeinfo.name.clone());
 
                     // We only move constructors out of line
@@ -197,7 +205,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
                     };
 
                     let mut intermediate_symbol =
-                        self.symbol_table.name_generator.new_intermediate();
+                        symbol_table.name_generator.new_intermediate();
 
                     symbol.kind = IrIndentifierKind::StaticFunctionName;
                     let mut constructor_call = Box::new(Instruction {
@@ -216,7 +224,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
                         },
                     });
 
-                    constructor_call.visit(self)?;
+                    constructor_call.visit(self, symbol_table)?;
 
                     if let Some(current_block) = &mut self.current_block {
                         current_block.instructions.push(constructor_call);
@@ -250,7 +258,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
             }
             _ => (),
         }
-        symbol.type_reference = self.typename_of(symbol);
+        symbol.type_reference = self.typename_of(symbol, symbol_table);
         Ok(TraversalResult::Continue)
     }
 
@@ -258,6 +266,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _highlevel_ir: &mut HighlevelIr,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -266,6 +275,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _function_body: &mut FunctionBody,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -274,6 +284,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _function_kind: &mut FunctionKind,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -282,6 +293,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         _operation: &mut Operation,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -290,6 +302,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         instr: &mut Instruction,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // TODO: These types should be stored somewhere (in the symbol table maybe?)
         let typename = match &mut instr.operation {
@@ -300,31 +313,31 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
                 on_success,
                 on_failure,
             } => {
-                expression.visit(self)?;
-                on_success.visit(self)?;
-                on_failure.visit(self)?;
+                expression.visit(self, symbol_table)?;
+                on_success.visit(self, symbol_table)?;
+                on_failure.visit(self, symbol_table)?;
                 "Void".to_string()
             }
             Operation::MemLoad => "TODO".to_string(),
             Operation::MemStore => "TODO".to_string(),
             Operation::IsEqual { left, right } => {
-                left.visit(self)?;
-                right.visit(self)?;
+                left.visit(self, symbol_table)?;
+                right.visit(self, symbol_table)?;
                 //  panic!("Failed");
                 "Int8".to_string()
             }
             Operation::CallExternalFunction { name, arguments } => {
-                name.visit(self)?;
+                name.visit(self, symbol_table)?;
                 for arg in arguments.iter_mut() {
-                    arg.visit(self)?;
+                    arg.visit(self, symbol_table)?;
                 }
 
                 "TODO-lookup".to_string()
             }
             Operation::CallFunction { name, arguments } => {
-                name.visit(self)?;
+                name.visit(self, symbol_table)?;
                 for arg in arguments.iter_mut() {
-                    arg.visit(self)?;
+                    arg.visit(self, symbol_table)?;
                 }
 
                 "TODO-lookup".to_string()
@@ -334,13 +347,13 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
                 owner: _,
                 arguments,
             } => {
-                name.visit(self)?;
+                name.visit(self, symbol_table)?;
                 for arg in arguments.iter_mut() {
-                    arg.visit(self)?;
+                    arg.visit(self, symbol_table)?;
                 }
 
                 let return_type = if let Some(function_type) = &name.type_reference {
-                    let function_typeinfo = self.symbol_table.type_of(function_type);
+                    let function_typeinfo = symbol_table.type_of(function_type);
 
                     if let Some(function_typeinfo) = function_typeinfo {
                         function_typeinfo.return_type.expect("").clone()
@@ -358,15 +371,15 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
                 owner: _,
                 arguments,
             } => {
-                name.visit(self)?;
+                name.visit(self, symbol_table)?;
                 for arg in arguments.iter_mut() {
-                    arg.visit(self)?;
+                    arg.visit(self, symbol_table)?;
                 }
 
                 "TODO-lookup".to_string()
             }
             Operation::ResolveSymbol { symbol } => {
-                symbol.visit(self)?;
+                symbol.visit(self, symbol_table)?;
                 match &symbol.type_reference {
                     Some(t) => t.clone(),
                     None => {
@@ -378,7 +391,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
                 }
             }
             Operation::Literal { data, typename } => {
-                typename.visit(self)?;
+                typename.visit(self, symbol_table)?;
 
                 match &typename.type_reference {
                     Some(t) => t.clone(),
@@ -394,7 +407,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
             Operation::PhiNode(inputs) => {
                 let mut type_name = None;
                 for input in inputs.iter_mut() {
-                    input.visit(self)?;
+                    input.visit(self, symbol_table)?;
                     if input.type_reference != type_name {
                         if type_name == None {
                             type_name = input.type_reference.clone();
@@ -413,11 +426,11 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         };
 
         if let Some(ssa) = &mut instr.ssa_name {
-            ssa.visit(self)?;
+            ssa.visit(self, symbol_table)?;
             if let Some(symbol_name) = &ssa.resolved {
                 // TODO: Check whether symbol exists
 
-                self.symbol_table.declare_type_of(symbol_name, &typename)?;
+                symbol_table.declare_type_of(symbol_name, &typename)?;
 
                 ssa.type_reference = Some(typename);
             } else {
@@ -435,6 +448,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         &mut self,
         _mode: TreeTraversalMode,
         block: &mut FunctionBlock,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         self.current_block = Some(FunctionBlock {
             name: block.name.clone(),
@@ -443,7 +457,7 @@ impl<'symtab, 'generator> HighlevelIrPass for AnnotateBaseTypes<'symtab, 'genera
         });
 
         for instr in block.instructions.iter_mut() {
-            instr.visit(self)?;
+            instr.visit(self, symbol_table)?;
             if let Some(ref mut new_block) = &mut self.current_block {
                 new_block.instructions.push(instr.clone());
             }

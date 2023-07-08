@@ -8,26 +8,24 @@ use crate::highlevel_ir::{
 use crate::highlevel_ir_pass::HighlevelIrPass;
 use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
 use crate::symbol_table::SymbolTable;
+use std::rc::Rc;
 
-pub struct CollectTypeDefinitionsPass<'symtab, 'generator> {
+pub struct CollectTypeDefinitionsPass {
     namespace_stack: Vec<String>,
     current_namespace: Option<String>,
     current_type: Option<String>,
-
-    symbol_table: &'symtab mut SymbolTable<'generator>,
 }
 
-impl<'symtab, 'generator> CollectTypeDefinitionsPass<'symtab, 'generator> {
-    pub fn new(symbol_table: &'symtab mut SymbolTable<'generator>) -> Self {
+impl CollectTypeDefinitionsPass {
+    pub fn new() -> Self {
         CollectTypeDefinitionsPass {
             namespace_stack: Vec::new(),
             current_namespace: None,
             current_type: None,
-            symbol_table,
         }
     }
 
-    fn resolve_qualified_name(&self, basename: &String) -> Option<String> {
+    fn resolve_qualified_name(&self, basename: &String, symbol_table: &mut SymbolTable,) -> Option<String> {
         match &self.current_namespace {
             None => (),
             Some(namespace) => {
@@ -42,13 +40,13 @@ impl<'symtab, 'generator> CollectTypeDefinitionsPass<'symtab, 'generator> {
                     );
 
                     let full_name =
-                        if let Some(aliased_name) = self.symbol_table.aliases.get(&full_name) {
+                        if let Some(aliased_name) = symbol_table.aliases.get(&full_name) {
                             aliased_name
                         } else {
                             &full_name
                         };
 
-                    if let Some(_) = self.symbol_table.typename_of(full_name) {
+                    if let Some(_) = symbol_table.typename_of(full_name) {
                         return Some(full_name.to_string());
                     }
 
@@ -58,13 +56,13 @@ impl<'symtab, 'generator> CollectTypeDefinitionsPass<'symtab, 'generator> {
             }
         }
 
-        let lookup = if let Some(aliased_name) = self.symbol_table.aliases.get(basename) {
+        let lookup = if let Some(aliased_name) = symbol_table.aliases.get(basename) {
             aliased_name
         } else {
             basename
         };
 
-        if let Some(_) = self.symbol_table.typename_of(lookup) {
+        if let Some(_) = symbol_table.typename_of(lookup) {
             return Some(lookup.to_string());
         }
 
@@ -86,11 +84,12 @@ impl<'symtab, 'generator> CollectTypeDefinitionsPass<'symtab, 'generator> {
     }
 }
 
-impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab, 'generator> {
+impl HighlevelIrPass for CollectTypeDefinitionsPass {
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
         con_type: &mut ConcreteType,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match con_type {
             ConcreteType::Tuple {
@@ -98,19 +97,19 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
                 namespace,
                 data_layout,
             } => {
-                let _ = namespace.visit(self)?;
+                let _ = namespace.visit(self, symbol_table)?;
                 self.push_namespace(namespace.qualified_name()?);
 
-                let _ = name.visit(self)?;
+                let _ = name.visit(self, symbol_table)?;
                 let qualified_name = name.qualified_name()?;
 
-                self.symbol_table.declare_type(&qualified_name)?;
+                symbol_table.declare_type(&qualified_name)?;
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
 
                 self.current_type = Some(qualified_name);
-                let _ = data_layout.visit(self)?;
+                let _ = data_layout.visit(self, symbol_table)?;
 
                 self.current_type = None;
 
@@ -121,21 +120,21 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
                 namespace,
                 data_layout,
             } => {
-                let _ = namespace.visit(self)?;
+                let _ = namespace.visit(self, symbol_table)?;
                 self.push_namespace(namespace.qualified_name()?);
 
-                let _ = name.visit(self)?;
+                let _ = name.visit(self, symbol_table)?;
                 let qualified_name = name.qualified_name()?;
 
-                self.symbol_table.declare_type(&qualified_name)?;
+                symbol_table.declare_type(&qualified_name)?;
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
-                self.symbol_table
+                symbol_table
                     .declare_alias(&name.unresolved, &qualified_name);
 
                 self.current_type = Some(qualified_name);
-                let _ = data_layout.visit(self)?;
+                let _ = data_layout.visit(self, symbol_table)?;
 
                 self.current_type = None;
                 self.pop_namespace();
@@ -148,10 +147,11 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         enum_value: &mut EnumValue,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         if let Some(return_type) = self.current_type.clone() {
             self.push_namespace(return_type.clone().to_string());
-            let _ = enum_value.name.visit(self)?;
+            let _ = enum_value.name.visit(self, symbol_table)?;
 
             let resolved_name = if let Some(resolved_name) = &enum_value.name.resolved {
                 resolved_name.to_string()
@@ -163,7 +163,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
             };
 
             // Creating alias for legacy reasons
-            self.symbol_table
+            symbol_table
                 .aliases
                 .insert(enum_value.name.unresolved.clone(), resolved_name.clone());
 
@@ -172,13 +172,13 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
             // TODO: Work out whehter we should attempt to resolve the type right away?
             let mut arguments: Vec<String> = Vec::new();
             if let Some(data) = &mut enum_value.data {
-                let _ = data.visit(self)?;
+                let _ = data.visit(self, symbol_table)?;
                 if let Some(resolved_type) = &data.resolved {
                     arguments.push(resolved_type.to_string());
                 }
             }
 
-            self.symbol_table
+            symbol_table
                 .declare_constructor(&resolved_name, &arguments, &return_type)?;
 
             // TODO: Set the constructor function signature and alias
@@ -196,6 +196,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _tuple: &mut Tuple,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -204,6 +205,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _variant: &mut Variant,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -213,6 +215,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _var_dec: &mut VariableDeclaration,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -221,6 +224,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _fnc: &mut ConcreteFunction,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // TODO: collect type of function
         Ok(TraversalResult::Continue)
@@ -230,6 +234,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _kind: &mut IrIndentifierKind,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -238,6 +243,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         symbol: &mut IrIdentifier,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match symbol.kind {
             IrIndentifierKind::BlockLabel | IrIndentifierKind::Namespace => {
@@ -251,7 +257,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
                                 .to_string();
                         symbol.resolved = Some(typename.clone());
                     }
-                } else if let Some(resolved_name) = self.resolve_qualified_name(&symbol.unresolved)
+                } else if let Some(resolved_name) = self.resolve_qualified_name(&symbol.unresolved, symbol_table)
                 {
                     symbol.resolved = Some(resolved_name);
                 }
@@ -265,12 +271,13 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         mode: TreeTraversalMode,
         _highlevel_ir: &mut HighlevelIr,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => {
-                println!("Types: {:#?}\n\n", self.symbol_table.type_of_table);
-                println!("Aliases: {:#?}\n\n", self.symbol_table.aliases);
+                println!("Types: {:#?}\n\n", symbol_table.type_of_table);
+                println!("Aliases: {:#?}\n\n", symbol_table.aliases);
             }
         }
         Ok(TraversalResult::Continue)
@@ -280,6 +287,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _function_body: &mut FunctionBody,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -288,6 +296,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _function_kind: &mut FunctionKind,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -296,6 +305,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _operation: &mut Operation,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -304,6 +314,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _instr: &mut Instruction,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -312,6 +323,7 @@ impl<'symtab, 'generator> HighlevelIrPass for CollectTypeDefinitionsPass<'symtab
         &mut self,
         _mode: TreeTraversalMode,
         _block: &mut FunctionBlock,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

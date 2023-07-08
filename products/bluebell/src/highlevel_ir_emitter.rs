@@ -18,10 +18,8 @@ enum StackObject {
     FunctionBlock(Box<FunctionBlock>),
 }
 
-pub struct HighlevelIrEmitter<'generator> {
+pub struct HighlevelIrEmitter {
     stack: Vec<StackObject>,
-
-    name_generator: &'generator mut IntermediateNameGenerator,
 
     // Used for transition and procedure
     current_block: Box<FunctionBlock>,
@@ -37,8 +35,8 @@ pub struct HighlevelIrEmitter<'generator> {
     ir: Box<HighlevelIr>,
 }
 
-impl<'generator> HighlevelIrEmitter<'generator> {
-    pub fn new(name_generator: &'generator mut IntermediateNameGenerator) -> Self {
+impl HighlevelIrEmitter {
+    pub fn new() -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         let ns = IrIdentifier {
@@ -50,7 +48,6 @@ impl<'generator> HighlevelIrEmitter<'generator> {
         };
         // TODO: Repeat similar code for all literals
         HighlevelIrEmitter {
-            name_generator,
             stack: Vec::new(),
             current_block,
             current_body,
@@ -85,7 +82,7 @@ impl<'generator> HighlevelIrEmitter<'generator> {
                 let symbol = if let Some(s) = instruction.ssa_name {
                     s
                 } else {
-                    self.name_generator.new_intermediate()
+                    self.ir.symbol_table.name_generator.new_intermediate()
                 };
                 instruction.ssa_name = Some(symbol.clone());
                 self.current_block.instructions.push(instruction);
@@ -214,7 +211,7 @@ impl<'generator> HighlevelIrEmitter<'generator> {
     }
 }
 
-impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
+impl AstConverting for HighlevelIrEmitter {
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
@@ -510,7 +507,7 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
 
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
-                let finally_exit_label = self.name_generator.new_block_label("match_finally");
+                let finally_exit_label = self.ir.symbol_table.name_generator.new_block_label("match_finally");
 
                 // Checking for catch all
                 let mut catch_all: Option<&NodePatternMatchExpressionClause> = None;
@@ -560,9 +557,9 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
                     let case = self.convert_instruction_to_symbol(compare_instr);
 
                     // Blocks for success and fail
-                    let fail_label = self.name_generator.new_block_label("match_fail");
+                    let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_fail");
 
-                    let success_label = self.name_generator.new_block_label("match_success");
+                    let success_label = self.ir.symbol_table.name_generator.new_block_label("match_success");
                     let mut success_block = FunctionBlock::new_from_symbol(success_label.clone());
 
                     // Terminating current block
@@ -602,7 +599,7 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
                     mem::swap(&mut fail_block, &mut self.current_block);
                     self.current_body.blocks.push(fail_block);
 
-                    // let fail_label = self.name_generator.new_block_label("match_case");
+                    // let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_case");
                     // let fail_block = FunctionBlock::new_from_symbol(fail_label);
                 }
 
@@ -740,7 +737,7 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
                 unimplemented!();
             }
             NodeValueLiteral::LiteralString(value) => {
-                let typename = self.name_generator.string_type();
+                let typename = self.ir.symbol_table.name_generator.string_type();
                 let operation = Operation::Literal {
                     data: value.to_string(),
                     typename,
@@ -1298,6 +1295,8 @@ impl<'generator> AstConverting for HighlevelIrEmitter<'generator> {
                 }
 
                 let refid = self
+                    .ir
+                    .symbol_table
                     .name_generator
                     .generate_anonymous_type_id("Tuple".to_string());
 

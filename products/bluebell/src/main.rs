@@ -64,7 +64,6 @@ struct Args {
 }
 
 fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
-    let mut name_generator = IntermediateNameGenerator::new();
 
     /****** Executable *****/
     ///////
@@ -82,7 +81,7 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 
     /////
     // AST -> Highlevel IR
-    let mut generator = HighlevelIrEmitter::new(&mut name_generator);
+    let mut generator = HighlevelIrEmitter::new();
     let mut ast2 = ast.clone();
 
     let mut ir = generator
@@ -97,16 +96,16 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 
     /////
     // Creating type symbols in symbol table
-    let mut symbol_table = SymbolTable::new(&mut name_generator);
-    let mut type_collector = CollectTypeDefinitionsPass::new(&mut symbol_table);
-    if let Err(err) = ir.visit(&mut type_collector) {
+
+    let mut type_collector = CollectTypeDefinitionsPass::new();
+    if let Err(err) = ir.run_pass(&mut type_collector) {
         panic!("{}", err);
     }
 
     /////
     // Annotate with types
-    let mut type_annotator = AnnotateBaseTypes::new(&mut symbol_table);
-    if let Err(err) = ir.visit(&mut type_annotator) {
+    let mut type_annotator = AnnotateBaseTypes::new();
+    if let Err(err) = ir.run_pass(&mut type_annotator) {
         panic!("{}", err);
     }
 
@@ -116,7 +115,7 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     /////
     // Debug pass
     let mut debug_printer = HighlevelIrDebugPrinter::new();
-    let _ = ir.visit(&mut debug_printer);
+    let _ = ir.run_pass(&mut debug_printer);
 
     /*** IR generation ***/
 

@@ -1,3 +1,5 @@
+use crate::symbol_table::SymbolTable;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum IrIndentifierKind {
     FunctionName,
@@ -314,6 +316,7 @@ pub struct HighlevelIr {
     pub type_definitions: Vec<ConcreteType>,
     pub function_definitions: Vec<ConcreteFunction>,
     pub lambda_functions: Vec<LambdaFunctionSingleArgument>,
+    pub symbol_table: SymbolTable,
 }
 
 impl HighlevelIr {
@@ -323,6 +326,7 @@ impl HighlevelIr {
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
             lambda_functions: Vec::new(),
+            symbol_table: SymbolTable::new(),
         }
     }
 }
