@@ -5,6 +5,6 @@ library TheLibraryPart
 contract TheContractPart()
 
 transition Main()
-  msg = "I Rock!";
+  msg = "Zilliqa Rocks!";
   x = builtin print msg
 end

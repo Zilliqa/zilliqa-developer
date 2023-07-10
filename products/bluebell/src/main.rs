@@ -68,30 +68,52 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 
     /****** Executable *****/
     ///////
-    // Declaring runtime
+
     let context = Context::create();
     let mut module = context.create_module("main");
 
+    // Runtime struct <- contains Context
+    // VM / Executor
+    // Executable <- contains Module
+    // Compiler
+
+    // Declaring runtime
     let ft = context.f64_type();
-    module.add_function("sumf", ft.fn_type(&[ft.into(), ft.into()], false), None);
     let i8_ptr_type = context.i8_type().ptr_type(inkwell::AddressSpace::default());
     let fn_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
+
+    module.add_function("sumf", ft.fn_type(&[ft.into(), ft.into()], false), None);
     module.add_function("builtin__print<msg>", fn_type, None);
 
-    /*** Parsing ***/
+    let setup_runtime = |contract_executor: &UnsafeLlvmTestExecutor| {
+        Target::initialize_native(&InitializationConfig::default()).unwrap();
+
+        //////
+        // Defining runtime
+
+        extern "C" fn sumf(a: f64, b: f64) -> f64 {
+            a + b
+        }
+        extern "C" fn print_string(s: *const c_char) {
+            let c_str = unsafe { CStr::from_ptr(s) };
+            let str_slice: &str = c_str.to_str().unwrap();
+            println!("{}", str_slice);
+        }
+        unsafe {
+            contract_executor.link_symbol("sumf", sumf as usize);
+            contract_executor.link_symbol("builtin__print<msg>", print_string as usize);            
+        }
+    };
+
+
+    /*** Compiling ***/
 
     /////
-    // AST -> Highlevel IR
+    // Frontend: AST -> Highlevel IR
     let mut generator = HighlevelIrEmitter::new();
-    let mut ast2 = ast.clone();
-
     let mut ir = generator
-        .emit(&mut ast2)
+        .emit(ast)
         .expect("Failed generating highlevel IR");
-
-    // let context = Context::create();
-    // let mut generator = LlvmIrGenerator::new(&context, ir);
-    // generator.write_function_definitions_to_module();
 
     /*** Analysis ***/
     let mut pass_manager = HighlevelIrPassManager::default_pipeline();
@@ -103,10 +125,8 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     let mut debug_printer = HighlevelIrDebugPrinter::new();
     let _ = ir.run_pass(&mut debug_printer);
 
-    /*** IR generation ***/
-
     ///////
-    // Generating IR
+    // Lowering/"backend": Generating LLVM IR
     let mut generator = LlvmIrGenerator::new(&context, ir, &mut module);
 
     match generator.build_module() {
@@ -128,28 +148,14 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 
     /****** Execution *****/
     //////
-    // Initializing
-    Target::initialize_native(&InitializationConfig::default()).unwrap();
-
-    //////
-    // Defining runtime
-
-    extern "C" fn sumf(a: f64, b: f64) -> f64 {
-        a + b
-    }
-    extern "C" fn print_string(s: *const c_char) {
-        let c_str = unsafe { CStr::from_ptr(s) };
-        let str_slice: &str = c_str.to_str().unwrap();
-        println!("{}", str_slice);
-    }
 
     //////
     // Executing
 
     let contract_executor = UnsafeLlvmTestExecutor::new(&mut module);
+    setup_runtime(& contract_executor);
+
     unsafe {
-        contract_executor.link_symbol("sumf", sumf as usize);
-        contract_executor.link_symbol("builtin__print<msg>", print_string as usize);
         contract_executor.execute(&entry_point);
     }
 }

@@ -192,7 +192,7 @@ impl HighlevelIrEmitter {
         Ok(ret)
     }
 
-    pub fn emit(&mut self, node: &mut NodeProgram) -> Result<Box<HighlevelIr>, String> {
+    pub fn emit(&mut self, node: &NodeProgram) -> Result<Box<HighlevelIr>, String> {
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
