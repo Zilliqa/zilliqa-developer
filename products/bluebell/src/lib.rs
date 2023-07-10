@@ -19,8 +19,8 @@ pub mod highlevel_ir_emitter;
 pub mod intermediate_name_generator;
 pub mod lexer;
 pub mod llvm_ir_generator;
+pub mod support;
 pub mod symbol_table;
-pub mod llvm_executable;
 
 // pub mod type_classes;
 // pub mod type_inference;

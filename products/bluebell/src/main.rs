@@ -9,16 +9,13 @@ use std::os::raw::c_char;
 use std::process;
 
 use bluebell::ast::NodeProgram;
-use bluebell::contract_executor::{UnsafeContractExecutor, UnsafeLlvmTestExecutor};
+use bluebell::contract_executor::UnsafeContractExecutor;
 use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
 use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
-use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
-use bluebell::intermediate_name_generator::IntermediateNameGenerator;
-use bluebell::llvm_ir_generator::LlvmIrGenerator;
-use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
-use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
-use bluebell::symbol_table::SymbolTable;
+
 use bluebell::highlevel_ir_pass_manager::HighlevelIrPassManager;
+use bluebell::llvm_ir_generator::LlvmIrGenerator;
+use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;
@@ -65,9 +62,33 @@ struct Args {
 }
 
 fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
-
     /****** Executable *****/
     ///////
+    let backend = LlvmBackend::new();
+    // TODO: runtime is a poor name.
+    let mut specification = backend.create_backend_specification();
+
+    specification.declare_integer("Int8", 8);
+    specification.declare_integer("Int16", 16);
+    specification.declare_integer("Int32", 32);
+    specification.declare_integer("Int64", 64);
+    specification.declare_integer("Uint8", 8);
+    specification.declare_integer("Uint16", 16);
+    specification.declare_integer("Uint32", 32);
+    specification.declare_integer("Uint64", 64);
+
+    let _ = specification
+        .declare_intrinsic("add", ["Int32", "Int32"].to_vec(), "Int32")
+        .attach_runtime(|| {
+            extern "C" fn addi32(a: i32, b: i32) -> i32 {
+                a + b
+            }
+
+            addi32 as usize
+        });
+
+    // let _executable = backend.create_executable("test");
+    // let executable = backend.compile(name, script);
 
     let context = Context::create();
     let mut module = context.create_module("main");
@@ -101,25 +122,22 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
         }
         unsafe {
             contract_executor.link_symbol("sumf", sumf as usize);
-            contract_executor.link_symbol("builtin__print<msg>", print_string as usize);            
+            contract_executor.link_symbol("builtin__print<msg>", print_string as usize);
         }
     };
-
 
     /*** Compiling ***/
 
     /////
     // Frontend: AST -> Highlevel IR
     let mut generator = HighlevelIrEmitter::new();
-    let mut ir = generator
-        .emit(ast)
-        .expect("Failed generating highlevel IR");
+    let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
 
     /*** Analysis ***/
     let mut pass_manager = HighlevelIrPassManager::default_pipeline();
 
     if let Err(err) = pass_manager.run(&mut ir) {
-        panic!("{}", err);        
+        panic!("{}", err);
     }
 
     let mut debug_printer = HighlevelIrDebugPrinter::new();
@@ -153,7 +171,7 @@ fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     // Executing
 
     let contract_executor = UnsafeLlvmTestExecutor::new(&mut module);
-    setup_runtime(& contract_executor);
+    setup_runtime(&contract_executor);
 
     unsafe {
         contract_executor.execute(&entry_point);
