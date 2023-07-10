@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use inkwell::context::Context;
 use inkwell::targets::{InitializationConfig, Target};
 use std::fs::File;
@@ -15,6 +15,7 @@ use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
 
 use bluebell::highlevel_ir_pass_manager::HighlevelIrPassManager;
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
+use bluebell::support::evm::evm_test;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
 use bluebell::lexer::Lexer;
@@ -25,6 +26,12 @@ use bluebell::*;
 enum BluebellOutputFormat {
     LlvmIr,
     FormattedScilla,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+enum BluebellBackend {
+    Llvm,
+    Evm,
 }
 
 #[derive(Clone, Debug, Subcommand)]
@@ -39,6 +46,10 @@ enum BluebellCommand {
         output: Option<String>,
     },
     Run {
+        /// Backend to use
+        #[arg(long, value_enum)]
+        backend: BluebellBackend,
+
         /// Function to name to invoke
         #[arg(short, long)]
         entry_point: String,
@@ -61,7 +72,7 @@ struct Args {
     mode: BluebellCommand,
 }
 
-fn bluebell_run(ast: &NodeProgram, entry_point: String, debug: bool) {
+fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     /****** Executable *****/
     ///////
     let backend = LlvmBackend::new();
@@ -194,7 +205,13 @@ fn main() {
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
             match args.mode {
-                BluebellCommand::Run { entry_point } => bluebell_run(&ast, entry_point, args.debug),
+                BluebellCommand::Run {
+                    entry_point,
+                    backend,
+                } => match backend {
+                    BluebellBackend::Llvm => bluebell_llvm_run(&ast, entry_point, args.debug),
+                    BluebellBackend::Evm => evm_test(),
+                },
                 _ => unimplemented!(),
             }
 
