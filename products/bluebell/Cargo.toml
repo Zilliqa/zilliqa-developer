@@ -17,7 +17,7 @@ lalrpop-util = {version = "0.19", features = ["lexer"]}
 inkwell = {version = "0.2.0", features= ["llvm16-0"]}
 
 # EVM stuff
-evm = "0.39.1" 
+evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
 primitive-types = { version = "0.12", default-features = false }
 hex = "0.4"
 
