@@ -2,6 +2,8 @@ use evm::Opcode;
 
 use std::collections::HashMap;
 
+use self::evm_decompiler::EvmBytecodeToAssembly;
+
 pub struct EvmByteCodeBuilder {
     bytecode: Vec<u8>,
     labels: HashMap<String, usize>,
@@ -13,6 +15,14 @@ impl EvmByteCodeBuilder {
             bytecode: Vec::new(),
             labels: HashMap::new(),
         }
+    }
+
+    pub fn from_bytes(_bytes: Vec<u8>) -> Self {
+        unimplemented!();
+    }
+
+    pub fn from_asm(script: &str) -> Self {
+        unimplemented!();
     }
 
     pub fn push_u8(&mut self, opcode: u8) -> &mut Self {
@@ -724,5 +734,28 @@ impl EvmByteCodeBuilder {
 
     pub fn build(self) -> Vec<u8> {
         self.bytecode
+    }
+}
+
+impl EvmBytecodeToAssembly for EvmByteCodeBuilder {
+    fn generate_evm_assembly(&self) -> String {
+        self.bytecode
+            .iter()
+            .map(|opcode| format!("{}", Self::opcode_to_assembly(*opcode)))
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
+
+    fn opcode_to_assembly(opcode: u8) -> &'static str {
+        match opcode {
+            0x00 => "STOP",
+            0x01 => "ADD",
+            0x02 => "MUL",
+            0x03 => "SUB",
+            0x04 => "DIV",
+            0x05 => "SDIV",
+            // Continue for all EVM opcodes...
+            _ => "UNKNOWN",
+        }
     }
 }
