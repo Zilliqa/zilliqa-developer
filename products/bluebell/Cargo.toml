@@ -2,6 +2,6 @@
 
 members = [
     "core",
-    "evm_bytecode",
+    "evm_assembly",
     "cli",
 ]
