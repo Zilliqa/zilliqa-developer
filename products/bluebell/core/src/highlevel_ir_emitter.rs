@@ -507,7 +507,11 @@ impl AstConverting for HighlevelIrEmitter {
 
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
-                let finally_exit_label = self.ir.symbol_table.name_generator.new_block_label("match_finally");
+                let finally_exit_label = self
+                    .ir
+                    .symbol_table
+                    .name_generator
+                    .new_block_label("match_finally");
 
                 // Checking for catch all
                 let mut catch_all: Option<&NodePatternMatchExpressionClause> = None;
@@ -557,9 +561,17 @@ impl AstConverting for HighlevelIrEmitter {
                     let case = self.convert_instruction_to_symbol(compare_instr);
 
                     // Blocks for success and fail
-                    let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_fail");
+                    let fail_label = self
+                        .ir
+                        .symbol_table
+                        .name_generator
+                        .new_block_label("match_fail");
 
-                    let success_label = self.ir.symbol_table.name_generator.new_block_label("match_success");
+                    let success_label = self
+                        .ir
+                        .symbol_table
+                        .name_generator
+                        .new_block_label("match_success");
                     let mut success_block = FunctionBlock::new_from_symbol(success_label.clone());
 
                     // Terminating current block

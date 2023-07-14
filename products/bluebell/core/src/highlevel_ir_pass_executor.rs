@@ -402,18 +402,16 @@ impl HighlevelIrPassExecutor for ConcreteFunction {
     }
 }
 
-
 impl HighlevelIr {
-    pub fn run_pass(&mut self,pass: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
+    pub fn run_pass(&mut self, pass: &mut dyn HighlevelIrPass) -> Result<TraversalResult, String> {
         for type_def in &mut self.type_definitions {
             type_def.visit(pass, &mut self.symbol_table)?;
         }
 
         for function_def in &mut self.function_definitions {
-            function_def.visit(pass,  &mut self.symbol_table)?;
+            function_def.visit(pass, &mut self.symbol_table)?;
         }
 
         Ok(TraversalResult::Continue)
     }
-
 }

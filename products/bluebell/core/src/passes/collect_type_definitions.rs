@@ -25,7 +25,11 @@ impl CollectTypeDefinitionsPass {
         }
     }
 
-    fn resolve_qualified_name(&self, basename: &String, symbol_table: &mut SymbolTable,) -> Option<String> {
+    fn resolve_qualified_name(
+        &self,
+        basename: &String,
+        symbol_table: &mut SymbolTable,
+    ) -> Option<String> {
         match &self.current_namespace {
             None => (),
             Some(namespace) => {
@@ -39,12 +43,12 @@ impl CollectTypeDefinitionsPass {
                         basename
                     );
 
-                    let full_name =
-                        if let Some(aliased_name) = symbol_table.aliases.get(&full_name) {
-                            aliased_name
-                        } else {
-                            &full_name
-                        };
+                    let full_name = if let Some(aliased_name) = symbol_table.aliases.get(&full_name)
+                    {
+                        aliased_name
+                    } else {
+                        &full_name
+                    };
 
                     if let Some(_) = symbol_table.typename_of(full_name) {
                         return Some(full_name.to_string());
@@ -130,8 +134,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
-                symbol_table
-                    .declare_alias(&name.unresolved, &qualified_name);
+                symbol_table.declare_alias(&name.unresolved, &qualified_name);
 
                 self.current_type = Some(qualified_name);
                 let _ = data_layout.visit(self, symbol_table)?;
@@ -178,8 +181,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
                 }
             }
 
-            symbol_table
-                .declare_constructor(&resolved_name, &arguments, &return_type)?;
+            symbol_table.declare_constructor(&resolved_name, &arguments, &return_type)?;
 
             // TODO: Set the constructor function signature and alias
 
@@ -257,7 +259,8 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
                                 .to_string();
                         symbol.resolved = Some(typename.clone());
                     }
-                } else if let Some(resolved_name) = self.resolve_qualified_name(&symbol.unresolved, symbol_table)
+                } else if let Some(resolved_name) =
+                    self.resolve_qualified_name(&symbol.unresolved, symbol_table)
                 {
                     symbol.resolved = Some(resolved_name);
                 }

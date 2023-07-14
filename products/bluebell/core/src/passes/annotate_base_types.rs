@@ -27,7 +27,11 @@ impl AnnotateBaseTypes {
     }
 
     // TODO: Make Symbol table member
-    pub fn typename_of(&self, symbol: &IrIdentifier, symbol_table: &mut SymbolTable) -> Option<String> {
+    pub fn typename_of(
+        &self,
+        symbol: &IrIdentifier,
+        symbol_table: &mut SymbolTable,
+    ) -> Option<String> {
         if let Some(name) = &symbol.resolved {
             symbol_table.typename_of(name)
         } else {
@@ -36,7 +40,11 @@ impl AnnotateBaseTypes {
     }
 
     // TODO: Make Symbol table member
-    pub fn type_of(&self, symbol: &IrIdentifier, symbol_table: &mut SymbolTable) -> Option<Box<TypeInfo>> {
+    pub fn type_of(
+        &self,
+        symbol: &IrIdentifier,
+        symbol_table: &mut SymbolTable,
+    ) -> Option<Box<TypeInfo>> {
         if let Some(name) = &symbol.resolved {
             symbol_table.type_of(name)
         } else {
@@ -204,8 +212,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
                         ));
                     };
 
-                    let mut intermediate_symbol =
-                        symbol_table.name_generator.new_intermediate();
+                    let mut intermediate_symbol = symbol_table.name_generator.new_intermediate();
 
                     symbol.kind = IrIndentifierKind::StaticFunctionName;
                     let mut constructor_call = Box::new(Instruction {
