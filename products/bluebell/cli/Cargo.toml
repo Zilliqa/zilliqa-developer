@@ -6,3 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bluebell = { path = "../core" }
+
+# CLI
+clap = { version = "4.3.11", features = ["derive"] }
+
+# LLVM stuff
+inkwell = {version = "0.2.0", features= ["llvm16-0"]}

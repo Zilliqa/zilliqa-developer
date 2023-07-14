@@ -1,14 +1,5 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+mod evm_bytecode_builder;
+mod evm_decompiler;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use self::evm_bytecode_builder::EvmByteCodeBuilder;
+pub use self::evm_decompiler::EvmAssemblyGenerator;

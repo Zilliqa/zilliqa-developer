@@ -9,7 +9,6 @@ edition = "2021"
 [build-dependencies] 
 lalrpop = "0.19.9"
 
-
 [dependencies]
 lalrpop-util = {version = "0.19", features = ["lexer"]}
 
@@ -20,9 +19,6 @@ inkwell = {version = "0.2.0", features= ["llvm16-0"]}
 evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
 primitive-types = { version = "0.12", default-features = false }
 hex = "0.4"
-
-# CLI
-clap = { version = "4.3.11", features = ["derive"] }
 
 # Test
 regex = "1"
