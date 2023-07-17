@@ -479,6 +479,7 @@ dependencies = [
  "evm",
  "hex",
  "primitive-types",
+ "sha3",
 ]
 
 [[package]]
