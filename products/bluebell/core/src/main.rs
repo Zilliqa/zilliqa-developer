@@ -83,10 +83,10 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     specification.declare_integer("Int16", 16);
     specification.declare_integer("Int32", 32);
     specification.declare_integer("Int64", 64);
-    specification.declare_integer("Uint8", 8);
-    specification.declare_integer("Uint16", 16);
-    specification.declare_integer("Uint32", 32);
-    specification.declare_integer("Uint64", 64);
+    specification.declare_unsigned_integer("Uint8", 8);
+    specification.declare_unsigned_integer("Uint16", 16);
+    specification.declare_unsigned_integer("Uint32", 32);
+    specification.declare_unsigned_integer("Uint64", 64);
 
     let _ = specification
         .declare_intrinsic("add", ["Int32", "Int32"].to_vec(), "Int32")

@@ -32,20 +32,20 @@ impl<'ctx> LlvmExecutable<'ctx> {
     }
 }
 
-pub struct BackendSpecification<'ctx> {
+pub struct LlvmBackendSpecification<'ctx> {
     context: &'ctx Context,
     function_declarations: HashMap<String, FunctionValue<'ctx>>,
     type_declarations: HashMap<String, LlvmType<'ctx>>,
     runtime_function_addresses: HashMap<String, usize>,
 }
 
-pub struct BackendSpecificationFunctionPrototype<'a, 'ctx> {
+pub struct LlvmBackendSpecificationFunctionPrototype<'a, 'ctx> {
     name: String,
-    runtime: &'a mut BackendSpecification<'ctx>,
+    runtime: &'a mut LlvmBackendSpecification<'ctx>,
 }
 
-impl<'a, 'ctx> BackendSpecificationFunctionPrototype<'a, 'ctx> {
-    pub fn new(name: String, runtime: &'a mut BackendSpecification<'ctx>) -> Self {
+impl<'a, 'ctx> LlvmBackendSpecificationFunctionPrototype<'a, 'ctx> {
+    pub fn new(name: String, runtime: &'a mut LlvmBackendSpecification<'ctx>) -> Self {
         Self { name, runtime }
     }
 
@@ -69,7 +69,7 @@ impl<'a, 'ctx> BackendSpecificationFunctionPrototype<'a, 'ctx> {
     }
 }
 
-impl<'ctx> BackendSpecification<'ctx> {
+impl<'ctx> LlvmBackendSpecification<'ctx> {
     pub fn new(context: &'ctx Context) -> Self {
         Self {
             context,
@@ -102,7 +102,7 @@ impl<'ctx> BackendSpecification<'ctx> {
         name: &str,
         arg_types: Vec<&str>,
         return_type: &str,
-    ) -> BackendSpecificationFunctionPrototype<'b, 'ctx> {
+    ) -> LlvmBackendSpecificationFunctionPrototype<'b, 'ctx> {
         // Resolve the return type
         let _return_type = match self
             .type_declarations
@@ -129,7 +129,7 @@ impl<'ctx> BackendSpecification<'ctx> {
             .collect();
         // TODO: Fix this
 
-        BackendSpecificationFunctionPrototype {
+        LlvmBackendSpecificationFunctionPrototype {
             name: name.to_string(),
             runtime: self,
         }
@@ -182,8 +182,8 @@ impl LlvmBackend {
         Self { context }
     }
 
-    pub fn create_backend_specification(&self) -> BackendSpecification {
-        BackendSpecification::new(&self.context)
+    pub fn create_backend_specification(&self) -> LlvmBackendSpecification {
+        LlvmBackendSpecification::new(&self.context)
     }
 
     pub fn compile(&self, name: String, script: String) -> Result<Module, String> {

@@ -33,6 +33,7 @@ impl OpcodeSpecification {
 
 #[derive(Debug)]
 pub struct EvmInstruction {
+    position: usize,
     opcode: Opcode,
     arguments: Vec<u8>,
     stack_consumed: usize,
@@ -1547,13 +1548,33 @@ impl EvmByteCodeBuilder {
     }
 }
 
+pub fn extract_function_selectors(bytecode: &[u8]) -> Vec<[u8; 4]> {
+    let mut selectors = Vec::new();
+    let mut index = 0;
+
+    while index + 4 <= bytecode.len() {
+        let selector = [
+            bytecode[index],
+            bytecode[index + 1],
+            bytecode[index + 2],
+            bytecode[index + 3],
+        ];
+        selectors.push(selector);
+        index += 4;
+    }
+
+    selectors
+}
+
 impl EvmAssemblyGenerator for EvmByteCodeBuilder {
     fn generate_evm_assembly(&self) -> String {
         let mut blocks: Vec<EvmBlock> = Vec::new();
         let mut block_counter = 0;
         let mut current_block = EvmBlock::new(format!("block{}", block_counter).to_string());
         block_counter += 1;
-        let mut i = 0;
+
+        let offset = 0; // 2; // First two bytes are [version number] [magic]
+        let mut i = offset;
         while i < self.bytecode.len() {
             let spec = match self.opcode_specs.get(&self.bytecode[i]) {
                 Some(spec) => spec,
@@ -1570,6 +1591,7 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder {
             };
 
             let mut instr = EvmInstruction {
+                position: i,
                 opcode: Opcode(self.bytecode[i]),
                 arguments: Vec::new(),
                 stack_consumed: spec.stack_consumed,
@@ -1607,7 +1629,7 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder {
                 }
             }
         }
-
+        println!("--Done!");
         let mut data: Vec<u8> = Vec::new();
         while i < self.bytecode.len() {
             data.push(self.bytecode[i]);
@@ -1627,11 +1649,22 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder {
                             let argument: String = instr
                                 .arguments
                                 .iter()
-                                .map(|byte| format!("{:02x}", byte))
+                                .map(|byte| format!("{:02x}", byte).to_string())
                                 .collect();
-                            format!("{} 0x{}", Self::opcode_to_assembly(instr.opcode), argument)
+                            format!(
+                                "[0x{:02x}: 0x{:02x}] {} 0x{}",
+                                instr.position,
+                                instr.opcode.as_u8(),
+                                Self::opcode_to_assembly(instr.opcode),
+                                argument
+                            )
                         } else {
-                            format!("{}", Self::opcode_to_assembly(instr.opcode))
+                            format!(
+                                "[0x{:02x}: 0x{:02x}] {}",
+                                instr.position,
+                                instr.opcode.as_u8(),
+                                Self::opcode_to_assembly(instr.opcode)
+                            )
                         }
                     })
                     .collect::<Vec<String>>()
