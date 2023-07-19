@@ -1,13 +1,16 @@
-use evm_assembly::EvmByteCodeBuilder;
-use std::collections::HashMap;
-
-use evm::backend::{Backend, Basic};
+use evm::backend::Backend;
 use evm::executor::stack::PrecompileFn;
 use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
 use evm::{Context, ExitError, ExitSucceed};
-use primitive_types::{H160, H256, U256};
+use primitive_types::H160;
 use std::collections::BTreeMap;
 use std::str::FromStr;
+
+use evm_assembly::io_interface::{CustomMemoryAccount, EvmIoInterface};
+use evm_assembly::types::EvmTypeValue;
+
+use evm_assembly::compiler_context::EvmCompilerContext;
+use evm_assembly::executor::EvmExecutor;
 
 // See
 // https://odra.dev/blog/evm-at-risc0/
@@ -15,301 +18,6 @@ use std::str::FromStr;
 
 // Transaction spec:
 // https://docs.soliditylang.org/en/latest/abi-spec.html#formal-specification-of-the-encoding
-
-#[derive(Default, Clone, Debug, Eq, PartialEq)]
-pub struct CustomMemoryAccount {
-    /// Account nonce.
-    pub nonce: U256,
-    /// Account balance.
-    pub balance: U256,
-    /// Full account storage.
-    pub storage: BTreeMap<H256, H256>,
-    /// Account code.
-    pub code: Vec<u8>,
-}
-
-pub struct EvmIoInterface {
-    // Backend refers to storage, not execution platform
-    state: BTreeMap<H160, CustomMemoryAccount>,
-}
-
-impl Backend for EvmIoInterface {
-    fn gas_price(&self) -> U256 {
-        unimplemented!()
-    }
-
-    fn origin(&self) -> H160 {
-        unimplemented!()
-    }
-
-    fn block_hash(&self, _: U256) -> H256 {
-        unimplemented!()
-    }
-
-    fn block_number(&self) -> U256 {
-        unimplemented!()
-    }
-
-    fn block_coinbase(&self) -> H160 {
-        unimplemented!()
-    }
-
-    fn block_timestamp(&self) -> U256 {
-        unimplemented!()
-    }
-
-    fn block_difficulty(&self) -> U256 {
-        unimplemented!()
-    }
-
-    //fn block_randomness(&self) -> Option<H256> { // Put note for PR
-    //    None
-    //}
-
-    fn block_gas_limit(&self) -> U256 {
-        unimplemented!()
-    }
-
-    fn block_base_fee_per_gas(&self) -> U256 {
-        unimplemented!()
-    }
-
-    fn chain_id(&self) -> U256 {
-        unimplemented!()
-    }
-
-    fn exists(&self, address: H160) -> bool {
-        println!("Checking if address '{:?}' exists!", address);
-        false
-        //        unimplemented!()
-    }
-
-    fn basic(&self, address: H160) -> Basic {
-        println!("Getting basic info for '{:?}'", address);
-        Basic {
-            balance: 0.into(),
-            nonce: 0.into(),
-        }
-    }
-
-    fn code(&self, address: H160) -> Vec<u8> {
-        println!("Requesting code for '{:?}'", address);
-        self.state
-            .get(&address)
-            .map(|v| v.code.clone())
-            .unwrap_or_default()
-    }
-
-    fn storage(&self, address: H160, index: H256) -> H256 {
-        unimplemented!()
-    }
-
-    fn original_storage(&self, address: H160, index: H256) -> Option<H256> {
-        unimplemented!()
-    }
-
-    // todo: this.
-    fn code_as_json(&self, _address: H160) -> Vec<u8> {
-        unimplemented!()
-    }
-
-    fn init_data_as_json(&self, _address: H160) -> Vec<u8> {
-        unimplemented!()
-    }
-
-    // todo: this.
-    fn substate_as_json(&self, _address: H160, _vname: &str, _indices: &[String]) -> Vec<u8> {
-        unimplemented!()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum EvmTypeValue {
-    Uint32(u32),
-    Uint256(U256),
-    // Address(Address),
-    // Add more types as needed
-}
-
-impl EvmTypeValue {
-    fn pad_byte_array(mut bytes: Vec<u8>) -> Vec<u8> {
-        let padding_size = 32 - bytes.len();
-        let mut ret = vec![0; padding_size];
-        ret.extend(bytes);
-        ret
-    }
-
-    fn to_bytes(&self) -> Vec<u8> {
-        match self {
-            EvmTypeValue::Uint32(value) => Self::pad_byte_array(value.to_be_bytes().to_vec()),
-            // EvmTypeValue::Uint256(value) => pad_byte_array(value.to_big_endian(/* &mut [u8] */).to_vec()),
-            // TODO EvmTypeValue::Address(value) => pad_byte_array(value.as_bytes().to_vec()),
-            // Handle other types here
-            _ => panic!("Type conversion not implemented."),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum EvmType {
-    Uint(usize),
-    Int(usize),
-    Bytes(usize),
-    Address,
-    Bool,
-    String,
-}
-
-impl EvmType {
-    fn signature(&self) -> String {
-        match self {
-            EvmType::Uint(size) => format!("uint{}", size).to_string(),
-            EvmType::Int(size) => format!("int{}", size).to_string(),
-            EvmType::Bytes(size) => format!("bytes{}", size).to_string(),
-            EvmType::Address => "address".to_string(),
-            EvmType::Bool => "bool".to_string(),
-            EvmType::String => "string".to_string(),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct EvmFunctionSignature {
-    name: String,
-    arguments: Vec<EvmType>,
-    return_type: EvmType,
-}
-
-impl EvmFunctionSignature {
-    pub fn new(name: String, arguments: Vec<EvmType>, return_type: &EvmType) -> Self {
-        Self {
-            name,
-            arguments,
-            return_type: return_type.clone(),
-        }
-    }
-
-    pub fn signature(&self) -> String {
-        let mut argnames = Vec::new();
-        for arg in &self.arguments {
-            argnames.push(arg.signature());
-        }
-
-        format!("{}({})", self.name, argnames.join(",")).to_string()
-    }
-
-    pub fn full_signature(&self) -> String {
-        let mut argnames = Vec::new();
-        for arg in &self.arguments {
-            argnames.push(arg.signature());
-        }
-
-        format!(
-            "{}({})->{}",
-            self.name,
-            argnames.join(","),
-            self.return_type.signature()
-        )
-        .to_string()
-    }
-
-    pub fn selector(&self) -> Vec<u8> {
-        let signature = self.signature();
-        use sha3::{Digest, Keccak256};
-        let hash = Keccak256::digest(signature);
-
-        let mut selector = Vec::new();
-        selector.extend_from_slice(&hash[..4]);
-        selector
-    }
-
-    pub fn generate_transaction_data(&self, args: Vec<EvmTypeValue>) -> Vec<u8> {
-        let mut data = Vec::new();
-        data.extend(self.selector());
-
-        // Encode the arguments
-        for arg in args {
-            data.extend(arg.to_bytes());
-        }
-
-        data
-    }
-}
-
-pub struct EvmExecutable {
-    builder: EvmByteCodeBuilder,
-}
-
-struct EvmBackendSpecification {
-    type_declarations: HashMap<String, EvmType>,
-    function_declarations: HashMap<String, EvmFunctionSignature>,
-    /// Scilla types -> EVM types
-    precompiles: BTreeMap<H160, PrecompileFn>,
-    contract_offset: usize,
-}
-
-impl EvmBackendSpecification {
-    pub fn new() -> Self {
-        Self {
-            type_declarations: HashMap::new(),
-            function_declarations: HashMap::new(),
-            precompiles: BTreeMap::new(),
-            contract_offset: 15,
-        }
-    }
-
-    pub fn declare_integer(&mut self, name: &str, bits: usize) {
-        assert!(bits <= 256);
-        self.type_declarations
-            .insert(name.to_string(), EvmType::Int(bits));
-    }
-
-    pub fn declare_unsigned_integer(&mut self, name: &str, bits: usize) {
-        assert!(bits <= 256);
-        self.type_declarations
-            .insert(name.to_string(), EvmType::Uint(bits));
-    }
-
-    pub fn declare_address(&mut self, name: &str) {
-        self.type_declarations
-            .insert(name.to_string(), EvmType::String);
-    }
-
-    pub fn declare_function(&mut self, name: &str, arg_types: Vec<&str>, return_type: &str) {
-        let return_type = self
-            .type_declarations
-            .get(return_type)
-            .expect("Return type not found.");
-
-        // Resolve argument types
-        let arg_types: Vec<_> = arg_types
-            .iter()
-            .map(|&type_name| {
-                self.type_declarations
-                    .get(type_name)
-                    .expect("Arg type not found.")
-                    .clone()
-            })
-            .collect();
-
-        let function_signature =
-            EvmFunctionSignature::new(name.to_string(), arg_types, return_type);
-
-        self.function_declarations
-            .insert(name.to_string(), function_signature.clone());
-    }
-
-    pub fn get_function(&self, name: &str) -> Option<&EvmFunctionSignature> {
-        self.function_declarations.get(name).clone()
-    }
-}
-
-struct EvmExecutor<'a> {
-    spec: &'a mut EvmBackendSpecification,
-    // state: MemoryStackState,
-}
-
-impl<'a> EvmExecutor<'a> {}
 
 pub(crate) fn test_precompile(
     input: &[u8],
@@ -355,7 +63,7 @@ pub fn get_precompiles() -> BTreeMap<H160, PrecompileFn> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        get_precompiles, CustomMemoryAccount, EvmBackendSpecification, EvmExecutor, EvmIoInterface,
+        get_precompiles, CustomMemoryAccount, EvmCompilerContext, EvmExecutor, EvmIoInterface,
         EvmTypeValue,
     };
     // use evm::backend::MemoryAccount;
@@ -370,7 +78,7 @@ mod tests {
     use std::collections::BTreeMap;
     #[test]
     fn blah() {
-        let mut specification = EvmBackendSpecification::new();
+        let mut specification = EvmCompilerContext::new();
         specification.declare_integer("Int8", 8);
         specification.declare_integer("Int16", 16);
         specification.declare_integer("Int32", 32);
@@ -467,7 +175,7 @@ mod tests {
         );
 
         // Prepare the executor.
-        let backend = EvmIoInterface { state }; //MemoryBackend::new(&vicinity, state);
+        let backend = EvmIoInterface::new(state); //MemoryBackend::new(&vicinity, state);
         let metadata = StackSubstateMetadata::new(u64::MAX, &config);
         let state = MemoryStackState::new(metadata, &backend);
         let precompiles = get_precompiles();
