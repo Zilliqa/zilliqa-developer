@@ -40,7 +40,12 @@ impl EvmCompilerContext {
             .insert(name.to_string(), EvmType::String);
     }
 
-    pub fn declare_function(&mut self, name: &str, arg_types: Vec<&str>, return_type: &str) {
+    pub fn declare_function(
+        &mut self,
+        name: &str,
+        arg_types: Vec<&str>,
+        return_type: &str,
+    ) -> EvmFunctionSignature {
         let return_type = self
             .type_declarations
             .get(return_type)
@@ -62,6 +67,8 @@ impl EvmCompilerContext {
 
         self.function_declarations
             .insert(name.to_string(), function_signature.clone());
+
+        function_signature
     }
 
     pub fn get_function(&self, name: &str) -> Option<&EvmFunctionSignature> {

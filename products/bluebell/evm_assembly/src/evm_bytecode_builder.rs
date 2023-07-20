@@ -1,35 +1,91 @@
+use crate::compiler_context::EvmCompilerContext;
 use evm::Opcode;
 
 use std::collections::HashMap;
 
 use crate::block::EvmBlock;
 use crate::evm_decompiler::EvmAssemblyGenerator;
-use crate::instruction::EvmInstruction;
+
+use crate::function::EvmFunction;
 use crate::opcode_spec::{create_opcode_spec, OpcodeSpecification};
 
-pub struct EvmByteCodeBuilder {
-    pub bytecode: Vec<u8>,
-    pub labels: HashMap<String, usize>,
-    pub blocks: Vec<EvmBlock>,
-    pub opcode_specs: HashMap<u8, OpcodeSpecification>,
+/*
+    codebuilder
+        .new_function("name", ["arg1", "arg2"])
+        .build(|block_builder| {
+            block.if(|block_builder| {
+            })
+
+        })
+*/
+
+pub struct FunctionBuilder<'a, 'ctx> {
+    pub builder: &'a mut EvmByteCodeBuilder<'ctx>,
+    function: EvmFunction,
 }
 
-impl EvmByteCodeBuilder {
-    pub fn new() -> Self {
+impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
+    pub fn build<F>(&mut self, builder: F)
+    where
+        F: Fn() -> i32,
+    {
+        builder();
+    }
+}
+
+/*
+impl<'a, 'ctx> FunctionBuilder<'a, 'ctx>> {
+
+}
+*/
+
+pub struct EvmByteCodeBuilder<'ctx> {
+    pub context: &'ctx mut EvmCompilerContext,
+    pub functions: Vec<EvmFunction>,
+    pub unused_blocks: Vec<EvmBlock>,
+    pub bytecode: Vec<u8>,
+    pub opcode_specs: HashMap<u8, OpcodeSpecification>,
+    pub auxiliary_data: Vec<u8>,
+}
+
+impl<'ctx> EvmByteCodeBuilder<'ctx> {
+    pub fn new(context: &'ctx mut EvmCompilerContext) -> Self {
         Self {
+            context,
+            functions: Vec::new(),
+            unused_blocks: Vec::new(),
             bytecode: Vec::new(),
-            blocks: Vec::new(),
-            labels: HashMap::new(),
             opcode_specs: create_opcode_spec(),
+            auxiliary_data: Vec::new(),
         }
     }
 
-    pub fn from_bytes(bytes: Vec<u8>) -> Self {
+    pub fn define_function<'a>(
+        &'a mut self,
+        name: &str,
+        arg_types: Vec<&str>,
+        return_type: &str,
+    ) -> FunctionBuilder<'a, 'ctx> {
+        let signature = self.context.declare_function(name, arg_types, return_type);
+        FunctionBuilder {
+            builder: self,
+            function: EvmFunction::from_signature(signature),
+        }
+    }
+
+    pub fn from_bytes(context: &'ctx mut EvmCompilerContext, bytes: Vec<u8>) -> Self {
+        let opcode_specs = create_opcode_spec();
+        let (blocks, auxiliary_data) =
+            EvmBlock::extract_blocks_from_bytecode(&bytes, &opcode_specs);
+
+        let (functions, unused_blocks) = EvmFunction::extract_functions(&blocks);
         Self {
+            context,
+            functions,
             bytecode: bytes,
-            blocks: Vec::new(),
-            labels: HashMap::new(),
-            opcode_specs: create_opcode_spec(),
+            unused_blocks,
+            opcode_specs,
+            auxiliary_data,
         }
     }
 
@@ -56,77 +112,12 @@ impl EvmByteCodeBuilder {
     }
 }
 
-impl EvmAssemblyGenerator for EvmByteCodeBuilder {
+impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
     fn generate_evm_assembly(&self) -> String {
-        let mut blocks: Vec<EvmBlock> = Vec::new();
-        let mut block_counter = 0;
-        let mut current_block = EvmBlock::new(format!("block{}", block_counter).to_string());
-        current_block.is_entry = true;
-        block_counter += 1;
+        let mut script = "Unused blocks:\n\n".to_string();
 
-        let offset = 0; // 2; // First two bytes are [version number] [magic]
-        let mut i = offset;
-        while i < self.bytecode.len() {
-            let spec = match self.opcode_specs.get(&self.bytecode[i]) {
-                Some(spec) => spec,
-                _ => {
-                    if let Some(instr) = current_block.instructions.last() {
-                        println!("Last instruction:\n{:#?}", instr);
-                        println!("Opcode name: {}", instr.opcode.to_string());
-                    }
-                    panic!("No spec found for opcode 0x{:02x}", self.bytecode[i]);
-                }
-            };
-
-            let mut instr = EvmInstruction {
-                position: i,
-                opcode: Opcode(self.bytecode[i]),
-                arguments: Vec::new(),
-                stack_consumed: spec.stack_consumed,
-                stack_produced: spec.stack_produced,
-                is_terminator: spec.is_terminator,
-            };
-
-            i += 1;
-            let mut collect_args = spec.bytecode_arguments;
-            if i + collect_args > self.bytecode.len() {
-                panic!("This is not good - we exceed the byte code");
-            }
-
-            while collect_args > 0 {
-                instr.arguments.push(self.bytecode[i]);
-                i += 1;
-                collect_args -= 1;
-            }
-
-            if instr.opcode == Opcode::JUMPDEST {
-                blocks.push(current_block);
-                current_block = EvmBlock::new(format!("block{}", block_counter).to_string());
-                block_counter += 1;
-            }
-
-            current_block.instructions.push(instr);
-
-            // A terminated block followed by an invalid opcode starts the data section.
-            // TODO: Find some spec to confirm this assumption
-            if spec.is_terminator {
-                if Opcode(self.bytecode[i]) == Opcode::INVALID {
-                    i += 1;
-                    // Encountered the auxilary data section
-                    break;
-                }
-            }
-        }
-        println!("--Done!");
-        let mut data: Vec<u8> = Vec::new();
-        while i < self.bytecode.len() {
-            data.push(self.bytecode[i]);
-            i += 1;
-        }
-
-        blocks.push(current_block);
-
-        let code_blocks = blocks
+        let unused_blocks = self
+            .unused_blocks
             .iter()
             .map(|block| {
                 let code = block
@@ -139,17 +130,25 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder {
                                 .iter()
                                 .map(|byte| format!("{:02x}", byte).to_string())
                                 .collect();
+                            let position = match instr.position {
+                                Some(v) => v,
+                                None => 0,
+                            };
                             format!(
                                 "[0x{:02x}: 0x{:02x}] {} 0x{}",
-                                instr.position,
+                                position,
                                 instr.opcode.as_u8(),
                                 instr.opcode.to_string(),
                                 argument
                             )
                         } else {
+                            let position = match instr.position {
+                                Some(v) => v,
+                                None => 0,
+                            };
                             format!(
                                 "[0x{:02x}: 0x{:02x}] {}",
-                                instr.position,
+                                position,
                                 instr.opcode.as_u8(),
                                 instr.opcode.to_string()
                             )
@@ -157,13 +156,70 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder {
                     })
                     .collect::<Vec<String>>()
                     .join("\n");
-                format!("{}:\n{}", block.name, code)
+                let position = match block.position {
+                    Some(v) => v,
+                    None => 0,
+                };
+                format!("{}: ;; Starts at 0x{:02x} \n{}", block.name, position, code)
             })
             .collect::<Vec<String>>()
             .join("\n\n");
+        script.push_str(&unused_blocks);
 
-        let data: String = data.iter().map(|byte| format!("{:02x}", byte)).collect();
+        for function in &self.functions {
+            let code_blocks = function
+                .blocks
+                .iter()
+                .map(|block| {
+                    let code = block
+                        .instructions
+                        .iter()
+                        .map(|instr| {
+                            if instr.arguments.len() > 0 {
+                                let argument: String = instr
+                                    .arguments
+                                    .iter()
+                                    .map(|byte| format!("{:02x}", byte).to_string())
+                                    .collect();
+                                let position = match instr.position {
+                                    Some(v) => v,
+                                    None => 0,
+                                };
+                                format!(
+                                    "[0x{:02x}: 0x{:02x}] {} 0x{}",
+                                    position,
+                                    instr.opcode.as_u8(),
+                                    instr.opcode.to_string(),
+                                    argument
+                                )
+                            } else {
+                                let position = match instr.position {
+                                    Some(v) => v,
+                                    None => 0,
+                                };
+                                format!(
+                                    "[0x{:02x}: 0x{:02x}] {}",
+                                    position,
+                                    instr.opcode.as_u8(),
+                                    instr.opcode.to_string()
+                                )
+                            }
+                        })
+                        .collect::<Vec<String>>()
+                        .join("\n");
+                    let position = match block.position {
+                        Some(v) => v,
+                        None => 0,
+                    };
+                    format!("{}: ;; Starts at 0x{:02x} \n{}", block.name, position, code)
+                })
+                .collect::<Vec<String>>()
+                .join("\n\n");
 
-        format!("{}\n\nauxdata: 0x{}", code_blocks, data)
+            script.push_str("\n\nFunction:\n");
+            script.push_str(&code_blocks);
+        }
+
+        script
     }
 }

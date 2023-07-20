@@ -32,6 +32,12 @@ impl OpcodeSpecification {
 pub fn create_opcode_spec() -> HashMap<u8, OpcodeSpecification> {
     let spec: HashMap<u8, OpcodeSpecification> = [
         (
+            // TODO: Change PUSH0 once the Zilliqa EVM is upgraded
+            // TODO: Ugly hack PUSH0 -> PUSH1
+            0x5f,
+            OpcodeSpecification::new(Opcode::PUSH1, 0, 0, false, 0),
+        ),
+        (
             Opcode::STOP.as_u8(),
             OpcodeSpecification::new(Opcode::STOP, 0, 0, false, 0),
         ),

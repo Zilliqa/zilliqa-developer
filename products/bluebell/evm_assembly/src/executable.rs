@@ -1,5 +1,5 @@
 use crate::EvmByteCodeBuilder;
 
-pub struct EvmExecutable {
-    builder: EvmByteCodeBuilder,
+pub struct EvmExecutable<'a> {
+    builder: EvmByteCodeBuilder<'a>,
 }

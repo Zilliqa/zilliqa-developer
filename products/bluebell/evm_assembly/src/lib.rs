@@ -4,6 +4,7 @@ mod evm_bytecode_builder;
 mod evm_decompiler;
 pub mod executable;
 pub mod executor;
+pub mod function;
 pub mod function_signature;
 pub mod instruction;
 pub mod io_interface;
