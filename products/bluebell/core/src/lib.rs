@@ -14,6 +14,7 @@ pub mod passes;
 
 // pub mod highlevel_ir_pass_manager;
 
+pub mod evm_ir_generator;
 pub mod highlevel_ir_debug_printer;
 pub mod highlevel_ir_emitter;
 pub mod intermediate_name_generator;

@@ -4,7 +4,7 @@ use evm::Opcode;
 use std::collections::HashSet;
 use std::collections::{HashMap, VecDeque};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EvmFunction {
     pub signature: Option<EvmFunctionSignature>,
     pub selector: Vec<u8>,

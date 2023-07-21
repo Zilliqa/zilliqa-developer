@@ -51,14 +51,23 @@ pub struct EvmByteCodeBuilder<'ctx> {
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
     pub fn new(context: &'ctx mut EvmCompilerContext) -> Self {
-        Self {
+        let mut ret = Self {
             context,
             functions: Vec::new(),
             unused_blocks: Vec::new(),
             bytecode: Vec::new(),
             opcode_specs: create_opcode_spec(),
             auxiliary_data: Vec::new(),
-        }
+        };
+
+        // Reserving the start of the bytecode for the "entry" function
+        ret.define_function("__main__", [].to_vec(), "Uint256")
+            .build(|_code_builder| {
+                // Placeholder block for the main function
+                [EvmBlock::new(None, "main_entry")].to_vec()
+            });
+
+        ret
     }
 
     pub fn define_function<'a>(
@@ -67,7 +76,11 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         arg_types: Vec<&str>,
         return_type: &str,
     ) -> FunctionBuilder<'a, 'ctx> {
-        let signature = self.context.declare_function(name, arg_types, return_type);
+        let signature = {
+            let prototype = self.context.declare_function(name, arg_types, return_type);
+            prototype.signature
+        };
+
         FunctionBuilder {
             builder: self,
             function: EvmFunction::from_signature(signature),
@@ -108,10 +121,78 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self
     }
 
-    pub fn build(mut self) -> Vec<u8> {
+    pub fn build(&mut self) -> Vec<u8> {
         let mut bytecode = Vec::new();
+
+        // Building entry function
+        let mut main = {
+            let mut binding = self.functions.first_mut();
+            let main = match binding {
+                Some(ref mut main) => main,
+                _ => panic!("Expected the reserved main function."),
+            };
+
+            main.clone()
+        };
+
+        let mut binding_block = main.blocks.first_mut();
+        let first_block = match binding_block {
+            Some(ref mut block) => block,
+            None => panic!("Function does not have a main block."),
+        };
+
+        // Making sure that there is value attached to the contract call
+        first_block.push1([0x80].to_vec());
+        first_block.push1([0x40].to_vec());
+        first_block.mstore();
+        first_block.external_callvalue();
+        first_block.dup1();
+        first_block.iszero();
+        first_block.jump_if_to("switch");
+        first_block.push1([0x00].to_vec());
+        first_block.dup1();
+        first_block.revert();
+
+        let mut switch_block = EvmBlock::new(None, "switch");
+        switch_block.pop();
+        switch_block.push1([0x04].to_vec()); // Checking that the size of call args
+        switch_block.calldatasize();
+        switch_block.lt();
+        switch_block.jump_if_to("fail");
+        switch_block.push1([0x00].to_vec());
+        switch_block.calldataload();
+        switch_block.push1([0xe0].to_vec());
+        switch_block.shr();
+
+        for (i, function) in self.functions.iter().enumerate() {
+            if i > 0 {
+                // Skipping the entry function
+                switch_block.dup1();
+                switch_block.push(function.selector.clone());
+                switch_block.eq();
+                match function.blocks.first() {
+                    Some(block) => switch_block.jump_if_to(&block.name),
+                    _ => panic!("Function does not have a block."),
+                };
+            }
+        }
+
+        switch_block.jump_to("fail");
+
+        let mut fail_block = EvmBlock::new(None, "fail");
+        fail_block.push1([0x00].to_vec());
+        fail_block.dup1();
+        fail_block.revert();
+
+        main.blocks.push(switch_block);
+        main.blocks.push(fail_block);
+
+        self.functions[0] = main;
+
+        // Resolving labels
         self.resolve_positions();
 
+        // Generating bytecode
         for function in self.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {

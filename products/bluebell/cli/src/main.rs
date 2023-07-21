@@ -13,14 +13,59 @@ use bluebell::contract_executor::UnsafeContractExecutor;
 use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
 use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
 
+use bluebell::evm_ir_generator::EvmIrGenerator;
 use bluebell::highlevel_ir_pass_manager::HighlevelIrPassManager;
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
-use bluebell::support::evm::evm_test;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;
 use bluebell::*;
+
+use evm_assembly::block::EvmBlock;
+use evm_assembly::compiler_context::EvmCompilerContext;
+use evm_assembly::executor::EvmExecutor;
+use evm_assembly::types::EvmTypeValue;
+use evm_assembly::EvmAssemblyGenerator;
+use evm_assembly::EvmByteCodeBuilder;
+
+use evm::backend::Backend;
+use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
+use evm::{Context as EvmContext, ExitError, ExitSucceed};
+
+fn test_precompile(
+    input: &[u8],
+    gas_limit: Option<u64>,
+    _contex: &EvmContext,
+    _backend: &dyn Backend,
+    _is_static: bool,
+) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+    println!("Running precompile!");
+    let gas_needed = match required_gas(input) {
+        Ok(i) => i,
+        Err(err) => return Err(PrecompileFailure::Error { exit_status: err }),
+    };
+
+    if let Some(gas_limit) = gas_limit {
+        if gas_limit < gas_needed {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::OutOfGas,
+            });
+        }
+    }
+
+    Ok((
+        PrecompileOutput {
+            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+            output: input.to_vec(),
+        },
+        gas_needed,
+    ))
+}
+
+fn required_gas(_input: &[u8]) -> Result<u64, ExitError> {
+    Ok(20)
+}
 
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellOutputFormat {
@@ -72,6 +117,44 @@ struct Args {
     mode: BluebellCommand,
 }
 
+fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
+    /****** Executable *****/
+    ///////
+    let mut specification = EvmCompilerContext::new();
+
+    specification.declare_integer("Int8", 8);
+    specification.declare_integer("Int16", 16);
+    specification.declare_integer("Int32", 32);
+    specification.declare_integer("Int64", 64);
+    specification.declare_unsigned_integer("Uint8", 8);
+    specification.declare_unsigned_integer("Uint16", 16);
+    specification.declare_unsigned_integer("Uint32", 32);
+    specification.declare_unsigned_integer("Uint64", 64);
+    specification.declare_unsigned_integer("Uint256", 256);
+
+    let _ = specification
+        .declare_function("fibonacci", ["Uint256"].to_vec(), "Uint256")
+        .attach_runtime(|| test_precompile);
+
+    ///////
+    // Executable
+    let mut generator = HighlevelIrEmitter::new();
+    let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
+
+    let mut generator = EvmIrGenerator::new(&mut specification, ir);
+
+    let executable = match generator.build_executable() {
+        Err(e) => {
+            panic!("Error: {:?}", e);
+        }
+        Ok(e) => e,
+    };
+
+    let executor = EvmExecutor::new(&specification, executable);
+    // TODO: Arguments from CLI
+    executor.execute(&entry_point, [EvmTypeValue::Uint32(10)].to_vec());
+}
+
 fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     /****** Executable *****/
     ///////
@@ -83,10 +166,10 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     specification.declare_integer("Int16", 16);
     specification.declare_integer("Int32", 32);
     specification.declare_integer("Int64", 64);
-    specification.declare_integer("Uint8", 8);
-    specification.declare_integer("Uint16", 16);
-    specification.declare_integer("Uint32", 32);
-    specification.declare_integer("Uint64", 64);
+    specification.declare_unsigned_integer("Uint8", 8);
+    specification.declare_unsigned_integer("Uint16", 16);
+    specification.declare_unsigned_integer("Uint32", 32);
+    specification.declare_unsigned_integer("Uint64", 64);
 
     let _ = specification
         .declare_intrinsic("add", ["Int32", "Int32"].to_vec(), "Int32")
@@ -210,7 +293,7 @@ fn main() {
                     backend,
                 } => match backend {
                     BluebellBackend::Llvm => bluebell_llvm_run(&ast, entry_point, args.debug),
-                    BluebellBackend::Evm => evm_test(),
+                    BluebellBackend::Evm => bluebell_evm_run(&ast, entry_point, args.debug),
                 },
                 _ => unimplemented!(),
             }

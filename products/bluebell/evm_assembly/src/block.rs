@@ -36,6 +36,10 @@ impl EvmBlock {
     pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmTypeValue>) -> &mut Self {
         println!("Calling {:?}", function);
         println!("Args: {:?}", args);
+        let address = match function.external_address {
+            Some(a) => a,
+            None => panic!("TODO: Internal calls not supported yet."),
+        };
         // TODO: Deal with internal calls
         self.push1([0x40].to_vec());
         self.mload(); // Stack element is the pointer
@@ -58,7 +62,7 @@ impl EvmBlock {
         }
 
         let gas = EvmTypeValue::Uint32(21000);
-        let address = EvmTypeValue::Uint32(0x05);
+        let address = EvmTypeValue::Uint32(address);
         let argsize = EvmTypeValue::Uint32(2 * (args.len() * 0x20) as u32); // Each argument is 32 byte long
 
         self.push([0x20].to_vec()); //return size, TODO

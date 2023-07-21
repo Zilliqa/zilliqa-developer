@@ -147,6 +147,7 @@ version = "0.1.0"
 dependencies = [
  "diffy",
  "evm",
+ "evm_assembly",
  "hex",
  "inkwell",
  "lalrpop",
@@ -232,6 +233,8 @@ version = "0.1.0"
 dependencies = [
  "bluebell",
  "clap",
+ "evm",
+ "evm_assembly",
  "inkwell",
 ]
 

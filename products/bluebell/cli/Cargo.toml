@@ -13,3 +13,8 @@ clap = { version = "4.3.11", features = ["derive"] }
 
 # LLVM stuff
 inkwell = {version = "0.2.0", features= ["llvm16-0"]}
+
+
+# EVM
+evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
+evm_assembly = { path = "../evm_assembly" }

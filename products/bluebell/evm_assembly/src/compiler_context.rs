@@ -4,13 +4,52 @@ use evm::executor::stack::PrecompileFn;
 use primitive_types::H160;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 pub struct EvmCompilerContext {
     type_declarations: HashMap<String, EvmType>,
     function_declarations: HashMap<String, EvmFunctionSignature>,
     /// Scilla types -> EVM types
     precompiles: BTreeMap<H160, PrecompileFn>,
-    contract_offset: usize,
+    precompile_addresses: HashMap<String, u32>,
+    contract_offset: u32,
+}
+
+pub struct EvmPrecompileBuilder<'a> {
+    context: &'a mut EvmCompilerContext,
+    pub signature: EvmFunctionSignature,
+}
+
+impl<'a> EvmPrecompileBuilder<'a> {
+    pub fn attach_runtime<F>(&mut self, get_precompile: F) -> Result<(), String>
+    where
+        F: FnOnce() -> PrecompileFn,
+    {
+        let precompiled = get_precompile();
+        let name = self.signature.name.clone();
+
+        if self.context.precompile_addresses.contains_key(&name) {
+            return Err(format!("Runtime function '{}' already exists.", name).to_string());
+        }
+
+        let index = self.context.contract_offset;
+        self.context.contract_offset += 1;
+
+        let address = {
+            let value = index;
+            let padded_string = format!("{:0>40}", value.to_string()); // Pad with leading zeros to 40 characters
+            H160::from_str(&padded_string).unwrap()
+        };
+
+        self.signature.external_address = Some(index);
+        self.context
+            .function_declarations
+            .insert(name.clone(), self.signature.clone());
+        println!("Value: {:?}", self.context.function_declarations.get(&name));
+        self.context.precompiles.insert(address, precompiled);
+
+        Ok(())
+    }
 }
 
 impl EvmCompilerContext {
@@ -18,8 +57,9 @@ impl EvmCompilerContext {
         Self {
             type_declarations: HashMap::new(),
             function_declarations: HashMap::new(),
+            precompile_addresses: HashMap::new(),
             precompiles: BTreeMap::new(),
-            contract_offset: 15,
+            contract_offset: 5,
         }
     }
 
@@ -45,7 +85,9 @@ impl EvmCompilerContext {
         name: &str,
         arg_types: Vec<&str>,
         return_type: &str,
-    ) -> EvmFunctionSignature {
+    ) -> EvmPrecompileBuilder {
+        // TODO: check if the function already exists
+
         let return_type = self
             .type_declarations
             .get(return_type)
@@ -68,10 +110,17 @@ impl EvmCompilerContext {
         self.function_declarations
             .insert(name.to_string(), function_signature.clone());
 
-        function_signature
+        EvmPrecompileBuilder {
+            context: self,
+            signature: function_signature,
+        }
     }
 
     pub fn get_function(&self, name: &str) -> Option<&EvmFunctionSignature> {
         self.function_declarations.get(name).clone()
+    }
+
+    pub fn get_precompiles(&self) -> BTreeMap<H160, PrecompileFn> {
+        self.precompiles.clone()
     }
 }

@@ -1,10 +1,13 @@
 use crate::types::{EvmType, EvmTypeValue};
+use primitive_types::H160;
 
 #[derive(Debug, Clone)]
 pub struct EvmFunctionSignature {
-    name: String,
+    pub name: String,
     arguments: Vec<EvmType>,
     return_type: EvmType,
+
+    pub external_address: Option<u32>,
 }
 
 impl EvmFunctionSignature {
@@ -13,6 +16,7 @@ impl EvmFunctionSignature {
             name,
             arguments,
             return_type: return_type.clone(),
+            external_address: None,
         }
     }
 
