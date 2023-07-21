@@ -4,7 +4,7 @@ library TheLibraryPart
 
 contract TheContractPart()
 
-transition Main()
+transition hello()
   msg = "Zilliqa Rocks!";
   x = builtin print msg
 end

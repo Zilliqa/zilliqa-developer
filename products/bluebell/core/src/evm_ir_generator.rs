@@ -27,7 +27,7 @@ impl<'ctx> EvmIrGenerator<'ctx> {
 
         // TODO: From AST
         builder
-            .define_function("hello", ["Uint256"].to_vec(), "Uint256")
+            .define_function("TheContractPart::hello", ["Uint256"].to_vec(), "Uint256")
             .build(|code_builder| {
                 let mut entry = EvmBlock::new(None, "entry");
 
