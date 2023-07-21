@@ -17,8 +17,12 @@ impl EvmTypeValue {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
+        Self::pad_byte_array(self.to_bytes_unpadded())
+    }
+
+    pub fn to_bytes_unpadded(&self) -> Vec<u8> {
         match self {
-            EvmTypeValue::Uint32(value) => Self::pad_byte_array(value.to_be_bytes().to_vec()),
+            EvmTypeValue::Uint32(value) => value.to_be_bytes().to_vec(),
             // EvmTypeValue::Uint256(value) => pad_byte_array(value.to_big_endian(/* &mut [u8] */).to_vec()),
             // TODO EvmTypeValue::Address(value) => pad_byte_array(value.as_bytes().to_vec()),
             // Handle other types here

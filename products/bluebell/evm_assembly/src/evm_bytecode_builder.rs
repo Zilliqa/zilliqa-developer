@@ -25,11 +25,12 @@ pub struct FunctionBuilder<'a, 'ctx> {
 }
 
 impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
-    pub fn build<F>(&mut self, builder: F)
+    pub fn build<F>(mut self, builder: F)
     where
-        F: Fn() -> i32,
+        F: Fn(&mut EvmByteCodeBuilder<'ctx>) -> Vec<EvmBlock>,
     {
-        builder();
+        self.function.blocks = builder(&mut self.builder);
+        self.builder.functions.push(self.function);
     }
 }
 
@@ -107,8 +108,55 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self
     }
 
-    pub fn build(self) -> Vec<u8> {
-        self.bytecode
+    pub fn build(mut self) -> Vec<u8> {
+        let mut bytecode = Vec::new();
+        self.resolve_positions();
+
+        for function in self.functions.iter_mut() {
+            for block in function.blocks.iter_mut() {
+                for instruction in block.instructions.iter_mut() {
+                    bytecode.push(instruction.opcode.as_u8());
+                    bytecode.extend(instruction.arguments.clone());
+                }
+            }
+        }
+
+        bytecode
+    }
+
+    pub fn resolve_positions(&mut self) {
+        let mut position = 0;
+        let mut label_positions = HashMap::new();
+
+        // Creating positions
+        for function in self.functions.iter_mut() {
+            for block in function.blocks.iter_mut() {
+                block.position = Some(position);
+                label_positions.insert(block.name.clone(), position);
+                for instruction in block.instructions.iter_mut() {
+                    instruction.position = Some(position);
+                    position += 1 + instruction.expected_args_length();
+                }
+            }
+        }
+
+        // Updating labels
+        for function in self.functions.iter_mut() {
+            for block in function.blocks.iter_mut() {
+                for instruction in block.instructions.iter_mut() {
+                    if let Some(name) = &instruction.unresolved_label {
+                        match label_positions.get(name) {
+                            Some(p) => {
+                                instruction.u64_to_arg_big_endian(*p);
+                            }
+                            None => {
+                                panic!("Label not found!");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

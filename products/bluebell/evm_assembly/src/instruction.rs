@@ -26,6 +26,80 @@ impl EvmInstruction {
         Some(u64::from_be_bytes(buf))
     }
 
+    pub fn u64_to_arg_big_endian(&mut self, value: usize) {
+        let bytes = value.to_be_bytes();
+        let mut leading_zeros = 0;
+        for byte in &bytes {
+            if *byte == 0 {
+                leading_zeros += 1;
+            } else {
+                break;
+            }
+        }
+
+        let argument_size = self.expected_args_length();
+
+        if leading_zeros == 8 {
+            // If the u64 value is zero, we still need to ensure that the argument size is correct
+            let leading_zero_bytes = argument_size - 8;
+            if leading_zero_bytes > 0 {
+                self.arguments = vec![0; leading_zero_bytes];
+            } else {
+                self.arguments = vec![];
+            }
+        } else {
+            let actual_size = 8 - leading_zeros;
+            if actual_size > argument_size {
+                // If the actual size is greater than the expected size, remove leading zeros
+                self.arguments = bytes[leading_zeros..].to_vec();
+            } else {
+                // If the actual size is less than the expected size, add leading zeros
+                let leading_zero_bytes = argument_size - actual_size;
+                let mut new_arguments = vec![0; leading_zero_bytes];
+                new_arguments.extend_from_slice(&bytes[leading_zeros..]);
+                self.arguments = new_arguments;
+            }
+        }
+    }
+
+    pub fn expected_args_length(&self) -> usize {
+        match self.opcode {
+            Opcode::PUSH1 => 1,
+            Opcode::PUSH2 => 2,
+            Opcode::PUSH3 => 3,
+            Opcode::PUSH4 => 4,
+            Opcode::PUSH5 => 5,
+            Opcode::PUSH6 => 6,
+            Opcode::PUSH7 => 7,
+            Opcode::PUSH8 => 8,
+            Opcode::PUSH9 => 9,
+            Opcode::PUSH10 => 10,
+            Opcode::PUSH11 => 11,
+            Opcode::PUSH12 => 12,
+            Opcode::PUSH13 => 13,
+            Opcode::PUSH14 => 14,
+            Opcode::PUSH15 => 15,
+            Opcode::PUSH16 => 16,
+            Opcode::PUSH17 => 17,
+            Opcode::PUSH18 => 18,
+            Opcode::PUSH19 => 19,
+            Opcode::PUSH20 => 20,
+            Opcode::PUSH21 => 21,
+            Opcode::PUSH22 => 22,
+            Opcode::PUSH23 => 23,
+            Opcode::PUSH24 => 24,
+            Opcode::PUSH25 => 25,
+            Opcode::PUSH26 => 26,
+            Opcode::PUSH27 => 27,
+            Opcode::PUSH28 => 28,
+            Opcode::PUSH29 => 29,
+            Opcode::PUSH30 => 30,
+            Opcode::PUSH31 => 31,
+            Opcode::PUSH32 => 32,
+            _ => 0,
+        }
+    }
+
     pub fn push_value_as_u64(&self) -> Option<u64> {
         match self.opcode {
             // Opcode::PUSH0 => Some(0),
