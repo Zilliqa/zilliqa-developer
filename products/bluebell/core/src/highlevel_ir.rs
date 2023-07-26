@@ -311,6 +311,7 @@ impl ComputableState {
 }
 */
 
+#[derive(Debug)]
 pub struct HighlevelIr {
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,

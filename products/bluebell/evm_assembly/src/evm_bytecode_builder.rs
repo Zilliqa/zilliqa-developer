@@ -43,10 +43,12 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx>> {
 pub struct EvmByteCodeBuilder<'ctx> {
     pub context: &'ctx mut EvmCompilerContext,
     pub functions: Vec<EvmFunction>,
+    pub data: Vec<(String, Vec<u8>)>,
     pub unused_blocks: Vec<EvmBlock>,
     pub bytecode: Vec<u8>,
     pub opcode_specs: HashMap<u8, OpcodeSpecification>,
     pub auxiliary_data: Vec<u8>,
+    pub was_finalized: bool,
 }
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
@@ -54,10 +56,12 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         let mut ret = Self {
             context,
             functions: Vec::new(),
+            data: Vec::new(),
             unused_blocks: Vec::new(),
             bytecode: Vec::new(),
             opcode_specs: create_opcode_spec(),
             auxiliary_data: Vec::new(),
+            was_finalized: false,
         };
 
         // Reserving the start of the bytecode for the "entry" function
@@ -100,6 +104,8 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             unused_blocks,
             opcode_specs,
             auxiliary_data,
+            data: Vec::new(),
+            was_finalized: false,
         }
     }
 
@@ -124,6 +130,31 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
     pub fn build(&mut self) -> Vec<u8> {
         let mut bytecode = Vec::new();
 
+        self.finalize_blocks();
+
+        // Generating bytecode
+        for function in self.functions.iter_mut() {
+            for block in function.blocks.iter_mut() {
+                for instruction in block.instructions.iter_mut() {
+                    bytecode.push(instruction.opcode.as_u8());
+                    bytecode.extend(instruction.arguments.clone());
+                }
+            }
+        }
+
+        bytecode.push(Opcode::STOP.as_u8());
+
+        for (_, payload) in &self.data {
+            bytecode.extend(payload);
+        }
+
+        bytecode
+    }
+
+    pub fn finalize_blocks(&mut self) {
+        if self.was_finalized {
+            return;
+        }
         // Building entry function
         let mut main = {
             let mut binding = self.functions.first_mut();
@@ -154,7 +185,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         first_block.revert();
 
         let mut switch_block = EvmBlock::new(None, "switch");
-        switch_block.pop();
+        // TODO: Fix this switch_block.pop(); 0 Oribabky remove dup1()?
         switch_block.push1([0x04].to_vec()); // Checking that the size of call args
         switch_block.calldatasize();
         switch_block.lt();
@@ -192,24 +223,16 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         // Resolving labels
         self.resolve_positions();
 
-        // Generating bytecode
-        for function in self.functions.iter_mut() {
-            for block in function.blocks.iter_mut() {
-                for instruction in block.instructions.iter_mut() {
-                    bytecode.push(instruction.opcode.as_u8());
-                    bytecode.extend(instruction.arguments.clone());
-                }
-            }
-        }
+        // TODO: Test that all stack positions zero out
 
-        bytecode
+        self.was_finalized = true;
     }
 
     pub fn resolve_positions(&mut self) {
         let mut position = 0;
         let mut label_positions = HashMap::new();
 
-        // Creating positions
+        // Creating code positions
         for function in self.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 block.position = Some(position);
@@ -219,6 +242,15 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                     position += 1 + instruction.expected_args_length();
                 }
             }
+        }
+
+        // Position reserved for STOP
+        position += 1;
+
+        // Creating data positions
+        for (name, payload) in &self.data {
+            label_positions.insert(name.to_string(), position);
+            position += payload.len();
         }
 
         // Updating labels

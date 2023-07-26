@@ -134,7 +134,8 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
 
                 // Backgwards compatibility support
                 // TODO: Enable and disable this with flag
-                symbol_table.declare_alias(&name.unresolved, &qualified_name);
+                // TODO: Check error
+                let _ = symbol_table.declare_alias(&name.unresolved, &qualified_name);
 
                 self.current_type = Some(qualified_name);
                 let _ = data_layout.visit(self, symbol_table)?;
@@ -198,7 +199,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _tuple: &mut Tuple,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -207,7 +208,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _variant: &mut Variant,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -217,7 +218,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _var_dec: &mut VariableDeclaration,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -226,7 +227,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _fnc: &mut ConcreteFunction,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // TODO: collect type of function
         Ok(TraversalResult::Continue)
@@ -236,7 +237,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _kind: &mut IrIndentifierKind,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -290,7 +291,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _function_body: &mut FunctionBody,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -299,7 +300,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _function_kind: &mut FunctionKind,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -308,7 +309,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _operation: &mut Operation,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -317,7 +318,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _instr: &mut Instruction,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -326,7 +327,7 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _block: &mut FunctionBlock,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

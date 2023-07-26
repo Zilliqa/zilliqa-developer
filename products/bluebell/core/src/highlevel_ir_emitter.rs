@@ -462,23 +462,17 @@ impl AstConverting for HighlevelIrEmitter {
                 }
 
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
-                let mut args_str = "".to_string();
-                for (i, arg) in xs.arguments.iter().enumerate() {
+                for arg in xs.arguments.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
                     let instruction = self.pop_instruction()?;
 
                     let symbol = self.convert_instruction_to_symbol(instruction);
-
-                    if i > 0 {
-                        args_str.push_str("_");
-                    }
-                    args_str.push_str(&symbol.unresolved.to_lowercase());
                     arguments.push(symbol);
                 }
 
                 let name = IrIdentifier {
-                    unresolved: format!("builtin__{}<{}>", b, args_str).to_string(), // TODO: Use name generator
+                    unresolved: format!("builtin__{}", b).to_string(), // TODO: Use name generator
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::TemplateFunctionName,

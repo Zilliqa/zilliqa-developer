@@ -74,7 +74,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _con_type: &mut ConcreteType,
-        symbol_table: &mut SymbolTable,
+        _symbol_tablee: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::SkipChildren)
     }
@@ -83,7 +83,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _enum_value: &mut EnumValue,
-        symbol_table: &mut SymbolTable,
+        _symbol_tablee: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -92,7 +92,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _tuple: &mut Tuple,
-        symbol_table: &mut SymbolTable,
+        _symbol_tablee: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -101,7 +101,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _variant: &mut Variant,
-        symbol_table: &mut SymbolTable,
+        _symbol_tablee: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -175,7 +175,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _kind: &mut IrIndentifierKind,
-        symbol_table: &mut SymbolTable,
+        _symbol_tablee: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -273,7 +273,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _highlevel_ir: &mut HighlevelIr,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -282,7 +282,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _function_body: &mut FunctionBody,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -291,7 +291,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _function_kind: &mut FunctionKind,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -300,7 +300,7 @@ impl HighlevelIrPass for AnnotateBaseTypes {
         &mut self,
         _mode: TreeTraversalMode,
         _operation: &mut Operation,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }
@@ -333,11 +333,40 @@ impl HighlevelIrPass for AnnotateBaseTypes {
                 //  panic!("Failed");
                 "Int8".to_string()
             }
-            Operation::CallExternalFunction { name, arguments } => {
+            Operation::CallExternalFunction {
+                ref mut name,
+                arguments,
+            } => {
                 name.visit(self, symbol_table)?;
-                for arg in arguments.iter_mut() {
+                let mut template_type_args: String = "".to_string();
+                for (i, arg) in arguments.iter_mut().enumerate() {
                     arg.visit(self, symbol_table)?;
+                    let type_name = match &arg.type_reference {
+                        Some(t) => t,
+                        None => {
+                            // TODO: Fix error propagation
+                            panic!(
+                                "{}",
+                                format!("Unable to resolve type for {:?}", arg.unresolved)
+                            );
+                        }
+                    };
+                    if i > 0 {
+                        template_type_args.push_str(",");
+                    }
+                    template_type_args.push_str(type_name);
                 }
+
+                // In the event of a template function, we use the unresolved name
+                // as the function may not yet exist
+                let name_value = &name.unresolved;
+
+                let function_type = format!("{}::<{}>", name_value, template_type_args).to_string();
+                name.resolved = Some(function_type.clone());
+
+                // The value of the SSA is the return type of the function
+                // TODO: To this end we need to resolve the type refernce from the resolved name
+                name.type_reference = Some(function_type.clone()); // TODO: Should contain return type as this is a function pointer
 
                 "TODO-lookup".to_string()
             }
@@ -431,6 +460,8 @@ impl HighlevelIrPass for AnnotateBaseTypes {
                 }
             }
         };
+
+        //instr.operation.type_reference = Some(typename);
 
         if let Some(ssa) = &mut instr.ssa_name {
             ssa.visit(self, symbol_table)?;

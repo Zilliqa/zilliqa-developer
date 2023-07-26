@@ -21,6 +21,7 @@ impl TypeInfo {
     }
 }
 
+#[derive(Debug)]
 pub struct SymbolTable {
     pub aliases: HashMap<String, String>,
     pub type_of_table: HashMap<String, Box<TypeInfo>>,

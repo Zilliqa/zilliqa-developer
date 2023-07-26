@@ -3,9 +3,11 @@ use primitive_types::U256;
 #[derive(Clone, Debug)]
 pub enum EvmTypeValue {
     Uint32(u32),
+    Uint64(u64),
     Uint256(U256),
     // Address(Address),
     // Add more types as needed
+    StackReference(u32),
 }
 
 impl EvmTypeValue {
@@ -23,6 +25,7 @@ impl EvmTypeValue {
     pub fn to_bytes_unpadded(&self) -> Vec<u8> {
         match self {
             EvmTypeValue::Uint32(value) => value.to_be_bytes().to_vec(),
+            EvmTypeValue::Uint64(value) => value.to_be_bytes().to_vec(),
             // EvmTypeValue::Uint256(value) => pad_byte_array(value.to_big_endian(/* &mut [u8] */).to_vec()),
             // TODO EvmTypeValue::Address(value) => pad_byte_array(value.as_bytes().to_vec()),
             // Handle other types here

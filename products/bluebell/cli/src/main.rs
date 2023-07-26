@@ -117,7 +117,7 @@ struct Args {
     mode: BluebellCommand,
 }
 
-fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
+fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, _debug: bool) {
     /****** Executable *****/
     ///////
     let mut specification = EvmCompilerContext::new();
@@ -135,11 +135,22 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     let _ = specification
         .declare_function("fibonacci", ["Uint256"].to_vec(), "Uint256")
         .attach_runtime(|| test_precompile);
+    let _ = specification.declare_inline_generics("builtin__add", |block, _args| {
+        block.add();
+        Ok(())
+    });
 
     ///////
     // Executable
     let mut generator = HighlevelIrEmitter::new();
     let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
+
+    /*** Analysis ***/
+    let mut pass_manager = HighlevelIrPassManager::default_pipeline();
+
+    if let Err(err) = pass_manager.run(&mut ir) {
+        panic!("{}", err);
+    }
 
     let mut generator = EvmIrGenerator::new(&mut specification, ir);
 

@@ -14,6 +14,9 @@ pub struct EvmBlock {
     pub is_entry: bool,
     pub is_terminated: bool,
     pub is_lookup_table: bool,
+
+    stack_counter: i32,
+    name_location: HashMap<String, i32>,
 }
 
 impl EvmBlock {
@@ -26,11 +29,34 @@ impl EvmBlock {
             is_entry: false,
             is_terminated: false,
             is_lookup_table: false,
+            stack_counter: 0,
+            name_location: HashMap::new(),
         };
 
         ret.jumpdest();
 
         ret
+    }
+
+    pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
+        if self.name_location.contains_key(name) {
+            return Err(format!("SSA name {} already exists", name));
+        }
+
+        self.name_location
+            .insert(name.to_string(), self.stack_counter);
+
+        // TODO: Consider pruning of the names
+
+        Ok(())
+    }
+
+    pub fn call_internal(
+        &mut self,
+        function: &EvmFunctionSignature,
+        args: Vec<EvmTypeValue>,
+    ) -> &mut Self {
+        todo!()
     }
 
     pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmTypeValue>) -> &mut Self {
@@ -155,11 +181,177 @@ impl EvmBlock {
         (blocks, data)
     }
 
+    fn update_stack(&mut self, opcode: Opcode) {
+        let change: i32 = match opcode {
+            Opcode::STOP => -0 + 0,
+            Opcode::ADD => -2 + 1,
+            Opcode::MUL => -2 + 1,
+            Opcode::SUB => -2 + 1,
+            Opcode::DIV => -2 + 1,
+            Opcode::SDIV => -2 + 1,
+            Opcode::MOD => -2 + 1,
+            Opcode::SMOD => -2 + 1,
+            Opcode::ADDMOD => -3 + 1,
+            Opcode::MULMOD => -3 + 1,
+            Opcode::EXP => -2 + 1,
+            Opcode::SIGNEXTEND => -2 + 1,
+            Opcode::LT => -2 + 1,
+            Opcode::GT => -2 + 1,
+            Opcode::SLT => -2 + 1,
+            Opcode::SGT => -2 + 1,
+            Opcode::EQ => -2 + 1,
+            Opcode::ISZERO => -1 + 1,
+            Opcode::AND => -2 + 1,
+            Opcode::OR => -2 + 1,
+            Opcode::XOR => -2 + 1,
+            Opcode::NOT => -1 + 1,
+            Opcode::BYTE => -2 + 1,
+            Opcode::CALLDATALOAD => -1 + 1,
+            Opcode::CALLDATASIZE => -0 + 1,
+            Opcode::CALLDATACOPY => -3 + 0,
+            Opcode::CODESIZE => -0 + 1,
+            Opcode::CODECOPY => -3 + 0,
+            Opcode::SHL => -2 + 1,
+            Opcode::SHR => -2 + 1,
+            Opcode::SAR => -2 + 1,
+            Opcode::POP => -1 + 0,
+            Opcode::MLOAD => -1 + 1,
+            Opcode::MSTORE => -2 + 0,
+            Opcode::MSTORE8 => -2 + 0,
+            Opcode::JUMP => -1 + 0,
+            Opcode::JUMPI => -2 + 0,
+            Opcode::PC => -0 + 1,
+            Opcode::MSIZE => -0 + 1,
+            Opcode::JUMPDEST => -0 + 0,
+            Opcode::PUSH1 => -0 + 1,
+            Opcode::PUSH2 => -0 + 1,
+            Opcode::PUSH3 => -0 + 1,
+            Opcode::PUSH4 => -0 + 1,
+            Opcode::PUSH5 => -0 + 1,
+            Opcode::PUSH6 => -0 + 1,
+            Opcode::PUSH7 => -0 + 1,
+            Opcode::PUSH8 => -0 + 1,
+            Opcode::PUSH9 => -0 + 1,
+            Opcode::PUSH10 => -0 + 1,
+            Opcode::PUSH11 => -0 + 1,
+            Opcode::PUSH12 => -0 + 1,
+            Opcode::PUSH13 => -0 + 1,
+            Opcode::PUSH14 => -0 + 1,
+            Opcode::PUSH15 => -0 + 1,
+            Opcode::PUSH16 => -0 + 1,
+            Opcode::PUSH17 => -0 + 1,
+            Opcode::PUSH18 => -0 + 1,
+            Opcode::PUSH19 => -0 + 1,
+            Opcode::PUSH20 => -0 + 1,
+            Opcode::PUSH21 => -0 + 1,
+            Opcode::PUSH22 => -0 + 1,
+            Opcode::PUSH23 => -0 + 1,
+            Opcode::PUSH24 => -0 + 1,
+            Opcode::PUSH25 => -0 + 1,
+            Opcode::PUSH26 => -0 + 1,
+            Opcode::PUSH27 => -0 + 1,
+            Opcode::PUSH28 => -0 + 1,
+            Opcode::PUSH29 => -0 + 1,
+            Opcode::PUSH30 => -0 + 1,
+            Opcode::PUSH31 => -0 + 1,
+            Opcode::PUSH32 => -0 + 1,
+            Opcode::DUP1 => -1 + 2,
+            Opcode::DUP2 => -2 + 3,
+            Opcode::DUP3 => -3 + 4,
+            Opcode::DUP4 => -4 + 5,
+            Opcode::DUP5 => -5 + 6,
+            Opcode::DUP6 => -6 + 7,
+            Opcode::DUP7 => -7 + 8,
+            Opcode::DUP8 => -8 + 9,
+            Opcode::DUP9 => -9 + 10,
+            Opcode::DUP10 => -10 + 11,
+            Opcode::DUP11 => -11 + 12,
+            Opcode::DUP12 => -12 + 13,
+            Opcode::DUP13 => -13 + 14,
+            Opcode::DUP14 => -14 + 15,
+            Opcode::DUP15 => -15 + 16,
+            Opcode::DUP16 => -16 + 17,
+            Opcode::SWAP1 => -2 + 2,
+            Opcode::SWAP2 => -3 + 3,
+            Opcode::SWAP3 => -4 + 4,
+            Opcode::SWAP4 => -5 + 5,
+            Opcode::SWAP5 => -6 + 6,
+            Opcode::SWAP6 => -7 + 7,
+            Opcode::SWAP7 => -8 + 8,
+            Opcode::SWAP8 => -9 + 9,
+            Opcode::SWAP9 => -10 + 10,
+            Opcode::SWAP10 => -11 + 11,
+            Opcode::SWAP11 => -12 + 12,
+            Opcode::SWAP12 => -13 + 13,
+            Opcode::SWAP13 => -14 + 14,
+            Opcode::SWAP14 => -15 + 15,
+            Opcode::SWAP15 => -16 + 16,
+            Opcode::SWAP16 => -17 + 17,
+            Opcode::RETURN => -2 + 0,
+            Opcode::REVERT => -2 + 0,
+            Opcode::INVALID => -0 + 0,
+            Opcode::EOFMAGIC => -0 + 0,
+            Opcode::SHA3 => -2 + 1,
+            Opcode::ADDRESS => -0 + 1,
+            Opcode::BALANCE => -1 + 1,
+            Opcode::SELFBALANCE => -0 + 1,
+            Opcode::BASEFEE => -0 + 1,
+            Opcode::ORIGIN => -0 + 1,
+            Opcode::CALLER => -0 + 1,
+            Opcode::CALLVALUE => -0 + 1,
+            Opcode::GASPRICE => -0 + 1,
+            Opcode::EXTCODESIZE => -1 + 1,
+            Opcode::EXTCODECOPY => -4 + 0,
+            Opcode::EXTCODEHASH => -1 + 1,
+            Opcode::RETURNDATASIZE => -0 + 1,
+            Opcode::RETURNDATACOPY => -3 + 0,
+            Opcode::BLOCKHASH => -1 + 1,
+            Opcode::COINBASE => -0 + 1,
+            Opcode::TIMESTAMP => -0 + 1,
+            Opcode::NUMBER => -0 + 1,
+            Opcode::DIFFICULTY => -0 + 0,
+            Opcode::GASLIMIT => -0 + 1,
+            Opcode::SLOAD => -1 + 1,
+            Opcode::SSTORE => -1 + 1,
+            Opcode::GAS => -0 + 1,
+            Opcode::LOG0 => -2 + 0,
+            Opcode::LOG1 => -3 + 0,
+            Opcode::LOG2 => -4 + 0,
+            Opcode::LOG3 => -5 + 0,
+            Opcode::LOG4 => -6 + 0,
+            Opcode::CREATE => -3 + 1,
+            Opcode::CREATE2 => -4 + 1,
+            Opcode::CALL => -7 + 1,
+            Opcode::CALLCODE => -7 + 1,
+            Opcode::DELEGATECALL => -6 + 1,
+            Opcode::STATICCALL => -6 + 1,
+            Opcode::SUICIDE => -0 + 0,
+            Opcode::CHAINID => -0 + 1,
+            _ => todo!(),
+        };
+        self.stack_counter += change;
+
+        println!(
+            "{}",
+            format!(
+                "Code: {:?} -> {} {}",
+                opcode.to_string(),
+                change,
+                self.stack_counter
+            )
+        );
+
+        if self.stack_counter < 0 {
+            panic!("Encountered negative stack counter.");
+        }
+    }
+
     pub fn write_instruction(
         &mut self,
         opcode: Opcode,
         unresolved_label: Option<String>,
     ) -> &mut Self {
+        self.update_stack(opcode.clone());
         self.instructions.push(EvmInstruction {
             position: None,
             opcode,
@@ -175,6 +367,7 @@ impl EvmBlock {
     }
 
     pub fn write_instruction_with_args(&mut self, opcode: Opcode, arguments: Vec<u8>) -> &mut Self {
+        self.update_stack(opcode.clone());
         self.instructions.push(EvmInstruction {
             position: None,
             opcode,

@@ -1,5 +1,6 @@
 use crate::highlevel_ir::{FunctionBlock, IrIdentifier, IrIndentifierKind};
 
+#[derive(Debug)]
 pub struct IntermediateNameGenerator {
     anonymous_type_number: u64,
     intermediate_counter: u64,

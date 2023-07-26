@@ -1,3 +1,5 @@
+use crate::block::EvmBlock;
+use crate::evm_bytecode_builder::EvmByteCodeBuilder;
 use crate::function_signature::EvmFunctionSignature;
 use crate::types::EvmType;
 use evm::executor::stack::PrecompileFn;
@@ -6,9 +8,13 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+type InlineGenericsFn = fn(&mut EvmBlock, Vec<String>) -> Result<(), String>;
+
 pub struct EvmCompilerContext {
     type_declarations: HashMap<String, EvmType>,
-    function_declarations: HashMap<String, EvmFunctionSignature>,
+
+    pub function_declarations: HashMap<String, EvmFunctionSignature>,
+    pub inline_generics: HashMap<String, InlineGenericsFn>,
     /// Scilla types -> EVM types
     precompiles: BTreeMap<H160, PrecompileFn>,
     precompile_addresses: HashMap<String, u32>,
@@ -45,7 +51,7 @@ impl<'a> EvmPrecompileBuilder<'a> {
         self.context
             .function_declarations
             .insert(name.clone(), self.signature.clone());
-        println!("Value: {:?}", self.context.function_declarations.get(&name));
+
         self.context.precompiles.insert(address, precompiled);
 
         Ok(())
@@ -57,10 +63,15 @@ impl EvmCompilerContext {
         Self {
             type_declarations: HashMap::new(),
             function_declarations: HashMap::new(),
+            inline_generics: HashMap::new(),
             precompile_addresses: HashMap::new(),
             precompiles: BTreeMap::new(),
             contract_offset: 5,
         }
+    }
+
+    pub fn create_builder<'ctx>(&'ctx mut self) -> EvmByteCodeBuilder<'ctx> {
+        EvmByteCodeBuilder::new(self)
     }
 
     pub fn declare_integer(&mut self, name: &str, bits: usize) {
@@ -78,6 +89,18 @@ impl EvmCompilerContext {
     pub fn declare_address(&mut self, name: &str) {
         self.type_declarations
             .insert(name.to_string(), EvmType::String);
+    }
+
+    pub fn declare_inline_generics(
+        &mut self,
+        name: &str,
+        builder: InlineGenericsFn,
+    ) -> Result<(), String> {
+        if self.inline_generics.contains_key(name) {
+            return Err(format!("Geneic {} already exists", name).to_string());
+        }
+        self.inline_generics.insert(name.to_string(), builder);
+        Ok(())
     }
 
     pub fn declare_function(
