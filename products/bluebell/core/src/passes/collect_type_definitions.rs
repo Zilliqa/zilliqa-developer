@@ -8,7 +8,6 @@ use crate::highlevel_ir::{
 use crate::highlevel_ir_pass::HighlevelIrPass;
 use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
 use crate::symbol_table::SymbolTable;
-use std::rc::Rc;
 
 pub struct CollectTypeDefinitionsPass {
     namespace_stack: Vec<String>,

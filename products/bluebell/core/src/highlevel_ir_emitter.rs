@@ -3,7 +3,7 @@ use crate::ast_converting::AstConverting;
 use crate::ast_visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::highlevel_ir::*;
-use crate::intermediate_name_generator::IntermediateNameGenerator;
+
 use std::mem;
 
 #[derive(Debug, Clone)]

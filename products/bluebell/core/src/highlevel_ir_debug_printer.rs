@@ -17,7 +17,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         &mut self,
         _mode: TreeTraversalMode,
         kind: &mut IrIndentifierKind,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match kind {
             IrIndentifierKind::TemplateFunctionName => self.script.push_str("!!"),
@@ -43,7 +43,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         &mut self,
         mode: TreeTraversalMode,
         symbol: &mut IrIdentifier,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {
@@ -112,7 +112,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         &mut self,
         _mode: TreeTraversalMode,
         _variant: &mut Variant,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         // Pass through deliberate
         Ok(TraversalResult::Continue)
@@ -331,7 +331,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         &mut self,
         _mode: TreeTraversalMode,
         function_kind: &mut FunctionKind,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match function_kind {
             FunctionKind::Procedure => {
@@ -384,7 +384,7 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
         &mut self,
         mode: TreeTraversalMode,
         _highlevel_ir: &mut HighlevelIr,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => {

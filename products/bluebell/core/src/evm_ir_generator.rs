@@ -1,16 +1,11 @@
 use crate::highlevel_ir::Operation;
-use crate::highlevel_ir::{
-    ConcreteFunction, ConcreteType, FunctionKind, HighlevelIr, IrLowering, Variant,
-};
+use crate::highlevel_ir::{ConcreteFunction, ConcreteType, HighlevelIr, IrLowering};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executor::EvmExecutor;
+
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
-use std::collections::HashMap;
-
-type Scope<'a> = HashMap<String, inkwell::values::BasicValueEnum<'a>>;
 
 pub struct EvmIrGenerator<'ctx> {
     //context: &'ctx mut EvmCompilerContext,
@@ -202,7 +197,7 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                                         Some(_value) => {
                                             todo!();
                                             // TODO: write return to the stack
-                                            blk.r#return();
+                                            // blk.r#return();
                                         }
                                         None => {
                                             blk.push([0x00].to_vec());

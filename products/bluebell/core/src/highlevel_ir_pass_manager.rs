@@ -1,12 +1,7 @@
 use crate::highlevel_ir::HighlevelIr;
 use crate::highlevel_ir_pass::HighlevelIrPass;
-use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
-use crate::intermediate_name_generator::IntermediateNameGenerator;
-use crate::symbol_table::SymbolTable;
-
 use crate::passes::annotate_base_types::AnnotateBaseTypes;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
-use std::rc::Rc;
 
 pub struct HighlevelIrPassManager {
     passes: Vec<Box<dyn HighlevelIrPass>>,
@@ -33,7 +28,7 @@ impl HighlevelIrPassManager {
     pub fn run(&mut self, ir: &mut HighlevelIr) -> Result<u32, String> {
         // TODO: Make self immutable and copy pass before running it on IR
         for pass in &mut self.passes {
-            ir.run_pass(pass.as_mut());
+            let _ = ir.run_pass(pass.as_mut());
         }
         Ok(0)
     }

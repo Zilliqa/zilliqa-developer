@@ -1,5 +1,4 @@
 use crate::types::{EvmType, EvmTypeValue};
-use primitive_types::H160;
 
 #[derive(Debug, Clone)]
 pub struct EvmFunctionSignature {

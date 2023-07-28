@@ -136,8 +136,8 @@ impl EvmFunction {
             ret.push(current_function);
         }
 
-        let mut unused_blocks = Vec::new();
-        for (position, block) in blocks {
+        let unused_blocks = Vec::new();
+        for (_position, _block) in blocks {
             /*
             // TODO:
             if position == None || !used_blocks.contains(&position.unwrap()) {

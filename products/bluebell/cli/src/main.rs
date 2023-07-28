@@ -22,12 +22,9 @@ use bluebell::lexer::Lexer;
 use bluebell::ParserError;
 use bluebell::*;
 
-use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executor::EvmExecutor;
 use evm_assembly::types::EvmTypeValue;
-use evm_assembly::EvmAssemblyGenerator;
-use evm_assembly::EvmByteCodeBuilder;
 
 use evm::backend::Backend;
 use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};

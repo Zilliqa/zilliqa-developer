@@ -22,8 +22,8 @@ enum LlvmType<'ctx> {
 }
 
 pub struct LlvmExecutable<'ctx> {
-    context: &'ctx Context,
-    module: Module<'ctx>,
+    pub context: &'ctx Context,
+    pub module: Module<'ctx>,
 }
 
 impl<'ctx> LlvmExecutable<'ctx> {
@@ -34,7 +34,7 @@ impl<'ctx> LlvmExecutable<'ctx> {
 
 pub struct LlvmBackendSpecification<'ctx> {
     context: &'ctx Context,
-    function_declarations: HashMap<String, FunctionValue<'ctx>>,
+    pub function_declarations: HashMap<String, FunctionValue<'ctx>>, // TODO: Not used yet - pub to silence warning
     type_declarations: HashMap<String, LlvmType<'ctx>>,
     runtime_function_addresses: HashMap<String, usize>,
 }
@@ -194,7 +194,9 @@ impl LlvmBackend {
         let ast = match parser.parse(&mut errors, lexer) {
             Ok(ast) => ast,
             Err(error) => {
-                let message = format!("Syntax error {:?}", error);
+                // TODO: This code is ineffecient and we should attach the
+                // the token position (line, char) to the ast nodes / parser
+                let _message = format!("Syntax error {:?}", error);
                 let mut pos: Vec<usize> = [].to_vec();
                 error.map_location(|l| {
                     pos.push(l);
@@ -246,6 +248,7 @@ impl LlvmBackend {
                 println!("{}", "^".repeat(pos[1] - pos[0]));
 
                 /*
+                TODO:
                 let my_error = ParserError {
                     message,
                     line: line_counter,

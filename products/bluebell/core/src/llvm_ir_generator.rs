@@ -240,7 +240,7 @@ impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
 
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
         for func in &self.ir.function_definitions {
-            let scope = Scope::new();
+            let _scope = Scope::new();
 
             let arg_types: Vec<_> = func
                 .arguments

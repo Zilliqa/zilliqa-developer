@@ -148,8 +148,8 @@ impl EvmBlock {
 
     pub fn call_internal(
         &mut self,
-        function: &EvmFunctionSignature,
-        args: Vec<EvmTypeValue>,
+        _function: &EvmFunctionSignature,
+        _args: Vec<EvmTypeValue>,
     ) -> &mut Self {
         todo!()
     }
