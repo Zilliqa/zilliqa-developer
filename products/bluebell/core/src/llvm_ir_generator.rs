@@ -1,5 +1,5 @@
-use crate::highlevel_ir::Operation;
-use crate::highlevel_ir::{
+use crate::intermediate_representation::highlevel_ir::Operation;
+use crate::intermediate_representation::highlevel_ir::{
     ConcreteFunction, ConcreteType, FunctionKind, HighlevelIr, IrLowering, Variant,
 };
 use inkwell::module::Module;

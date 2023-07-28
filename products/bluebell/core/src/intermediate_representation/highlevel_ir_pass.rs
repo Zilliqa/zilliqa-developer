@@ -1,5 +1,5 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::highlevel_ir::*;
+use crate::intermediate_representation::highlevel_ir::*;
 use crate::symbol_table::SymbolTable;
 
 pub trait HighlevelIrPass {

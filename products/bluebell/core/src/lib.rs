@@ -5,25 +5,16 @@ pub mod ast;
 pub mod constants;
 pub mod contract_executor;
 pub mod formatter;
-pub mod highlevel_ir;
-pub mod highlevel_ir_pass;
-pub mod highlevel_ir_pass_executor;
-pub mod highlevel_ir_pass_manager;
+pub mod intermediate_representation;
 pub mod passes;
 
-// pub mod highlevel_ir_pass_manager;
-
 pub mod evm_ir_generator;
-pub mod highlevel_ir_debug_printer;
-pub mod highlevel_ir_emitter;
+
 pub mod intermediate_name_generator;
 pub mod lexer;
 pub mod llvm_ir_generator;
 pub mod support;
 pub mod symbol_table;
-
-// pub mod type_classes;
-// pub mod type_inference;
 
 lalrpop_mod!(pub parser);
 

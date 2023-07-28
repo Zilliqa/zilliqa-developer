@@ -1,5 +1,7 @@
-use crate::highlevel_ir::Operation;
-use crate::highlevel_ir::{ConcreteFunction, ConcreteType, HighlevelIr, IrLowering};
+use crate::intermediate_representation::highlevel_ir::Operation;
+use crate::intermediate_representation::highlevel_ir::{
+    ConcreteFunction, ConcreteType, HighlevelIr, IrLowering,
+};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 

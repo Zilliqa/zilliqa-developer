@@ -2,10 +2,10 @@
 mod tests {
     extern crate diffy;
     use bluebell::contract_executor::UnsafeContractExecutor;
-    use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
-    use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
+    use bluebell::highlevel_ir_debug_printer::DebugPrinter;
     use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
     use bluebell::intermediate_name_generator::IntermediateNameGenerator;
+    use bluebell::intermediate_representation::highlevel_ir_emitter::HighlevelIrEmitter;
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
@@ -89,7 +89,7 @@ mod tests {
 
                 /////
                 // Debug pass
-                let mut debug_printer = HighlevelIrDebugPrinter::new();
+                let mut debug_printer = DebugPrinter::new();
                 let _ = ir.visit(&mut debug_printer);
 
                 /*** IR generation ***/

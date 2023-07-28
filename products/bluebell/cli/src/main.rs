@@ -10,13 +10,14 @@ use std::process;
 
 use bluebell::ast::nodes::NodeProgram;
 use bluebell::contract_executor::UnsafeContractExecutor;
-use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
-use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
+use bluebell::passes::debug_printer::DebugPrinter;
 
 use bluebell::evm_ir_generator::EvmIrGenerator;
-use bluebell::highlevel_ir_pass_manager::HighlevelIrPassManager;
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
+
+use bluebell::intermediate_representation::highlevel_ir_emitter::HighlevelIrEmitter;
+use bluebell::intermediate_representation::highlevel_ir_pass_manager::HighlevelIrPassManager;
 
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;
@@ -246,7 +247,7 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
         panic!("{}", err);
     }
 
-    let mut debug_printer = HighlevelIrDebugPrinter::new();
+    let mut debug_printer = DebugPrinter::new();
     let _ = ir.run_pass(&mut debug_printer);
 
     ///////

@@ -1,12 +1,12 @@
 use crate::constants::NAMESPACE_SEPARATOR;
 use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::highlevel_ir::Instruction;
-use crate::highlevel_ir::{
+use crate::intermediate_representation::highlevel_ir::Instruction;
+use crate::intermediate_representation::highlevel_ir::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
     HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
 };
-use crate::highlevel_ir_pass::HighlevelIrPass;
-use crate::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
+use crate::intermediate_representation::highlevel_ir_pass::HighlevelIrPass;
+use crate::intermediate_representation::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
 use crate::symbol_table::SymbolTable;
 use crate::symbol_table::TypeInfo;
 use std::mem;

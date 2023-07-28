@@ -1,4 +1,6 @@
-use crate::highlevel_ir::{FunctionBlock, IrIdentifier, IrIndentifierKind};
+use crate::intermediate_representation::highlevel_ir::{
+    FunctionBlock, IrIdentifier, IrIndentifierKind,
+};
 
 #[derive(Debug)]
 pub struct IntermediateNameGenerator {

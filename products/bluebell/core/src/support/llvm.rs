@@ -3,8 +3,8 @@ use crate::lexer::Lexer;
 use crate::parser;
 
 use crate::contract_executor::UnsafeContractExecutor;
-use crate::highlevel_ir_emitter::HighlevelIrEmitter;
-use crate::highlevel_ir_pass_manager::HighlevelIrPassManager;
+use crate::intermediate_representation::highlevel_ir_emitter::HighlevelIrEmitter;
+use crate::intermediate_representation::highlevel_ir_pass_manager::HighlevelIrPassManager;
 use crate::llvm_ir_generator::LlvmIrGenerator;
 
 use inkwell::context::Context;
@@ -274,7 +274,7 @@ impl LlvmBackend {
         }
 
         /*
-        let mut debug_printer = HighlevelIrDebugPrinter::new();
+        let mut debug_printer = DebugPrinter::new();
         let _ = ir.run_pass(&mut debug_printer);
         */
 
