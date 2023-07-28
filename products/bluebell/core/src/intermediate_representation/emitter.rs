@@ -32,7 +32,7 @@ pub struct IrEmitter {
     current_namespace: IrIdentifier,
     namespace_stack: Vec<IrIdentifier>,
 
-    ir: Box<HighlevelIr>,
+    ir: Box<IntermediateRepresentation>,
 }
 
 impl IrEmitter {
@@ -54,7 +54,7 @@ impl IrEmitter {
             current_namespace: ns.clone(),
             namespace_stack: [ns].to_vec(),
             /// current_function: None,
-            ir: Box::new(HighlevelIr::new()),
+            ir: Box::new(IntermediateRepresentation::new()),
         }
     }
 
@@ -192,7 +192,7 @@ impl IrEmitter {
         Ok(ret)
     }
 
-    pub fn emit(&mut self, node: &NodeProgram) -> Result<Box<HighlevelIr>, String> {
+    pub fn emit(&mut self, node: &NodeProgram) -> Result<Box<IntermediateRepresentation>, String> {
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
@@ -204,7 +204,7 @@ impl IrEmitter {
         // Annotating symbols with types
 
         // Returning
-        let mut ret = Box::new(HighlevelIr::new());
+        let mut ret = Box::new(IntermediateRepresentation::new());
         mem::swap(&mut self.ir, &mut ret);
 
         Ok(ret)

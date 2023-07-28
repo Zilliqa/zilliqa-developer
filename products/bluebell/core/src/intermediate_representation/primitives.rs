@@ -315,7 +315,7 @@ impl ComputableState {
 */
 
 #[derive(Debug)]
-pub struct HighlevelIr {
+pub struct IntermediateRepresentation {
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,
     pub function_definitions: Vec<ConcreteFunction>,
@@ -323,9 +323,9 @@ pub struct HighlevelIr {
     pub symbol_table: SymbolTable,
 }
 
-impl HighlevelIr {
+impl IntermediateRepresentation {
     pub fn new() -> Self {
-        HighlevelIr {
+        IntermediateRepresentation {
             version: "".to_string(),
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
@@ -338,5 +338,5 @@ impl HighlevelIr {
 pub trait IrLowering {
     fn lower_concrete_type(&mut self, con_type: &ConcreteType);
     fn lower_concrete_function(&mut self, con_function: &ConcreteFunction);
-    fn lower(&mut self, primitives: &HighlevelIr);
+    fn lower(&mut self, primitives: &IntermediateRepresentation);
 }

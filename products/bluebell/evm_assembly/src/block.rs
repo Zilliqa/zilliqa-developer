@@ -193,7 +193,7 @@ impl EvmBlock {
         self.push(gas.to_bytes_unpadded());
 
         // TODO: How come self.external_call(); does not call the precompile?
-        // self.external_staticcall();
+        self.external_staticcall();
 
         self
     }

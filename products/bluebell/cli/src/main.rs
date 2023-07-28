@@ -12,7 +12,7 @@ use bluebell::ast::nodes::NodeProgram;
 use bluebell::contract_executor::UnsafeContractExecutor;
 use bluebell::passes::debug_printer::DebugPrinter;
 
-use bluebell::evm_ir_generator::EvmIrGenerator;
+use bluebell::evm_bytecode_generator::EvmBytecodeGenerator;
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
@@ -154,7 +154,7 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, _debug: bool) {
         panic!("{}", err);
     }
 
-    let mut generator = EvmIrGenerator::new(&mut specification, ir);
+    let mut generator = EvmBytecodeGenerator::new(&mut specification, ir);
 
     let executable = match generator.build_executable() {
         Err(e) => {

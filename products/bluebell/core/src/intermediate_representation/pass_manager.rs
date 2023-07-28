@@ -1,5 +1,5 @@
 use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::primitives::HighlevelIr;
+use crate::intermediate_representation::primitives::IntermediateRepresentation;
 use crate::passes::annotate_base_types::AnnotateBaseTypes;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 
@@ -25,7 +25,7 @@ impl PassManager {
         self.passes.push(pass);
     }
 
-    pub fn run(&mut self, ir: &mut HighlevelIr) -> Result<u32, String> {
+    pub fn run(&mut self, ir: &mut IntermediateRepresentation) -> Result<u32, String> {
         // TODO: Make self immutable and copy pass before running it on IR
         for pass in &mut self.passes {
             let _ = ir.run_pass(pass.as_mut());

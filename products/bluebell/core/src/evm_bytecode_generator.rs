@@ -1,6 +1,6 @@
 use crate::intermediate_representation::primitives::Operation;
 use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, HighlevelIr, IrLowering,
+    ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
 };
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
@@ -9,28 +9,34 @@ use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
 
-pub struct EvmIrGenerator<'ctx> {
-    //context: &'ctx mut EvmCompilerContext,
+/// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
+/// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.
+///
+/// 'ctx lifetime marker is tied with `EvmByteCodeBuilder`'s lifetime which represents the lifetime of the EvmCompilerContext.
+pub struct EvmBytecodeGenerator<'ctx> {
+    /// `builder` is an instance of `EvmByteCodeBuilder` that provides methods to construct
+    /// EVM bytecode sequentially. The lifetime of this builder should not outlive the context 'ctx.
     builder: EvmByteCodeBuilder<'ctx>,
-    ir: Box<HighlevelIr>,
+
+    /// `ir` is an intermediate representation (IR) of the smart contract code. It's a
+    /// high-level, platform-independent representation used for code optimization before
+    /// it's translated into the target bytecode.
+    ir: Box<IntermediateRepresentation>,
 }
 
-impl<'ctx> EvmIrGenerator<'ctx> {
-    pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<HighlevelIr>) -> Self {
+impl<'ctx> EvmBytecodeGenerator<'ctx> {
+    /// This constructs a new `EvmBytecodeGenerator`. It takes an existing EVM compiler context
+    /// and a boxed intermediate representation (IR) of the program.  
+    pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<IntermediateRepresentation>) -> Self {
         let builder = context.create_builder();
         Self { builder, ir }
     }
 
+    /// This function writes function definitions from the IR to the EVM module.
+    /// It loops over all function definitions in the IR and creates corresponding function definitions
+    /// in the EVM module using the byte code builder.
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
         for func in &self.ir.function_definitions {
-            /*
-                        let arg_types: Vec<_> = func
-                            .arguments
-                            .iter()
-                            .map(|arg| &arg.typename.unresolved)
-                            .collect();
-            */
-
             let arg_types: Vec<&str> = func
                 .arguments
                 .iter()
@@ -218,23 +224,7 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                         ret.push(blk);
                     }
 
-                    /*
-                    let fnc = code_builder.context.get_function("fibonacci").unwrap();
-                    entry.call(fnc, [EvmTypeValue::Uint32(10)].to_vec());
-
-                    entry.push1([1].to_vec());
-                    entry.jump_if_to("success");
-                    entry.jump_to("finally");
-
-                    let mut success = EvmBlock::new(None, "success");
-                    success.jump_to("finally");
-
-                    let mut finally = EvmBlock::new(None, "finally");
-
-                    finally.r#return();
-                    [entry, success, finally].to_vec()
-                    */
-                    ret // [entry].to_vec()
+                    ret
                 });
         }
 
@@ -242,7 +232,6 @@ impl<'ctx> EvmIrGenerator<'ctx> {
     }
 
     pub fn build_executable(&mut self) -> Result<Vec<u8>, String> {
-        // self.write_type_definitions_to_module()?;
         self.write_function_definitions_to_module()?;
 
         self.builder.finalize_blocks();
@@ -251,16 +240,28 @@ impl<'ctx> EvmIrGenerator<'ctx> {
     }
 }
 
-impl<'ctx> IrLowering for EvmIrGenerator<'ctx> {
+/// This impl block provides the lowering operations for our `EvmBytecodeGenerator`.
+/// Here we translate high-level intermediate representation (IR) constructs into
+/// lower-level constructs that are suitable for generating EVM bytecode.
+impl<'ctx> IrLowering for EvmBytecodeGenerator<'ctx> {
+    /// This function takes a `ConcreteType` and lowers it into a form suitable for generating
+    /// EVM bytecode. How exactly this is done will depend on the concrete type in question.
     fn lower_concrete_type(&mut self, _con_type: &ConcreteType) {
+        // TODO: Implement
         unimplemented!()
     }
 
+    /// This function takes a `ConcreteFunction` and lowers it into a form suitable
+    /// for generating EVM bytecode. This typically involves translating the function's
+    /// high-level operations into equivalent sequences of low-level EVM operations.
     fn lower_concrete_function(&mut self, _con_function: &ConcreteFunction) {
+        // TODO: Move write_function_definitions_to_module into this structure
         unimplemented!()
     }
 
-    fn lower(&mut self, primitives: &HighlevelIr) {
+    /// This is the main interface for lowering. It takes an intermediate representation (IR)
+    /// and lowers all its types and function definitions.
+    fn lower(&mut self, primitives: &IntermediateRepresentation) {
         for con_type in &primitives.type_definitions {
             self.lower_concrete_type(con_type);
         }

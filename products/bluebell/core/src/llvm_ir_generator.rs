@@ -1,6 +1,6 @@
 use crate::intermediate_representation::primitives::Operation;
 use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, FunctionKind, HighlevelIr, IrLowering, Variant,
+    ConcreteFunction, ConcreteType, FunctionKind, IntermediateRepresentation, IrLowering, Variant,
 };
 use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
@@ -10,15 +10,58 @@ use std::collections::HashMap;
 
 type Scope<'a> = HashMap<String, inkwell::values::BasicValueEnum<'a>>;
 
+/// `LlvmIrGenerator` is a structure encapsulating the generation of LLVM Intermediate Representation (IR)
+/// from a higher-level IR. It holds references to the LLVM context and module, a builder for generating
+/// instructions, the high-level IR to be lowered, and a scope stack for managing variables.
 pub struct LlvmIrGenerator<'ctx, 'module> {
+    /// `context` is the LLVM context, which holds any LLVM-specific configuration and state.
     context: &'ctx Context,
+
+    /// `builder` is an LLVM builder, which is a helper object that makes it easy to generate LLVM instructions.
     builder: Builder<'ctx>,
+
+    /// `module` is the LLVM module, which is the top level container of all LLVM Intermediate Representation
+    /// objects. Each module contains a list of global variables, functions, libraries for dynamic linking, etc.
     module: &'module mut Module<'ctx>,
-    ir: Box<HighlevelIr>, // TODO: Add any members needed for the generation here
+
+    /// `ir` is the high-level intermediate representation of the program, stored as a boxed value.
+    ir: Box<IntermediateRepresentation>,
+
+    /// `scopes` is a stack of scopes, with each scope containing information about variable bindings in that
+    /// scope. This allows us to keep track of variables and their values.
     scopes: Vec<Scope<'ctx>>,
 }
 
 impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
+    /// This function builds an LLVM module from the stored high-level intermediate representation.
+    /// It translates the type and function definitions in the high-level IR to corresponding constructs
+    /// in the LLVM IR.
+    pub fn build_module(&mut self) -> Result<u32, String> {
+        self.write_type_definitions_to_module()?;
+        self.write_function_definitions_to_module()?;
+
+        Ok(0)
+    }
+
+    /// This constructs a new `LlvmIrGenerator` with an LLVM context, a high-level intermediate representation,
+    /// and an LLVM module. It also creates a new LLVM builder, initializes a scope stack with one empty scope.
+    pub fn new(
+        context: &'ctx Context,
+        ir: Box<IntermediateRepresentation>,
+        module: &'module mut Module<'ctx>,
+    ) -> Self {
+        let builder = context.create_builder();
+        let mut scopes = Vec::new();
+        scopes.push(Scope::new());
+        LlvmIrGenerator {
+            context,
+            builder,
+            module,
+            ir,
+            scopes,
+        }
+    }
+
     pub fn get_type_definition(&self, name: &str) -> Result<BasicTypeEnum<'ctx>, String> {
         match name {
             // TODO: Collect this into a single module
@@ -383,34 +426,10 @@ impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
         }
         Ok(0)
     }
-
-    pub fn build_module(&mut self) -> Result<u32, String> {
-        self.write_type_definitions_to_module()?;
-        self.write_function_definitions_to_module()?;
-
-        Ok(0)
-    }
-
-    pub fn new(
-        context: &'ctx Context,
-        ir: Box<HighlevelIr>,
-        module: &'module mut Module<'ctx>,
-    ) -> Self {
-        let builder = context.create_builder();
-        let mut scopes = Vec::new();
-        scopes.push(Scope::new());
-        LlvmIrGenerator {
-            context,
-            builder,
-            module,
-            ir,
-            scopes,
-        }
-    }
 }
 
 impl<'ctx, 'module> IrLowering for LlvmIrGenerator<'ctx, 'module> {
-    // Lower a single concrete type from HighlevelIr to LLVM IR.
+    // Lower a single concrete type from IntermediateRepresentation to LLVM IR.
     fn lower_concrete_type(&mut self, con_type: &ConcreteType) {
         match con_type {
             ConcreteType::Tuple {
@@ -431,7 +450,7 @@ impl<'ctx, 'module> IrLowering for LlvmIrGenerator<'ctx, 'module> {
             }
         }
     }
-    // Lower a single concrete function from HighlevelIr to LLVM IR.
+    // Lower a single concrete function from IntermediateRepresentation to LLVM IR.
     fn lower_concrete_function(&mut self, con_function: &ConcreteFunction) {
         let _func_name = &con_function
             .name
@@ -455,7 +474,7 @@ impl<'ctx, 'module> IrLowering for LlvmIrGenerator<'ctx, 'module> {
     }
 
     // Lower the entire HighLevelIr to LLVM IR.
-    fn lower(&mut self, primitives: &HighlevelIr) {
+    fn lower(&mut self, primitives: &IntermediateRepresentation) {
         for con_type in &primitives.type_definitions {
             self.lower_concrete_type(con_type);
         }

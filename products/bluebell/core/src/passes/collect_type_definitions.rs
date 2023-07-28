@@ -5,7 +5,8 @@ use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
+    VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
 
@@ -273,7 +274,7 @@ impl IrPass for CollectTypeDefinitionsPass {
     fn visit_primitives(
         &mut self,
         mode: TreeTraversalMode,
-        _primitives: &mut HighlevelIr,
+        _primitives: &mut IntermediateRepresentation,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {

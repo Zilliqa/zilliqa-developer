@@ -3,12 +3,19 @@ use crate::ast::nodes::*;
 use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 
+/// `BluebellFormatter` is a structure responsible for generating a formatted script from an AST.
+/// It stores the current indentation level for the partially generated script `script`.
 pub struct BluebellFormatter {
+    /// `indent_level` keeps track of the current indentation level in the script.
+    /// It will typically increase with each nested construct.
     indent_level: usize,
+
+    /// `script` is a string representing the partially generated script.
     script: String,
 }
 
 impl BluebellFormatter {
+    /// This constructs a new `BluebellFormatter` with an initial `indent_level` of 0 and an empty `script`.
     pub fn new() -> Self {
         Self {
             indent_level: 0,
@@ -16,23 +23,30 @@ impl BluebellFormatter {
         }
     }
 
-    pub fn to_string(&self) -> String {
-        self.script.clone()
+    /// This function returns the current state of the script as a `String`.
+    pub fn to_string(&self) -> &String {
+        &self.script
     }
 
-    pub fn add_newlines(&mut self, count: usize) {
-        self.script.push_str(&"\n".repeat(count));
-        self.script.push_str(&" ".repeat(self.indent_level * 2));
-    }
-
-    pub fn emit(&mut self, node: &mut NodeProgram) -> String {
+    /// After resetting the current `script`, this function makes `ast` visit the instance of `BluebellFormatter`.
+    /// The `NodeProgram`'s `visit` method will walk down the AST rooted at `ast`, and mutate the `script`
+    /// and `indent_level` as it sees fit. After visiting the `ast`, it returns the current state of the `script`.
+    pub fn emit(&mut self, ast: &mut NodeProgram) -> String {
         self.script = "".to_string();
         // TODO: Handle errors
         // Consider adding an error logger and be greedy
         // when collecting errors
-        let _ = node.visit(self);
-
+        let _ = ast.visit(self);
         self.script.clone()
+    }
+
+    /// This function adds newlines to the `script`. The number of newlines to be added is specified by the
+    /// `count` parameter. After adding the newlines, it appends spaces equivalent to twice the current
+    /// `indent_level` to maintain indentation.
+    fn add_newlines(&mut self, count: usize) {
+        self.script.push_str(&"\n".repeat(count));
+        // TODO: Consider making indentation configurable from constants.rs
+        self.script.push_str(&" ".repeat(self.indent_level * 2));
     }
 }
 

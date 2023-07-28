@@ -5,7 +5,8 @@ use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
+    VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::intermediate_representation::symbol_table::TypeInfo;
@@ -272,7 +273,7 @@ impl IrPass for AnnotateBaseTypes {
     fn visit_primitives(
         &mut self,
         _mode: TreeTraversalMode,
-        _primitives: &mut HighlevelIr,
+        _primitives: &mut IntermediateRepresentation,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)

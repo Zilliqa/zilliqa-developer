@@ -411,7 +411,7 @@ impl PassExecutor for ConcreteFunction {
     }
 }
 
-impl HighlevelIr {
+impl IntermediateRepresentation {
     pub fn run_pass(&mut self, pass: &mut dyn IrPass) -> Result<TraversalResult, String> {
         for type_def in &mut self.type_definitions {
             type_def.visit(pass, &mut self.symbol_table)?;

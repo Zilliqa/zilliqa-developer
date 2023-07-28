@@ -154,12 +154,14 @@ impl<'ctx, 'module> UnsafeLlvmTestExecutor<'ctx, 'module> {
 }
 
 impl<'ctx, 'module> UnsafeContractExecutor for UnsafeLlvmTestExecutor<'ctx, 'module> {
-    unsafe fn execute(&self, name: &str) -> f64 {
+    unsafe fn execute(&self, name: &str) -> Result<Vec<u8>, String> {
+        // TODO: Workout how we deal with generic return values
         let function = self
             .execution_engine
             .get_function::<unsafe extern "C" fn() -> f64>(name)
             .expect("Unable to find the function");
-        function.call()
+        function.call();
+        Ok([].to_vec()) // TODO: Should be the result of the execution
     }
 
     unsafe fn link_symbol(&self, name: &str, addr: usize) {
