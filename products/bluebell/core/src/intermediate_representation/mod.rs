@@ -1,5 +1,5 @@
 pub mod emitter;
-pub mod intermediate_name_generator;
+pub mod name_generator;
 pub mod pass;
 pub mod pass_executor;
 pub mod pass_manager;

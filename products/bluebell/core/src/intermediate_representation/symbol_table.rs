@@ -1,4 +1,4 @@
-use crate::intermediate_representation::intermediate_name_generator::IntermediateNameGenerator;
+use crate::intermediate_representation::name_generator::NameGenerator;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -25,7 +25,7 @@ impl TypeInfo {
 pub struct SymbolTable {
     pub aliases: HashMap<String, String>,
     pub type_of_table: HashMap<String, Box<TypeInfo>>,
-    pub name_generator: IntermediateNameGenerator,
+    pub name_generator: NameGenerator,
 }
 
 impl SymbolTable {
@@ -35,7 +35,7 @@ impl SymbolTable {
         let mut ret = SymbolTable {
             aliases: HashMap::new(),
             type_of_table,
-            name_generator: IntermediateNameGenerator::new(),
+            name_generator: NameGenerator::new(),
         };
 
         // TODO: Get types from RuntimeModule
@@ -53,7 +53,7 @@ impl SymbolTable {
         ret
     }
 
-    pub fn get_name_generator(&mut self) -> &mut IntermediateNameGenerator {
+    pub fn get_name_generator(&mut self) -> &mut NameGenerator {
         &mut self.name_generator
     }
 

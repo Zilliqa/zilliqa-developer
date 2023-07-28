@@ -2,10 +2,10 @@
 mod tests {
     extern crate diffy;
     use bluebell::contract_executor::UnsafeContractExecutor;
-    use bluebell::intermediate_name_generator::IntermediateNameGenerator;
     use bluebell::intermediate_representation::emitter::IrEmitter;
     use bluebell::intermediate_representation::symbol_table::SymbolTable;
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
+    use bluebell::name_generator::NameGenerator;
     use bluebell::pass_executor::PassExecutor;
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
@@ -39,7 +39,7 @@ mod tests {
         match parser.parse(&mut errors, lexer) {
             Ok(ast) => {
                 /* TODO: Fix
-                let mut name_generator = IntermediateNameGenerator::new();
+                let mut name_generator = NameGenerator::new();
 
                 / ****** Executable ***** /
                 ///////

@@ -3,13 +3,13 @@ use crate::intermediate_representation::primitives::{
 };
 
 #[derive(Debug)]
-pub struct IntermediateNameGenerator {
+pub struct NameGenerator {
     anonymous_type_number: u64,
     intermediate_counter: u64,
     block_counter: u64,
 }
 
-impl IntermediateNameGenerator {
+impl NameGenerator {
     // TODO: Rename to NameManager or the like
     pub fn new() -> Self {
         Self {
