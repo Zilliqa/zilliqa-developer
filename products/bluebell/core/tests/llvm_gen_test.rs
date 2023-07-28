@@ -3,9 +3,9 @@ mod tests {
     extern crate diffy;
     use bluebell::contract_executor::UnsafeContractExecutor;
     use bluebell::intermediate_name_generator::IntermediateNameGenerator;
-    use bluebell::intermediate_representation::emitter::HighlevelIrEmitter;
+    use bluebell::intermediate_representation::emitter::IrEmitter;
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
-    use bluebell::pass_executor::HighlevelIrPassExecutor;
+    use bluebell::pass_executor::PassExecutor;
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
     use bluebell::primitives_debug_printer::DebugPrinter;
@@ -56,7 +56,7 @@ mod tests {
                 / *** Parsing *** /
                 /////
                 // AST -> Highlevel IR
-                let mut generator = HighlevelIrEmitter::new(&mut name_generator);
+                let mut generator = IrEmitter::new(&mut name_generator);
                 let mut ast2 = ast.clone();
                 // println!("AST: {:#?}\n\n", ast2);
                 let mut ir = generator

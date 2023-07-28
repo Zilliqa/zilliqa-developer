@@ -18,7 +18,7 @@ enum StackObject {
     FunctionBlock(Box<FunctionBlock>),
 }
 
-pub struct HighlevelIrEmitter {
+pub struct IrEmitter {
     stack: Vec<StackObject>,
 
     // Used for transition and procedure
@@ -35,7 +35,7 @@ pub struct HighlevelIrEmitter {
     ir: Box<HighlevelIr>,
 }
 
-impl HighlevelIrEmitter {
+impl IrEmitter {
     pub fn new() -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
@@ -47,7 +47,7 @@ impl HighlevelIrEmitter {
             is_definition: false,
         };
         // TODO: Repeat similar code for all literals
-        HighlevelIrEmitter {
+        IrEmitter {
             stack: Vec::new(),
             current_block,
             current_body,
@@ -211,7 +211,7 @@ impl HighlevelIrEmitter {
     }
 }
 
-impl AstConverting for HighlevelIrEmitter {
+impl AstConverting for IrEmitter {
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,

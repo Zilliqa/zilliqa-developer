@@ -1,7 +1,7 @@
 use crate::constants::NAMESPACE_SEPARATOR;
 use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::HighlevelIrPass;
-use crate::intermediate_representation::pass_executor::HighlevelIrPassExecutor;
+use crate::intermediate_representation::pass::IrPass;
+use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -87,7 +87,7 @@ impl CollectTypeDefinitionsPass {
     }
 }
 
-impl HighlevelIrPass for CollectTypeDefinitionsPass {
+impl IrPass for CollectTypeDefinitionsPass {
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,

@@ -16,8 +16,8 @@ use bluebell::evm_ir_generator::EvmIrGenerator;
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
-use bluebell::intermediate_representation::emitter::HighlevelIrEmitter;
-use bluebell::intermediate_representation::pass_manager::HighlevelIrPassManager;
+use bluebell::intermediate_representation::emitter::IrEmitter;
+use bluebell::intermediate_representation::pass_manager::PassManager;
 
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;
@@ -144,11 +144,11 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, _debug: bool) {
 
     ///////
     // Executable
-    let mut generator = HighlevelIrEmitter::new();
+    let mut generator = IrEmitter::new();
     let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
 
     /*** Analysis ***/
-    let mut pass_manager = HighlevelIrPassManager::default_pipeline();
+    let mut pass_manager = PassManager::default_pipeline();
 
     if let Err(err) = pass_manager.run(&mut ir) {
         panic!("{}", err);
@@ -237,11 +237,11 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 
     /////
     // Frontend: AST -> Highlevel IR
-    let mut generator = HighlevelIrEmitter::new();
+    let mut generator = IrEmitter::new();
     let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
 
     /*** Analysis ***/
-    let mut pass_manager = HighlevelIrPassManager::default_pipeline();
+    let mut pass_manager = PassManager::default_pipeline();
 
     if let Err(err) = pass_manager.run(&mut ir) {
         panic!("{}", err);

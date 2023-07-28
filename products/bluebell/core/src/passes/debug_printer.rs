@@ -1,6 +1,6 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::HighlevelIrPass;
-use crate::intermediate_representation::pass_executor::HighlevelIrPassExecutor;
+use crate::intermediate_representation::pass::IrPass;
+use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -12,7 +12,7 @@ pub struct DebugPrinter {
     script: String,
 }
 
-impl HighlevelIrPass for DebugPrinter {
+impl IrPass for DebugPrinter {
     fn visit_symbol_kind(
         &mut self,
         _mode: TreeTraversalMode,

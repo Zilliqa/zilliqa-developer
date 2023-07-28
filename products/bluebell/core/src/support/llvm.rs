@@ -3,8 +3,8 @@ use crate::lexer::Lexer;
 use crate::parser;
 
 use crate::contract_executor::UnsafeContractExecutor;
-use crate::intermediate_representation::emitter::HighlevelIrEmitter;
-use crate::intermediate_representation::pass_manager::HighlevelIrPassManager;
+use crate::intermediate_representation::emitter::IrEmitter;
+use crate::intermediate_representation::pass_manager::PassManager;
 use crate::llvm_ir_generator::LlvmIrGenerator;
 
 use inkwell::context::Context;
@@ -261,13 +261,13 @@ impl LlvmBackend {
         };
 
         let mut module = self.context.create_module(&name);
-        let mut generator = HighlevelIrEmitter::new();
+        let mut generator = IrEmitter::new();
         let mut ir = generator
             .emit(&ast)
             .expect("Failed generating highlevel IR");
 
         /*** Analysis ***/
-        let mut pass_manager = HighlevelIrPassManager::default_pipeline();
+        let mut pass_manager = PassManager::default_pipeline();
 
         if let Err(err) = pass_manager.run(&mut ir) {
             panic!("{}", err);

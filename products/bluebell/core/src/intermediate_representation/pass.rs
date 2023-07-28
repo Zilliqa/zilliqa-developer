@@ -2,7 +2,7 @@ use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
 use crate::symbol_table::SymbolTable;
 
-pub trait HighlevelIrPass {
+pub trait IrPass {
     fn visit_symbol_kind(
         &mut self,
         mode: TreeTraversalMode,

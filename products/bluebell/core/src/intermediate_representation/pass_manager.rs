@@ -1,13 +1,13 @@
-use crate::intermediate_representation::pass::HighlevelIrPass;
+use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::HighlevelIr;
 use crate::passes::annotate_base_types::AnnotateBaseTypes;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 
-pub struct HighlevelIrPassManager {
-    passes: Vec<Box<dyn HighlevelIrPass>>,
+pub struct PassManager {
+    passes: Vec<Box<dyn IrPass>>,
 }
 
-impl HighlevelIrPassManager {
+impl PassManager {
     pub fn new() -> Self {
         Self { passes: Vec::new() }
     }
@@ -21,7 +21,7 @@ impl HighlevelIrPassManager {
         ret
     }
 
-    pub fn add_pass(&mut self, pass: Box<dyn HighlevelIrPass>) {
+    pub fn add_pass(&mut self, pass: Box<dyn IrPass>) {
         self.passes.push(pass);
     }
 
