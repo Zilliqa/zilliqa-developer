@@ -6,7 +6,7 @@ use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
     HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
 };
-use crate::symbol_table::SymbolTable;
+use crate::intermediate_representation::symbol_table::SymbolTable;
 
 pub struct DebugPrinter {
     script: String,

@@ -1,4 +1,4 @@
-use crate::symbol_table::SymbolTable;
+use crate::intermediate_representation::symbol_table::SymbolTable;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum IrIndentifierKind {

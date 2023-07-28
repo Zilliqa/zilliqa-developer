@@ -1,4 +1,4 @@
-use crate::intermediate_name_generator::IntermediateNameGenerator;
+use crate::intermediate_representation::intermediate_name_generator::IntermediateNameGenerator;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]

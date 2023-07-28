@@ -1,6 +1,6 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
-use crate::symbol_table::SymbolTable;
+use crate::intermediate_representation::symbol_table::SymbolTable;
 
 pub trait IrPass {
     fn visit_symbol_kind(

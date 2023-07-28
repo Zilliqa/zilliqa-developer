@@ -9,9 +9,6 @@ pub mod intermediate_representation;
 pub mod passes;
 
 pub mod evm_ir_generator;
-
-pub mod intermediate_name_generator;
 pub mod llvm_ir_generator;
 pub mod parser;
 pub mod support;
-pub mod symbol_table;

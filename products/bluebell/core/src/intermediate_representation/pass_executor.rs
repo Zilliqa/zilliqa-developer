@@ -1,7 +1,7 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::*;
-use crate::symbol_table::SymbolTable;
+use crate::intermediate_representation::symbol_table::SymbolTable;
 
 pub trait PassExecutor {
     fn visit(
