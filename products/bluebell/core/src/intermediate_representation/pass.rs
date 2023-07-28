@@ -1,5 +1,5 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::highlevel_ir::*;
+use crate::intermediate_representation::primitives::*;
 use crate::symbol_table::SymbolTable;
 
 pub trait HighlevelIrPass {
@@ -82,10 +82,10 @@ pub trait HighlevelIrPass {
         con_function: &mut ConcreteFunction,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
-    fn visit_highlevel_ir(
+    fn visit_primitives(
         &mut self,
         mode: TreeTraversalMode,
-        highlevel_ir: &mut HighlevelIr,
+        primitives: &mut HighlevelIr,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
 }

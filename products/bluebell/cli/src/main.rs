@@ -16,8 +16,8 @@ use bluebell::evm_ir_generator::EvmIrGenerator;
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
-use bluebell::intermediate_representation::highlevel_ir_emitter::HighlevelIrEmitter;
-use bluebell::intermediate_representation::highlevel_ir_pass_manager::HighlevelIrPassManager;
+use bluebell::intermediate_representation::emitter::HighlevelIrEmitter;
+use bluebell::intermediate_representation::pass_manager::HighlevelIrPassManager;
 
 use bluebell::lexer::Lexer;
 use bluebell::ParserError;

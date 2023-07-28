@@ -338,5 +338,5 @@ impl HighlevelIr {
 pub trait IrLowering {
     fn lower_concrete_type(&mut self, con_type: &ConcreteType);
     fn lower_concrete_function(&mut self, con_function: &ConcreteFunction);
-    fn lower(&mut self, highlevel_ir: &HighlevelIr);
+    fn lower(&mut self, primitives: &HighlevelIr);
 }

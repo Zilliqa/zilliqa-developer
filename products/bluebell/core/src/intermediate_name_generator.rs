@@ -1,4 +1,4 @@
-use crate::intermediate_representation::highlevel_ir::{
+use crate::intermediate_representation::primitives::{
     FunctionBlock, IrIdentifier, IrIndentifierKind,
 };
 

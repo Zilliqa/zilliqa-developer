@@ -1,5 +1,5 @@
-use crate::intermediate_representation::highlevel_ir::HighlevelIr;
-use crate::intermediate_representation::highlevel_ir_pass::HighlevelIrPass;
+use crate::intermediate_representation::pass::HighlevelIrPass;
+use crate::intermediate_representation::primitives::HighlevelIr;
 use crate::passes::annotate_base_types::AnnotateBaseTypes;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 

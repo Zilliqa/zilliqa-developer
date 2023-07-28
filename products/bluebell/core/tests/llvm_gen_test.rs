@@ -2,13 +2,13 @@
 mod tests {
     extern crate diffy;
     use bluebell::contract_executor::UnsafeContractExecutor;
-    use bluebell::highlevel_ir_debug_printer::DebugPrinter;
-    use bluebell::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
     use bluebell::intermediate_name_generator::IntermediateNameGenerator;
-    use bluebell::intermediate_representation::highlevel_ir_emitter::HighlevelIrEmitter;
+    use bluebell::intermediate_representation::emitter::HighlevelIrEmitter;
     use bluebell::llvm_ir_generator::LlvmIrGenerator;
+    use bluebell::pass_executor::HighlevelIrPassExecutor;
     use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
     use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
+    use bluebell::primitives_debug_printer::DebugPrinter;
     use bluebell::support::llvm::UnsafeLlvmTestExecutor;
     use bluebell::symbol_table::SymbolTable;
     use core::ffi::c_char;

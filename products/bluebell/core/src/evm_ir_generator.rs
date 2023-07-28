@@ -1,5 +1,5 @@
-use crate::intermediate_representation::highlevel_ir::Operation;
-use crate::intermediate_representation::highlevel_ir::{
+use crate::intermediate_representation::primitives::Operation;
+use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, HighlevelIr, IrLowering,
 };
 use evm_assembly::block::EvmBlock;
@@ -260,12 +260,12 @@ impl<'ctx> IrLowering for EvmIrGenerator<'ctx> {
         unimplemented!()
     }
 
-    fn lower(&mut self, highlevel_ir: &HighlevelIr) {
-        for con_type in &highlevel_ir.type_definitions {
+    fn lower(&mut self, primitives: &HighlevelIr) {
+        for con_type in &primitives.type_definitions {
             self.lower_concrete_type(con_type);
         }
 
-        for con_function in &highlevel_ir.function_definitions {
+        for con_function in &primitives.function_definitions {
             self.lower_concrete_function(con_function);
         }
     }

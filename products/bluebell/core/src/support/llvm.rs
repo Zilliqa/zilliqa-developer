@@ -3,8 +3,8 @@ use crate::lexer::Lexer;
 use crate::parser;
 
 use crate::contract_executor::UnsafeContractExecutor;
-use crate::intermediate_representation::highlevel_ir_emitter::HighlevelIrEmitter;
-use crate::intermediate_representation::highlevel_ir_pass_manager::HighlevelIrPassManager;
+use crate::intermediate_representation::emitter::HighlevelIrEmitter;
+use crate::intermediate_representation::pass_manager::HighlevelIrPassManager;
 use crate::llvm_ir_generator::LlvmIrGenerator;
 
 use inkwell::context::Context;

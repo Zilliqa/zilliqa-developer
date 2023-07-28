@@ -1,12 +1,12 @@
 use crate::constants::NAMESPACE_SEPARATOR;
 use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::highlevel_ir::Instruction;
-use crate::intermediate_representation::highlevel_ir::{
+use crate::intermediate_representation::pass::HighlevelIrPass;
+use crate::intermediate_representation::pass_executor::HighlevelIrPassExecutor;
+use crate::intermediate_representation::primitives::Instruction;
+use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
     HighlevelIr, IrIdentifier, IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
 };
-use crate::intermediate_representation::highlevel_ir_pass::HighlevelIrPass;
-use crate::intermediate_representation::highlevel_ir_pass_executor::HighlevelIrPassExecutor;
 use crate::symbol_table::SymbolTable;
 
 pub struct CollectTypeDefinitionsPass {
@@ -270,10 +270,10 @@ impl HighlevelIrPass for CollectTypeDefinitionsPass {
         Ok(TraversalResult::SkipChildren)
     }
 
-    fn visit_highlevel_ir(
+    fn visit_primitives(
         &mut self,
         mode: TreeTraversalMode,
-        _highlevel_ir: &mut HighlevelIr,
+        _primitives: &mut HighlevelIr,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
