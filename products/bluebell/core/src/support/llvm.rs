@@ -1,6 +1,6 @@
-use crate::lexer;
-use crate::lexer::Lexer;
-use crate::parser;
+use crate::parser::lexer;
+use crate::parser::lexer::Lexer;
+use crate::parser::parser;
 
 use crate::contract_executor::UnsafeContractExecutor;
 use crate::intermediate_representation::emitter::IrEmitter;

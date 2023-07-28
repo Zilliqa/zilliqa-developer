@@ -5,7 +5,7 @@ mod tests {
     use super::*;
     use bluebell::ast::*;
     use bluebell::constants::*;
-    use bluebell::lexer;
+    use bluebell::parser::lexer;
     use bluebell::parser;
     use bluebell::type_classes::*;
     use bluebell::type_inference::*;

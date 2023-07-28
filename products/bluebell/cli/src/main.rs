@@ -19,9 +19,9 @@ use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 use bluebell::intermediate_representation::emitter::IrEmitter;
 use bluebell::intermediate_representation::pass_manager::PassManager;
 
-use bluebell::lexer::Lexer;
-use bluebell::ParserError;
-use bluebell::*;
+use bluebell::parser::lexer;
+use bluebell::parser::lexer::Lexer;
+use bluebell::parser::{parser, ParserError};
 
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executor::EvmExecutor;

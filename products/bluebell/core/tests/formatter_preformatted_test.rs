@@ -2,9 +2,9 @@
 mod tests {
     extern crate diffy;
     use bluebell::formatter::BluebellFormatter;
-    use bluebell::lexer;
-    use bluebell::lexer::Lexer;
-    use bluebell::parser;
+    use bluebell::parser::lexer;
+    use bluebell::parser::lexer::Lexer;
+    use bluebell::parser::parser;
     use bluebell::ParserError;
     use bluebell::*;
     use diffy::{create_patch, PatchFormatter};

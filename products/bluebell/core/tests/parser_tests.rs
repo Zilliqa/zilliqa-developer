@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use bluebell::lexer;
-    use bluebell::lexer::Lexer;
-    use bluebell::parser;
+    use bluebell::parser::lexer;
+    use bluebell::parser::lexer::Lexer;
+    use bluebell::parser::parser;
 
     use std::collections::HashMap;
     use std::env;
@@ -14,7 +14,7 @@ mod tests {
         ($parser:ty, $result:expr) => {
             let mut errors = vec![];
             assert!(<$parser>::new()
-                .parse(&mut errors, bluebell::lexer::Lexer::new($result))
+                .parse(&mut errors, bluebell::parser::lexer::Lexer::new($result))
                 .is_ok());
         };
     }
@@ -23,7 +23,7 @@ mod tests {
         ($parser:ty, $result:expr) => {
             let mut errors = vec![];
             assert!(<$parser>::new()
-                .parse(&mut errors, bluebell::lexer::Lexer::new($result))
+                .parse(&mut errors, bluebell::parser::lexer::Lexer::new($result))
                 .is_err());
         };
     }

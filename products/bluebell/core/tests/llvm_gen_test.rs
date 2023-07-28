@@ -16,9 +16,9 @@ mod tests {
     use inkwell::context::Context;
     use inkwell::targets::{InitializationConfig, Target};
 
-    use bluebell::lexer;
-    use bluebell::lexer::Lexer;
     use bluebell::parser;
+    use bluebell::parser::lexer;
+    use bluebell::parser::lexer::Lexer;
     use bluebell::ParserError;
 
     use std::fs;
