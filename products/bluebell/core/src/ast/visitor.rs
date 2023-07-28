@@ -1,5 +1,5 @@
-use crate::ast::*;
-use crate::ast_converting::AstConverting;
+use crate::ast::converting::AstConverting;
+use crate::ast::nodes::*;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 
 pub trait AstVisitor {

@@ -1,6 +1,6 @@
-use crate::ast::*;
-use crate::ast_converting::AstConverting;
-use crate::ast_visitor::AstVisitor;
+use crate::ast::converting::AstConverting;
+use crate::ast::nodes::*;
+use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::highlevel_ir::*;
 

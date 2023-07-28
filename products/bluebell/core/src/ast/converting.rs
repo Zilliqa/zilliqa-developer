@@ -1,4 +1,4 @@
-use crate::ast::*;
+use crate::ast::nodes::*;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 
 pub trait AstConverting {

@@ -1,4 +1,4 @@
-use crate::ast::*;
+use crate::ast::nodes::*;
 use crate::lexer;
 
 grammar<'err, 'input>(errors: &'err mut Vec<lexer::ParseError>);

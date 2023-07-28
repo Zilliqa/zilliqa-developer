@@ -8,7 +8,7 @@ use std::io::Read;
 use std::os::raw::c_char;
 use std::process;
 
-use bluebell::ast::NodeProgram;
+use bluebell::ast::nodes::NodeProgram;
 use bluebell::contract_executor::UnsafeContractExecutor;
 use bluebell::highlevel_ir_debug_printer::HighlevelIrDebugPrinter;
 use bluebell::highlevel_ir_emitter::HighlevelIrEmitter;
