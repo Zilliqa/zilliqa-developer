@@ -459,6 +459,12 @@ impl HighlevelIrPass for AnnotateBaseTypes {
                     "Void".to_string() // TODO: specify somewhere
                 }
             }
+            Operation::Revert(n) | Operation::Return(n) => {
+                match n {
+                    Some(_) => todo!(),
+                    None => "Void".to_string(), // TODO: specify somewhere
+                }
+            }
         };
 
         //instr.operation.type_reference = Some(typename);

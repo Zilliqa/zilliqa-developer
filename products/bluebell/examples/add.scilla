@@ -7,5 +7,5 @@ contract TheContractPart()
 transition hello()
   a = Uint64 23;
   b = Uint64 209;
-  x = builtin add a b
+  x = builtin fibonacci a b
 end

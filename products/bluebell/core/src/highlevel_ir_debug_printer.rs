@@ -219,6 +219,26 @@ impl HighlevelIrPass for HighlevelIrDebugPrinter {
                 }
                 self.script.push_str("]");
             }
+            Operation::Return(arg) => {
+                self.script.push_str("return");
+                match arg {
+                    Some(r) => {
+                        self.script.push_str(" ");
+                        r.visit(self, symbol_table)?;
+                    }
+                    &mut None => todo!(),
+                };
+            }
+            Operation::Revert(arg) => {
+                self.script.push_str("revert");
+                match arg {
+                    Some(r) => {
+                        self.script.push_str(" ");
+                        r.visit(self, symbol_table)?;
+                    }
+                    &mut None => todo!(),
+                };
+            }
         }
         Ok(TraversalResult::SkipChildren)
     }

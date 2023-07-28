@@ -55,7 +55,8 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                 .build(|code_builder| {
                     let mut ret: Vec<EvmBlock> = Vec::new();
 
-                    // TODO: deal with arguments
+                    // Return PC + Arguments are expected to be on the stack
+
                     for block in &func.body.blocks {
                         let block_name = match block.name.qualified_name() {
                             Ok(b) => b,
@@ -63,6 +64,7 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                         };
                         let mut blk = EvmBlock::new(None, &block_name);
 
+                        println!("Block: {:#?}", block);
                         for instr in &block.instructions {
                             match instr.operation {
                                 Operation::CallExternalFunction {
@@ -73,7 +75,6 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                                     let _ = arguments;
                                     println!("\n");
                                     println!("Argumnets: {:?}", arguments);
-                                    // Copying arguments
 
                                     // Invoking
                                     let qualified_name = match &name.resolved {
@@ -91,10 +92,40 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                                     };
 
                                     let ctx = &code_builder.context;
+                                    // We have three types of calls:
+                                    // - Precompiles / external function
+                                    // - Inline assembler generics
+                                    // - Internal calls
+
                                     if ctx.function_declarations.contains_key(qualified_name) {
-                                        // Ordinary function
-                                        unimplemented!()
+                                        let signature = match ctx.get_function(qualified_name) {
+                                            Some(s) => s,
+                                            None => panic!(
+                                                "Internal error: Unable to retrieve function"
+                                            ),
+                                        };
+                                        let mut args: Vec<String> = Vec::new();
+                                        println!("Resolving arguments {:?}", arguments);
+                                        for arg in arguments {
+                                            match &arg.resolved {
+                                                Some(n) => args.push(n.to_string()),
+                                                None => panic!("Argument name was not resolved"),
+                                            }
+                                        }
+                                        // Precompiled or external function
+                                        blk.call(signature, args);
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
+                                        // Copying arguments
+                                        for arg in arguments {
+                                            match &arg.resolved {
+                                                Some(n) => match blk.duplicate_stack_name(n) {
+                                                    Err(e) => panic!("{}", e),
+                                                    _ => (),
+                                                },
+                                                None => panic!("Argument name was not resolved"),
+                                            }
+                                        }
+
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
                                         let f = ctx.inline_generics.get(&name.unresolved).unwrap();
@@ -121,7 +152,6 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                                         Ok(v) => v,
                                         _ => panic!("Qualified name could not be resolved"),
                                     };
-                                    println!("\nCreating literal: {:?}", instr);
                                     let ssa_name = match &instr.ssa_name {
                                         Some(v) => match &v.resolved {
                                             Some(x) => x,
@@ -142,16 +172,18 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                                                 _ => panic!("Could not resolve SSA qualified name"),
                                             };
                                             let payload = data.clone().into_bytes();
-                                            println!(
-                                                "{}: {}",
-                                                ssa_name,
-                                                hex::encode(payload.clone())
-                                            );
                                             code_builder.data.push((ssa_name, payload));
+                                            todo!()
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
                                             blk.push(value.to_bytes_unpadded());
+                                            match blk.register_stack_name(ssa_name) {
+                                                Err(_) => {
+                                                    panic!("Failed to register SSA stack name.")
+                                                }
+                                                _ => (),
+                                            }
                                         }
                                         // TODO: add cases for other types of literals here if needed
                                         _ => {
@@ -165,13 +197,25 @@ impl<'ctx> EvmIrGenerator<'ctx> {
                                         }
                                     }
                                 }
-
+                                Operation::Return(ref value) => {
+                                    match value {
+                                        Some(_value) => {
+                                            todo!();
+                                            // TODO: write return to the stack
+                                            blk.r#return();
+                                        }
+                                        None => {
+                                            blk.push([0x00].to_vec());
+                                            blk.dup1();
+                                            blk.r#return();
+                                        }
+                                    }
+                                }
                                 _ => {
                                     println!("Unhandled instruction: {:#?}", instr);
                                     unimplemented!() // Add handling for other operations here
                                 }
                             }
-                            println!("{:?}", instr);
                         }
 
                         ret.push(blk);

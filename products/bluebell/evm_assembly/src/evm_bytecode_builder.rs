@@ -185,7 +185,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         first_block.revert();
 
         let mut switch_block = EvmBlock::new(None, "switch");
-        // TODO: Fix this switch_block.pop(); 0 Oribabky remove dup1()?
+        switch_block.pop(); // 0 Oribabky remove dup1()?
         switch_block.push1([0x04].to_vec()); // Checking that the size of call args
         switch_block.calldatasize();
         switch_block.lt();
@@ -308,10 +308,11 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                                 None => 0,
                             };
                             format!(
-                                "[0x{:02x}: 0x{:02x}] {}",
+                                "[0x{:02x}: 0x{:02x}] {}  ;; {}",
                                 position,
                                 instr.opcode.as_u8(),
-                                instr.opcode.to_string()
+                                instr.opcode.to_string(),
+                                instr.stack_size
                             )
                         }
                     })
@@ -321,7 +322,10 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                     Some(v) => v,
                     None => 0,
                 };
-                format!("{}: ;; Starts at 0x{:02x} \n{}", block.name, position, code)
+                format!(
+                    "{}: ;; Starts at 0x{:02x}  u8[{}] \n{}",
+                    block.name, position, block.consumes, code
+                )
             })
             .collect::<Vec<String>>()
             .join("\n\n");
@@ -359,10 +363,11 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                                     None => 0,
                                 };
                                 format!(
-                                    "[0x{:02x}: 0x{:02x}] {}",
+                                    "[0x{:02x}: 0x{:02x}] {} ;; {}",
                                     position,
                                     instr.opcode.as_u8(),
-                                    instr.opcode.to_string()
+                                    instr.opcode.to_string(),
+                                    instr.stack_size
                                 )
                             }
                         })
@@ -372,7 +377,10 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                         Some(v) => v,
                         None => 0,
                     };
-                    format!("{}: ;; Starts at 0x{:02x} \n{}", block.name, position, code)
+                    format!(
+                        "{}: ;; Starts at 0x{:02x} u8[{}]\n{}",
+                        block.name, position, block.consumes, code
+                    )
                 })
                 .collect::<Vec<String>>()
                 .join("\n\n");

@@ -63,7 +63,7 @@ impl<'a> EvmExecutor<'a> {
 
         // Call the 0x10 contract using the 0xf0 user.
         // Use the input variable.
-        let (_exit_reason, _result) = executor.transact_call(
+        let (exit_reason, result) = executor.transact_call(
             H160::from_str("0xf000000000000000000000000000000000000000").unwrap(),
             H160::from_str("0x1000000000000000000000000000000000000000").unwrap(),
             U256::zero(),
@@ -71,5 +71,8 @@ impl<'a> EvmExecutor<'a> {
             u64::MAX,
             Vec::new(),
         );
+
+        println!("Exit reason: {:#?}", exit_reason);
+        println!("Result: {:#?}", result);
     }
 }

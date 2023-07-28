@@ -217,6 +217,15 @@ impl HighlevelIrPassExecutor for Operation {
                     Ok(TraversalResult::Continue)
                 }
                 Operation::Noop => Ok(TraversalResult::Continue),
+                Operation::Return(arg) | Operation::Revert(arg) => {
+                    match arg {
+                        Some(a) => {
+                            a.visit(pass, symbol_table)?;
+                        }
+                        _ => (),
+                    }
+                    Ok(TraversalResult::Continue)
+                }
             }
         } else {
             ret

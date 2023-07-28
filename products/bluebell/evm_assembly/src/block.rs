@@ -1,6 +1,6 @@
 use crate::function_signature::EvmFunctionSignature;
 use crate::instruction::EvmInstruction;
-use crate::opcode_spec::OpcodeSpecification;
+use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
 use crate::types::EvmTypeValue;
 use evm::Opcode;
 use std::collections::HashMap;
@@ -15,7 +15,10 @@ pub struct EvmBlock {
     pub is_terminated: bool,
     pub is_lookup_table: bool,
 
+    pub consumes: i32,
+    pub produces: i32,
     stack_counter: i32,
+
     name_location: HashMap<String, i32>,
 }
 
@@ -29,6 +32,8 @@ impl EvmBlock {
             is_entry: false,
             is_terminated: false,
             is_lookup_table: false,
+            consumes: 0,
+            produces: 0,
             stack_counter: 0,
             name_location: HashMap::new(),
         };
@@ -38,17 +43,107 @@ impl EvmBlock {
         ret
     }
 
+    pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
+        if self.name_location.contains_key(name) {
+            return Err(format!("SSA name {} already exists", name));
+        }
+
+        // TODO: assumes that args are first in, last out
+        self.name_location.insert(name.to_string(), -arg_number);
+
+        // TODO: Consider pruning of the names
+
+        Ok(())
+    }
+
     pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
         if self.name_location.contains_key(name) {
             return Err(format!("SSA name {} already exists", name));
         }
 
+        println!("Registering stack entry: {}: {}", name, self.stack_counter);
         self.name_location
             .insert(name.to_string(), self.stack_counter);
 
         // TODO: Consider pruning of the names
 
         Ok(())
+    }
+
+    pub fn duplicate_stack_name(&mut self, name: &str) -> Result<(), String> {
+        match self.name_location.get(name) {
+            Some(pos) => {
+                let n = self.stack_counter - pos + 1;
+                match n {
+                    1 => {
+                        self.dup1();
+                        Ok(())
+                    }
+                    2 => {
+                        self.dup2();
+                        Ok(())
+                    }
+                    3 => {
+                        self.dup3();
+                        Ok(())
+                    }
+                    4 => {
+                        self.dup4();
+                        Ok(())
+                    }
+                    5 => {
+                        self.dup5();
+                        Ok(())
+                    }
+                    6 => {
+                        self.dup6();
+                        Ok(())
+                    }
+                    7 => {
+                        self.dup7();
+                        Ok(())
+                    }
+                    8 => {
+                        self.dup8();
+                        Ok(())
+                    }
+                    9 => {
+                        self.dup9();
+                        Ok(())
+                    }
+                    10 => {
+                        self.dup10();
+                        Ok(())
+                    }
+                    11 => {
+                        self.dup11();
+                        Ok(())
+                    }
+                    12 => {
+                        self.dup12();
+                        Ok(())
+                    }
+                    13 => {
+                        self.dup13();
+                        Ok(())
+                    }
+                    14 => {
+                        self.dup14();
+                        Ok(())
+                    }
+                    15 => {
+                        self.dup15();
+                        Ok(())
+                    }
+                    16 => {
+                        self.dup16();
+                        Ok(())
+                    }
+                    _ => Err("Stack overflow.".to_string()),
+                }
+            }
+            None => Err(format!("Failed to find SSA name {} on stack", name)),
+        }
     }
 
     pub fn call_internal(
@@ -59,14 +154,13 @@ impl EvmBlock {
         todo!()
     }
 
-    pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmTypeValue>) -> &mut Self {
-        println!("Calling {:?}", function);
-        println!("Args: {:?}", args);
+    pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<String>) -> &mut Self {
         let address = match function.external_address {
             Some(a) => a,
             None => panic!("TODO: Internal calls not supported yet."),
         };
         // TODO: Deal with internal calls
+        // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4
         self.push1([0x40].to_vec());
         self.mload(); // Stack element is the pointer
 
@@ -74,7 +168,7 @@ impl EvmBlock {
             self.dup1();
             self.push1([(i * 0x20) as u8].to_vec());
             self.add();
-            self.push1([0x20].to_vec()); // Length of the argument
+            self.push1([0x20].to_vec()); // Length of the argument, TODO: Get length
             self.mstore();
         }
 
@@ -83,29 +177,30 @@ impl EvmBlock {
             self.dup1();
             self.push1([(j * 0x20) as u8].to_vec());
             self.add();
-            self.push(arg.to_bytes_unpadded());
+            let _ = self.duplicate_stack_name(arg); // TODO: Propagate error if this fails
             self.mstore();
         }
 
-        let gas = EvmTypeValue::Uint32(21000);
+        let gas = EvmTypeValue::Uint32(21000); // TODO: How to compute this or where to get it from
         let address = EvmTypeValue::Uint32(address);
         let argsize = EvmTypeValue::Uint32(2 * (args.len() * 0x20) as u32); // Each argument is 32 byte long
 
-        self.push([0x20].to_vec()); //return size, TODO
+        self.push([0x20].to_vec()); //return size, TODO: Compute the size of the return type
         self.dup2(); //
         self.push(argsize.to_bytes_unpadded());
         self.dup4(); // p
         self.push(address.to_bytes_unpadded());
         self.push(gas.to_bytes_unpadded());
 
-        self.external_staticcall();
+        // TODO: How come self.external_call(); does not call the precompile?
+        // self.external_staticcall();
 
         self
     }
 
     pub fn extract_blocks_from_bytecode(
         bytecode: &Vec<u8>,
-        opcode_specs: &HashMap<u8, OpcodeSpecification>,
+        _opcode_specs: &HashMap<u8, OpcodeSpecification>, // TODO: remove
     ) -> (Vec<EvmBlock>, Vec<u8>) {
         let mut blocks: Vec<EvmBlock> = Vec::new();
         let mut block_counter = 0;
@@ -116,30 +211,21 @@ impl EvmBlock {
         let offset = 0;
         let mut i = offset;
         while i < bytecode.len() {
-            let spec = match opcode_specs.get(&bytecode[i]) {
-                Some(spec) => spec,
-                _ => {
-                    if let Some(instr) = current_block.instructions.last() {
-                        println!("Last instruction:\n{:#?}", instr);
-                        println!("Opcode name: {}", instr.opcode.to_string());
-                    }
-                    panic!("No spec found for opcode 0x{:02x}", bytecode[i]);
-                }
-            };
-
+            let opcode = Opcode(bytecode[i]);
+            let is_terminator = opcode.is_terminator();
+            let mut collect_args = opcode.bytecode_arguments();
+            // TODO: Use write_instruction
             let mut instr = EvmInstruction {
                 position: Some(i),
-                opcode: Opcode(bytecode[i]),
+                opcode,
                 arguments: Vec::new(),
                 unresolved_label: None,
 
-                stack_consumed: spec.stack_consumed,
-                stack_produced: spec.stack_produced,
-                is_terminator: spec.is_terminator,
+                stack_size: 0, // TODO: Should be calculated using write_instruction
+                is_terminator,
             };
 
             i += 1;
-            let mut collect_args = spec.bytecode_arguments;
             if i + collect_args > bytecode.len() {
                 panic!("This is not good - we exceed the byte code");
             }
@@ -161,7 +247,7 @@ impl EvmBlock {
 
             // A terminated block followed by an invalid opcode starts the data section.
             // TODO: Find some spec to confirm this assumption
-            if spec.is_terminator {
+            if is_terminator {
                 if Opcode(bytecode[i]) == Opcode::INVALID {
                     i += 1;
 
@@ -182,168 +268,32 @@ impl EvmBlock {
     }
 
     fn update_stack(&mut self, opcode: Opcode) {
-        let change: i32 = match opcode {
-            Opcode::STOP => -0 + 0,
-            Opcode::ADD => -2 + 1,
-            Opcode::MUL => -2 + 1,
-            Opcode::SUB => -2 + 1,
-            Opcode::DIV => -2 + 1,
-            Opcode::SDIV => -2 + 1,
-            Opcode::MOD => -2 + 1,
-            Opcode::SMOD => -2 + 1,
-            Opcode::ADDMOD => -3 + 1,
-            Opcode::MULMOD => -3 + 1,
-            Opcode::EXP => -2 + 1,
-            Opcode::SIGNEXTEND => -2 + 1,
-            Opcode::LT => -2 + 1,
-            Opcode::GT => -2 + 1,
-            Opcode::SLT => -2 + 1,
-            Opcode::SGT => -2 + 1,
-            Opcode::EQ => -2 + 1,
-            Opcode::ISZERO => -1 + 1,
-            Opcode::AND => -2 + 1,
-            Opcode::OR => -2 + 1,
-            Opcode::XOR => -2 + 1,
-            Opcode::NOT => -1 + 1,
-            Opcode::BYTE => -2 + 1,
-            Opcode::CALLDATALOAD => -1 + 1,
-            Opcode::CALLDATASIZE => -0 + 1,
-            Opcode::CALLDATACOPY => -3 + 0,
-            Opcode::CODESIZE => -0 + 1,
-            Opcode::CODECOPY => -3 + 0,
-            Opcode::SHL => -2 + 1,
-            Opcode::SHR => -2 + 1,
-            Opcode::SAR => -2 + 1,
-            Opcode::POP => -1 + 0,
-            Opcode::MLOAD => -1 + 1,
-            Opcode::MSTORE => -2 + 0,
-            Opcode::MSTORE8 => -2 + 0,
-            Opcode::JUMP => -1 + 0,
-            Opcode::JUMPI => -2 + 0,
-            Opcode::PC => -0 + 1,
-            Opcode::MSIZE => -0 + 1,
-            Opcode::JUMPDEST => -0 + 0,
-            Opcode::PUSH1 => -0 + 1,
-            Opcode::PUSH2 => -0 + 1,
-            Opcode::PUSH3 => -0 + 1,
-            Opcode::PUSH4 => -0 + 1,
-            Opcode::PUSH5 => -0 + 1,
-            Opcode::PUSH6 => -0 + 1,
-            Opcode::PUSH7 => -0 + 1,
-            Opcode::PUSH8 => -0 + 1,
-            Opcode::PUSH9 => -0 + 1,
-            Opcode::PUSH10 => -0 + 1,
-            Opcode::PUSH11 => -0 + 1,
-            Opcode::PUSH12 => -0 + 1,
-            Opcode::PUSH13 => -0 + 1,
-            Opcode::PUSH14 => -0 + 1,
-            Opcode::PUSH15 => -0 + 1,
-            Opcode::PUSH16 => -0 + 1,
-            Opcode::PUSH17 => -0 + 1,
-            Opcode::PUSH18 => -0 + 1,
-            Opcode::PUSH19 => -0 + 1,
-            Opcode::PUSH20 => -0 + 1,
-            Opcode::PUSH21 => -0 + 1,
-            Opcode::PUSH22 => -0 + 1,
-            Opcode::PUSH23 => -0 + 1,
-            Opcode::PUSH24 => -0 + 1,
-            Opcode::PUSH25 => -0 + 1,
-            Opcode::PUSH26 => -0 + 1,
-            Opcode::PUSH27 => -0 + 1,
-            Opcode::PUSH28 => -0 + 1,
-            Opcode::PUSH29 => -0 + 1,
-            Opcode::PUSH30 => -0 + 1,
-            Opcode::PUSH31 => -0 + 1,
-            Opcode::PUSH32 => -0 + 1,
-            Opcode::DUP1 => -1 + 2,
-            Opcode::DUP2 => -2 + 3,
-            Opcode::DUP3 => -3 + 4,
-            Opcode::DUP4 => -4 + 5,
-            Opcode::DUP5 => -5 + 6,
-            Opcode::DUP6 => -6 + 7,
-            Opcode::DUP7 => -7 + 8,
-            Opcode::DUP8 => -8 + 9,
-            Opcode::DUP9 => -9 + 10,
-            Opcode::DUP10 => -10 + 11,
-            Opcode::DUP11 => -11 + 12,
-            Opcode::DUP12 => -12 + 13,
-            Opcode::DUP13 => -13 + 14,
-            Opcode::DUP14 => -14 + 15,
-            Opcode::DUP15 => -15 + 16,
-            Opcode::DUP16 => -16 + 17,
-            Opcode::SWAP1 => -2 + 2,
-            Opcode::SWAP2 => -3 + 3,
-            Opcode::SWAP3 => -4 + 4,
-            Opcode::SWAP4 => -5 + 5,
-            Opcode::SWAP5 => -6 + 6,
-            Opcode::SWAP6 => -7 + 7,
-            Opcode::SWAP7 => -8 + 8,
-            Opcode::SWAP8 => -9 + 9,
-            Opcode::SWAP9 => -10 + 10,
-            Opcode::SWAP10 => -11 + 11,
-            Opcode::SWAP11 => -12 + 12,
-            Opcode::SWAP12 => -13 + 13,
-            Opcode::SWAP13 => -14 + 14,
-            Opcode::SWAP14 => -15 + 15,
-            Opcode::SWAP15 => -16 + 16,
-            Opcode::SWAP16 => -17 + 17,
-            Opcode::RETURN => -2 + 0,
-            Opcode::REVERT => -2 + 0,
-            Opcode::INVALID => -0 + 0,
-            Opcode::EOFMAGIC => -0 + 0,
-            Opcode::SHA3 => -2 + 1,
-            Opcode::ADDRESS => -0 + 1,
-            Opcode::BALANCE => -1 + 1,
-            Opcode::SELFBALANCE => -0 + 1,
-            Opcode::BASEFEE => -0 + 1,
-            Opcode::ORIGIN => -0 + 1,
-            Opcode::CALLER => -0 + 1,
-            Opcode::CALLVALUE => -0 + 1,
-            Opcode::GASPRICE => -0 + 1,
-            Opcode::EXTCODESIZE => -1 + 1,
-            Opcode::EXTCODECOPY => -4 + 0,
-            Opcode::EXTCODEHASH => -1 + 1,
-            Opcode::RETURNDATASIZE => -0 + 1,
-            Opcode::RETURNDATACOPY => -3 + 0,
-            Opcode::BLOCKHASH => -1 + 1,
-            Opcode::COINBASE => -0 + 1,
-            Opcode::TIMESTAMP => -0 + 1,
-            Opcode::NUMBER => -0 + 1,
-            Opcode::DIFFICULTY => -0 + 0,
-            Opcode::GASLIMIT => -0 + 1,
-            Opcode::SLOAD => -1 + 1,
-            Opcode::SSTORE => -1 + 1,
-            Opcode::GAS => -0 + 1,
-            Opcode::LOG0 => -2 + 0,
-            Opcode::LOG1 => -3 + 0,
-            Opcode::LOG2 => -4 + 0,
-            Opcode::LOG3 => -5 + 0,
-            Opcode::LOG4 => -6 + 0,
-            Opcode::CREATE => -3 + 1,
-            Opcode::CREATE2 => -4 + 1,
-            Opcode::CALL => -7 + 1,
-            Opcode::CALLCODE => -7 + 1,
-            Opcode::DELEGATECALL => -6 + 1,
-            Opcode::STATICCALL => -6 + 1,
-            Opcode::SUICIDE => -0 + 0,
-            Opcode::CHAINID => -0 + 1,
-            _ => todo!(),
-        };
-        self.stack_counter += change;
+        let consumes: i32 = opcode.stack_consumed();
+        let produces: i32 = opcode.stack_produced();
+
+        self.stack_counter -= consumes;
+
+        if self.stack_counter < 0 {
+            self.consumes = std::cmp::max(self.consumes, -self.stack_counter);
+        }
+
+        self.stack_counter += produces;
 
         println!(
             "{}",
             format!(
                 "Code: {:?} -> {} {}",
                 opcode.to_string(),
-                change,
+                produces - consumes,
                 self.stack_counter
             )
         );
 
+        /*
         if self.stack_counter < 0 {
             panic!("Encountered negative stack counter.");
         }
+        */
     }
 
     pub fn write_instruction(
@@ -351,34 +301,33 @@ impl EvmBlock {
         opcode: Opcode,
         unresolved_label: Option<String>,
     ) -> &mut Self {
-        self.update_stack(opcode.clone());
         self.instructions.push(EvmInstruction {
             position: None,
-            opcode,
+            opcode: opcode.clone(),
             arguments: [].to_vec(),
-
             unresolved_label,
 
-            stack_consumed: 0,
-            stack_produced: 0,
+            stack_size: self.stack_counter as usize,
             is_terminator: false,
         });
+
+        self.update_stack(opcode);
         self
     }
 
     pub fn write_instruction_with_args(&mut self, opcode: Opcode, arguments: Vec<u8>) -> &mut Self {
-        self.update_stack(opcode.clone());
         self.instructions.push(EvmInstruction {
             position: None,
-            opcode,
+            opcode: opcode.clone(),
             arguments,
 
             unresolved_label: None,
 
-            stack_consumed: 0,
-            stack_produced: 0,
+            stack_size: self.stack_counter as usize,
             is_terminator: false,
         });
+
+        self.update_stack(opcode);
         self
     }
 

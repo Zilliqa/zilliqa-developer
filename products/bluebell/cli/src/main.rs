@@ -133,9 +133,13 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, _debug: bool) {
     specification.declare_unsigned_integer("Uint256", 256);
 
     let _ = specification
-        .declare_function("fibonacci", ["Uint256"].to_vec(), "Uint256")
+        .declare_function(
+            "builtin__fibonacci::<Uint64,Uint64>",
+            ["Uint256", "Uint256"].to_vec(),
+            "Uint256",
+        )
         .attach_runtime(|| test_precompile);
-    let _ = specification.declare_inline_generics("builtin__add", |block, _args| {
+    let _ = specification.declare_inline_generics("builtin__add", |block, _arg_types| {
         block.add();
         Ok(())
     });

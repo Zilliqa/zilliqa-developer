@@ -189,6 +189,9 @@ pub enum Operation {
     },
     AcceptTransfer,
     PhiNode(Vec<IrIdentifier>),
+
+    Return(Option<IrIdentifier>),
+    Revert(Option<IrIdentifier>),
 }
 
 #[derive(Debug, Clone)]

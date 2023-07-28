@@ -1248,7 +1248,21 @@ impl AstConverting for HighlevelIrEmitter {
         let _ = node.body.visit(self)?;
 
         // Exit
-        let body = self.pop_function_body()?;
+        let mut body = self.pop_function_body()?;
+
+        if let Some(ref mut last_block) = &mut body.blocks.last_mut() {
+            if !last_block.terminated {
+                // let last_block = last_block.clone();
+                // Terminates the block with a void return in the event it is not terminated.
+                last_block.instructions.push(Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::Return(None),
+                }));
+                last_block.terminated = true;
+            }
+        }
+
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
         function_name.kind = IrIndentifierKind::TransitionName;
