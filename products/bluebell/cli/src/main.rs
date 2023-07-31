@@ -371,7 +371,9 @@ fn main() {
                 "{}",
                 " ".repeat(char_counter + format!("Line {},{}:", line_counter, char_counter).len())
             );
-            println!("{}", "^".repeat(pos[1] - pos[0]));
+            if pos.len() > 1 {
+                println!("{}", "^".repeat(pos[1] - pos[0]));
+            }
 
             let my_error = ParserError {
                 message,

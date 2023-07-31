@@ -5,6 +5,11 @@ library TheLibraryPart
 contract TheContractPart()
 
 transition hello()
-  msg = "Zilliqa Rocks!";
-  x = builtin print msg
+  msg1 = "Zilliqa Rocks!";
+  msg2 = "Zilliqa Matches!";
+  b = True;
+  match b with
+    | True => x = builtin print msg1
+    | False => x = builtin print msg2
+  end
 end
