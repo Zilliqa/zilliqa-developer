@@ -14,62 +14,62 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import 'cross-fetch/polyfill';
-import { WithRequest } from './util';
+import "cross-fetch/polyfill";
+import { WithRequest } from "./util";
 
 /**
  * blockchain-side.
  */
 export enum RPCMethod {
   // Network-related methods
-  GetNetworkId = 'GetNetworkId',
+  GetNetworkId = "GetNetworkId",
 
   // Blockchain-related methods
-  GetBlockchainInfo = 'GetBlockchainInfo',
-  GetShardingStructure = 'GetShardingStructure',
-  GetDSBlock = 'GetDsBlock',
-  GetLatestDSBlock = 'GetLatestDsBlock',
-  GetNumDSBlocks = 'GetNumDSBlocks',
-  GetDSBlockRate = 'GetDSBlockRate',
-  DSBlockListing = 'DSBlockListing',
-  GetTxBlock = 'GetTxBlock',
-  GetLatestTxBlock = 'GetLatestTxBlock',
-  GetNumTxBlocks = 'GetNumTxBlocks',
-  GetTxBlockRate = 'GetTxBlockRate',
-  TxBlockListing = 'TxBlockListing',
-  GetNumTransactions = 'GetNumTransactions',
-  GetTransactionRate = 'GetTransactionRate',
-  GetCurrentMiniEpoch = 'GetCurrentMiniEpoch',
-  GetCurrentDSEpoch = 'GetCurrentDSEpoch',
-  GetPrevDifficulty = 'GetPrevDifficulty',
-  GetPrevDSDifficulty = 'GetPrevDSDifficulty',
-  GetTotalCoinSupply = 'GetTotalCoinSupply',
-  GetMinerInfo = 'GetMinerInfo',
+  GetBlockchainInfo = "GetBlockchainInfo",
+  GetShardingStructure = "GetShardingStructure",
+  GetDSBlock = "GetDsBlock",
+  GetLatestDSBlock = "GetLatestDsBlock",
+  GetNumDSBlocks = "GetNumDSBlocks",
+  GetDSBlockRate = "GetDSBlockRate",
+  DSBlockListing = "DSBlockListing",
+  GetTxBlock = "GetTxBlock",
+  GetLatestTxBlock = "GetLatestTxBlock",
+  GetNumTxBlocks = "GetNumTxBlocks",
+  GetTxBlockRate = "GetTxBlockRate",
+  TxBlockListing = "TxBlockListing",
+  GetNumTransactions = "GetNumTransactions",
+  GetTransactionRate = "GetTransactionRate",
+  GetCurrentMiniEpoch = "GetCurrentMiniEpoch",
+  GetCurrentDSEpoch = "GetCurrentDSEpoch",
+  GetPrevDifficulty = "GetPrevDifficulty",
+  GetPrevDSDifficulty = "GetPrevDSDifficulty",
+  GetTotalCoinSupply = "GetTotalCoinSupply",
+  GetMinerInfo = "GetMinerInfo",
 
   // Transaction-related methods
-  CreateTransaction = 'CreateTransaction',
-  GetTransaction = 'GetTransaction',
-  GetTransactionStatus = 'GetTransactionStatus',
-  GetRecentTransactions = 'GetRecentTransactions',
-  GetTransactionsForTxBlock = 'GetTransactionsForTxBlock',
-  GetTransactionsForTxBlockEx = 'GetTransactionsForTxBlockEx',
-  GetTxnBodiesForTxBlock = 'GetTxnBodiesForTxBlock',
-  GetTxnBodiesForTxBlockEx = 'GetTxnBodiesForTxBlockEx',
-  GetNumTxnsTxEpoch = 'GetNumTxnsTxEpoch',
-  GetNumTxnsDSEpoch = 'GetNumTxnsDSEpoch',
-  GetMinimumGasPrice = 'GetMinimumGasPrice',
+  CreateTransaction = "CreateTransaction",
+  GetTransaction = "GetTransaction",
+  GetTransactionStatus = "GetTransactionStatus",
+  GetRecentTransactions = "GetRecentTransactions",
+  GetTransactionsForTxBlock = "GetTransactionsForTxBlock",
+  GetTransactionsForTxBlockEx = "GetTransactionsForTxBlockEx",
+  GetTxnBodiesForTxBlock = "GetTxnBodiesForTxBlock",
+  GetTxnBodiesForTxBlockEx = "GetTxnBodiesForTxBlockEx",
+  GetNumTxnsTxEpoch = "GetNumTxnsTxEpoch",
+  GetNumTxnsDSEpoch = "GetNumTxnsDSEpoch",
+  GetMinimumGasPrice = "GetMinimumGasPrice",
 
   // Contract-related methods
-  GetContractAddressFromTransactionID = 'GetContractAddressFromTransactionID',
-  GetSmartContracts = 'GetSmartContracts',
-  GetSmartContractCode = 'GetSmartContractCode',
-  GetSmartContractInit = 'GetSmartContractInit',
-  GetSmartContractState = 'GetSmartContractState',
-  GetSmartContractSubState = 'GetSmartContractSubState',
-  GetStateProof = 'GetStateProof',
+  GetContractAddressFromTransactionID = "GetContractAddressFromTransactionID",
+  GetSmartContracts = "GetSmartContracts",
+  GetSmartContractCode = "GetSmartContractCode",
+  GetSmartContractInit = "GetSmartContractInit",
+  GetSmartContractState = "GetSmartContractState",
+  GetSmartContractSubState = "GetSmartContractSubState",
+  GetStateProof = "GetStateProof",
 
   // Account-related methods
-  GetBalance = 'GetBalance',
+  GetBalance = "GetBalance",
 }
 
 export enum RPCErrorCode {
@@ -101,7 +101,7 @@ export enum RPCErrorCode {
 
 export interface RPCRequestPayload<T> {
   id: number;
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   method: RPCMethod;
   params: T;
 }
@@ -118,7 +118,7 @@ export interface RPCRequest<T> {
 }
 
 interface RPCResponseBase {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   id: number;
 }
 
@@ -142,22 +142,21 @@ export interface RPCError<E> {
 export type RPCResponse<R, E> = RPCResponseSuccess<R> | RPCResponseError<E>;
 
 export type RPCResponseHandler<R, E, T> = (
-  response: WithRequest<RPCResponse<R, E>>,
+  response: WithRequest<RPCResponse<R, E>>
 ) => T;
 
-const DEFAULT_HEADERS = { 'Content-Type': 'application/json' };
+const DEFAULT_HEADERS = { "Content-Type": "application/json" };
 
 export const performRPC = async <R, E, D extends any[], T = RPCResponse<R, E>>(
   request: RPCRequest<D>,
-  handler: RPCResponseHandler<R, E, T>,
+  handler: RPCResponseHandler<R, E, T>
 ): Promise<T> => {
   try {
     const response = await fetch(request.url, {
-      method: 'POST',
-      cache: 'no-cache',
-      mode: 'cors',
-      redirect: 'follow',
-      referrer: 'no-referrer',
+      method: "POST",
+      cache: "no-cache",
+      mode: "cors",
+      redirect: "follow",
       body: JSON.stringify(request.payload),
       headers: {
         ...DEFAULT_HEADERS,
@@ -181,18 +180,18 @@ export const performBatchRPC = async <
   R,
   E,
   D extends any[],
-  T = RPCResponse<R, E>,
+  T = RPCResponse<R, E>
 >(
   request: RPCRequest<D>,
-  handler: RPCResponseHandler<R, E, T>,
+  handler: RPCResponseHandler<R, E, T> // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<T> => {
   try {
     const response = await fetch(request.url, {
-      method: 'POST',
-      cache: 'no-cache',
-      mode: 'cors',
-      redirect: 'follow',
-      referrer: 'no-referrer',
+      method: "POST",
+      cache: "no-cache",
+      mode: "cors",
+      redirect: "follow",
+      referrer: "no-referrer",
       body: JSON.stringify(request.payload),
       headers: {
         ...DEFAULT_HEADERS,

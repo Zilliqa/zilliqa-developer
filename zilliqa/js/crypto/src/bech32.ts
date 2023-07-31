@@ -15,9 +15,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { validation } from '@zilliqa-js/util';
+import { validation } from "@zilliqa-js/util";
 
-import { toChecksumAddress } from './util';
+import { toChecksumAddress } from "./util";
 // This code is taken from https://github.com/sipa/bech32/tree/bdc264f84014c234e908d72026b7b780122be11f/ref/javascript
 // Copyright (c) 2017 Pieter Wuille
 //
@@ -38,7 +38,9 @@ import { toChecksumAddress } from './util';
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
+
+const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 const GENERATOR = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
 
 const polymod = (values: Buffer): number => {
@@ -89,7 +91,7 @@ function createChecksum(hrp: string, data: Buffer) {
 
 export const encode = (hrp: string, data: Buffer) => {
   const combined = Buffer.concat([data, createChecksum(hrp, data)]);
-  let ret = hrp + '1';
+  let ret = hrp + "1";
   for (let p = 0; p < combined.length; ++p) {
     ret += CHARSET.charAt(combined[p]);
   }
@@ -115,7 +117,7 @@ export const decode = (bechString: string) => {
     return null;
   }
   bechString = bechString.toLowerCase();
-  const pos = bechString.lastIndexOf('1');
+  const pos = bechString.lastIndexOf("1");
   if (pos < 1 || pos + 7 > bechString.length || bechString.length > 90) {
     return null;
   }
@@ -137,7 +139,7 @@ export const decode = (bechString: string) => {
 };
 
 // HRP is the human-readable part of zilliqa bech32 addresses
-export const HRP = 'zil';
+export const HRP = "zil";
 
 /**
  * convertBits
@@ -158,7 +160,7 @@ export const convertBits = (
   data: Buffer,
   fromWidth: number,
   toWidth: number,
-  pad: boolean = true,
+  pad: boolean = true
 ) => {
   let acc = 0;
   let bits = 0;
@@ -202,17 +204,17 @@ export const convertBits = (
  */
 export const toBech32Address = (address: string): string => {
   if (!validation.isAddress(address)) {
-    throw new Error('Invalid address format.');
+    throw new Error("Invalid address format.");
   }
 
   const addrBz = convertBits(
-    Buffer.from(address.replace('0x', ''), 'hex'),
+    Buffer.from(address.replace("0x", ""), "hex"),
     8,
-    5,
+    5
   );
 
   if (addrBz === null) {
-    throw new Error('Could not convert byte Buffer to 5-bit Buffer');
+    throw new Error("Could not convert byte Buffer to 5-bit Buffer");
   }
 
   return encode(HRP, addrBz);
@@ -228,7 +230,7 @@ export const fromBech32Address = (address: string): string => {
   const res = decode(address);
 
   if (res === null) {
-    throw new Error('Invalid bech32 address');
+    throw new Error("Invalid bech32 address");
   }
 
   const { hrp, data } = res;
@@ -241,8 +243,8 @@ export const fromBech32Address = (address: string): string => {
   const buf = convertBits(data, 5, 8, false);
 
   if (buf === null) {
-    throw new Error('Could not convert buffer to bytes');
+    throw new Error("Could not convert buffer to bytes");
   }
 
-  return toChecksumAddress(buf.toString('hex'));
+  return toChecksumAddress(buf.toString("hex"));
 };

@@ -44,6 +44,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/subscriptions",
         "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/buffer",
         "//:node_modules/tslib",
     ],
     declaration = True,
@@ -53,7 +54,7 @@ ts_project(
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
-    tsconfig = "tsconfig.json",
+    tsconfig = "tsconfig.bazel.json",
     visibility = ["//visibility:public"],
     deps = [
         "//:node_modules/@types/bn.js",
@@ -71,6 +72,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/subscriptions",
         "//:node_modules/@zilliqa-js/util",
+        "//:node_modules/buffer",
         "//:node_modules/tslib",
     ],
 )

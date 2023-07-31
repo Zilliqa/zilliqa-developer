@@ -17,6 +17,9 @@ jobs:
   build-debug:
     runs-on: macos-12
     name: "Bazel Debug Build"
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,17 +27,26 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
-      - name: Bazel cache
-        id: cache-bazel-debug
-        uses: actions/cache@v3.0.4
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
         with:
-          path: ~/.cache/bazel/
-          key: ${{ runner.os }}-bazel-debug
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service_account: "${{ secrets.GCP_PRD_GITHUB_SA_GCS_CACHE }}"
+          create_credentials_file: true
+
+      - name: Configure bazel GCS cache
+        run: |
+          export BAZEL_REMOTE_CACHE_CREDENTIALS_JSON='${{ steps.auth.outputs.credentials_file_path }}'
+          export BAZEL_REMOTE_CACHE_ENDPOINT='${{ vars.BAZEL_REMOTE_CACHE_ENDPOINT }}'
+          python config/gcp_cs_cache.py
+        shell: bash
 
       - name: "Building debug"
         run: |
-          bazelisk build --keep_going --disk_cache=~/.cache/bazel/  //...
+          bazelisk build --keep_going //...
 
       - name: "Running tests"
         run: |
-          bazelisk test --test_output=all --keep_going --disk_cache=~/.cache/bazel/ //...
+          bazelisk test --test_output=all //...

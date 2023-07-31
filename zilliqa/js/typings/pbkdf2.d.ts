@@ -14,24 +14,23 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-declare module 'pbkdf2' {
+declare module "pbkdf2" {
   type Digest =
-    | 'md5'
-    | 'sha1'
-    | 'sha224'
-    | 'sha256'
-    | 'sha384'
-    | 'sha512'
-    | 'rmd160'
-    | 'ripemd160';
+    | "md5"
+    | "sha1"
+    | "sha224"
+    | "sha256"
+    | "sha384"
+    | "sha512"
+    | "rmd160"
+    | "ripemd160";
 
   function pbkdf2Sync(
     passphrase: Buffer,
     salt: Buffer,
     n: number,
     dklen: number,
-    digest: Digest,
+    digest: Digest
   ): Buffer;
 
   function pbkdf2(
@@ -40,7 +39,7 @@ declare module 'pbkdf2' {
     n: number,
     dklen: number,
     digest: Digest,
-    cb: (err: any, derivedKey: Buffer) => void,
+    cb: (err: any, derivedKey: Buffer) => void
   ): void;
 
   interface Exported {

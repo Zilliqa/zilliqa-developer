@@ -37,6 +37,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/bip39",
+        "//:node_modules/buffer",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/tslib",
@@ -48,7 +49,7 @@ ts_project(
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
-    tsconfig = "tsconfig.json",
+    tsconfig = "tsconfig.bazel.json",
     visibility = ["//visibility:public"],
     deps = [
         "//:node_modules/@types/bip39",
@@ -64,6 +65,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/proto",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/bip39",
+        "//:node_modules/buffer",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/protobufjs",  # TODO: This one should come automatically from proto

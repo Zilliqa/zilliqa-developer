@@ -96,6 +96,8 @@ pkg_tar(
 container_image(
     name = "image",
     base = "@nginx//image",
+    # Due to bazel's OS X docker support: https://github.com/bazelbuild/rules_docker/issues/768
+    docker_run_flags = "--publish=80:80",
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["80"],
@@ -108,6 +110,8 @@ container_image(
 container_image(
     name = "dev-image",
     base = "@nginx//image",
+    # Due to bazel's OS X docker support: https://github.com/bazelbuild/rules_docker/issues/768
+    docker_run_flags = "--publish=8000:8000",
     # Disabling legacy run behaviour to allow run from the command line
     legacy_run_behavior = False,
     ports = ["8000"],

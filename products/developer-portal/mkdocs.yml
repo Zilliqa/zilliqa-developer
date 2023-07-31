@@ -239,6 +239,7 @@ nav:
           - Get Tx Block: api/blockchain-related-methods/api-blockchain-get-tx-block.md
           - Get Tx Block Rate: api/blockchain-related-methods/api-blockchain-get-tx-block-rate.md
           - Tx Block Listing: api/blockchain-related-methods/api-blockchain-tx-block-listing.md
+          - Get Software Version: api/blockchain-related-methods/api-blockchain-get-software-version.md
       - Transaction-related Methods:
           - Create Tx: api/transaction-related-methods/api-transaction-create-tx.md
           - Get Minimum Gas Price: api/transaction-related-methods/api-transaction-get-minimum-gas-price.md
