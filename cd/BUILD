@@ -1,7 +1,7 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@zilliqa_python_deps//:requirements.bzl", "requirement")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
-load(":applications.bzl", "APPLICATIONS")
+load(":applications.bzl", "APPLICATIONS_PROD", "APPLICATIONS_STAGING")
 
 expand_workspace_status(
     name = "git-version-py",
@@ -27,8 +27,8 @@ py_binary(
     srcs = [
         "update_manifests_repository.py",
     ],
-    args = ["$(location {}:cd_staging_patch)".format(s) for s in APPLICATIONS],
-    data = ["{}:cd_staging_patch".format(s) for s in APPLICATIONS],
+    args = ["$(location {}:cd_staging_patch)".format(s) for s in APPLICATIONS_STAGING],
+    data = ["{}:cd_staging_patch".format(s) for s in APPLICATIONS_STAGING],
     main = "update_manifests_repository.py",
     visibility = ["//visibility:public"],
     deps = [
@@ -42,8 +42,8 @@ py_binary(
     srcs = [
         "update_manifests_repository.py",
     ],
-    args = ["$(location {}:cd_production_patch)".format(s) for s in APPLICATIONS],
-    data = ["{}:cd_production_patch".format(s) for s in APPLICATIONS],
+    args = ["$(location {}:cd_production_patch)".format(s) for s in APPLICATIONS_PROD],
+    data = ["{}:cd_production_patch".format(s) for s in APPLICATIONS_PROD],
     main = "update_manifests_repository.py",
     visibility = ["//visibility:public"],
     deps = [

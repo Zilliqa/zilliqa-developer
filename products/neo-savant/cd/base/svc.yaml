@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: neo-savant-ide
-  namespace: default
+  namespace: neo-savant-ide
   labels:
     "app.kubernetes.io/name": "neo-savant-ide"
 spec:

@@ -1,0 +1,14 @@
+define: &region "asia-southeast1"
+
+backend: kind
+
+clusters:
+  staging:
+    manifests: {}
+    region: *region
+    name: local-cluster
+    apps:
+      neo-savant-dev:
+        path: products/neo-savant/cd/base
+        track: development
+        type: kustomize
