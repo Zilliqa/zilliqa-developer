@@ -25,7 +25,7 @@ impl<'a> EvmExecutor<'a> {
         let input = self
             .context
             .get_function(name)
-            .expect("REASON")
+            .expect(&format!("Function name {} not found", name).to_string())
             .generate_transaction_data(args);
 
         // Initialized the state of EVM's memory.
@@ -60,7 +60,7 @@ impl<'a> EvmExecutor<'a> {
         let state = MemoryStackState::new(metadata, &backend);
         let precompiles = self.context.get_precompiles();
         let mut executor = StackExecutor::new_with_precompiles(state, &config, &precompiles);
-
+        println!("Execute input: {}", hex::encode(input.clone()));
         // Call the 0x10 contract using the 0xf0 user.
         // Use the input variable.
         let (exit_reason, result) = executor.transact_call(

@@ -34,11 +34,14 @@ use evm::{Context as EvmContext, ExitError, ExitSucceed};
 fn test_precompile(
     input: &[u8],
     gas_limit: Option<u64>,
-    _contex: &EvmContext,
+    context: &EvmContext,
     _backend: &dyn Backend,
-    _is_static: bool,
+    is_static: bool,
 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-    println!("Running precompile!");
+    println!("Running precompile {:?}!", input);
+    println!("Len: {} / {}", input.len() / 32, input.len());
+    println!("Context: {:#?}", context);
+    println!("Static: {}", is_static);
     let gas_needed = match required_gas(input) {
         Ok(i) => i,
         Err(err) => return Err(PrecompileFailure::Error { exit_status: err }),
@@ -163,6 +166,7 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, _debug: bool) {
         Ok(e) => e,
     };
 
+    println!("Bytecode: {}", hex::encode(executable.clone()));
     let executor = EvmExecutor::new(&specification, executable);
     // TODO: Arguments from CLI
     executor.execute(&entry_point, [EvmTypeValue::Uint32(10)].to_vec());

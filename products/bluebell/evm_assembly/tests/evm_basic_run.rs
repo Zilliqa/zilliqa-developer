@@ -109,8 +109,8 @@ mod tests {
             });
 
         let executable = builder.build();
-        println!("{}", builder.generate_evm_assembly());
-        println!("Code: {}", hex::encode(executable.clone()));
+        //        println!("{}", builder.generate_evm_assembly());
+        //        println!("Code: {}", hex::encode(executable.clone()));
 
         let executor = EvmExecutor::new(&specification, executable);
         executor.execute("hello", [EvmTypeValue::Uint32(10)].to_vec());

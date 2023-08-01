@@ -19,6 +19,7 @@ pub enum IrIndentifierKind {
     VirtualRegister,
     VirtualRegisterIntermediate,
     Memory,
+    State,
 
     // More info needed to derive kind
     Unknown,
@@ -148,6 +149,12 @@ impl VariableDeclaration {
 }
 
 #[derive(Debug, Clone)]
+pub struct FieldAddress {
+    pub name: IrIdentifier,
+    pub value: Option<Vec<u8>>,
+}
+
+#[derive(Debug, Clone)]
 pub enum Operation {
     Noop,
     Jump(IrIdentifier),
@@ -158,6 +165,11 @@ pub enum Operation {
     },
     MemLoad,
     MemStore,
+    StateLoad,
+    StateStore {
+        address: FieldAddress,
+        value: IrIdentifier,
+    },
     IsEqual {
         left: IrIdentifier,
         right: IrIdentifier,
@@ -315,10 +327,17 @@ impl ComputableState {
 */
 
 #[derive(Debug)]
+pub struct ContractField {
+    pub variable: VariableDeclaration,
+    pub initializer: Box<Instruction>,
+}
+
+#[derive(Debug)]
 pub struct IntermediateRepresentation {
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,
     pub function_definitions: Vec<ConcreteFunction>,
+    pub fields_definitions: Vec<ContractField>,
     pub lambda_functions: Vec<LambdaFunctionSingleArgument>,
     pub symbol_table: SymbolTable,
 }
@@ -329,6 +348,7 @@ impl IntermediateRepresentation {
             version: "".to_string(),
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
+            fields_definitions: Vec::new(),
             lambda_functions: Vec::new(),
             symbol_table: SymbolTable::new(),
         }

@@ -1,0 +1,14 @@
+scilla_version 0
+
+library HelloWorld
+contract HelloWorld(owner: ByStr20)
+
+field welcome_msg : String = ""
+
+transition setHello (msg : String)
+  is_owner = builtin eq owner _sender;
+  match is_owner with
+  | True =>
+    welcome_msg := msg;
+  end
+end

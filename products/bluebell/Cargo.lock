@@ -235,7 +235,9 @@ dependencies = [
  "clap",
  "evm",
  "evm_assembly",
+ "hex",
  "inkwell",
+ "primitive-types",
 ]
 
 [[package]]

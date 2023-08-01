@@ -35,6 +35,7 @@ impl IrPass for DebugPrinter {
             IrIndentifierKind::VirtualRegister => self.script.push_str("%"),
             IrIndentifierKind::VirtualRegisterIntermediate => self.script.push_str("%"),
             IrIndentifierKind::Memory => self.script.push_str("%"),
+            IrIndentifierKind::State => self.script.push_str("#"),
 
             IrIndentifierKind::Unknown => self.script.push_str("?"),
         }
@@ -157,8 +158,14 @@ impl IrPass for DebugPrinter {
                 self.script.push_str(" ");
                 on_failure.visit(self, symbol_table)?;
             }
-            Operation::MemLoad => self.script.push_str("load [TODO]"),
-            Operation::MemStore => self.script.push_str("store [TODO]"),
+            Operation::MemLoad => self.script.push_str("mload [TODO]"),
+            Operation::MemStore => self.script.push_str("mstore [TODO]"),
+            Operation::StateLoad => self.script.push_str("sload [TODO]"),
+            Operation::StateStore {
+                address: _,
+                value: _,
+            } => self.script.push_str("sstore [TODO]"),
+
             Operation::IsEqual { left, right } => {
                 self.script.push_str("eq ");
                 left.visit(self, symbol_table)?;

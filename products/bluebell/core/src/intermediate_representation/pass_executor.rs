@@ -163,7 +163,12 @@ impl PassExecutor for Operation {
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             match self {
                 Operation::Jump(identifier) => identifier.visit(pass, symbol_table),
-                Operation::MemLoad
+                Operation::StateLoad
+                | Operation::StateStore {
+                    address: _,
+                    value: _,
+                }
+                | Operation::MemLoad
                 | Operation::MemStore
                 | Operation::AcceptTransfer
                 | Operation::PhiNode(_) => Ok(TraversalResult::Continue),

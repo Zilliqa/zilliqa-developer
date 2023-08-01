@@ -164,30 +164,35 @@ impl EvmBlock {
         self.push1([0x40].to_vec());
         self.mload(); // Stack element is the pointer
 
-        for (i, _) in args.iter().enumerate().rev() {
-            self.dup1();
+        for (i, arg) in args.iter().enumerate().rev() {
+            let _ = self.duplicate_stack_name(arg); // TODO: Propagate error if this fails
+
+            self.dup2();
             self.push1([(i * 0x20) as u8].to_vec());
             self.add();
-            self.push1([0x20].to_vec()); // Length of the argument, TODO: Get length
             self.mstore();
         }
 
-        for (i, arg) in args.iter().enumerate().rev() {
+        for (i, _) in args.iter().enumerate().rev() {
             let j = i + args.len();
-            self.dup1();
+
+            self.push1([0x20].to_vec()); // Length of the argument, TODO: Get length
+
+            self.dup2();
             self.push1([(j * 0x20) as u8].to_vec());
             self.add();
-            let _ = self.duplicate_stack_name(arg); // TODO: Propagate error if this fails
             self.mstore();
         }
 
-        let gas = EvmTypeValue::Uint32(21000); // TODO: How to compute this or where to get it from
+        let gas = EvmTypeValue::Uint32(0x1337); // TODO: How to compute this or where to get it from
         let address = EvmTypeValue::Uint32(address);
-        let argsize = EvmTypeValue::Uint32(2 * (args.len() * 0x20) as u32); // Each argument is 32 byte long
+        let argsize = EvmTypeValue::Uint32((args.len() * 0x20) as u32); // Each argument is 32 byte long
 
         self.push([0x20].to_vec()); //return size, TODO: Compute the size of the return type
+
         self.dup2(); //
         self.push(argsize.to_bytes_unpadded());
+
         self.dup4(); // p
         self.push(address.to_bytes_unpadded());
         self.push(gas.to_bytes_unpadded());
@@ -279,6 +284,7 @@ impl EvmBlock {
 
         self.stack_counter += produces;
 
+        /*
         println!(
             "{}",
             format!(
@@ -288,7 +294,7 @@ impl EvmBlock {
                 self.stack_counter
             )
         );
-
+        */
         /*
         if self.stack_counter < 0 {
             panic!("Encountered negative stack counter.");

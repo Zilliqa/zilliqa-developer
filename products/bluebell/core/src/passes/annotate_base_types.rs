@@ -326,6 +326,11 @@ impl IrPass for AnnotateBaseTypes {
                 on_failure.visit(self, symbol_table)?;
                 "Void".to_string()
             }
+            Operation::StateLoad => "TODO".to_string(),
+            Operation::StateStore {
+                address: _,
+                value: _,
+            } => "TODO".to_string(),
             Operation::MemLoad => "TODO".to_string(),
             Operation::MemStore => "TODO".to_string(),
             Operation::IsEqual { left, right } => {

@@ -818,10 +818,42 @@ impl AstConverting for IrEmitter {
                 unimplemented!()
             }
             NodeStatement::Store {
-                left_hand_side: _,
-                right_hand_side: _,
+                left_hand_side,
+                right_hand_side,
             } => {
-                unimplemented!()
+                // Generating instruction and setting its name
+                let _ = right_hand_side.visit(self)?;
+
+                let mut right_hand_side = self.pop_instruction()?;
+                let symbol = IrIdentifier {
+                    unresolved: left_hand_side.to_string(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::VirtualRegister,
+                    is_definition: false,
+                };
+                (*right_hand_side).ssa_name = Some(symbol.clone());
+                self.current_block.instructions.push(right_hand_side);
+
+                let ret = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::StateStore {
+                        address: FieldAddress {
+                            name: IrIdentifier {
+                                unresolved: left_hand_side.to_string(),
+                                resolved: None,
+                                type_reference: None,
+                                kind: IrIndentifierKind::State,
+                                is_definition: false,
+                            },
+                            value: None,
+                        },
+                        value: symbol,
+                    },
+                });
+
+                ret
             }
             NodeStatement::Bind {
                 left_hand_side,
@@ -1201,9 +1233,19 @@ impl AstConverting for IrEmitter {
     fn emit_contract_field(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodeContractField,
+        node: &NodeContractField,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        let _ = node.typed_identifier.visit(self)?;
+        let variable = self.pop_variable_declaration()?;
+        let _ = node.right_hand_side.visit(self)?;
+        let initializer = self.pop_instruction()?;
+        let field = ContractField {
+            variable,
+            initializer,
+        };
+
+        self.ir.fields_definitions.push(field);
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_with_constraint(
         &mut self,
