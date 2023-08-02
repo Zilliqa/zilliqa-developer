@@ -27,17 +27,6 @@ container_image(
 )
 
 container_push(
-    name = "push_image_staging",
-    format = "Docker",
-    image = ":image",
-    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "scilla-savant-ide",
-
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
-)
-
-container_push(
     name = "push_image_production",
     format = "Docker",
     image = ":image",
