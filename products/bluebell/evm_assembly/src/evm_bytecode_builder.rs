@@ -30,6 +30,31 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
         F: Fn(&mut EvmByteCodeBuilder<'ctx>) -> Vec<EvmBlock>,
     {
         self.function.blocks = builder(&mut self.builder);
+
+        let signature = &self.function.signature.clone().unwrap();
+        // if first_block.consumes
+
+        match self.function.compute_stack_difference() {
+            Err(e) => panic!("{}", e),
+            _ => (),
+        }
+
+        /*
+        if self.function.consumes != signature.arguments.len().try_into().unwrap() {
+           panic!("{}", format!("Function consumes {} but expects {}",self.function.consumes,signature.arguments.len() ))
+        }
+        */
+
+        if self.function.produces > 1 {
+            panic!(
+                "{}",
+                format!(
+                    "Function produces {} but at the moment we only support 1 return argument",
+                    self.function.produces
+                )
+            )
+        }
+
         self.builder.functions.push(self.function);
     }
 }
@@ -68,7 +93,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         ret.define_function("__main__", [].to_vec(), "Uint256")
             .build(|_code_builder| {
                 // Placeholder block for the main function
-                [EvmBlock::new(None, "main_entry")].to_vec()
+                [EvmBlock::new(None, [].to_vec(), "main_entry")].to_vec()
             });
 
         ret
@@ -184,7 +209,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         first_block.dup1();
         first_block.revert();
 
-        let mut switch_block = EvmBlock::new(None, "switch");
+        let mut switch_block = EvmBlock::new(None, [].to_vec(), "switch");
         switch_block.pop(); // 0 Oribabky remove dup1()?
         switch_block.push1([0x04].to_vec()); // Checking that the size of call args
         switch_block.calldatasize();
@@ -196,8 +221,8 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         switch_block.shr();
 
         for (i, function) in self.functions.iter().enumerate() {
+            // Skipping the entry function (the one we are building now)
             if i > 0 {
-                // Skipping the entry function
                 switch_block.dup1();
                 switch_block.push(function.selector.clone());
                 switch_block.eq();
@@ -210,7 +235,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         switch_block.jump_to("fail");
 
-        let mut fail_block = EvmBlock::new(None, "fail");
+        let mut fail_block = EvmBlock::new(None, [].to_vec(), "fail");
         fail_block.push1([0x00].to_vec());
         fail_block.dup1();
         fail_block.revert();

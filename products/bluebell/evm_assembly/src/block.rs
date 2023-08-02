@@ -6,6 +6,84 @@ use evm::Opcode;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
+pub struct Scope {
+    stack_counter: i32,
+    entry_stack_counter: i32,
+    name_location: HashMap<String, i32>,
+}
+
+impl Scope {
+    pub fn empty(arg_count: i32) -> Self {
+        Scope {
+            stack_counter: 0,
+            entry_stack_counter: arg_count,
+            name_location: HashMap::new(),
+        }
+    }
+
+    pub fn new(parent: Scope) -> Self {
+        let mut ret = parent.clone();
+        ret.entry_stack_counter = ret.stack_counter;
+
+        ret
+    }
+
+    pub fn relative_stack_counter(&self) -> i32 {
+        (self.stack_counter - self.entry_stack_counter) as i32
+    }
+
+    pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
+        if self.name_location.contains_key(name) {
+            return Err(format!("SSA name {} already exists", name));
+        }
+
+        assert!(
+            self.entry_stack_counter > self.stack_counter,
+            "Attempting to register too many function arguments"
+        );
+        println!("Registering arg entry: {}: {}", name, self.stack_counter);
+
+        // TODO: assumes that args are first in, last out
+        self.name_location.insert(name.to_string(), arg_number);
+        self.stack_counter += 1;
+
+        // TODO: Consider pruning of the names
+
+        Ok(())
+    }
+
+    pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
+        if self.name_location.contains_key(name) {
+            return Err(format!("SSA name {} already exists", name));
+        }
+        assert!(self.stack_counter > 0);
+
+        println!(
+            "Registering stack entry: {}: {}",
+            name,
+            self.stack_counter - 1
+        );
+        self.name_location
+            .insert(name.to_string(), self.stack_counter - 1);
+
+        // TODO: Consider pruning of the names
+
+        Ok(())
+    }
+
+    fn update_stack(&mut self, opcode: Opcode) -> i32 {
+        let consumes: i32 = opcode.stack_consumed();
+        let produces: i32 = opcode.stack_produced();
+
+        self.stack_counter -= consumes;
+        let ret = self.entry_stack_counter - self.stack_counter;
+        self.stack_counter += produces;
+
+        ret
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct EvmBlock {
     pub name: String,
     pub position: Option<usize>,
@@ -17,13 +95,14 @@ pub struct EvmBlock {
 
     pub consumes: i32,
     pub produces: i32,
-    stack_counter: i32,
 
-    name_location: HashMap<String, i32>,
+    scope: Scope,
+    // stack_counter: i32,
+    // name_location: HashMap<String, i32>,
 }
 
 impl EvmBlock {
-    pub fn new(position: Option<usize>, name: &str) -> Self {
+    pub fn new(position: Option<usize>, arg_names: Vec<String>, name: &str) -> Self {
         let mut ret = Self {
             name: name.to_string(),
             position,
@@ -34,47 +113,44 @@ impl EvmBlock {
             is_lookup_table: false,
             consumes: 0,
             produces: 0,
-            stack_counter: 0,
-            name_location: HashMap::new(),
+            scope: Scope::empty(arg_names.len() as i32),
         };
 
+        for (i, name) in arg_names.iter().enumerate() {
+            match ret.register_arg_name(name, i as i32) {
+                Err(e) => panic!("{}", e),
+                _ => (),
+            }
+        }
         ret.jumpdest();
 
         ret
     }
 
     pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
-        if self.name_location.contains_key(name) {
-            return Err(format!("SSA name {} already exists", name));
-        }
-
-        // TODO: assumes that args are first in, last out
-        self.name_location.insert(name.to_string(), -arg_number);
-
-        // TODO: Consider pruning of the names
-
-        Ok(())
+        self.scope.register_arg_name(name, arg_number)
     }
 
     pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
-        if self.name_location.contains_key(name) {
-            return Err(format!("SSA name {} already exists", name));
+        self.scope.register_stack_name(name)
+    }
+
+    fn update_stack(&mut self, opcode: Opcode) {
+        let deepest_visit = self.scope.update_stack(opcode);
+
+        // Updating how deeply in the stack we consume
+        if deepest_visit > 0 {
+            self.consumes = std::cmp::max(self.consumes, deepest_visit);
         }
 
-        println!("Registering stack entry: {}: {}", name, self.stack_counter);
-        self.name_location
-            .insert(name.to_string(), self.stack_counter);
-
-        // TODO: Consider pruning of the names
-
-        Ok(())
+        // TODO: Track all argument variables and verify that they were used.
     }
 
     pub fn duplicate_stack_name(&mut self, name: &str) -> Result<(), String> {
-        match self.name_location.get(name) {
+        match self.scope.name_location.get(name) {
             Some(pos) => {
-                let n = self.stack_counter - pos + 1;
-                match n {
+                let distance = self.scope.stack_counter - pos;
+                match distance {
                     1 => {
                         self.dup1();
                         Ok(())
@@ -139,10 +215,10 @@ impl EvmBlock {
                         self.dup16();
                         Ok(())
                     }
-                    _ => Err("Stack overflow.".to_string()),
+                    _ => panic!("{}", "Stack overflow.".to_string()),
                 }
             }
-            None => Err(format!("Failed to find SSA name {} on stack", name)),
+            None => panic!("{}", format!("Failed to find SSA name {} on stack", name)),
         }
     }
 
@@ -209,7 +285,8 @@ impl EvmBlock {
     ) -> (Vec<EvmBlock>, Vec<u8>) {
         let mut blocks: Vec<EvmBlock> = Vec::new();
         let mut block_counter = 0;
-        let mut current_block = EvmBlock::new(Some(0), &format!("block{}", block_counter));
+        let mut current_block =
+            EvmBlock::new(Some(0), [].to_vec(), &format!("block{}", block_counter));
         current_block.is_entry = true;
         block_counter += 1;
 
@@ -243,7 +320,11 @@ impl EvmBlock {
 
             if instr.opcode == Opcode::JUMPDEST {
                 blocks.push(current_block);
-                current_block = EvmBlock::new(instr.position, &format!("block{}", block_counter));
+                current_block = EvmBlock::new(
+                    instr.position,
+                    [].to_vec(),
+                    &format!("block{}", block_counter),
+                );
 
                 block_counter += 1;
             }
@@ -261,7 +342,7 @@ impl EvmBlock {
                 }
             }
         }
-        println!("Terminating {} / {}", i, bytecode.len());
+
         let mut data: Vec<u8> = Vec::new();
         while i < bytecode.len() {
             data.push(bytecode[i]);
@@ -270,36 +351,6 @@ impl EvmBlock {
 
         blocks.push(current_block);
         (blocks, data)
-    }
-
-    fn update_stack(&mut self, opcode: Opcode) {
-        let consumes: i32 = opcode.stack_consumed();
-        let produces: i32 = opcode.stack_produced();
-
-        self.stack_counter -= consumes;
-
-        if self.stack_counter < 0 {
-            self.consumes = std::cmp::max(self.consumes, -self.stack_counter);
-        }
-
-        self.stack_counter += produces;
-
-        /*
-        println!(
-            "{}",
-            format!(
-                "Code: {:?} -> {} {}",
-                opcode.to_string(),
-                produces - consumes,
-                self.stack_counter
-            )
-        );
-        */
-        /*
-        if self.stack_counter < 0 {
-            panic!("Encountered negative stack counter.");
-        }
-        */
     }
 
     pub fn write_instruction(
@@ -313,7 +364,7 @@ impl EvmBlock {
             arguments: [].to_vec(),
             unresolved_label,
 
-            stack_size: self.stack_counter as usize,
+            stack_size: self.scope.relative_stack_counter(),
             is_terminator: false,
         });
 
@@ -329,7 +380,7 @@ impl EvmBlock {
 
             unresolved_label: None,
 
-            stack_size: self.stack_counter as usize,
+            stack_size: self.scope.relative_stack_counter(),
             is_terminator: false,
         });
 

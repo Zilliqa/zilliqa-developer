@@ -8,7 +8,7 @@ pub struct EvmInstruction {
 
     pub unresolved_label: Option<String>,
 
-    pub stack_size: usize, // The number of elements on the stack since the start of the block before this instruction is executed
+    pub stack_size: i32, // The number of elements on the stack since the start of the block before this instruction is executed
     pub is_terminator: bool,
 }
 

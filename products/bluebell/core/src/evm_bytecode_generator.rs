@@ -43,6 +43,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 .map(|arg| arg.typename.unresolved.as_str())
                 .collect();
 
+            let arg_names: Vec<String> = func
+                .arguments
+                .iter()
+                .map(|arg| {
+                    arg.name
+                        .resolved
+                        .clone()
+                        .expect("Unresolved function argument name")
+                })
+                .collect();
+
             let function_name = func
                 .name
                 .qualified_name()
@@ -52,6 +63,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 Some(return_type) => return_type.as_str(),
                 None => "Uint256", // TODO: panic!("Void type not implemented for EVM")
             };
+
+            println!("Writing function {:#?}", func.name);
 
             self.builder
                 .define_function(&function_name, arg_types, return_type)
@@ -65,9 +78,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                             Ok(b) => b,
                             Err(_) => panic!("Failed to get qualified name."),
                         };
-                        let mut blk = EvmBlock::new(None, &block_name);
 
-                        println!("Block: {:#?}", block);
+                        // Creating entry function
+                        let mut blk = EvmBlock::new(None, arg_names.clone(), &block_name);
+
                         for instr in &block.instructions {
                             match instr.operation {
                                 Operation::CallExternalFunction {
@@ -226,6 +240,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                     ret
                 });
+            println!("DONE!");
         }
 
         Ok(0)
