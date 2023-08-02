@@ -50,21 +50,6 @@ pkg_tar(
 )
 
 expand_workspace_status(
-    name = "staging-kustomization",
-    output = "products/neo-savant/cd/overlays/staging/kustomization.yaml",
-    template = "products/neo-savant/cd/overlays/staging/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_staging_patch",
-    srcs = ["products/neo-savant/cd/overlays/staging/kustomization.yaml"],
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
     name = "production-kustomization",
     output = "products/neo-savant/cd/overlays/production/kustomization.yaml",
     template = "products/neo-savant/cd/overlays/production/kustomization.tpl.yaml",
