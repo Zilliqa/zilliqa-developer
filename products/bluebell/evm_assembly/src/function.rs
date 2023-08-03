@@ -47,7 +47,6 @@ impl EvmFunction {
                 ));
             }
 
-            println!("Walking {:#?}", next);
             // TODO: This needs to be done outside of the loop
             // It is basically to prevent that placeholder blocks are analyzed
             if next.instructions.len() == 1 {

@@ -564,6 +564,10 @@ impl EvmBlock {
     }
     */
 
+    pub fn push_u64(&mut self, arg: u64) -> &mut Self {
+        self.push(arg.to_be_bytes().to_vec())
+    }
+
     pub fn push(&mut self, arguments: Vec<u8>) -> &mut Self {
         match arguments.len() {
             // TODO: 0 => self.push0(arguments),

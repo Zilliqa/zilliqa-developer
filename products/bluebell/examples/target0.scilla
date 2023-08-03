@@ -3,8 +3,7 @@ scilla_version 0
 library HelloWorld
 contract HelloWorld()
 
-transition setHello (a : Uint64)
-  b = Uint64 200;
-  c = Uint64 127;
+transition setHello (a : Uint64, c: Uint64)
+  (* c = Uint64 127; *)
   x = builtin fibonacci a c
 end

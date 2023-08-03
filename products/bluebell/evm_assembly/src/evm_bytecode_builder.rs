@@ -40,6 +40,7 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
         }
 
         /*
+        TODO:
         if self.function.consumes != signature.arguments.len().try_into().unwrap() {
            panic!("{}", format!("Function consumes {} but expects {}",self.function.consumes,signature.arguments.len() ))
         }
@@ -220,6 +221,8 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         switch_block.push1([0xe0].to_vec());
         switch_block.shr();
 
+        let mut data_loading_blocks: Vec<EvmBlock> = Vec::new();
+
         for (i, function) in self.functions.iter().enumerate() {
             // Skipping the entry function (the one we are building now)
             if i > 0 {
@@ -227,7 +230,31 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                 switch_block.push(function.selector.clone());
                 switch_block.eq();
                 match function.blocks.first() {
-                    Some(block) => switch_block.jump_if_to(&block.name),
+                    Some(block) => {
+                        let name = format!("load_args_{}", "function_name").to_string();
+                        let mut load_data_block = EvmBlock::new(None, [].to_vec(), &name);
+
+                        switch_block.jump_if_to(&load_data_block.name);
+
+                        let signature = function.signature.clone().unwrap();
+
+                        // Loading data
+                        // TODO: Check the size
+                        let args_size = 0x04;
+                        load_data_block.push1([args_size].to_vec()); // Checking that the size of call args
+                        load_data_block.calldatasize();
+                        load_data_block.lt();
+                        load_data_block.jump_if_to("fail");
+
+                        // TODO: Load data
+                        for (i, _arg) in signature.arguments.iter().enumerate() {
+                            load_data_block.push_u64((4 + 0x20 * i).try_into().unwrap());
+                            load_data_block.calldataload();
+                        }
+
+                        load_data_block.jump_to(&block.name);
+                        data_loading_blocks.push(load_data_block);
+                    }
                     _ => panic!("Function does not have a block."),
                 };
             }
@@ -241,6 +268,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         fail_block.revert();
 
         main.blocks.push(switch_block);
+        for block in data_loading_blocks {
+            main.blocks.push(block);
+        }
         main.blocks.push(fail_block);
 
         self.functions[0] = main;

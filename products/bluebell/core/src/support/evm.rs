@@ -24,10 +24,13 @@ impl BluebellModule for ScillaDefaultTypes {
         context.declare_integer("Int16", 16);
         context.declare_integer("Int32", 32);
         context.declare_integer("Int64", 64);
+        context.declare_integer("Int128", 128);
+        context.declare_integer("Int256", 256);
         context.declare_unsigned_integer("Uint8", 8);
         context.declare_unsigned_integer("Uint16", 16);
         context.declare_unsigned_integer("Uint32", 32);
         context.declare_unsigned_integer("Uint64", 64);
+        context.declare_unsigned_integer("Uint128", 128);
         context.declare_unsigned_integer("Uint256", 256);
     }
 }
