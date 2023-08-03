@@ -1,11 +1,9 @@
-define: &region "asia-southeast1"
-
 backend: kind
 
 clusters:
-  staging:
+  localdev:
     manifests: {}
-    region: *region
+    region: asia-southeast1
     name: local-cluster
     apps:
       neo-savant-dev:
