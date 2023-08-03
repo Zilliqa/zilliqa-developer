@@ -3,21 +3,24 @@ kind: Kustomization
 
 resources:
   - ../../base
-images:
-  - name: developer-explorer
-    newName: 816080630680.dkr.ecr.us-west-2.amazonaws.com/developer-explorer
-    newTag: ${FULL_VERSION_TAG}
+  - certificate.yaml
 
 patches:
-  - patch: |-
+  - target:
+      kind: Ingress
+      name: devex
+    patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: devex.eks01uws2.stg.z7a.xyz
+        value: devex.zilstg.dev
       - op: replace
         path: "/spec/rules/1/host"
         value: stg-devex.zilliqa.com
-    target:
-      kind: Ingress
-      name: devex
+      - op: replace
+        path: /metadata/annotations
+        value:
+          kubernetes.io/ingress.class: gce
+          kubernetes.io/ingress.global-static-ip-name: devex-zilstg-dev
+          networking.gke.io/managed-certificates: devex
 
 namespace: devex-staging
