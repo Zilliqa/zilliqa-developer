@@ -165,7 +165,7 @@ container_image(
 )
 
 container_push(
-    name = "push_image_local",
+    name = "push_image_dev",
     format = "Docker",
     image = ":image",
     registry = "localhost:5001",
@@ -174,18 +174,18 @@ container_push(
 )
 
 container_push(
-    name = "push_image_staging",
+    name = "push_image_stg",
     format = "Docker",
     image = ":image",
-    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "developer-explorer",
+    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private",
+    repository = "devex",
 
     # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
+    tag = "$${IMAGE_TAG}",
 )
 
 container_push(
-    name = "push_image_production",
+    name = "push_image_prd",
     format = "Docker",
     image = ":image",
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
