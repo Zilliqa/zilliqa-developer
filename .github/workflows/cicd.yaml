@@ -26,11 +26,6 @@ jobs:
       matrix:
         application: [devex]
         include:
-          - application: neo-savant
-            docker_domain: asia-docker.pkg.dev
-            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
-            image_name: neo-savant
-            path: products/neo-savant
           - application: devex
             docker_domain: asia-docker.pkg.dev
             registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
