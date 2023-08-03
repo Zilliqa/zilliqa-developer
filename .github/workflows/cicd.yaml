@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [neo-savant, devex]
+        application: [devex]
         include:
           - application: neo-savant
             docker_domain: asia-docker.pkg.dev
@@ -37,7 +37,7 @@ jobs:
             image_name: devex
             path: products/devex
     env:
-      DEFAULT_BRANCH: main
+      DEFAULT_BRANCH: devops-904
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
