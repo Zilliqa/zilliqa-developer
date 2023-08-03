@@ -165,6 +165,15 @@ container_image(
 )
 
 container_push(
+    name = "push_image_local",
+    format = "Docker",
+    image = ":image",
+    registry = "localhost:5001",
+    repository = "devex",
+    tag = "latest",
+)
+
+container_push(
     name = "push_image_staging",
     format = "Docker",
     image = ":image",

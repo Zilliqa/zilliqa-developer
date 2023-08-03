@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: devex
-  namespace: default
+  namespace: devex
   labels:
     "app.kubernetes.io/name": "devex"
 spec:
@@ -18,7 +18,7 @@ spec:
         "app.kubernetes.io/name": "devex"
     spec:
       containers:
-        - image: developer-explorer:latest
+        - image: devex
           name: devex
           ports:
             - containerPort: 80
