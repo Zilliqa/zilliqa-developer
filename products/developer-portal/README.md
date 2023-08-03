@@ -1,56 +1,4 @@
-# Neo-savant IDE
-
-Neo-savant is a fully-fledged IDE used for writing, testing and deploying Scilla smart contracts painlessly. It can be tried out at [https://ide.zilliqa.com/](https://ide.zilliqa.com/).
-
-Neo-Savant helps Scilla developers to create and deploy Smart Contracts using an automated development environment, in-browser, with quick and intuitive controls.
-
-## Features
-
-- Intuitive UI for easy deployment/contract invocation.
-- Multiple networks supported: Testnet, Mainnet and a Simulated Environment where you can test out contracts without spending $ZIL
-- Account management using Keystore, Ledger or ZilPay.
-- Simple, persistent file manager for managing your contracts that allows for renaming/deletion.
-- Possibility to import already deployed contracts and call their transitions.
-- Support for event in contracts, with automatic notifications in the UI.
-- Support for arbitrary gas price/gas limit in deployment/calls.
-
-## Project setup
-
-```bash
-npm install
-```
-
-### Compiles and hot-reloads for development
-
-```bash
-npm run serve
-```
-
-### Compiles and minifies for production
-
-```bash
-npm run build
-```
-
-### Run your tests
-
-```bash
-npm run test
-```
-
-### Lints and fixes files
-
-```bash
-npm run lint
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-## License
-
-Neo-savant IDE is licenced under [GPLv3](LICENSE).
+# Developer portal
 
 ## Deploying applications with z (internal tool one-stop shop for the Zilliqa provisioning and deployment operations)
 
@@ -101,7 +49,7 @@ Build and push the image:
 
 ```sh
 ## from this repo base directory
-cd ./products/neo-savant
+cd ./products/developer-portal
 make image/build
 make image/push
 ```
@@ -168,7 +116,7 @@ z login
 1. Create a branch:
 
    ```sh
-   git checkout -b users/<username>/add_neo_savant_to_staging_cluster
+   git checkout -b users/<username>/add_developer_portal_to_staging_cluster
    ```
 
 1. In the file `infra/live/gcp/non-production/prj-d-staging/z_ase1.yaml` add the following:
@@ -179,9 +127,9 @@ z login
      clusters:
        staging:
          apps:
-           neo-savant:
+           developer-portal:
              repo: https://github.com/Zilliqa/zilliqa-developer
-             path: products/neo-savant/cd/overlays/staging
+             path: products/developer-portal/cd/overlays/staging
              track: staging
              type: kustomize
      ```
@@ -193,15 +141,15 @@ z login
      dns:
        vars:
        subdomains:
-         neo-savant-ide: {}
+         zilliqa-devportal: {}
      ```
 
 1. Push the changes
 
    ```sh
    git add .
-   git commit -m "Add Neo Savant to staging cluster"
-   git push origin users/<username>/add_neo_savant_to_staging_cluster
+   git commit -m "Add Developer Portal to staging cluster"
+   git push origin users/<username>/add_developer_portal_to_staging_cluster
    ```
 
 1. Open a Pull Request to the main branch
@@ -216,5 +164,5 @@ z login
 ### Deploy the application
 
 ```sh
-z app sync --cache-dir=.cache neo-savant
+z app sync --cache-dir=.cache developer-portal
 ```

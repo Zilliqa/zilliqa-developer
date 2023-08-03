@@ -122,14 +122,23 @@ container_image(
 )
 
 container_push(
-    name = "push_image_staging",
+    name = "push_image_dev",
     format = "Docker",
     image = ":image",
-    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
+    registry = "localhost:5001",
+    repository = "zilliqa-devportal",
+    tag = "latest",
+)
+
+container_push(
+    name = "push_image_stg",
+    format = "Docker",
+    image = ":image",
+    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private",
     repository = "zilliqa-devportal",
 
     # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
+    tag = "{GIT_SHORT_HASH_8_CHARS}",
 )
 
 container_push(
@@ -149,21 +158,6 @@ container_push(
 pkg_tar(
     name = "cd_base",
     srcs = glob(["products/devportal/cd/base/*.yaml"]),
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
-    name = "staging-kustomization",
-    output = "products/devportal/cd/overlays/staging/kustomization.yaml",
-    template = "products/devportal/cd/overlays/staging/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_staging_patch",
-    srcs = ["products/devportal/cd/overlays/staging/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",

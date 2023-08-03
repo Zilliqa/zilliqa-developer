@@ -31,6 +31,18 @@
       "pattern": "^https://evm-api-dev.zilliqa.com"
     },
     {
+      "pattern": "^http://evm-api-filters.zilliqa.com"
+    },
+    {
+      "pattern": "^https://api.testnet.zilliqa.com"
+    },
+    {
+      "pattern": "^http://evm-api-filters.testnet.zilliqa.com"
+    },
+    {
+      "pattern": "^http://evm-api-filters-dev.zilliqa.com"
+    },
+    {
       "pattern": "^https://devex.zilliqa.com"
     },
     {

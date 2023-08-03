@@ -2,14 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: zilliqa-devportal
-  namespace: default
+  namespace: devportal
   labels:
     "app.kubernetes.io/name": "zilliqa-devportal"
   annotations:
-    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-    - host: zilliqa-devportal.platform.prd.z7a.xyz
+    - host: localhost
       http:
         paths:
           - path: /

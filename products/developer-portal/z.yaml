@@ -9,7 +9,7 @@ clusters:
     region: asia-southeast1
     name: local-cluster
     apps:
-      neo-savant-dev:
-        path: products/neo-savant/cd/base
+      developer-portal-dev:
+        path: products/developer-portal/cd/base
         track: development
         type: kustomize

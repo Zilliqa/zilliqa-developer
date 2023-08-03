@@ -4,6 +4,7 @@ import subprocess
 import sys
 
 GIT_SHORT_HASH_LEGNTH = 9
+GIT_SHORT_HASH_LENGTH_8 = 8
 
 
 def is_git_dirty(path):
@@ -237,6 +238,7 @@ def main():
     print("GIT_DIRTY {}".format("1" if git_is_dirty else "0"))
     print("GIT_COMMIT_HASH {}".format(git_hash))
     print("GIT_SHORT_HASH {}".format(git_hash[:GIT_SHORT_HASH_LEGNTH]))
+    print("GIT_SHORT_HASH_8_CHARS {}".format(git_hash[:GIT_SHORT_HASH_LENGTH_8]))
     print("GIT_BRANCH {branch}".format(**version))
     print("GIT_BRANCHES {branches}".format(**version))
     print("GIT_DESCRIBE {describe}".format(**version))

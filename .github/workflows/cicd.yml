@@ -24,13 +24,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [neo-savant]
+        application: [neo-savant, developer-portal]
         include:
           - application: neo-savant
             docker_domain: asia-docker.pkg.dev
             registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
             image_name: neo-savant
             path: products/neo-savant
+          - application: developer-portal
+            docker_domain: asia-docker.pkg.dev
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            image_name: zilliqa-devportal
+            path: products/developer-portal
     env:
       DEFAULT_BRANCH: main
     steps:
@@ -67,20 +72,11 @@ jobs:
           tag: ${{ matrix.registry_stg }}/${{ matrix.image_name }}
           length: 8
 
-      - name: "Build ${{ matrix.application }} - staging"
+      - name: "Build and push ${{ matrix.application }} - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         env:
           ENVIRONMENT: stg
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
         run: |
           cd ${{ matrix.path }}
-          make image/build
-
-      - name: "Push ${{ matrix.application }} - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        env:
-          ENVIRONMENT: stg
-          IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
-        run: |
-          cd ${{ matrix.path }}
-          make image/push
+          make image/build-and-push
