@@ -145,7 +145,7 @@ z login
 1. Create a branch:
 
    ```sh
-   git checkout -b users/<username>/add_<application_name>_to_staging_cluster
+   git checkout -b users/<username>/add_devex_to_staging_cluster
    ```
 
 2. In the file `infra/live/gcp/non-production/prj-d-staging/z_ase1.yaml` add the following:
@@ -170,7 +170,7 @@ z login
      dns:
        vars:
        subdomains:
-       devex: {}
+         devex: {}
      ```
 
 3. Push the changes
@@ -178,7 +178,7 @@ z login
    ```sh
    git add .
    git commit -m "Add Devex to staging cluster"
-   git push origin users/<username>/add_neo_savant_to_staging_cluster
+   git push origin users/<username>/add_devex_to_staging_cluster
    ```
 
 4. Open a Pull Request to the main branch

@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: zilliqa-devportal
+spec:
+  domains:
+    - zilliqa-devportal.zilstg.dev

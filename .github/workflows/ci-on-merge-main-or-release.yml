@@ -140,16 +140,6 @@ jobs:
           docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
           docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build and push Docker - developer-portal - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
-        run: |
-          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_staging
-
-      - name: "Build and push Docker - devex - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
-        run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_stg
-
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
@@ -201,9 +191,6 @@ jobs:
       - name: "Create application.bzl"
         run: |
           echo 'APPLICATIONS_STAGING = [' > cd/applications.bzl
-          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" || "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'docs') }}" = "true" ]; then
-            echo '    "//products/developer-portal",' >> cd/applications.bzl
-          fi
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex-apollo') }}" = "true" ]; then
             echo '    "//products/devex-apollo",' >> cd/applications.bzl
           fi
