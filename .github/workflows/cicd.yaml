@@ -32,7 +32,7 @@ jobs:
             image_name: devex
             path: products/devex
     env:
-      DEFAULT_BRANCH: devops-904
+      DEFAULT_BRANCH: main
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -42,7 +42,7 @@ jobs:
           fetch-depth: 0
 
       - name: "Authenticate to Google Cloud - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         id: google-auth
         uses: "google-github-actions/auth@v1"
         with:
@@ -52,7 +52,7 @@ jobs:
           create_credentials_file: true
 
       - name: Login to the registry - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: docker/login-action@v2
         with:
           registry: ${{ matrix.docker_domain }}
@@ -60,7 +60,7 @@ jobs:
           password: "${{ steps.google-auth.outputs.access_token }}"
 
       - name: Get tag version staging - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         id: set-tag
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:
@@ -68,7 +68,7 @@ jobs:
           length: 8
 
       - name: "Build and push ${{ matrix.application }} - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        # if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         env:
           ENVIRONMENT: stg
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
