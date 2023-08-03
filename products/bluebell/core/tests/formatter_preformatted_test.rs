@@ -5,7 +5,7 @@ mod tests {
     use bluebell::parser::lexer;
     use bluebell::parser::lexer::Lexer;
     use bluebell::parser::parser;
-    use bluebell::ParserError;
+    use bluebell::parser::ParserError;
     use bluebell::*;
     use diffy::{create_patch, PatchFormatter};
     use std::fs;

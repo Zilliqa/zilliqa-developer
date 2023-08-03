@@ -12,7 +12,8 @@ use bluebell::ast::nodes::NodeProgram;
 use bluebell::contract_executor::UnsafeContractExecutor;
 use bluebell::passes::debug_printer::DebugPrinter;
 
-use bluebell::evm_bytecode_generator::EvmBytecodeGenerator;
+use bluebell::support::evm::{EvmCompiler, ScillaDefaultBuiltins, ScillaDefaultTypes};
+
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
@@ -23,50 +24,7 @@ use bluebell::parser::lexer;
 use bluebell::parser::lexer::Lexer;
 use bluebell::parser::{parser, ParserError};
 
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executor::EvmExecutor;
 use evm_assembly::types::EvmTypeValue;
-
-use evm::backend::Backend;
-use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
-use evm::{Context as EvmContext, ExitError, ExitSucceed};
-
-fn test_precompile(
-    input: &[u8],
-    gas_limit: Option<u64>,
-    context: &EvmContext,
-    _backend: &dyn Backend,
-    is_static: bool,
-) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-    println!("Running precompile {:?}!", input);
-    println!("Len: {} / {}", input.len() / 32, input.len());
-    println!("Context: {:#?}", context);
-    println!("Static: {}", is_static);
-    let gas_needed = match required_gas(input) {
-        Ok(i) => i,
-        Err(err) => return Err(PrecompileFailure::Error { exit_status: err }),
-    };
-
-    if let Some(gas_limit) = gas_limit {
-        if gas_limit < gas_needed {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::OutOfGas,
-            });
-        }
-    }
-
-    Ok((
-        PrecompileOutput {
-            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
-            output: input.to_vec(),
-        },
-        gas_needed,
-    ))
-}
-
-fn required_gas(_input: &[u8]) -> Result<u64, ExitError> {
-    Ok(20)
-}
 
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellOutputFormat {
@@ -99,6 +57,10 @@ enum BluebellCommand {
         /// Function to name to invoke
         #[arg(short, long)]
         entry_point: String,
+
+        /// Arguments to pass to function
+        #[arg(short, long, default_value_t= ("".to_string()))]
+        args: String,
     },
 }
 
@@ -118,58 +80,30 @@ struct Args {
     mode: BluebellCommand,
 }
 
-fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, _debug: bool) {
-    /****** Executable *****/
-    ///////
-    let mut specification = EvmCompilerContext::new();
+fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, args: String, _debug: bool) {
+    let mut compiler = EvmCompiler::new();
 
-    specification.declare_integer("Int8", 8);
-    specification.declare_integer("Int16", 16);
-    specification.declare_integer("Int32", 32);
-    specification.declare_integer("Int64", 64);
-    specification.declare_unsigned_integer("Uint8", 8);
-    specification.declare_unsigned_integer("Uint16", 16);
-    specification.declare_unsigned_integer("Uint32", 32);
-    specification.declare_unsigned_integer("Uint64", 64);
-    specification.declare_unsigned_integer("Uint256", 256);
+    // Defining capabilities
+    let default_types = ScillaDefaultTypes {};
+    let default_builtins = ScillaDefaultBuiltins {};
 
-    let _ = specification
-        .declare_function(
-            "builtin__fibonacci::<Uint64,Uint64>",
-            ["Uint256", "Uint256"].to_vec(),
-            "Uint256",
-        )
-        .attach_runtime(|| test_precompile);
-    let _ = specification.declare_inline_generics("builtin__add", |block, _arg_types| {
-        block.add();
-        Ok(())
-    });
+    compiler.attach(&default_types);
+    compiler.attach(&default_builtins);
 
-    ///////
-    // Executable
-    let mut generator = IrEmitter::new();
-    let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
+    // Creating executable
 
-    /*** Analysis ***/
-    let mut pass_manager = PassManager::default_pipeline();
-
-    if let Err(err) = pass_manager.run(&mut ir) {
-        panic!("{}", err);
-    }
-
-    let mut generator = EvmBytecodeGenerator::new(&mut specification, ir);
-
-    let executable = match generator.build_executable() {
-        Err(e) => {
-            panic!("Error: {:?}", e);
-        }
-        Ok(e) => e,
+    let executable = match compiler.executable_from_ast(ast) {
+        Err(e) => panic!("{:?}", e),
+        Ok(v) => v,
     };
 
-    println!("Bytecode: {}", hex::encode(executable.clone()));
-    let executor = EvmExecutor::new(&specification, executable);
-    // TODO: Arguments from CLI
-    executor.execute(&entry_point, [EvmTypeValue::Uint32(10)].to_vec());
+    let arguments: Vec<EvmTypeValue> = if args == "" {
+        [].to_vec()
+    } else {
+        serde_json::from_str(&args).expect("Failed to deserialize arguments")
+    };
+
+    executable.execute(&entry_point, arguments);
 }
 
 fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
@@ -307,10 +241,13 @@ fn main() {
             match args.mode {
                 BluebellCommand::Run {
                     entry_point,
+                    args: arguments,
                     backend,
                 } => match backend {
                     BluebellBackend::Llvm => bluebell_llvm_run(&ast, entry_point, args.debug),
-                    BluebellBackend::Evm => bluebell_evm_run(&ast, entry_point, args.debug),
+                    BluebellBackend::Evm => {
+                        bluebell_evm_run(&ast, entry_point, arguments, args.debug)
+                    }
                 },
                 _ => unimplemented!(),
             }
