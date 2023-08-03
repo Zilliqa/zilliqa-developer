@@ -181,7 +181,7 @@ container_push(
     repository = "devex",
 
     # Tagging from workspace status - requires --stamp as build args
-    tag = "$${IMAGE_TAG}",
+    tag = "$${IMAGE_TAG#*:}",
 )
 
 container_push(

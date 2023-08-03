@@ -191,6 +191,7 @@ z login
              track: staging
              type: kustomize
      ```
+
    - in `subdomains` stanza add:
 
      ```yaml
