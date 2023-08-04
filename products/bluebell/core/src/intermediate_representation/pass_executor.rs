@@ -163,11 +163,13 @@ impl PassExecutor for Operation {
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             match self {
                 Operation::Jump(identifier) => identifier.visit(pass, symbol_table),
-                Operation::StateLoad
-                | Operation::StateStore {
-                    address: _,
-                    value: _,
+                Operation::StateStore { address, value } => {
+                    let ret = value.visit(pass, symbol_table);
+                    address.name.visit(pass, symbol_table)?;
+
+                    ret
                 }
+                Operation::StateLoad
                 | Operation::MemLoad
                 | Operation::MemStore
                 | Operation::AcceptTransfer
@@ -264,6 +266,7 @@ impl PassExecutor for Instruction {
         } else {
             ret
         }?;
+
         match children_ret {
             TraversalResult::Continue => {
                 pass.visit_instruction(TreeTraversalMode::Exit, self, symbol_table)

@@ -92,12 +92,17 @@ impl Backend for EvmIoInterface {
             .unwrap_or_default()
     }
 
-    fn storage(&self, _address: H160, _index: H256) -> H256 {
+    fn storage(&self, address: H160, index: H256) -> H256 {
+        println!("Address: {:#?}", address);
+        println!("Index: {:#?}", index);
         unimplemented!()
     }
 
-    fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
-        unimplemented!()
+    fn original_storage(&self, address: H160, index: H256) -> Option<H256> {
+        println!("Address: {:#?}", address);
+        println!("Index: {:#?}", index);
+        // TODO: Implement storage
+        None
     }
 
     // todo: this.

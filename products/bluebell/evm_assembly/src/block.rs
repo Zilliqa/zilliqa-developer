@@ -3,6 +3,7 @@ use crate::instruction::EvmInstruction;
 use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
 use crate::types::EvmTypeValue;
 use evm::Opcode;
+use primitive_types::U256;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -71,6 +72,19 @@ impl Scope {
         Ok(())
     }
 
+    pub fn register_alias(&mut self, source: &str, dest: &str) -> Result<(), String> {
+        if self.name_location.contains_key(dest) {
+            return Err(format!("SSA name {} already exists", dest));
+        }
+
+        if let Some(value) = self.name_location.get(source) {
+            self.name_location.insert(dest.to_string(), *value);
+            Ok(())
+        } else {
+            return Err(format!("SSA name {} does not exists", dest));
+        }
+    }
+
     fn update_stack(&mut self, opcode: Opcode) -> i32 {
         let consumes: i32 = opcode.stack_consumed();
         let produces: i32 = opcode.stack_produced();
@@ -133,6 +147,10 @@ impl EvmBlock {
 
     pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
         self.scope.register_stack_name(name)
+    }
+
+    pub fn register_alias(&mut self, source: &str, dest: &str) -> Result<(), String> {
+        self.scope.register_alias(source, dest)
     }
 
     fn update_stack(&mut self, opcode: Opcode) {
@@ -566,6 +584,12 @@ impl EvmBlock {
 
     pub fn push_u64(&mut self, arg: u64) -> &mut Self {
         self.push(arg.to_be_bytes().to_vec())
+    }
+
+    pub fn push_u256(&mut self, arg: U256) -> &mut Self {
+        let mut bytes = [0u8; 32];
+        arg.to_big_endian(&mut bytes);
+        self.push(Vec::from(bytes))
     }
 
     pub fn push(&mut self, arguments: Vec<u8>) -> &mut Self {

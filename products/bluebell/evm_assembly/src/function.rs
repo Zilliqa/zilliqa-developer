@@ -72,8 +72,11 @@ impl EvmFunction {
                     Some(l) => l,
                     _ => {
                         produces = Some(block_production);
-                        todo!(); // This is actually an internal function end
-                        return Err(format!("No label specified for jump in {}", next.name));
+
+                        // Returns to a pointer and there is nothing to resolve
+                        continue;
+                        // todo!(); // This is actually an internal function end
+                        // return Err(format!("No label specified for jump in {}", next.name));
                     }
                 };
 

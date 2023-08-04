@@ -151,7 +151,7 @@ impl VariableDeclaration {
 #[derive(Debug, Clone)]
 pub struct FieldAddress {
     pub name: IrIdentifier,
-    pub value: Option<Vec<u8>>,
+    pub value: Option<Vec<u8>>, // TODO: Consider dropping this one
 }
 
 #[derive(Debug, Clone)]

@@ -4,10 +4,19 @@ use crate::intermediate_representation::primitives::{
 };
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use primitive_types::U256;
+use std::collections::HashMap;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
+
+#[derive(Debug)]
+pub struct StateLayoutEntry {
+    pub address_offset: U256,
+    pub size: u64,
+    pub initializer: U256,
+}
 
 /// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
 /// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.
@@ -22,6 +31,9 @@ pub struct EvmBytecodeGenerator<'ctx> {
     /// high-level, platform-independent representation used for code optimization before
     /// it's translated into the target bytecode.
     ir: Box<IntermediateRepresentation>,
+
+    // TODO: State allocation - TODO: move to IR and setup using pass
+    state_layout: HashMap<String, StateLayoutEntry>,
 }
 
 impl<'ctx> EvmBytecodeGenerator<'ctx> {
@@ -29,7 +41,35 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
     /// and a boxed intermediate representation (IR) of the program.  
     pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<IntermediateRepresentation>) -> Self {
         let builder = context.create_builder();
-        Self { builder, ir }
+        Self {
+            builder,
+            ir,
+            state_layout: HashMap::new(),
+        }
+    }
+
+    /// TODO:
+    pub fn build_state_layout(&mut self) -> Result<(), String> {
+        // TODO: Add support for immutables
+        let mut address_offset: u64 = 4919;
+
+        for field in &self.ir.fields_definitions {
+            let name = &field.variable.name.unresolved;
+            let address = U256::from(address_offset);
+            let initializer = U256::from(0);
+
+            let state = StateLayoutEntry {
+                address_offset: address,
+                size: 1, // TODO:
+                initializer,
+            };
+
+            self.state_layout.insert(name.to_string(), state);
+            address_offset += 1;
+        }
+        println!("State: {:#?}", self.state_layout);
+        Ok(())
+        //        unimplemented!()
     }
 
     /// This function writes function definitions from the IR to the EVM module.
@@ -214,19 +254,67 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     }
                                 }
-                                Operation::Return(ref value) => {
-                                    match value {
-                                        Some(_value) => {
-                                            todo!();
-                                            // TODO: write return to the stack
-                                            // blk.r#return();
-                                        }
-                                        None => {
-                                            blk.push([0x00].to_vec());
-                                            blk.dup1();
-                                            blk.r#return();
-                                        }
+                                Operation::ResolveSymbol { ref symbol } => {
+                                    let source = match &symbol.resolved {
+                                        Some(v) => v,
+                                        None => panic!("Unresolved symbol: {:?}", symbol),
+                                    };
+                                    let dest = match &instr.ssa_name {
+                                        Some(v) => match &v.resolved {
+                                            Some(x) => x,
+                                            _ => panic!("Alias symbol name was unresolved."),
+                                        },
+                                        _ => panic!("Alias with no SSA name are not supported"),
+                                    };
+
+                                    if let Err(e) = blk.register_alias(source, dest) {
+                                        panic!("Failed registering alias: {:?}", e);
                                     }
+                                }
+                                Operation::StateStore {
+                                    ref address,
+                                    ref value,
+                                } => {
+                                    // TODO: Ensure that we used resolved address name
+                                    let binding = &self.state_layout.get(&address.name.unresolved);
+                                    let state = match binding {
+                                        Some(v) => v,
+                                        None => panic!(
+                                            "{}",
+                                            format!(
+                                                "Unable to find state {}",
+                                                address.name.unresolved
+                                            )
+                                        ),
+                                    };
+
+                                    let address = state.address_offset;
+
+                                    println!("Storing {:?} on {:?}", value, address);
+                                    let value_name = match &value.resolved {
+                                        Some(v) => v,
+                                        None => {
+                                            panic!("{}", format!("Unable to resolve {:?}", value))
+                                        }
+                                    };
+
+                                    if let Err(e) = blk.duplicate_stack_name(value_name) {
+                                        panic!("Unable to resolve value to be stored: {:?}", e);
+                                    }
+
+                                    blk.push_u256(address);
+                                    blk.external_sstore();
+                                }
+                                Operation::Return(ref _value) => {
+                                    blk.push_u64(100000); // TODO: Load return pointer
+                                    blk.jump();
+                                    /*
+                                    if value {
+                                        println!("RETURN: {:#?}", value);
+                                        todo!()
+                                    }
+                                    */
+                                    // TODO:
                                 }
                                 _ => {
                                     println!("Unhandled instruction: {:#?}", instr);
@@ -247,6 +335,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
     }
 
     pub fn build_executable(&mut self) -> Result<Vec<u8>, String> {
+        self.build_state_layout()?;
+
         self.write_function_definitions_to_module()?;
 
         self.builder.finalize_blocks();

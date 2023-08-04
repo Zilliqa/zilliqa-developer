@@ -238,17 +238,17 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
                         let signature = function.signature.clone().unwrap();
 
-                        // Loading data
-                        // TODO: Check the size
-                        let args_size = 0x04;
-                        load_data_block.push1([args_size].to_vec()); // Checking that the size of call args
+                        // Checking that the size of call args
+                        // TODO: Assumptino is that all arguments are 256-bits
+                        let args_size = 0x04 + 0x20 * signature.arguments.len();
+                        load_data_block.push_u64(args_size.try_into().unwrap());
                         load_data_block.calldatasize();
                         load_data_block.lt();
                         load_data_block.jump_if_to("fail");
 
-                        // TODO: Load data
+                        // Loading data
                         for (i, _arg) in signature.arguments.iter().enumerate() {
-                            load_data_block.push_u64((4 + 0x20 * i).try_into().unwrap());
+                            load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
                             load_data_block.calldataload();
                         }
 
