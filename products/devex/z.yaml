@@ -1,3 +1,5 @@
+define: &region "asia-southeast1"
+
 backend: kind
 
 clusters:
@@ -6,10 +8,10 @@ clusters:
       nginx-ingress:
         from: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
         options: "-f"
-    region: asia-southeast1
+    region: *region
     name: local-cluster
     apps:
-      neo-savant-dev:
-        path: products/neo-savant/cd/base
+      devex-dev:
+        path: products/devex/cd/base
         track: development
         type: kustomize

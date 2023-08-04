@@ -67,20 +67,11 @@ jobs:
           tag: ${{ matrix.registry_stg }}/${{ matrix.image_name }}
           length: 8
 
-      - name: "Build ${{ matrix.application }} - staging"
+      - name: "Build and push ${{ matrix.application }} - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         env:
           ENVIRONMENT: stg
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
         run: |
           cd ${{ matrix.path }}
-          make image/build
-
-      - name: "Push ${{ matrix.application }} - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        env:
-          ENVIRONMENT: stg
-          IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
-        run: |
-          cd ${{ matrix.path }}
-          make image/push
+          make image/build-and-push

@@ -148,7 +148,7 @@ jobs:
       - name: "Build and push Docker - devex - staging"
         if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_staging
+          bazelisk run --test_output=all --keep_going //products/devex:push_image_stg
 
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
@@ -195,7 +195,7 @@ jobs:
       - name: "Build and push Docker - devex - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_production
+          bazelisk run --test_output=all --keep_going //products/devex:push_image_prd
 
       ### BEGIN DEPLOYMENT STAGES
       - name: "Create application.bzl"
