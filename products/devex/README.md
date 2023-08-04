@@ -140,7 +140,7 @@ export GITHUB_PAT=<GITHUB_PAT>
 z login
 ```
 
-### Add the application to the staging `z.yaml` file. Skip this step if it is an existing application.
+### Add the application to the staging `z.yaml` file. Skip this step if it is an existing application
 
 1. Create a branch:
 
