@@ -207,15 +207,6 @@ pkg_tar(
     visibility = ["//visibility:public"],
 )
 
-pkg_tar(
-    name = "cd_staging_patch",
-    srcs = ["cd/overlays/staging/kustomization.yaml"],
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
 expand_workspace_status(
     name = "production-kustomization",
     output = "cd/overlays/production/kustomization.yaml",
