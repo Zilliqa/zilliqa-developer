@@ -139,7 +139,7 @@ z login
 1. Create a branch:
 
    ```sh
-   git checkout -b users/<username>/add_<application_name>_to_staging_cluster
+   git checkout -b users/<username>/add_neo_savant_to_staging_cluster
    ```
 
 2. In the file `infra/live/gcp/non-production/prj-d-staging/z_ase1.yaml` add the following:
@@ -164,7 +164,7 @@ z login
      dns:
        vars:
        subdomains:
-       neo-savant-ide: {}
+         neo-savant-ide: {}
      ```
 
 3. Push the changes

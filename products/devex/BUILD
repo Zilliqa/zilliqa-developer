@@ -179,8 +179,6 @@ container_push(
     image = ":image",
     registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private",
     repository = "devex",
-
-    # Tagging from workspace status - requires --stamp as build args
     tag = "$${IMAGE_TAG#*:}",
 )
 

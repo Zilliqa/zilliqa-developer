@@ -1,5 +1,5 @@
 .PHONY: all
-all: image/build image/push
+all: image/build-and-push
 
 .ONESHELL:
 SHELL := /bin/bash
