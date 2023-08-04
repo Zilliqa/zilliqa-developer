@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: neo-savant-ide
-  namespace: default
+  namespace: neo-savant-ide
   labels:
     "app.kubernetes.io/name": "neo-savant-ide"
 spec:
@@ -18,7 +18,7 @@ spec:
         "app.kubernetes.io/name": "neo-savant-ide"
     spec:
       containers:
-        - image: nginx:latest
+        - image: neo-savant
           name: neo-savant-ide
           ports:
             - containerPort: 80

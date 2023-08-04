@@ -27,17 +27,6 @@ container_image(
 )
 
 container_push(
-    name = "push_image_staging",
-    format = "Docker",
-    image = ":image",
-    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "scilla-savant-ide",
-
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
-)
-
-container_push(
     name = "push_image_production",
     format = "Docker",
     image = ":image",
@@ -54,21 +43,6 @@ container_push(
 pkg_tar(
     name = "cd_base",
     srcs = glob(["products/neo-savant/cd/base/*.yaml"]),
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
-    name = "staging-kustomization",
-    output = "products/neo-savant/cd/overlays/staging/kustomization.yaml",
-    template = "products/neo-savant/cd/overlays/staging/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_staging_patch",
-    srcs = ["products/neo-savant/cd/overlays/staging/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",

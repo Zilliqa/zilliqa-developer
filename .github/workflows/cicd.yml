@@ -1,0 +1,86 @@
+name: "CICD"
+
+on:
+  # Test run before merging
+  pull_request:
+    branches:
+      - main
+  # On merged
+  push:
+    branches:
+      - main
+  # On released
+  release:
+    types: [created]
+
+jobs:
+  build-docker:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-22.04
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    name: "Build and push images"
+    strategy:
+      fail-fast: false
+      matrix:
+        application: [neo-savant]
+        include:
+          - application: neo-savant
+            docker_domain: asia-docker.pkg.dev
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            image_name: neo-savant
+            path: products/neo-savant
+    env:
+      DEFAULT_BRANCH: main
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+
+      - name: "Authenticate to Google Cloud - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        id: google-auth
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service_account: "${{ secrets.GCP_STG_GITHUB_SA_DOCKER_REGISTRY }}"
+          create_credentials_file: true
+
+      - name: Login to the registry - staging
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ matrix.docker_domain }}
+          username: "oauth2accesstoken"
+          password: "${{ steps.google-auth.outputs.access_token }}"
+
+      - name: Get tag version staging - staging
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        id: set-tag
+        uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
+        with:
+          tag: ${{ matrix.registry_stg }}/${{ matrix.image_name }}
+          length: 8
+
+      - name: "Build ${{ matrix.application }} - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        env:
+          ENVIRONMENT: stg
+          IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build
+
+      - name: "Push ${{ matrix.application }} - staging"
+        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
+        env:
+          ENVIRONMENT: stg
+          IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/push
