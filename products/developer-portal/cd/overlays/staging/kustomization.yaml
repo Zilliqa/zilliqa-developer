@@ -4,10 +4,6 @@ kind: Kustomization
 resources:
   - ../../base
   - certificate.yaml
-images:
-  - name: zilliqa-devportal
-    newName: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private/zilliqa-devportal
-    newTag: ce89b506
 
 patches:
   - target:

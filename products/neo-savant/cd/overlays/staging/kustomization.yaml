@@ -4,10 +4,6 @@ kind: Kustomization
 resources:
   - ../../base
   - certificate.yaml
-images:
-  - name: neo-savant
-    newName: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private/neo-savant
-    newTag: 535b54fb
 
 patches:
   - target:
