@@ -4,7 +4,6 @@ This module contains the applications which are deployed upon merge into main an
 
 APPLICATIONS_STAGING = [
     "//products/developer-portal",
-    "//products/devex",
     "//products/devex-apollo",
 ]
 
