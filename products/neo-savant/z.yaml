@@ -1,0 +1,12 @@
+backend: kind
+
+clusters:
+  localdev:
+    manifests: {}
+    region: asia-southeast1
+    name: local-cluster
+    apps:
+      neo-savant-dev:
+        path: products/neo-savant/cd/base
+        track: development
+        type: kustomize
