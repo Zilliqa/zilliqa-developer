@@ -1,39 +1,20 @@
 # Developer portal
 
-## Deploying applications with z (internal tool one-stop shop for the Zilliqa provisioning and deployment operations)
+## Deploying applications with z
 
-For more details about `z` please refer to the [documentation](https://github.com/Zilliqa/devops/blob/main/docs/z2.md).
+`z` is the one-stop shop for the Zilliqa provisioning and deployment operations. To deploy applications with z ensure the `z`
+binary is installed in your operative system PATH environment variable. For more details about `z` please refer to the [documentation](https://github.com/Zilliqa/devops/blob/main/docs/z2.md).
 
 ## Deploying applications to localdev
 
-Applications are specified in the `apps` stanzas of the `z.yaml` file.
-A typical configuration looks something like this:
-
-```yaml
-backend: kind
-
-clusters:
-  cluster_name:
-    apps:
-      app1:
-        path: products/app1/deployment
-        track: development
-        type: kustomize
-      apps2:
-        path: products/app2/development
-        track: development
-        type: kustomize
-```
-
-Clone the devops repo:
+To deploy the localdev/development environment go to the project folder in the zilliqa-developer repository:
 
 ```sh
-git clone https://github.com/Zilliqa/devops.git
-cd devops
-source setenv
+cd ./products/developer-portal
 ```
 
-Set the following environment variables:
+The `./products/developer-portal/z.yaml` contains all the relevant configurations for the development environment.
+Now set the following environment variables to reference the project's `z.yaml` file:
 
 - `Z_ENV` to the path in which your `z.yaml` resides.
 - `ZQ_USER` to your username (the bit before `@` in your email address)
@@ -41,49 +22,39 @@ Set the following environment variables:
 for example:
 
 ```sh
-export Z_ENV=/path/to/z.yaml
+export Z_ENV=z.yaml
 export ZQ_USER=<user_id>@zilliqa.com
+```
+
+Create the local kind cluster (if not created previously):
+
+```sh
+z local create
+```
+
+Execute the manifests (in this case for ensuring the installation of the ingress-nginx controller, required for localdev/development environments):
+
+```sh
+z k-apply
 ```
 
 Build and push the image:
 
 ```sh
-## from this repo base directory
-cd ./products/developer-portal
-make image/build
-make image/push
+make image/build-and-push
 ```
 
-And deploy the application with the:
+And deploy the application to your local cluster with:
 
 ```sh
 z app sync
 ```
 
+Verify your application is running correct from the `http://localhost` URL and with `kubectl` commands (if required).
+
 ## Deploying applications to staging
 
-Applications are specified in the `apps` and `registries` stanzas of
-the `z.yaml` file. A typical configuration looks something like this:
-
-```yaml
-registries:
-  staging: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-pub
-clusters:
-  cluster_name:
-    apps:
-      app1:
-        path: products/app1/deployment
-        track: staging
-        repo: https://github.com/zilliqa-internal
-        type: kustomize
-      apps2:
-        path: products/app2/development
-        track: staging
-        repo: https://github.com/zilliqa-internal
-        type: kustomize
-```
-
-### Clone the devops repo
+To deploy the staging environment we need to clone the devops repository and execute `z` from there:
 
 ```sh
 git clone https://github.com/Zilliqa/devops.git
@@ -119,7 +90,7 @@ z login
    git checkout -b users/<username>/add_developer_portal_to_staging_cluster
    ```
 
-1. In the file `infra/live/gcp/non-production/prj-d-staging/z_ase1.yaml` add the following:
+2. In the file `infra/live/gcp/non-production/prj-d-staging/z_ase1.yaml` add the following:
 
    - in `apps` stanza add:
 
@@ -144,7 +115,7 @@ z login
          zilliqa-devportal: {}
      ```
 
-1. Push the changes
+3. Push the changes
 
    ```sh
    git add .
@@ -152,9 +123,9 @@ z login
    git push origin users/<username>/add_developer_portal_to_staging_cluster
    ```
 
-1. Open a Pull Request to the main branch
+4. Open a Pull Request to the main branch
 
-1. Apply the changes
+5. Apply the changes
 
    ```sh
    z plan
@@ -166,3 +137,5 @@ z login
 ```sh
 z app sync --cache-dir=.cache developer-portal
 ```
+
+Verify your application is running correct from the staging URL and with `kubectl` commands (if required).
