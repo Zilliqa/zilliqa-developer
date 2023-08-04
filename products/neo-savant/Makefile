@@ -14,10 +14,7 @@ ifeq ($(filter $(ENVIRONMENT),$(VALID_ENVIRONMENTS)),)
 $(error Invalid value for ENVIRONMENT. Valid values are dev, stg, or prd.)
 endif
 
-## Build the Docker image
-image/build:
+## Build and push the Docker image
+image/build-and-push:
 	docker build --build-arg DEPLOY_ENV=${ENVIRONMENT} -t "${IMAGE_TAG}" .
-
-## Push the Docker image
-image/push:
 	docker push "${IMAGE_TAG}"
