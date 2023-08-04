@@ -204,9 +204,6 @@ jobs:
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" || "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'docs') }}" = "true" ]; then
             echo '    "//products/developer-portal",' >> cd/applications.bzl
           fi
-          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex') }}" = "true" ]; then
-            echo '    "//products/devex",' >> cd/applications.bzl
-          fi
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex-apollo') }}" = "true" ]; then
             echo '    "//products/devex-apollo",' >> cd/applications.bzl
           fi

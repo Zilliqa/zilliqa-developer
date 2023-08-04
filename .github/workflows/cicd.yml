@@ -24,8 +24,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [neo-savant]
+        application: [devex, neo-savant]
         include:
+          - application: devex
+            docker_domain: asia-docker.pkg.dev
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            image_name: devex
+            path: products/devex
           - application: neo-savant
             docker_domain: asia-docker.pkg.dev
             registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
