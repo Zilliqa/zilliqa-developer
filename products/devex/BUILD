@@ -207,12 +207,6 @@ pkg_tar(
     visibility = ["//visibility:public"],
 )
 
-expand_workspace_status(
-    name = "staging-kustomization",
-    output = "products/devex/cd/overlays/staging/kustomization.yaml",
-    template = "products/devex/cd/overlays/staging/kustomization.tpl.yaml",
-)
-
 pkg_tar(
     name = "cd_staging_patch",
     srcs = ["products/devex/cd/overlays/staging/kustomization.yaml"],
