@@ -2,6 +2,7 @@ use crate::compiler_context::EvmCompilerContext;
 use crate::io_interface::CustomMemoryAccount;
 use crate::io_interface::EvmIoInterface;
 use crate::types::EvmTypeValue;
+use evm::backend::Apply;
 use evm::executor::stack::MemoryStackState;
 use evm::executor::stack::StackExecutor;
 use evm::executor::stack::StackSubstateMetadata;
@@ -22,6 +23,7 @@ impl<'a> EvmExecutor<'a> {
     }
 
     pub fn execute(&self, name: &str, args: Vec<EvmTypeValue>) {
+        println!("Code: {}", hex::encode(self.code.clone()));
         let input = self
             .context
             .get_function(name)
@@ -57,10 +59,11 @@ impl<'a> EvmExecutor<'a> {
         // Prepare the executor.
         let backend = EvmIoInterface::new(state); //MemoryBackend::new(&vicinity, state);
         let metadata = StackSubstateMetadata::new(u64::MAX, &config);
-        let state = MemoryStackState::new(metadata, &backend);
+        let mem_state = MemoryStackState::new(metadata, &backend);
         let precompiles = self.context.get_precompiles();
-        let mut executor = StackExecutor::new_with_precompiles(state, &config, &precompiles);
+        let mut executor = StackExecutor::new_with_precompiles(mem_state, &config, &precompiles);
         println!("Execute input: {}", hex::encode(input.clone()));
+
         // Call the 0x10 contract using the 0xf0 user.
         // Use the input variable.
         let (exit_reason, result) = executor.transact_call(
@@ -72,7 +75,28 @@ impl<'a> EvmExecutor<'a> {
             Vec::new(),
         );
 
+        let (state_apply, _logs) = executor.into_state().deconstruct();
         println!("Exit reason: {:#?}", exit_reason);
         println!("Result: {:#?}", result);
+        /// println!("Logs: {:#?}", logs);
+        for update in state_apply {
+            match update {
+                Apply::Modify {
+                    address,
+                    basic: _,
+                    code: _,
+                    storage,
+                    reset_storage: _,
+                } => {
+                    println!("Hello world {:?} => ", address);
+                    for (k, v) in storage {
+                        println!(" -- {:?} <= {:?}", k, v);
+                    }
+                }
+                Apply::Delete { address } => {
+                    println!("Deleting {:?}", address)
+                }
+            }
+        }
     }
 }

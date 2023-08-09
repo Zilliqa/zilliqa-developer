@@ -155,6 +155,7 @@ impl IrPass for AnnotateBaseTypes {
         };
 
         self.push_namespace(namespace);
+        println!("Visiting {:?}", fnc.name);
         fnc.name.visit(self, symbol_table)?;
 
         self.push_namespace(fnc.name.unresolved.clone());
@@ -254,8 +255,25 @@ impl IrPass for AnnotateBaseTypes {
             IrIndentifierKind::BlockLabel => (),
             IrIndentifierKind::FunctionName
             | IrIndentifierKind::TransitionName
-            | IrIndentifierKind::ProcedureName
-            | IrIndentifierKind::VirtualRegister
+            | IrIndentifierKind::ProcedureName => {
+                println!("Attempting to resolve: {:?}", symbol);
+                if !symbol.is_definition {
+                    if let Some(resolved_name) =
+                        symbol_table.resolve_qualified_name(&symbol.unresolved, &self.namespace)
+                    {
+                        symbol.resolved = Some(resolved_name);
+                    }
+                    /*
+                    // In the event of a definition we make a qualified name
+                    if let Some(ns) = &self.namespace {
+                        symbol.resolved = Some(
+                            format!("{}{}{}", ns, NAMESPACE_SEPARATOR, symbol.unresolved).to_string(),
+                        );
+                    }
+                    */
+                }
+            }
+            IrIndentifierKind::VirtualRegister
             | IrIndentifierKind::VirtualRegisterIntermediate
             | IrIndentifierKind::Memory => {
                 if let Some(ns) = &self.namespace {
@@ -380,6 +398,8 @@ impl IrPass for AnnotateBaseTypes {
             }
             Operation::CallFunction { name, arguments } => {
                 name.visit(self, symbol_table)?;
+                println!("Function name after visiting: {:#?}", name);
+                println!("Symbol table: {:#?}", symbol_table);
                 for arg in arguments.iter_mut() {
                     arg.visit(self, symbol_table)?;
                 }

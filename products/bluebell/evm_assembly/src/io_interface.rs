@@ -14,6 +14,7 @@ pub struct CustomMemoryAccount {
     pub code: Vec<u8>,
 }
 
+#[derive(Debug)]
 pub struct EvmIoInterface {
     // Backend refers to storage, not execution platform
     state: BTreeMap<H160, CustomMemoryAccount>,
@@ -27,7 +28,8 @@ impl EvmIoInterface {
 
 impl Backend for EvmIoInterface {
     fn gas_price(&self) -> U256 {
-        unimplemented!()
+        println!("LOG: Requesting gas price");
+        U256::zero()
     }
 
     fn origin(&self) -> H160 {
@@ -35,11 +37,13 @@ impl Backend for EvmIoInterface {
     }
 
     fn block_hash(&self, _: U256) -> H256 {
-        unimplemented!()
+        println!("LOG: Requesting block hash");
+        H256::zero()
     }
 
     fn block_number(&self) -> U256 {
-        unimplemented!()
+        println!("LOG: Requesting block number");
+        U256::zero()
     }
 
     fn block_coinbase(&self) -> H160 {
@@ -47,7 +51,8 @@ impl Backend for EvmIoInterface {
     }
 
     fn block_timestamp(&self) -> U256 {
-        unimplemented!()
+        println!("LOG: Requesting block block timestamp");
+        U256::zero()
     }
 
     fn block_difficulty(&self) -> U256 {
@@ -71,13 +76,12 @@ impl Backend for EvmIoInterface {
     }
 
     fn exists(&self, address: H160) -> bool {
-        println!("Checking if address '{:?}' exists!", address);
-        false
-        //        unimplemented!()
+        println!("LOG: Checking if address '{:?}' exists!", address);
+        self.state.contains_key(&address)
     }
 
     fn basic(&self, address: H160) -> Basic {
-        println!("Getting basic info for '{:?}'", address);
+        println!("LOG: Getting basic info for '{:?}'", address);
         Basic {
             balance: 0.into(),
             nonce: 0.into(),
@@ -85,7 +89,7 @@ impl Backend for EvmIoInterface {
     }
 
     fn code(&self, address: H160) -> Vec<u8> {
-        println!("Requesting code for '{:?}'", address);
+        println!("LOG: Requesting code for '{:?}'", address);
         self.state
             .get(&address)
             .map(|v| v.code.clone())
@@ -93,16 +97,33 @@ impl Backend for EvmIoInterface {
     }
 
     fn storage(&self, address: H160, index: H256) -> H256 {
-        println!("Address: {:#?}", address);
-        println!("Index: {:#?}", index);
-        unimplemented!()
+        println!("LOG: Accessing storage '{:?}'.'{:?}'", address, index);
+
+        let storage = self
+            .state
+            .get(&address)
+            .map(|v| v.storage.clone())
+            .unwrap_or_default();
+
+        match storage.get(&index) {
+            Some(v) => v.clone(),
+            None => H256::zero(),
+        }
     }
 
     fn original_storage(&self, address: H160, index: H256) -> Option<H256> {
-        println!("Address: {:#?}", address);
-        println!("Index: {:#?}", index);
-        // TODO: Implement storage
-        None
+        println!(
+            "LOG: Accessing original storage '{:?}'.'{:?}'",
+            address, index
+        );
+
+        let storage = self
+            .state
+            .get(&address)
+            .map(|v| v.storage.clone())
+            .unwrap_or_default();
+
+        storage.get(&index).copied()
     }
 
     // todo: this.

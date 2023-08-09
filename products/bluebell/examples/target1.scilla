@@ -5,15 +5,20 @@ contract HelloWorld()
 
 field welcome_msg : Uint64 = Uint64 0
 
-transition setHello (msg : Uint64)
+transition setHelloImpl(msg: Uint64)
   welcome_msg := msg
+
+end
+
+transition setHello (msg : Uint64)
+  setHelloImpl msg
 end
 
 (*
 
-1. Create field table
-2. Implement store
-3. Remove extra resolve? Check with scilla checker
-4. Implement load
+1. (v) Create field table
+2. (v) Implement store
+3. ( ) Remove extra resolve? Check with scilla checker
+4. ( ) Implement load
 
 *)

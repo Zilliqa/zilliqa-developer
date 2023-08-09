@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Scope {
-    stack_counter: i32,
+    pub stack_counter: i32,
     entry_stack_counter: i32,
     name_location: HashMap<String, i32>,
 }
@@ -110,7 +110,7 @@ pub struct EvmBlock {
     pub consumes: i32,
     pub produces: i32,
 
-    scope: Scope,
+    pub scope: Scope,
     // stack_counter: i32,
     // name_location: HashMap<String, i32>,
 }
@@ -557,6 +557,10 @@ impl EvmBlock {
     pub fn jump_to(&mut self, label: &str) -> &mut Self {
         self.write_instruction(Opcode::PUSH4, Some(label.to_string()));
         self.write_instruction(Opcode::JUMP, None)
+    }
+
+    pub fn push_label(&mut self, label: &str) -> &mut Self {
+        self.write_instruction(Opcode::PUSH4, Some(label.to_string()))
     }
 
     pub fn jump_if_to(&mut self, label: &str) -> &mut Self {

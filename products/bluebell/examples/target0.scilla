@@ -4,7 +4,9 @@ library HelloWorld
 contract HelloWorld()
 
 transition setHello (a : Uint64, b: Uint64)
-  x = builtin fibonacci a b
+  x = builtin fibonacci a a;
+  x = builtin print a;
+  x = builtin print a
 end
 
 

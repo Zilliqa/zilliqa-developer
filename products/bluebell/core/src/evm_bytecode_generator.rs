@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
+use std::mem;
 
 #[derive(Debug)]
 pub struct StateLayoutEntry {
@@ -104,7 +105,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 None => "Uint256", // TODO: panic!("Void type not implemented for EVM")
             };
 
-            println!("Writing function {:#?}", func.name);
+            println!("Writing function {:#?}", function_name);
 
             self.builder
                 .define_function(&function_name, arg_types, return_type)
@@ -112,7 +113,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                     let mut ret: Vec<EvmBlock> = Vec::new();
 
                     // Return PC + Arguments are expected to be on the stack
-
                     for block in &func.body.blocks {
                         let block_name = match block.name.qualified_name() {
                             Ok(b) => b,
@@ -124,6 +124,39 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                         for instr in &block.instructions {
                             match instr.operation {
+                                Operation::CallFunction {
+                                    ref name,
+                                    ref arguments,
+                                } => {
+                                    println!("Calling {:#?} -- {:#?}", name, arguments);
+                                    let mut exit_block = EvmBlock::new(
+                                        Some(0),
+                                        ["result".to_string()].to_vec(),
+                                        "exit_block",
+                                    );
+
+                                    // Adding return point
+                                    blk.push_label("exit_block");
+
+                                    for arg in arguments {
+                                        match &arg.resolved {
+                                            Some(a) => blk.duplicate_stack_name(&a),
+                                            None => panic!("Unable to resolve {}", arg.unresolved),
+                                        };
+                                    }
+
+                                    // Jumping to function
+                                    let label = match &name.resolved {
+                                        Some(v) => v,
+                                        None => panic!(
+                                            "Unresolved function name in function call {:?}",
+                                            name
+                                        ),
+                                    };
+                                    blk.jump_to(&label);
+                                    mem::swap(&mut blk, &mut exit_block);
+                                    ret.push(exit_block);
+                                }
                                 Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
@@ -306,15 +339,14 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     blk.external_sstore();
                                 }
                                 Operation::Return(ref _value) => {
-                                    blk.push_u64(100000); // TODO: Load return pointer
-                                    blk.jump();
-                                    /*
-                                    if value {
-                                        println!("RETURN: {:#?}", value);
-                                        todo!()
+                                    // Assumes that the next element on the stack is return pointer
+                                    // TODO: Pop all elements that were not used yet.
+                                    // TODO: Push value if exists and swap1, then jump
+
+                                    while blk.scope.stack_counter != 0 {
+                                        blk.pop();
                                     }
-                                    */
-                                    // TODO:
+                                    blk.jump();
                                 }
                                 _ => {
                                     println!("Unhandled instruction: {:#?}", instr);

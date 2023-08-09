@@ -246,6 +246,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                         load_data_block.lt();
                         load_data_block.jump_if_to("fail");
 
+                        // Adding return address
+                        load_data_block.push_label("success");
+
                         // Loading data
                         for (i, _arg) in signature.arguments.iter().enumerate() {
                             load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
@@ -267,11 +270,17 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         fail_block.dup1();
         fail_block.revert();
 
+        let mut success_block = EvmBlock::new(None, [].to_vec(), "success");
+        success_block.push1([0x00].to_vec());
+        success_block.dup1();
+        success_block.r#return();
+
         main.blocks.push(switch_block);
         for block in data_loading_blocks {
             main.blocks.push(block);
         }
         main.blocks.push(fail_block);
+        main.blocks.push(success_block);
 
         self.functions[0] = main;
 
@@ -289,9 +298,16 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         // Creating code positions
         for function in self.functions.iter_mut() {
-            for block in function.blocks.iter_mut() {
+            for (i, block) in function.blocks.iter_mut().enumerate() {
                 block.position = Some(position);
                 label_positions.insert(block.name.clone(), position);
+                if i == 0 {
+                    let function_name = match &function.signature {
+                        Some(v) => v.name.clone(),
+                        None => panic!("Invalid function signature {:?}", function),
+                    };
+                    label_positions.insert(function_name, position);
+                }
                 for instruction in block.instructions.iter_mut() {
                     instruction.position = Some(position);
                     position += 1 + instruction.expected_args_length();
@@ -318,7 +334,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                                 instruction.u64_to_arg_big_endian(*p);
                             }
                             None => {
-                                panic!("Label not found!");
+                                panic!("Label not found {:#?}!", name);
                             }
                         }
                     }

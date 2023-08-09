@@ -929,10 +929,42 @@ impl AstConverting for IrEmitter {
                 unimplemented!()
             }
             NodeStatement::CallProc {
-                component_id: _,
-                arguments: _,
+                component_id,
+                arguments: call_args,
             } => {
-                unimplemented!()
+                let mut arguments: Vec<IrIdentifier> = [].to_vec();
+                for arg in call_args.iter() {
+                    // TODO: xs should be rename .... not clear what this is, but it means function arguments
+                    let _ = arg.visit(self)?;
+                    let instruction = self.pop_instruction()?;
+
+                    let symbol = self.convert_instruction_to_symbol(instruction);
+                    arguments.push(symbol);
+                }
+
+                let name = match component_id {
+                    NodeComponentId::WithTypeLikeName(_) => unimplemented!(),
+                    NodeComponentId::WithRegularId(n) => n,
+                };
+
+                let name = IrIdentifier {
+                    unresolved: name.to_string(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::ProcedureName,
+                    is_definition: false,
+                };
+
+                let operation = Operation::CallFunction { name, arguments };
+
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                });
+
+                // self.stack.push(StackObject::Instruction(instr));
+                instr
             }
             NodeStatement::Iterate {
                 identifier_name: _,
@@ -1308,6 +1340,7 @@ impl AstConverting for IrEmitter {
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
         function_name.kind = IrIndentifierKind::TransitionName;
+        function_name.is_definition = true;
 
         // TODO: Decude return type from body
 

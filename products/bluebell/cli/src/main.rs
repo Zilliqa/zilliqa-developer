@@ -1,3 +1,5 @@
+use bluebell::support::modules::BluebellModule;
+use bluebell::support::modules::ScillaDebugBuiltins;
 use std::ffi::CStr;
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -12,7 +14,8 @@ use bluebell::ast::nodes::NodeProgram;
 use bluebell::contract_executor::UnsafeContractExecutor;
 use bluebell::passes::debug_printer::DebugPrinter;
 
-use bluebell::support::evm::{EvmCompiler, ScillaDefaultBuiltins, ScillaDefaultTypes};
+use bluebell::support::evm::EvmCompiler;
+use bluebell::support::modules::{ScillaDefaultBuiltins, ScillaDefaultTypes};
 
 use bluebell::llvm_ir_generator::LlvmIrGenerator;
 use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
@@ -75,12 +78,31 @@ struct Args {
     #[arg(long, default_value_t = false)]
     debug: bool,
 
+    /// Features to enable at runtime
+    #[arg(long = "runtime-enable")]
+    features_raw: Option<String>,
+
     /// Command to execute
     #[command(subcommand)]
     mode: BluebellCommand,
 }
 
-fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, args: String, _debug: bool) {
+impl Args {
+    fn features(&self) -> Vec<String> {
+        match &self.features_raw {
+            Some(v) => v.split(",").map(|s| s.to_string()).collect(),
+            _ => Vec::new(),
+        }
+    }
+}
+
+fn bluebell_evm_run(
+    ast: &NodeProgram,
+    entry_point: String,
+    args: String,
+    features: Vec<String>,
+    _debug: bool,
+) {
     let mut compiler = EvmCompiler::new();
 
     // Defining capabilities
@@ -90,7 +112,17 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, args: String, _debug
     compiler.attach(&default_types);
     compiler.attach(&default_builtins);
 
-    // Creating executable
+    for feature in features {
+        match &feature[..] {
+            "debug" => {
+                let feature = ScillaDebugBuiltins {};
+                compiler.attach(&feature);
+            }
+            _ => {
+                panic!("Unknown feature {}", feature)
+            }
+        }
+    }
 
     let executable = match compiler.executable_from_ast(ast) {
         Err(e) => panic!("{:?}", e),
@@ -103,6 +135,7 @@ fn bluebell_evm_run(ast: &NodeProgram, entry_point: String, args: String, _debug
         serde_json::from_str(&args).expect("Failed to deserialize arguments")
     };
 
+    print!("Arguments: {:?}", args);
     executable.execute(&entry_point, arguments);
 }
 
@@ -226,6 +259,7 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 fn main() {
     let args = Args::parse();
 
+    let features = args.features();
     // Accessing the values
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
     let mut file = File::open(args.filename).expect("Unable to open file");
@@ -236,6 +270,7 @@ fn main() {
     let lexer = Lexer::new(&script);
 
     let parser = parser::ProgramParser::new();
+
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
             match args.mode {
@@ -246,7 +281,7 @@ fn main() {
                 } => match backend {
                     BluebellBackend::Llvm => bluebell_llvm_run(&ast, entry_point, args.debug),
                     BluebellBackend::Evm => {
-                        bluebell_evm_run(&ast, entry_point, arguments, args.debug)
+                        bluebell_evm_run(&ast, entry_point, arguments, features, args.debug)
                     }
                 },
                 _ => unimplemented!(),
