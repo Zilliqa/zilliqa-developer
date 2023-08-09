@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/contract",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Contract-related functionality.",
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/src/index.js",
