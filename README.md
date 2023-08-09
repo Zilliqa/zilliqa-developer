@@ -126,7 +126,14 @@ Checkout out the repository. First ensure that tests are passing:
 bazelisk test //zilliqa/js/...
 ```
 
-Next navigate to the `zilliqa/js` folder and build all libraries:
+Next navigate to the `zilliqa/js` folder. If you have not done so, install all
+dependencies:
+
+```sh
+pnpm i
+```
+
+Then build all libraries:
 
 ```sh
 pnpm -r build

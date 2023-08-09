@@ -2,7 +2,7 @@
 
 > Classes for managing accounts and account-related actions.
 
-# Interfaces
+## Interfaces
 
 ```typescript
 export interface TxReceipt {
@@ -28,260 +28,260 @@ interface TxParams {
 
 When you give `nonce`, you should give `pubKey` together.
 
-# Classes
+## Classes
 
-## `Account`
+### `Account`
 
 Class for managing an account (i.e., a private/public keypair).
 
-### `Account(privateKey: string, nonce?: number): Account`
+#### `Account(privateKey: string, nonce?: number): Account`
 
-**Parameters**
+##### Parameters
 
 - `privateKey`: `string` - hex-encoded private key
 - `nonce`: `number` (optional) - the current nonce
 
-**Returns**
+##### Returns
 
 - `Account` - an `Account` instance.
 
-## Members
+### Members
 
-### `privateKey: string`
+#### `privateKey: string`
 
-### `publicKey: string`
+#### `publicKey: string`
 
-### `address: string`
+#### `address: string`
 
-### `nonce: number`
+#### `nonce: number`
 
-## Static Methods
+### Static Methods
 
-### `static fromFile(file: string, passphrase: string): Promise<Account>`
+#### `static fromFile(file: string, passphrase: string): Promise<Account>`
 
 Generates an account from any JSON-encoded string that complies with the
 [Web3 Secret Storage definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
 
-**Parameters**
+##### Parameters
 
 - `file`: `string` - JSON-encoded string containing the keystore file.
 - `passphrase`: `string` - passphrase used to encrypt the file.
 
-**Returns**
+##### Returns
 
 - `Promise<Account>` - an `Account` instance, initialised with the details
   provided by the keystore file.
 
-## Instance Methods
+### Instance Methods
 
-### `toFile(passphrase: string, kdf: 'pbkdf2' |'scrypt' = 'scrypt'): Promise<Account>`
+#### `toFile(passphrase: string, kdf: 'pbkdf2' |'scrypt' = 'scrypt'): Promise<Account>`
 
 Encrypts and JSON-encodes the account. Complies with the
 [Web3 Secret Storage definition](https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition).
 
-**Parameters**
+##### Parameters
 
 - `passphrase`: `string` - passphrase used to encrypt the file.
 - `kdf`: `'pbkdf2' | 'scrypt'` - the key derivation function to use for
   encryption.
 
-**Returns**
+##### Returns
 
 - `Promise<string>` - the JSON-encoded string of the keystore file.
 
-### `signTransaction(bytes: Buffer): string`
+#### `signTransaction(bytes: Buffer): string`
 
 Signs arbitrary bytes (most often transactions) using a Schnorr signing scheme.
 
-**Parameters**
+##### Parameters
 
 - `bytes`: `Buffer` - a `Buffer` of the `protobuf` encoded transaction bytes.
 
-**Returns**
+##### Returns
 
 - `string` - hex-encoded signature over the bytes, using the instance private
   key.
 
-## `Wallet`
+### `Wallet`
 
 Class for managing multiple accounts.
 
-### `Wallet(provider: Provider, accounts?: Account[] = []): Wallet`
+#### `Wallet(provider: Provider, accounts?: Account[] = []): Wallet`
 
-**Parameters**
+##### Parameters
 
 - `provider`: `Provider` - a Provider instance (see `@zilliqa-js/core`).
   Required for signing.
 - `accounts`: `Account[]` (optional) - an array of `Account` instances to
   pre-populate the wallet with.
 
-**Returns**
+##### Returns
 
 - `Wallet`
 
-## Members
+### Members
 
-### `accounts: { [address: string]: Account }`
+#### `accounts: { [address: string]: Account }`
 
 An object consisting of `address: Account` KV pairs. By default, an empty
 object.
 
-### `defaultAccount: Account`
+#### `defaultAccount: Account`
 
 The default account used for signing transactions. By default, `undefined`. It
 is set to the `0`-indexed account when a `Wallet` instance is constructed.
 
-## Instance methods
+### Instance methods
 
-### `create(): void`
+#### `create(): void`
 
 Creates a new keypair with a randomly-generated private key. The new account is
 accessible by address. This method mutates the `Wallet` instance.
 
-**Parameters**
+##### Parameters
 
 None
 
-**Returns**
+##### Returns
 
 - `string` - address of the new account.
 
-### `addByPrivateKey(privateKey: string): string`
+#### `addByPrivateKey(privateKey: string): string`
 
 Adds an `Account` to the `Wallet`.
 
-**Parameters**
+##### Parameters
 
 - `privateKey`: `string` - hex-encoded private key.
 
-**Returns**
+##### Returns
 
 - `string` - the corresponing address, computer from the private key.
 
-### `addByKeystore(keystore: string, passphrase: string): Promise<string>`
+#### `addByKeystore(keystore: string, passphrase: string): Promise<string>`
 
 Adds an account by keystore. This method is asynchronous and returns a
 `Promise<string>`, in order not to block on the underlying decryption operation.
 
-**Parameters**
+##### Parameters
 
 - `keystore`: `string` - JSON-encoded keystore file.
 - `passphrase`: `string` - the passphrase used to encode the keystore file.
 
-**Returns**
+##### Returns
 
 - `Promise<string>` - the corresponding address.
 
-### `addByMnemonic(phrase: string, index: number = 0): string`
+#### `addByMnemonic(phrase: string, index: number = 0): string`
 
 Adds an `Account` by use of a mnemonic as specified in BIP-32 and BIP-39
 
-**Parameters**
+##### Parameters
 
 - `phrase`: `string` - the 12-word mnemonic to use.
 - `index`: `number` (Optional) - the index of the child key.
 
-**Returns**
+##### Returns
 
 - `string` - the corresponding address.
 
-### `export(address: string, passphrase, string, kdf: 'pbkdf2' | 'scrypt'): Promise<string>`
+#### `export(address: string, passphrase, string, kdf: 'pbkdf2' | 'scrypt'): Promise<string>`
 
 - Exports an `Account` to a keystore file, encrypted with a passphrase.
 
-**Parameters**
+##### Parameters
 
 - `address`: `string` - the address of the selected account.
 - `passphrase`: `string` - the passphrase to encrypt the `Account` with.
 - `kdf`: `'pbkdf2' | 'scrypt'` - key derivation function.
 
-**Returns**
+##### Returns
 
 - `Promise<string>` - the JSON-encoded keystore file.
 
-### `remove(address: string): boolean`
+#### `remove(address: string): boolean`
 
 - Exports an `Account` to a keystore file, encrypted with a passphrase.
 
-**Parameters**
+##### Parameters
 
 - `address`: `string` - the address of the account to remove.
 
-**Returns**
+##### Returns
 
 - `boolean` - whether the `Account` was successfully removed.
 
-### `setDefault(address: string): void`
+#### `setDefault(address: string): void`
 
 Sets the default account to sign with.
 
-**Parameters**
+##### Parameters
 
 - `address`: `string` - the address of the account to set as default.
 
-**Returns**
+##### Returns
 
 - `void`
 
-### `sign(transaction: Transaction, offlineSign?: boolean): Promise<Transaction>`
+#### `sign(transaction: Transaction, offlineSign?: boolean): Promise<Transaction>`
 
 Sign a `Transaction` with the default `Account`. This method is asynchronous as
 it will attempt to obtain the `nonce` from the `Provider`. There is an offline
 mode that can be activated manually by setting the optional `offlineSign`
 parameter.
 
-**Parameters**
+##### Parameters
 
 - `transaction`: `Transaction` - a `Transaction` instance.
-- `offlineSign`: `boolean` (optional) - toggles offline signing on/off.
-  Defaults to `false` if the field is not set. If explicitly set to `true`,
-  offline mode is used and does not require internet connection to sign a
-  transaction.
+- `offlineSign`: `boolean` (optional) - toggles offline signing on/off. Defaults
+  to `false` if the field is not set. If explicitly set to `true`, offline mode
+  is used and does not require internet connection to sign a transaction.
 
-**Note**: In offline mode, the nonce must be explicitly set in the Transaction
+##### Note\*\*: In offline mode, the nonce must be explicitly set in the Transacti
+
 object.
 
-**Returns**
+##### Returns
 
 - `Promise<Transaction>` - a signed transaction.
 
-### `signWith(transaction: Transaction, address: string, offlineSign?: boolean): Promise<Transaction>`
+#### `signWith(transaction: Transaction, address: string, offlineSign?: boolean): Promise<Transaction>`
 
 Sign a `Transaction` with the chosen `Account`. This method is asynchronous as
 it will attempt to obtain the `nonce` from the `Provider`. There is an offline
 mode that can be activated manually by setting the optional `offlineSign`
 parameter.
 
-**Parameters**
+##### Parameters
 
 - `transaction`: `Transaction` - a `Transaction` instance.
 - `address`: `string` - the address of the `Account` to be used for signing.
-- `offlineSign`: `boolean` (optional) - toggles offline signing on/off.
-  Defaults to `false` if the field is not set. If explicitly set to `true`,
-  offline mode is used and does not require internet connection to sign a
-  transaction.
+- `offlineSign`: `boolean` (optional) - toggles offline signing on/off. Defaults
+  to `false` if the field is not set. If explicitly set to `true`, offline mode
+  is used and does not require internet connection to sign a transaction.
 
-**Note**: In offline mode, the nonce must be explicitly set in the Transaction
+##### Note\*\*: In offline mode, the nonce must be explicitly set in the Transacti
+
 object.
 
-**Returns**
+##### Returns
 
 - `Promise<Transaction>` - a signed transaction.
 
-### `signBatch(txList: Transaction[]): Promise<Transaction[]>`
+#### `signBatch(txList: Transaction[]): Promise<Transaction[]>`
 
 Sign a list of `Transaction` with the default `Account`. This method is
 asynchronous as it will attempt to obtain the `nonce` from the `Provider`.
 
-**Parameters**
+##### Parameters
 
 - `txList`: `Transaction[]` - a list of `Transaction` instances.
 
-**Returns**
+##### Returns
 
 - `Promise<Transaction[]>` - a list of signed transactions.
 
-**Example**
+##### Example
 
 ```json
 // zilliqa, wallet obj declaration omitted for clarity
@@ -313,44 +313,44 @@ for (const signedTx of batchResult) {
 }
 ```
 
-## `Transaction`
+### `Transaction`
 
 A class that represents a single `Transaction` on the Zilliqa network. It is a
 functor. Its purpose is to encode the possible states a Transaction can be in:
 Confirmed, Rejected, Pending, or Initialised (i.e., not broadcasted).
 
-## Members
+### Members
 
-### `bytes: Buffer`
+#### `bytes: Buffer`
 
 A getter `protobuf` that returns a `Buffer` of `protobuf`-encoded bytes. This is
 a convenience member that allows a `Transaction` to be signed easily.
 
-### `senderAddress: string`
+#### `senderAddress: string`
 
 A getter than computes the address of the `Transaction` sender. If there is no
 sender public key set, returns `0x00000000000000000000000000000000000000000000`.
 
-### `txParams: TxParams`
+#### `txParams: TxParams`
 
 A getter that returns the current `TxParams`.
 
-## Static Methods
+### Static Methods
 
-### `static confirm(params: TxParams, provider: Provider): Transaction`
+#### `static confirm(params: TxParams, provider: Provider): Transaction`
 
 Instantiates a `Transaction` in `Confirmed` state.
 
-**Parameters**
+##### Parameters
 
 - `params`: `TxParams` - core fields to initialise the `Transaction` with.
 - `provider`: `Provider` - a `Provider` instance.
 
-**Returns**
+##### Returns
 
 - `Transaction` - the newly-Instantiated `Transaction`.
 
-**Example**
+##### Example
 
 ```typescript
 import { HTTPProvider } from "@zilliqa-js/core";
@@ -368,20 +368,20 @@ const tx = Transaction.confirm(txParams, new HTTPProvider("http://my-api.com"));
 expect(tx.isConfirmed()).toBeTruthy();
 ```
 
-### `static reject(params: TxParams, provider: Provider): Transaction`
+#### `static reject(params: TxParams, provider: Provider): Transaction`
 
 Instantiates a `Transaction` in `Rejected` state.
 
-**Parameters**
+##### Parameters
 
 - `params`: `TxParams` - core fields to initialise the `Transaction` with.
 - `provider`: `Provider` - a `Provider` instance.
 
-**Returns**
+##### Returns
 
 - `Transaction` - the newly-Instantiated `Transaction`.
 
-**Example**
+##### Example
 
 ```typescript
 import { HTTPProvider } from "@zilliqa-js/core";
@@ -398,16 +398,16 @@ const tx = Transaction.reject(txParams, new HTTPProvider("http://my-api.com"));
 expect(tx.isRejected()).toBeTruthy();
 ```
 
-## Instance Methods
+### Instance Methods
 
-### `confirm(txHash: string, maxAttempts: number = 33, interval: number = 1000): Promise<Transaction>`
+#### `confirm(txHash: string, maxAttempts: number = 33, interval: number = 1000): Promise<Transaction>`
 
 Checks whether the `Transaction` is confirmed on the blockchain, by verifying
 the its `receipt` status (`boolean`). This method uses an exponential backoff to
 poll the lookup node. By default, the number of attempts made is 33, with a
 starting interval of 1000ms.
 
-**Parameters**
+##### Parameters
 
 - `txHash`: `string` - the transaction hash to use for polling.
 - `maxAttempts`: `number = 33` (Optional) - the maximum number of attempts
@@ -415,11 +415,11 @@ starting interval of 1000ms.
 - `interval`: `number = 1000` (Optional) - the initial interval. This grows
   exponentially between attempts.
 
-**Returns**
+##### Returns
 
 - `Promise<Transaction>` - `Transaction` with its status confirmed onchain.
 
-**Example**
+##### Example
 
 ```typescript
 import { HTTPProvider } from '@zilliqa-js/core';
@@ -434,7 +434,7 @@ tx.confirm(some_hash)
   .catch((err) => // handle the error);
 ```
 
-### `blockConfirm(txHash: string, maxblockCount: number = 4, interval: number = 1000): Promise<Transaction>`
+#### `blockConfirm(txHash: string, maxblockCount: number = 4, interval: number = 1000): Promise<Transaction>`
 
 Checks whether the `Transaction` is confirmed on the blockchain, by verifying
 the its `receipt` status (`boolean`). This method uses latest blockNumber to get
@@ -443,7 +443,7 @@ default, the number of blockCount is 4, with a starting interval of 1000ms. The
 member `Transaction.blockConfirmation` will count the block numbers during the
 process.
 
-**Parameters**
+##### Parameters
 
 - `txHash`: `string` - the transaction hash to use for polling.
 - `maxblockCount`: `number = 4` (Optional) - the maximum number of block count
@@ -451,11 +451,11 @@ process.
 - `interval`: `number = 1000` (Optional) - the initial interval. This grows
   exponentially between attempts.
 
-**Returns**
+##### Returns
 
 - `Promise<Transaction>` - `Transaction` with its status confirmed onchain.
 
-**Example**
+##### Example
 
 ```typescript
 import { HTTPProvider } from '@zilliqa-js/core';
@@ -471,22 +471,22 @@ tx.blockConfirm(some_hash)
 
 ```
 
-### `map(txHash): Transaction`
+#### `map(txHash): Transaction`
 
 Maps over the transaction, taking a callback that accepts `TxParams`. The user
 may freely mutate the Transaction, and will receive the newly-mutated
 transaction. The object returned is merged into the target `Transaction`.
 
-**Parameters**
+##### Parameters
 
 - `fn`: `(prev: TxParams) => TxParams)` - the transaction hash to use for
   polling. exponentially between attempts.
 
-**Returns**
+##### Returns
 
 - `Transaction`.
 
-**Example**
+##### Example
 
 ```typescript
 import { HTTPProvider } from '@zilliqa-js/core';
@@ -512,18 +512,18 @@ async () => {
 }();
 ```
 
-# Functions
+## Functions
 
-### `encodeTransactionProto(tx: TxParams): Buffer`
+#### `encodeTransactionProto(tx: TxParams): Buffer`
 
 Encodes a transaction with `protobuf` and returns its bytes as a Buffer. Used
 for providing a payload to `signTransaction`.
 
-**Parameters**
+##### Parameters
 
 - `tx`: `TxParams` - plain object containing core transaction fields that must
   be used when generating a signature.
 
-**Returns**
+##### Returns
 
 - `Buffer` - the bytes of the `protobuf`-serialised transaction fields.

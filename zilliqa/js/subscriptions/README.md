@@ -10,7 +10,6 @@ Zilliqa blockchain.
 - [Examples](#examples)
 - [Supported Events](#supported-events)
 - [Documentation](#documentation)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Installation

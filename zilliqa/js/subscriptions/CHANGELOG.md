@@ -1,4 +1,4 @@
-## 3.4.4
+# 3.4.4
 
 - Adding README.md
 - Adding CHANGELOG.md

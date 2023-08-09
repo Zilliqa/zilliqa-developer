@@ -28,11 +28,11 @@ more info.
 Converts an integer to an array of hexadecimal strings (little endian). Size is
 the total length of bytes to pad to.
 
-**Parameters**
+#### Parameters
 
 - `int`: `number` - the decimal number to convert.
 
-**Returns**
+#### Returns
 
 - `string[]` - hexadecimal array representation of the decimal number.
 
@@ -40,11 +40,11 @@ the total length of bytes to pad to.
 
 Converts an integer to a `Uint8Array` (i.e., byte array).
 
-**Parameters**
+#### Parameters
 
 - `num`: `number` - the decimal number to convert
 
-**Returns**
+#### Returns
 
 - `Uint8Array` - byte array, padded to `size`.
 
@@ -52,11 +52,11 @@ Converts an integer to a `Uint8Array` (i.e., byte array).
 
 Converts a hex-encoded `string` to a `Uint8Array`. Endianess is not important.
 
-**Parameters**
+#### Parameters
 
 - `hex`: `string`
 
-**Returns**
+#### Returns
 
 - `Uint8Array`
 
@@ -64,11 +64,11 @@ Converts a hex-encoded `string` to a `Uint8Array`. Endianess is not important.
 
 Converts a hex-encoded string to an array of integers.
 
-**Parameters**
+#### Parameters
 
 - `hex`: `string`
 
-**Returns**
+#### Returns
 
 - `number[]`
 
@@ -77,12 +77,12 @@ Converts a hex-encoded string to an array of integers.
 Performs bitwise addition of two 16-bit numbers, returning a 32-bit number.
 Throws if either number exceeds 16 bits.
 
-**Parameters**
+#### Parameters
 
 - `a`: `number` - a 16-bit number.
 - `b`: `number` - a 16-bit number.
 
-**Returns**
+#### Returns
 
 - `number` - the combined 32-bit number.
 
@@ -91,12 +91,12 @@ Throws if either number exceeds 16 bits.
 Performs a constant time comparison of two hexadecimal values. This avoids
 timing attacks.
 
-**Parameters**
+#### Parameters
 
 - `a`: `string` - hex-encoded string.
 - `b`: `string` - hex-encoded string.
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the values are equal.
 
@@ -104,11 +104,11 @@ timing attacks.
 
 Determines if a given string is hex-encoded.
 
-**Parameters**
+#### Parameters
 
 - `str`: `string`.
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is hex-encoded.
 
@@ -116,11 +116,11 @@ Determines if a given string is hex-encoded.
 
 Determines if a given string is a valid address.
 
-**Parameters**
+#### Parameters
 
 - `address`: `string`.
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is an address.
 
@@ -128,11 +128,11 @@ Determines if a given string is a valid address.
 
 Determines if a given string is a valid Zilliqa bech32 address.
 
-**Parameters**
+#### Parameters
 
 - `address`: `string`.
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is a valid Zilliqa bech32 address.
 
@@ -140,11 +140,11 @@ Determines if a given string is a valid Zilliqa bech32 address.
 
 Determines if a given string is a valid private key.
 
-**Parameters**
+#### Parameters
 
 - `privateKey`: `string`.
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is a valid private key.
 
@@ -152,11 +152,11 @@ Determines if a given string is a valid private key.
 
 Determines if a given string is a valid _uncompressed_ public key.
 
-**Parameters**
+#### Parameters
 
 - `pubKey`: `string`.
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is a valid public key.
 
@@ -164,11 +164,11 @@ Determines if a given string is a valid _uncompressed_ public key.
 
 Determines if a given string is a valid Schnorr signature.
 
-**Parameters**
+#### Parameters
 
 - `sig`: `string`
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is a valid signature.
 
@@ -176,11 +176,11 @@ Determines if a given string is a valid Schnorr signature.
 
 Determines if a given value is a valid JS `number`.
 
-**Parameters**
+#### Parameters
 
 - `x`: `unknown`
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the string is a valid signature.
 
@@ -188,11 +188,11 @@ Determines if a given value is a valid JS `number`.
 
 Determines if a given value is an instance of `BN.js`.
 
-**Parameters**
+#### Parameters
 
 - `x`: `unknown`
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the value is a `BN` instance.
 
@@ -200,11 +200,11 @@ Determines if a given value is an instance of `BN.js`.
 
 Determines if a given value is a valid JS `string`.
 
-**Parameters**
+#### Parameters
 
 - `x`: `unknown`
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the value is a `string`.
 
@@ -213,11 +213,11 @@ Determines if a given value is a valid JS `string`.
 Determines if a given value is a _plain_ JS object (i.e. directly below `Object`
 in the prototype chain).
 
-**Parameters**
+#### Parameters
 
 - `x`: `unknown`
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the value is a plain object.
 
@@ -225,12 +225,12 @@ in the prototype chain).
 
 Determines if a value has the shape specified by `test`.
 
-**Parameters**
+#### Parameters
 
 - `x`: `unknown`
 - `test`: `{ [key: string]: Validator[] }`
 
-**Returns**
+#### Returns
 
 - `boolean` - `true` if the value matches `test`.
 
@@ -238,7 +238,7 @@ Determines if a value has the shape specified by `test`.
 
 Converts from `qa` (smallest unit) to `zil` or `li`.
 
-**Parameters**
+#### Parameters
 
 - `qa`: `BN` - the value to convert from.
 - `unit`: `Units` - the unit to be converted to (`'zil' | 'qa'`).
@@ -248,7 +248,7 @@ Converts from `qa` (smallest unit) to `zil` or `li`.
 
 Converts `zil` or `li` to `qa` (smallest unit).
 
-**Parameters**
+#### Parameters
 
 - `input`: `string | number | BN` - the value to convert from.
 - `unit`: `Units` - the unit to be converted _from_ (`'zil' | 'li'`).

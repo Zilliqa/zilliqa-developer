@@ -2,15 +2,15 @@
 
 > Core abstractions required for interacting with the blockchain.
 
-# Classes
-
-## `BaseProvider`
-
-Base class for concrete `Providers`.
+## Classes
 
 ### `BaseProvider`
 
-**Parameters**
+Base class for concrete `Providers`.
+
+#### `BaseProvider`
+
+##### Parameters
 
 - `nodeURL`: `string` - the URL of the lookup node to send requests to.
 - `reqMiddleware`: `Map<Matcher, ReqMiddlewareFn[]>` - an ES6 `Map` of
@@ -18,13 +18,13 @@ Base class for concrete `Providers`.
 - `reqMiddleware`: `Map<Matcher, ResMiddlewareFn[]>` - an ES6 `Map` of
   `Matcher`, `ResMiddlewareFn[]` pairs.
 
-**Returns**
+##### Returns
 
 - `BaseProvider`
 
-## Members
+### Members
 
-### `middleware: { request: { use(fn: ReqMiddlewareFn, match: Matcher = '*') }, response: use(fn: ResMiddlewareFn, match: Matcher = '*') }`
+#### `middleware: { request: { use(fn: ReqMiddlewareFn, match: Matcher = '*') }, response: use(fn: ResMiddlewareFn, match: Matcher = '*') }`
 
 An object that allows setting middleware on requests and responses. Middleware
 allows fine-grained control over the request-reponse cycle.
@@ -36,7 +36,7 @@ object.
 `Matcher` is either an RPC method, a regular expression, or the wildcard
 matcher, the string `'*'`.
 
-**Example**
+##### Example
 
 In the following example, all requests sent through the module will
 transparently JSON encode `CreateTransaction` requests in a format required by
@@ -102,32 +102,32 @@ export class MyModule {
 
 ```
 
-## `HTTPProvider`
+### `HTTPProvider`
 
 Concrete `Provider`. Extends `BaseProvider`.
 
-### Instance methods
+#### Instance methods
 
-### `send<P extends any[], R = any, E string>(method: RPCMethod, ...params: P): Promise<RPCResponse<R,E>>`
+#### `send<P extends any[], R = any, E string>(method: RPCMethod, ...params: P): Promise<RPCResponse<R,E>>`
 
-**Parameters**
+##### Parameters
 
 - `method`: `RPCMethod` - a valid Zilliqa JSON-RPC method (`string`).
 - `params`: `any[]` - an array of arbitrary parameters to send.
 
-**Returns**
+##### Returns
 
 - `Promise<RPCResponse<R,E>>` - resolves with the reponse, or rejects with an
   error, if any.
 
-# Decorators
+## Decorators
 
-## `sign`
+### `sign`
 
 Method decorator used to decorate methods whose _first_ argument is `Signable`,
 i.e., have a `bytes` property.
 
-**Example**
+#### Example
 
 ```typescript
   @sign

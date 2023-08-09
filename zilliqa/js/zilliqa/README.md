@@ -8,7 +8,6 @@ JavaScript library for interacting with the Zilliqa blockchain.
 - [Usage](#usage)
 - [Examples](#examples)
 - [Documentation](#documentation)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Installation
