@@ -13,6 +13,9 @@ _SRCS = [
     "//zilliqa/js:aes-js.d",
     "//zilliqa/js:pbkdf2.d",
     "//zilliqa/js:hmac-drbg.d",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
 ] + glob(
     [
         "src/*.ts",
