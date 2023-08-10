@@ -161,31 +161,39 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref name,
                                     ref arguments,
                                 } => {
-                                    let _ = name;
-                                    let _ = arguments;
-                                    println!("\n");
-                                    println!("Argumnets: {:?}", arguments);
-
                                     // Invoking
                                     let qualified_name = match &name.resolved {
                                         Some(n) => n,
                                         None => {
                                             // TODO: Fix error propagation
                                             panic!(
-                                                "{}",
-                                                format!(
-                                                    "Encountered unresolved function name {}",
-                                                    name.unresolved
-                                                )
+                                                "Encountered unresolved function name {}",
+                                                name.unresolved
                                             )
                                         }
                                     };
 
-                                    let ctx = &code_builder.context;
+                                    let mut ctx = &mut code_builder.context;
                                     // We have three types of calls:
                                     // - Precompiles / external function
                                     // - Inline assembler generics
                                     // - Internal calls
+
+                                    // Copying arguments to stack
+                                    for arg in arguments {
+                                        match &arg.resolved {
+                                            Some(n) => match blk.duplicate_stack_name(n) {
+                                                Err(e) => panic!("{}", e),
+                                                _ => (),
+                                            },
+                                            None => panic!("Argument name was not resolved"),
+                                        }
+                                    }
+
+                                    let args_types: Vec<String> = arguments
+                                        .iter()
+                                        .map(|arg| arg.type_reference.clone().unwrap())
+                                        .collect();
 
                                     if ctx.function_declarations.contains_key(qualified_name) {
                                         let signature = match ctx.get_function(qualified_name) {
@@ -194,36 +202,14 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 "Internal error: Unable to retrieve function"
                                             ),
                                         };
-                                        let mut args: Vec<String> = Vec::new();
-                                        println!("Resolving arguments {:?}", arguments);
-                                        for arg in arguments {
-                                            match &arg.resolved {
-                                                Some(n) => args.push(n.to_string()),
-                                                None => panic!("Argument name was not resolved"),
-                                            }
-                                        }
-                                        // Precompiled or external function
-                                        blk.call(signature, args);
-                                    } else if ctx.inline_generics.contains_key(&name.unresolved) {
-                                        // Copying arguments
-                                        for arg in arguments {
-                                            match &arg.resolved {
-                                                Some(n) => match blk.duplicate_stack_name(n) {
-                                                    Err(e) => panic!("{}", e),
-                                                    _ => (),
-                                                },
-                                                None => panic!("Argument name was not resolved"),
-                                            }
-                                        }
 
+                                        // Precompiled or external function
+                                        blk.call(signature, args_types);
+                                    } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
                                         let f = ctx.inline_generics.get(&name.unresolved).unwrap();
-                                        let args: Vec<String> = arguments
-                                            .iter()
-                                            .map(|arg| arg.resolved.clone().unwrap())
-                                            .collect();
-                                        match f(&mut blk, args) {
+                                        match f(&mut ctx, &mut blk, args_types) {
                                             Ok(v) => v,
                                             Err(e) => {
                                                 panic!("Error in external call: {}", e);
@@ -263,6 +249,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             };
                                             let payload = data.clone().into_bytes();
                                             code_builder.data.push((ssa_name, payload));
+
+                                            // TODO: Load data from code into memory
+                                            // TODO: We need a way to reference the data section
                                             todo!()
                                         }
                                         "Uint64" => {

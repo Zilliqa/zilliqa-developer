@@ -70,6 +70,7 @@ impl EvmTypeValue {
         match self {
             EvmTypeValue::Uint32(value) => value.to_be_bytes().to_vec(),
             EvmTypeValue::Uint64(value) => value.to_be_bytes().to_vec(),
+            EvmTypeValue::String(value) => value.as_bytes().to_vec(),
             // EvmTypeValue::Uint256(value) => pad_byte_array(value.to_big_endian(/* &mut [u8] */).to_vec()),
             // TODO EvmTypeValue::Address(value) => pad_byte_array(value.as_bytes().to_vec()),
             // Handle other types here

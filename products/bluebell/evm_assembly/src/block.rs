@@ -6,6 +6,9 @@ use evm::Opcode;
 use primitive_types::U256;
 use std::collections::HashMap;
 
+pub const ALLOCATION_POINTER: u8 = 0x40;
+pub const MEMORY_OFFSET: u8 = 0x80;
+
 #[derive(Debug, Clone)]
 pub struct Scope {
     pub stack_counter: i32,
@@ -240,6 +243,16 @@ impl EvmBlock {
         }
     }
 
+    pub fn alloca_static(&mut self, size: u64) {
+        self.push1([ALLOCATION_POINTER].to_vec());
+        self.mload(); // Stack element is the pointer to be left on stack
+        self.dup1();
+        self.push_u64(size);
+        self.add();
+        self.push1([ALLOCATION_POINTER].to_vec());
+        self.mstore();
+    }
+
     pub fn call_internal(
         &mut self,
         _function: &EvmFunctionSignature,
@@ -255,12 +268,12 @@ impl EvmBlock {
         };
         // TODO: Deal with internal calls
         // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4
-        self.push1([0x40].to_vec());
+
+        self.push1([ALLOCATION_POINTER].to_vec());
         self.mload(); // Stack element is the pointer
 
-        for (i, arg) in args.iter().enumerate().rev() {
-            let _ = self.duplicate_stack_name(arg); // TODO: Propagate error if this fails
-
+        for (i, _arg) in args.iter().enumerate().rev() {
+            self.swap1();
             self.dup2();
             self.push1([(i * 0x20) as u8].to_vec());
             self.add();
@@ -587,6 +600,10 @@ impl EvmBlock {
     */
 
     pub fn push_u64(&mut self, arg: u64) -> &mut Self {
+        self.push(arg.to_be_bytes().to_vec())
+    }
+
+    pub fn push_u32(&mut self, arg: u32) -> &mut Self {
         self.push(arg.to_be_bytes().to_vec())
     }
 

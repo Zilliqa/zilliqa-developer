@@ -5,9 +5,9 @@ use std::collections::HashMap;
 
 use crate::block::EvmBlock;
 use crate::evm_decompiler::EvmAssemblyGenerator;
-
 use crate::function::EvmFunction;
 use crate::opcode_spec::{create_opcode_spec, OpcodeSpecification};
+use crate::types::EvmType;
 
 /*
     codebuilder
@@ -238,6 +238,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
                         let signature = function.signature.clone().unwrap();
 
+                        println!("Signature --> {:?}", signature);
                         // Checking that the size of call args
                         // TODO: Assumptino is that all arguments are 256-bits
                         let args_size = 0x04 + 0x20 * signature.arguments.len();
@@ -250,9 +251,29 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                         load_data_block.push_label("success");
 
                         // Loading data
-                        for (i, _arg) in signature.arguments.iter().enumerate() {
-                            load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
-                            load_data_block.calldataload();
+                        for (i, arg) in signature.arguments.iter().enumerate() {
+                            if let EvmType::String = arg {
+                                // TODO: We only support loading of 32 byte strings.
+                                // TODO: Count non-zero characters and push to the stack
+                                let size = 32;
+                                load_data_block.alloca_static(4 + size);
+                                // First four bytes store size
+                                load_data_block.dup1();
+                                load_data_block.push_u32(size as u32);
+                                load_data_block.mstore();
+                                load_data_block.push1([0x04].to_vec());
+                                load_data_block.add();
+
+                                load_data_block.dup1();
+                                load_data_block
+                                    .push_u64((0x04 + 0x04 + 0x20 * i).try_into().unwrap());
+                                load_data_block.calldataload();
+                                load_data_block.swap1();
+                                load_data_block.mstore();
+                            } else {
+                                load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
+                                load_data_block.calldataload();
+                            }
                         }
 
                         load_data_block.jump_to(&block.name);
