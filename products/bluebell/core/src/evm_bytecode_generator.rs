@@ -123,6 +123,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         let mut blk = EvmBlock::new(None, arg_names.clone(), &block_name);
 
                         for instr in &block.instructions {
+                            println!("---");
                             match instr.operation {
                                 Operation::CallFunction {
                                     ref name,
@@ -161,6 +162,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref name,
                                     ref arguments,
                                 } => {
+                                    println!("Extcall");
                                     // Invoking
                                     let qualified_name = match &name.resolved {
                                         Some(n) => n,
@@ -214,13 +216,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         let new_blocks =
                                             block_generator(&mut ctx, &mut blk, args_types);
                                         match new_blocks {
-                                            Ok(mut new_blocks) => {
-                                                if let Some(ref mut last) =
-                                                    &mut new_blocks.last().as_mut()
-                                                {
-                                                    mem::swap(&mut blk, &mut last);
-                                                }
-
+                                            Ok(new_blocks) => {
                                                 for block in new_blocks {
                                                     ret.push(block);
                                                 }
@@ -238,6 +234,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref data,
                                     ref typename,
                                 } => {
+                                    println!("Literal");
                                     let qualified_name = match typename.qualified_name() {
                                         Ok(v) => v,
                                         _ => panic!("Qualified name could not be resolved"),
@@ -291,6 +288,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
                                 }
                                 Operation::ResolveSymbol { ref symbol } => {
+                                    println!("Resolve");
                                     let source = match &symbol.resolved {
                                         Some(v) => v,
                                         None => panic!("Unresolved symbol: {:?}", symbol),
@@ -311,6 +309,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref address,
                                     ref value,
                                 } => {
+                                    println!("StateStore");
+
                                     // TODO: Ensure that we used resolved address name
                                     let binding = &self.state_layout.get(&address.name.unresolved);
                                     let state = match binding {
@@ -346,7 +346,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // TODO: Pop all elements that were not used yet.
                                     // TODO: Push value if exists and swap1, then jump
 
-                                    while blk.scope.stack_counter != 0 {
+                                    while blk.scope.stack_counter > 0 {
                                         blk.pop();
                                     }
                                     blk.jump();
@@ -359,6 +359,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         }
 
                         ret.push(blk);
+                        println!("Pushing block");
                     }
 
                     ret

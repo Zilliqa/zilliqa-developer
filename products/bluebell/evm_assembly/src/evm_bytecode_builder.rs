@@ -155,9 +155,10 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
     pub fn build(&mut self) -> Vec<u8> {
         let mut bytecode = Vec::new();
-
+        println!("Finalizing code");
         self.finalize_blocks();
 
+        println!("Generating bytecode");
         // Generating bytecode
         for function in self.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
@@ -222,8 +223,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         switch_block.shr();
 
         let mut data_loading_blocks: Vec<EvmBlock> = Vec::new();
-
         for (i, function) in self.functions.iter().enumerate() {
+            println!("Writing function {}", i);
+
             // Skipping the entry function (the one we are building now)
             if i > 0 {
                 switch_block.dup1();
@@ -239,6 +241,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                         let signature = function.signature.clone().unwrap();
 
                         println!("Signature --> {:?}", signature);
+
+                        load_data_block.pop(); // Remove the user function selector from the stack
+
                         // Checking that the size of call args
                         // TODO: Assumptino is that all arguments are 256-bits
                         let args_size = 0x04 + 0x20 * signature.arguments.len();
@@ -258,15 +263,17 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                                 let size = 32;
                                 load_data_block.alloca_static(4 + size);
                                 // First four bytes store size
-                                load_data_block.dup1();
                                 load_data_block.push_u32(size as u32);
+                                load_data_block.push_u32(256 - 32);
+                                load_data_block.shl();
+                                load_data_block.dup2();
                                 load_data_block.mstore();
+
+                                load_data_block.dup1();
                                 load_data_block.push1([0x04].to_vec());
                                 load_data_block.add();
 
-                                load_data_block.dup1();
-                                load_data_block
-                                    .push_u64((0x04 + 0x04 + 0x20 * i).try_into().unwrap());
+                                load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
                                 load_data_block.calldataload();
                                 load_data_block.swap1();
                                 load_data_block.mstore();
@@ -284,6 +291,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             }
         }
 
+        println!("Creating switch statement");
         switch_block.jump_to("fail");
 
         let mut fail_block = EvmBlock::new(None, [].to_vec(), "fail");
@@ -306,7 +314,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self.functions[0] = main;
 
         // Resolving labels
+        println!("Resolving positions!");
         self.resolve_positions();
+        println!("Resolving positions - DONE!");
 
         // TODO: Test that all stack positions zero out
 

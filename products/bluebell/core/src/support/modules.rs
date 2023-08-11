@@ -1,8 +1,9 @@
 use evm::backend::Backend;
 use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
+use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
-
+use std::mem;
 // TODO: Generalize to support both EVM and LLVM
 
 pub trait BluebellModule {
@@ -100,22 +101,14 @@ impl BluebellModule for ScillaDebugBuiltins {
                 fn custom_runtime(
                     input: &[u8],
                     _gas_limit: Option<u64>,
-                    context: &EvmContext,
+                    _context: &EvmContext,
                     _backend: &dyn Backend,
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    if input.len() >= 8 {
-                        let last_8 = &input[input.len() - 8..];
-                        let _ptr = u64::from_be_bytes([
-                            last_8[0], last_8[1], last_8[2], last_8[3], last_8[4], last_8[5],
-                            last_8[6], last_8[7],
-                        ]);
-                        println!("STRING print not implemented.");
-                        println!("Context: {:#?}", context);
-                        // println!("Backend: {:#?}", backend);
-                    } else {
-                        panic!("Pointer length less than 8 bytes.");
-                    }
+                    match std::str::from_utf8(input) {
+                        Ok(v) => println!("{}", v),
+                        Err(_) => println!("{}", hex::encode(input)),
+                    };
 
                     Ok((
                         PrecompileOutput {
@@ -130,22 +123,71 @@ impl BluebellModule for ScillaDebugBuiltins {
             });
 
         let _ = specification.declare_inline_generics("builtin__print", |ctx, block, arg_types| {
+            let mut ret: Vec<EvmBlock> = Vec::new();
             for arg in arg_types {
-                let mut subcall_arg_types: Vec<String> = [arg.clone()].to_vec();
-                if arg == "String" {
-                    // TODO: Put string onto stack
-                }
-
                 let signature = match ctx.get_function(&format!("builtin__print__impl::<{}>", arg))
                 {
                     Some(s) => s,
                     None => panic!("Internal error: Unable to retrieve function"),
                 };
-                block.call(signature, subcall_arg_types);
+                let subcall_arg_types: Vec<String> = [arg.clone()].to_vec();
+
+                // TODO: In the event of string, this is not one to one
+                if arg == "String" {
+                    // Putting string onto stack so it is accessible to our precompile function
+                    block.dup1(); // Duplicate to preserve base address for loop
+
+                    block.mload();
+                    block.push_u32(256 - 32);
+                    block.shr(); // Stack now contains size of string
+
+                    block.push([0x04].to_vec()); // Offset / counter
+
+                    block.jump_to("loop_start");
+
+                    let mut loop_start = EvmBlock::new(Some(0), [].to_vec(), "loop_start");
+                    let mut loop_body = EvmBlock::new(Some(0), [].to_vec(), "loop_body");
+                    let mut loop_end = EvmBlock::new(Some(0), [].to_vec(), "loop_end");
+
+                    loop_start.dup2();
+                    loop_start.dup2();
+                    loop_start.gt();
+                    loop_start.jump_if_to("loop_end");
+                    loop_start.jump_to("loop_body");
+
+                    loop_body.dup3(); // Duplicating base address
+                    loop_body.dup2(); // Counter / offset
+                    loop_body.add();
+                    loop_body.mload();
+                    loop_body.call(signature, subcall_arg_types);
+                    loop_body.pop(); // Removing result
+
+                    loop_body.push([0x20].to_vec()); // Incrementing counter
+                    loop_body.add();
+                    loop_body.jump_to("loop_start");
+
+                    println!("Adding pop instructions");
+                    loop_end.pop(); // Remove counter
+                    loop_end.pop(); // Removing size
+                    loop_end.pop(); // Removing base address
+                    println!("Done");
+
+                    // End block becomes the new main block
+                    mem::swap(block, &mut loop_end);
+
+                    ret.push(loop_end);
+                    ret.push(loop_start);
+                    ret.push(loop_body);
+                } else {
+                    block.call(signature, subcall_arg_types);
+                    block.pop(); // Removing result
+                }
+
+                block.pop(); // Removing the argument that was to be printed
             }
 
-            // block.call();
-            Ok([].to_vec())
+            block.pop(); // TODO: This ought to not be there. Double check if you have miscalculated the stack or figure out why it is needed.
+            Ok(ret)
         });
     }
 }
