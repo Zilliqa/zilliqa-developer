@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 type InlineGenericsFn =
-    fn(&mut EvmCompilerContext, &mut EvmBlock, Vec<String>) -> Result<(), String>;
+    fn(&mut EvmCompilerContext, &mut EvmBlock, Vec<String>) -> Result<Vec<EvmBlock>, String>;
 
 pub struct EvmCompilerContext {
     type_declarations: HashMap<String, EvmType>,

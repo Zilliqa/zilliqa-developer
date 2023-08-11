@@ -145,7 +145,7 @@ impl BluebellModule for ScillaDebugBuiltins {
             }
 
             // block.call();
-            Ok(())
+            Ok([].to_vec())
         });
     }
 }
@@ -211,37 +211,37 @@ impl BluebellModule for ScillaDefaultBuiltins {
         let _ = specification.declare_inline_generics("builtin__add", |_ctx, block, _arg_types| {
             // TODO: Check that the number of arguments is two and otherwise return an error
             block.add();
-            Ok(())
+            Ok([].to_vec())
         });
 
         // Implementing `sub`:
         let _ = specification.declare_inline_generics("builtin__sub", |_ctx, block, _arg_types| {
             block.sub();
-            Ok(())
+            Ok([].to_vec())
         });
 
         // Implementing `mul`:
         let _ = specification.declare_inline_generics("builtin__mul", |_ctx, block, _arg_types| {
             block.mul();
-            Ok(())
+            Ok([].to_vec())
         });
 
         // Implementing `div`:
         let _ = specification.declare_inline_generics("builtin__div", |_ctx, block, _arg_types| {
             block.div();
-            Ok(())
+            Ok([].to_vec())
         });
 
         // Implementing `rem`:
         let _ = specification.declare_inline_generics("builtin__rem", |_ctx, block, _arg_types| {
             block.smod(); // smod might be the appropriate EVM instruction for remainder, but verify with EVM docs.
-            Ok(())
+            Ok([].to_vec())
         });
 
         // Implementing comparison builtins:
         let _ = specification.declare_inline_generics("builtin__lt", |_ctx, block, _arg_types| {
             block.lt();
-            Ok(())
+            Ok([].to_vec())
         });
 
         let _ =
@@ -254,12 +254,12 @@ impl BluebellModule for ScillaDefaultBuiltins {
 
         let _ = specification.declare_inline_generics("builtin__eq", |_ctx, block, _arg_types| {
             block.eq();
-            Ok(())
+            Ok([].to_vec())
         });
 
         let _ = specification.declare_inline_generics("builtin__gt", |_ctx, block, _arg_types| {
             block.gt();
-            Ok(())
+            Ok([].to_vec())
         });
 
         let _ =
@@ -274,18 +274,18 @@ impl BluebellModule for ScillaDefaultBuiltins {
         let _ =
             specification.declare_inline_generics("builtin__andb", |_ctx, block, _arg_types| {
                 block.and();
-                Ok(())
+                Ok([].to_vec())
             });
 
         let _ = specification.declare_inline_generics("builtin__orb", |_ctx, block, _arg_types| {
             block.or();
-            Ok(())
+            Ok([].to_vec())
         });
 
         let _ =
             specification.declare_inline_generics("builtin__notb", |_ctx, block, _arg_types| {
                 block.not();
-                Ok(())
+                Ok([].to_vec())
             });
 
         // Implementing cryptographic builtins:
@@ -302,7 +302,7 @@ impl BluebellModule for ScillaDefaultBuiltins {
             "builtin__keccak256hash",
             |_ctx, block, _arg_types| {
                 block.external_sha3();
-                Ok(())
+                Ok([].to_vec())
             },
         );
 

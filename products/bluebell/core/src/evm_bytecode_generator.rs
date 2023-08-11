@@ -208,9 +208,23 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
-                                        let f = ctx.inline_generics.get(&name.unresolved).unwrap();
-                                        match f(&mut ctx, &mut blk, args_types) {
-                                            Ok(v) => v,
+
+                                        let block_generator =
+                                            ctx.inline_generics.get(&name.unresolved).unwrap();
+                                        let new_blocks =
+                                            block_generator(&mut ctx, &mut blk, args_types);
+                                        match new_blocks {
+                                            Ok(mut new_blocks) => {
+                                                if let Some(ref mut last) =
+                                                    &mut new_blocks.last().as_mut()
+                                                {
+                                                    mem::swap(&mut blk, &mut last);
+                                                }
+
+                                                for block in new_blocks {
+                                                    ret.push(block);
+                                                }
+                                            }
                                             Err(e) => {
                                                 panic!("Error in external call: {}", e);
                                             }
