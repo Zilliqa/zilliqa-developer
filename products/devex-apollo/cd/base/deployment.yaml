@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: devex-apollo
-  namespace: default
+  namespace: devex-apollo
   labels:
     "app.kubernetes.io/name": "devex-apollo"
 spec:
@@ -18,7 +18,7 @@ spec:
         "app.kubernetes.io/name": "devex-apollo"
     spec:
       containers:
-        - image: devex-apollo:latest
+        - image: devex-apollo
           name: devex-apollo
           ports:
             - containerPort: 5000
