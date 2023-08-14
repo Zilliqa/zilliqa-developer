@@ -35,6 +35,11 @@ spec:
                   key: DOCUMENTDB_HOST
             - name: DOCUMENTDB_PORT
               value: "27017"
+            - name: DOCUMENTDB_DB
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_DB
             - name: DOCUMENTDB_USER
               valueFrom:
                 secretKeyRef:
