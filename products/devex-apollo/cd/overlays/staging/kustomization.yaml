@@ -5,7 +5,7 @@ resources:
   - ../../base
   - certificate.yaml
   - configmap.yaml
-  - secrets.yaml
+  - secrets-app.yaml
 
 patches:
   - target:
