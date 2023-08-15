@@ -349,9 +349,9 @@ impl IrPass for DebugPrinter {
 
     fn visit_contract_field(
         &mut self,
-        mode: TreeTraversalMode,
-        function_kind: &mut ContractField,
-        symbol_table: &mut SymbolTable,
+        _mode: TreeTraversalMode,
+        _function_kind: &mut ContractField,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         self.script.push_str("// field emitter not implemented!\n");
         Ok(TraversalResult::Continue)
@@ -430,9 +430,9 @@ impl IrPass for DebugPrinter {
 
     fn visit_case_clause(
         &mut self,
-        mode: TreeTraversalMode,
-        con_function: &mut CaseClause,
-        symbol_table: &mut SymbolTable,
+        _mode: TreeTraversalMode,
+        _con_function: &mut CaseClause,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         unimplemented!()
     }

@@ -6,12 +6,11 @@ mod tests {
     use bluebell::parser::lexer::Lexer;
     use bluebell::parser::parser;
     use bluebell::parser::ParserError;
-    use bluebell::*;
+
     use diffy::{create_patch, PatchFormatter};
     use std::fs;
     use std::fs::File;
     use std::io::Read;
-    use std::process::Command;
 
     fn strip_comments(input: &str) -> String {
         let re = regex::Regex::new(r"[ ]*\(\*([^*]|\*+[^*)])*\*+\)\n*").unwrap();
@@ -52,7 +51,7 @@ mod tests {
                 formatted == script
             }
             Err(error) => {
-                let ret = error.clone();
+                let _ret = error.clone();
                 let message = format!("Syntax error {:?}", error);
                 let mut pos: Vec<usize> = [].to_vec();
                 error.map_location(|l| {

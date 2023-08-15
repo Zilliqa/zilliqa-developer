@@ -63,7 +63,7 @@ mod tests {
     use crate::test_precompile;
     use crate::{EvmCompilerContext, EvmTypeValue};
     use evm_assembly::block::EvmBlock;
-    use evm_assembly::EvmAssemblyGenerator;
+
     use evm_assembly::EvmByteCodeBuilder;
 
     #[test]

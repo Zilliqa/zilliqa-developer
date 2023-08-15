@@ -31,7 +31,7 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
     {
         self.function.blocks = builder(&mut self.builder);
 
-        let signature = &self.function.signature.clone().unwrap();
+        let _signature = &self.function.signature.clone().unwrap();
         // if first_block.consumes
 
         match self.function.compute_stack_difference() {

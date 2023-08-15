@@ -463,7 +463,20 @@ impl PassExecutor for CaseClause {
         pass: &mut dyn IrPass,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        unimplemented!()
+        let ret = pass.visit_case_clause(TreeTraversalMode::Enter, self, symbol_table)?;
+        let children_ret = if ret == TraversalResult::Continue {
+            let _ = self.expression.visit(pass, symbol_table)?;
+            let _ = self.label.visit(pass, symbol_table)?;
+            TraversalResult::Continue
+        } else {
+            ret
+        };
+        match children_ret {
+            TraversalResult::Continue => {
+                pass.visit_case_clause(TreeTraversalMode::Exit, self, symbol_table)
+            }
+            _ => Ok(TraversalResult::Continue),
+        }
     }
 }
 

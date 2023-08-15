@@ -1,20 +1,6 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
-    use bluebell::contract_executor::UnsafeContractExecutor;
-    use bluebell::intermediate_representation::emitter::IrEmitter;
-    use bluebell::intermediate_representation::name_generator::NameGenerator;
-    use bluebell::intermediate_representation::pass_executor::PassExecutor;
-    use bluebell::intermediate_representation::symbol_table::SymbolTable;
-    use bluebell::llvm_ir_generator::LlvmIrGenerator;
-    use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
-    use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
-    use bluebell::passes::debug_printer::DebugPrinter;
-    use bluebell::support::llvm::UnsafeLlvmTestExecutor;
-    use core::ffi::c_char;
-    use core::ffi::CStr;
-    use inkwell::context::Context;
-    use inkwell::targets::{InitializationConfig, Target};
 
     use bluebell::parser::lexer;
     use bluebell::parser::lexer::Lexer;
@@ -37,7 +23,7 @@ mod tests {
         assert!(errors.len() == 0);
 
         match parser.parse(&mut errors, lexer) {
-            Ok(ast) => {
+            Ok(_ast) => {
                 /* TODO: Fix
                 let mut name_generator = NameGenerator::new();
 

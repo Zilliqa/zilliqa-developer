@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
+use sha3::{Digest, Keccak256};
 use std::mem;
 
 #[derive(Debug)]
@@ -124,6 +125,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                         for instr in &block.instructions {
                             println!("---");
+                            println!("{:#?}", instr);
                             match instr.operation {
                                 Operation::CallFunction {
                                     ref name,
@@ -385,9 +387,108 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
                                     blk.jump();
                                 }
+                                Operation::CallStaticFunction {
+                                    // TODO: Poor name
+                                    ref name,
+                                    owner: _,
+                                    ref arguments,
+                                } => {
+                                    if arguments.len() > 0 {
+                                        // TODO: Pack data
+                                        unimplemented!();
+                                    }
+                                    println!("Handling static call {:#?}", name);
+                                    let name = match &name.resolved {
+                                        Some(n) => n,
+                                        None => {
+                                            panic!("Unable to resolve name {:?}", name.unresolved)
+                                        }
+                                    };
+                                    let hash = Keccak256::digest(name);
+                                    let mut selector = Vec::new();
+                                    selector.extend_from_slice(&hash[..4]);
+                                    blk.push(selector);
+                                }
+                                Operation::IsEqual {
+                                    ref left,
+                                    ref right,
+                                } => {
+                                    println!("{:#?}", left);
+                                    println!("{:#?}", right);
+                                    match &left.resolved {
+                                        Some(l) => match blk.duplicate_stack_name(l) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        },
+                                        None => panic!("Unresolved left hand side"),
+                                    }
+                                    match &right.resolved {
+                                        Some(r) => match blk.duplicate_stack_name(r) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        },
+                                        None => panic!("Unresolved left hand side"),
+                                    }
+
+                                    blk.eq();
+                                }
+                                Operation::Switch {
+                                    ref cases,
+                                    ref on_default,
+                                } => {
+                                    for case in cases {
+                                        let label = match &case.label.resolved {
+                                            Some(l) => l,
+                                            None => panic!("Could not resolve case label"),
+                                        };
+                                        // TODO: This assumes order in cases
+                                        blk.jump_if_to(label);
+                                    }
+
+                                    let label = match &on_default.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve default label"),
+                                    };
+                                    blk.jump_to(label);
+                                    // unimplemented!() // Add handling for other operations here
+                                }
                                 _ => {
                                     println!("Unhandled instruction: {:#?}", instr);
                                     unimplemented!() // Add handling for other operations here
+                                }
+                            }
+
+                            // Handling SSA
+                            if let Some(ssa_name) = &instr.ssa_name {
+                                let ssa_name = match &ssa_name.resolved {
+                                    Some(x) => x,
+                                    _ => panic!("SSA symbol name was unresolved."),
+                                };
+
+                                match instr.operation {
+                                    Operation::ResolveSymbol { symbol: _ }
+                                    | Operation::StateStore {
+                                        address: _,
+                                        value: _,
+                                    }
+                                    | Operation::StateLoad {
+                                        address: _,
+                                        value: _,
+                                    }
+                                    | Operation::Literal {
+                                        data: _,
+                                        typename: _,
+                                    } => (), // Literals are handled in the first match statement
+                                    _ => match blk.register_stack_name(ssa_name) {
+                                        Err(_) => {
+                                            println!("Instruction: {:#?}", instr);
+                                            panic!(
+                                                "Failed to register SSA stack name: {}.",
+                                                ssa_name
+                                            );
+                                        }
+                                        _ => (),
+                                    },
                                 }
                             }
                         }

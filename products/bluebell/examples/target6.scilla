@@ -1,7 +1,14 @@
 scilla_version 0
 
 library HelloWorld
+type Bool = 
+  | True
+  | False
+
+
+
 contract HelloWorld()
+
 
 field welcome_msg : Uint64 = Uint64 0
 

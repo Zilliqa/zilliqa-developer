@@ -519,10 +519,16 @@ impl IrPass for AnnotateBaseTypes {
                     if let Some(function_typeinfo) = function_typeinfo {
                         function_typeinfo.return_type.expect("").clone()
                     } else {
-                        return Err("Unable to determine of {:?}".to_string());
+                        return Err(format!("Unable to determine type of {:?}", name.unresolved)
+                            .to_string());
                     }
                 } else {
-                    return Err("Unable to determine return type of {:?}".to_string());
+                    println!("Extra detail: {:#?}, {:#?}", name, arguments);
+                    return Err(format!(
+                        "Unable to determine return type of {:?}",
+                        name.unresolved
+                    )
+                    .to_string());
                 };
 
                 return_type
@@ -615,9 +621,9 @@ impl IrPass for AnnotateBaseTypes {
 
     fn visit_case_clause(
         &mut self,
-        mode: TreeTraversalMode,
-        con_function: &mut CaseClause,
-        symbol_table: &mut SymbolTable,
+        _mode: TreeTraversalMode,
+        _con_function: &mut CaseClause,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

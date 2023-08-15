@@ -334,9 +334,9 @@ impl IrPass for CollectTypeDefinitionsPass {
     }
     fn visit_case_clause(
         &mut self,
-        mode: TreeTraversalMode,
-        con_function: &mut CaseClause,
-        symbol_table: &mut SymbolTable,
+        _mode: TreeTraversalMode,
+        _con_function: &mut CaseClause,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

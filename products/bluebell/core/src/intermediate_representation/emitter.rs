@@ -522,22 +522,7 @@ impl AstConverting for IrEmitter {
                 let mut phi_results: Vec<IrIdentifier> = Vec::new();
 
                 for clause in clauses.iter() {
-                    match &clause.pattern {
-                        NodePattern::Wildcard => continue,
-                        NodePattern::Binder(_name) => {
-                            unimplemented!()
-                        }
-                        NodePattern::Constructor(name, args) => {
-                            if args.len() > 0 {
-                                println!("Name: {:#?}", name);
-                                println!("Args: {:#?}", args);
-
-                                unimplemented!();
-                            }
-
-                            let _ = name.visit(self);
-                        }
-                    }
+                    clause.pattern.visit(self)?;
 
                     // Creating compare instruction
                     // TODO: Pop instruction or symbol
@@ -771,14 +756,28 @@ impl AstConverting for IrEmitter {
     fn emit_pattern(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodePattern,
+        node: &NodePattern,
     ) -> Result<TraversalResult, String> {
-        /*
-        match node {
+        match &node {
+            NodePattern::Wildcard => {
+                unimplemented!()
+            }
+            NodePattern::Binder(_name) => {
+                unimplemented!()
+            }
+            NodePattern::Constructor(name, args) => {
+                if args.len() > 0 {
+                    println!("Name: {:#?}", name);
+                    println!("Args: {:#?}", args);
 
+                    unimplemented!();
+                }
+
+                let _ = name.visit(self);
+            }
         }
-        */
-        unimplemented!();
+
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_argument_pattern(
         &mut self,
@@ -845,7 +844,7 @@ impl AstConverting for IrEmitter {
                     },
                 });
 
-                ret
+                Some(ret)
             }
             NodeStatement::RemoteFetch(_remote_stmt) => {
                 unimplemented!()
@@ -886,7 +885,7 @@ impl AstConverting for IrEmitter {
                     },
                 });
 
-                ret
+                Some(ret)
             }
             NodeStatement::Bind {
                 left_hand_side,
@@ -905,7 +904,7 @@ impl AstConverting for IrEmitter {
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
 
-                right_hand_side
+                Some(right_hand_side)
             }
             NodeStatement::ReadFromBC {
                 left_hand_side: _,
@@ -941,11 +940,11 @@ impl AstConverting for IrEmitter {
             } => {
                 unimplemented!()
             }
-            NodeStatement::Accept => Box::new(Instruction {
+            NodeStatement::Accept => Some(Box::new(Instruction {
                 ssa_name: None,
                 result_type: None,
                 operation: Operation::AcceptTransfer,
-            }),
+            })),
             NodeStatement::Send { identifier_name: _ } => {
                 unimplemented!()
             }
@@ -964,12 +963,66 @@ impl AstConverting for IrEmitter {
                 let expression = self.pop_instruction()?;
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
+                let match_exit = self
+                    .ir
+                    .symbol_table
+                    .name_generator
+                    .new_block_label("match_exit");
+
                 println!("Clauses: {:#?}", clauses);
-                let mut cases: Vec<CaseClause> = Vec::new();
+                let mut case_blocks: Vec<Box<FunctionBlock>> = Vec::new();
+
+                // Termingating current block with placeholder label
+                let jump = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::Jump(match_exit.clone()),
+                });
+                self.current_block.instructions.push(jump);
 
                 for (i, clause) in clauses.iter().enumerate() {
                     match &clause.statement_block {
                         Some(statement_block) => {
+                            println!("Clause: {:#?}", clause);
+
+                            // Terminating previous block
+                            let label_condition = self
+                                .ir
+                                .symbol_table
+                                .name_generator
+                                .new_block_label(&format!("clause_{}_condition", i));
+                            let label_block = self
+                                .ir
+                                .symbol_table
+                                .name_generator
+                                .new_block_label(&format!("clause_{}_block", i));
+
+                            let last_instruction =
+                                &mut self.current_block.instructions.last_mut().unwrap();
+                            match &mut last_instruction.operation {
+                                Operation::Jump(ref mut value) => {
+                                    *value = label_condition.clone();
+                                }
+                                Operation::ConditionalJump {
+                                    expression: _,
+                                    on_success: _,
+                                    ref mut on_failure,
+                                } => {
+                                    *on_failure = label_condition.clone();
+                                }
+                                _ => {
+                                    println!("{:#?}", self.current_block);
+                                    panic!("Expected previous block to be a terminating jump.");
+                                }
+                            }
+
+                            // Instating condition checking block as self.current_block
+                            let mut clause_condition_block =
+                                FunctionBlock::new_from_symbol(label_condition);
+                            mem::swap(&mut clause_condition_block, &mut self.current_block);
+                            case_blocks.push(clause_condition_block);
+
+                            clause.pattern_expression.visit(self)?;
                             let expected_value = self.pop_ir_identifier()?;
                             assert!(expected_value.kind == IrIndentifierKind::Unknown);
 
@@ -982,48 +1035,52 @@ impl AstConverting for IrEmitter {
                                 },
                             });
                             let case_expression = self.convert_instruction_to_symbol(compare_instr);
-
-                            statement_block.visit(self)?;
-                            let mut clause_block = self.pop_function_block()?;
-                            let label = self
-                                .ir
-                                .symbol_table
-                                .name_generator
-                                .new_block_label(&format!("clause_{}", i));
-                            clause_block.name = label.clone();
-                            cases.push(CaseClause {
-                                label,
-                                expression: case_expression,
+                            let jump_condition = Box::new(Instruction {
+                                ssa_name: None,
+                                result_type: None,
+                                operation: Operation::IsEqual {
+                                    left: case_expression,
+                                    right: main_expression_symbol.clone(),
+                                },
                             });
 
-                            self.current_body.blocks.push(clause_block);
+                            let jump_if = Box::new(Instruction {
+                                ssa_name: None,
+                                result_type: None,
+                                operation: Operation::ConditionalJump {
+                                    expression: self.convert_instruction_to_symbol(jump_condition),
+                                    on_success: label_block.clone(),
+                                    on_failure: match_exit.clone(), // Exit or Placeholder - will be overwritten in next cycle
+                                },
+                            });
+                            self.current_block.instructions.push(jump_if);
+
+                            // Condition block
+                            statement_block.visit(self)?;
+                            let mut clause_block = self.pop_function_block()?;
+
+                            clause_block.name = label_block.clone();
+
+                            let terminator_instr = Box::new(Instruction {
+                                ssa_name: None,
+                                result_type: None,
+                                operation: Operation::Jump(match_exit.clone()),
+                            });
+                            clause_block.instructions.push(terminator_instr);
                         }
                         None => panic!("No clause statement found!"),
                     }
                 }
 
-                let match_exit = self
-                    .ir
-                    .symbol_table
-                    .name_generator
-                    .new_block_label("match_exit");
-
-                let op = Operation::Switch {
-                    cases,
-                    on_default: match_exit.clone(),
-                };
-                self.current_block.instructions.push(Box::new(Instruction {
-                    ssa_name: None,
-                    result_type: None,
-                    operation: op,
-                }));
-                println!("Body: {:#?}", self.current_body);
-
                 let mut match_exit_block = FunctionBlock::new_from_symbol(match_exit);
                 mem::swap(&mut match_exit_block, &mut self.current_block);
-                self.current_body.blocks.push(match_exit_block);
 
-                unimplemented!()
+                self.current_body.blocks.push(match_exit_block);
+                self.current_body.blocks.extend(case_blocks);
+                None
+
+                // println!("Body: {:#?}", self.current_body);
+                // unimplemented!()
             }
             NodeStatement::CallProc {
                 component_id,
@@ -1061,7 +1118,7 @@ impl AstConverting for IrEmitter {
                 });
 
                 // self.stack.push(StackObject::Instruction(instr));
-                instr
+                Some(instr)
             }
             NodeStatement::Iterate {
                 identifier_name: _,
@@ -1071,7 +1128,10 @@ impl AstConverting for IrEmitter {
             }
         };
 
-        self.current_block.instructions.push(instr);
+        match instr {
+            Some(instr) => self.current_block.instructions.push(instr),
+            None => (),
+        }
         Ok(TraversalResult::SkipChildren)
     }
 

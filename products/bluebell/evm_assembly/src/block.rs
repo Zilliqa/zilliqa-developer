@@ -14,6 +14,7 @@ pub struct Scope {
     pub stack_counter: i32,
     entry_stack_counter: i32,
     name_location: HashMap<String, i32>,
+    location_name: HashMap<i32, String>,
 }
 
 impl Scope {
@@ -22,12 +23,13 @@ impl Scope {
             stack_counter: 0,
             entry_stack_counter: arg_count,
             name_location: HashMap::new(),
+            location_name: HashMap::new(),
         }
     }
 
-    pub fn new(parent: Scope) -> Self {
+    pub fn new(parent: Scope, arg_count: i32) -> Self {
         let mut ret = parent.clone();
-        ret.entry_stack_counter = ret.stack_counter;
+        ret.entry_stack_counter = ret.stack_counter + arg_count;
 
         ret
     }
@@ -49,6 +51,8 @@ impl Scope {
 
         // TODO: assumes that args are first in, last out
         self.name_location.insert(name.to_string(), arg_number);
+        self.location_name.insert(arg_number, name.to_string());
+
         self.stack_counter += 1;
 
         // TODO: Consider pruning of the names
@@ -69,6 +73,8 @@ impl Scope {
         );
         self.name_location
             .insert(name.to_string(), self.stack_counter - 1);
+        self.location_name
+            .insert(self.stack_counter - 1, name.to_string());
 
         // TODO: Consider pruning of the names
 
@@ -76,6 +82,7 @@ impl Scope {
     }
 
     pub fn register_alias(&mut self, source: &str, dest: &str) -> Result<(), String> {
+        // TODO: Create separate alias record to deal with this
         if self.name_location.contains_key(dest) {
             return Err(format!("SSA name {} already exists", dest));
         }
@@ -96,7 +103,21 @@ impl Scope {
         let ret = self.entry_stack_counter - self.stack_counter;
         self.stack_counter += produces;
 
+        // TODO: prune self.location_name and self.name_location
+
         ret
+    }
+
+    fn swap(&mut self, depth: i32) {
+        let name = match self.location_name.get(&depth) {
+            Some(n) => n.clone(),
+            None => return,
+        };
+
+        self.location_name.remove(&depth);
+        self.name_location.remove(&name);
+        self.name_location.insert(name.to_string(), depth);
+        self.location_name.insert(depth, name.to_string());
     }
 }
 
@@ -848,66 +869,82 @@ impl EvmBlock {
     }
 
     pub fn swap1(&mut self) -> &mut Self {
+        self.scope.swap(1);
         self.write_instruction(Opcode::SWAP1, None)
     }
 
     pub fn swap2(&mut self) -> &mut Self {
+        self.scope.swap(2);
         self.write_instruction(Opcode::SWAP2, None)
     }
 
     pub fn swap3(&mut self) -> &mut Self {
+        self.scope.swap(3);
         self.write_instruction(Opcode::SWAP3, None)
     }
 
     pub fn swap4(&mut self) -> &mut Self {
+        self.scope.swap(4);
         self.write_instruction(Opcode::SWAP4, None)
     }
 
     pub fn swap5(&mut self) -> &mut Self {
+        self.scope.swap(5);
         self.write_instruction(Opcode::SWAP5, None)
     }
 
     pub fn swap6(&mut self) -> &mut Self {
+        self.scope.swap(6);
         self.write_instruction(Opcode::SWAP6, None)
     }
 
     pub fn swap7(&mut self) -> &mut Self {
+        self.scope.swap(7);
         self.write_instruction(Opcode::SWAP7, None)
     }
 
     pub fn swap8(&mut self) -> &mut Self {
+        self.scope.swap(8);
         self.write_instruction(Opcode::SWAP8, None)
     }
 
     pub fn swap9(&mut self) -> &mut Self {
+        self.scope.swap(9);
         self.write_instruction(Opcode::SWAP9, None)
     }
 
     pub fn swap10(&mut self) -> &mut Self {
+        self.scope.swap(10);
         self.write_instruction(Opcode::SWAP10, None)
     }
 
     pub fn swap11(&mut self) -> &mut Self {
+        self.scope.swap(11);
         self.write_instruction(Opcode::SWAP11, None)
     }
 
     pub fn swap12(&mut self) -> &mut Self {
+        self.scope.swap(12);
         self.write_instruction(Opcode::SWAP12, None)
     }
 
     pub fn swap13(&mut self) -> &mut Self {
+        self.scope.swap(13);
         self.write_instruction(Opcode::SWAP13, None)
     }
 
     pub fn swap14(&mut self) -> &mut Self {
+        self.scope.swap(14);
         self.write_instruction(Opcode::SWAP14, None)
     }
 
     pub fn swap15(&mut self) -> &mut Self {
+        self.scope.swap(15);
         self.write_instruction(Opcode::SWAP15, None)
     }
 
     pub fn swap16(&mut self) -> &mut Self {
+        self.scope.swap(16);
         self.write_instruction(Opcode::SWAP16, None)
     }
 
