@@ -2,6 +2,8 @@ use crate::constants::NAMESPACE_SEPARATOR;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::pass_executor::PassExecutor;
+use crate::intermediate_representation::primitives::CaseClause;
+use crate::intermediate_representation::primitives::ContractField;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -96,6 +98,22 @@ impl IrPass for CollectTypeDefinitionsPass {
                 self.pop_namespace();
             }
         }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn visit_contract_field(
+        &mut self,
+        _mode: TreeTraversalMode,
+        field: &mut ContractField,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        let _ = field.namespace.visit(self, symbol_table)?;
+        self.push_namespace(field.namespace.qualified_name()?);
+
+        field.variable.visit(self, symbol_table)?;
+        field.initializer.visit(self, symbol_table)?;
+
+        self.pop_namespace();
         Ok(TraversalResult::SkipChildren)
     }
 
@@ -229,6 +247,7 @@ impl IrPass for CollectTypeDefinitionsPass {
                 println!("Attempting to resolve: {:?}", symbol);
                 if symbol.is_definition {
                     println!("Namespace {:?}", self.current_namespace);
+
                     if let Some(namespace) = &self.current_namespace {
                         let typename =
                             format!("{}{}{}", namespace, NAMESPACE_SEPARATOR, symbol.unresolved)
@@ -310,6 +329,14 @@ impl IrPass for CollectTypeDefinitionsPass {
         _mode: TreeTraversalMode,
         _block: &mut FunctionBlock,
         _symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        Ok(TraversalResult::Continue)
+    }
+    fn visit_case_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        con_function: &mut CaseClause,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

@@ -1,6 +1,8 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::pass_executor::PassExecutor;
+use crate::intermediate_representation::primitives::CaseClause;
+use crate::intermediate_representation::primitives::ContractField;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -142,6 +144,13 @@ impl IrPass for DebugPrinter {
             Operation::Noop => {
                 self.script.push_str("noop");
             }
+            Operation::Switch { cases, on_default } => {
+                self.script.push_str("switch ");
+                for case in cases.iter_mut() {
+                    case.visit(self, symbol_table)?;
+                }
+                on_default.visit(self, symbol_table)?;
+            }
             Operation::Jump(identifier) => {
                 self.script.push_str("jmp ");
                 identifier.visit(self, symbol_table)?;
@@ -160,7 +169,10 @@ impl IrPass for DebugPrinter {
             }
             Operation::MemLoad => self.script.push_str("mload [TODO]"),
             Operation::MemStore => self.script.push_str("mstore [TODO]"),
-            Operation::StateLoad => self.script.push_str("sload [TODO]"),
+            Operation::StateLoad {
+                address: _,
+                value: _,
+            } => self.script.push_str("sstore [TODO]"),
             Operation::StateStore {
                 address: _,
                 value: _,
@@ -335,6 +347,16 @@ impl IrPass for DebugPrinter {
         Ok(TraversalResult::SkipChildren)
     }
 
+    fn visit_contract_field(
+        &mut self,
+        mode: TreeTraversalMode,
+        function_kind: &mut ContractField,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        self.script.push_str("// field emitter not implemented!\n");
+        Ok(TraversalResult::Continue)
+    }
+
     fn visit_function_kind(
         &mut self,
         _mode: TreeTraversalMode,
@@ -404,6 +426,15 @@ impl IrPass for DebugPrinter {
             }
         }
         Ok(TraversalResult::Continue)
+    }
+
+    fn visit_case_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        con_function: &mut CaseClause,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        unimplemented!()
     }
 }
 

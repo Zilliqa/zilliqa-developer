@@ -341,6 +341,40 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     blk.push_u256(address);
                                     blk.external_sstore();
                                 }
+
+                                Operation::StateLoad {
+                                    ref address,
+                                    ref value,
+                                } => {
+                                    println!("LoadStore");
+
+                                    // TODO: Ensure that we used resolved address name
+                                    let binding = &self.state_layout.get(&address.name.unresolved);
+                                    let state = match binding {
+                                        Some(v) => v,
+                                        None => panic!(
+                                            "{}",
+                                            format!(
+                                                "Unable to find state {}",
+                                                address.name.unresolved
+                                            )
+                                        ),
+                                    };
+
+                                    let address = state.address_offset;
+
+                                    println!("Loading {:?} from {:?}", value, address);
+                                    let value_name = match &value.resolved {
+                                        Some(v) => v,
+                                        None => {
+                                            panic!("{}", format!("Unable to resolve {:?}", value))
+                                        }
+                                    };
+
+                                    blk.push_u256(address);
+                                    blk.external_sload();
+                                    blk.register_stack_name(value_name);
+                                }
                                 Operation::Return(ref _value) => {
                                     // Assumes that the next element on the stack is return pointer
                                     // TODO: Pop all elements that were not used yet.

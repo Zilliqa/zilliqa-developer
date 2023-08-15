@@ -2,6 +2,8 @@ use crate::constants::NAMESPACE_SEPARATOR;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::pass_executor::PassExecutor;
+use crate::intermediate_representation::primitives::CaseClause;
+use crate::intermediate_representation::primitives::ContractField;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -114,12 +116,14 @@ impl IrPass for AnnotateBaseTypes {
         var_dec: &mut VariableDeclaration,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
+        println!("Visiting {:?}", var_dec);
         if let Some(typename) = &var_dec.typename.resolved {
             let _ = var_dec.name.visit(self, symbol_table)?;
             var_dec.name.type_reference = Some(typename.clone());
 
             if let Some(symbol) = &var_dec.name.resolved {
                 // TODO: Check that symbol is unique
+
                 symbol_table.declare_type_of(&symbol, typename)?;
 
                 Ok(TraversalResult::SkipChildren)
@@ -136,6 +140,36 @@ impl IrPass for AnnotateBaseTypes {
                 var_dec.name.unresolved, var_dec.typename.unresolved
             ))
         }
+    }
+
+    fn visit_contract_field(
+        &mut self,
+        _mode: TreeTraversalMode,
+        field: &mut ContractField,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        let namespace = match &field.namespace.resolved {
+            Some(ns) => ns.clone(),
+            None => {
+                return Err(format!(
+                    "Could not determine the namespace of {}",
+                    field.namespace.unresolved
+                ))
+            }
+        };
+
+        self.push_namespace(namespace);
+
+        println!("-------");
+        println!("| ContractField");
+        println!("-------");
+
+        field.variable.visit(self, symbol_table)?;
+        field.initializer.visit(self, symbol_table)?;
+
+        self.pop_namespace();
+
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn visit_concrete_function(
@@ -250,19 +284,23 @@ impl IrPass for AnnotateBaseTypes {
             }
             _ => (),
         }
-
+        println!("Attempting to resolve {:?}", symbol);
         match symbol.kind {
             IrIndentifierKind::BlockLabel => (),
             IrIndentifierKind::FunctionName
+            | IrIndentifierKind::State
             | IrIndentifierKind::TransitionName
             | IrIndentifierKind::ProcedureName => {
-                println!("Attempting to resolve: {:?}", symbol);
                 if !symbol.is_definition {
                     if let Some(resolved_name) =
                         symbol_table.resolve_qualified_name(&symbol.unresolved, &self.namespace)
                     {
                         symbol.resolved = Some(resolved_name);
+                        println!(" --> {:?}", symbol.resolved);
+                    } else {
+                        println!("Not resolved!!");
                     }
+
                     /*
                     // In the event of a definition we make a qualified name
                     if let Some(ns) = &self.namespace {
@@ -332,8 +370,15 @@ impl IrPass for AnnotateBaseTypes {
     ) -> Result<TraversalResult, String> {
         // TODO: These types should be stored somewhere (in the symbol table maybe?)
         let typename = match &mut instr.operation {
-            Operation::Noop => "Void".to_string(),
-            Operation::Jump(_) => "Void".to_string(),
+            Operation::Noop => "Void".to_string(), // TODO: Fetch from somewhere
+            Operation::Jump(_) => "Void".to_string(), // TODO: Fetch from somewhere
+            Operation::Switch { cases, on_default } => {
+                for case in cases.iter_mut() {
+                    case.visit(self, symbol_table)?;
+                }
+                on_default.visit(self, symbol_table)?;
+                "TODO".to_string()
+            }
             Operation::ConditionalJump {
                 expression,
                 on_success,
@@ -342,14 +387,65 @@ impl IrPass for AnnotateBaseTypes {
                 expression.visit(self, symbol_table)?;
                 on_success.visit(self, symbol_table)?;
                 on_failure.visit(self, symbol_table)?;
-                "Void".to_string()
+                "Void".to_string() // TODO: Fetch from somewhere
             }
-            Operation::StateLoad => "TODO".to_string(),
+            Operation::StateLoad { address, value } => {
+                address.name.visit(self, symbol_table)?;
+                value.visit(self, symbol_table)?;
+
+                let symbol_name = match &value.resolved {
+                    Some(r) => r.clone(),
+                    None => {
+                        return Err(format!(
+                            "Unable resolve symbol name for for load statement {}",
+                            value.unresolved
+                        ))
+                    }
+                };
+
+                value.type_reference = address.name.type_reference.clone();
+
+                match &value.type_reference {
+                    Some(typename) => {
+                        symbol_table.declare_type_of(&symbol_name, &typename)?;
+                        typename.clone()
+                    }
+                    None => {
+                        return Err(format!(
+                            "Unable to deduce type for load statement {}",
+                            symbol_name
+                        ))
+                    }
+                }
+            }
             Operation::StateStore { address, value } => {
                 address.name.visit(self, symbol_table)?;
                 value.visit(self, symbol_table)?;
 
-                "TODO".to_string()
+                let symbol_name = match &address.name.resolved {
+                    Some(r) => r.clone(),
+                    None => {
+                        return Err(format!(
+                            "Unable resolve symbol name for for store statement {}",
+                            value.unresolved
+                        ))
+                    }
+                };
+
+                value.type_reference = address.name.type_reference.clone();
+
+                match &value.type_reference {
+                    Some(typename) => {
+                        symbol_table.declare_type_of(&symbol_name, &typename)?;
+                        typename.clone()
+                    }
+                    None => {
+                        return Err(format!(
+                            "Unable to deduce type for store statement {}",
+                            symbol_name
+                        ))
+                    }
+                }
             }
             Operation::MemLoad => "TODO".to_string(),
             Operation::MemStore => "TODO".to_string(),
@@ -357,7 +453,8 @@ impl IrPass for AnnotateBaseTypes {
                 left.visit(self, symbol_table)?;
                 right.visit(self, symbol_table)?;
                 //  panic!("Failed");
-                "Int8".to_string()
+                // TODO: Should return the same type as left and right
+                "Uint256".to_string()
             }
             Operation::CallExternalFunction {
                 ref mut name,
@@ -372,8 +469,8 @@ impl IrPass for AnnotateBaseTypes {
                         None => {
                             // TODO: Fix error propagation
                             panic!(
-                                "{}",
-                                format!("Unable to resolve type for {:?}", arg.unresolved)
+                                "Unable to resolve type for {:?} in {:?}",
+                                arg.unresolved, name
                             );
                         }
                     };
@@ -467,7 +564,7 @@ impl IrPass for AnnotateBaseTypes {
                     }
                 }
             }
-            Operation::AcceptTransfer => "Void".to_string(),
+            Operation::AcceptTransfer => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::PhiNode(inputs) => {
                 let mut type_name = None;
                 for input in inputs.iter_mut() {
@@ -484,13 +581,13 @@ impl IrPass for AnnotateBaseTypes {
                 if let Some(type_name) = type_name {
                     type_name
                 } else {
-                    "Void".to_string() // TODO: specify somewhere
+                    "Void".to_string() // TODO: specify somewhere // TODO: Fetch from somewhere
                 }
             }
             Operation::Revert(n) | Operation::Return(n) => {
                 match n {
                     Some(_) => todo!(),
-                    None => "Void".to_string(), // TODO: specify somewhere
+                    None => "Void".to_string(), // TODO: specify somewhere // TODO: Fetch from somewhere
                 }
             }
         };
@@ -514,6 +611,15 @@ impl IrPass for AnnotateBaseTypes {
         }
 
         Ok(TraversalResult::SkipChildren)
+    }
+
+    fn visit_case_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        con_function: &mut CaseClause,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        Ok(TraversalResult::Continue)
     }
 
     fn visit_function_block(

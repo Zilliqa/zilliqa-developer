@@ -809,10 +809,43 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         let instr = match node {
             NodeStatement::Load {
-                left_hand_side: _,
-                right_hand_side: _,
+                left_hand_side,
+                right_hand_side,
             } => {
-                unimplemented!()
+                let symbol = IrIdentifier {
+                    unresolved: left_hand_side.to_string(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::VirtualRegister,
+                    is_definition: false,
+                };
+
+                let right_hand_side = match right_hand_side {
+                    NodeVariableIdentifier::VariableName(name) => name,
+                    _ => panic!("Load of state {:#?}", right_hand_side),
+                };
+
+                println!("RHS: {:#?}", right_hand_side);
+
+                let ret = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::StateLoad {
+                        address: FieldAddress {
+                            name: IrIdentifier {
+                                unresolved: right_hand_side.to_string(),
+                                resolved: None,
+                                type_reference: None,
+                                kind: IrIndentifierKind::State,
+                                is_definition: false,
+                            },
+                            value: None,
+                        },
+                        value: symbol,
+                    },
+                });
+
+                ret
             }
             NodeStatement::RemoteFetch(_remote_stmt) => {
                 unimplemented!()
@@ -922,10 +955,74 @@ impl AstConverting for IrEmitter {
             NodeStatement::Throw { error_variable: _ } => {
                 unimplemented!()
             }
-            NodeStatement::MatchStmt {
-                variable: _,
-                clauses: _,
-            } => {
+            NodeStatement::MatchStmt { variable, clauses } => {
+                println!("Variable: {:#?}", variable);
+                println!("Clauses: {:#?}", clauses);
+                println!("Body: {:#?}", self.current_body);
+
+                let _ = variable.visit(self)?;
+                let expression = self.pop_instruction()?;
+                let main_expression_symbol = self.convert_instruction_to_symbol(expression);
+
+                println!("Clauses: {:#?}", clauses);
+                let mut cases: Vec<CaseClause> = Vec::new();
+
+                for (i, clause) in clauses.iter().enumerate() {
+                    match &clause.statement_block {
+                        Some(statement_block) => {
+                            let expected_value = self.pop_ir_identifier()?;
+                            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+
+                            let compare_instr = Box::new(Instruction {
+                                ssa_name: None,
+                                result_type: None,
+                                operation: Operation::IsEqual {
+                                    left: main_expression_symbol.clone(),
+                                    right: expected_value,
+                                },
+                            });
+                            let case_expression = self.convert_instruction_to_symbol(compare_instr);
+
+                            statement_block.visit(self)?;
+                            let mut clause_block = self.pop_function_block()?;
+                            let label = self
+                                .ir
+                                .symbol_table
+                                .name_generator
+                                .new_block_label(&format!("clause_{}", i));
+                            clause_block.name = label.clone();
+                            cases.push(CaseClause {
+                                label,
+                                expression: case_expression,
+                            });
+
+                            self.current_body.blocks.push(clause_block);
+                        }
+                        None => panic!("No clause statement found!"),
+                    }
+                }
+
+                let match_exit = self
+                    .ir
+                    .symbol_table
+                    .name_generator
+                    .new_block_label("match_exit");
+
+                let op = Operation::Switch {
+                    cases,
+                    on_default: match_exit.clone(),
+                };
+                self.current_block.instructions.push(Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: op,
+                }));
+                println!("Body: {:#?}", self.current_body);
+
+                let mut match_exit_block = FunctionBlock::new_from_symbol(match_exit);
+                mem::swap(&mut match_exit_block, &mut self.current_block);
+                self.current_body.blocks.push(match_exit_block);
+
                 unimplemented!()
             }
             NodeStatement::CallProc {
@@ -1268,15 +1365,21 @@ impl AstConverting for IrEmitter {
         node: &NodeContractField,
     ) -> Result<TraversalResult, String> {
         let _ = node.typed_identifier.visit(self)?;
-        let variable = self.pop_variable_declaration()?;
+        println!("{:#?}", node.typed_identifier);
+
+        let mut variable = self.pop_variable_declaration()?;
         let _ = node.right_hand_side.visit(self)?;
         let initializer = self.pop_instruction()?;
+        variable.name.kind = IrIndentifierKind::State;
+
         let field = ContractField {
+            namespace: self.current_namespace.clone(),
             variable,
             initializer,
         };
 
         self.ir.fields_definitions.push(field);
+
         Ok(TraversalResult::SkipChildren)
     }
     fn emit_with_constraint(

@@ -139,6 +139,7 @@ impl PassExecutor for VariableDeclaration {
     ) -> Result<TraversalResult, String> {
         let ret = pass.visit_variable_declaration(TreeTraversalMode::Enter, self, symbol_table);
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
+            self.name.visit(pass, symbol_table)?;
             self.typename.visit(pass, symbol_table)
         } else {
             ret
@@ -162,6 +163,12 @@ impl PassExecutor for Operation {
 
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             match self {
+                Operation::Switch { cases, on_default } => {
+                    for case in cases.iter_mut() {
+                        case.visit(pass, symbol_table)?;
+                    }
+                    on_default.visit(pass, symbol_table)
+                }
                 Operation::Jump(identifier) => identifier.visit(pass, symbol_table),
                 Operation::StateStore { address, value } => {
                     let ret = value.visit(pass, symbol_table);
@@ -169,8 +176,13 @@ impl PassExecutor for Operation {
 
                     ret
                 }
-                Operation::StateLoad
-                | Operation::MemLoad
+                Operation::StateLoad { address, value } => {
+                    let ret = value.visit(pass, symbol_table);
+                    address.name.visit(pass, symbol_table)?;
+
+                    ret
+                }
+                Operation::MemLoad
                 | Operation::MemStore
                 | Operation::AcceptTransfer
                 | Operation::PhiNode(_) => Ok(TraversalResult::Continue),
@@ -367,6 +379,32 @@ impl PassExecutor for ConcreteType {
     }
 }
 
+impl PassExecutor for ContractField {
+    fn visit(
+        &mut self,
+        pass: &mut dyn IrPass,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        let ret = pass.visit_contract_field(TreeTraversalMode::Enter, self, symbol_table)?;
+
+        let children_ret = if ret == TraversalResult::Continue {
+            println!("Visiting children!");
+            let _ = self.variable.visit(pass, symbol_table)?;
+            let _ = self.initializer.visit(pass, symbol_table)?;
+
+            TraversalResult::Continue
+        } else {
+            ret
+        };
+        match children_ret {
+            TraversalResult::Continue => {
+                pass.visit_contract_field(TreeTraversalMode::Exit, self, symbol_table)
+            }
+            _ => Ok(TraversalResult::Continue),
+        }
+    }
+}
+
 impl PassExecutor for FunctionKind {
     fn visit(
         &mut self,
@@ -419,10 +457,24 @@ impl PassExecutor for ConcreteFunction {
     }
 }
 
+impl PassExecutor for CaseClause {
+    fn visit(
+        &mut self,
+        pass: &mut dyn IrPass,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        unimplemented!()
+    }
+}
+
 impl IntermediateRepresentation {
     pub fn run_pass(&mut self, pass: &mut dyn IrPass) -> Result<TraversalResult, String> {
         for type_def in &mut self.type_definitions {
             type_def.visit(pass, &mut self.symbol_table)?;
+        }
+
+        for contract_field in &mut self.fields_definitions {
+            contract_field.visit(pass, &mut self.symbol_table)?;
         }
 
         for function_def in &mut self.function_definitions {

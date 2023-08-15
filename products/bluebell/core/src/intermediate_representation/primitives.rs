@@ -155,6 +155,12 @@ pub struct FieldAddress {
 }
 
 #[derive(Debug, Clone)]
+pub struct CaseClause {
+    pub expression: IrIdentifier,
+    pub label: IrIdentifier,
+}
+
+#[derive(Debug, Clone)]
 pub enum Operation {
     Noop,
     Jump(IrIdentifier),
@@ -163,9 +169,17 @@ pub enum Operation {
         on_success: IrIdentifier,
         on_failure: IrIdentifier,
     },
+
+    Switch {
+        cases: Vec<CaseClause>,
+        on_default: IrIdentifier,
+    },
     MemLoad,
     MemStore,
-    StateLoad,
+    StateLoad {
+        address: FieldAddress,
+        value: IrIdentifier,
+    },
     StateStore {
         address: FieldAddress,
         value: IrIdentifier,
@@ -295,50 +309,23 @@ pub struct LambdaFunctionSingleArgument {
     pub block: FunctionBlock,
 }
 
-/*
-impl ComputableState {
-    pub fn get_concrete_name(&self, types: Vec<String>) -> Result<String, String> {
-        let mut basename = if let Some(n) = &self.base.name.resolved {
-            n.clone()
-        } else {
-            return Err("Internal error: Base function does not have a resolved name".to_string());
-        };
-
-        if types.len() != self.template_arguments.len() {
-            return Err(format!(
-                "Template function expected {} arguments, but found {} arguments",
-                self.template_arguments.len(),
-                types.len()
-            ));
-        }
-
-        basename.push_str("<");
-        for (i, arg) in types.iter().enumerate() {
-            if i > 0 {
-                basename.push_str(", ");
-            }
-            basename.push_str(arg);
-        }
-        basename.push_str(">");
-
-        Ok(basename)
-    }
-}
-*/
-
 #[derive(Debug)]
 pub struct ContractField {
+    pub namespace: IrIdentifier,
     pub variable: VariableDeclaration,
     pub initializer: Box<Instruction>,
 }
 
 #[derive(Debug)]
 pub struct IntermediateRepresentation {
+    // Program IR
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,
     pub function_definitions: Vec<ConcreteFunction>,
     pub fields_definitions: Vec<ContractField>,
     pub lambda_functions: Vec<LambdaFunctionSingleArgument>,
+
+    // Symbols, storage and memory layout
     pub symbol_table: SymbolTable,
 }
 

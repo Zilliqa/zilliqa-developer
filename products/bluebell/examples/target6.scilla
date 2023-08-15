@@ -1,0 +1,14 @@
+scilla_version 0
+
+library HelloWorld
+contract HelloWorld()
+
+field welcome_msg : Uint64 = Uint64 0
+
+transition setHello (msg : Uint64)
+  is_owner = False;
+  match is_owner with
+  | True =>
+    welcome_msg := msg
+  end
+end

@@ -286,13 +286,15 @@ impl BluebellModule for ScillaDefaultBuiltins {
             Ok([].to_vec())
         });
 
-        let _ =
-            specification.declare_inline_generics("builtin__lte", |_ctx, _block, _arg_types| {
-                // block.lte();  // This might need additional logic as EVM directly doesn't have lte
-                // Ok(())
+        let _ = specification.declare_inline_generics("builtin__lte", |_ctx, block, _arg_types| {
+            block.dup2();
+            block.dup2();
+            block.lt();
+            block.eq();
+            block.or();
 
-                panic!("LTE not supported directly by EVM");
-            });
+            Ok([].to_vec())
+        });
 
         let _ = specification.declare_inline_generics("builtin__eq", |_ctx, block, _arg_types| {
             block.eq();
@@ -304,13 +306,15 @@ impl BluebellModule for ScillaDefaultBuiltins {
             Ok([].to_vec())
         });
 
-        let _ =
-            specification.declare_inline_generics("builtin__gte", |_ctx, _block, _arg_types| {
-                // block.gte();  // This might need additional logic as EVM directly doesn't have gte
-                // Ok(())
+        let _ = specification.declare_inline_generics("builtin__gte", |_ctx, block, _arg_types| {
+            block.dup2();
+            block.dup2();
+            block.gt();
+            block.eq();
+            block.or();
 
-                panic!("GTE not supported directly by EVM");
-            });
+            Ok([].to_vec())
+        });
 
         // Implementing boolean builtins:
         let _ =
