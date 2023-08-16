@@ -14,7 +14,6 @@ COPY ./yarn.lock ./
 RUN yarn install && yarn cache clean
 
 COPY . ./
-RUN wget -q https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
 EXPOSE 5000
 
 CMD ["bash", "run.sh"]
