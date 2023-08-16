@@ -4,7 +4,7 @@ metadata:
   name: devex-apollo
   namespace: devex-apollo
   labels:
-    "app.kubernetes.io/name": "devex-apollo"
+    app.kubernetes.io/name: devex-apollo
 spec:
   rules:
     - host: localhost

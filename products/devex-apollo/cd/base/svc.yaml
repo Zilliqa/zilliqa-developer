@@ -4,7 +4,9 @@ metadata:
   name: devex-apollo
   namespace: devex-apollo
   labels:
-    "app.kubernetes.io/name": "devex-apollo"
+    app.kubernetes.io/name: devex-apollo
+  annotations:
+    cloud.google.com/backend-config: '{"default": "devex-apollo"}'
 spec:
   type: ClusterIP
   ports:
@@ -13,4 +15,12 @@ spec:
       protocol: TCP
       name: http
   selector:
-    "app.kubernetes.io/name": "devex-apollo"
+    app.kubernetes.io/name: devex-apollo
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: devex-apollo
+spec:
+  healthCheck:
+    requestPath: /graphql?query=%7B__typename%7D
