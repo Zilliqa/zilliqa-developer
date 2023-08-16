@@ -7,3 +7,5 @@ resources:
   - ingress.yaml
   - secrets-app.yaml
   - svc.yaml
+
+namespace: devex-apollo
