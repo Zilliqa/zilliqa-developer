@@ -21,7 +21,7 @@ spec:
         - image: devex-apollo
           name: devex-apollo
           ports:
-            - containerPort: 5000
+            - containerPort: 80
           env:
             - name: BLOCKS_PER_REQUEST
               valueFrom:

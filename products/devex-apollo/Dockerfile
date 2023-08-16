@@ -14,6 +14,6 @@ COPY ./yarn.lock ./
 RUN yarn install && yarn cache clean
 
 COPY . ./
-EXPOSE 5000
+EXPOSE 80
 
 CMD ["bash", "run.sh"]

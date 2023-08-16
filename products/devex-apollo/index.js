@@ -162,6 +162,6 @@ connection.once("open", function () {
   });
 });
 
-app.listen(5000, () => {
-  console.log("🚀  Server ready at port 5000");
+app.listen(80, () => {
+  console.log("🚀  Server ready at port 80");
 });
