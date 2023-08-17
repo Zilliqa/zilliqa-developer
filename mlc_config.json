@@ -65,6 +65,9 @@
     },
     {
       "pattern": "^https://stg-indexer-api.rialto.studio/zilliqa"
+    },
+    {
+      "pattern": "^https://coq.inria.fr"
     }
   ],
   "replacementPatterns": [],

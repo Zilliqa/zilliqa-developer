@@ -2,26 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: devex-apollo
-  namespace: default
+  namespace: devex-apollo
   labels:
-    "app.kubernetes.io/name": "devex-apollo"
+    app.kubernetes.io/name: devex-apollo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      "app.kubernetes.io/name": "devex-apollo"
+      app.kubernetes.io/name: devex-apollo
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        "app.kubernetes.io/name": "devex-apollo"
+        app.kubernetes.io/name: devex-apollo
     spec:
       containers:
-        - image: devex-apollo:latest
+        - image: devex-apollo
           name: devex-apollo
           ports:
-            - containerPort: 5000
+            - containerPort: 80
           env:
             - name: BLOCKS_PER_REQUEST
               valueFrom:
@@ -35,6 +35,11 @@ spec:
                   key: DOCUMENTDB_HOST
             - name: DOCUMENTDB_PORT
               value: "27017"
+            - name: DOCUMENTDB_DB
+              valueFrom:
+                secretKeyRef:
+                  name: devex-apollo
+                  key: DOCUMENTDB_DB
             - name: DOCUMENTDB_USER
               valueFrom:
                 secretKeyRef:
