@@ -1,6 +1,7 @@
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::IntermediateRepresentation;
 use crate::passes::annotate_base_types::AnnotateBaseTypes;
+use crate::passes::block_dependencies::DeduceBlockDependencies;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 
 pub struct PassManager {
@@ -17,6 +18,7 @@ impl PassManager {
 
         ret.passes.push(Box::new(CollectTypeDefinitionsPass::new()));
         ret.passes.push(Box::new(AnnotateBaseTypes::new()));
+        ret.passes.push(Box::new(DeduceBlockDependencies::new()));
 
         ret
     }

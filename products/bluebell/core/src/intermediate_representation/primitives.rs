@@ -1,4 +1,6 @@
 use crate::intermediate_representation::symbol_table::SymbolTable;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum IrIndentifierKind {
@@ -230,6 +232,11 @@ pub struct Instruction {
 #[derive(Debug, Clone)]
 pub struct FunctionBlock {
     pub name: IrIdentifier,
+    pub block_arguments: Vec<String>,
+    pub enters_from: HashSet<String>,
+    pub exits_to: HashSet<String>,
+    pub defined_ssas: HashSet<String>,
+    pub jump_required_arguments: HashMap<String, Vec<String>>,
     pub instructions: Vec<Box<Instruction>>,
     pub terminated: bool,
 }
@@ -242,6 +249,11 @@ impl FunctionBlock {
     pub fn new_from_symbol(name: IrIdentifier) -> Box<Self> {
         Box::new(Self {
             name,
+            block_arguments: Vec::new(),
+            enters_from: HashSet::new(),
+            exits_to: HashSet::new(),
+            defined_ssas: HashSet::new(),
+            jump_required_arguments: HashMap::new(),
             instructions: Vec::new(),
             terminated: false,
         })

@@ -12,6 +12,7 @@ use crate::intermediate_representation::primitives::{
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::intermediate_representation::symbol_table::TypeInfo;
+use std::collections::HashSet;
 use std::mem;
 
 pub struct AnnotateBaseTypes {
@@ -634,11 +635,11 @@ impl IrPass for AnnotateBaseTypes {
         block: &mut FunctionBlock,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        self.current_block = Some(FunctionBlock {
-            name: block.name.clone(),
-            instructions: Vec::new(),
-            terminated: block.terminated,
-        });
+        self.current_block = Some(*FunctionBlock::new_from_symbol(block.name.clone()));
+
+        if let Some(ref mut new_block) = &mut self.current_block {
+            new_block.terminated = block.terminated;
+        }
 
         for instr in block.instructions.iter_mut() {
             instr.visit(self, symbol_table)?;

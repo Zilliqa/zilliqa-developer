@@ -1067,6 +1067,7 @@ impl AstConverting for IrEmitter {
                                 operation: Operation::Jump(match_exit.clone()),
                             });
                             clause_block.instructions.push(terminator_instr);
+                            self.current_body.blocks.push(clause_block);
                         }
                         None => panic!("No clause statement found!"),
                     }
