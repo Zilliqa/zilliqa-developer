@@ -28,22 +28,22 @@ jobs:
         include:
           - application: developer-portal
             docker_domain: asia-docker.pkg.dev
-            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
             image_name: zilliqa-devportal
             path: products/developer-portal
           - application: devex
             docker_domain: asia-docker.pkg.dev
-            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
             image_name: devex
             path: products/devex
           - application: devex-apollo
             docker_domain: asia-docker.pkg.dev
-            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
             image_name: devex-apollo
             path: products/devex-apollo
           - application: neo-savant
             docker_domain: asia-docker.pkg.dev
-            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+            registry_stg: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
             image_name: neo-savant
             path: products/neo-savant
     env:
