@@ -184,15 +184,6 @@ jobs:
           echo ']' >> cd/applications.bzl
           cat cd/applications.bzl
 
-      - name: "Creating staging update"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          bazelisk run //cd:update_staging
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
-          BUILD_URI_SUFFIX: ${{ github.head_ref }}
-
       - name: "Creating production update"
         if: github.event_name == 'release' && github.event.action == 'created'
         run: |
