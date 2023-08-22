@@ -168,7 +168,7 @@ jobs:
       ### BEGIN DEPLOYMENT STAGES
       - name: "Create application.bzl"
         run: |
-          echo 'APPLICATIONS_PROD = [' >> cd/applications.bzl
+          echo 'APPLICATIONS_PROD = [' > cd/applications.bzl
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" || "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'docs') }}" = "true" ]; then
             echo '    "//products/developer-portal",' >> cd/applications.bzl
           fi
