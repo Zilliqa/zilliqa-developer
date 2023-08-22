@@ -177,7 +177,7 @@ container_push(
     name = "push_image_stg",
     format = "Docker",
     image = ":image",
-    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private",
+    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public",
     repository = "devex",
     tag = "$${IMAGE_TAG#*:}",
 )
