@@ -1060,8 +1060,6 @@ impl AstVisitor for NodeLibrarySingleDefinition {
 }
 impl AstVisitor for NodeContractDefinition {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
-        println!("Visiting contract!");
-
         let ret = emitter.emit_contract_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             if let Err(msg) = self.parameters.visit(emitter) {

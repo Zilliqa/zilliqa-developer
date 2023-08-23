@@ -196,7 +196,6 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
         extern "C" fn print_string(s: *const c_char) {
             let c_str = unsafe { CStr::from_ptr(s) };
             let str_slice: &str = c_str.to_str().unwrap();
-            println!("{}", str_slice);
         }
         unsafe {
             contract_executor.link_symbol("sumf", sumf as usize);
@@ -292,7 +291,6 @@ fn main() {
             let mut formatter = BluebellFormatter::new();
             let mut ast2 = ast.clone();
             let formatted_ast = formatter.emit(&mut ast2); // Call to_string on the top-level AST node to get formatted output
-            println!("{}", formatted_ast);
 
             let mut formatter = BluebellFormatter::new();
             let mut ast2 = ast.clone();

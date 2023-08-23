@@ -28,7 +28,6 @@ impl EvmIoInterface {
 
 impl Backend for EvmIoInterface {
     fn gas_price(&self) -> U256 {
-        println!("LOG: Requesting gas price");
         U256::zero()
     }
 
@@ -37,12 +36,10 @@ impl Backend for EvmIoInterface {
     }
 
     fn block_hash(&self, _: U256) -> H256 {
-        println!("LOG: Requesting block hash");
         H256::zero()
     }
 
     fn block_number(&self) -> U256 {
-        println!("LOG: Requesting block number");
         U256::zero()
     }
 
@@ -51,7 +48,6 @@ impl Backend for EvmIoInterface {
     }
 
     fn block_timestamp(&self) -> U256 {
-        println!("LOG: Requesting block block timestamp");
         U256::zero()
     }
 
@@ -76,12 +72,10 @@ impl Backend for EvmIoInterface {
     }
 
     fn exists(&self, address: H160) -> bool {
-        println!("LOG: Checking if address '{:?}' exists!", address);
         self.state.contains_key(&address)
     }
 
     fn basic(&self, address: H160) -> Basic {
-        println!("LOG: Getting basic info for '{:?}'", address);
         Basic {
             balance: 0.into(),
             nonce: 0.into(),
@@ -89,7 +83,6 @@ impl Backend for EvmIoInterface {
     }
 
     fn code(&self, address: H160) -> Vec<u8> {
-        println!("LOG: Requesting code for '{:?}'", address);
         self.state
             .get(&address)
             .map(|v| v.code.clone())
@@ -97,8 +90,6 @@ impl Backend for EvmIoInterface {
     }
 
     fn storage(&self, address: H160, index: H256) -> H256 {
-        println!("LOG: Accessing storage '{:?}'.'{:?}'", address, index);
-
         let storage = self
             .state
             .get(&address)
@@ -112,11 +103,6 @@ impl Backend for EvmIoInterface {
     }
 
     fn original_storage(&self, address: H160, index: H256) -> Option<H256> {
-        println!(
-            "LOG: Accessing original storage '{:?}'.'{:?}'",
-            address, index
-        );
-
         let storage = self
             .state
             .get(&address)

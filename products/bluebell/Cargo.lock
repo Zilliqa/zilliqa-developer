@@ -154,6 +154,8 @@ dependencies = [
  "lalrpop-util",
  "primitive-types",
  "regex",
+ "serde",
+ "serde_json",
  "sha3",
 ]
 

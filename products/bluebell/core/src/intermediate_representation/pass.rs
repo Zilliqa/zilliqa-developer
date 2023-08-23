@@ -96,9 +96,13 @@ pub trait IrPass {
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
     fn visit_primitives(
+        // TODO Remove
         &mut self,
         mode: TreeTraversalMode,
         primitives: &mut IntermediateRepresentation,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
+
+    fn initiate(&mut self);
+    fn finalize(&mut self);
 }

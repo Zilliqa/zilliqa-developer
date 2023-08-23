@@ -16,6 +16,14 @@ pub struct DebugPrinter {
 }
 
 impl IrPass for DebugPrinter {
+    fn initiate(&mut self) {
+        self.script = "".to_string();
+    }
+
+    fn finalize(&mut self) {
+        println!("{}", self.script);
+    }
+
     fn visit_symbol_kind(
         &mut self,
         _mode: TreeTraversalMode,
@@ -141,6 +149,10 @@ impl IrPass for DebugPrinter {
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match operation {
+            Operation::TerminatingRef(identifier) => {
+                self.script.push_str("; unused variable ");
+                identifier.visit(self, symbol_table)?;
+            }
             Operation::Noop => {
                 self.script.push_str("noop");
             }
@@ -246,7 +258,9 @@ impl IrPass for DebugPrinter {
                         self.script.push_str(" ");
                         r.visit(self, symbol_table)?;
                     }
-                    &mut None => todo!(),
+                    &mut None => {
+                        self.script.push_str(" void");
+                    }
                 };
             }
             Operation::Revert(arg) => {
@@ -419,12 +433,11 @@ impl IrPass for DebugPrinter {
         match mode {
             TreeTraversalMode::Enter => {
                 // TODO: Emit scilla version etc
-                // unimplemented!()
+                unimplemented!()
             }
-            TreeTraversalMode::Exit => {
-                println!("{}", self.script);
-            }
+            TreeTraversalMode::Exit => {}
         }
+
         Ok(TraversalResult::Continue)
     }
 

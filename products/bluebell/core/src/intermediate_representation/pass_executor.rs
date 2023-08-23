@@ -163,6 +163,7 @@ impl PassExecutor for Operation {
 
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             match self {
+                Operation::TerminatingRef(identifier) => identifier.visit(pass, symbol_table),
                 Operation::Switch { cases, on_default } => {
                     for case in cases.iter_mut() {
                         case.visit(pass, symbol_table)?;
@@ -388,7 +389,6 @@ impl PassExecutor for ContractField {
         let ret = pass.visit_contract_field(TreeTraversalMode::Enter, self, symbol_table)?;
 
         let children_ret = if ret == TraversalResult::Continue {
-            println!("Visiting children!");
             let _ = self.variable.visit(pass, symbol_table)?;
             let _ = self.initializer.visit(pass, symbol_table)?;
 
@@ -482,6 +482,8 @@ impl PassExecutor for CaseClause {
 
 impl IntermediateRepresentation {
     pub fn run_pass(&mut self, pass: &mut dyn IrPass) -> Result<TraversalResult, String> {
+        pass.initiate();
+
         for type_def in &mut self.type_definitions {
             type_def.visit(pass, &mut self.symbol_table)?;
         }
@@ -494,6 +496,7 @@ impl IntermediateRepresentation {
             function_def.visit(pass, &mut self.symbol_table)?;
         }
 
+        pass.finalize();
         Ok(TraversalResult::Continue)
     }
 }

@@ -212,7 +212,6 @@ mod tests {
             let path_str = path.to_string_lossy().into_owned();
 
             // Run the .scilla file using your Scilla execution command
-            println!("- Compiling to LLVM IR {}", path_str);
             let ret = parse_and_emit(path_str);
             success = ret && success;
         }

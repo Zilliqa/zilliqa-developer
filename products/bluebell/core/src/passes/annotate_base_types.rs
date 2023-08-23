@@ -74,6 +74,8 @@ impl AnnotateBaseTypes {
 // TODO: Rename to AnnotateTypesDeclarations
 
 impl IrPass for AnnotateBaseTypes {
+    fn initiate(&mut self) {}
+    fn finalize(&mut self) {}
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
@@ -117,7 +119,6 @@ impl IrPass for AnnotateBaseTypes {
         var_dec: &mut VariableDeclaration,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        println!("Visiting {:?}", var_dec);
         if let Some(typename) = &var_dec.typename.resolved {
             let _ = var_dec.name.visit(self, symbol_table)?;
             var_dec.name.type_reference = Some(typename.clone());
@@ -161,10 +162,6 @@ impl IrPass for AnnotateBaseTypes {
 
         self.push_namespace(namespace);
 
-        println!("-------");
-        println!("| ContractField");
-        println!("-------");
-
         field.variable.visit(self, symbol_table)?;
         field.initializer.visit(self, symbol_table)?;
 
@@ -190,7 +187,7 @@ impl IrPass for AnnotateBaseTypes {
         };
 
         self.push_namespace(namespace);
-        println!("Visiting {:?}", fnc.name);
+
         fnc.name.visit(self, symbol_table)?;
 
         self.push_namespace(fnc.name.unresolved.clone());
@@ -271,7 +268,7 @@ impl IrPass for AnnotateBaseTypes {
                     constructor_call.visit(self, symbol_table)?;
 
                     if let Some(current_block) = &mut self.current_block {
-                        current_block.instructions.push(constructor_call);
+                        current_block.instructions.push_back(constructor_call);
                     } else {
                         return Err(
                             "Internal error: No block available to push instruction ".to_string()
@@ -285,7 +282,7 @@ impl IrPass for AnnotateBaseTypes {
             }
             _ => (),
         }
-        println!("Attempting to resolve {:?}", symbol);
+
         match symbol.kind {
             IrIndentifierKind::BlockLabel => (),
             IrIndentifierKind::FunctionName
@@ -297,7 +294,6 @@ impl IrPass for AnnotateBaseTypes {
                         symbol_table.resolve_qualified_name(&symbol.unresolved, &self.namespace)
                     {
                         symbol.resolved = Some(resolved_name);
-                        println!(" --> {:?}", symbol.resolved);
                     } else {
                         println!("Not resolved!!");
                     }
@@ -371,6 +367,9 @@ impl IrPass for AnnotateBaseTypes {
     ) -> Result<TraversalResult, String> {
         // TODO: These types should be stored somewhere (in the symbol table maybe?)
         let typename = match &mut instr.operation {
+            Operation::TerminatingRef(identifier) => {
+                "Void".to_string() // TODO: Fetch from somewhere
+            }
             Operation::Noop => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::Jump(_) => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::Switch { cases, on_default } => {
@@ -496,8 +495,6 @@ impl IrPass for AnnotateBaseTypes {
             }
             Operation::CallFunction { name, arguments } => {
                 name.visit(self, symbol_table)?;
-                println!("Function name after visiting: {:#?}", name);
-                println!("Symbol table: {:#?}", symbol_table);
                 for arg in arguments.iter_mut() {
                     arg.visit(self, symbol_table)?;
                 }
@@ -644,7 +641,7 @@ impl IrPass for AnnotateBaseTypes {
         for instr in block.instructions.iter_mut() {
             instr.visit(self, symbol_table)?;
             if let Some(ref mut new_block) = &mut self.current_block {
-                new_block.instructions.push(instr.clone());
+                new_block.instructions.push_back(instr.clone());
             }
         }
 

@@ -73,7 +73,11 @@ impl EvmCompilerContext {
     }
 
     pub fn create_builder<'ctx>(&'ctx mut self) -> EvmByteCodeBuilder<'ctx> {
-        EvmByteCodeBuilder::new(self)
+        EvmByteCodeBuilder::new(self, true)
+    }
+
+    pub fn create_builder_no_abi_support<'ctx>(&'ctx mut self) -> EvmByteCodeBuilder<'ctx> {
+        EvmByteCodeBuilder::new(self, false)
     }
 
     pub fn declare_integer(&mut self, name: &str, bits: usize) {

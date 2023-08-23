@@ -1,3 +1,5 @@
+use evm_assembly::executor::EvmExecutable;
+use std::collections::HashSet;
 use crate::intermediate_representation::primitives::Operation;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
@@ -41,8 +43,13 @@ pub struct EvmBytecodeGenerator<'ctx> {
 impl<'ctx> EvmBytecodeGenerator<'ctx> {
     /// This constructs a new `EvmBytecodeGenerator`. It takes an existing EVM compiler context
     /// and a boxed intermediate representation (IR) of the program.  
-    pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<IntermediateRepresentation>) -> Self {
-        let builder = context.create_builder();
+    pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<IntermediateRepresentation>, abi_support: bool) -> Self {
+        let builder = if abi_support {
+            context.create_builder()
+        } else {
+            context.create_builder_no_abi_support()
+
+        };
         Self {
             builder,
             ir,
@@ -69,7 +76,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
             self.state_layout.insert(name.to_string(), state);
             address_offset += 1;
         }
-        println!("State: {:#?}", self.state_layout);
+
         Ok(())
         //        unimplemented!()
     }
@@ -106,12 +113,20 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 None => "Uint256", // TODO: panic!("Void type not implemented for EVM")
             };
 
-            println!("Writing function {:#?}", function_name);
-
             self.builder
                 .define_function(&function_name, arg_types, return_type)
                 .build(|code_builder| {
                     let mut ret: Vec<EvmBlock> = Vec::new();
+
+                    // TODO: Check that arg_names matches length of the arguments in the first block
+                    if let Some(entry) = func.body.blocks.first() {
+                        if arg_names.len() != entry.block_arguments.len() {
+                            panic!("Internal error: Function argument names differ from block names in length");
+                        }
+                        if arg_names.clone().into_iter().collect::<HashSet<_>>() != entry.block_arguments {
+                            panic!("Internal error: Function argument names differ from block names in order");
+                        }
+                    }
 
                     // Return PC + Arguments are expected to be on the stack
                     for block in &func.body.blocks {
@@ -121,17 +136,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         };
 
                         // Creating entry function
-                        let mut blk = EvmBlock::new(None, arg_names.clone(), &block_name);
+                        let block_args : Vec<String> = block.block_arguments.clone().into_iter().collect();
+
+                        let mut evm_block =
+                            EvmBlock::new(None, block_args, &block_name);
 
                         for instr in &block.instructions {
-                            println!("---");
-                            println!("{:#?}", instr);
-                            match instr.operation {
+                            match &instr.operation {
                                 Operation::CallFunction {
                                     ref name,
                                     ref arguments,
                                 } => {
-                                    println!("Calling {:#?} -- {:#?}", name, arguments);
                                     let mut exit_block = EvmBlock::new(
                                         Some(0),
                                         ["result".to_string()].to_vec(),
@@ -139,11 +154,11 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     );
 
                                     // Adding return point
-                                    blk.push_label("exit_block");
+                                    evm_block.push_label("exit_block");
 
                                     for arg in arguments {
                                         match &arg.resolved {
-                                            Some(a) => blk.duplicate_stack_name(&a),
+                                            Some(a) => evm_block.duplicate_stack_name(&a),
                                             None => panic!("Unable to resolve {}", arg.unresolved),
                                         };
                                     }
@@ -156,15 +171,14 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             name
                                         ),
                                     };
-                                    blk.jump_to(&label);
-                                    mem::swap(&mut blk, &mut exit_block);
+                                    evm_block.jump_to(&label);
+                                    mem::swap(&mut evm_block, &mut exit_block);
                                     ret.push(exit_block);
                                 }
                                 Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
                                 } => {
-                                    println!("Extcall");
                                     // Invoking
                                     let qualified_name = match &name.resolved {
                                         Some(n) => n,
@@ -186,7 +200,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Copying arguments to stack
                                     for arg in arguments {
                                         match &arg.resolved {
-                                            Some(n) => match blk.duplicate_stack_name(n) {
+                                            Some(n) => match evm_block.duplicate_stack_name(n) {
                                                 Err(e) => panic!("{}", e),
                                                 _ => (),
                                             },
@@ -208,7 +222,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         };
 
                                         // Precompiled or external function
-                                        blk.call(signature, args_types);
+                                        evm_block.call(signature, args_types);
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
@@ -216,7 +230,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         let block_generator =
                                             ctx.inline_generics.get(&name.unresolved).unwrap();
                                         let new_blocks =
-                                            block_generator(&mut ctx, &mut blk, args_types);
+                                            block_generator(&mut ctx, &mut evm_block, args_types);
                                         match new_blocks {
                                             Ok(new_blocks) => {
                                                 for block in new_blocks {
@@ -236,7 +250,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref data,
                                     ref typename,
                                 } => {
-                                    println!("Literal");
                                     let qualified_name = match typename.qualified_name() {
                                         Ok(v) => v,
                                         _ => panic!("Qualified name could not be resolved"),
@@ -269,8 +282,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
-                                            blk.push(value.to_bytes_unpadded());
-                                            match blk.register_stack_name(ssa_name) {
+                                            evm_block.push(value.to_bytes_unpadded());
+                                            match evm_block.register_stack_name(ssa_name) {
                                                 Err(_) => {
                                                     panic!("Failed to register SSA stack name.")
                                                 }
@@ -290,7 +303,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
                                 }
                                 Operation::ResolveSymbol { ref symbol } => {
-                                    println!("Resolve");
                                     let source = match &symbol.resolved {
                                         Some(v) => v,
                                         None => panic!("Unresolved symbol: {:?}", symbol),
@@ -303,7 +315,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         _ => panic!("Alias with no SSA name are not supported"),
                                     };
 
-                                    if let Err(e) = blk.register_alias(source, dest) {
+                                    if let Err(e) = evm_block.register_alias(source, dest) {
                                         panic!("Failed registering alias: {:?}", e);
                                     }
                                 }
@@ -311,8 +323,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref address,
                                     ref value,
                                 } => {
-                                    println!("StateStore");
-
                                     // TODO: Ensure that we used resolved address name
                                     let binding = &self.state_layout.get(&address.name.unresolved);
                                     let state = match binding {
@@ -328,7 +338,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     let address = state.address_offset;
 
-                                    println!("Storing {:?} on {:?}", value, address);
                                     let value_name = match &value.resolved {
                                         Some(v) => v,
                                         None => {
@@ -336,20 +345,18 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
-                                    if let Err(e) = blk.duplicate_stack_name(value_name) {
+                                    if let Err(e) = evm_block.duplicate_stack_name(value_name) {
                                         panic!("Unable to resolve value to be stored: {:?}", e);
                                     }
 
-                                    blk.push_u256(address);
-                                    blk.external_sstore();
+                                    evm_block.push_u256(address);
+                                    evm_block.external_sstore();
                                 }
 
                                 Operation::StateLoad {
                                     ref address,
                                     ref value,
                                 } => {
-                                    println!("LoadStore");
-
                                     // TODO: Ensure that we used resolved address name
                                     let binding = &self.state_layout.get(&address.name.unresolved);
                                     let state = match binding {
@@ -365,7 +372,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     let address = state.address_offset;
 
-                                    println!("Loading {:?} from {:?}", value, address);
                                     let value_name = match &value.resolved {
                                         Some(v) => v,
                                         None => {
@@ -373,19 +379,19 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
-                                    blk.push_u256(address);
-                                    blk.external_sload();
-                                    blk.register_stack_name(value_name);
+                                    evm_block.push_u256(address);
+                                    evm_block.external_sload();
+                                    evm_block.register_stack_name(value_name);
                                 }
                                 Operation::Return(ref _value) => {
                                     // Assumes that the next element on the stack is return pointer
                                     // TODO: Pop all elements that were not used yet.
                                     // TODO: Push value if exists and swap1, then jump
 
-                                    while blk.scope.stack_counter > 0 {
-                                        blk.pop();
+                                    while evm_block.scope.stack_counter > 0 {
+                                        evm_block.pop();
                                     }
-                                    blk.jump();
+                                    evm_block.jump();
                                 }
                                 Operation::CallStaticFunction {
                                     // TODO: Poor name
@@ -397,7 +403,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         // TODO: Pack data
                                         unimplemented!();
                                     }
-                                    println!("Handling static call {:#?}", name);
                                     let name = match &name.resolved {
                                         Some(n) => n,
                                         None => {
@@ -407,32 +412,32 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     let hash = Keccak256::digest(name);
                                     let mut selector = Vec::new();
                                     selector.extend_from_slice(&hash[..4]);
-                                    blk.push(selector);
+                                    evm_block.push(selector);
                                 }
                                 Operation::IsEqual {
                                     ref left,
                                     ref right,
                                 } => {
-                                    println!("{:#?}", left);
-                                    println!("{:#?}", right);
+
                                     match &left.resolved {
-                                        Some(l) => match blk.duplicate_stack_name(l) {
+                                        Some(l) => match evm_block.duplicate_stack_name(l) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         },
                                         None => panic!("Unresolved left hand side"),
                                     }
                                     match &right.resolved {
-                                        Some(r) => match blk.duplicate_stack_name(r) {
+                                        Some(r) => match evm_block.duplicate_stack_name(r) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         },
                                         None => panic!("Unresolved left hand side"),
                                     }
 
-                                    blk.eq();
+                                    evm_block.eq();
                                 }
                                 Operation::Switch {
+                                    // TODO: Deprecated?
                                     ref cases,
                                     ref on_default,
                                 } => {
@@ -442,15 +447,108 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             None => panic!("Could not resolve case label"),
                                         };
                                         // TODO: This assumes order in cases
-                                        blk.jump_if_to(label);
+                                        evm_block.jump_if_to(label);
                                     }
 
                                     let label = match &on_default.resolved {
                                         Some(l) => l,
                                         None => panic!("Could not resolve default label"),
                                     };
-                                    blk.jump_to(label);
+                                    evm_block.jump_to(label);
                                     // unimplemented!() // Add handling for other operations here
+                                }
+                                Operation::Jump(label) => {
+                                    let label = match &label.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve default label"),
+                                    };
+
+                                    let mut pop_count = evm_block.scope.stack_counter;
+                                    let jump_args = block
+                                        .jump_required_arguments
+                                        .get(label)
+                                        .unwrap_or(&HashSet::new())
+                                        .clone();
+
+                                    for arg in jump_args {
+                                        match evm_block.duplicate_stack_name(&arg) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        }
+                                        evm_block.swap(pop_count);
+                                    }
+
+                                    while pop_count > 0 {
+                                        evm_block.pop();
+                                        pop_count -= 1;
+                                    }
+
+                                    evm_block.jump_to(label);
+                                }
+                                Operation::ConditionalJump {
+                                    ref expression,
+                                    ref on_success,
+                                    ref on_failure,
+                                } => {
+                                    let mut pop_count = evm_block.scope.stack_counter;
+
+                                    match &expression.resolved {
+                                        Some(name) => evm_block.duplicate_stack_name(&name),
+                                        None => panic!("Expression does not have a SSA name"),
+                                    };
+
+                                    let success_label = match &on_success.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve on_success label"),
+                                    };
+
+                                    let failure_label = match &on_failure.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve on_failure label"),
+                                    };
+                                    // TODO: Fix this such that it is done properly
+
+                                    let success_jump_args = block
+                                        .jump_required_arguments
+                                        .get(success_label)
+                                        .unwrap_or(&HashSet::new())
+                                        .clone();
+                                    let failure_jump_args = block
+                                        .jump_required_arguments
+                                        .get(failure_label)
+                                        .unwrap_or(&HashSet::new())
+                                        .clone();
+
+                                    if !success_jump_args.eq(&failure_jump_args) {
+                                        println!("A: {:#?}",success_jump_args);
+                                        println!("B: {:#?}",failure_jump_args);
+
+                                        panic!("Block termination must require same number of subsequent variable dependencies.");
+                                    }
+
+                                    // Putting all arguments on the stack and preparing to pop before jumping
+                                    for arg in success_jump_args {
+                                        match evm_block.duplicate_stack_name(&arg) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        }
+                                        evm_block.swap(pop_count + 1);
+                                    }
+                                    evm_block.swap(pop_count);
+
+
+                                    while pop_count > 0 {
+                                        evm_block.pop();
+                                        pop_count -= 1;
+                                    }
+
+                                    evm_block.jump_if_to(success_label);
+
+                                    // TODO: manage stack
+                                    evm_block.jump_to(failure_label);
+                                }
+                                Operation::TerminatingRef (_) => {
+                                    // Ignore terminating ref as this will just be pop at the end of the block.
                                 }
                                 _ => {
                                     println!("Unhandled instruction: {:#?}", instr);
@@ -479,33 +577,32 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         data: _,
                                         typename: _,
                                     } => (), // Literals are handled in the first match statement
-                                    _ => match blk.register_stack_name(ssa_name) {
+                                    _ => {
+                                        match evm_block.register_stack_name(ssa_name) {                                        
                                         Err(_) => {
-                                            println!("Instruction: {:#?}", instr);
                                             panic!(
                                                 "Failed to register SSA stack name: {}.",
                                                 ssa_name
                                             );
                                         }
                                         _ => (),
-                                    },
+                                    }
+                                    }
                                 }
                             }
                         }
 
-                        ret.push(blk);
-                        println!("Pushing block");
+                        ret.push(evm_block);
                     }
 
                     ret
                 });
-            println!("DONE!");
         }
 
         Ok(0)
     }
 
-    pub fn build_executable(&mut self) -> Result<Vec<u8>, String> {
+    pub fn build_executable(&mut self) -> Result<EvmExecutable, String> {
         self.build_state_layout()?;
 
         self.write_function_definitions_to_module()?;

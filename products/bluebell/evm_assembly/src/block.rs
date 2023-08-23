@@ -47,7 +47,6 @@ impl Scope {
             self.entry_stack_counter > self.stack_counter,
             "Attempting to register too many function arguments"
         );
-        println!("Registering arg entry: {}: {}", name, self.stack_counter);
 
         // TODO: assumes that args are first in, last out
         self.name_location.insert(name.to_string(), arg_number);
@@ -66,11 +65,6 @@ impl Scope {
         }
         assert!(self.stack_counter > 0);
 
-        println!(
-            "Registering stack entry: {}: {}",
-            name,
-            self.stack_counter - 1
-        );
         self.name_location
             .insert(name.to_string(), self.stack_counter - 1);
         self.location_name
@@ -866,6 +860,28 @@ impl EvmBlock {
 
     pub fn dup16(&mut self) -> &mut Self {
         self.write_instruction(Opcode::DUP16, None)
+    }
+
+    pub fn swap(&mut self, depth: i32) -> &mut Self {
+        match depth {
+            0 => self,
+            1 => self.swap1(),
+            2 => self.swap2(),
+            3 => self.swap3(),
+            4 => self.swap4(),
+            5 => self.swap5(),
+            6 => self.swap6(),
+            7 => self.swap7(),
+            8 => self.swap8(),
+            9 => self.swap9(),
+            10 => self.swap10(),
+            11 => self.swap11(),
+            12 => self.swap12(),
+            13 => self.swap13(),
+            14 => self.swap14(),
+            15 => self.swap15(),
+            _ => panic!("Swap depth must be at least 0 and lower than 16"),
+        }
     }
 
     pub fn swap1(&mut self) -> &mut Self {

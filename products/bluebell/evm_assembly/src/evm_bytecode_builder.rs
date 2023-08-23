@@ -1,4 +1,5 @@
 use crate::compiler_context::EvmCompilerContext;
+use crate::executor::EvmExecutable;
 use evm::Opcode;
 
 use std::collections::HashMap;
@@ -8,6 +9,7 @@ use crate::evm_decompiler::EvmAssemblyGenerator;
 use crate::function::EvmFunction;
 use crate::opcode_spec::{create_opcode_spec, OpcodeSpecification};
 use crate::types::EvmType;
+use std::collections::VecDeque;
 
 /*
     codebuilder
@@ -56,7 +58,7 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
             )
         }
 
-        self.builder.functions.push(self.function);
+        self.builder.functions.push_back(self.function);
     }
 }
 
@@ -68,26 +70,30 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx>> {
 
 pub struct EvmByteCodeBuilder<'ctx> {
     pub context: &'ctx mut EvmCompilerContext,
-    pub functions: Vec<EvmFunction>,
+    pub functions: VecDeque<EvmFunction>,
     pub data: Vec<(String, Vec<u8>)>,
     pub unused_blocks: Vec<EvmBlock>,
     pub bytecode: Vec<u8>,
     pub opcode_specs: HashMap<u8, OpcodeSpecification>,
     pub auxiliary_data: Vec<u8>,
     pub was_finalized: bool,
+    pub create_abi_boilerplate: bool,
+    pub label_positions: HashMap<String, usize>,
 }
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
-    pub fn new(context: &'ctx mut EvmCompilerContext) -> Self {
+    pub fn new(context: &'ctx mut EvmCompilerContext, create_abi_boilerplate: bool) -> Self {
         let mut ret = Self {
             context,
-            functions: Vec::new(),
+            functions: VecDeque::new(),
             data: Vec::new(),
             unused_blocks: Vec::new(),
             bytecode: Vec::new(),
             opcode_specs: create_opcode_spec(),
             auxiliary_data: Vec::new(),
             was_finalized: false,
+            create_abi_boilerplate,
+            label_positions: HashMap::new(),
         };
 
         // Reserving the start of the bytecode for the "entry" function
@@ -125,13 +131,15 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         let (functions, unused_blocks) = EvmFunction::extract_functions(&blocks);
         Self {
             context,
-            functions,
+            functions: functions.into(),
             bytecode: bytes,
             unused_blocks,
             opcode_specs,
             auxiliary_data,
             data: Vec::new(),
             was_finalized: false,
+            create_abi_boilerplate: false,
+            label_positions: HashMap::new(),
         }
     }
 
@@ -153,12 +161,10 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self
     }
 
-    pub fn build(&mut self) -> Vec<u8> {
+    pub fn build(&mut self) -> EvmExecutable {
         let mut bytecode = Vec::new();
-        println!("Finalizing code");
         self.finalize_blocks();
 
-        println!("Generating bytecode");
         // Generating bytecode
         for function in self.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
@@ -175,16 +181,21 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             bytecode.extend(payload);
         }
 
-        bytecode
+        // TODO: Make block table
+        EvmExecutable {
+            bytecode,
+            label_positions: self.label_positions.clone(),
+        }
     }
 
     pub fn finalize_blocks(&mut self) {
         if self.was_finalized {
             return;
         }
+
         // Building entry function
         let mut main = {
-            let mut binding = self.functions.first_mut();
+            let mut binding = self.functions.front_mut();
             let main = match binding {
                 Some(ref mut main) => main,
                 _ => panic!("Expected the reserved main function."),
@@ -200,16 +211,34 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         };
 
         // Making sure that there is value attached to the contract call
-        first_block.push1([0x80].to_vec());
-        first_block.push1([0x40].to_vec());
-        first_block.mstore();
-        first_block.external_callvalue();
-        first_block.dup1();
-        first_block.iszero();
-        first_block.jump_if_to("switch");
-        first_block.push1([0x00].to_vec());
-        first_block.dup1();
-        first_block.revert();
+        if self.create_abi_boilerplate {
+            first_block.push1([0x80].to_vec());
+            first_block.push1([0x40].to_vec());
+            first_block.mstore();
+            first_block.external_callvalue();
+            first_block.dup1();
+            first_block.iszero();
+            first_block.jump_if_to("switch");
+            first_block.push1([0x00].to_vec());
+            first_block.dup1();
+            first_block.revert();
+        } else {
+            first_block.push1([0x80].to_vec());
+            first_block.push1([0x40].to_vec());
+            first_block.mstore();
+
+            // Adding return address
+            first_block.push_label("success");
+            if let Some(fnc) = &self.functions.get(1) {
+                if let Some(block) = fnc.blocks.first() {
+                    first_block.jump_to(&block.name);
+                } else {
+                    first_block.jump();
+                }
+            } else {
+                first_block.jump();
+            }
+        }
 
         let mut switch_block = EvmBlock::new(None, [].to_vec(), "switch");
         switch_block.pop(); // 0 Oribabky remove dup1()?
@@ -224,8 +253,6 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         let mut data_loading_blocks: Vec<EvmBlock> = Vec::new();
         for (i, function) in self.functions.iter().enumerate() {
-            println!("Writing function {}", i);
-
             // Skipping the entry function (the one we are building now)
             if i > 0 {
                 switch_block.dup1();
@@ -239,8 +266,6 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                         switch_block.jump_if_to(&load_data_block.name);
 
                         let signature = function.signature.clone().unwrap();
-
-                        println!("Signature --> {:?}", signature);
 
                         load_data_block.pop(); // Remove the user function selector from the stack
 
@@ -291,7 +316,6 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             }
         }
 
-        println!("Creating switch statement");
         switch_block.jump_to("fail");
 
         let mut fail_block = EvmBlock::new(None, [].to_vec(), "fail");
@@ -304,19 +328,21 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         success_block.dup1();
         success_block.r#return();
 
-        main.blocks.push(switch_block);
-        for block in data_loading_blocks {
-            main.blocks.push(block);
+        if self.create_abi_boilerplate {
+            main.blocks.push(switch_block);
+            for block in data_loading_blocks {
+                main.blocks.push(block);
+            }
+            main.blocks.push(fail_block);
+            main.blocks.push(success_block);
+        } else {
+            main.blocks.push(success_block);
         }
-        main.blocks.push(fail_block);
-        main.blocks.push(success_block);
 
         self.functions[0] = main;
 
         // Resolving labels
-        println!("Resolving positions!");
         self.resolve_positions();
-        println!("Resolving positions - DONE!");
 
         // TODO: Test that all stack positions zero out
 
@@ -325,19 +351,19 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
     pub fn resolve_positions(&mut self) {
         let mut position = 0;
-        let mut label_positions = HashMap::new();
+        self.label_positions = HashMap::new();
 
         // Creating code positions
         for function in self.functions.iter_mut() {
             for (i, block) in function.blocks.iter_mut().enumerate() {
                 block.position = Some(position);
-                label_positions.insert(block.name.clone(), position);
+                self.label_positions.insert(block.name.clone(), position);
                 if i == 0 {
                     let function_name = match &function.signature {
                         Some(v) => v.name.clone(),
                         None => panic!("Invalid function signature {:?}", function),
                     };
-                    label_positions.insert(function_name, position);
+                    self.label_positions.insert(function_name, position);
                 }
                 for instruction in block.instructions.iter_mut() {
                     instruction.position = Some(position);
@@ -351,7 +377,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         // Creating data positions
         for (name, payload) in &self.data {
-            label_positions.insert(name.to_string(), position);
+            self.label_positions.insert(name.to_string(), position);
             position += payload.len();
         }
 
@@ -360,7 +386,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
                     if let Some(name) = &instruction.unresolved_label {
-                        match label_positions.get(name) {
+                        match self.label_positions.get(name) {
                             Some(p) => {
                                 instruction.u64_to_arg_big_endian(*p);
                             }

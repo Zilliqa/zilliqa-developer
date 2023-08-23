@@ -22,7 +22,6 @@ fn test_precompile(
     _backend: &dyn Backend,
     _is_static: bool,
 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-    println!("Running precompile!");
     let gas_needed = match required_gas(input) {
         Ok(i) => i,
         Err(err) => return Err(PrecompileFailure::Error { exit_status: err }),
@@ -109,8 +108,6 @@ mod tests {
             });
 
         let executable = builder.build();
-        //        println!("{}", builder.generate_evm_assembly());
-        //        println!("Code: {}", hex::encode(executable.clone()));
 
         let executor = EvmExecutor::new(&specification, executable);
         executor.execute("hello", [EvmTypeValue::Uint32(10)].to_vec());

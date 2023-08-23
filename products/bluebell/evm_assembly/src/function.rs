@@ -91,7 +91,6 @@ impl EvmFunction {
                 };
 
                 traversal_queue.push((block, block_production));
-                println!("Block:: {}", block.name);
             }
         }
 

@@ -24,8 +24,6 @@ pub struct DeduceBlockDependencies {
     defined_names: HashSet<String>,
     used_names: HashSet<String>,
     listed_jump_to: HashSet<String>,
-
-    current_block: Option<FunctionBlock>,
 }
 
 impl DeduceBlockDependencies {
@@ -35,7 +33,6 @@ impl DeduceBlockDependencies {
             defined_names: HashSet::new(),
             used_names: HashSet::new(),
             listed_jump_to: HashSet::new(),
-            current_block: None,
         }
     }
 }
@@ -43,6 +40,9 @@ impl DeduceBlockDependencies {
 // TODO: Rename to AnnotateTypesDeclarations
 
 impl IrPass for DeduceBlockDependencies {
+    fn initiate(&mut self) {}
+    fn finalize(&mut self) {}
+
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
@@ -150,9 +150,8 @@ impl IrPass for DeduceBlockDependencies {
                                 continue;
                             }
 
-                            println!(": {} {} {}", variable, from, used.contains(&from));
                             used.insert(from.clone());
-                            println!("---> {} {}", from, used.contains(&from));
+
                             let required_block_args = match self.blocks.get(&to) {
                                 Some(to) => to.block_arguments.clone(),
                                 None => panic!("Unregistered block {}", to),
@@ -163,15 +162,12 @@ impl IrPass for DeduceBlockDependencies {
                                     from_block
                                         .jump_required_arguments
                                         .insert(to, required_block_args);
-                                    if from_block.defined_ssas.contains(variable) {
-                                        println!("Variable {} defuned here", variable);
-                                        // TODO: Add to
-                                    } else {
+                                    if !from_block.defined_ssas.contains(variable) {
                                         // If the variable is not contained in the arguments already,
                                         // we add it and continue to traverse backwards
                                         if !from_block.block_arguments.contains(variable) {
-                                            from_block.block_arguments.push(variable.to_string());
-                                            println!("Adding {} to block args here", variable);
+                                            from_block.block_arguments.insert(variable.to_string());
+
                                             for name in &block.enters_from {
                                                 edge_queue.push_back((
                                                     name.to_string(),
@@ -208,19 +204,6 @@ impl IrPass for DeduceBlockDependencies {
                         panic!("Unregistered block {}", name);
                     }
                 }
-                for block in &fnc.body.blocks {
-                    println!("");
-                    println!("Blocks {:?}", block.name.resolved);
-                    println!("- defined_ssas: {:#?}", block.defined_ssas);
-                    println!("- exits_to: {:#?}", block.exits_to);
-                    println!(
-                        "- jump_required_arguments: {:#?}",
-                        block.jump_required_arguments
-                    );
-                    println!("- block_arguments: {:#?}", block.block_arguments);
-                }
-
-                panic!("Function analysis finsihed")
             }
         }
         Ok(TraversalResult::Continue)
@@ -269,7 +252,7 @@ impl IrPass for DeduceBlockDependencies {
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
-            TreeTraversalMode::Enter => println!("Visiting {:#?}", function_body),
+            TreeTraversalMode::Enter => (),
             _ => (),
         };
         Ok(TraversalResult::Continue)
@@ -369,10 +352,6 @@ impl IrPass for DeduceBlockDependencies {
             };
             instr.visit(self, symbol_table)?;
         }
-
-        // println!("Used names: {:#?}", self.used_names);
-        // println!("Defined names: {:#?}", self.defined_names);
-        // println!("Jumps to: {:#?}", self.listed_jump_to);
 
         block.block_arguments = self
             .used_names

@@ -43,6 +43,9 @@ impl CollectTypeDefinitionsPass {
 }
 
 impl IrPass for CollectTypeDefinitionsPass {
+    fn initiate(&mut self) {}
+    fn finalize(&mut self) {}
+
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
@@ -244,16 +247,12 @@ impl IrPass for CollectTypeDefinitionsPass {
                 symbol.resolved = Some(symbol.unresolved.clone());
             }
             _ => {
-                println!("Attempting to resolve: {:?}", symbol);
                 if symbol.is_definition {
-                    println!("Namespace {:?}", self.current_namespace);
-
                     if let Some(namespace) = &self.current_namespace {
                         let typename =
                             format!("{}{}{}", namespace, NAMESPACE_SEPARATOR, symbol.unresolved)
                                 .to_string();
                         symbol.resolved = Some(typename.clone());
-                        println!("Resolved {:?}", symbol.resolved);
                     } else {
                         symbol.resolved = Some(symbol.unresolved.clone());
                     }
@@ -283,6 +282,7 @@ impl IrPass for CollectTypeDefinitionsPass {
             TreeTraversalMode::Exit => {
                 println!("Types: {:#?}\n\n", symbol_table.type_of_table);
                 println!("Aliases: {:#?}\n\n", symbol_table.aliases);
+                panic!("Not handled.");
             }
         }
         Ok(TraversalResult::Continue)

@@ -1,8 +1,10 @@
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::IntermediateRepresentation;
 use crate::passes::annotate_base_types::AnnotateBaseTypes;
+use crate::passes::balance_block_args::BalanceBlockArguments;
 use crate::passes::block_dependencies::DeduceBlockDependencies;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
+use crate::passes::debug_printer::DebugPrinter;
 
 pub struct PassManager {
     passes: Vec<Box<dyn IrPass>>,
@@ -19,8 +21,16 @@ impl PassManager {
         ret.passes.push(Box::new(CollectTypeDefinitionsPass::new()));
         ret.passes.push(Box::new(AnnotateBaseTypes::new()));
         ret.passes.push(Box::new(DeduceBlockDependencies::new()));
+        ret.passes.push(Box::new(BalanceBlockArguments::new()));
+        ret.passes.push(Box::new(DeduceBlockDependencies::new()));
 
         ret
+    }
+
+    pub fn enable_debug_printer(&mut self) -> &mut Self {
+        self.passes.push(Box::new(DebugPrinter::new()));
+
+        self
     }
 
     pub fn add_pass(&mut self, pass: Box<dyn IrPass>) {

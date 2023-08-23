@@ -111,11 +111,6 @@ impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
                 let size = match size.get_sign_extended_constant() {
                     Some(s) => s,
                     None => 100, // TODO: This needs fixing for structs - get the size
-                                 /*{
-                                     println!("Failed to convert {:?}", size);
-                                     println!("- Type: {:?}", typevalue);
-                                     unimplemented!()
-                                 }*/
                 };
                 if size > data_size {
                     data_size = size;

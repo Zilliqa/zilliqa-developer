@@ -10,20 +10,46 @@ use evm::Config;
 use primitive_types::H160;
 use primitive_types::U256;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::str::FromStr;
+
+pub struct EvmExecutable {
+    pub bytecode: Vec<u8>,
+    pub label_positions: HashMap<String, usize>,
+    // TODO: abi:
+}
+
+impl EvmExecutable {
+    pub fn get_label_position(&self, label: &str) -> Option<usize> {
+        self.label_positions.get(label).copied()
+    }
+}
 
 pub struct EvmExecutor<'a> {
     context: &'a EvmCompilerContext,
-    code: Vec<u8>, // state: MemoryStackState,
+    pub executable: EvmExecutable,
+}
+
+#[derive(Debug, Clone)]
+pub struct ExecutorResult {
+    pub changeset: HashMap<String, Option<String>>,
+    pub result: String,
 }
 
 impl<'a> EvmExecutor<'a> {
-    pub fn new(context: &'a EvmCompilerContext, code: Vec<u8>) -> Self {
-        Self { context, code }
+    pub fn new(context: &'a EvmCompilerContext, executable: EvmExecutable) -> Self {
+        Self {
+            context,
+            executable,
+        }
     }
 
-    pub fn execute(&self, name: &str, args: Vec<EvmTypeValue>) {
-        println!("Code: {}", hex::encode(self.code.clone()));
+    pub fn get_label_position(&self, label: &str) -> Option<usize> {
+        self.executable.label_positions.get(label).copied()
+    }
+
+    pub fn execute(&self, name: &str, args: Vec<EvmTypeValue>) -> ExecutorResult {
+        println!("Code: {}", hex::encode(self.executable.bytecode.clone()));
         let input = self
             .context
             .get_function(name)
@@ -41,7 +67,7 @@ impl<'a> EvmExecutor<'a> {
                 nonce: U256::one(),
                 balance: U256::from(10000000),
                 storage: BTreeMap::new(),
-                code: self.code.clone(),
+                code: self.executable.bytecode.clone(),
             },
         );
 
@@ -78,7 +104,13 @@ impl<'a> EvmExecutor<'a> {
         let (state_apply, _logs) = executor.into_state().deconstruct();
         println!("Exit reason: {:#?}", exit_reason);
         println!("Result: {:#?}", result);
-        /// println!("Logs: {:#?}", logs);
+        // println!("Logs: {:#?}", logs);
+        // let mut ret: HashMap< String, Option<String>> = HashMap::new();
+        let mut ret = ExecutorResult {
+            changeset: HashMap::new(),
+            result: format!("{:?}", result),
+        };
+
         for update in state_apply {
             match update {
                 Apply::Modify {
@@ -88,15 +120,18 @@ impl<'a> EvmExecutor<'a> {
                     storage,
                     reset_storage: _,
                 } => {
-                    println!("Hello world {:?} => ", address);
                     for (k, v) in storage {
-                        println!(" -- {:?} <= {:?}", k, v);
+                        let key = format!("{:?}.{:?}", address, k);
+                        ret.changeset.insert(key, Some(format!("{:?}", v)));
                     }
                 }
                 Apply::Delete { address } => {
-                    println!("Deleting {:?}", address)
+                    let key = format!("{:?}", address);
+                    ret.changeset.insert(key, None);
                 }
             }
         }
+
+        ret
     }
 }

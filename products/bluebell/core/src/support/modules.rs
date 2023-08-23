@@ -166,11 +166,9 @@ impl BluebellModule for ScillaDebugBuiltins {
                     loop_body.add();
                     loop_body.jump_to("loop_start");
 
-                    println!("Adding pop instructions");
                     loop_end.pop(); // Remove counter
                     loop_end.pop(); // Removing size
                     loop_end.pop(); // Removing base address
-                    println!("Done");
 
                     // End block becomes the new main block
                     mem::swap(block, &mut loop_end);

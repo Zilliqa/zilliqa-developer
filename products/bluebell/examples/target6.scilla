@@ -16,6 +16,9 @@ transition setHello (msg : Uint64)
   is_owner = False;
   match is_owner with
   | True =>
-    welcome_msg := msg
+    y = Uint64 1337; (* Hack to compensate for problem stack accounting *)
+    x = builtin print msg
+(*  | False =>
+    welcome_msg := msg    *)
   end
 end
