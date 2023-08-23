@@ -271,7 +271,7 @@ end
 "#
             .to_string(),
         );
-
+        println!("{:?}", executable.label_positions);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
         expect_was_visited!(vm, executable, "clause_0_condition_1");
         expect_not_visited!(vm, executable, "clause_0_block_2");

@@ -533,6 +533,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             Err(e) => panic!("{:#?}", e),
                                         }
                                         evm_block.swap(pop_count + 1);
+                                        evm_block.pop();
+                                        assert!(pop_count > 0);
+
+                                        pop_count -= 1;
                                     }
                                     evm_block.swap(pop_count);
 
