@@ -281,6 +281,32 @@ end
     }
 
     #[test]
+    fn test_single_statement_in_match() {
+        test_compile_and_execute!(
+            "HelloWorld::setHello",
+            "",
+            r#"scilla_version 0
+
+library HelloWorld
+type Bool = 
+  | True
+  | False
+
+contract HelloWorld()
+
+transition setHello (msg : Uint64)
+  is_owner = True;
+  match is_owner with
+  | True =>
+    x = builtin print msg
+  end
+end
+"#,
+            ""
+        );
+    }
+
+    #[test]
     fn test_set_match_uint() {
         test_compile_and_execute!(
             "HelloWorld::setHello",

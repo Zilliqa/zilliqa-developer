@@ -178,7 +178,8 @@ impl BluebellModule for ScillaDebugBuiltins {
                     ret.push(loop_body);
                 } else {
                     block.call(signature, subcall_arg_types);
-                    block.pop(); // Removing result
+                    block.swap1(); // Moving the result so it does not get popped
+                                   // block.pop(); // Removing result
                 }
 
                 block.pop(); // Removing the argument that was to be printed

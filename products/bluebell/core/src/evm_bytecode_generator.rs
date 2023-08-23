@@ -142,6 +142,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                             EvmBlock::new(None, block_args, &block_name);
 
                         for instr in &block.instructions {
+
                             match &instr.operation {
                                 Operation::CallFunction {
                                     ref name,
@@ -179,6 +180,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref name,
                                     ref arguments,
                                 } => {
+
                                     // Invoking
                                     let qualified_name = match &name.resolved {
                                         Some(n) => n,
@@ -527,6 +529,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
 
                                     // Putting all arguments on the stack and preparing to pop before jumping
+
                                     for arg in success_jump_args {
                                         match evm_block.duplicate_stack_name(&arg) {
                                             Ok(()) => (),
@@ -539,7 +542,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         pop_count -= 1;
                                     }
                                     evm_block.swap(pop_count);
-
 
                                     while pop_count > 0 {
                                         evm_block.pop();
@@ -583,7 +585,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     } => (), // Literals are handled in the first match statement
                                     _ => {
                                         match evm_block.register_stack_name(ssa_name) {                                        
-                                        Err(_) => {
+                                        Err(_) => {                                            
                                             panic!(
                                                 "Failed to register SSA stack name: {}.",
                                                 ssa_name
