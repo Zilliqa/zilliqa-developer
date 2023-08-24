@@ -487,9 +487,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     // Moving arguments
                                     for (i, arg) in jump_args.iter().enumerate() {
-                                        evm_block.set_next_instruction_comment(format!("Moving argument {} behind {}",i, pop_count).to_string()) ;
-
-                                        match evm_block.move_stack_name(&arg, pop_count + i as i32) {
+                                        let pos = pop_count+1+i as i32;
+                                        evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' behind {}",pos,arg, pop_count).to_string()) ;
+                                        
+                                        match evm_block.move_stack_name(&arg, pos) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         }
@@ -509,12 +510,13 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref on_success,
                                     ref on_failure,
                                 } => {
-                                    let mut pop_count = evm_block.scope.stack_counter;
 
                                     match &expression.resolved {
                                         Some(name) => evm_block.duplicate_stack_name(&name),
                                         None => panic!("Expression does not have a SSA name"),
                                     };
+
+                                    let mut pop_count = evm_block.scope.stack_counter;                                    
 
                                     let success_label = match &on_success.resolved {
                                         Some(l) => l,
@@ -546,21 +548,27 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
 
 
-                                    // Preserving the args to the next block
-                                    pop_count -= success_jump_args.len() as i32;
+                                    // Preserving the args to the next block and the condition                                    
+                                    pop_count -= success_jump_args.len()  as i32;
+                                    assert!(pop_count>=0);
 
                                     // Putting all arguments on the stack and preparing to pop before jumping
                                     for (i, arg) in success_jump_args.iter().enumerate() {
-                                        evm_block.set_next_instruction_comment(format!("Moving argument {} behind {}",i, pop_count).to_string()) ;
+                                        let pos = pop_count+1+i as i32;
+                                        evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' to {}",i, arg, pos).to_string()) ;
+                                        assert_eq!(pos, evm_block.scope.stack_counter+1 - (success_jump_args.len() - i) as i32);
                                         // Note the +1 to leave room for the condition
-                                        match evm_block.move_stack_name(&arg, 1+pop_count+i as i32) {
+                                        match evm_block.move_stack_name(&arg, pos) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         }
                                     }
+                                    pop_count-= 1;
 
-                                    evm_block.set_next_instruction_comment(format!("Preserving jump condition and preparing stack deletion {}", pop_count).to_string());
-                                    evm_block.swap(pop_count);
+                                    if pop_count > 0 {
+                                        evm_block.set_next_instruction_comment(format!("Preserving jump condition and preparing stack deletion {}", pop_count).to_string());
+                                        evm_block.swap(pop_count);
+                                    }
 
                                     while pop_count > 0 {
                                         evm_block.pop();

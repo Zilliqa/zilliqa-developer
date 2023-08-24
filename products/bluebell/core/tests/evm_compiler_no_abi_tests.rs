@@ -220,7 +220,7 @@ end
     }
 
     #[test]
-    fn test_xset_true_path_in_match_nobody_multi_choice() {
+    fn test_set_true_path_in_match_nobody_multi_choice() {
         let (vm, executable) = create_vm_and_run_code(
             r#"scilla_version 0
 library HelloWorld
@@ -249,7 +249,7 @@ end
     }
 
     #[test]
-    fn test_set_false_path_in_match_nobody_multi_choice() {
+    fn test_cset_false_path_in_match_nobody_multi_choice() {
         let (vm, executable) = create_vm_and_run_code(
             r#"scilla_version 0
 library HelloWorld

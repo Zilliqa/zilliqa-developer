@@ -195,6 +195,7 @@ impl EvmBlock {
     }
 
     pub fn move_value(&mut self, from: i32, to: i32) -> Result<(), String> {
+        println!("Moving {} to {}", from, to);
         if from == to {
             return Ok(());
         }
@@ -207,7 +208,10 @@ impl EvmBlock {
 
     pub fn move_stack_name(&mut self, name: &str, pos: i32) -> Result<(), String> {
         match self.scope.name_location.get(name) {
-            Some(orig_pos) => self.move_value(*orig_pos, pos),
+            Some(depth) => {
+                let orig_pos = self.scope.stack_counter - depth;
+                self.move_value(orig_pos, pos)
+            }
             None => Err("Stack overflow.".to_string()),
         }
     }
