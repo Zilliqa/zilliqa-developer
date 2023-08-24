@@ -5,6 +5,7 @@ use crate::types::EvmTypeValue;
 use evm::Opcode;
 use primitive_types::U256;
 use std::collections::HashMap;
+use std::mem;
 
 pub const ALLOCATION_POINTER: u8 = 0x40;
 pub const MEMORY_OFFSET: u8 = 0x80;
@@ -12,6 +13,7 @@ pub const MEMORY_OFFSET: u8 = 0x80;
 #[derive(Debug, Clone)]
 pub struct Scope {
     pub stack_counter: i32,
+    arg_count: i32,
     entry_stack_counter: i32,
     name_location: HashMap<String, i32>,
     location_name: HashMap<i32, String>,
@@ -22,6 +24,7 @@ impl Scope {
         Scope {
             stack_counter: 0,
             entry_stack_counter: arg_count,
+            arg_count,
             name_location: HashMap::new(),
             location_name: HashMap::new(),
         }
@@ -36,6 +39,10 @@ impl Scope {
 
     pub fn relative_stack_counter(&self) -> i32 {
         (self.stack_counter - self.entry_stack_counter) as i32
+    }
+
+    pub fn arg_count(&self) -> i32 {
+        self.arg_count
     }
 
     pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
@@ -129,8 +136,8 @@ pub struct EvmBlock {
     pub produces: i32,
 
     pub scope: Scope,
-    // stack_counter: i32,
-    // name_location: HashMap<String, i32>,
+    pub comment: Option<String>, // stack_counter: i32,
+                                 // name_location: HashMap<String, i32>,
 }
 
 impl EvmBlock {
@@ -146,6 +153,7 @@ impl EvmBlock {
             consumes: 0,
             produces: 0,
             scope: Scope::empty(arg_names.len() as i32),
+            comment: None,
         };
 
         for (i, name) in arg_names.iter().enumerate() {
@@ -157,6 +165,10 @@ impl EvmBlock {
         ret.jumpdest();
 
         ret
+    }
+
+    pub fn set_next_instruction_comment(&mut self, comment: String) {
+        self.comment = Some(comment);
     }
 
     pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
@@ -180,6 +192,24 @@ impl EvmBlock {
         }
 
         // TODO: Track all argument variables and verify that they were used.
+    }
+
+    pub fn move_value(&mut self, from: i32, to: i32) -> Result<(), String> {
+        if from == to {
+            return Ok(());
+        }
+        self.swap(from);
+        self.swap(to);
+        self.swap(from);
+
+        Ok(())
+    }
+
+    pub fn move_stack_name(&mut self, name: &str, pos: i32) -> Result<(), String> {
+        match self.scope.name_location.get(name) {
+            Some(orig_pos) => self.move_value(*orig_pos, pos),
+            None => Err("Stack overflow.".to_string()),
+        }
     }
 
     pub fn duplicate_stack_name(&mut self, name: &str) -> Result<(), String> {
@@ -351,6 +381,7 @@ impl EvmBlock {
 
                 stack_size: 0, // TODO: Should be calculated using write_instruction
                 is_terminator,
+                comment: None,
             };
 
             i += 1;
@@ -404,14 +435,18 @@ impl EvmBlock {
         opcode: Opcode,
         unresolved_label: Option<String>,
     ) -> &mut Self {
+        let mut comment = None;
+        mem::swap(&mut comment, &mut self.comment);
+
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
             arguments: [].to_vec(),
             unresolved_label,
 
-            stack_size: self.scope.relative_stack_counter(),
+            stack_size: self.scope.stack_counter,
             is_terminator: false,
+            comment,
         });
 
         self.update_stack(opcode);
@@ -419,6 +454,8 @@ impl EvmBlock {
     }
 
     pub fn write_instruction_with_args(&mut self, opcode: Opcode, arguments: Vec<u8>) -> &mut Self {
+        let mut comment = None;
+        mem::swap(&mut comment, &mut self.comment);
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
@@ -426,8 +463,9 @@ impl EvmBlock {
 
             unresolved_label: None,
 
-            stack_size: self.scope.relative_stack_counter(),
+            stack_size: self.scope.stack_counter,
             is_terminator: false,
+            comment,
         });
 
         self.update_stack(opcode);

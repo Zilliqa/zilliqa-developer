@@ -308,7 +308,37 @@ impl IrPass for DebugPrinter {
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         block.name.visit(self, symbol_table)?;
-        self.script.push_str(":\n");
+        self.script.push_str(":");
+        self.script.push_str("\n    ;; arguments:");
+        for arg in &block.block_arguments {
+            self.script.push_str(" ");
+            self.script.push_str(&arg);
+            self.script.push_str(",");
+        }
+        self.script.push_str("\n    ;; enters_from:");
+        for arg in &block.enters_from {
+            self.script.push_str(" ");
+            self.script.push_str(&arg);
+            self.script.push_str(",");
+        }
+        self.script.push_str("\n    ;; exits_to:");
+        for arg in &block.exits_to {
+            self.script.push_str(" ");
+            self.script.push_str(&arg);
+            self.script.push_str(",");
+        }
+
+        self.script.push_str("\n    ;; jump args:");
+        for (name, args) in &block.jump_required_arguments {
+            self.script.push_str("\n    ;;   * ");
+            self.script.push_str(&name);
+            for arg in args {
+                self.script.push_str("\n    ;;        - ");
+                self.script.push_str(&arg);
+            }
+        }
+
+        self.script.push_str("\n");
         for instr in block.instructions.iter_mut() {
             instr.visit(self, symbol_table)?;
         }
@@ -367,7 +397,8 @@ impl IrPass for DebugPrinter {
         _function_kind: &mut ContractField,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        self.script.push_str("// field emitter not implemented!\n");
+        self.script
+            .push_str(";; TODO: field emitter not implemented!\n");
         Ok(TraversalResult::Continue)
     }
 

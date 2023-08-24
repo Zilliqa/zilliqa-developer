@@ -2,7 +2,7 @@ use crate::intermediate_representation::primitives::{
     FunctionBlock, IrIdentifier, IrIndentifierKind,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NameGenerator {
     anonymous_type_number: u64,
     intermediate_counter: u64,

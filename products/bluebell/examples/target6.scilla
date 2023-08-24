@@ -13,11 +13,12 @@ contract HelloWorld()
 field welcome_msg : Uint64 = Uint64 0
 
 transition setHello (msg : Uint64)
-  is_owner = True;
+  is_owner = False;
   match is_owner with
   | True =>
-    x = builtin print msg
-(*  | False =>
-    welcome_msg := msg    *)
+    x = builtin print__impl msg
+  | False =>
+    x = builtin print__impl msg;
+    y = builtin print__impl msg
   end
 end

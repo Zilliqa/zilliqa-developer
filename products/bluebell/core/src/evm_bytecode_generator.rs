@@ -1,3 +1,5 @@
+use crate::intermediate_representation::pass::IrPass;
+use crate::passes::debug_printer::DebugPrinter;
 use evm_assembly::executor::EvmExecutable;
 use std::collections::HashSet;
 use crate::intermediate_representation::primitives::Operation;
@@ -8,6 +10,7 @@ use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use primitive_types::U256;
 use std::collections::HashMap;
+use crate::constants::{TreeTraversalMode};
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
@@ -113,10 +116,12 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 None => "Uint256", // TODO: panic!("Void type not implemented for EVM")
             };
 
+
             self.builder
                 .define_function(&function_name, arg_types, return_type)
                 .build(|code_builder| {
                     let mut ret: Vec<EvmBlock> = Vec::new();
+                    let mut symbol_table = self.ir.symbol_table.clone();
 
                     // TODO: Check that arg_names matches length of the arguments in the first block
                     if let Some(entry) = func.body.blocks.first() {
@@ -135,6 +140,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                             Err(_) => panic!("Failed to get qualified name."),
                         };
 
+
                         // Creating entry function
                         let block_args : Vec<String> = block.block_arguments.clone().into_iter().collect();
 
@@ -142,6 +148,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                             EvmBlock::new(None, block_args, &block_name);
 
                         for instr in &block.instructions {
+                            let mut instruction_printer = DebugPrinter::new();
+                            let mut instr_copy = instr.clone();                            
+                            instruction_printer.visit_instruction(TreeTraversalMode::Enter, &mut instr_copy, &mut symbol_table);
+                            evm_block.set_next_instruction_comment(instruction_printer.value());
 
                             match &instr.operation {
                                 Operation::CallFunction {
@@ -472,13 +482,20 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         .unwrap_or(&HashSet::new())
                                         .clone();
 
-                                    for arg in jump_args {
-                                        match evm_block.duplicate_stack_name(&arg) {
+                                    // Preserving the args to the next block
+                                    pop_count -= jump_args.len() as i32;
+
+                                    // Moving arguments
+                                    for (i, arg) in jump_args.iter().enumerate() {
+                                        evm_block.set_next_instruction_comment(format!("Moving argument {} behind {}",i, pop_count).to_string()) ;
+
+                                        match evm_block.move_stack_name(&arg, pop_count + i as i32) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         }
-                                        evm_block.swap(pop_count);
+
                                     }
+
 
                                     while pop_count > 0 {
                                         evm_block.pop();
@@ -528,19 +545,21 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         panic!("Block termination must require same number of subsequent variable dependencies.");
                                     }
 
-                                    // Putting all arguments on the stack and preparing to pop before jumping
 
-                                    for arg in success_jump_args {
-                                        match evm_block.duplicate_stack_name(&arg) {
+                                    // Preserving the args to the next block
+                                    pop_count -= success_jump_args.len() as i32;
+
+                                    // Putting all arguments on the stack and preparing to pop before jumping
+                                    for (i, arg) in success_jump_args.iter().enumerate() {
+                                        evm_block.set_next_instruction_comment(format!("Moving argument {} behind {}",i, pop_count).to_string()) ;
+                                        // Note the +1 to leave room for the condition
+                                        match evm_block.move_stack_name(&arg, 1+pop_count+i as i32) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         }
-                                        evm_block.swap(pop_count + 1);
-                                        evm_block.pop();
-                                        assert!(pop_count > 0);
-
-                                        pop_count -= 1;
                                     }
+
+                                    evm_block.set_next_instruction_comment(format!("Preserving jump condition and preparing stack deletion {}", pop_count).to_string());
                                     evm_block.swap(pop_count);
 
                                     while pop_count > 0 {

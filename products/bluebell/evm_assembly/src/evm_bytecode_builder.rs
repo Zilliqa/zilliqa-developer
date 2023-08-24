@@ -413,36 +413,31 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                     .instructions
                     .iter()
                     .map(|instr| {
-                        if instr.arguments.len() > 0 {
+                        let position = match instr.position {
+                            Some(v) => v,
+                            None => 0,
+                        };
+                        let instruction_value = if instr.arguments.len() > 0 {
                             let argument: String = instr
                                 .arguments
                                 .iter()
                                 .map(|byte| format!("{:02x}", byte).to_string())
                                 .collect();
-                            let position = match instr.position {
-                                Some(v) => v,
-                                None => 0,
-                            };
-                            format!(
-                                "[0x{:02x}: 0x{:02x}] {} 0x{}",
-                                position,
-                                instr.opcode.as_u8(),
-                                instr.opcode.to_string(),
-                                argument
-                            )
+
+                            format!("{} 0x{}", instr.opcode.to_string(), argument).to_string()
                         } else {
-                            let position = match instr.position {
-                                Some(v) => v,
-                                None => 0,
-                            };
-                            format!(
-                                "[0x{:02x}: 0x{:02x}] {}  ;; {}",
-                                position,
-                                instr.opcode.as_u8(),
-                                instr.opcode.to_string(),
-                                instr.stack_size
-                            )
-                        }
+                            instr.opcode.to_string()
+                        };
+
+                        format!(
+                            "[0x{:02x}: 0x{:02x}] {:<width$}  ;; Stack: {}, Comment: {}",
+                            position,
+                            instr.opcode.as_u8(),
+                            instruction_value,
+                            instr.stack_size,
+                            instr.comment.clone().unwrap_or("".to_string()).trim(),
+                            width = 40
+                        )
                     })
                     .collect::<Vec<String>>()
                     .join("\n");
@@ -468,36 +463,32 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                         .instructions
                         .iter()
                         .map(|instr| {
-                            if instr.arguments.len() > 0 {
+                            let position = match instr.position {
+                                Some(v) => v,
+                                None => 0,
+                            };
+
+                            let instruction_value = if instr.arguments.len() > 0 {
                                 let argument: String = instr
                                     .arguments
                                     .iter()
                                     .map(|byte| format!("{:02x}", byte).to_string())
                                     .collect();
-                                let position = match instr.position {
-                                    Some(v) => v,
-                                    None => 0,
-                                };
-                                format!(
-                                    "[0x{:02x}: 0x{:02x}] {} 0x{}",
-                                    position,
-                                    instr.opcode.as_u8(),
-                                    instr.opcode.to_string(),
-                                    argument
-                                )
+
+                                format!("{} 0x{}", instr.opcode.to_string(), argument).to_string()
                             } else {
-                                let position = match instr.position {
-                                    Some(v) => v,
-                                    None => 0,
-                                };
-                                format!(
-                                    "[0x{:02x}: 0x{:02x}] {} ;; {}",
-                                    position,
-                                    instr.opcode.as_u8(),
-                                    instr.opcode.to_string(),
-                                    instr.stack_size
-                                )
-                            }
+                                instr.opcode.to_string()
+                            };
+
+                            format!(
+                                "[0x{:02x}: 0x{:02x}] {:<width$} ;; Stack: {}, Comment: {}",
+                                position,
+                                instr.opcode.as_u8(),
+                                instruction_value,
+                                instr.stack_size,
+                                instr.comment.clone().unwrap_or("".to_string()).trim(),
+                                width = 40
+                            )
                         })
                         .collect::<Vec<String>>()
                         .join("\n");

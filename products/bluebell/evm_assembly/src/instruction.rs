@@ -10,6 +10,7 @@ pub struct EvmInstruction {
 
     pub stack_size: i32, // The number of elements on the stack since the start of the block before this instruction is executed
     pub is_terminator: bool,
+    pub comment: Option<String>,
 }
 
 impl EvmInstruction {

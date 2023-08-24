@@ -1,7 +1,5 @@
-use evm::Capture;
-use evm::ExitReason;
 use evm::Machine;
-use evm::Trap;
+
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -61,7 +59,6 @@ mod tests {
     use evm_assembly::types::EvmTypeValue;
     use serde_json;
 
-    use evm::{Capture, ExitSucceed, Machine};
     use std::rc::Rc;
 
     fn result_to_string(ret: ExecutorResult) -> String {
@@ -223,7 +220,7 @@ end
     }
 
     #[test]
-    fn test_set_true_path_in_match_nobody_multi_choice() {
+    fn test_xset_true_path_in_match_nobody_multi_choice() {
         let (vm, executable) = create_vm_and_run_code(
             r#"scilla_version 0
 library HelloWorld
@@ -278,6 +275,94 @@ end
         expect_was_visited!(vm, executable, "clause_1_block_4");
         expect_was_visited!(vm, executable, "match_exit_0");
         expect_was_visited!(vm, executable, "success");
+    }
+
+    #[test]
+    fn test_set_false_path_in_match_nobody_multi_choice_with_block() {
+        let (vm, executable) = create_vm_and_run_code(
+            r#"scilla_version 0
+library HelloWorld
+type Bool = 
+  | True
+  | False
+
+contract HelloWorld()
+transition setHello ()
+	msg = Uint64 12;
+	x = False;
+	match x with
+	  | True =>
+	    a = builtin print__impl msg
+	  | False =>
+	    a = builtin print__impl msg;
+	    b = builtin print__impl msg
+	end
+end
+"#
+            .to_string(),
+        );
+        println!("{:?}", executable.label_positions);
+        expect_was_visited!(vm, executable, "HelloWorld::setHello");
+        expect_was_visited!(vm, executable, "clause_0_condition_1");
+        expect_not_visited!(vm, executable, "clause_0_block_2");
+        expect_was_visited!(vm, executable, "clause_1_block_4");
+        expect_was_visited!(vm, executable, "match_exit_0");
+        expect_was_visited!(vm, executable, "success");
+    }
+
+    #[test]
+    fn test_std_out() {
+        test_compile_and_execute!(
+            "HelloWorld::setHello",
+            "[42]",
+            r#"scilla_version 0
+
+contract HelloWorld()
+
+transition setHello ()
+  msg = Uint64 12;
+  x = builtin print__impl msg;
+  y = builtin print__impl msg
+end
+"#,
+            ""
+        );
+        // TODO: test output - requires a new module
+        // assert!(false);
+    }
+
+    #[test]
+    fn test_match_std_out() {
+        test_compile_and_execute!(
+            "HelloWorld::setHello",
+            "[42]",
+            r#"scilla_version 0
+
+library HelloWorld
+type Bool = 
+  | True
+  | False
+
+contract HelloWorld()
+
+transition setHello ()
+  msg = Uint64 12;
+
+  is_owner = False;
+  match is_owner with
+  | True =>
+    x = builtin print__impl msg
+  | False =>
+    x = builtin print__impl msg;
+    y = builtin print__impl msg
+  end
+
+end
+"#,
+            ""
+        );
+        // TODO: test output - requires a new module
+        //        assert!(false);
     }
 
     #[test]
