@@ -65,16 +65,19 @@ pub enum ExecutorViewMessage {
         code: Rc<Vec<u8>>,
         data: Rc<Vec<u8>>,
     }, // Add other messages here if needed
+    RunStep,
 }
 #[derive(Properties)]
 pub struct ExecutorViewProps {
     pub executable: Rc<RefCell<EvmExecutable>>,
+    pub data: String,
 }
 
 impl Clone for ExecutorViewProps {
     fn clone(&self) -> Self {
         Self {
             executable: Rc::clone(&self.executable),
+            data: self.data.clone(),
         }
     }
 }
@@ -92,14 +95,49 @@ impl Component for ExecutorView {
     type Properties = ExecutorViewProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let props = ctx.props().clone();
+        let data = if props.data != "" {
+            hex::decode(props.data.clone())
+        } else {
+            Ok(Vec::<u8>::new())
+        };
+
+        if let Ok(data) = data {
+            let code = (*props.executable).clone().into_inner().bytecode;
+            ctx.link().send_message(ExecutorViewMessage::ResetMachine {
+                code: code.into(),
+                data: data.into(),
+            });
+        }
+
         Self {
-            props: ctx.props().clone(),
+            props,
             selected_tab: 0,
             observable_machine: None,
         }
     }
 
+    fn changed(&mut self, ctx: &Context<Self>, props: &ExecutorViewProps) -> bool {
+        let data = if props.data != "" {
+            hex::decode(props.data.clone())
+        } else {
+            Ok(Vec::<u8>::new())
+        };
+
+        if let Ok(data) = data {
+            let code = (*props.executable).clone().into_inner().bytecode;
+            ctx.link().send_message(ExecutorViewMessage::ResetMachine {
+                code: code.into(),
+                data: data.into(),
+            });
+            true
+        } else {
+            false
+        }
+    }
+
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        console::log!("Was here?");
         match msg {
             ExecutorViewMessage::SelectTab(index) => {
                 self.selected_tab = index;
@@ -109,20 +147,88 @@ impl Component for ExecutorView {
                 self.observable_machine = Some(ObservableMachine::new(code, data, 1024, 1024));
                 true
             } // Handle other messages here
+            ExecutorViewMessage::RunStep => {
+                if let Some(ref mut machine) = self.observable_machine {
+                    console::log!("Stepping");
+                    machine.step();
+                    true
+                } else {
+                    false
+                }
+            }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let bytecode: Vec<String> = vec!["PUSH1 0x60".into(), "PUSH1 0x40".into()];
+        let observable_machine = if let Some(om) = &self.observable_machine {
+            om
+        } else {
+            return html! {
+                <div>{"Something went wrong"}</div>
+            };
+        };
+
+        let machine = &observable_machine.machine;
+        let program_counter = if let Ok(pc) = machine.position() {
+            pc
+        } else {
+            &0
+        };
+
+        if observable_machine.failed {
+            if let Some(msg) = &observable_machine.error_message {
+                return html! {
+                    <div>{msg}</div>
+                };
+            }
+
+            return html! {
+                <div>{"VM execution failed for unknown reasons"}</div>
+            };
+        }
+
+        let functions = (*self.props.executable).clone().into_inner().ir.functions;
+
+        let mut bytecode: Vec<String> = Vec::new();
+        for function in &functions {
+            for block in &function.blocks {
+                for instr in &block.instructions {
+                    let position = match instr.position {
+                        Some(v) => v,
+                        None => 0,
+                    };
+
+                    let instruction_value = if instr.arguments.len() > 0 {
+                        let argument: String = instr
+                            .arguments
+                            .iter()
+                            .map(|byte| format!("{:02x}", byte).to_string())
+                            .collect();
+
+                        format!("{} 0x{}", instr.opcode.to_string(), argument).to_string()
+                    } else {
+                        instr.opcode.to_string()
+                    };
+
+                    let value = format!(
+                        "[0x{:02x}] {} ;; Stack: {}, Comment: {}",
+                        position,
+                        instruction_value,
+                        instr.stack_size,
+                        instr.comment.clone().unwrap_or("".to_string()).trim(),
+                    );
+                    bytecode.push(value);
+                }
+            }
+        }
+
         let stack: Vec<String> = vec![];
         let instruction: String = "PUSH1 0x60".into();
         let memory: Vec<String> = vec![];
 
         let _script = (*self.props.executable).clone().into_inner().ir.to_string();
 
-        let step_button_click = Callback::from(move |_| {
-            console::log!("Step Button clicked");
-        });
+        let step_button_click = ctx.link().callback(move |_| ExecutorViewMessage::RunStep);
 
         let run_button_click = Callback::from(move |_| {
             console::log!("Run Button clicked");
@@ -151,6 +257,7 @@ impl Component for ExecutorView {
                                             <button class="bg-green-500 text-white font-medium px-5 py-2 rounded-lg hover:bg-green-600" onclick={run_button_click.clone()}>
                                                 {"Run"}
                                             </button>
+                                            {program_counter}
                                         </div>
                                         <label class="text-gray-700 font-semibold" for="source-code">
                                             {"Source Code"}
@@ -273,7 +380,7 @@ end
     if let Some(executable) = &*executable {
         return html! {
             <div class="container mx-auto mt-12 p-6 bg-gray-50 rounded-lg shadow-md">
-                <ExecutorView executable={executable} />
+                <ExecutorView executable={executable} data={""} />
             </div>
         };
     }

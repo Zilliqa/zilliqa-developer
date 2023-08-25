@@ -6,6 +6,8 @@ use std::rc::Rc;
 pub struct ObservableMachine {
     pub machine: Machine,
     pub positions_visited: HashMap<usize, usize>,
+    pub failed: bool,
+    pub error_message: Option<String>,
 }
 
 impl ObservableMachine {
@@ -19,9 +21,20 @@ impl ObservableMachine {
         Self {
             machine: Machine::new(code, data, stack_limit, memory_limit),
             positions_visited: HashMap::new(),
+            failed: false,
+            error_message: None,
         }
     }
 
+    pub fn step(&mut self) {
+        match self.machine.step() {
+            Ok(()) => (),
+            Err(res) => {
+                self.failed = true;
+                self.error_message = Some(format!("{:?}", res).to_string());
+            }
+        }
+    }
     pub fn run(&mut self) {
         loop {
             match self.machine.step() {
