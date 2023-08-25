@@ -13,7 +13,7 @@ lalrpop = "0.19.9"
 lalrpop-util = {version = "0.19", features = ["lexer"]}
 
 # LLVM stuff
-inkwell = {version = "0.2.0", features= ["llvm16-0"]}
+# inkwell = {version = "0.2.0", features= ["llvm16-0"]}
 
 # EVM stuff
 evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }

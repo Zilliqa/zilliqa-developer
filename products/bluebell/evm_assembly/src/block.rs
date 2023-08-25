@@ -199,9 +199,15 @@ impl EvmBlock {
         if from == to {
             return Ok(());
         }
-        self.swap(from);
-        self.swap(to);
-        self.swap(from);
+
+        // Ensuring that we are handling the corner
+        // case where eihter from or to is 0 correctly:
+        // Net result will be a single swap since swap(0) is noop
+        let (a, b) = if from < to { (from, to) } else { (to, from) };
+
+        self.swap(a);
+        self.swap(b);
+        self.swap(a);
 
         Ok(())
     }
@@ -209,7 +215,8 @@ impl EvmBlock {
     pub fn move_stack_name(&mut self, name: &str, pos: i32) -> Result<(), String> {
         match self.scope.name_location.get(name) {
             Some(depth) => {
-                let orig_pos = self.scope.stack_counter - depth;
+                let orig_pos = self.scope.stack_counter - depth - 1;
+
                 self.move_value(orig_pos, pos)
             }
             None => Err("Stack overflow.".to_string()),

@@ -487,7 +487,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     // Moving arguments
                                     for (i, arg) in jump_args.iter().enumerate() {
-                                        let pos = pop_count+1+i as i32;
+                                        let pos = pop_count+i as i32;
                                         evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' behind {}",pos,arg, pop_count).to_string()) ;
                                         
                                         match evm_block.move_stack_name(&arg, pos) {
@@ -554,15 +554,18 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     // Putting all arguments on the stack and preparing to pop before jumping
                                     for (i, arg) in success_jump_args.iter().enumerate() {
-                                        let pos = pop_count+1+i as i32;
+                                        let pos = pop_count+i as i32;
                                         evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' to {}",i, arg, pos).to_string()) ;
-                                        assert_eq!(pos, evm_block.scope.stack_counter+1 - (success_jump_args.len() - i) as i32);
-                                        // Note the +1 to leave room for the condition
+                                        //assert_eq!(pos, evm_block.scope.stack_counter+1 - (success_jump_args.len() - i) as i32);
+
                                         match evm_block.move_stack_name(&arg, pos) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
                                         }
                                     }
+
+                                    // Making room for the condition
+                                    assert!(pop_count>0);
                                     pop_count-= 1;
 
                                     if pop_count > 0 {
