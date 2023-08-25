@@ -3,8 +3,9 @@ use bluebell::support::modules::ScillaDebugBuiltins;
 use std::ffi::CStr;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use inkwell::context::Context;
-use inkwell::targets::{InitializationConfig, Target};
+// DEPRECATED
+// use inkwell::context::Context;
+// use inkwell::targets::{InitializationConfig, Target};
 use std::fs::File;
 use std::io::Read;
 use std::os::raw::c_char;
@@ -17,8 +18,8 @@ use bluebell::passes::debug_printer::DebugPrinter;
 use bluebell::support::evm::EvmCompiler;
 use bluebell::support::modules::{ScillaDefaultBuiltins, ScillaDefaultTypes};
 
-use bluebell::llvm_ir_generator::LlvmIrGenerator;
-use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
+// use bluebell::llvm_ir_generator::LlvmIrGenerator;
+// use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
 
 use bluebell::intermediate_representation::emitter::IrEmitter;
 use bluebell::intermediate_representation::pass_manager::PassManager;
@@ -140,6 +141,9 @@ fn bluebell_evm_run(
 }
 
 fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
+    // DEPRECATED
+    panic!("LLVM support is DEPRECATED for now.");
+    /*
     /****** Executable *****/
     ///////
     let backend = LlvmBackend::new();
@@ -253,6 +257,7 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     unsafe {
         contract_executor.execute(&entry_point);
     }
+    */
 }
 
 fn main() {

@@ -1,16 +1,16 @@
+use crate::constants::TreeTraversalMode;
 use crate::intermediate_representation::pass::IrPass;
-use crate::passes::debug_printer::DebugPrinter;
-use evm_assembly::executor::EvmExecutable;
-use std::collections::HashSet;
 use crate::intermediate_representation::primitives::Operation;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
 };
+use crate::passes::debug_printer::DebugPrinter;
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use evm_assembly::executable::EvmExecutable;
 use primitive_types::U256;
 use std::collections::HashMap;
-use crate::constants::{TreeTraversalMode};
+use std::collections::HashSet;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
@@ -46,12 +46,15 @@ pub struct EvmBytecodeGenerator<'ctx> {
 impl<'ctx> EvmBytecodeGenerator<'ctx> {
     /// This constructs a new `EvmBytecodeGenerator`. It takes an existing EVM compiler context
     /// and a boxed intermediate representation (IR) of the program.  
-    pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<IntermediateRepresentation>, abi_support: bool) -> Self {
+    pub fn new(
+        context: &'ctx mut EvmCompilerContext,
+        ir: Box<IntermediateRepresentation>,
+        abi_support: bool,
+    ) -> Self {
         let builder = if abi_support {
             context.create_builder()
         } else {
             context.create_builder_no_abi_support()
-
         };
         Self {
             builder,
@@ -116,7 +119,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 None => "Uint256", // TODO: panic!("Void type not implemented for EVM")
             };
 
-
             self.builder
                 .define_function(&function_name, arg_types, return_type)
                 .build(|code_builder| {
@@ -149,8 +151,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                         for instr in &block.instructions {
                             let mut instruction_printer = DebugPrinter::new();
-                            let mut instr_copy = instr.clone();                            
-                            instruction_printer.visit_instruction(TreeTraversalMode::Enter, &mut instr_copy, &mut symbol_table);
+                            let mut instr_copy = instr.clone();
+                            let _ = instruction_printer.visit_instruction(TreeTraversalMode::Enter, &mut instr_copy, &mut symbol_table);
                             evm_block.set_next_instruction_comment(instruction_printer.value());
 
                             match &instr.operation {
@@ -168,7 +170,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     evm_block.push_label("exit_block");
 
                                     for arg in arguments {
-                                        match &arg.resolved {
+                                        let _ = match &arg.resolved {
                                             Some(a) => evm_block.duplicate_stack_name(&a),
                                             None => panic!("Unable to resolve {}", arg.unresolved),
                                         };
@@ -286,7 +288,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 _ => panic!("Could not resolve SSA qualified name"),
                                             };
                                             let payload = data.clone().into_bytes();
-                                            code_builder.data.push((ssa_name, payload));
+                                            code_builder.ir.data.push((ssa_name, payload));
 
                                             // TODO: Load data from code into memory
                                             // TODO: We need a way to reference the data section
@@ -489,7 +491,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     for (i, arg) in jump_args.iter().enumerate() {
                                         let pos = pop_count+i as i32;
                                         evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' behind {}",pos,arg, pop_count).to_string()) ;
-                                        
                                         match evm_block.move_stack_name(&arg, pos) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
@@ -516,7 +517,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         None => panic!("Expression does not have a SSA name"),
                                     };
 
-                                    let mut pop_count = evm_block.scope.stack_counter;                                    
+                                    let mut pop_count = evm_block.scope.stack_counter;
 
                                     let success_label = match &on_success.resolved {
                                         Some(l) => l,
@@ -614,8 +615,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         typename: _,
                                     } => (), // Literals are handled in the first match statement
                                     _ => {
-                                        match evm_block.register_stack_name(ssa_name) {                                        
-                                        Err(_) => {                                            
+                                        match evm_block.register_stack_name(ssa_name) {
+                                        Err(_) => {
                                             panic!(
                                                 "Failed to register SSA stack name: {}.",
                                                 ssa_name

@@ -10,7 +10,8 @@ use crate::parser::lexer;
 use crate::parser::lexer::Lexer;
 use crate::parser::parser;
 use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executor::{EvmExecutable, EvmExecutor};
+use evm_assembly::executable::EvmExecutable;
+use evm_assembly::executor::EvmExecutor;
 
 pub struct EvmCompiler {
     context: EvmCompilerContext,

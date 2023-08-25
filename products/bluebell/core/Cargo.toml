@@ -12,7 +12,8 @@ lalrpop = "0.19.9"
 [dependencies]
 lalrpop-util = {version = "0.19", features = ["lexer"]}
 
-# LLVM stuff
+# DEPRECATED
+# # LLVM stuff
 # inkwell = {version = "0.2.0", features= ["llvm16-0"]}
 
 # EVM stuff

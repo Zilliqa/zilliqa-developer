@@ -1,5 +1,8 @@
+use crate::bytecode_ir::EvmBytecodeIr;
 use crate::compiler_context::EvmCompilerContext;
-use crate::executor::EvmExecutable;
+use crate::executable::EvmExecutable;
+use std::mem;
+
 use evm::Opcode;
 
 use std::collections::HashMap;
@@ -9,17 +12,6 @@ use crate::evm_decompiler::EvmAssemblyGenerator;
 use crate::function::EvmFunction;
 use crate::opcode_spec::{create_opcode_spec, OpcodeSpecification};
 use crate::types::EvmType;
-use std::collections::VecDeque;
-
-/*
-    codebuilder
-        .new_function("name", ["arg1", "arg2"])
-        .build(|block_builder| {
-            block.if(|block_builder| {
-            })
-
-        })
-*/
 
 pub struct FunctionBuilder<'a, 'ctx> {
     pub builder: &'a mut EvmByteCodeBuilder<'ctx>,
@@ -58,7 +50,7 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
             )
         }
 
-        self.builder.functions.push_back(self.function);
+        self.builder.ir.functions.push_back(self.function);
     }
 }
 
@@ -70,11 +62,10 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx>> {
 
 pub struct EvmByteCodeBuilder<'ctx> {
     pub context: &'ctx mut EvmCompilerContext,
-    pub functions: VecDeque<EvmFunction>,
-    pub data: Vec<(String, Vec<u8>)>,
-    pub unused_blocks: Vec<EvmBlock>,
+    pub ir: EvmBytecodeIr,
+
     pub bytecode: Vec<u8>,
-    pub opcode_specs: HashMap<u8, OpcodeSpecification>,
+    pub opcode_specs: HashMap<u8, OpcodeSpecification>, // TODO: Should be deleted
     pub auxiliary_data: Vec<u8>,
     pub was_finalized: bool,
     pub create_abi_boilerplate: bool,
@@ -85,9 +76,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
     pub fn new(context: &'ctx mut EvmCompilerContext, create_abi_boilerplate: bool) -> Self {
         let mut ret = Self {
             context,
-            functions: VecDeque::new(),
-            data: Vec::new(),
-            unused_blocks: Vec::new(),
+            ir: EvmBytecodeIr::new(),
             bytecode: Vec::new(),
             opcode_specs: create_opcode_spec(),
             auxiliary_data: Vec::new(),
@@ -129,14 +118,18 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             EvmBlock::extract_blocks_from_bytecode(&bytes, &opcode_specs);
 
         let (functions, unused_blocks) = EvmFunction::extract_functions(&blocks);
+        let ir = EvmBytecodeIr {
+            functions: functions.into(),
+            data: Vec::new(),
+            unused_blocks,
+        };
         Self {
             context,
-            functions: functions.into(),
-            bytecode: bytes,
-            unused_blocks,
+            ir,
             opcode_specs,
             auxiliary_data,
-            data: Vec::new(),
+            bytecode: bytes,
+
             was_finalized: false,
             create_abi_boilerplate: false,
             label_positions: HashMap::new(),
@@ -166,7 +159,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self.finalize_blocks();
 
         // Generating bytecode
-        for function in self.functions.iter_mut() {
+        for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
                     bytecode.push(instruction.opcode.as_u8());
@@ -177,14 +170,18 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         bytecode.push(Opcode::STOP.as_u8());
 
-        for (_, payload) in &self.data {
+        for (_, payload) in &self.ir.data {
             bytecode.extend(payload);
         }
+
+        let mut ir = EvmBytecodeIr::new();
+        mem::swap(&mut ir, &mut self.ir);
 
         // TODO: Make block table
         EvmExecutable {
             bytecode,
             label_positions: self.label_positions.clone(),
+            ir,
         }
     }
 
@@ -195,7 +192,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         // Building entry function
         let mut main = {
-            let mut binding = self.functions.front_mut();
+            let mut binding = self.ir.functions.front_mut();
             let main = match binding {
                 Some(ref mut main) => main,
                 _ => panic!("Expected the reserved main function."),
@@ -229,7 +226,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
             // Adding return address
             first_block.push_label("success");
-            if let Some(fnc) = &self.functions.get(1) {
+            if let Some(fnc) = &self.ir.functions.get(1) {
                 if let Some(block) = fnc.blocks.first() {
                     first_block.jump_to(&block.name);
                 } else {
@@ -252,7 +249,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         switch_block.shr();
 
         let mut data_loading_blocks: Vec<EvmBlock> = Vec::new();
-        for (i, function) in self.functions.iter().enumerate() {
+        for (i, function) in self.ir.functions.iter().enumerate() {
             // Skipping the entry function (the one we are building now)
             if i > 0 {
                 switch_block.dup1();
@@ -339,7 +336,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             main.blocks.push(success_block);
         }
 
-        self.functions[0] = main;
+        self.ir.functions[0] = main;
 
         // Resolving labels
         self.resolve_positions();
@@ -354,7 +351,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self.label_positions = HashMap::new();
 
         // Creating code positions
-        for function in self.functions.iter_mut() {
+        for function in self.ir.functions.iter_mut() {
             for (i, block) in function.blocks.iter_mut().enumerate() {
                 block.position = Some(position);
                 self.label_positions.insert(block.name.clone(), position);
@@ -376,13 +373,13 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         position += 1;
 
         // Creating data positions
-        for (name, payload) in &self.data {
+        for (name, payload) in &self.ir.data {
             self.label_positions.insert(name.to_string(), position);
             position += payload.len();
         }
 
         // Updating labels
-        for function in self.functions.iter_mut() {
+        for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
                     if let Some(name) = &instruction.unresolved_label {
@@ -406,6 +403,7 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
         let mut script = "Unused blocks:\n\n".to_string();
 
         let unused_blocks = self
+            .ir
             .unused_blocks
             .iter()
             .map(|block| {
@@ -454,7 +452,7 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
             .join("\n\n");
         script.push_str(&unused_blocks);
 
-        for function in &self.functions {
+        for function in &self.ir.functions {
             let code_blocks = function
                 .blocks
                 .iter()

@@ -207,6 +207,7 @@ dependencies = [
 name = "bluebell-playground"
 version = "0.1.0"
 dependencies = [
+ "bluebell",
  "evm",
  "evm_assembly",
  "getrandom",
@@ -217,7 +218,7 @@ dependencies = [
  "primitive-types",
  "regex",
  "serde",
- "serde-wasm-bindgen 0.3.1",
+ "serde-wasm-bindgen 0.4.5",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -318,7 +319,6 @@ dependencies = [
  "evm",
  "evm_assembly",
  "hex",
- "inkwell",
  "primitive-types",
  "serde",
  "serde_json",
@@ -1012,31 +1012,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "inkwell"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f4fcb4a4fa0b8f7b4178e24e6317d6f8b95ab500d8e6e1bd4283b6860e369c1"
-dependencies = [
- "either",
- "inkwell_internals",
- "libc",
- "llvm-sys",
- "once_cell",
- "parking_lot",
-]
-
-[[package]]
-name = "inkwell_internals"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b185e7d068d6820411502efa14d8fbf010750485399402156b72dd2a548ef8e9"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.25",
-]
-
-[[package]]
 name = "is-terminal"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1112,12 +1087,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lazy_static"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
-
-[[package]]
 name = "libc"
 version = "0.2.147"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1128,19 +1097,6 @@ name = "linux-raw-sys"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09fc20d2ca12cb9f044c93e3bd6d32d523e6e2ec3db4f7b2939cd99026ecd3f0"
-
-[[package]]
-name = "llvm-sys"
-version = "160.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c23bd4905c97f88d0dfec97095829f4ac7eff8ce28fec74a8f8eb8e64830a86e"
-dependencies = [
- "cc",
- "lazy_static",
- "libc",
- "regex",
- "semver",
-]
 
 [[package]]
 name = "lock_api"
@@ -1638,12 +1594,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
-name = "semver"
-version = "1.0.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bebd363326d05ec3e2f532ab7660680f3b02130d780c299bca73469d521bc0ed"
-
-[[package]]
 name = "serde"
 version = "1.0.171"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1654,11 +1604,10 @@ dependencies = [
 
 [[package]]
 name = "serde-wasm-bindgen"
-version = "0.3.1"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "618365e8e586c22123d692b72a7d791d5ee697817b65a218cdf12a98870af0f7"
+checksum = "e3b4c031cd0d9014307d82b8abf653c0290fbdaeb4c02d00c63cf52f728628bf"
 dependencies = [
- "fnv",
  "js-sys",
  "serde",
  "wasm-bindgen",
