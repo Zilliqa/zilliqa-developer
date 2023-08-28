@@ -1,6 +1,7 @@
 use crate::bytecode_ir::EvmBytecodeIr;
 use crate::compiler_context::EvmCompilerContext;
 use crate::executable::EvmExecutable;
+use crate::opcode_spec::OpcodeSpec;
 use std::mem;
 
 use evm::Opcode;
@@ -69,7 +70,7 @@ pub struct EvmByteCodeBuilder<'ctx> {
     pub auxiliary_data: Vec<u8>,
     pub was_finalized: bool,
     pub create_abi_boilerplate: bool,
-    pub label_positions: HashMap<String, usize>,
+    pub label_positions: HashMap<String, u32>,
 }
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
@@ -162,6 +163,13 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
+                    // Sanity check that arguments matches
+                    assert!(
+                        instruction.opcode.bytecode_arguments() == instruction.arguments.len(),
+                        "Sanity check failed while writing byte code."
+                    );
+
+                    // Writing code
                     bytecode.push(instruction.opcode.as_u8());
                     bytecode.extend(instruction.arguments.clone());
                 }
@@ -347,7 +355,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
     }
 
     pub fn resolve_positions(&mut self) {
-        let mut position = 0;
+        let mut position: u32 = 0;
         self.label_positions = HashMap::new();
 
         // Creating code positions
@@ -364,7 +372,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                 }
                 for instruction in block.instructions.iter_mut() {
                     instruction.position = Some(position);
-                    position += 1 + instruction.expected_args_length();
+                    position += 1 + instruction.expected_args_length() as u32;
                 }
             }
         }
@@ -375,7 +383,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         // Creating data positions
         for (name, payload) in &self.ir.data {
             self.label_positions.insert(name.to_string(), position);
-            position += payload.len();
+            position += payload.len() as u32;
         }
 
         // Updating labels
@@ -385,7 +393,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                     if let Some(name) = &instruction.unresolved_label {
                         match self.label_positions.get(name) {
                             Some(p) => {
-                                instruction.u64_to_arg_big_endian(*p);
+                                instruction.u32_to_arg_big_endian(*p);
                             }
                             None => {
                                 panic!("Label not found {:#?}!", name);

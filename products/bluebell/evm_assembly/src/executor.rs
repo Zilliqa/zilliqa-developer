@@ -34,7 +34,7 @@ impl<'a> EvmExecutor<'a> {
         }
     }
 
-    pub fn get_label_position(&self, label: &str) -> Option<usize> {
+    pub fn get_label_position(&self, label: &str) -> Option<u32> {
         self.executable.label_positions.get(label).copied()
     }
 

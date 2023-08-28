@@ -153,8 +153,8 @@ impl EvmFunction {
             None => (),
         };
 
-        let blocks: HashMap<usize, &EvmBlock> = {
-            let mut ret: HashMap<usize, &EvmBlock> = HashMap::new();
+        let blocks: HashMap<u32, &EvmBlock> = {
+            let mut ret: HashMap<u32, &EvmBlock> = HashMap::new();
 
             while pos < blocks.len() {
                 let block = &blocks[pos];
@@ -186,7 +186,7 @@ impl EvmFunction {
 
                 if instr.opcode == Opcode::JUMPI || instr.opcode == Opcode::JUMP {
                     if let Some(position) = last_push_value {
-                        let position = position as usize;
+                        let position = position as u32;
                         if let Some(block) = &blocks.get(&position) {
                             if let Some(selector) = signature_value {
                                 function_starts.push((selector, &block));
@@ -229,7 +229,7 @@ impl EvmFunction {
                     // TODO: Prevent cross function block inclusion (i.e. you call one function from the other)
                     if instr.opcode == Opcode::JUMPI || instr.opcode == Opcode::JUMP {
                         if let Some(position) = last_push_value {
-                            let position = position as usize;
+                            let position = position as u32;
                             if let Some(block) = &blocks.get(&position) {
                                 queue.push_back(&block);
                             }

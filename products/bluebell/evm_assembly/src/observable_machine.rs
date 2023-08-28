@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 pub struct ObservableMachine {
     pub machine: Machine,
-    pub positions_visited: HashMap<usize, usize>,
+    pub positions_visited: HashMap<u32, u32>,
     pub failed: bool,
     pub error_message: Option<String>,
 }
@@ -42,20 +42,20 @@ impl ObservableMachine {
                 Err(_res) => return,
             }
             if let Ok(p) = self.machine.position() {
-                if let Some(value) = self.positions_visited.get_mut(p) {
+                if let Some(value) = self.positions_visited.get_mut(&(*p as u32)) {
                     *value = *value + 1;
                 } else {
-                    self.positions_visited.insert(*p, 1);
+                    self.positions_visited.insert(*p as u32, 1);
                 }
             }
         }
     }
 
-    pub fn did_visit_program_counter(&self, pc: usize) -> bool {
+    pub fn did_visit_program_counter(&self, pc: u32) -> bool {
         None != self.positions_visited.get(&pc)
     }
 
-    pub fn did_not_visit_program_counter(&self, pc: usize) -> bool {
+    pub fn did_not_visit_program_counter(&self, pc: u32) -> bool {
         None == self.positions_visited.get(&pc)
     }
 }

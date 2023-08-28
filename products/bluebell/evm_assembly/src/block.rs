@@ -125,9 +125,9 @@ impl Scope {
 #[derive(Debug, Clone)]
 pub struct EvmBlock {
     pub name: String,
-    pub position: Option<usize>,
+    pub position: Option<u32>,
     pub instructions: Vec<EvmInstruction>,
-    pub entry_from: Vec<usize>,
+    pub entry_from: Vec<u32>,
     pub is_entry: bool,
     pub is_terminated: bool,
     pub is_lookup_table: bool,
@@ -141,7 +141,7 @@ pub struct EvmBlock {
 }
 
 impl EvmBlock {
-    pub fn new(position: Option<usize>, arg_names: Vec<String>, name: &str) -> Self {
+    pub fn new(position: Option<u32>, arg_names: Vec<String>, name: &str) -> Self {
         let mut ret = Self {
             name: name.to_string(),
             position,
@@ -385,7 +385,7 @@ impl EvmBlock {
             let mut collect_args = opcode.bytecode_arguments();
             // TODO: Use write_instruction
             let mut instr = EvmInstruction {
-                position: Some(i),
+                position: Some(i as u32),
                 opcode,
                 arguments: Vec::new(),
                 unresolved_label: None,
@@ -465,6 +465,8 @@ impl EvmBlock {
     }
 
     pub fn write_instruction_with_args(&mut self, opcode: Opcode, arguments: Vec<u8>) -> &mut Self {
+        assert!(opcode.bytecode_arguments() == arguments.len());
+
         let mut comment = None;
         mem::swap(&mut comment, &mut self.comment);
         self.instructions.push(EvmInstruction {
@@ -720,34 +722,42 @@ impl EvmBlock {
     }
 
     pub fn push1(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 1);
         self.write_instruction_with_args(Opcode::PUSH1, arguments)
     }
 
     pub fn push2(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 2);
         self.write_instruction_with_args(Opcode::PUSH2, arguments)
     }
 
     pub fn push3(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 3);
         self.write_instruction_with_args(Opcode::PUSH3, arguments)
     }
 
     pub fn push4(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 4);
         self.write_instruction_with_args(Opcode::PUSH4, arguments)
     }
 
     pub fn push5(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 5);
         self.write_instruction_with_args(Opcode::PUSH5, arguments)
     }
 
     pub fn push6(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 6);
         self.write_instruction_with_args(Opcode::PUSH6, arguments)
     }
 
     pub fn push7(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 7);
         self.write_instruction_with_args(Opcode::PUSH7, arguments)
     }
 
     pub fn push8(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 8);
         self.write_instruction_with_args(Opcode::PUSH8, arguments)
     }
 

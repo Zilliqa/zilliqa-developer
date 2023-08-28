@@ -1,11 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use super::ObservableMachine;
     use bluebell::support::evm::EvmCompiler;
     use bluebell::support::modules::ScillaDebugBuiltins;
     use bluebell::support::modules::ScillaDefaultBuiltins;
     use bluebell::support::modules::ScillaDefaultTypes;
-    use evm_assembly::executor::EvmExecutable;
+    use evm_assembly::executable::EvmExecutable;
     use evm_assembly::executor::ExecutorResult;
     use evm_assembly::observable_machine::ObservableMachine;
     use evm_assembly::types::EvmTypeValue;
@@ -54,6 +53,10 @@ mod tests {
         compiler.attach(&default_builtins);
         compiler.attach(&debug);
         let executable = compiler.executable_from_script(script.to_string())?;
+        println!(
+            "Produced code: {}",
+            hex::encode(&executable.executable.bytecode.clone())
+        );
 
         let arguments: Vec<EvmTypeValue> = if args == "" {
             [].to_vec()
@@ -92,6 +95,11 @@ mod tests {
         let executor = compiler
             .executable_from_script(source)
             .expect("Failed to compile source");
+        println!(
+            "Produced code: {}",
+            hex::encode(&executor.executable.bytecode.clone())
+        );
+
         let data = "00";
         let code = executor.executable.bytecode.clone();
         let data = hex::decode(data).unwrap();

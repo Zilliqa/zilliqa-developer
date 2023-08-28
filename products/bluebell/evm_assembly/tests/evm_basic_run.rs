@@ -84,7 +84,7 @@ mod tests {
 
         ///////
         // Executable
-        let mut builder = EvmByteCodeBuilder::new(&mut specification);
+        let mut builder = EvmByteCodeBuilder::new(&mut specification, true);
 
         builder
             .define_function("hello", ["Uint256"].to_vec(), "Uint256")
