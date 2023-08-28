@@ -238,78 +238,97 @@ impl Component for ExecutorView {
             .link()
             .callback(move |index: usize| ExecutorViewMessage::SelectTab(index));
 
-        html! {
-                    <div class="space-y-6">
-                        <Tabs
-                            selected_tab={self.selected_tab.clone()}
-                            on_tab_selected={handle_tab_selected}
-                            tabs={vec!["Execute".to_string(), "Intermediate Representation".to_string()]}
-                        />
+          html! {         
+            <div class="h-full w-full flex flex-col relative">
+                <div class="space-x-4 right-0 top-0 absolute">
+                    <button class="bg-blue-600 text-white px-2 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick={step_button_click.clone()}>
+                        {"Step"}
+                    </button>
+                    <button class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" onclick={run_button_click.clone()}>
+                        {"Run"}
+                    </button>
+                    {program_counter}
+                </div>
+                <Tabs
+                    selected_tab={self.selected_tab.clone()}
+                    on_tab_selected={handle_tab_selected}
+                    tabs={vec!["EVM Bytecode".to_string(), "Intermediate Representation".to_string()]}
+                />
+                <div class="space-y-6 flex flex-col flex-grow">
 
-                        { if self.selected_tab == 0 {
-                            html! {
-                                <div class="space-y-6">
-                                    <div class="flex justify-between">
-                                        <div class="space-x-4">
-                                            <button class="bg-blue-500 text-white font-medium px-5 py-2 rounded-lg hover:bg-blue-600" onclick={step_button_click.clone()}>
-                                                {"Step"}
-                                            </button>
-                                            <button class="bg-green-500 text-white font-medium px-5 py-2 rounded-lg hover:bg-green-600" onclick={run_button_click.clone()}>
-                                                {"Run"}
-                                            </button>
-                                            {program_counter}
-                                        </div>
-                                        <label class="text-gray-700 font-semibold" for="source-code">
-                                            {"Source Code"}
-                                        </label>
+                    { if self.selected_tab == 0 {
+                        html! {
+                            <>
+                            <div class="p-4 bg-white border rounded-md shadow-sm space-y-2 overflow-y-auto">
+                                { for bytecode.iter().map(|instr| html! {
+                                    <div class="flex items-center space-x-4 text-sm text-gray-700">
+                                        <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
+                                        <div>{instr}</div>
                                     </div>
-                                    <div>
-                                        <h2 class="text-lg font-semibold mb-3">{"EVM Bytecode"}</h2>
-                                        <div class="p-4 bg-white border rounded-md shadow-sm space-y-2">
-                                            { for bytecode.iter().map(|instr| html! {
-                                                <div class="flex items-center space-x-4">
-                                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" />
-                                                    <div>{instr}</div>
-                                                </div>
-                                            }) }
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-lg font-semibold mb-3">{"Stack"}</h2>
-                                        <div class="p-4 bg-white border rounded-md shadow-sm space-y-2 overflow-y-auto h-48">
-                                            { for stack.iter().map(|s| html! { <div>{s}</div> }) }
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-lg font-semibold mb-3">{"Current Instruction"}</h2>
-                                        <div class="p-4 bg-white border rounded-md shadow-sm">
-                                            { &instruction }
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-lg font-semibold mb-3">{"Memory"}</h2>
-                                        <div class="p-4 bg-white border rounded-md shadow-sm space-y-2">
-                                            { for memory.iter().map(|mem| html! { <div>{mem}</div> }) }
-                                        </div>
-                                    </div>
+                                }) }
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold mb-3 text-gray-800">{"Stack"}</h2>
+                                <div class="p-4 bg-white border rounded-md shadow-sm space-y-2 overflow-y-auto h-48">
+                                    { for stack.iter().map(|s| html! { <div class="text-sm text-gray-700">{s}</div> }) }
                                 </div>
-                            }
-                        } else {
-                            html! {
-                                <div class="space-y-6">
-                                    // "Intermediate Representation" tab content
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold mb-3 text-gray-800">{"Memory"}</h2>
+                                <div class="p-4 bg-white border rounded-md shadow-sm space-y-2">
+                                    { for memory.iter().map(|mem| html! { <div class="text-sm text-gray-700">{mem}</div> }) }
                                 </div>
-                            }
-                        } }
-                    </div>
+                            </div>
+                            </>
+                        }
+                    } else {
+                        html! {
+                            <div class="space-y-6">
+                                // "Intermediate Representation" tab content
+                            </div>
+                        }
+                    } }
+                </div>                
+            </div>
         }
-        /*
-        html! {
-            <textarea value={script} />
-        }
-        */
+
     }
 }
+
+#[derive(Properties, PartialEq, Clone)]
+pub struct MainCardProps {
+    pub children: Children,
+}
+
+pub struct MainCard {
+    props: MainCardProps,
+}
+
+impl Component for MainCard {
+    type Message = ();
+    type Properties = MainCardProps;
+
+    fn create(ctx: &Context<Self>) -> Self {
+        let props = ctx.props().clone();
+
+        Self {
+            props,
+        }
+    }
+    fn changed(&mut self, ctx: &Context<Self>, props: &MainCardProps) -> bool {
+        true
+    }
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        html! {
+            <div class="flex h-screen w-screen p-16 justify-center items-center">
+                <div class="h-full w-full bg-white p-6 rounded-lg flex flex-col justify-center items-center">
+                    { for self.props.children.iter() }
+                </div>
+            </div>
+        }            
+    }
+}
+
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -378,34 +397,48 @@ end
     };
 
     if let Some(executable) = &*executable {
+
+        /*
         return html! {
             <div class="container mx-auto mt-12 p-6 bg-gray-50 rounded-lg shadow-md">
                 <ExecutorView executable={executable} data={""} />
             </div>
         };
+        */
+        return     html! {
+            <MainCard key="second">
+                <ExecutorView executable={executable} data={""} />
+            </MainCard>
+        };
     }
 
     let source_code: String = source_code.to_string();
-    html! {
-        <div class="container mx-auto mt-12 p-6 bg-gray-50 rounded-lg shadow-md">
-                <div class="space-y-6">
-                    <h1 class="text-2xl font-bold text-gray-800">{"Scilla Compiler"}</h1>
 
-                    <textarea
-                        id="source-code"
-                        class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-indigo-200 transition-shadow duration-150"
-                        rows="20"
-                        value={source_code}
-                        oninput={handle_source_code_change}
-                        placeholder="Enter Scilla source code here..."
-                    />
 
-                    <div>
-                        <button class="bg-indigo-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-indigo-700" onclick={compile_button_click.clone()}>
-                            {"Compile"}
-                        </button>
-                    </div>
-                </div>
+html! {
+    <MainCard key="first">
+        <div class="h-full w-full flex flex-col space-y-6">
+            <h1 class="text-2xl font-semibold text-gray-900 mb-4">{"Scilla Compiler"}</h1>
+
+            <textarea
+                id="source-code"
+                class="flex-1 w-full p-4 bg-black text-white border rounded-md shadow-sm resize-none focus:border-teal-500 focus:ring focus:ring-teal-200 transition-shadow duration-150 font-mono"
+                style="tab-size: 4; white-space: pre;"
+                rows="20"
+                value={source_code}
+                oninput={handle_source_code_change}
+                placeholder="Enter Scilla source code here..."
+            />
+
+
+            <div class="mt-4">
+                <button class="bg-indigo-600 text-lg text-white px-6 py-2 rounded-lg shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150" onclick={compile_button_click.clone()}>
+                    {"Compile"}
+                </button>
+            </div>
         </div>
-    }
+    </MainCard>
+}
+
+
 }
