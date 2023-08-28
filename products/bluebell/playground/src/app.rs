@@ -126,30 +126,31 @@ pub struct Props {
     pub tabs: Vec<String>,
 }
 
-pub struct ExecutorViewInstruction {
+pub struct ByteCodeViewInstruction {
+    pub label: Option<String>,
     pub bytecode_position: u32,
     pub hex_bytecode_position: String,
     pub text: String,
-    pub ir_origin: String,
+    pub comment: String,
 }
 
-pub struct ExecutorView {
-    props: ExecutorViewProps,
+pub struct ByteCodeView {
+    props: ByteCodeViewProps,
     selected_tab: usize,
-    instructions: Vec<ExecutorViewInstruction>,
+    instructions: Vec<ByteCodeViewInstruction>,
 }
-pub enum ExecutorViewMessage {
+pub enum ByteCodeViewMessage {
     SelectTab(usize),
-    SetInstructions(Vec<ExecutorViewInstruction>),
+    SetInstructions(Vec<ByteCodeViewInstruction>),
 }
 #[derive(Properties)]
-pub struct ExecutorViewProps {
+pub struct ByteCodeViewProps {
     pub executable: Rc<RefCell<EvmExecutable>>,
     pub data: String,
     pub program_counter: u32,
 }
 
-impl Clone for ExecutorViewProps {
+impl Clone for ByteCodeViewProps {
     fn clone(&self) -> Self {
         Self {
             executable: Rc::clone(&self.executable),
@@ -159,9 +160,9 @@ impl Clone for ExecutorViewProps {
     }
 }
 
-impl PartialEq for ExecutorViewProps {
+impl PartialEq for ByteCodeViewProps {
     fn eq(&self, other: &Self) -> bool {
-        // Logic to compare two ExecutorViewProps.
+        // Logic to compare two ByteCodeViewProps.
         // If you only need reference equality for the Rc:
         Rc::ptr_eq(&self.executable, &other.executable)
             && self.data == other.data
@@ -169,9 +170,9 @@ impl PartialEq for ExecutorViewProps {
     }
 }
 
-impl Component for ExecutorView {
-    type Message = ExecutorViewMessage;
-    type Properties = ExecutorViewProps;
+impl Component for ByteCodeView {
+    type Message = ByteCodeViewMessage;
+    type Properties = ByteCodeViewProps;
 
     fn create(ctx: &Context<Self>) -> Self {
         let props = ctx.props().clone();
@@ -185,12 +186,14 @@ impl Component for ExecutorView {
         ret
     }
 
-    fn changed(&mut self, ctx: &Context<Self>, props: &ExecutorViewProps) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, props: &ByteCodeViewProps) -> bool {
         let functions = (*props.executable).clone().into_inner().ir.functions;
 
-        let mut instructions: Vec<ExecutorViewInstruction> = Vec::new();
+        let mut instructions: Vec<ByteCodeViewInstruction> = Vec::new();
         for function in &functions {
             for block in &function.blocks {
+                let mut next_label = Some(block.name.clone());
+
                 for instr in &block.instructions {
                     let bytecode_position = match instr.position {
                         Some(v) => v,
@@ -209,29 +212,31 @@ impl Component for ExecutorView {
                         instr.opcode.to_string()
                     };
 
-                    let next_instr = ExecutorViewInstruction {
+                    let next_instr = ByteCodeViewInstruction {
+                        label: next_label,
                         bytecode_position,
                         hex_bytecode_position: format!("0x{:02x}", bytecode_position).to_string(),
                         text: instruction_value,
-                        ir_origin: "".to_string(),
+                        comment: instr.comment.clone().unwrap_or("".to_string()),
                     };
                     instructions.push(next_instr);
+                    next_label = None;
                 }
             }
         }
         self.props = ctx.props().clone();
         ctx.link()
-            .send_message(ExecutorViewMessage::SetInstructions(instructions));
+            .send_message(ByteCodeViewMessage::SetInstructions(instructions));
         true
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ExecutorViewMessage::SelectTab(index) => {
+            ByteCodeViewMessage::SelectTab(index) => {
                 self.selected_tab = index;
                 true
             }
-            ExecutorViewMessage::SetInstructions(instructions) => {
+            ByteCodeViewMessage::SetInstructions(instructions) => {
                 self.instructions = instructions;
                 true
             }
@@ -242,27 +247,57 @@ impl Component for ExecutorView {
         let program_counter = self.props.program_counter;
 
         html! {
-            <div class="h-full w-full flex flex-col relative">
-                <div class="space-y-6 flex flex-col flex-grow">
-                            <div class="p-4 bg-white border rounded-md shadow-sm space-y-2 overflow-y-auto">
-                                { for self.instructions.iter().map(|instr| html! {
-                                    <div class={
-                                        if program_counter == instr.bytecode_position {
-                                          "flex items-center space-x-4 text-sm text-gray-700 bg-green-600"
-                                      }
-                                      else
-                                      {
-                                         "flex items-center space-x-4 text-sm text-gray-700"
-                                      }
-                                    }>
-                                        <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
-                                        <div>{instr.hex_bytecode_position.clone()}</div>
-                                        <div>{instr.text.clone()}</div>
-                                    </div>
-                                }) }
-                            </div>
-                </div>
-            </div>
+                <>
+                    <h2 class="text-2xl ">{"EVM Bytecode"}</h2>
+                    <div class="px-4 bg-white overflow-auto space-y-1">
+                        {
+                            for self.instructions.iter().map(|instr| html! {
+                                <>
+                                    {
+                                        if let Some(label) = &instr.label {
+                                            html! {
+                                                <div class="pt-6 font-medium flex items-center space-x-4 text-sm text-gray-700">
+                                                {label}
+                                                </div>
+                                            }
+                                        } else {
+                                            html!{}
+                                        }
+                                    }
+
+                                {
+                                    if instr.comment.len() > 0 {
+                                        html! {
+                                            <div class="flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap">
+                                                <span class="h-5 w-5"></span>
+                                                <div class="ml-4 font-mono text-xs text-gray-400">{instr.comment.clone()}</div>
+                                            </div>
+                                        }
+                                    } else {
+                                        html!{}
+                                    }
+                                }
+
+                                <div class={
+                                    if program_counter == instr.bytecode_position {
+                                      "flex items-center space-x-4 text-sm text-gray-700 bg-green-600 whitespace-nowrap"
+                                  }
+                                  else
+                                  {
+                                     "flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap"
+                                  }
+                                }>
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
+                                    <div>{instr.hex_bytecode_position.clone()}</div>
+                                    <div>{instr.text.clone()}</div>
+                                </div>
+
+                            </>
+                        })
+                    }
+                    </div>
+                </>
+
         }
     }
 }
@@ -308,7 +343,7 @@ impl PartialEq for MainCardProps {
 
 pub struct MainCard {
     props: MainCardProps,
-    observable_machine: Option<ObservableMachine>,
+    observable_machine: Option<Rc<RefCell<ObservableMachine>>>,
     data: String,
     view: usize,
 }
@@ -320,6 +355,86 @@ pub enum MainCardMessage {
     }, // Add other messages here if needed
     RunStep,
     SelectView(usize),
+}
+
+#[derive(Properties)]
+pub struct MachineViewProps {
+    pub observable_machine: Rc<RefCell<ObservableMachine>>,
+    pub program_counter: u32,
+}
+
+impl Clone for MachineViewProps {
+    fn clone(&self) -> Self {
+        Self {
+            observable_machine: Rc::clone(&self.observable_machine),
+            program_counter: self.program_counter,
+        }
+    }
+}
+
+impl PartialEq for MachineViewProps {
+    fn eq(&self, other: &Self) -> bool {
+        // Logic to compare two ByteCodeViewProps.
+        // If you only need reference equality for the Rc:
+        Rc::ptr_eq(&self.observable_machine, &other.observable_machine)
+            && self.program_counter == other.program_counter
+    }
+}
+
+pub struct MachineView {
+    props: MachineViewProps,
+}
+
+impl Component for MachineView {
+    type Message = ();
+    type Properties = MachineViewProps;
+
+    fn create(ctx: &Context<Self>) -> Self {
+        Self {
+            props: ctx.props().clone(),
+        }
+    }
+
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
+        true
+    }
+
+    fn changed(&mut self, ctx: &Context<Self>, _props: &Self::Properties) -> bool {
+        self.props = ctx.props().clone();
+        true
+    }
+
+    fn view(&self, _ctx: &Context<Self>) -> Html {
+        let machine = &(self.props.observable_machine.borrow()).machine;
+
+        html! {
+            <div class="bg-black min-h-full max-h-full h-screen w-full p-4">
+                <h2 class="text-xl font-bold mb-4">{"EVM Machine State"}</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="border p-4">
+                        <h3 class="text-lg font-semibold mb-2">{"Stack"}</h3>
+                        <ul>
+                            { for machine.stack().data().iter().map(|item| html! { <li>{format!("{:?}", item)}</li> }) }
+                        </ul>
+                    </div>
+                    <div class="border p-4">
+                        <h3 class="text-lg font-semibold mb-2">{"Memory"}</h3>
+                        <div>
+                            { for machine.memory().data().chunks(32).enumerate().map(|(idx, chunk)| {
+                                let address = idx * 32;
+                                let segment: String = chunk.iter().map(|b| format!("{:02x}", b)).collect::<Vec<_>>().join("");
+                                html! { <p>{format!("0x{:02x}  {}", address, segment)}</p> }
+                            }) }
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-lg font-semibold mb-2">{"Program Counter"}</h3>
+                    <p>{format!("{:?}", machine.position())}</p>
+                </div>
+            </div>
+        }
+    }
 }
 
 impl Component for MainCard {
@@ -348,12 +463,14 @@ impl Component for MainCard {
             }
             MainCardMessage::ResetMachine { code, data } => {
                 console::log!("Code: {}", hex::encode(&*code));
-                self.observable_machine = Some(ObservableMachine::new(code, data, 1024, 1024));
+                self.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
+                    code, data, 1024, 1024,
+                ))));
                 true
             }
             MainCardMessage::RunStep => {
                 if let Some(ref mut machine) = self.observable_machine {
-                    machine.step();
+                    machine.borrow_mut().step();
                     true
                 } else {
                     false
@@ -387,6 +504,7 @@ impl Component for MainCard {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let (program_counter, error_message) =
             if let Some(observable_machine) = &self.observable_machine {
+                let observable_machine = observable_machine.borrow();
                 let machine = &observable_machine.machine;
                 let program_counter = if let Ok(pc) = machine.position() {
                     pc
@@ -395,13 +513,13 @@ impl Component for MainCard {
                 };
 
                 let error = if observable_machine.failed {
-                    &observable_machine.error_message
+                    observable_machine.error_message.clone()
                 } else {
-                    &None
+                    None
                 };
                 ((*program_counter as u32), error)
             } else {
-                (0, &None)
+                (0, None)
             };
         let step_button_click = ctx.link().callback(move |_| MainCardMessage::RunStep);
 
@@ -565,6 +683,16 @@ impl Component for MainCard {
           <main class="h-full w-full">
             <div class="xl:pr-96">
               <div class="relative">
+              {
+                if let Some(observable_machine) = &self.observable_machine {
+                    html! {
+                        <MachineView program_counter={program_counter} observable_machine={observable_machine} />
+                    }
+                }
+                else {
+                    html! {}
+                }
+                }
                 { for self.props.children.iter() }
                 /* Main area */
               </div>
@@ -573,7 +701,7 @@ impl Component for MainCard {
           <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
             {
                 if let Some(executable) = &self.props.executable {
-                    html! { <ExecutorView executable={executable} data={""} program_counter={program_counter} /> }
+                    html! { <ByteCodeView executable={executable} data={""} program_counter={program_counter} /> }
                 } else {
                     html! {
                         <div>{"Nothing compiled yet."}</div>
