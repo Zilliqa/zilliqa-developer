@@ -86,46 +86,6 @@ impl Component for FloatingCard {
     }
 }
 
-#[function_component(Tabs)]
-pub fn tabs(props: &Props) -> Html {
-    let Props {
-        selected_tab,
-        on_tab_selected,
-        tabs,
-    } = props;
-
-    html! {
-        <div class="border-b border-gray-200">
-            <nav class="-mb-px flex">
-                { for tabs.iter().enumerate().map(|(index, tab)| {
-                    let is_selected = *selected_tab == index;
-                    let button_class = if is_selected {
-                        "border-indigo-500 text-indigo-600"
-                    } else {
-                        "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    };
-
-                    html! {
-                        <button
-                            class={"inline-flex items-center px-4 py-2 border-b-2 font-medium".to_owned() + button_class}
-                            onclick={on_tab_selected.reform(move |_| index)}
-                        >
-                            { tab }
-                        </button>
-                    }
-                }) }
-            </nav>
-        </div>
-    }
-}
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {
-    pub selected_tab: usize,
-    pub on_tab_selected: Callback<usize>,
-    pub tabs: Vec<String>,
-}
-
 pub struct ByteCodeViewInstruction {
     pub label: Option<String>,
     pub bytecode_position: u32,
@@ -410,22 +370,28 @@ impl Component for MachineView {
         html! {
             <div class="bg-black min-h-full max-h-full h-screen w-full p-4">
                 <h2 class="text-xl font-bold mb-4">{"EVM Machine State"}</h2>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-rows-2 lg:grid-cols-2 gap-4">
                     <div class="border p-4">
                         <h3 class="text-lg font-semibold mb-2">{"Stack"}</h3>
                         <ul>
-                            { for machine.stack().data().iter().map(|item| html! { <li>{format!("{:?}", item)}</li> }) }
+                            { for machine.stack().data().iter().rev().map(|item| html! { <li>{format!("{:?}", item)}</li> }) }
                         </ul>
                     </div>
                     <div class="border p-4">
                         <h3 class="text-lg font-semibold mb-2">{"Memory"}</h3>
-                        <div>
+                        <div class="grid grid-cols-12">
                             { for machine.memory().data().chunks(32).enumerate().map(|(idx, chunk)| {
                                 let address = idx * 32;
                                 let segment: String = chunk.iter().map(|b| format!("{:02x}", b)).collect::<Vec<_>>().join("");
-                                html! { <p>{format!("0x{:02x}  {}", address, segment)}</p> }
+                                html! {
+                                    <>
+                                    <div class="col-span-2">{format!("0x{:02x}", address)}</div>
+                                    <div class="col-span-10">{format!("{}", segment)}</div>
+                                    </>
+                                }
                             }) }
                         </div>
+
                     </div>
                 </div>
                 <div class="mt-4">
@@ -492,6 +458,7 @@ impl Component for MainCard {
                     code: code.into(),
                     data: data.into(),
                 });
+                self.props = ctx.props().clone();
                 true
             } else {
                 false
@@ -807,16 +774,8 @@ end
 
     let source_code: String = source_code.to_string();
 
-    // TODO: Hack to fix the fact that MainCard is not updating correctly with
-    // the executable
-
-    let key = if let Some(_executable) = &*executable {
-        "second"
-    } else {
-        "first"
-    };
     html! {
-        <MainCard key={key} executable={&*executable}>
+        <MainCard  executable={&*executable}>
                 <div class="h-full w-full">
                 <textarea
                     id="source-code"
