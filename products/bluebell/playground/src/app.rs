@@ -1,11 +1,14 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use yew::virtual_dom::VNode;
 
 use evm_assembly::executable::EvmExecutable;
 use gloo_console as console;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+use yewdux::prelude::*;
 
+use crate::state::{State, StateMessage};
 use bluebell::support::evm::EvmCompiler;
 use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
@@ -262,110 +265,69 @@ impl Component for ByteCodeView {
     }
 }
 
-#[derive(Properties)]
-pub struct MainCardProps {
+#[derive(Clone, PartialEq)]
+pub struct MenuItem {
+    pub icon: VNode,
+    pub text: String,
+    pub index: u32,
+}
+
+#[derive(Properties, Clone, PartialEq)]
+pub struct AppLayoutProps {
     pub children: Children,
-    pub executable: Option<Rc<RefCell<EvmExecutable>>>,
+    pub on_select_view: Callback<u32>,
+    pub menu: Vec<MenuItem>,
 }
 
-impl Clone for MainCardProps {
-    fn clone(&self) -> Self {
-        let executable = if let Some(e) = &self.executable {
-            Some(Rc::clone(&e))
-        } else {
-            None
-        };
-        Self {
-            executable,
-            children: self.children.clone(),
-        }
-    }
-}
-
-impl PartialEq for MainCardProps {
-    fn eq(&self, other: &Self) -> bool {
-        if self.executable.is_none() && other.executable.is_none() {
-            return self.children == other.children;
-        }
-        let e1 = match &self.executable {
-            Some(e) => e,
-            None => return false,
-        };
-
-        let e2 = match &other.executable {
-            Some(e) => e,
-            None => return false,
-        };
-
-        Rc::ptr_eq(&e1, &e2) && self.children == other.children
-    }
-}
-
-pub struct MainCard {
-    props: MainCardProps,
-    observable_machine: Option<Rc<RefCell<ObservableMachine>>>,
+pub struct AppLayout {
+    props: AppLayoutProps,
     data: String,
     view: usize,
-}
-
-pub enum MainCardMessage {
-    ResetMachine {
-        code: Rc<Vec<u8>>,
-        data: Rc<Vec<u8>>,
-    }, // Add other messages here if needed
-    RunStep,
-    SelectView(usize),
-}
-
-#[derive(Properties)]
-pub struct MachineViewProps {
-    pub observable_machine: Rc<RefCell<ObservableMachine>>,
-    pub program_counter: u32,
-}
-
-impl Clone for MachineViewProps {
-    fn clone(&self) -> Self {
-        Self {
-            observable_machine: Rc::clone(&self.observable_machine),
-            program_counter: self.program_counter,
-        }
-    }
-}
-
-impl PartialEq for MachineViewProps {
-    fn eq(&self, other: &Self) -> bool {
-        // Logic to compare two ByteCodeViewProps.
-        // If you only need reference equality for the Rc:
-        Rc::ptr_eq(&self.observable_machine, &other.observable_machine)
-            && self.program_counter == other.program_counter
-    }
+    dispatch: Dispatch<State>,
+    state: Rc<State>,
 }
 
 pub struct MachineView {
-    props: MachineViewProps,
+    dispatch: Dispatch<State>,
+    state: Rc<State>,
+}
+
+pub enum MachineViewMessage {
+    UpdateState(Rc<State>),
 }
 
 impl Component for MachineView {
-    type Message = ();
-    type Properties = MachineViewProps;
+    type Message = MachineViewMessage;
+    type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
+        let state_callback = ctx.link().callback(MachineViewMessage::UpdateState);
+        let dispatch = Dispatch::<State>::subscribe(state_callback);
         Self {
-            props: ctx.props().clone(),
+            state: dispatch.get(),
+            dispatch,
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
-        true
-    }
-
-    fn changed(&mut self, ctx: &Context<Self>, _props: &Self::Properties) -> bool {
-        self.props = ctx.props().clone();
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            MachineViewMessage::UpdateState(state) => {
+                self.state = state;
+            }
+        }
         true
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
-        let machine = &(self.props.observable_machine.borrow()).machine;
+        let observable_machine = match &self.state.observable_machine {
+            Some(o) => o,
+            None => {
+                return html! {
+                    <div>{"No machine started yet."}</div>
+                }
+            }
+        };
+        let machine = &(observable_machine.borrow()).machine;
 
         html! {
             <div class="bg-black min-h-full max-h-full h-screen w-full p-4">
@@ -403,38 +365,53 @@ impl Component for MachineView {
     }
 }
 
-impl Component for MainCard {
-    type Message = MainCardMessage;
-    type Properties = MainCardProps;
+pub enum AppLayoutMessage {
+    UpdateState(Rc<State>),
+}
+
+impl Component for AppLayout {
+    type Message = AppLayoutMessage;
+    type Properties = AppLayoutProps;
 
     fn create(ctx: &Context<Self>) -> Self {
         let props = ctx.props().clone();
 
-        let mut ret = Self {
+        let state_callback = ctx.link().callback(AppLayoutMessage::UpdateState);
+        let dispatch = Dispatch::<State>::subscribe(state_callback);
+
+        Self {
             props: props.clone(),
-            observable_machine: None,
             data: "".to_string(),
             view: 0,
-        };
-
-        Component::changed(&mut ret, ctx, &props);
-        ret
+            state: dispatch.get(),
+            dispatch,
+        }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            MainCardMessage::SelectView(index) => {
+            AppLayoutMessage::UpdateState(state) => {
+                self.state = state;
+            }
+        }
+        true
+    }
+
+    /*
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            AppLayoutMessage::SelectView(index) => {
                 self.view = index;
                 true
             }
-            MainCardMessage::ResetMachine { code, data } => {
+            AppLayoutMessage::ResetMachine { code, data } => {
                 console::log!("Code: {}", hex::encode(&*code));
                 self.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
                     code, data, 1024, 1024,
                 ))));
                 true
             }
-            MainCardMessage::RunStep => {
+            AppLayoutMessage::RunStep => {
                 if let Some(ref mut machine) = self.observable_machine {
                     machine.borrow_mut().step();
                     true
@@ -444,55 +421,33 @@ impl Component for MainCard {
             }
         }
     }
-    fn changed(&mut self, ctx: &Context<Self>, _props: &MainCardProps) -> bool {
-        let data = if self.data != "" {
-            hex::decode(self.data.clone())
-        } else {
-            Ok(Vec::<u8>::new())
-        };
-
-        if let Some(ref e) = &ctx.props().executable {
-            if let Ok(data) = data {
-                let code: Vec<u8> = (&*e.borrow().bytecode).to_vec(); //.into_inner().bytecode;
-                ctx.link().send_message(MainCardMessage::ResetMachine {
-                    code: code.into(),
-                    data: data.into(),
-                });
-                self.props = ctx.props().clone();
-                true
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    }
+    */
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let (program_counter, error_message) =
-            if let Some(observable_machine) = &self.observable_machine {
-                let observable_machine = observable_machine.borrow();
-                let machine = &observable_machine.machine;
-                let program_counter = if let Ok(pc) = machine.position() {
-                    pc
-                } else {
-                    &0
-                };
-
-                let error = if observable_machine.failed {
-                    observable_machine.error_message.clone()
-                } else {
-                    None
-                };
-                ((*program_counter as u32), error)
-            } else {
-                (0, None)
-            };
-        let step_button_click = ctx.link().callback(move |_| MainCardMessage::RunStep);
+        let step_button_click = self.dispatch.apply_callback(|_| StateMessage::RunStep);
 
         let run_button_click = Callback::from(move |_| {
             console::log!("Run Button clicked");
         });
+
+        let generate_menu = |item: &MenuItem, is_desktop: bool| {
+            let item_class = if is_desktop {
+                "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
+            } else {
+                "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+            };
+
+            let index = item.index;
+
+            html! {
+                <li>
+                    <a href="#" class={item_class} onclick={self.props.on_select_view.reform(move |_| index)}>
+                        { item.icon.clone() }
+                        { if !is_desktop { html! { &item.text } } else { html! {} } }
+                    </a>
+                </li>
+            }
+        };
 
         html! {
         <div class="pl-20 h-screen w-screen">
@@ -514,59 +469,11 @@ impl Component for MainCard {
                   <div class="flex h-16 shrink-0 items-center">
                     <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
                   </div>
-                  <nav class="flex flex-1 flex-col">
+                <nav class="flex flex-1 flex-col">
                     <ul role="list" class="-mx-2 flex-1 space-y-1">
-                      <li>
-                        <a href="#" class="bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                          <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                          </svg>
-                          {"Dashboard"}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                          <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                          </svg>
-                          {"Team"}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                          <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                          </svg>
-                          {"Projects"}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                          <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                          </svg>
-                          {"Calendar"}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                          <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-                          </svg>
-                          {"Documents"}
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
-                          <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
-                          </svg>
-                          {"Reports"}
-                        </a>
-                      </li>
+                        { for self.props.menu.iter().map(|item| generate_menu(item, false)) }
                     </ul>
-                  </nav>
+                </nav>
                 </div>
               </div>
             </div>
@@ -577,60 +484,11 @@ impl Component for MainCard {
             <div class="flex h-16 shrink-0 items-center justify-center">
               <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
             </div>
-            <nav class="mt-8">
-              <ul role="list" class="flex flex-col items-center space-y-1">
-                <li>
-                  /* Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" */
-                  <a href="#" class="bg-gray-800 text-white group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                    <span class="sr-only">{"Dashboard"}</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                    </svg>
-                    <span class="sr-only">{"Team"}</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                    </svg>
-                    <span class="sr-only">{"Projects"}</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                    </svg>
-                    <span class="sr-only">{"Calendar"}</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-                    </svg>
-                    <span class="sr-only">{"Documents"}</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
-                    </svg>
-                    <span class="sr-only">{"Reports"}</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
+                <nav class="mt-8">
+                    <ul role="list" class="flex flex-col items-center space-y-1">
+                        { for self.props.menu.iter().map(|item| generate_menu(item, true)) }
+                    </ul>
+                </nav>
           </div>
 
           <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
@@ -650,25 +508,16 @@ impl Component for MainCard {
           <main class="h-full w-full">
             <div class="xl:pr-96">
               <div class="relative">
-              {
-                if let Some(observable_machine) = &self.observable_machine {
-                    html! {
-                        <MachineView program_counter={program_counter} observable_machine={observable_machine} />
-                    }
-                }
-                else {
-                    html! {}
-                }
-                }
                 { for self.props.children.iter() }
                 /* Main area */
               </div>
             </div>
           </main>
           <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
+            <div>{self.state.program_counter}</div>
             {
-                if let Some(executable) = &self.props.executable {
-                    html! { <ByteCodeView executable={executable} data={""} program_counter={program_counter} /> }
+                if let Some(executable) = &self.state.executable {
+                    html! { <ByteCodeView executable={executable} data={""} program_counter={self.state.program_counter} /> }
                 } else {
                     html! {
                         <div>{"Nothing compiled yet."}</div>
@@ -677,7 +526,7 @@ impl Component for MainCard {
             }
           </aside>
             {
-                      if let Some(_) = &self.props.executable {
+                      if let Some(_) = &self.state.executable {
                         html!{
                         <FloatingCard>
                             <div class="space-x-4 ">
@@ -687,7 +536,7 @@ impl Component for MainCard {
                                 <button class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" onclick={run_button_click.clone()}>
                                     {"Run"}
                                 </button>
-                                <div>{format!("0x{:02x}", program_counter)} <span>{" ("}{program_counter}{")"}</span></div>
+                                <div>{format!("0x{:02x}", self.state.program_counter)} <span>{" ("}{self.state.program_counter}{")"}</span></div>
                             </div>
                         </FloatingCard>
                     }
@@ -704,34 +553,14 @@ impl Component for MainCard {
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let source_code = use_state(|| {
-        r#"scilla_version 0
+    let state = use_store_value::<State>();
+    let source_code = &state.source_code;
 
-library HelloWorld
-type Bool = 
-  | True
-  | False
-
-contract HelloWorld()
-
-transition setHello ()
-  msg = Uint64 12;
-
-  is_owner = False;
-  match is_owner with
-  | True =>
-    x = builtin print__impl msg
-  | False =>
-    x = builtin print__impl msg;
-    y = builtin print__impl msg
-  end
-
-end
-"#
-        .to_string()
-    });
-    let executable_state: UseStateHandle<Option<Rc<RefCell<EvmExecutable>>>> = use_state(|| None);
-    let executable = executable_state.clone();
+    let current_view_state: UseStateHandle<u32> = use_state(|| 0);
+    let current_view = current_view_state.clone();
+    let set_current_view = move |i| {
+        current_view_state.set(i);
+    };
 
     let compile_button_click = {
         let source_code = source_code.clone();
@@ -751,7 +580,18 @@ end
                     "Produced code: {}",
                     hex::encode(&exec.executable.bytecode.clone())
                 );
-                executable_state.set(Some(Rc::new(RefCell::new(exec.executable))));
+
+                let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
+
+                let dispatch = Dispatch::<State>::new();
+                dispatch.reduce_mut(move |s| {
+                    s.executable = Some(Rc::new(RefCell::new(exec.executable)))
+                });
+
+                dispatch.apply(StateMessage::ResetMachine {
+                    code: code.into(),
+                    data: [].to_vec().into(), // TODO:
+                });
             } else {
                 console::error!("Compilation failed!");
             }
@@ -764,18 +604,52 @@ end
     };
 
     let handle_source_code_change = {
-        let source_code = source_code.clone();
-        Callback::from(move |e: InputEvent| {
+        Dispatch::<State>::new().reduce_mut_callback_with(move |s, e: InputEvent| {
             let value = target_input_value(&e);
 
-            source_code.set(value);
+            s.source_code = value
         })
     };
 
     let source_code: String = source_code.to_string();
 
+    let menu : Vec< MenuItem > = [
+        MenuItem {
+            icon: html!{
+<svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                    </svg>
+            },
+            text: "Code Editor".to_string(),
+            index: 0
+        },
+        MenuItem {
+            icon: html!{
+<svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                    </svg>
+            },
+            text: "Virtual Machine".to_string(),
+            index: 1
+        },
+        MenuItem {
+            icon: html!{
+<svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                    </svg>
+            },
+            text: "Bytecode".to_string(),
+            index: 2
+        }
+
+    ].to_vec();
+
     html! {
-        <MainCard  executable={&*executable}>
+        <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view}>
+
+            { if *current_view == 0 {
+
+                html! {
                 <div class="h-full w-full">
                 <textarea
                     id="source-code"
@@ -796,6 +670,17 @@ end
                     </button>
                 </div>
                 </div>
-        </MainCard>
+            }
+        } else if *current_view == 1 {
+                    html! {
+                        <MachineView  />
+                    }
+        }  else {
+            html! {
+                <div>{"Undefined view"}</div>
+            }
+        }
+    }
+        </AppLayout>
     }
 }
