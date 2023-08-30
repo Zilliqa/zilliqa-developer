@@ -1,22 +1,15 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 use yew::virtual_dom::VNode;
 
-use evm_assembly::executable::EvmExecutable;
 use gloo_console as console;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
 
-use crate::state::{State, StateMessage};
-use bluebell::support::evm::EvmCompiler;
-use bluebell::support::modules::ScillaDebugBuiltins;
-use bluebell::support::modules::ScillaDefaultBuiltins;
-use bluebell::support::modules::ScillaDefaultTypes;
-use evm_assembly::observable_machine::ObservableMachine;
-use crate::vm_remote::VmRemoteControl;
 use crate::bytecode_view::ByteCodeView;
 use crate::machine_view::MachineView;
+use crate::state::{State, StateMessage};
+use crate::vm_remote::VmRemoteControl;
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {
@@ -30,7 +23,7 @@ pub struct AppLayoutProps {
     pub children: Children,
     pub on_select_view: Callback<u32>,
     pub menu: Vec<MenuItem>,
-    pub view: u32
+    pub view: u32,
 }
 
 pub struct AppLayout {
@@ -39,8 +32,6 @@ pub struct AppLayout {
     dispatch: Dispatch<State>,
     state: Rc<State>,
 }
-
-
 
 pub enum AppLayoutMessage {
     UpdateState(Rc<State>),
@@ -66,7 +57,7 @@ impl Component for AppLayout {
 
     fn changed(&mut self, ctx: &Context<Self>, _props: &Self::Properties) -> bool {
         self.props = ctx.props().clone();
-        true        
+        true
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -78,16 +69,16 @@ impl Component for AppLayout {
         true
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         let step_button_click = self.dispatch.apply_callback(|_| StateMessage::RunStep);
+        let stop_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
 
         let run_button_click = Callback::from(move |_| {
             console::log!("Run Button clicked 2");
         });
 
-
         let generate_menu = {
-            let selected_view  = self.props.view as u32;
+            let selected_view = self.props.view as u32;
             move |item: &MenuItem, is_desktop: bool| {
                 let mut item_class = if is_desktop {
                     "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold".to_string()
@@ -112,103 +103,140 @@ impl Component for AppLayout {
         };
 
         html! {
-        <div class="pl-20 h-screen w-screen">
-          <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-gray-900/80"></div>
+                <div class="pl-20 h-screen w-screen">
+                  <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
+                    <div class="fixed inset-0 bg-gray-900/80"></div>
 
-            <div class="fixed inset-0 flex">
-              <div class="relative mr-16 flex w-full max-w-xs flex-1">
-                <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
-                  <button type="button" class="-m-2.5 p-2.5">
-                    <span class="sr-only">{"Close sidebar"}</span>
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+                    <div class="fixed inset-0 flex">
+                      <div class="relative mr-16 flex w-full max-w-xs flex-1">
+                        <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
+                          <button type="button" class="-m-2.5 p-2.5">
+                            <span class="sr-only">{"Close sidebar"}</span>
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
 
-                <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
-                  <div class="flex h-16 shrink-0 items-center">
-                    <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
+                        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
+                          <div class="flex h-16 shrink-0 items-center">
+                            <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
+                          </div>
+                        <nav class="flex flex-1 flex-col">
+                            <ul role="list" class="-mx-2 flex-1 space-y-1">
+                                { for self.props.menu.iter().map(|item| generate_menu(item, false)) }
+                            </ul>
+                        </nav>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                <nav class="flex flex-1 flex-col">
-                    <ul role="list" class="-mx-2 flex-1 space-y-1">
-                        { for self.props.menu.iter().map(|item| generate_menu(item, false)) }
-                    </ul>
-                </nav>
+
+                  /* Static sidebar for desktop */
+                  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-20 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
+                    <div class="flex h-16 shrink-0 items-center justify-center">
+                      <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
+                    </div>
+                        <nav class="mt-8">
+                            <ul role="list" class="flex flex-col items-center space-y-1">
+                                { for self.props.menu.iter().map(|item| generate_menu(item, true)) }
+                            </ul>
+                        </nav>
+                  </div>
+
+                  <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
+                    <button type="button" class="-m-2.5 p-2.5 text-gray-400 lg:hidden">
+                      <span class="sr-only">{"Open sidebar"}</span>
+                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                      </svg>
+                    </button>
+                    <div class="flex-1 text-sm font-semibold leading-6 text-white">{"Dashboard"}</div>
+                    <a href="#">
+                      <span class="sr-only">{"Your profile"}</span>
+                      <img class="h-8 w-8 rounded-full bg-gray-800" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
+                    </a>
+                  </div>
+
+                  <main class="h-full w-full">
+                    <div class="xl:pr-96">
+                      <div class="relative">
+                        { for self.props.children.iter() }
+                        /* Main area */
+                      </div>
+                    </div>
+                  </main>
+                  <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
+                    {
+                        if let Some(executable) = &self.state.executable {
+                            html! { <ByteCodeView executable={executable} data={""} program_counter={self.state.program_counter} /> }
+                        } else {
+                            html! {
+                                <div>{"Nothing compiled yet."}</div>
+                            }
+                        }
+                    }
+                  </aside>
+                    {
+                              if let Some(_) = &self.state.executable {
+                                html!{
+        <VmRemoteControl>
+            <div class="flex flex-col items-center space-y-4">
+
+                <div
+                    class="p-2 bg-zinc-900 w-full text-gray-100 rounded-md flex items-center space-x-2"
+                >
+                    <span class="font-bold">{"PC:"}</span>
+                    <span>{format!("0x{:02x}", self.state.program_counter)}</span>
+                    <span>{format!("({})", self.state.program_counter)}</span>
                 </div>
-              </div>
+
+                <div class="flex items-center space-x-4">
+
+                        <button
+                        class="flex items-center justify-center bg-blue-600 text-white w-12 h-12 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
+                        onclick={step_button_click.clone()}
+                    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
+        </svg>
+
+                    </button>
+
+                        <button
+                        class="flex items-center justify-center bg-green-600 text-white w-14 h-14 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-center"
+                        onclick={run_button_click.clone()}
+                    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+        </svg>
+
+                    </button>
+
+                        <button
+                        class="flex items-center justify-center bg-red-600 text-white w-10 h-10 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
+                        onclick={stop_button_click.clone()}
+                    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+        </svg>
+
+                    </button>
+
+                </div>
             </div>
-          </div>
+        </VmRemoteControl>
 
-          /* Static sidebar for desktop */
-          <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-20 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
-            <div class="flex h-16 shrink-0 items-center justify-center">
-              <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
-            </div>
-                <nav class="mt-8">
-                    <ul role="list" class="flex flex-col items-center space-y-1">
-                        { for self.props.menu.iter().map(|item| generate_menu(item, true)) }
-                    </ul>
-                </nav>
-          </div>
 
-          <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-            <button type="button" class="-m-2.5 p-2.5 text-gray-400 lg:hidden">
-              <span class="sr-only">{"Open sidebar"}</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            </button>
-            <div class="flex-1 text-sm font-semibold leading-6 text-white">{"Dashboard"}</div>
-            <a href="#">
-              <span class="sr-only">{"Your profile"}</span>
-              <img class="h-8 w-8 rounded-full bg-gray-800" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
-            </a>
-          </div>
+                            }
+                            } else {
+                                html! {}
 
-          <main class="h-full w-full">
-            <div class="xl:pr-96">
-              <div class="relative">
-                { for self.props.children.iter() }
-                /* Main area */
-              </div>
-            </div>
-          </main>
-          <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
-            {
-                if let Some(executable) = &self.state.executable {
-                    html! { <ByteCodeView executable={executable} data={""} program_counter={self.state.program_counter} /> }
-                } else {
-                    html! {
-                        <div>{"Nothing compiled yet."}</div>
-                    }
-                }
-            }
-          </aside>
-            {
-                      if let Some(_) = &self.state.executable {
-                        html!{
-                        <VmRemoteControl>
-                            <div class="space-x-4 ">
-                                <button class="bg-blue-600 text-white px-2 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick={step_button_click.clone()}>
-                                    {"Step"}
-                                </button>
-                                <button class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" onclick={run_button_click.clone()}>
-                                    {"Run"}
-                                </button>
-                                <div>{format!("0x{:02x}", self.state.program_counter)} <span>{" ("}{self.state.program_counter}{")"}</span></div>
-                            </div>
-                        </VmRemoteControl>
-                    }
-                    } else {
-                        html! {}
+                            }
 
-                    }
-
-                }
-        </div>
-                }
+                        }
+                </div>
+                        }
     }
 }
 
@@ -216,6 +244,8 @@ impl Component for AppLayout {
 pub fn app() -> Html {
     let state = use_store_value::<State>();
     let source_code = &state.source_code;
+    let bytecode_hex = &state.bytecode_hex;
+    let program_counter = state.program_counter as usize;
 
     let current_view_state: UseStateHandle<u32> = use_state(|| 0);
     let current_view = current_view_state.clone();
@@ -225,37 +255,13 @@ pub fn app() -> Html {
 
     let compile_button_click = {
         let source_code = source_code.clone();
+
         Callback::from(move |_| {
-            let mut compiler = EvmCompiler::new_no_abi_support();
-            compiler.pass_manager_mut().enable_debug_printer();
-
-            let default_types = ScillaDefaultTypes {};
-            let default_builtins = ScillaDefaultBuiltins {};
-            let debug = ScillaDebugBuiltins {};
-
-            compiler.attach(&default_types);
-            compiler.attach(&default_builtins);
-            compiler.attach(&debug);
-            if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
-                console::log!(
-                    "Produced code: {}",
-                    hex::encode(&exec.executable.bytecode.clone())
-                );
-
-                let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
-
-                let dispatch = Dispatch::<State>::new();
-                dispatch.reduce_mut(move |s| {
-                    s.executable = Some(Rc::new(RefCell::new(exec.executable)))
-                });
-
-                dispatch.apply(StateMessage::ResetMachine {
-                    code: code.into(),
-                    data: [].to_vec().into(), // TODO:
-                });
-            } else {
-                console::error!("Compilation failed!");
-            }
+            let dispatch = Dispatch::<State>::new();
+            dispatch.apply(StateMessage::CompileCode {
+                source_code: source_code.to_string(),
+            });
+            console::log!("Was here??");
         })
     };
 
@@ -338,7 +344,30 @@ pub fn app() -> Html {
                     html! {
                         <MachineView  />
                     }
-        }  else {
+        } else  if *current_view == 2 {
+
+            let (before, byte_at_pc, after) = if program_counter * 2 < bytecode_hex.len() {
+                let (start, rest) = bytecode_hex.split_at(program_counter * 2);
+                let (byte, end) = rest.split_at(2);
+                (start, byte, end)
+            } else {
+                (&bytecode_hex[..], "", "")
+            };
+
+
+            html! {
+                <div class="h-full w-full pl-10 bg-black">
+                    <div
+                        id="bytecode"
+                        class="text-left break-words w-full h-screen bg-black text-white font-mono focus:none outline:none"
+                    >
+                        { before }
+                        <span class="bg-yellow-600 text-black px-1">{ byte_at_pc }</span>
+                        { after }
+                    </div>
+                </div>
+            }
+        } else {
             html! {
                 <div>{"Undefined view"}</div>
             }

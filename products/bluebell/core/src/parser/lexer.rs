@@ -207,6 +207,19 @@ impl<'input> Lexer<'input> {
     }
 }
 
+pub struct SourcePosition {
+    pub start: usize,
+    pub end: usize,
+    pub line: usize,
+    pub column: usize,
+}
+impl SourcePosition {
+    pub fn set_end(&mut self, end: usize) -> &mut Self {
+        self.end = end;
+        self
+    }
+}
+
 impl<'input> Iterator for Lexer<'input> {
     type Item = Spanned<Token<&'input str>, usize, ParseError>;
 
@@ -222,6 +235,8 @@ impl<'input> Iterator for Lexer<'input> {
                     .map(|c| c.is_alphanumeric() || c == '_')
                     .unwrap_or(false);
                 let next_is_numeric = look_ahead.map(|c| c.is_numeric()).unwrap_or(false);
+
+                //                let source_position : SourcePosition
 
                 // Handle more complex tokens, whitespace, and comments
                 if ch.is_whitespace() {

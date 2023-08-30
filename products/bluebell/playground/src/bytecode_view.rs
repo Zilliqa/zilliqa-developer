@@ -1,11 +1,11 @@
+use evm_assembly::executable::EvmExecutable;
+use gloo_console as console;
+use gloo_timers::callback::Timeout;
+use std::cell::RefCell;
+use std::rc::Rc;
+use web_sys::window;
 use yew::prelude::*;
 use yewdux::prelude::*;
-use std::rc::Rc;
-use evm_assembly::executable::EvmExecutable;
-use std::cell::RefCell;
-use web_sys::window;
-use gloo_timers::callback::Timeout;
-use gloo_console as console;
 
 pub struct ByteCodeViewInstruction {
     pub label: Option<String>,
@@ -64,7 +64,7 @@ impl Component for ByteCodeView {
             props: props.clone(),
             selected_tab: 0,
             instructions: Vec::new(),
-            timeout: None
+            timeout: None,
         };
         Component::changed(&mut ret, ctx, &props);
         ret
@@ -130,74 +130,78 @@ impl Component for ByteCodeView {
                 let id = format!("instr-{}", index);
                 self.timeout.take();
                 self.timeout = Some(Timeout::new(100, move || {
-                    if let Some(element) = web_sys::window().unwrap().document().unwrap().get_element_by_id(&id) {
+                    if let Some(element) = web_sys::window()
+                        .unwrap()
+                        .document()
+                        .unwrap()
+                        .get_element_by_id(&id)
+                    {
                         element.scroll_into_view();
                     }
                 }));
                 false
-            }            
+            }
         }
     }
 
-	fn view(&self, ctx: &Context<Self>) -> Html {
-	    let program_counter = self.props.program_counter;
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let program_counter = self.props.program_counter;
 
-	    html! {
-	            <>
-	                <h2 class="text-2xl ">{"EVM Bytecode"}</h2>
-	                <div class="px-2 bg-white overflow-x-auto space-y-1">
-	                    {
-	                        for self.instructions.iter().enumerate().map(|(index, instr)| {
-	                            let id = format!("instr-{}", index+5);
-		                        if program_counter == instr.bytecode_position {
-		                            ctx.link().send_message(ByteCodeViewMessage::ScrollToPosition(index));
-		                        }
-	                            html! {
-	                                <>
-	                                    {
-	                                        if let Some(label) = &instr.label {
-	                                            html! {
-	                                                <div class="pt-6 font-medium flex items-center space-x-4 text-sm text-gray-700">
-	                                                {label}
-	                                                </div>
-	                                            }
-	                                        } else {
-	                                            html!{}
-	                                        }
-	                                    }
-		                                {
-		                                    if instr.comment.len() > 0 {
-		                                        html! {
-		                                            <div class="flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap">
-		                                                <span class="h-5 w-5"></span>
-		                                                <div class="ml-4 font-mono text-xs text-gray-400">{instr.comment.clone()}</div>
-		                                            </div>
-		                                        }
-		                                    } else {
-		                                        html!{}
-		                                    }
-		                                }
+        html! {
+                <>
+                    <h2 class="text-2xl ">{"EVM Bytecode"}</h2>
+                    <div class="px-2 bg-white overflow-x-auto space-y-1">
+                        {
+                            for self.instructions.iter().enumerate().map(|(index, instr)| {
+                                let id = format!("instr-{}", index+5);
+                                if program_counter == instr.bytecode_position {
+                                    ctx.link().send_message(ByteCodeViewMessage::ScrollToPosition(index));
+                                }
+                                html! {
+                                    <>
+                                        {
+                                            if let Some(label) = &instr.label {
+                                                html! {
+                                                    <div class="pt-6 font-medium flex items-center space-x-4 text-sm text-gray-700">
+                                                    {label}
+                                                    </div>
+                                                }
+                                            } else {
+                                                html!{}
+                                            }
+                                        }
+                                        {
+                                            if instr.comment.len() > 0 {
+                                                html! {
+                                                    <div class="flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap">
+                                                        <span class="h-5 w-5"></span>
+                                                        <div class="ml-4 font-mono text-xs text-gray-400">{instr.comment.clone()}</div>
+                                                    </div>
+                                                }
+                                            } else {
+                                                html!{}
+                                            }
+                                        }
 
-	                                    <div class={
-	                                        if program_counter == instr.bytecode_position {
-	                                          "p-2 rounded flex items-center space-x-4 text-sm text-gray-700 bg-gray-300 whitespace-nowrap"
-	                                      }
-	                                      else
-	                                      {
-	                                         "p-2 rounded  flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap"
-	                                      }
-	                                    } id={id}> // Assign the unique id here
-	                                        <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
-	                                        <div>{instr.hex_bytecode_position.clone()}</div>
-	                                        <div>{instr.text.clone()}</div>
-	                                    </div>
-	                                </>
-	                            }
-	                        })
-	                    }
-	                </div>
-	            </>
-	    }
-	}
-
+                                        <div class={
+                                            if program_counter == instr.bytecode_position {
+                                              "p-2 rounded flex items-center space-x-4 text-sm text-gray-700 bg-gray-300 whitespace-nowrap"
+                                          }
+                                          else
+                                          {
+                                             "p-2 rounded  flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap"
+                                          }
+                                        } id={id}> // Assign the unique id here
+                                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
+                                            <div>{instr.hex_bytecode_position.clone()}</div>
+                                            <div>{instr.text.clone()}</div>
+                                        </div>
+                                    </>
+                                }
+                            })
+                        }
+                    </div>
+                </>
+        }
+    }
 }

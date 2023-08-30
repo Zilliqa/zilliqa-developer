@@ -1,8 +1,8 @@
+use crate::state::{State, StateMessage};
+use std::cell::RefCell;
+use std::rc::Rc;
 use yew::prelude::*;
 use yewdux::prelude::*;
-use std::rc::Rc;
-use std::cell::RefCell;
-use crate::state::{State, StateMessage};
 
 pub struct MachineView {
     dispatch: Dispatch<State>,
@@ -90,10 +90,6 @@ impl Component for MachineView {
                         </div>
                     </div>
 
-                </div>
-                <div class="mt-4">
-                    <h3 class="text-lg font-semibold mb-2">{"Program Counter"}</h3>
-                    <p>{format!("{:?}", machine.position())}</p>
                 </div>
             </div>
         }

@@ -61,6 +61,30 @@ impl Component for VmRemoteControl {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let is_dragging = self.is_dragging;
+        html! {
+            <div
+                class="cursor-grab border rounded-lg bg-gray-700  border-black p-5 w-72 min-w-56 max-w-100 h-28 select-none shadow-xl transition-transform ease-in-out duration-300"
+                style={format!("position: absolute; right: {}px; bottom: {}px;", self.position.0, self.position.1)}
+                onmousedown={ctx.link().callback(|e: MouseEvent| {
+                    e.prevent_default();
+                    VmRemoteControlMessage::MouseDown((e.client_x(), e.client_y()))
+                })}
+                onmousemove={ctx.link().callback(move |e: MouseEvent| {
+                    if is_dragging {
+                        e.prevent_default();
+                        VmRemoteControlMessage::MouseMove((e.client_x(), e.client_y()))
+                    } else {
+                        VmRemoteControlMessage::MouseUp
+                    }
+                })}
+                onmouseup={ctx.link().callback(|_| VmRemoteControlMessage::MouseUp)}
+            >
+                { self.props.children.clone() }
+            </div>
+        }
+
+        /*
         html! {
             <div
                 class="cursor-grab border rounded border-gray-300 p-4 w-64 min-w-48 max-w-96 h-24 select-none bg-white shadow-md"
@@ -72,5 +96,6 @@ impl Component for VmRemoteControl {
                     { self.props.children.clone() }
             </div>
         }
+        */
     }
 }

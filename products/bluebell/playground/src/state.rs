@@ -1,10 +1,15 @@
 // use strum_macros::{Display, EnumIter};
+use bluebell::support::evm::EvmCompiler;
+use bluebell::support::modules::ScillaDebugBuiltins;
+use bluebell::support::modules::ScillaDefaultBuiltins;
+use bluebell::support::modules::ScillaDefaultTypes;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::observable_machine::ObservableMachine;
 use gloo_console as console;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::Rc;
+use yewdux::prelude::Dispatch;
 use yewdux::prelude::Reducer;
 use yewdux::store::Store;
 
@@ -12,6 +17,9 @@ use yewdux::store::Store;
 #[store(storage = "local")]
 pub struct State {
     pub source_code: String,
+
+    #[serde(skip)]
+    pub bytecode_hex: String,
 
     #[serde(skip)]
     pub executable: Option<Rc<RefCell<EvmExecutable>>>,
@@ -52,6 +60,7 @@ transition setHello ()
 end
 "#,
             ),
+            bytecode_hex: "".to_string(),
             executable: None,
             observable_machine: None,
             program_counter: 0,
@@ -60,19 +69,59 @@ end
 }
 
 pub enum StateMessage {
+    Reset,
     ResetMachine {
         code: Rc<Vec<u8>>,
         data: Rc<Vec<u8>>,
     }, // Add other messages here if needed
     RunStep,
+    CompileCode {
+        source_code: String,
+    },
 }
 
 impl Reducer<State> for StateMessage {
     fn apply(self, mut orig_state: Rc<State>) -> Rc<State> {
         let state = Rc::make_mut(&mut orig_state);
         match self {
+            StateMessage::Reset => {
+                state.observable_machine = None;
+                state.executable = None;
+                state.bytecode_hex = "".to_string();
+                true
+            }
+            StateMessage::CompileCode { source_code } => {
+                let mut compiler = EvmCompiler::new_no_abi_support();
+                compiler.pass_manager_mut().enable_debug_printer();
+
+                let default_types = ScillaDefaultTypes {};
+                let default_builtins = ScillaDefaultBuiltins {};
+                let debug = ScillaDebugBuiltins {};
+
+                compiler.attach(&default_types);
+                compiler.attach(&default_builtins);
+                compiler.attach(&debug);
+                if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
+                    state.source_code = source_code.clone();
+                    state.bytecode_hex = hex::encode(&exec.executable.bytecode.clone());
+                    let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
+
+                    state.executable = Some(Rc::new(RefCell::new(exec.executable)));
+                    state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
+                        code.into(),
+                        [].to_vec().into(),
+                        1024,
+                        1024,
+                    ))));
+                } else {
+                    console::error!("Compilation failed!");
+                }
+
+                true
+            }
             StateMessage::ResetMachine { code, data } => {
                 // console::log!("Code: {}", hex::encode(&*code));
+                console::log!("Resetting machine");
                 state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
                     code, data, 1024, 1024,
                 ))));
@@ -120,6 +169,7 @@ impl Clone for State {
             executable,
             observable_machine,
             program_counter: self.program_counter,
+            bytecode_hex: self.bytecode_hex.clone(),
         }
     }
 }
@@ -150,6 +200,7 @@ impl PartialEq for State {
             && Rc::ptr_eq(&o1, &o2)
             && self.source_code == other.source_code
             && self.program_counter == other.program_counter
+            && self.bytecode_hex == other.bytecode_hex
     }
 }
 
