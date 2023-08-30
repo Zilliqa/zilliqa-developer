@@ -23,6 +23,7 @@ gloo-console = "0.2.3"
 regex = "1"
 getrandom = { version = "0.2", features = ["js"] }
 yewdux = "0.9.3"
+gloo-timers = "0.3"
 
 # Bluebell
 bluebell = { path = "../core" }

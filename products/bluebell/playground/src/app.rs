@@ -14,256 +14,9 @@ use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
 use bluebell::support::modules::ScillaDefaultTypes;
 use evm_assembly::observable_machine::ObservableMachine;
-
-pub struct FloatingCard {
-    props: FloatingCardProps,
-    is_dragging: bool,
-    position: (i32, i32),
-    last_mouse_position: (i32, i32),
-}
-
-#[derive(Properties, Clone, PartialEq)]
-pub struct FloatingCardProps {
-    pub children: Children,
-}
-
-pub enum FloatingCardMessage {
-    MouseDown((i32, i32)),
-    MouseMove((i32, i32)),
-    MouseUp,
-}
-
-impl Component for FloatingCard {
-    type Message = FloatingCardMessage;
-    type Properties = FloatingCardProps;
-
-    fn create(ctx: &Context<Self>) -> Self {
-        let props = ctx.props().clone();
-        Self {
-            props,
-            is_dragging: false,
-            position: (300, 100),
-            last_mouse_position: (0, 0),
-        }
-    }
-
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            FloatingCardMessage::MouseDown(coords) => {
-                self.is_dragging = true;
-                self.last_mouse_position = coords;
-            }
-            FloatingCardMessage::MouseMove(coords) => {
-                if self.is_dragging {
-                    let dx = coords.0 - self.last_mouse_position.0;
-                    let dy = coords.1 - self.last_mouse_position.1;
-                    self.position.0 -= dx;
-                    self.position.1 -= dy;
-                    self.last_mouse_position = coords;
-                }
-            }
-            FloatingCardMessage::MouseUp => {
-                self.is_dragging = false;
-            }
-        }
-        true
-    }
-
-    fn changed(&mut self, ctx: &Context<Self>, _props: &FloatingCardProps) -> bool {
-        self.props = ctx.props().clone();
-        true
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        html! {
-            <div
-                class="cursor-grab border rounded border-gray-300 p-4 w-64 min-w-48 max-w-96 h-24 select-none bg-white shadow-md"
-                style={format!("position: absolute; right: {}px; bottom: {}px;", self.position.0, self.position.1)}
-                onmousedown={ctx.link().callback(|e: MouseEvent| FloatingCardMessage::MouseDown((e.client_x(), e.client_y())))}
-                onmousemove={ctx.link().callback(|e: MouseEvent| FloatingCardMessage::MouseMove((e.client_x(), e.client_y())))}
-                onmouseup={ctx.link().callback(|_| FloatingCardMessage::MouseUp)}
-            >
-                    { self.props.children.clone() }
-            </div>
-        }
-    }
-}
-
-pub struct ByteCodeViewInstruction {
-    pub label: Option<String>,
-    pub bytecode_position: u32,
-    pub hex_bytecode_position: String,
-    pub text: String,
-    pub comment: String,
-}
-
-pub struct ByteCodeView {
-    props: ByteCodeViewProps,
-    selected_tab: usize,
-    instructions: Vec<ByteCodeViewInstruction>,
-}
-pub enum ByteCodeViewMessage {
-    SelectTab(usize),
-    SetInstructions(Vec<ByteCodeViewInstruction>),
-}
-#[derive(Properties)]
-pub struct ByteCodeViewProps {
-    pub executable: Rc<RefCell<EvmExecutable>>,
-    pub data: String,
-    pub program_counter: u32,
-}
-
-impl Clone for ByteCodeViewProps {
-    fn clone(&self) -> Self {
-        Self {
-            executable: Rc::clone(&self.executable),
-            data: self.data.clone(),
-            program_counter: self.program_counter,
-        }
-    }
-}
-
-impl PartialEq for ByteCodeViewProps {
-    fn eq(&self, other: &Self) -> bool {
-        // Logic to compare two ByteCodeViewProps.
-        // If you only need reference equality for the Rc:
-        Rc::ptr_eq(&self.executable, &other.executable)
-            && self.data == other.data
-            && self.program_counter == other.program_counter
-    }
-}
-
-impl Component for ByteCodeView {
-    type Message = ByteCodeViewMessage;
-    type Properties = ByteCodeViewProps;
-
-    fn create(ctx: &Context<Self>) -> Self {
-        let props = ctx.props().clone();
-
-        let mut ret = Self {
-            props: props.clone(),
-            selected_tab: 0,
-            instructions: Vec::new(),
-        };
-        Component::changed(&mut ret, ctx, &props);
-        ret
-    }
-
-    fn changed(&mut self, ctx: &Context<Self>, props: &ByteCodeViewProps) -> bool {
-        let functions = (*props.executable).clone().into_inner().ir.functions;
-
-        let mut instructions: Vec<ByteCodeViewInstruction> = Vec::new();
-        for function in &functions {
-            for block in &function.blocks {
-                let mut next_label = Some(block.name.clone());
-
-                for instr in &block.instructions {
-                    let bytecode_position = match instr.position {
-                        Some(v) => v,
-                        None => 0,
-                    };
-
-                    let instruction_value = if instr.arguments.len() > 0 {
-                        let argument: String = instr
-                            .arguments
-                            .iter()
-                            .map(|byte| format!("{:02x}", byte).to_string())
-                            .collect();
-
-                        format!("{} 0x{}", instr.opcode.to_string(), argument).to_string()
-                    } else {
-                        instr.opcode.to_string()
-                    };
-
-                    let next_instr = ByteCodeViewInstruction {
-                        label: next_label,
-                        bytecode_position,
-                        hex_bytecode_position: format!("0x{:02x}", bytecode_position).to_string(),
-                        text: instruction_value,
-                        comment: instr.comment.clone().unwrap_or("".to_string()),
-                    };
-                    instructions.push(next_instr);
-                    next_label = None;
-                }
-            }
-        }
-        self.props = ctx.props().clone();
-        ctx.link()
-            .send_message(ByteCodeViewMessage::SetInstructions(instructions));
-        true
-    }
-
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            ByteCodeViewMessage::SelectTab(index) => {
-                self.selected_tab = index;
-                true
-            }
-            ByteCodeViewMessage::SetInstructions(instructions) => {
-                self.instructions = instructions;
-                true
-            }
-        }
-    }
-
-    fn view(&self, _ctx: &Context<Self>) -> Html {
-        let program_counter = self.props.program_counter;
-
-        html! {
-                <>
-                    <h2 class="text-2xl ">{"EVM Bytecode"}</h2>
-                    <div class="px-4 bg-white overflow-auto space-y-1">
-                        {
-                            for self.instructions.iter().map(|instr| html! {
-                                <>
-                                    {
-                                        if let Some(label) = &instr.label {
-                                            html! {
-                                                <div class="pt-6 font-medium flex items-center space-x-4 text-sm text-gray-700">
-                                                {label}
-                                                </div>
-                                            }
-                                        } else {
-                                            html!{}
-                                        }
-                                    }
-
-                                {
-                                    if instr.comment.len() > 0 {
-                                        html! {
-                                            <div class="flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap">
-                                                <span class="h-5 w-5"></span>
-                                                <div class="ml-4 font-mono text-xs text-gray-400">{instr.comment.clone()}</div>
-                                            </div>
-                                        }
-                                    } else {
-                                        html!{}
-                                    }
-                                }
-
-                                <div class={
-                                    if program_counter == instr.bytecode_position {
-                                      "flex items-center space-x-4 text-sm text-gray-700 bg-green-600 whitespace-nowrap"
-                                  }
-                                  else
-                                  {
-                                     "flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap"
-                                  }
-                                }>
-                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
-                                    <div>{instr.hex_bytecode_position.clone()}</div>
-                                    <div>{instr.text.clone()}</div>
-                                </div>
-
-                            </>
-                        })
-                    }
-                    </div>
-                </>
-
-        }
-    }
-}
+use crate::vm_remote::VmRemoteControl;
+use crate::bytecode_view::ByteCodeView;
+use crate::machine_view::MachineView;
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {
@@ -277,93 +30,17 @@ pub struct AppLayoutProps {
     pub children: Children,
     pub on_select_view: Callback<u32>,
     pub menu: Vec<MenuItem>,
+    pub view: u32
 }
 
 pub struct AppLayout {
     props: AppLayoutProps,
     data: String,
-    view: usize,
     dispatch: Dispatch<State>,
     state: Rc<State>,
 }
 
-pub struct MachineView {
-    dispatch: Dispatch<State>,
-    state: Rc<State>,
-}
 
-pub enum MachineViewMessage {
-    UpdateState(Rc<State>),
-}
-
-impl Component for MachineView {
-    type Message = MachineViewMessage;
-    type Properties = ();
-
-    fn create(ctx: &Context<Self>) -> Self {
-        let state_callback = ctx.link().callback(MachineViewMessage::UpdateState);
-        let dispatch = Dispatch::<State>::subscribe(state_callback);
-        Self {
-            state: dispatch.get(),
-            dispatch,
-        }
-    }
-
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            MachineViewMessage::UpdateState(state) => {
-                self.state = state;
-            }
-        }
-        true
-    }
-
-    fn view(&self, _ctx: &Context<Self>) -> Html {
-        let observable_machine = match &self.state.observable_machine {
-            Some(o) => o,
-            None => {
-                return html! {
-                    <div>{"No machine started yet."}</div>
-                }
-            }
-        };
-        let machine = &(observable_machine.borrow()).machine;
-
-        html! {
-            <div class="bg-black min-h-full max-h-full h-screen w-full p-4">
-                <h2 class="text-xl font-bold mb-4">{"EVM Machine State"}</h2>
-                <div class="grid grid-rows-2 lg:grid-cols-2 gap-4">
-                    <div class="border p-4">
-                        <h3 class="text-lg font-semibold mb-2">{"Stack"}</h3>
-                        <ul>
-                            { for machine.stack().data().iter().rev().map(|item| html! { <li>{format!("{:?}", item)}</li> }) }
-                        </ul>
-                    </div>
-                    <div class="border p-4">
-                        <h3 class="text-lg font-semibold mb-2">{"Memory"}</h3>
-                        <div class="grid grid-cols-12">
-                            { for machine.memory().data().chunks(32).enumerate().map(|(idx, chunk)| {
-                                let address = idx * 32;
-                                let segment: String = chunk.iter().map(|b| format!("{:02x}", b)).collect::<Vec<_>>().join("");
-                                html! {
-                                    <>
-                                    <div class="col-span-2">{format!("0x{:02x}", address)}</div>
-                                    <div class="col-span-10">{format!("{}", segment)}</div>
-                                    </>
-                                }
-                            }) }
-                        </div>
-
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <h3 class="text-lg font-semibold mb-2">{"Program Counter"}</h3>
-                    <p>{format!("{:?}", machine.position())}</p>
-                </div>
-            </div>
-        }
-    }
-}
 
 pub enum AppLayoutMessage {
     UpdateState(Rc<State>),
@@ -382,10 +59,14 @@ impl Component for AppLayout {
         Self {
             props: props.clone(),
             data: "".to_string(),
-            view: 0,
             state: dispatch.get(),
             dispatch,
         }
+    }
+
+    fn changed(&mut self, ctx: &Context<Self>, _props: &Self::Properties) -> bool {
+        self.props = ctx.props().clone();
+        true        
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -397,55 +78,36 @@ impl Component for AppLayout {
         true
     }
 
-    /*
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            AppLayoutMessage::SelectView(index) => {
-                self.view = index;
-                true
-            }
-            AppLayoutMessage::ResetMachine { code, data } => {
-                console::log!("Code: {}", hex::encode(&*code));
-                self.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
-                    code, data, 1024, 1024,
-                ))));
-                true
-            }
-            AppLayoutMessage::RunStep => {
-                if let Some(ref mut machine) = self.observable_machine {
-                    machine.borrow_mut().step();
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-    }
-    */
-
     fn view(&self, ctx: &Context<Self>) -> Html {
         let step_button_click = self.dispatch.apply_callback(|_| StateMessage::RunStep);
 
         let run_button_click = Callback::from(move |_| {
-            console::log!("Run Button clicked");
+            console::log!("Run Button clicked 2");
         });
 
-        let generate_menu = |item: &MenuItem, is_desktop: bool| {
-            let item_class = if is_desktop {
-                "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
-            } else {
-                "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-            };
 
-            let index = item.index;
+        let generate_menu = {
+            let selected_view  = self.props.view as u32;
+            move |item: &MenuItem, is_desktop: bool| {
+                let mut item_class = if is_desktop {
+                    "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold".to_string()
+                } else {
+                    "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold".to_string()
+                };
 
-            html! {
-                <li>
-                    <a href="#" class={item_class} onclick={self.props.on_select_view.reform(move |_| index)}>
-                        { item.icon.clone() }
-                        { if !is_desktop { html! { &item.text } } else { html! {} } }
-                    </a>
-                </li>
+                if item.index == selected_view {
+                    item_class.push_str(" bg-gray-700");
+                }
+                let index = item.index;
+
+                html! {
+                    <li>
+                        <a href="#" class={item_class} onclick={self.props.on_select_view.reform(move |_| index)}>
+                            { item.icon.clone() }
+                            { if !is_desktop { html! { &item.text } } else { html! {} } }
+                        </a>
+                    </li>
+                }
             }
         };
 
@@ -514,7 +176,6 @@ impl Component for AppLayout {
             </div>
           </main>
           <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
-            <div>{self.state.program_counter}</div>
             {
                 if let Some(executable) = &self.state.executable {
                     html! { <ByteCodeView executable={executable} data={""} program_counter={self.state.program_counter} /> }
@@ -528,7 +189,7 @@ impl Component for AppLayout {
             {
                       if let Some(_) = &self.state.executable {
                         html!{
-                        <FloatingCard>
+                        <VmRemoteControl>
                             <div class="space-x-4 ">
                                 <button class="bg-blue-600 text-white px-2 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick={step_button_click.clone()}>
                                     {"Step"}
@@ -538,7 +199,7 @@ impl Component for AppLayout {
                                 </button>
                                 <div>{format!("0x{:02x}", self.state.program_counter)} <span>{" ("}{self.state.program_counter}{")"}</span></div>
                             </div>
-                        </FloatingCard>
+                        </VmRemoteControl>
                     }
                     } else {
                         html! {}
@@ -616,27 +277,29 @@ pub fn app() -> Html {
     let menu : Vec< MenuItem > = [
         MenuItem {
             icon: html!{
-<svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+</svg>
             },
             text: "Code Editor".to_string(),
             index: 0
         },
         MenuItem {
             icon: html!{
-<svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+</svg>
+
             },
             text: "Virtual Machine".to_string(),
             index: 1
         },
         MenuItem {
             icon: html!{
-<svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+</svg>
             },
             text: "Bytecode".to_string(),
             index: 2
@@ -645,15 +308,15 @@ pub fn app() -> Html {
     ].to_vec();
 
     html! {
-        <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view}>
+        <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
 
             { if *current_view == 0 {
 
                 html! {
-                <div class="h-full w-full">
+                <div class="h-full w-full pl-10 bg-black">
                 <textarea
                     id="source-code"
-                    class="w-full h-screen  bg-black text-white resize-none font-mono"
+                    class="w-full h-screen  bg-black text-white resize-none font-mono focus:none outline:none"
                     style="tab-size: 4; white-space: pre;"
 
                     value={source_code}
