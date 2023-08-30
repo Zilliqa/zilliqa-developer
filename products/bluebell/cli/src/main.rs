@@ -304,9 +304,9 @@ fn main() {
         }
         Err(error) => {
             let message = format!("Syntax error {:?}", error);
-            let mut pos: Vec<usize> = [].to_vec();
+            let mut pos: Vec<lexer::SourcePosition> = [].to_vec();
             error.map_location(|l| {
-                pos.push(l);
+                pos.push(l.clone());
                 l
             });
 
@@ -325,7 +325,7 @@ fn main() {
                         line_start = n + 1;
                     }
                 }
-                if !should_stop && n == pos[0] {
+                if !should_stop && n == pos[0].start {
                     should_stop = true;
                 }
 
@@ -351,7 +351,7 @@ fn main() {
                 " ".repeat(char_counter + format!("Line {},{}:", line_counter, char_counter).len())
             );
             if pos.len() > 1 {
-                println!("{}", "^".repeat(pos[1] - pos[0]));
+                println!("{}", "^".repeat(pos[1].end - pos[0].end));
             }
 
             let my_error = ParserError {

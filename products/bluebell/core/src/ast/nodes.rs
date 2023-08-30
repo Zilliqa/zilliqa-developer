@@ -1,4 +1,10 @@
+use crate::parser::lexer::SourcePosition;
 use std::fmt;
+
+pub struct Span {
+    pub start: SourcePosition,
+    pub end: SourcePosition,
+}
 
 /*
 Things that need renaming:

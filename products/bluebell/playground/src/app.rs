@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::rc::Rc;
 use yew::virtual_dom::VNode;
 
@@ -10,6 +11,8 @@ use crate::bytecode_view::ByteCodeView;
 use crate::machine_view::MachineView;
 use crate::state::{State, StateMessage};
 use crate::vm_remote::VmRemoteControl;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {
@@ -159,8 +162,8 @@ impl Component for AppLayout {
                   </div>
 
                   <main class="h-full w-full">
-                    <div class="xl:pr-96">
-                      <div class="relative">
+                    <div class="xl:pr-96 h-full">
+                      <div class="relative h-full w-full">
                         { for self.props.children.iter() }
                         /* Main area */
                       </div>
@@ -240,6 +243,13 @@ impl Component for AppLayout {
     }
 }
 
+fn line_to_pixel_offset(line: usize) -> usize {
+    const FONT_SIZE: usize = 20; /* font size in pixels */
+    const LINE_HEIGHT: f32 = 1.0; /* line height as a multiplier */
+
+    (line - 1) * (FONT_SIZE as f32 * LINE_HEIGHT) as usize
+}
+
 #[function_component(App)]
 pub fn app() -> Html {
     let state = use_store_value::<State>();
@@ -279,6 +289,7 @@ pub fn app() -> Html {
     };
 
     let source_code: String = source_code.to_string();
+    let error_map: HashMap<usize, String> = HashMap::new();
 
     let menu : Vec< MenuItem > = [
         MenuItem {
@@ -319,27 +330,36 @@ pub fn app() -> Html {
             { if *current_view == 0 {
 
                 html! {
-                <div class="h-full w-full pl-10 bg-black">
-                <textarea
-                    id="source-code"
-                    class="w-full h-screen  bg-black text-white resize-none font-mono focus:none outline:none"
-                    style="tab-size: 4; white-space: pre;"
+                    <div class="h-full w-full pl-10 bg-black">
+                            <div class="editor-container h-full w-full bg-black  text-white text-left font-mono">
+                                <pre class="highlighted-code h-full w-full flex flex-col items-stretch hidden">
+                                    <code class="language-scilla h-full w-full"> /* TODO: Fix highligther */
+                                    {source_code.clone()}
+                                    </code>
+                                </pre>
+                                <textarea
+                                    class="overlay-textarea text-white outline-0 text-left font-mono h-full w-full focus:none"
+                                    value={source_code}
+                                    oninput={handle_source_code_change}
+                                />
+                                { for error_map.iter().map(|(line, error)| {
+                                    html! {
+                                        <div class="error-annotation" style={format!("top: {}px", line_to_pixel_offset(*line))}>
+                                            { error }
+                                        </div>
+                                    }
+                                })}
+                            </div>
+                                <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
+                                    <button class="h-16 w-16 bg-indigo-600 text-lg text-white px-6 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150" onclick={compile_button_click.clone()}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                    </div>
+                }
 
-                    value={source_code}
-                    oninput={handle_source_code_change}
-                    placeholder="Enter Scilla source code here..."
-                />
-
-
-                <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
-                    <button class="h-16 w-16 bg-indigo-600 text-lg text-white px-6 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150" onclick={compile_button_click.clone()}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                        </svg>
-                    </button>
-                </div>
-                </div>
-            }
         } else if *current_view == 1 {
                     html! {
                         <MachineView  />

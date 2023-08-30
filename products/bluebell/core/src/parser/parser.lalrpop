@@ -6,7 +6,7 @@ grammar<'err, 'input>(errors: &'err mut Vec<lexer::ParseError>);
 
 
 extern {
-    type Location = usize;
+    type Location = lexer::SourcePosition;
     type Error = lexer::ParseError;
 
     enum lexer::Token<&'input str> {
