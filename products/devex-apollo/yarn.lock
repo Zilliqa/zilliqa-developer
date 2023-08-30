@@ -2339,7 +2339,7 @@ mock-socket@^9.0.2:
   dependencies:
     url-parse "^1.4.4"
 
-mongodb@3.6.2, mongodb@^3.5.9:
+mongodb@3.6.2:
   version "3.6.2"
   resolved "https://registry.npmjs.org/mongodb/-/mongodb-3.6.2.tgz"
   dependencies:
@@ -2347,6 +2347,18 @@ mongodb@3.6.2, mongodb@^3.5.9:
     bson "^1.1.4"
     denque "^1.4.1"
     require_optional "^1.0.1"
+    safe-buffer "^5.1.2"
+  optionalDependencies:
+    saslprep "^1.0.0"
+
+mongodb@^3.6.10:
+  version "3.6.10"
+  resolved "https://registry.npmjs.org/mongodb/-/mongodb-3.6.10.tgz#f10e990113c86b195c8af0599b9b3a90748b6ee4"
+  dependencies:
+    bl "^2.2.1"
+    bson "^1.1.4"
+    denque "^1.4.1"
+    optional-require "^1.0.3"
     safe-buffer "^5.1.2"
   optionalDependencies:
     saslprep "^1.0.0"
@@ -2547,6 +2559,12 @@ onetime@^2.0.0:
   resolved "https://registry.npmjs.org/onetime/-/onetime-2.0.1.tgz"
   dependencies:
     mimic-fn "^1.0.0"
+
+optional-require@^1.0.3:
+  version "1.1.8"
+  resolved "https://registry.npmjs.org/optional-require/-/optional-require-1.1.8.tgz#16364d76261b75d964c482b2406cb824d8ec44b7"
+  dependencies:
+    require-at "^1.0.6"
 
 os-tmpdir@~1.0.2:
   version "1.0.2"
@@ -2770,6 +2788,10 @@ repeat-element@^1.1.2:
 repeat-string@^1.6.1:
   version "1.6.1"
   resolved "https://registry.npmjs.org/repeat-string/-/repeat-string-1.6.1.tgz"
+
+require-at@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.npmjs.org/require-at/-/require-at-1.0.6.tgz#9eb7e3c5e00727f5a4744070a7f560d4de4f6e6a"
 
 require_optional@^1.0.1:
   version "1.0.1"
