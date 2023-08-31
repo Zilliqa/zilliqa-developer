@@ -78,7 +78,6 @@ extern {
 
 
 
-
 // The rule that defines a byte string type in Scilla.
 // A byte string type in Scilla is a built-in type that represents a sequence of bytes.
 // The `BYSTR` keyword is used to define a byte string type in Scilla.
@@ -90,7 +89,11 @@ extern {
 // @syntax typeByteStr
 // @return A byte string type in Scilla.
 pub ByteString : NodeByteStr = {
-	r"ByStr[0-9]+" => NodeByteStr::Type(String::from(<>)),
+	<start:@L> <node:r"ByStr[0-9]+"> <end:@R> => NodeByteStr::Type(WithMetaData::<String> {
+        node: String::from(node),
+        start,
+        end
+    }),
 
 }
 
@@ -106,10 +109,22 @@ pub ByteString : NodeByteStr = {
 //
 // @syntax identifierTypeName
 // @return An identifier type name as a custom type name, a byte string type name, or an event type name.
-pub TypeNameIdentifier: NodeTypeNameIdentifier = {
-	ByteString => NodeTypeNameIdentifier::ByteStringType(<>),
-	"Event" => NodeTypeNameIdentifier::EventType,
-    <n:TypeOrEnumLikeIdentifierId> => NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(n),	
+pub TypeNameIdentifier: WithMetaData<NodeTypeNameIdentifier> = {
+	<start:@L> <node:ByteString> <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
+        node: NodeTypeNameIdentifier::EventType,  
+        start,
+        end
+    },
+    <start:@L> "Event" <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
+        node: NodeTypeNameIdentifier::EventType,  
+        start,
+        end
+    },
+    <start:@L> <node:TypeOrEnumLikeIdentifierId> <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
+        node: NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(node),	
+        start,
+        end
+    }
 }
 
 
@@ -124,9 +139,18 @@ pub TypeNameIdentifier: NodeTypeNameIdentifier = {
 //
 // @syntax importedName
 // @return A single imported name with an optional alias.
-pub ImportedName: NodeImportedName = {
-	TypeNameIdentifier => NodeImportedName::RegularImport(<>),
-	<n:TypeNameIdentifier> "as" <v:TypeNameIdentifier> => NodeImportedName::AliasedImport(n,v)
+pub ImportedName: WithMetaData<NodeImportedName> = {
+	<start:@L> <node:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeImportedName> {
+        node: NodeImportedName::RegularImport(node),
+        start,
+        end
+    },
+	<start:@L> <n:TypeNameIdentifier> "as" <v:TypeNameIdentifier> <end:@R> => 
+        WithMetaData::<NodeImportedName> {
+            node: NodeImportedName::AliasedImport(n,v),
+            start,
+            end
+        }
 }
 
 
@@ -197,10 +221,23 @@ pub MetaIdentifier : NodeMetaIdentifier = {
 //
 // @syntax variableIdentifier
 // @return A variable identifier as an identifier name with an optional namespace.
-pub VariableIdentifier : NodeVariableIdentifier = {
-	RegularId => NodeVariableIdentifier::VariableName(<>),
-	SpecialId => NodeVariableIdentifier::SpecialIdentifier(<>),
-	<n:TypeNameIdentifier> "." <r:RegularId> => NodeVariableIdentifier::VariableInNamespace(n,r),
+pub VariableIdentifier : WithMetaData<NodeVariableIdentifier> = {
+	<start:@L> <node:RegularId> <end:@R> => WithMetaData::<NodeVariableIdentifier> { 
+        node: NodeVariableIdentifier::VariableName(node),
+        start,
+        end
+    },
+	<start:@L> <node:SpecialId> <end:@R> => WithMetaData::<NodeVariableIdentifier> { 
+        node:  NodeVariableIdentifier::SpecialIdentifier(node),
+        start,
+        end
+    },
+
+	<start:@L> <n:TypeNameIdentifier> "." <r:RegularId>  <end:@R> => WithMetaData::<NodeVariableIdentifier> { 
+        node: NodeVariableIdentifier::VariableInNamespace(n,r),
+        start,
+        end
+    },
 }
 
 
@@ -323,24 +360,36 @@ pub TypeArgument: NodeTypeArgument = {
 // @syntax addressType
 // @return A Scilla address type.
 pub AddressType: NodeAddressType = {
-	<type_name: TypeNameIdentifier> "with" "end" => NodeAddressType {
+	<start:@L> <type_name: TypeNameIdentifier> "with" "end" <end:@R> => NodeAddressType {
         identifier: type_name,
-        type_name: "".to_string(),
+        type_name: WithMetaData::<String> {
+            node: "".to_string(),
+            start,
+            end
+        },
         address_fields: vec![]
     },
-	<type_name: TypeNameIdentifier> "with" "contract" <address_fields: AddressTypeFieldList?> "end" => NodeAddressType {
+	<start:@L> <type_name: TypeNameIdentifier> "with"  "contract" <address_fields: AddressTypeFieldList?> "end" <end:@R> => NodeAddressType {
         identifier: type_name,
-        type_name: "contract".to_string(),
+        type_name: WithMetaData::<String> {
+            node: "contract".to_string(),
+            start,
+            end
+        },
         address_fields: address_fields.unwrap_or([].to_vec())
     },
-	<type_name: TypeNameIdentifier> "with" "library" "end" => NodeAddressType {
+	<start:@L> <type_name: TypeNameIdentifier> "with" "library" "end" <end:@R> => NodeAddressType {
         identifier: type_name,
-        type_name: "library".to_string(),
+        type_name:  WithMetaData::<String> {
+            node: "library".to_string(),
+            start,
+            end
+        },
         address_fields: vec![]
     },
-	<type_name: TypeNameIdentifier> "with" <special_identifie:SpecialId> "end" => NodeAddressType {
+	<start:@L> <type_name: TypeNameIdentifier> "with" <special_identifier:SpecialId> "end" <end:@R> => NodeAddressType {
         identifier: type_name,
-        type_name: special_identifie,
+        type_name: special_identifier,
         address_fields: vec![]
     },
 };
@@ -820,8 +869,8 @@ pub AtomicExpression: NodeAtomicExpression = {
 // @return A value literal as a signed or unsigned integer, a hexadecimal value, a string, or an empty map.
 pub ValueLiteral: NodeValueLiteral = {
 	<n: TypeNameIdentifier> <v: SignedInteger> => NodeValueLiteral::LiteralInt(n, v),
-     <h: HexNumber> => NodeValueLiteral::LiteralHex(h.trim_start_matches("0x").to_string()),
-     <s: StringLiteral> => NodeValueLiteral::LiteralString(s[1..s.len() - 1].to_string()),
+     <start:@L> <node: HexNumber> <end:@R> => NodeValueLiteral::LiteralHex(node),
+     <s: StringLiteral> => NodeValueLiteral::LiteralString(s),
      "Emp" <key_type: TypeMapKey>  <value_type: TypeMapValue> => {
 		NodeValueLiteral::LiteralEmptyMap(key_type, value_type)
 	},
@@ -1282,8 +1331,12 @@ pub WithConstraint: NodeWithConstraint = "with" <expression:FullExpression> "=>"
 
 
 
-HexNumber: String = {
-   r"0(x|X)([a-fA-F0-9][a-fA-F0-9])*" =>String::from(<>)
+HexNumber: WithMetaData<String> = {
+   <start:@L> <node:r"0(x|X)([a-fA-F0-9][a-fA-F0-9])*"> <end:@R>  => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
 }
 
 
@@ -1298,8 +1351,12 @@ HexNumber: String = {
 // @syntax integer
 // @return A Scilla integer as a numeric value that can be positive or negative. 
 
-SignedInteger: String = {
-    r"[+-]?[0-9]+" => String::from(<>)
+SignedInteger: WithMetaData<String> = {
+    <start:@L> <node:r"[+-]?[0-9]+"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
 }
 
 
@@ -1313,8 +1370,12 @@ SignedInteger: String = {
 //
 // @syntax identifierRegular
 // @return A regular identifier as a name that can be used to identify a variable or a function in a Scilla program.
-RegularId: String = {
-	r"[a-z][a-zA-Z0-9_]*" => String::from(<>)
+RegularId: WithMetaData<String> = {
+	<start:@L> <node:r"[a-z][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
 }
 
 
@@ -1325,8 +1386,12 @@ RegularId: String = {
 //
 // @syntax identifierSpecial
 // @return A special identifier as an identifier that starts with an underscore followed by alphanumeric characters.
-SpecialId: String = {
-	r"[_][a-zA-Z0-9_]*" => String::from(<>)
+SpecialId: WithMetaData<String>  = {
+	<start:@L> <node:r"[_][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
 }
 
 
@@ -1340,16 +1405,28 @@ SpecialId: String = {
 //
 // @syntax typeTypeOrEnumLikeIdentifierName
 // @return A custom type name as a user-defined type name in a Scilla contract.
-TypeOrEnumLikeIdentifierId: String = {
-	r"[A-Z][a-zA-Z0-9_]*" => String::from(<>)
+TypeOrEnumLikeIdentifierId: WithMetaData<String> = {
+	<start:@L> <node:r"[A-Z][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
 }
 
-TemplateTypeId: String = {
-	r"['][A-Z][a-zA-Z0-9_]*" => String::from(<>)
+TemplateTypeId: WithMetaData<String>  = {
+	<start:@L> <node:r"['][A-Z][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    }
 }
 
-StringLiteral: String = {
-	r#""(?:\\.|[^"])*""# => String::from(<>)
+StringLiteral: WithMetaData<String> = {
+	<start:@L> <node:r#""(?:\\.|[^"])*""#> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    }
 }
 
 

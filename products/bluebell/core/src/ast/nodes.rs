@@ -1,11 +1,6 @@
 use crate::parser::lexer::SourcePosition;
 use std::fmt;
 
-pub struct Span {
-    pub start: SourcePosition,
-    pub end: SourcePosition,
-}
-
 /*
 Things that need renaming:
 AtomicSid -> ????
@@ -13,16 +8,29 @@ EventType -> AutoType ;; Essentially a JSON dict
 */
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
+pub struct WithMetaData<T> {
+    pub node: T,
+    pub start: SourcePosition,
+    pub end: SourcePosition,
+}
+
+impl<T: fmt::Display> fmt::Display for WithMetaData<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.node.to_string())
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeByteStr {
-    Constant(String),
-    Type(String),
+    Constant(WithMetaData<String>), // TODO: Aparently not used anywhere
+    Type(WithMetaData<String>),
 }
 
 impl NodeByteStr {
     pub fn to_string(&self) -> String {
         match self {
-            NodeByteStr::Constant(s) => s.clone(),
-            NodeByteStr::Type(t) => t.clone(),
+            NodeByteStr::Constant(s) => s.node.clone(),
+            NodeByteStr::Type(t) => t.node.clone(),
         }
     }
 }
@@ -34,16 +42,16 @@ impl fmt::Display for NodeByteStr {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeNameIdentifier {
-    ByteStringType(NodeByteStr),
+    ByteStringType(WithMetaData<NodeByteStr>),
     EventType,
-    TypeOrEnumLikeIdentifier(String),
+    TypeOrEnumLikeIdentifier(WithMetaData<String>),
 }
 
 impl NodeTypeNameIdentifier {
     pub fn to_string(&self) -> String {
         match self {
             NodeTypeNameIdentifier::ByteStringType(byte_str) => {
-                format!("{}", byte_str.to_string())
+                format!("{}", byte_str.node.to_string())
             }
             NodeTypeNameIdentifier::EventType => format!("Event"),
             NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(custom_type) => {
@@ -60,20 +68,26 @@ impl fmt::Display for NodeTypeNameIdentifier {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeImportedName {
-    RegularImport(NodeTypeNameIdentifier),
-    AliasedImport(NodeTypeNameIdentifier, NodeTypeNameIdentifier),
+    RegularImport(WithMetaData<NodeTypeNameIdentifier>),
+    AliasedImport(
+        WithMetaData<NodeTypeNameIdentifier>,
+        WithMetaData<NodeTypeNameIdentifier>,
+    ),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeImportDeclarations {
-    pub import_list: Vec<NodeImportedName>,
+    pub import_list: Vec<WithMetaData<NodeImportedName>>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeMetaIdentifier {
-    MetaName(NodeTypeNameIdentifier),
-    MetaNameInNamespace(NodeTypeNameIdentifier, NodeTypeNameIdentifier),
-    MetaNameInHexspace(String, NodeTypeNameIdentifier),
+    MetaName(WithMetaData<NodeTypeNameIdentifier>),
+    MetaNameInNamespace(
+        WithMetaData<NodeTypeNameIdentifier>,
+        WithMetaData<NodeTypeNameIdentifier>,
+    ),
+    MetaNameInHexspace(WithMetaData<String>, WithMetaData<NodeTypeNameIdentifier>),
     ByteString,
 }
 
@@ -102,9 +116,9 @@ impl fmt::Display for NodeMetaIdentifier {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeVariableIdentifier {
-    VariableName(String),
-    SpecialIdentifier(String),
-    VariableInNamespace(NodeTypeNameIdentifier, String),
+    VariableName(WithMetaData<String>),
+    SpecialIdentifier(WithMetaData<String>),
+    VariableInNamespace(WithMetaData<NodeTypeNameIdentifier>, WithMetaData<String>),
 }
 
 impl NodeVariableIdentifier {
@@ -127,7 +141,7 @@ impl fmt::Display for NodeVariableIdentifier {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeBuiltinArguments {
-    pub arguments: Vec<NodeVariableIdentifier>,
+    pub arguments: Vec<WithMetaData<NodeVariableIdentifier>>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -150,7 +164,7 @@ pub enum NodeTypeMapValue {
 pub enum NodeTypeArgument {
     EnclosedTypeArgument(Box<NodeScillaType>),
     GenericTypeArgument(NodeMetaIdentifier),
-    TemplateTypeArgument(String),
+    TemplateTypeArgument(WithMetaData<String>),
     AddressTypeArgument(NodeAddressType),
     MapTypeArgument(NodeTypeMapKey, NodeTypeMapValue),
 }
@@ -162,8 +176,8 @@ pub enum NodeScillaType {
     FunctionType(Box<NodeScillaType>, Box<NodeScillaType>),
     EnclosedType(Box<NodeScillaType>),
     ScillaAddresseType(Box<NodeAddressType>),
-    PolyFunctionType(String, Box<NodeScillaType>),
-    TypeVarType(String),
+    PolyFunctionType(WithMetaData<String>, Box<NodeScillaType>),
+    TypeVarType(WithMetaData<String>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -174,64 +188,67 @@ pub struct NodeTypeMapEntry {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeAddressTypeField {
-    pub identifier: NodeVariableIdentifier,
+    pub identifier: WithMetaData<NodeVariableIdentifier>,
     pub type_name: NodeScillaType,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeAddressType {
-    pub identifier: NodeTypeNameIdentifier,
-    pub type_name: String,
+    pub identifier: WithMetaData<NodeTypeNameIdentifier>,
+    pub type_name: WithMetaData<String>,
     pub address_fields: Vec<NodeAddressTypeField>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeFullExpression {
     LocalVariableDeclaration {
-        identifier_name: String,
+        identifier_name: WithMetaData<String>,
         expression: Box<NodeFullExpression>,
         type_annotation: Option<NodeTypeAnnotation>,
         containing_expression: Box<NodeFullExpression>,
     },
     FunctionDeclaration {
-        identier_value: String,
+        identier_value: WithMetaData<String>,
         type_annotation: NodeTypeAnnotation,
         expression: Box<NodeFullExpression>,
     },
     FunctionCall {
-        function_name: NodeVariableIdentifier,
-        argument_list: Vec<NodeVariableIdentifier>,
+        function_name: WithMetaData<NodeVariableIdentifier>,
+        argument_list: Vec<WithMetaData<NodeVariableIdentifier>>,
     },
     ExpressionAtomic(Box<NodeAtomicExpression>),
     ExpressionBuiltin {
-        b: String,
+        b: WithMetaData<String>,
         targs: Option<NodeContractTypeArguments>,
         xs: NodeBuiltinArguments,
     },
     Message(Vec<NodeMessageEntry>),
     Match {
-        match_expression: NodeVariableIdentifier,
+        match_expression: WithMetaData<NodeVariableIdentifier>,
         clauses: Vec<NodePatternMatchExpressionClause>,
     },
     ConstructorCall {
         identifier_name: NodeMetaIdentifier,
         contract_type_arguments: Option<NodeContractTypeArguments>,
-        argument_list: Vec<NodeVariableIdentifier>,
+        argument_list: Vec<WithMetaData<NodeVariableIdentifier>>,
     },
     TemplateFunction {
-        identifier_name: String,
+        identifier_name: WithMetaData<String>,
         expression: Box<NodeFullExpression>,
     },
     TApp {
-        identifier_name: NodeVariableIdentifier,
+        identifier_name: WithMetaData<NodeVariableIdentifier>,
         type_arguments: Vec<NodeTypeArgument>,
     },
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeMessageEntry {
-    MessageLiteral(NodeVariableIdentifier, NodeValueLiteral),
-    MessageVariable(NodeVariableIdentifier, NodeVariableIdentifier),
+    MessageLiteral(WithMetaData<NodeVariableIdentifier>, NodeValueLiteral),
+    MessageVariable(
+        WithMetaData<NodeVariableIdentifier>,
+        WithMetaData<NodeVariableIdentifier>,
+    ),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -242,7 +259,7 @@ pub struct NodePatternMatchExpressionClause {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeAtomicExpression {
-    AtomicSid(NodeVariableIdentifier),
+    AtomicSid(WithMetaData<NodeVariableIdentifier>),
     AtomicLit(NodeValueLiteral),
 }
 
@@ -253,28 +270,28 @@ pub struct NodeContractTypeArguments {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeValueLiteral {
-    LiteralInt(NodeTypeNameIdentifier, String),
-    LiteralHex(String),
-    LiteralString(String),
+    LiteralInt(WithMetaData<NodeTypeNameIdentifier>, WithMetaData<String>),
+    LiteralHex(WithMetaData<String>),
+    LiteralString(WithMetaData<String>),
     LiteralEmptyMap(NodeTypeMapKey, NodeTypeMapValue),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeMapAccess {
-    pub identifier_name: NodeVariableIdentifier,
+    pub identifier_name: WithMetaData<NodeVariableIdentifier>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodePattern {
     Wildcard,
-    Binder(String),
+    Binder(WithMetaData<String>),
     Constructor(NodeMetaIdentifier, Vec<NodeArgumentPattern>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeArgumentPattern {
     WildcardArgument,
-    BinderArgument(String),
+    BinderArgument(WithMetaData<String>),
     ConstructorArgument(NodeMetaIdentifier),
     PatternArgument(Box<NodePattern>),
 }
@@ -287,85 +304,107 @@ pub struct NodePatternMatchClause {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeBlockchainFetchArguments {
-    pub arguments: Vec<NodeVariableIdentifier>,
+    pub arguments: Vec<WithMetaData<NodeVariableIdentifier>>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeStatement {
     Load {
-        left_hand_side: String,
-        right_hand_side: NodeVariableIdentifier,
+        left_hand_side: WithMetaData<String>,
+        right_hand_side: WithMetaData<NodeVariableIdentifier>,
     },
     RemoteFetch(Box<NodeRemoteFetchStatement>),
     Store {
-        left_hand_side: String,
-        right_hand_side: NodeVariableIdentifier,
+        left_hand_side: WithMetaData<String>,
+        right_hand_side: WithMetaData<NodeVariableIdentifier>,
     },
     Bind {
-        left_hand_side: String,
+        left_hand_side: WithMetaData<String>,
         right_hand_side: Box<NodeFullExpression>,
     },
     ReadFromBC {
-        left_hand_side: String,
-        type_name: NodeTypeNameIdentifier,
+        left_hand_side: WithMetaData<String>,
+        type_name: WithMetaData<NodeTypeNameIdentifier>,
         arguments: Option<NodeBlockchainFetchArguments>,
     },
     MapGet {
-        left_hand_side: String,
+        left_hand_side: WithMetaData<String>,
         keys: Vec<NodeMapAccess>,
-        right_hand_side: String,
+        right_hand_side: WithMetaData<String>,
     },
     MapGetExists {
-        left_hand_side: String,
+        left_hand_side: WithMetaData<String>,
         keys: Vec<NodeMapAccess>,
-        right_hand_side: String,
+        right_hand_side: WithMetaData<String>,
     },
     MapUpdate {
-        left_hand_side: String,
+        left_hand_side: WithMetaData<String>,
         keys: Vec<NodeMapAccess>,
-        right_hand_side: NodeVariableIdentifier,
+        right_hand_side: WithMetaData<NodeVariableIdentifier>,
     },
     MapUpdateDelete {
-        left_hand_side: String,
+        left_hand_side: WithMetaData<String>,
         keys: Vec<NodeMapAccess>,
     },
     Accept,
     Send {
-        identifier_name: NodeVariableIdentifier,
+        identifier_name: WithMetaData<NodeVariableIdentifier>,
     },
     CreateEvnt {
-        identifier_name: NodeVariableIdentifier,
+        identifier_name: WithMetaData<NodeVariableIdentifier>,
     },
     Throw {
-        error_variable: Option<NodeVariableIdentifier>,
+        error_variable: Option<WithMetaData<NodeVariableIdentifier>>,
     },
     MatchStmt {
-        variable: NodeVariableIdentifier,
+        variable: WithMetaData<NodeVariableIdentifier>,
         clauses: Vec<NodePatternMatchClause>,
     },
     CallProc {
         component_id: NodeComponentId,
-        arguments: Vec<NodeVariableIdentifier>,
+        arguments: Vec<WithMetaData<NodeVariableIdentifier>>,
     },
     Iterate {
-        identifier_name: NodeVariableIdentifier,
+        identifier_name: WithMetaData<NodeVariableIdentifier>,
         component_id: NodeComponentId,
     },
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeRemoteFetchStatement {
-    ReadStateMutable(String, String, NodeVariableIdentifier),
-    ReadStateMutableSpecialId(String, String, String),
-    ReadStateMutableMapAccess(String, String, String, Vec<NodeMapAccess>),
-    ReadStateMutableMapAccessExists(String, String, String, Vec<NodeMapAccess>),
-    ReadStateMutableCastAddress(String, NodeVariableIdentifier, NodeAddressType),
+    ReadStateMutable(
+        WithMetaData<String>,
+        WithMetaData<String>,
+        WithMetaData<NodeVariableIdentifier>,
+    ),
+    ReadStateMutableSpecialId(
+        WithMetaData<String>,
+        WithMetaData<String>,
+        WithMetaData<String>,
+    ),
+    ReadStateMutableMapAccess(
+        WithMetaData<String>,
+        WithMetaData<String>,
+        WithMetaData<String>,
+        Vec<NodeMapAccess>,
+    ),
+    ReadStateMutableMapAccessExists(
+        WithMetaData<String>,
+        WithMetaData<String>,
+        WithMetaData<String>,
+        Vec<NodeMapAccess>,
+    ),
+    ReadStateMutableCastAddress(
+        WithMetaData<String>,
+        WithMetaData<NodeVariableIdentifier>,
+        NodeAddressType,
+    ),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeComponentId {
-    WithTypeLikeName(NodeTypeNameIdentifier),
-    WithRegularId(String),
+    WithTypeLikeName(WithMetaData<NodeTypeNameIdentifier>),
+    WithRegularId(WithMetaData<String>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -390,7 +429,7 @@ pub struct NodeStatementBlock {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypedIdentifier {
-    pub identifier_name: String,
+    pub identifier_name: WithMetaData<String>,
     pub annotation: NodeTypeAnnotation,
 }
 
@@ -401,7 +440,7 @@ pub struct NodeTypeAnnotation {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeProgram {
-    pub version: String,
+    pub version: WithMetaData<String>,
     pub import_declarations: Option<NodeImportDeclarations>,
     pub library_definition: Option<NodeLibraryDefinition>,
     pub contract_definition: NodeContractDefinition,
@@ -409,27 +448,27 @@ pub struct NodeProgram {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeLibraryDefinition {
-    pub name: NodeTypeNameIdentifier,
+    pub name: WithMetaData<NodeTypeNameIdentifier>,
     pub definitions: Vec<NodeLibrarySingleDefinition>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeLibrarySingleDefinition {
     LetDefinition {
-        variable_name: String,
+        variable_name: WithMetaData<String>,
         type_annotation: Option<NodeTypeAnnotation>,
         expression: NodeFullExpression,
     },
     TypeDefinition(
         // TODO: Enum definition
-        NodeTypeNameIdentifier,
+        WithMetaData<NodeTypeNameIdentifier>,
         Option<Vec<NodeTypeAlternativeClause>>,
     ),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractDefinition {
-    pub contract_name: NodeTypeNameIdentifier,
+    pub contract_name: WithMetaData<NodeTypeNameIdentifier>,
     pub parameters: NodeComponentParameters,
     pub constraint: Option<NodeWithConstraint>,
     pub fields: Vec<NodeContractField>,
@@ -469,8 +508,8 @@ pub struct NodeTransitionDefinition {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeAlternativeClause {
-    ClauseType(NodeTypeNameIdentifier),
-    ClauseTypeWithArgs(NodeTypeNameIdentifier, Vec<NodeTypeArgument>),
+    ClauseType(WithMetaData<NodeTypeNameIdentifier>),
+    ClauseTypeWithArgs(WithMetaData<NodeTypeNameIdentifier>, Vec<NodeTypeArgument>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]

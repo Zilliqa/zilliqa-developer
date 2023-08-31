@@ -325,7 +325,7 @@ fn main() {
                         line_start = n + 1;
                     }
                 }
-                if !should_stop && n == pos[0].start {
+                if !should_stop && n == pos[0].position {
                     should_stop = true;
                 }
 
@@ -351,7 +351,7 @@ fn main() {
                 " ".repeat(char_counter + format!("Line {},{}:", line_counter, char_counter).len())
             );
             if pos.len() > 1 {
-                println!("{}", "^".repeat(pos[1].end - pos[0].end));
+                println!("{}", "^".repeat(pos[1].position - pos[0].position));
             }
 
             let my_error = ParserError {

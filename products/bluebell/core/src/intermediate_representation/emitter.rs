@@ -444,7 +444,7 @@ impl AstConverting for IrEmitter {
             }
             NodeFullExpression::ExpressionAtomic(expr) => match &**expr {
                 NodeAtomicExpression::AtomicSid(identifier) => {
-                    let _ = identifier.visit(self)?;
+                    let _ = identifier.node.visit(self)?;
                 }
                 NodeAtomicExpression::AtomicLit(literal) => {
                     let _ = literal.visit(self)?;
@@ -458,7 +458,7 @@ impl AstConverting for IrEmitter {
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
                 for arg in xs.arguments.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
-                    let _ = arg.visit(self)?;
+                    let _ = arg.node.visit(self)?;
                     let instruction = self.pop_instruction()?;
 
                     let symbol = self.convert_instruction_to_symbol(instruction);
@@ -490,7 +490,7 @@ impl AstConverting for IrEmitter {
                 match_expression,
                 clauses,
             } => {
-                let _ = match_expression.visit(self)?;
+                let _ = match_expression.node.visit(self)?;
                 let expression = self.pop_instruction()?;
 
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
@@ -705,7 +705,7 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeValueLiteral::LiteralInt(typename, value) => {
-                let _ = typename.visit(self)?;
+                let _ = typename.node.visit(self)?;
                 let mut typename = self.pop_ir_identifier()?;
                 assert!(typename.kind == IrIndentifierKind::Unknown);
                 typename.kind = IrIndentifierKind::TypeName;
@@ -815,9 +815,9 @@ impl AstConverting for IrEmitter {
                     is_definition: false,
                 };
 
-                let right_hand_side = match right_hand_side {
+                let right_hand_side = match &right_hand_side.node {
                     NodeVariableIdentifier::VariableName(name) => name,
-                    _ => panic!("Load of state {:#?}", right_hand_side),
+                    _ => panic!("Load of state {:#?}", right_hand_side.node),
                 };
 
                 let ret = Box::new(Instruction {
@@ -848,7 +848,7 @@ impl AstConverting for IrEmitter {
                 right_hand_side,
             } => {
                 // Generating instruction and setting its name
-                let _ = right_hand_side.visit(self)?;
+                let _ = right_hand_side.node.visit(self)?;
 
                 let mut right_hand_side = self.pop_instruction()?;
                 let symbol = IrIdentifier {
@@ -949,7 +949,7 @@ impl AstConverting for IrEmitter {
                 unimplemented!()
             }
             NodeStatement::MatchStmt { variable, clauses } => {
-                let _ = variable.visit(self)?;
+                let _ = variable.node.visit(self)?;
                 let expression = self.pop_instruction()?;
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
@@ -1061,7 +1061,7 @@ impl AstConverting for IrEmitter {
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
                 for arg in call_args.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
-                    let _ = arg.visit(self)?;
+                    let _ = arg.node.visit(self)?;
                     let instruction = self.pop_instruction()?;
 
                     let symbol = self.convert_instruction_to_symbol(instruction);
@@ -1221,7 +1221,8 @@ impl AstConverting for IrEmitter {
         assert!(typename.kind == IrIndentifierKind::Unknown);
         typename.kind = IrIndentifierKind::TypeName;
 
-        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, false, typename));
+        let s =
+            StackObject::VariableDeclaration(VariableDeclaration::new(name.node, false, typename));
         self.stack.push(s);
 
         Ok(TraversalResult::SkipChildren)
@@ -1277,7 +1278,7 @@ impl AstConverting for IrEmitter {
         _mode: TreeTraversalMode,
         node: &NodeLibraryDefinition,
     ) -> Result<TraversalResult, String> {
-        let _ = node.name.visit(self)?;
+        let _ = node.name.node.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
         assert!(ns.kind == IrIndentifierKind::Unknown);
         ns.kind = IrIndentifierKind::Namespace;
@@ -1317,7 +1318,7 @@ impl AstConverting for IrEmitter {
                 unimplemented!();
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
-                let _ = name.visit(self)?;
+                let _ = name.node.visit(self)?;
                 let mut name = self.pop_ir_identifier()?;
                 assert!(name.kind == IrIndentifierKind::Unknown);
                 name.kind = IrIndentifierKind::TypeName;
@@ -1353,7 +1354,7 @@ impl AstConverting for IrEmitter {
         node: &NodeContractDefinition,
     ) -> Result<TraversalResult, String> {
         // TODO: Decide whether the namespace should be distinct
-        let _ = node.contract_name.visit(self)?;
+        let _ = node.contract_name.node.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
         assert!(ns.kind == IrIndentifierKind::Unknown);
         ns.kind = IrIndentifierKind::Namespace;
@@ -1487,7 +1488,7 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
-                let _ = identifier.visit(self)?;
+                let _ = identifier.node.visit(self)?;
                 let mut enum_name = self.pop_ir_identifier()?;
                 assert!(enum_name.kind == IrIndentifierKind::Unknown);
                 enum_name.kind = IrIndentifierKind::StaticFunctionName;
@@ -1495,7 +1496,7 @@ impl AstConverting for IrEmitter {
                     .push(StackObject::EnumValue(EnumValue::new(enum_name, None)));
             }
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
-                let _ = identifier.visit(self)?;
+                let _ = identifier.node.visit(self)?;
                 let mut member_name = self.pop_ir_identifier()?;
                 assert!(member_name.kind == IrIndentifierKind::Unknown);
                 member_name.kind = IrIndentifierKind::StaticFunctionName;
