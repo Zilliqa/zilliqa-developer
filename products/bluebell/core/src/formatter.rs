@@ -275,7 +275,7 @@ impl AstConverting for BluebellFormatter {
                 let _ = lead.node.visit(self)?;
                 for arg in args.iter() {
                     self.script.push_str(" ");
-                    let _ = arg.visit(self)?;
+                    let _ = arg.node.visit(self)?;
                 }
             }
             NodeScillaType::MapType(key, value) => {
@@ -376,7 +376,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(&identifier_name.node);
                 self.indent_level += 1;
                 if let Some(t) = type_annotation {
-                    let _ = t.visit(self)?;
+                    let _ = t.node.visit(self)?;
                 }
                 self.script.push_str(" = ");
                 let _ = (*expression).node.visit(self)?;
@@ -394,7 +394,7 @@ impl AstConverting for BluebellFormatter {
                 self.indent_level += 1;
                 self.script.push_str("(");
                 self.script.push_str(&identier_value.node);
-                let _ = type_annotation.visit(self)?;
+                let _ = type_annotation.node.visit(self)?;
                 self.script.push_str(") => ");
 
                 let _ = (*expression).node.visit(self)?;
@@ -411,22 +411,22 @@ impl AstConverting for BluebellFormatter {
                 }
             }
             NodeFullExpression::ExpressionAtomic(expr) => {
-                let _ = expr.visit(self)?;
+                let _ = expr.node.visit(self)?;
             }
             NodeFullExpression::ExpressionBuiltin { b, targs, xs } => {
                 self.script.push_str("builtin ");
                 self.script.push_str(&b.node);
                 if let Some(args) = targs {
-                    let _ = args.visit(self)?;
+                    let _ = args.node.visit(self)?;
                 }
                 self.script.push_str(" ");
-                let _ = xs.visit(self)?;
+                let _ = xs.node.visit(self)?;
             }
             NodeFullExpression::Message(entries) => {
                 self.script.push_str("{");
                 self.indent_level += 1;
                 for (i, message) in entries.iter().enumerate() {
-                    let _ = message.visit(self)?;
+                    let _ = message.node.visit(self)?;
                     if i != entries.len() - 1 {
                         self.script.push_str(";")
                     }
@@ -445,7 +445,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(" with ");
                 self.indent_level += 1;
                 for clause in clauses.iter() {
-                    let _ = clause.visit(self)?;
+                    let _ = clause.node.visit(self)?;
                 }
                 self.indent_level -= 1;
                 self.add_newlines(1);
@@ -459,7 +459,7 @@ impl AstConverting for BluebellFormatter {
                 let _ = identifier_name.node.visit(self)?;
                 if let Some(cta) = contract_type_arguments {
                     self.script.push_str(" ");
-                    let _ = cta.visit(self)?;
+                    let _ = cta.node.visit(self)?;
                 }
                 for a in argument_list.iter() {
                     self.script.push_str(" ");
@@ -484,7 +484,7 @@ impl AstConverting for BluebellFormatter {
                 let _ = identifier_name.node.visit(self)?;
                 for arg in type_arguments.iter() {
                     self.script.push_str(" ");
-                    let _ = arg.visit(self)?;
+                    let _ = arg.node.visit(self)?;
                 }
             }
         }
@@ -503,7 +503,7 @@ impl AstConverting for BluebellFormatter {
                 // Assuming the emit_variable_identifier and emit_value_literal are implemented
                 let _ = var.node.visit(self)?;
                 self.script.push_str(" : ");
-                let _ = val.visit(self)?;
+                let _ = val.node.visit(self)?;
             }
             NodeMessageEntry::MessageVariable(var1, var2) => {
                 let _ = var1.node.visit(self)?;
@@ -520,7 +520,7 @@ impl AstConverting for BluebellFormatter {
     ) -> Result<TraversalResult, String> {
         self.add_newlines(1);
         self.script.push_str("| ");
-        let _ = node.pattern.visit(self)?;
+        let _ = node.pattern.node.visit(self)?;
         self.script.push_str(" => ");
         let _ = node.expression.node.visit(self)?;
         Ok(TraversalResult::SkipChildren)
@@ -546,7 +546,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(" ");
             }
 
-            let _ = arg.visit(self)?;
+            let _ = arg.node.visit(self)?;
         }
         self.script.push_str("}");
 
@@ -612,7 +612,7 @@ impl AstConverting for BluebellFormatter {
 
                 for arg in args.iter() {
                     self.script.push_str(" ");
-                    let _ = arg.visit(self)?;
+                    let _ = arg.node.visit(self)?;
                 }
             }
         }
@@ -649,10 +649,10 @@ impl AstConverting for BluebellFormatter {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
                 self.script.push_str("| ");
-                let _ = node.pattern_expression.visit(self)?;
+                let _ = node.pattern_expression.node.visit(self)?;
                 self.script.push_str(" =>");
                 if let Some(stmt) = &node.statement_block {
-                    let _ = stmt.visit(self)?;
+                    let _ = stmt.node.visit(self)?;
                 }
             }
             TreeTraversalMode::Exit => {}
@@ -741,7 +741,7 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(&left_hand_side.node);
                 for key in keys.iter() {
-                    let _ = key.visit(self)?;
+                    let _ = key.node.visit(self)?;
                 }
                 self.script.push_str(" := ");
                 let _ = right_hand_side.node.visit(self)?;
@@ -774,7 +774,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(" with");
                 self.indent_level += 1;
                 for clause in clauses.iter() {
-                    let _ = clause.visit(self)?;
+                    let _ = clause.node.visit(self)?;
                 }
                 self.indent_level -= 1;
                 self.add_newlines(1);
@@ -784,7 +784,7 @@ impl AstConverting for BluebellFormatter {
                 component_id,
                 arguments,
             } => {
-                let _ = component_id.visit(self)?;
+                let _ = component_id.node.visit(self)?;
                 for arg in arguments.iter() {
                     self.script.push_str(" ");
                     let _ = arg.node.visit(self)?;
@@ -797,7 +797,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str("forall ");
                 let _ = identifier_name.node.visit(self)?;
                 self.script.push_str(" ");
-                let _ = component_id.visit(self)?;
+                let _ = component_id.node.visit(self)?;
             }
         }
 
@@ -827,7 +827,7 @@ impl AstConverting for BluebellFormatter {
                 self.script
                     .push_str(&format!("{} <-& {}.{} ", lhs, address, member_id));
                 for access in map_accesses.iter() {
-                    let _ = access.visit(self)?;
+                    let _ = access.node.visit(self)?;
                 }
             }
             NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(
@@ -839,7 +839,7 @@ impl AstConverting for BluebellFormatter {
                 self.script
                     .push_str(&format!("{} <-& exists {}.{} ", lhs, address, member_id));
                 for access in map_accesses.iter() {
-                    let _ = access.visit(self)?;
+                    let _ = access.node.visit(self)?;
                 }
             }
             NodeRemoteFetchStatement::ReadStateMutableCastAddress(
@@ -884,7 +884,7 @@ impl AstConverting for BluebellFormatter {
                     if i > 0 {
                         self.script.push_str(", ");
                     }
-                    let _ = parameter.visit(self)?;
+                    let _ = parameter.node.visit(self)?;
                 }
                 self.script.push_str(")");
             }
@@ -1004,7 +1004,7 @@ impl AstConverting for BluebellFormatter {
                     self.script.push_str(&variable_name.node);
                     self.indent_level += 1;
                     if let Some(v) = type_annotation {
-                        let _ = v.visit(self)?;
+                        let _ = v.node.visit(self)?;
                     }
                     self.script.push_str(" = ");
                     let _ = expression.node.visit(self)?;
@@ -1019,7 +1019,7 @@ impl AstConverting for BluebellFormatter {
                             self.script.push_str(" =");
                             self.indent_level += 1;
                             for clause in clauses.iter() {
-                                let _ = clause.visit(self)?;
+                                let _ = clause.node.visit(self)?;
                             }
                             self.indent_level -= 1;
                         }
@@ -1060,7 +1060,7 @@ impl AstConverting for BluebellFormatter {
             TreeTraversalMode::Enter => {
                 self.add_newlines(1);
                 self.script.push_str("field ");
-                let _ = node.typed_identifier.visit(self)?;
+                let _ = node.typed_identifier.node.visit(self)?;
                 self.script.push_str(" = ");
                 let _ = node.right_hand_side.node.visit(self)?;
             }
@@ -1146,7 +1146,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(" of");
                 for arg in args.iter() {
                     self.script.push_str(" ");
-                    let _ = arg.visit(self)?;
+                    let _ = arg.node.visit(self)?;
                 }
             }
         }

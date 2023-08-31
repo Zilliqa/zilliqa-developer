@@ -246,7 +246,7 @@ impl AstVisitor for NodeScillaType {
                     Err(msg) => Err(msg),
                     _ => {
                         for arg in args {
-                            match arg.visit(emitter) {
+                            match arg.node.visit(emitter) {
                                 Err(msg) => return Err(msg),
                                 _ => continue,
                             }
@@ -369,11 +369,11 @@ impl AstVisitor for NodeFullExpression {
                         Ok(TraversalResult::Continue)
                     }
                 },
-                NodeFullExpression::ExpressionAtomic(atom_expr) => atom_expr.visit(emitter),
-                NodeFullExpression::ExpressionBuiltin { xs, .. } => xs.visit(emitter),
+                NodeFullExpression::ExpressionAtomic(atom_expr) => atom_expr.node.visit(emitter),
+                NodeFullExpression::ExpressionBuiltin { xs, .. } => xs.node.visit(emitter),
                 NodeFullExpression::Message(message_entries) => {
                     for entry in message_entries {
-                        match entry.visit(emitter) {
+                        match entry.node.visit(emitter) {
                             Err(msg) => return Err(msg),
                             _ => continue,
                         }
@@ -388,7 +388,7 @@ impl AstVisitor for NodeFullExpression {
                     Err(msg) => Err(msg),
                     _ => {
                         for clause in clauses {
-                            match clause.visit(emitter) {
+                            match clause.node.visit(emitter) {
                                 Err(msg) => return Err(msg),
                                 _ => continue,
                             }
@@ -423,7 +423,7 @@ impl AstVisitor for NodeFullExpression {
                     Err(msg) => Err(msg),
                     _ => {
                         for targ in type_arguments {
-                            match targ.visit(emitter) {
+                            match targ.node.visit(emitter) {
                                 Err(msg) => return Err(msg),
                                 _ => continue,
                             }
@@ -452,7 +452,7 @@ impl AstVisitor for NodeMessageEntry {
                 NodeMessageEntry::MessageLiteral(var_identifier, value_literal) => {
                     match var_identifier.node.visit(emitter) {
                         Err(msg) => Err(msg),
-                        _ => value_literal.visit(emitter),
+                        _ => value_literal.node.visit(emitter),
                     }
                 }
                 NodeMessageEntry::MessageVariable(var_identifier1, var_identifier2) => {
@@ -476,7 +476,7 @@ impl AstVisitor for NodePatternMatchExpressionClause {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_pattern_match_expression_clause(TreeTraversalMode::Enter, self);
         let pattern_ret = if ret == Ok(TraversalResult::Continue) {
-            self.pattern.visit(emitter)
+            self.pattern.node.visit(emitter)
         } else {
             ret
         };
@@ -501,7 +501,7 @@ impl AstVisitor for NodeAtomicExpression {
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self {
                 NodeAtomicExpression::AtomicSid(sid) => sid.node.visit(emitter),
-                NodeAtomicExpression::AtomicLit(lit) => lit.visit(emitter),
+                NodeAtomicExpression::AtomicLit(lit) => lit.node.visit(emitter),
             }
         } else {
             ret
@@ -521,7 +521,7 @@ impl AstVisitor for NodeContractTypeArguments {
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             self.type_arguments
                 .iter()
-                .map(|child| child.visit(emitter))
+                .map(|child| child.node.visit(emitter))
                 .find(|result| *result == Err("".into()))
                 .unwrap_or(Ok(TraversalResult::Continue))
         } else {
@@ -587,7 +587,7 @@ impl AstVisitor for NodePattern {
                         Err(msg) => Err(msg),
                         _ => {
                             for pattern in argument_patterns {
-                                let result = pattern.visit(emitter);
+                                let result = pattern.node.visit(emitter);
                                 if let Err(msg) = result {
                                     return Err(msg);
                                 }
@@ -617,7 +617,7 @@ impl AstVisitor for NodeArgumentPattern {
                 NodeArgumentPattern::ConstructorArgument(meta_identifier) => {
                     meta_identifier.node.visit(emitter)
                 }
-                NodeArgumentPattern::PatternArgument(pattern) => pattern.visit(emitter),
+                NodeArgumentPattern::PatternArgument(pattern) => pattern.node.visit(emitter),
             }
         } else {
             ret
@@ -635,10 +635,10 @@ impl AstVisitor for NodePatternMatchClause {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_pattern_match_clause(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            match self.pattern_expression.visit(emitter) {
+            match self.pattern_expression.node.visit(emitter) {
                 Err(msg) => Err(msg),
                 _ => match &self.statement_block {
-                    Some(stmt_block) => stmt_block.visit(emitter),
+                    Some(stmt_block) => stmt_block.node.visit(emitter),
                     None => Ok(TraversalResult::Continue),
                 },
             }
@@ -702,7 +702,7 @@ impl AstVisitor for NodeStatement {
                 | NodeStatement::MapGetExists { keys, .. }
                 | NodeStatement::MapUpdateDelete { keys, .. } => {
                     for key in keys {
-                        let ret = key.visit(emitter);
+                        let ret = key.node.visit(emitter);
                         if ret != Ok(TraversalResult::Continue) {
                             return ret;
                         }
@@ -730,7 +730,7 @@ impl AstVisitor for NodeStatement {
                         return ret;
                     }
                     for clause in clauses {
-                        let ret = clause.visit(emitter);
+                        let ret = clause.node.visit(emitter);
                         if ret != Ok(TraversalResult::Continue) {
                             return ret;
                         }
@@ -742,7 +742,7 @@ impl AstVisitor for NodeStatement {
                     arguments,
                     ..
                 } => {
-                    let ret = component_id.visit(emitter);
+                    let ret = component_id.node.visit(emitter);
                     if ret != Ok(TraversalResult::Continue) {
                         return ret;
                     }
@@ -762,7 +762,7 @@ impl AstVisitor for NodeStatement {
                     if ret != Ok(TraversalResult::Continue) {
                         return ret;
                     }
-                    component_id.visit(emitter)
+                    component_id.node.visit(emitter)
                 }
                 _ => Ok(TraversalResult::Continue),
             }
@@ -790,7 +790,7 @@ impl AstVisitor for NodeRemoteFetchStatement {
                 }
                 NodeRemoteFetchStatement::ReadStateMutableMapAccess(_, _, _, accesses) => {
                     for access in accesses {
-                        if let Err(msg) = access.visit(emitter) {
+                        if let Err(msg) = access.node.visit(emitter) {
                             return Err(msg);
                         }
                     }
@@ -798,7 +798,7 @@ impl AstVisitor for NodeRemoteFetchStatement {
                 }
                 NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(_, _, _, accesses) => {
                     for access in accesses {
-                        if let Err(msg) = access.visit(emitter) {
+                        if let Err(msg) = access.node.visit(emitter) {
                             return Err(msg);
                         }
                     }
@@ -850,7 +850,7 @@ impl AstVisitor for NodeComponentParameters {
         let ret = emitter.emit_component_parameters(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             for param in &self.parameters {
-                match param.visit(emitter) {
+                match param.node.visit(emitter) {
                     Err(msg) => return Err(msg),
                     _ => {}
                 }
@@ -872,7 +872,7 @@ impl AstVisitor for NodeParameterPair {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_parameter_pair(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            self.identifier_with_type.visit(emitter)
+            self.identifier_with_type.node.visit(emitter)
         } else {
             ret
         };
@@ -888,7 +888,7 @@ impl AstVisitor for NodeComponentBody {
         let ret = emitter.emit_component_body(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             if let Some(statement_block) = &self.statement_block {
-                statement_block.visit(emitter)
+                statement_block.node.visit(emitter)
             } else {
                 Ok(TraversalResult::Continue)
             }
@@ -931,7 +931,7 @@ impl AstVisitor for NodeTypedIdentifier {
         let ret = emitter.emit_typed_identifier(TreeTraversalMode::Enter, self);
         // Visit the annotation child node if the enter phase didn't fail or skip children
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            self.annotation.visit(emitter)
+            self.annotation.node.visit(emitter)
         } else {
             ret
         };
@@ -970,21 +970,21 @@ impl AstVisitor for NodeProgram {
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             // Visit import_declarations if it's not None
             if let Some(import_declarations) = &self.import_declarations {
-                let result = import_declarations.visit(emitter);
+                let result = import_declarations.node.visit(emitter);
                 if result != Ok(TraversalResult::Continue) {
                     return result;
                 }
             }
             // Visit library_definition if it's not None
             if let Some(library_definition) = &self.library_definition {
-                let result = library_definition.visit(emitter);
+                let result = library_definition.node.visit(emitter);
                 if result != Ok(TraversalResult::Continue) {
                     return result;
                 }
             }
             // Visit contract_definition
 
-            let result = self.contract_definition.visit(emitter);
+            let result = self.contract_definition.node.visit(emitter);
             result
         } else {
             ret
@@ -1002,7 +1002,7 @@ impl AstVisitor for NodeLibraryDefinition {
         let ret = emitter.emit_library_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             for definition in &self.definitions {
-                match definition.visit(emitter) {
+                match definition.node.visit(emitter) {
                     Err(msg) => return Err(msg),
                     _ => continue,
                 };
@@ -1039,7 +1039,7 @@ impl AstVisitor for NodeLibrarySingleDefinition {
                         _ => match option_clause {
                             Some(clauses) => {
                                 for clause in clauses {
-                                    if let Err(msg) = clause.visit(emitter) {
+                                    if let Err(msg) = clause.node.visit(emitter) {
                                         return Err(msg);
                                     }
                                 }
@@ -1065,21 +1065,21 @@ impl AstVisitor for NodeContractDefinition {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_contract_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            if let Err(msg) = self.parameters.visit(emitter) {
+            if let Err(msg) = self.parameters.node.visit(emitter) {
                 return Err(msg);
             }
             if let Some(constraint) = &self.constraint {
-                if let Err(msg) = constraint.visit(emitter) {
+                if let Err(msg) = constraint.node.visit(emitter) {
                     return Err(msg);
                 }
             }
             for field in &self.fields {
-                if let Err(msg) = field.visit(emitter) {
+                if let Err(msg) = field.node.visit(emitter) {
                     return Err(msg);
                 }
             }
             for component in &self.components {
-                if let Err(msg) = component.visit(emitter) {
+                if let Err(msg) = component.node.visit(emitter) {
                     return Err(msg);
                 }
             }
@@ -1100,7 +1100,7 @@ impl AstVisitor for NodeContractField {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_contract_field(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            match self.typed_identifier.visit(emitter) {
+            match self.typed_identifier.node.visit(emitter) {
                 Err(msg) => Err(msg),
                 _ => self.right_hand_side.node.visit(emitter),
             }
@@ -1156,9 +1156,9 @@ impl AstVisitor for NodeProcedureDefinition {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_procedure_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            match self.name.visit(emitter) {
+            match self.name.node.visit(emitter) {
                 Err(msg) => Err(msg),
-                _ => match self.parameters.visit(emitter) {
+                _ => match self.parameters.node.visit(emitter) {
                     Err(msg) => Err(msg),
                     _ => self.body.visit(emitter),
                 },
@@ -1178,9 +1178,9 @@ impl AstVisitor for NodeTransitionDefinition {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_transition_definition(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            match self.name.visit(emitter) {
+            match self.name.node.visit(emitter) {
                 Err(msg) => Err(msg),
-                _ => match self.parameters.visit(emitter) {
+                _ => match self.parameters.node.visit(emitter) {
                     Err(msg) => Err(msg),
                     _ => self.body.visit(emitter),
                 },
@@ -1211,7 +1211,7 @@ impl AstVisitor for NodeTypeAlternativeClause {
                     _ => (),
                 }
                 for type_arg in type_args {
-                    match type_arg.visit(emitter) {
+                    match type_arg.node.visit(emitter) {
                         Err(msg) => return Err(msg),
                         _ => (),
                     }

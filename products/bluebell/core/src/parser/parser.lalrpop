@@ -166,18 +166,27 @@ pub ImportedName: WithMetaData<NodeImportedName> = {
 // @syntax importDeclarations
 // @return A list of one or more imported names.
 //
-pub ImportDeclarations: NodeImportDeclarations = {
+pub ImportDeclarations: WithMetaData<NodeImportDeclarations> = {
 	<prev:ImportDeclarations>
-	"import" <n:ImportedName> => {
-		let mut ret = NodeImportDeclarations {
-			import_list: prev.import_list.clone()
-		};
-		ret.import_list.push(n);
-		ret
-	},
-	"import" <n:ImportedName+> => NodeImportDeclarations {
-		import_list: n
-	}	
+	<start:@L> "import" <n:ImportedName> <end:@R> => 
+        WithMetaData::<NodeImportDeclarations> {
+            node: {
+    		let mut ret = NodeImportDeclarations {
+    			import_list: prev.node.import_list.clone()
+    		};
+    		ret.import_list.push(n);
+    		ret
+    	},
+        start,
+        end
+    },
+	<start:@L> "import" <n:ImportedName+> <end:@R>  => WithMetaData::<NodeImportDeclarations> {
+        node: NodeImportDeclarations {
+    		import_list: n
+	   },
+       start,
+       end
+    }
 }
 
 
@@ -268,21 +277,35 @@ pub VariableIdentifier : WithMetaData<NodeVariableIdentifier> = {
 //
 // @syntax builtinArguments
 // @return The arguments for a built-in function as either variable identifiers or an empty set of parentheses. 
-pub BuiltinArguments: NodeBuiltinArguments = {
-	<prev:BuiltinArguments>
-	<n:VariableIdentifier> => {
-		let mut ret = NodeBuiltinArguments {
-			arguments: prev.arguments.clone()
-		};
-		ret.arguments.push(n);
-		ret
-	},
-	<n:VariableIdentifier> => NodeBuiltinArguments {
-		arguments: vec![n]
-	},
-    "(" ")" =>  NodeBuiltinArguments {
-		arguments: vec![]
-	}	
+pub BuiltinArguments: WithMetaData<NodeBuiltinArguments> = {
+	<start:@L> <prev:BuiltinArguments>
+	<n:VariableIdentifier> <end:@R> => 
+    WithMetaData::<NodeBuiltinArguments> {
+        node: {
+    		let mut ret = NodeBuiltinArguments {
+    			arguments: prev.node.arguments.clone()
+    		};
+    		ret.arguments.push(n);
+    		ret
+    	},
+        start,
+        end
+    },
+	<start:@L> <n:VariableIdentifier> <end:@R> =>     WithMetaData::<NodeBuiltinArguments> {
+        node: NodeBuiltinArguments {
+    		arguments: vec![n]
+	    },
+        start,
+        end
+    },
+    <start:@L> "(" ")" <end:@R> =>
+        WithMetaData::<NodeBuiltinArguments> { 
+        node: NodeBuiltinArguments {
+     		arguments: vec![]
+	    },
+        start,
+        end
+    }
 }
 
 pub RemainingTypes: WithMetaData<NodeScillaType> = {
@@ -371,12 +394,37 @@ pub ScillaType: WithMetaData<NodeScillaType> = {
 //
 // @syntax typeArgument
 // @return A Scilla type argument as a Scilla type name, meta identifier, template type identifier, address type or map type.
-pub TypeArgument: NodeTypeArgument = {
-    "(" <t:ScillaType> ")" => NodeTypeArgument::EnclosedTypeArgument(Box::new(t)),
-    <i:MetaIdentifier> => NodeTypeArgument::GenericTypeArgument(i),
-    <t:TemplateTypeId> => NodeTypeArgument::TemplateTypeArgument(t),
-    <a:AddressType> => NodeTypeArgument::AddressTypeArgument(a),
-    "Map" <k:TypeMapKey> <v:TypeMapValue> => NodeTypeArgument::MapTypeArgument(k, v),
+pub TypeArgument: WithMetaData<NodeTypeArgument> = {
+    <start:@L> "(" <t:ScillaType> ")" <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::EnclosedTypeArgument(Box::new(t)),
+        start,
+        end
+    },
+    <start:@L> <i:MetaIdentifier> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::GenericTypeArgument(i),
+        start,
+        end
+    },
+    <start:@L> <t:TemplateTypeId> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::TemplateTypeArgument(t),
+        start,
+        end
+    },
+    <start:@L> <a:AddressType> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::AddressTypeArgument(a),
+        start,
+        end
+    },
+    <start:@L> "Map" <k:TypeMapKey> <v:TypeMapValue> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::MapTypeArgument(k, v),
+        start,
+        end
+    },
 }
 
 
@@ -633,14 +681,16 @@ pub Program: NodeProgram = {
 //
 // @syntax libraryDefinition
 // @return A Scilla library definition with a library name and zero or more library definitions. 
-pub LibraryDefinition: NodeLibraryDefinition = {
-    "library" 
+pub LibraryDefinition: WithMetaData<NodeLibraryDefinition> = {
+    <start:@L> "library" 
     <l:TypeNameIdentifier>
-    <d:LibrarySingleDefinition*> => {
-        NodeLibraryDefinition {
+    <d:LibrarySingleDefinition*> <end:@R> => WithMetaData::<NodeLibraryDefinition> {
+        node: NodeLibraryDefinition {
             name: l,
             definitions: d
-        }
+        },
+        start,
+        end
     },
 }
 
@@ -663,18 +713,28 @@ pub LibraryDefinition: NodeLibraryDefinition = {
 //
 // @syntax librarySingleDefinition
 // @return A single Scilla library definition with a name, optional type annotation, optional expression, and optional type variations.
-pub LibrarySingleDefinition: NodeLibrarySingleDefinition = {
-	"let" <variable_name: RegularId>
+pub LibrarySingleDefinition: WithMetaData<NodeLibrarySingleDefinition> = {
+	<start:@L> "let" <variable_name: RegularId>
 	 <type_annotation: TypeAnnotation?> 
-	 "=" <expression: FullExpression> => {
-		NodeLibrarySingleDefinition::LetDefinition {
-			variable_name: variable_name,
-			type_annotation: type_annotation,
-			expression: expression.into()
-		}
-	},
-	"type" <type_name: TypeNameIdentifier> => NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
-	"type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> => NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations))
+	 "=" <expression: FullExpression> <end:@R> => WithMetaData::<NodeLibrarySingleDefinition> { 
+        node:       NodeLibrarySingleDefinition::LetDefinition {
+            variable_name: variable_name,
+            type_annotation: type_annotation,
+            expression: expression.into()
+        },
+        start,
+        end
+    },
+	<start:@L> "type" <type_name: TypeNameIdentifier> <end:@R> => WithMetaData::<NodeLibrarySingleDefinition> { 
+        node: NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
+        start,
+        end
+    },
+	<start:@L>  "type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> <end:@R> => WithMetaData::<NodeLibrarySingleDefinition> { 
+        node: NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations)),
+        start,
+        end
+    }
 
     // TODO: Langauge extension for review
     // // Struct
@@ -712,10 +772,14 @@ pub LibrarySingleDefinition: NodeLibrarySingleDefinition = {
 //
 // @syntax typedIdentifier
 // @return A typed identifier as an identifier name with an associated Scilla type annotation.
-pub TypedIdentifier: NodeTypedIdentifier = {
-    <identifier_name: RegularId>
-    <annotation: TypeAnnotation>
-    => NodeTypedIdentifier {identifier_name, annotation }
+pub TypedIdentifier: WithMetaData<NodeTypedIdentifier> = {
+    <start:@L> <identifier_name: RegularId>
+    <annotation: TypeAnnotation> <end:@R>
+    => WithMetaData::<NodeTypedIdentifier> {
+        node: NodeTypedIdentifier {identifier_name, annotation },
+        start,
+        end
+    }
 };
 
 
@@ -729,8 +793,13 @@ pub TypedIdentifier: NodeTypedIdentifier = {
 //
 // @syntax typeAnnotation
 // @return A Scilla type as a type annotation for a variable or field.
-pub TypeAnnotation: NodeTypeAnnotation = {
-":" <type_name:ScillaType> => NodeTypeAnnotation {type_name: type_name }
+pub TypeAnnotation: WithMetaData< NodeTypeAnnotation> = {
+<start:@L> ":" <type_name:ScillaType> <end:@R> => 
+    WithMetaData::<NodeTypeAnnotation> {
+        node: NodeTypeAnnotation {type_name: type_name },
+        start,
+        end
+    }
 }
 
 
@@ -746,10 +815,16 @@ pub TypeAnnotation: NodeTypeAnnotation = {
 //
 // @syntax typeAlternativeClause
 // @return A Scilla type alternative clause with a type name and optional type arguments.
-pub TypeAlternativeClause: NodeTypeAlternativeClause = {
-	"|" <n:TypeNameIdentifier> => NodeTypeAlternativeClause::ClauseType(n),
-	"|" <n:TypeNameIdentifier> "of" <t:TypeArgument+> => {
-		NodeTypeAlternativeClause::ClauseTypeWithArgs(n, t)	
+pub TypeAlternativeClause: WithMetaData<NodeTypeAlternativeClause> = {
+	<start:@L> "|" <n:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeTypeAlternativeClause> { 
+        node: NodeTypeAlternativeClause::ClauseType(n),
+        start,
+        end
+    },
+	<start:@L> "|" <n:TypeNameIdentifier> "of" <t:TypeArgument+> <end:@R>  => WithMetaData::<NodeTypeAlternativeClause> {
+		node: NodeTypeAlternativeClause::ClauseTypeWithArgs(n, t),
+        start,
+        end
 	}
 }
 
@@ -783,8 +858,13 @@ pub TypeMapValueAllowingTypeArguments: NodeTypeMapValueAllowingTypeArguments = {
 //
 // @syntax contractTypeArguments
 // @return A list of type arguments enclosed in braces. 
-pub ContractTypeArguments: NodeContractTypeArguments= {
-    "{" <type_arguments: TypeArgument*> "}" => NodeContractTypeArguments{ type_arguments: type_arguments }
+pub ContractTypeArguments: WithMetaData<NodeContractTypeArguments> = {
+    <start:@L> "{" <type_arguments: TypeArgument*> "}" <end:@R> => 
+    WithMetaData::<NodeContractTypeArguments> {
+        node: NodeContractTypeArguments{ type_arguments: type_arguments },
+        start,
+        end
+    }
 }
 
 
@@ -857,7 +937,7 @@ pub FullExpression : WithMetaData<NodeFullExpression> = {
          },
     <start:@L> "{" <m:MessageEntry> <messages:NextMessageEntry*> "}"<end:@R> => 
         WithMetaData::<NodeFullExpression> { node:  {
-                let mut message_entries: Vec<NodeMessageEntry> = Vec::new();
+                let mut message_entries: Vec<WithMetaData<NodeMessageEntry>> = Vec::new();
                 message_entries.push(m);
                 for message in messages {
                     message_entries.push(message);
@@ -909,8 +989,12 @@ pub FullExpression : WithMetaData<NodeFullExpression> = {
 //
 // @syntax patternMatchExpressionClause
 // @return A pattern match expression clause as a pattern expression with a corresponding full expression.
-pub PatternMatchExpressionClause: NodePatternMatchExpressionClause = {
-	"|" <p:Pattern> "=>" <e:FullExpression> => NodePatternMatchExpressionClause { pattern: p, expression: e }
+pub PatternMatchExpressionClause: WithMetaData<NodePatternMatchExpressionClause> = {
+	<start:@L> "|" <p:Pattern> "=>" <e:FullExpression> <end:@R> => WithMetaData::<NodePatternMatchExpressionClause> {
+        node: NodePatternMatchExpressionClause { pattern: p, expression: e },
+        start,
+        end
+    }
 }
 
 
@@ -928,11 +1012,25 @@ pub PatternMatchExpressionClause: NodePatternMatchExpressionClause = {
 //
 // @syntax pattern
 // @return A pattern that can be matched against a given expression in Scilla.
-pub Pattern: NodePattern = {
-	"_" => NodePattern::Wildcard,
-	<identifier_name: RegularId> => NodePattern::Binder(identifier_name),
-	<meta: MetaIdentifier> <constructor_arguments: ArgumentPattern*> =>
-		NodePattern::Constructor(meta, constructor_arguments),
+pub Pattern: WithMetaData<NodePattern> = {
+	<start:@L> "_" <end:@R> => 
+    WithMetaData::<NodePattern> {
+        node: NodePattern::Wildcard,
+        start,
+        end
+    },
+	<start:@L> <identifier_name: RegularId> <end:@R> => 
+    WithMetaData::<NodePattern> {
+        node: NodePattern::Binder(identifier_name),
+        start,
+        end
+    },
+	<start:@L> <meta: MetaIdentifier> <constructor_arguments: ArgumentPattern*> <end:@R> =>
+    WithMetaData::<NodePattern> {
+        node: 		NodePattern::Constructor(meta, constructor_arguments),
+        start,
+        end
+    },
 }
 
 
@@ -949,12 +1047,32 @@ pub Pattern: NodePattern = {
 //
 // @syntax argumentPattern
 // @return An argument pattern as a wildcard, a binding identifier, a meta-identifier, or a pattern expression.
-pub ArgumentPattern: NodeArgumentPattern = {
-    "_" => NodeArgumentPattern::WildcardArgument,
-    <binding_identifier: RegularId> => NodeArgumentPattern::BinderArgument(binding_identifier),
-    <identifier_name: MetaIdentifier> => NodeArgumentPattern::ConstructorArgument(identifier_name),
-    "(" <pattern_expression:Pattern> ")" 
-        => NodeArgumentPattern::PatternArgument(Box::new(pattern_expression))
+pub ArgumentPattern: WithMetaData<NodeArgumentPattern> = {
+    <start:@L> "_" <end:@R> => 
+        WithMetaData::<NodeArgumentPattern> {
+            node: NodeArgumentPattern::WildcardArgument,
+            start,
+            end
+        },
+    <start:@L> <binding_identifier: RegularId> <end:@R> => 
+        WithMetaData::<NodeArgumentPattern> {
+            node: NodeArgumentPattern::BinderArgument(binding_identifier),
+            start,
+            end
+        },
+    <start:@L> <identifier_name: MetaIdentifier> <end:@R> => 
+        WithMetaData::<NodeArgumentPattern> {
+            node: NodeArgumentPattern::ConstructorArgument(identifier_name),
+            start,
+            end
+        },
+    <start:@L> "(" <pattern_expression:Pattern> ")" 
+        <end:@R> => 
+            WithMetaData::<NodeArgumentPattern> {
+                node: NodeArgumentPattern::PatternArgument(Box::new(pattern_expression)),
+                start,
+                end
+            },
 }
 
 
@@ -969,13 +1087,22 @@ pub ArgumentPattern: NodeArgumentPattern = {
 //
 // @syntax messageEntry
 // @return A message entry as a key-value pair in a Scilla message that consists of an identifier name and a value.
-pub NextMessageEntry: NodeMessageEntry = {
-	";" <message:MessageEntry> => message
+pub NextMessageEntry: WithMetaData<NodeMessageEntry> = {
+	 ";" <message:MessageEntry> => message
 }
 
-pub MessageEntry: NodeMessageEntry = {
-    <i:VariableIdentifier> ":" <v:ValueLiteral> => NodeMessageEntry::MessageLiteral(i, v),
-    <i:VariableIdentifier> ":" <v:VariableIdentifier> => NodeMessageEntry::MessageVariable(i, v)
+pub MessageEntry: WithMetaData<NodeMessageEntry> = {
+    <start:@L> <i:VariableIdentifier> ":" <v:ValueLiteral> <end:@R> => 
+    WithMetaData::<NodeMessageEntry> {
+        node: NodeMessageEntry::MessageLiteral(i, v),
+        start,
+        end
+    },
+    <start:@L> <i:VariableIdentifier> ":" <v:VariableIdentifier> <end:@R> => WithMetaData::<NodeMessageEntry> {
+        node: NodeMessageEntry::MessageVariable(i, v),
+        start,
+        end
+    }        
 }
 
 
@@ -987,9 +1114,19 @@ pub MessageEntry: NodeMessageEntry = {
 //
 // @syntax atomicExpression
 // @return A Scilla atomic expression, which can be a variable identifier or a value literal.
-pub AtomicExpression: NodeAtomicExpression = {
-	<variable_identifier:VariableIdentifier> => NodeAtomicExpression::AtomicSid(variable_identifier),
-    <value_literal:ValueLiteral> => NodeAtomicExpression::AtomicLit(value_literal)
+pub AtomicExpression: WithMetaData<NodeAtomicExpression> = {
+	<start:@L> <variable_identifier:VariableIdentifier> <end:@R> => 
+    WithMetaData::<NodeAtomicExpression> {
+        node: NodeAtomicExpression::AtomicSid(variable_identifier),
+        start,
+        end
+    },
+    <start:@L> <value_literal:ValueLiteral> <end:@R> => 
+    WithMetaData::<NodeAtomicExpression> {
+        node: NodeAtomicExpression::AtomicLit(value_literal),
+        start,
+        end
+    },
 };
 
 
@@ -1011,13 +1148,33 @@ pub AtomicExpression: NodeAtomicExpression = {
 //
 // @syntax valueLiteral
 // @return A value literal as a signed or unsigned integer, a hexadecimal value, a string, or an empty map.
-pub ValueLiteral: NodeValueLiteral = {
-	<n: TypeNameIdentifier> <v: SignedInteger> => NodeValueLiteral::LiteralInt(n, v),
-     <start:@L> <node: HexNumber> <end:@R> => NodeValueLiteral::LiteralHex(node),
-     <s: StringLiteral> => NodeValueLiteral::LiteralString(s),
-     "Emp" <key_type: TypeMapKey>  <value_type: TypeMapValue> => {
-		NodeValueLiteral::LiteralEmptyMap(key_type, value_type)
-	},
+pub ValueLiteral: WithMetaData<NodeValueLiteral> = {
+	<start:@L> <n: TypeNameIdentifier> <v: SignedInteger> <end:@L> => 
+    WithMetaData::<NodeValueLiteral> { 
+        node: NodeValueLiteral::LiteralInt(n, v),
+        start,
+        end,
+    },
+     <start:@L> <node: HexNumber> <end:@R> => 
+     WithMetaData::<NodeValueLiteral> { 
+        node: NodeValueLiteral::LiteralHex(node),
+        start,
+        end,
+    },
+     <start:@L> <s: StringLiteral> <end:@R> => 
+     WithMetaData::<NodeValueLiteral> { 
+        node: NodeValueLiteral::LiteralString(s),
+        start,
+        end,
+    },
+     <start:@L> "Emp" <key_type: TypeMapKey>  <value_type: TypeMapValue> <end:@R> => 
+     WithMetaData::<NodeValueLiteral> { 
+        node: {
+    		NodeValueLiteral::LiteralEmptyMap(key_type, value_type)
+    	},
+        start,
+        end,
+    },        
 }; 
 
 
@@ -1140,17 +1297,22 @@ pub NextStatement :  NodeStatement = {
 //
 // @syntax statementBlock
 // @return A Scilla statement block as a sequence of one or more Scilla statements separated by semicolons.
-pub StatementBlock: NodeStatementBlock = { 
-	<first_statement: Statement> <statement_list:NextStatement*> => {
-		let mut statements: Vec<NodeStatement> = [].to_vec();
-        statements.push(first_statement);
-        for stmt in statement_list {
-            statements.push(stmt);
-        }
-		NodeStatementBlock {
-			statements
-		}
-	}
+pub StatementBlock: WithMetaData<NodeStatementBlock> = { 
+	<start:@L> <first_statement: Statement> <statement_list:NextStatement*> <end:@R> => 
+    WithMetaData::<NodeStatementBlock> {
+        node: {
+    		let mut statements: Vec<NodeStatement> = [].to_vec();
+            statements.push(first_statement);
+            for stmt in statement_list {
+                statements.push(stmt);
+            }
+    		NodeStatementBlock {
+    			statements
+    		}
+    	},
+        start,
+        end
+    }
 }
 
 
@@ -1183,9 +1345,20 @@ pub BlockchainFetchArguments: NodeBlockchainFetchArguments = {
 //
 // @syntax componentId
 // @return A Scilla component ID with either an identifier with a type name or an identifier with a regular name.
-pub ComponentId:  NodeComponentId = {
-    <identifier:TypeNameIdentifier> => NodeComponentId::WithTypeLikeName(identifier),
-    <identifier:RegularId> => NodeComponentId::WithRegularId(identifier)
+pub ComponentId:  WithMetaData<NodeComponentId> = {
+    <start:@L> <identifier:TypeNameIdentifier> <end:@R> => 
+    WithMetaData::<NodeComponentId> {
+        node: NodeComponentId::WithTypeLikeName(identifier),
+        start,
+        end
+    },
+    <start:@L> <identifier:RegularId> <end:@R>  => 
+    WithMetaData::<NodeComponentId> {
+        node: NodeComponentId::WithRegularId(identifier), 
+        start,
+        end
+    }
+
 }
 
 
@@ -1201,11 +1374,16 @@ pub ComponentId:  NodeComponentId = {
 //
 // @syntax patternMatchClause
 // @return A Scilla pattern match clause with a pattern expression and a set of one or more Scilla statements to be executed if the pattern matches.
-pub PatternMatchClause: NodePatternMatchClause = {
-   "|" <pattern_expression:Pattern> "=>" <statement_block:StatementBlock?>
-   => NodePatternMatchClause {
-       pattern_expression: Box::new(pattern_expression),
-       statement_block: statement_block
+pub PatternMatchClause: WithMetaData<NodePatternMatchClause> = {
+   <start:@L> "|" <pattern_expression:Pattern> "=>" <statement_block:StatementBlock?> <end:@R>
+   => 
+   WithMetaData::<NodePatternMatchClause> {
+        node: NodePatternMatchClause {
+           pattern_expression: Box::new(pattern_expression),
+           statement_block: statement_block
+       },
+       start,
+       end
    }
 }
 
@@ -1287,8 +1465,12 @@ pub RemoteFetchStatement: NodeRemoteFetchStatement = {
 //
 // @syntax mapAccess
 // @return A map access as a variable identifier name in a Scilla map.
-pub MapAccess: NodeMapAccess = {
-    "[" <identifier_name:VariableIdentifier> "]" => NodeMapAccess {identifier_name},
+pub MapAccess: WithMetaData<NodeMapAccess> = {
+    <start:@L> "[" <identifier_name:VariableIdentifier> "]" <end:@R> => WithMetaData::<NodeMapAccess> {
+        node:NodeMapAccess {identifier_name},
+        start,
+        end
+    } 
 };
 
 
@@ -1302,13 +1484,19 @@ pub MapAccess: NodeMapAccess = {
 //
 // @syntax parameterPair
 // @return A Scilla parameter pair with an identifier with type.
-pub ParameterPair: NodeParameterPair = {
-    <identifier_with_type: TypedIdentifier>
-    => NodeParameterPair { identifier_with_type }
+pub ParameterPair: WithMetaData<NodeParameterPair> = {
+    <start:@L> <identifier_with_type: TypedIdentifier> <end:@R>
+    => 
+    WithMetaData::<NodeParameterPair> {
+        node:  NodeParameterPair { identifier_with_type },
+        start,
+        end
+    }
+
 }
 
 
-pub NextParameterPair: NodeParameterPair = {
+pub NextParameterPair: WithMetaData<NodeParameterPair> = {
     "," <p: ParameterPair>  => p
 }
 
@@ -1323,22 +1511,26 @@ pub NextParameterPair: NodeParameterPair = {
 //
 // @syntax componentParameters
 // @return Scilla component parameters with zero or more parameter pairs.
-pub ComponentParameters : NodeComponentParameters = {
-   "(" 
+pub ComponentParameters : WithMetaData<NodeComponentParameters> = {
+   <start:@L> "(" 
    <p:ParameterPair?> <next_params:NextParameterPair*>
-   ")" 
-   => {
-       let mut parameters: Vec<NodeParameterPair> = Vec::new();
-       if let Some(pair) = p {
-	        parameters.push(pair);
-       }
+   ")" <end:@R>
+   => WithMetaData::<NodeComponentParameters> {
+       node: {
+           let mut parameters: Vec<WithMetaData<NodeParameterPair>> = Vec::new();
+           if let Some(pair) = p {
+    	        parameters.push(pair);
+           }
 
-       for p in next_params {
-           parameters.push(p);
-       }
+           for p in next_params {
+               parameters.push(p);
+           }
 
-       NodeComponentParameters { parameters }
-   }
+           NodeComponentParameters { parameters }
+       },
+       start,
+       end
+    }
 };
 
 
@@ -1353,9 +1545,18 @@ pub ComponentParameters : NodeComponentParameters = {
 //
 // @syntax componentDefinition
 // @return A Scilla component definition with either a transition definition or a procedure definition.
-pub ComponentDefinition: NodeComponentDefinition = {
-    <definition:TransitionDefinition> => NodeComponentDefinition::TransitionComponent(Box::new(definition)),
-    <definition:ProcedureDefinition> => NodeComponentDefinition::ProcedureComponent(Box::new(definition))
+pub ComponentDefinition: WithMetaData<NodeComponentDefinition> = {
+    <start:@L> <definition:TransitionDefinition> <end:@R> => 
+    WithMetaData::<NodeComponentDefinition> { 
+        node: NodeComponentDefinition::TransitionComponent(Box::new(definition)),
+        start,
+        end
+    },
+    <start:@L> <definition:ProcedureDefinition> <end:@R> => WithMetaData::<NodeComponentDefinition> {
+        node: NodeComponentDefinition::ProcedureComponent(Box::new(definition)),
+        start,
+        end
+    }
 }    
 
 
@@ -1425,18 +1626,22 @@ pub ComponentBody: NodeComponentBody = {
 // @syntax contract
 // @return A Scilla contract definition with a name, optional parameters, optional constraint, zero or more fields, and zero or more components.
 
-pub ContractDefinition: NodeContractDefinition = {
-    "contract" <contract_name:TypeNameIdentifier>
+pub ContractDefinition: WithMetaData<NodeContractDefinition> = {
+    <start:@L> "contract" <contract_name:TypeNameIdentifier>
         <parameters:ComponentParameters>
         <constraint:WithConstraint?>
         <fields:ContractField*>
-        <components:ComponentDefinition*>
-    => NodeContractDefinition {
-        contract_name,
-        parameters,
-        constraint,
-        fields,
-        components
+        <components:ComponentDefinition*> <end:@R>
+    => WithMetaData::<NodeContractDefinition> {
+        node: NodeContractDefinition {
+            contract_name,
+            parameters,
+            constraint,
+            fields,
+            components
+        },
+        start,
+        end
     }
 };
 
@@ -1455,9 +1660,13 @@ pub ContractDefinition: NodeContractDefinition = {
 // @syntax contractField
 // @return A Scilla contract field with a typed identifier and a right-hand side expression.
 
-pub ContractField : NodeContractField = 
-    "field" <typed_identifier:TypedIdentifier> "=" <right_hand_side:FullExpression>
-    => NodeContractField{ typed_identifier, right_hand_side };
+pub ContractField : WithMetaData<NodeContractField> = 
+    <start:@L> "field" <typed_identifier:TypedIdentifier> "=" <right_hand_side:FullExpression> <end:@R>
+    => WithMetaData::<NodeContractField> {
+        node: NodeContractField{ typed_identifier, right_hand_side },
+        start,
+        end
+    };
 
 
 // The rule that defines a Scilla contract constraint.
@@ -1470,7 +1679,13 @@ pub ContractField : NodeContractField =
 //
 // @syntax withConstraint
 // @return A Scilla contract constraint with a boolean expression.
-pub WithConstraint: NodeWithConstraint = "with" <expression:FullExpression> "=>" => NodeWithConstraint { expression: Box::new(expression) };
+pub WithConstraint: WithMetaData<NodeWithConstraint> = 
+    <start:@L> "with" <expression:FullExpression> "=>" <end:@R> => 
+    WithMetaData::<NodeWithConstraint> {
+        node: NodeWithConstraint { expression: Box::new(expression) },
+        start,
+        end
+    };    
 
 
 
