@@ -197,11 +197,27 @@ pub ImportDeclarations: NodeImportDeclarations = {
 // @syntax metaIdentifier
 // @return A meta identifier as a Scilla identifier name in a namespace or a hexspace, or a ByStr value.
 
-pub MetaIdentifier : NodeMetaIdentifier = {
-	TypeNameIdentifier => NodeMetaIdentifier::MetaName(<>),
-	<l:TypeNameIdentifier> "." <r:TypeNameIdentifier> => NodeMetaIdentifier::MetaNameInNamespace(l,r),
-	<l:HexNumber> "." <r:TypeNameIdentifier> => NodeMetaIdentifier::MetaNameInHexspace(l,r),
-	"ByStr" => NodeMetaIdentifier::ByteString,	
+pub MetaIdentifier : WithMetaData<NodeMetaIdentifier> = {
+	<start:@L> <node:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node: NodeMetaIdentifier::MetaName(node),
+        start,
+        end
+    },
+	<start:@L> <l:TypeNameIdentifier> "." <r:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node: NodeMetaIdentifier::MetaNameInNamespace(l,r),
+        start,
+        end
+    },
+	<start:@L> <l:HexNumber> "." <r:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node: NodeMetaIdentifier::MetaNameInHexspace(l,r),
+        start,
+        end
+    },
+	<start:@L> "ByStr" <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node:  NodeMetaIdentifier::ByteString,
+        start,
+        end
+    },
 }
 
 
@@ -269,30 +285,50 @@ pub BuiltinArguments: NodeBuiltinArguments = {
 	}	
 }
 
-pub RemainingTypes: NodeScillaType = {
-    <meta_identifier: MetaIdentifier> <arguments: TypeArgument*> => {
-        NodeScillaType::GenericTypeWithArgs(meta_identifier, arguments)
+pub RemainingTypes: WithMetaData<NodeScillaType> = {
+    <start:@L> <meta_identifier: MetaIdentifier> <arguments: TypeArgument*> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::GenericTypeWithArgs(meta_identifier, arguments),
+        start,
+        end
     },
-    "Map" <key_type: TypeMapKey> <value_type: TypeMapValue> => {
-        NodeScillaType::MapType(key_type, value_type)
+    <start:@L> "Map" <key_type: TypeMapKey> <value_type: TypeMapValue> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::MapType(key_type, value_type),
+        start,
+        end
     },
-    "(" <type_name: ScillaType> ")" => {
-        NodeScillaType::EnclosedType(Box::new(type_name))
+    <start:@L> "(" <type_name: ScillaType> ")" <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::EnclosedType(Box::new(type_name)),
+        start,
+        end
     },
-    <address_type: AddressType> => {
-        NodeScillaType::ScillaAddresseType(Box::new(address_type))
+    <start:@L> <address_type: AddressType> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::ScillaAddresseType(Box::new(address_type)),
+        start,
+        end
     },
-    "forall" <template_variable: TemplateTypeId> "." <type_name: RemainingTypes> => {
-        NodeScillaType::PolyFunctionType(template_variable, Box::new(type_name))
+    <start:@L> "forall" <template_variable: TemplateTypeId> "." <type_name: RemainingTypes> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::PolyFunctionType(template_variable, Box::new(type_name)),
+        start,
+        end
     },
-    <template_variable: TemplateTypeId> => {
-        NodeScillaType::TypeVarType(template_variable)
+    <start:@L> <template_variable: TemplateTypeId> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::TypeVarType(template_variable),
+        start,
+        end
     }	
 }
 
-pub FunctionSignature: NodeScillaType = {
-	<from_type: RemainingTypes> "->" <to_type: FunctionSignature> => NodeScillaType::FunctionType(Box::new(from_type), Box::new(to_type)),
-	<from_type: RemainingTypes> "->" <to_type: RemainingTypes> =>  NodeScillaType::FunctionType(Box::new(from_type), Box::new(to_type))
+pub FunctionSignature: WithMetaData<NodeScillaType> = {
+	<start:@L> <from_type: RemainingTypes> "->" <to_type: FunctionSignature> <end:@R> => WithMetaData::<NodeScillaType> {
+        node: NodeScillaType::FunctionType(Box::new(from_type), Box::new(to_type)),
+        start,
+        end
+    },
+	<start:@L> <from_type: RemainingTypes> "->" <to_type: RemainingTypes> <end:@R> => WithMetaData::<NodeScillaType> {
+        node:  NodeScillaType::FunctionType(Box::new(from_type), Box::new(to_type)),
+        start,
+        end
+    },
 }
 
 
@@ -313,7 +349,7 @@ pub FunctionSignature: NodeScillaType = {
 //
 // @syntax scillaType
 // @return A Scilla type as a type identifier or keyword with optional type arguments, key type and value type, source type and target type, enclosed type, address type, or type variable.
-pub ScillaType: NodeScillaType = {	
+pub ScillaType: WithMetaData<NodeScillaType> = {	
 	 <f:FunctionSignature> => f,
 	 <x:RemainingTypes> => x	 
 }
@@ -359,39 +395,58 @@ pub TypeArgument: NodeTypeArgument = {
 //
 // @syntax addressType
 // @return A Scilla address type.
-pub AddressType: NodeAddressType = {
-	<start:@L> <type_name: TypeNameIdentifier> "with" "end" <end:@R> => NodeAddressType {
-        identifier: type_name,
-        type_name: WithMetaData::<String> {
-            node: "".to_string(),
-            start,
-            end
+pub AddressType: WithMetaData<NodeAddressType> = {
+	<start:@L> <type_name: TypeNameIdentifier> "with" "end" <end:@R> => WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name: WithMetaData::<String> {
+                node: "".to_string(),
+                start: start.clone(),
+                end: end.clone(),
+            },
+            address_fields: vec![]
         },
-        address_fields: vec![]
+        start,
+        end
     },
-	<start:@L> <type_name: TypeNameIdentifier> "with"  "contract" <address_fields: AddressTypeFieldList?> "end" <end:@R> => NodeAddressType {
-        identifier: type_name,
-        type_name: WithMetaData::<String> {
-            node: "contract".to_string(),
-            start,
-            end
+	<start:@L> <type_name: TypeNameIdentifier> "with"  "contract" <address_fields: AddressTypeFieldList?> "end" <end:@R> => 
+    WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name: WithMetaData::<String> {
+                node: "contract".to_string(),
+                start: start.clone(),
+                end: end.clone()
+            },
+            address_fields: address_fields.unwrap_or([].to_vec())
         },
-        address_fields: address_fields.unwrap_or([].to_vec())
+        start,
+        end
     },
-	<start:@L> <type_name: TypeNameIdentifier> "with" "library" "end" <end:@R> => NodeAddressType {
-        identifier: type_name,
-        type_name:  WithMetaData::<String> {
-            node: "library".to_string(),
-            start,
-            end
+	<start:@L> <type_name: TypeNameIdentifier> "with" "library" "end" <end:@R> => 
+    WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name:  WithMetaData::<String> {
+                node: "library".to_string(),
+                start: start.clone(),
+                end: end.clone()
+            },
+            address_fields: vec![]
         },
-        address_fields: vec![]
+        start,
+        end
     },
-	<start:@L> <type_name: TypeNameIdentifier> "with" <special_identifier:SpecialId> "end" <end:@R> => NodeAddressType {
-        identifier: type_name,
-        type_name: special_identifier,
-        address_fields: vec![]
-    },
+	<start:@L> <type_name: TypeNameIdentifier> "with" <special_identifier:SpecialId> "end" <end:@R> => 
+    WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name: special_identifier,
+            address_fields: vec![]
+        },
+        start,
+        end
+    }
 };
 
 

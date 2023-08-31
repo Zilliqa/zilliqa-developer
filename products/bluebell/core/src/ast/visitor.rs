@@ -167,13 +167,13 @@ impl AstVisitor for NodeTypeMapKey {
         let ret = emitter.emit_type_map_key(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self {
-                NodeTypeMapKey::GenericMapKey(node_met_id) => node_met_id.visit(emitter),
-                NodeTypeMapKey::EnclosedGenericId(node_met_id) => node_met_id.visit(emitter),
+                NodeTypeMapKey::GenericMapKey(node_met_id) => node_met_id.node.visit(emitter),
+                NodeTypeMapKey::EnclosedGenericId(node_met_id) => node_met_id.node.visit(emitter),
                 NodeTypeMapKey::EnclosedAddressMapKeyType(node_address_type) => {
-                    node_address_type.visit(emitter)
+                    node_address_type.node.visit(emitter)
                 }
                 NodeTypeMapKey::AddressMapKeyType(node_address_type) => {
-                    node_address_type.visit(emitter)
+                    node_address_type.node.visit(emitter)
                 }
             }
         } else {
@@ -192,11 +192,13 @@ impl AstVisitor for NodeTypeMapValue {
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self {
                 NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(meta_id) => {
-                    meta_id.visit(emitter)
+                    meta_id.node.visit(emitter)
                 }
                 NodeTypeMapValue::MapKeyValue(entry) => entry.visit(emitter),
                 NodeTypeMapValue::MapValueParanthesizedType(value) => value.visit(emitter),
-                NodeTypeMapValue::MapValueAddressType(address_type) => address_type.visit(emitter),
+                NodeTypeMapValue::MapValueAddressType(address_type) => {
+                    address_type.node.visit(emitter)
+                }
             }
         } else {
             ret
@@ -213,10 +215,10 @@ impl AstVisitor for NodeTypeArgument {
         let ret = emitter.emit_type_argument(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self {
-                NodeTypeArgument::EnclosedTypeArgument(node) => node.visit(emitter),
-                NodeTypeArgument::GenericTypeArgument(node) => node.visit(emitter),
+                NodeTypeArgument::EnclosedTypeArgument(node) => node.node.visit(emitter),
+                NodeTypeArgument::GenericTypeArgument(node) => node.node.visit(emitter),
                 NodeTypeArgument::TemplateTypeArgument(_) => Ok(TraversalResult::Continue),
-                NodeTypeArgument::AddressTypeArgument(node) => node.visit(emitter),
+                NodeTypeArgument::AddressTypeArgument(node) => node.node.visit(emitter),
                 NodeTypeArgument::MapTypeArgument(key_node, value_node) => {
                     match key_node.visit(emitter) {
                         Ok(TraversalResult::Continue) => value_node.visit(emitter),
@@ -240,7 +242,7 @@ impl AstVisitor for NodeScillaType {
         let ret = emitter.emit_scilla_type(TreeTraversalMode::Enter, self);
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self {
-                NodeScillaType::GenericTypeWithArgs(id, args) => match id.visit(emitter) {
+                NodeScillaType::GenericTypeWithArgs(id, args) => match id.node.visit(emitter) {
                     Err(msg) => Err(msg),
                     _ => {
                         for arg in args {
@@ -256,13 +258,13 @@ impl AstVisitor for NodeScillaType {
                     Err(msg) => Err(msg),
                     _ => value.visit(emitter),
                 },
-                NodeScillaType::FunctionType(t1, t2) => match t1.visit(emitter) {
+                NodeScillaType::FunctionType(t1, t2) => match t1.node.visit(emitter) {
                     Err(msg) => Err(msg),
-                    _ => t2.visit(emitter),
+                    _ => t2.node.visit(emitter),
                 },
-                NodeScillaType::PolyFunctionType(_, t) => t.visit(emitter),
-                NodeScillaType::EnclosedType(t) => t.visit(emitter),
-                NodeScillaType::ScillaAddresseType(t) => t.visit(emitter),
+                NodeScillaType::PolyFunctionType(_, t) => t.node.visit(emitter),
+                NodeScillaType::EnclosedType(t) => t.node.visit(emitter),
+                NodeScillaType::ScillaAddresseType(t) => t.node.visit(emitter),
                 NodeScillaType::TypeVarType(_) => Ok(TraversalResult::Continue),
             }
         } else {
@@ -299,7 +301,7 @@ impl AstVisitor for NodeAddressTypeField {
         let children_ret = if ret == Ok(TraversalResult::Continue) {
             match self.identifier.node.visit(emitter) {
                 Err(msg) => Err(msg),
-                _ => self.type_name.visit(emitter),
+                _ => self.type_name.node.visit(emitter),
             }
         } else {
             ret
@@ -398,7 +400,7 @@ impl AstVisitor for NodeFullExpression {
                     identifier_name,
                     argument_list,
                     ..
-                } => match identifier_name.visit(emitter) {
+                } => match identifier_name.node.visit(emitter) {
                     Err(msg) => Err(msg),
                     _ => {
                         for arg in argument_list {
@@ -581,7 +583,7 @@ impl AstVisitor for NodePattern {
                 NodePattern::Wildcard => Ok(TraversalResult::Continue),
                 NodePattern::Binder(_) => Ok(TraversalResult::Continue),
                 NodePattern::Constructor(identifier, argument_patterns) => {
-                    match identifier.visit(emitter) {
+                    match identifier.node.visit(emitter) {
                         Err(msg) => Err(msg),
                         _ => {
                             for pattern in argument_patterns {
@@ -613,7 +615,7 @@ impl AstVisitor for NodeArgumentPattern {
                 NodeArgumentPattern::WildcardArgument => Ok(TraversalResult::Continue),
                 NodeArgumentPattern::BinderArgument(_) => Ok(TraversalResult::Continue),
                 NodeArgumentPattern::ConstructorArgument(meta_identifier) => {
-                    meta_identifier.visit(emitter)
+                    meta_identifier.node.visit(emitter)
                 }
                 NodeArgumentPattern::PatternArgument(pattern) => pattern.visit(emitter),
             }
@@ -805,7 +807,7 @@ impl AstVisitor for NodeRemoteFetchStatement {
                 NodeRemoteFetchStatement::ReadStateMutableCastAddress(_, variable, address) => {
                     match variable.node.visit(emitter) {
                         Err(msg) => Err(msg),
-                        _ => address.visit(emitter),
+                        _ => address.node.visit(emitter),
                     }
                 }
             }
@@ -948,7 +950,7 @@ impl AstVisitor for NodeTypeAnnotation {
         let ret = emitter.emit_type_annotation(TreeTraversalMode::Enter, self);
         // Child element: self.type_name
         let children_ret = if ret == Ok(TraversalResult::Continue) {
-            self.type_name.visit(emitter)
+            self.type_name.node.visit(emitter)
         } else {
             ret
         };
@@ -1235,7 +1237,7 @@ impl AstVisitor for NodeTypeMapValueArguments {
                     enclosed.visit(emitter)
                 }
                 NodeTypeMapValueArguments::GenericMapValueArgument(meta_identifier) => {
-                    meta_identifier.visit(emitter)
+                    meta_identifier.node.visit(emitter)
                 }
                 NodeTypeMapValueArguments::MapKeyValueType(key_type, value_type) => {
                     match key_type.visit(emitter) {
@@ -1269,7 +1271,7 @@ impl AstVisitor for NodeTypeMapValueAllowingTypeArguments {
                     meta_id,
                     value_args,
                 ) => {
-                    let mut ret = meta_id.visit(emitter);
+                    let mut ret = meta_id.node.visit(emitter);
                     if ret == Ok(TraversalResult::Continue) {
                         for value_arg in value_args {
                             ret = value_arg.visit(emitter);

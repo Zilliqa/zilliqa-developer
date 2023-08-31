@@ -323,7 +323,7 @@ impl AstConverting for IrEmitter {
                 unimplemented!();
             }
             NodeTypeArgument::GenericTypeArgument(n) => {
-                let _ = n.visit(self)?;
+                let _ = n.node.visit(self)?;
             }
             NodeTypeArgument::TemplateTypeArgument(_) => {
                 unimplemented!();
@@ -344,7 +344,7 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
-                let _ = lead.visit(self)?;
+                let _ = lead.node.visit(self)?;
                 if args.len() > 0 {
                     // TODO: Deal with arguments
                     unimplemented!()
@@ -357,22 +357,22 @@ impl AstConverting for IrEmitter {
                 unimplemented!()
             }
             NodeScillaType::FunctionType(a, b) => {
-                let _ = (*a).visit(self)?;
-                let _ = (*b).visit(self)?;
+                let _ = (*a).node.visit(self)?;
+                let _ = (*b).node.visit(self)?;
                 // TODO: Implement the function type
                 unimplemented!()
             }
 
             NodeScillaType::PolyFunctionType(_name, a) => {
                 // TODO: What to do with name
-                let _ = (*a).visit(self)?;
+                let _ = (*a).node.visit(self)?;
                 unimplemented!()
             }
             NodeScillaType::EnclosedType(a) => {
-                let _ = (*a).visit(self)?;
+                let _ = (*a).node.visit(self)?;
             }
             NodeScillaType::ScillaAddresseType(a) => {
-                let _ = (*a).visit(self)?;
+                let _ = (*a).node.visit(self)?;
             }
             NodeScillaType::TypeVarType(_name) => {
                 /*
@@ -623,7 +623,7 @@ impl AstConverting for IrEmitter {
                 contract_type_arguments,
                 argument_list,
             } => {
-                let _ = identifier_name.visit(self)?;
+                let _ = identifier_name.node.visit(self)?;
 
                 // Expecting function name symbol
                 let mut name = self.pop_ir_identifier()?;
@@ -769,7 +769,7 @@ impl AstConverting for IrEmitter {
                     unimplemented!();
                 }
 
-                let _ = name.visit(self);
+                let _ = name.node.visit(self);
             }
         }
 

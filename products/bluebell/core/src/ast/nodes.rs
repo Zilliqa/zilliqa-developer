@@ -146,37 +146,40 @@ pub struct NodeBuiltinArguments {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapKey {
-    GenericMapKey(NodeMetaIdentifier),
-    EnclosedGenericId(NodeMetaIdentifier),
-    EnclosedAddressMapKeyType(NodeAddressType),
-    AddressMapKeyType(NodeAddressType),
+    GenericMapKey(WithMetaData<NodeMetaIdentifier>),
+    EnclosedGenericId(WithMetaData<NodeMetaIdentifier>),
+    EnclosedAddressMapKeyType(WithMetaData<NodeAddressType>),
+    AddressMapKeyType(WithMetaData<NodeAddressType>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValue {
-    MapValueTypeOrEnumLikeIdentifier(NodeMetaIdentifier),
+    MapValueTypeOrEnumLikeIdentifier(WithMetaData<NodeMetaIdentifier>),
     MapKeyValue(Box<NodeTypeMapEntry>),
     MapValueParanthesizedType(Box<NodeTypeMapValueAllowingTypeArguments>),
-    MapValueAddressType(Box<NodeAddressType>),
+    MapValueAddressType(Box<WithMetaData<NodeAddressType>>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeArgument {
-    EnclosedTypeArgument(Box<NodeScillaType>),
-    GenericTypeArgument(NodeMetaIdentifier),
+    EnclosedTypeArgument(Box<WithMetaData<NodeScillaType>>),
+    GenericTypeArgument(WithMetaData<NodeMetaIdentifier>),
     TemplateTypeArgument(WithMetaData<String>),
-    AddressTypeArgument(NodeAddressType),
+    AddressTypeArgument(WithMetaData<NodeAddressType>),
     MapTypeArgument(NodeTypeMapKey, NodeTypeMapValue),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeScillaType {
-    GenericTypeWithArgs(NodeMetaIdentifier, Vec<NodeTypeArgument>),
+    GenericTypeWithArgs(WithMetaData<NodeMetaIdentifier>, Vec<NodeTypeArgument>),
     MapType(NodeTypeMapKey, NodeTypeMapValue),
-    FunctionType(Box<NodeScillaType>, Box<NodeScillaType>),
-    EnclosedType(Box<NodeScillaType>),
-    ScillaAddresseType(Box<NodeAddressType>),
-    PolyFunctionType(WithMetaData<String>, Box<NodeScillaType>),
+    FunctionType(
+        Box<WithMetaData<NodeScillaType>>,
+        Box<WithMetaData<NodeScillaType>>,
+    ),
+    EnclosedType(Box<WithMetaData<NodeScillaType>>),
+    ScillaAddresseType(Box<WithMetaData<NodeAddressType>>),
+    PolyFunctionType(WithMetaData<String>, Box<WithMetaData<NodeScillaType>>),
     TypeVarType(WithMetaData<String>),
 }
 
@@ -189,7 +192,7 @@ pub struct NodeTypeMapEntry {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeAddressTypeField {
     pub identifier: WithMetaData<NodeVariableIdentifier>,
-    pub type_name: NodeScillaType,
+    pub type_name: WithMetaData<NodeScillaType>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -228,7 +231,7 @@ pub enum NodeFullExpression {
         clauses: Vec<NodePatternMatchExpressionClause>,
     },
     ConstructorCall {
-        identifier_name: NodeMetaIdentifier,
+        identifier_name: WithMetaData<NodeMetaIdentifier>,
         contract_type_arguments: Option<NodeContractTypeArguments>,
         argument_list: Vec<WithMetaData<NodeVariableIdentifier>>,
     },
@@ -285,14 +288,14 @@ pub struct NodeMapAccess {
 pub enum NodePattern {
     Wildcard,
     Binder(WithMetaData<String>),
-    Constructor(NodeMetaIdentifier, Vec<NodeArgumentPattern>),
+    Constructor(WithMetaData<NodeMetaIdentifier>, Vec<NodeArgumentPattern>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeArgumentPattern {
     WildcardArgument,
     BinderArgument(WithMetaData<String>),
-    ConstructorArgument(NodeMetaIdentifier),
+    ConstructorArgument(WithMetaData<NodeMetaIdentifier>),
     PatternArgument(Box<NodePattern>),
 }
 
@@ -397,7 +400,7 @@ pub enum NodeRemoteFetchStatement {
     ReadStateMutableCastAddress(
         WithMetaData<String>,
         WithMetaData<NodeVariableIdentifier>,
-        NodeAddressType,
+        WithMetaData<NodeAddressType>,
     ),
 }
 
@@ -435,7 +438,7 @@ pub struct NodeTypedIdentifier {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypeAnnotation {
-    pub type_name: NodeScillaType,
+    pub type_name: WithMetaData<NodeScillaType>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -515,12 +518,15 @@ pub enum NodeTypeAlternativeClause {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValueArguments {
     EnclosedTypeMapValue(Box<NodeTypeMapValueAllowingTypeArguments>),
-    GenericMapValueArgument(NodeMetaIdentifier),
+    GenericMapValueArgument(WithMetaData<NodeMetaIdentifier>),
     MapKeyValueType(NodeTypeMapKey, NodeTypeMapValue),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValueAllowingTypeArguments {
     TypeMapValueNoArgs(NodeTypeMapValue),
-    TypeMapValueWithArgs(NodeMetaIdentifier, Vec<NodeTypeMapValueArguments>),
+    TypeMapValueWithArgs(
+        WithMetaData<NodeMetaIdentifier>,
+        Vec<NodeTypeMapValueArguments>,
+    ),
 }

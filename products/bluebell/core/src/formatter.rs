@@ -194,20 +194,20 @@ impl AstConverting for BluebellFormatter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeMapKey::GenericMapKey(value) => {
-                let _ = value.visit(self)?;
+                let _ = value.node.visit(self)?;
             }
             NodeTypeMapKey::EnclosedGenericId(value) => {
                 self.script.push_str("(");
-                let _ = value.visit(self)?;
+                let _ = value.node.visit(self)?;
                 self.script.push_str(")");
             }
             NodeTypeMapKey::EnclosedAddressMapKeyType(value) => {
                 self.script.push_str("(");
-                let _ = value.visit(self)?;
+                let _ = value.node.visit(self)?;
                 self.script.push_str(")");
             }
             NodeTypeMapKey::AddressMapKeyType(value) => {
-                let _ = value.visit(self)?;
+                let _ = value.node.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -220,7 +220,7 @@ impl AstConverting for BluebellFormatter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(value) => {
-                let _ = value.visit(self)?;
+                let _ = value.node.visit(self)?;
             }
             NodeTypeMapValue::MapKeyValue(value) => {
                 let _ = (*value).visit(self)?;
@@ -231,7 +231,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(")");
             }
             NodeTypeMapValue::MapValueAddressType(value) => {
-                let _ = (*value).visit(self)?;
+                let _ = (*value).node.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -272,7 +272,7 @@ impl AstConverting for BluebellFormatter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
-                let _ = lead.visit(self)?;
+                let _ = lead.node.visit(self)?;
                 for arg in args.iter() {
                     self.script.push_str(" ");
                     let _ = arg.visit(self)?;
@@ -285,20 +285,20 @@ impl AstConverting for BluebellFormatter {
                 let _ = value.visit(self)?;
             }
             NodeScillaType::FunctionType(a, b) => {
-                let _ = (*a).visit(self)?;
-                let _ = (*b).visit(self)?;
+                let _ = (*a).node.visit(self)?;
+                let _ = (*b).node.visit(self)?;
             }
             NodeScillaType::EnclosedType(a) => {
                 self.script.push_str("( ");
-                let _ = (*a).visit(self)?;
+                let _ = (*a).node.visit(self)?;
                 self.script.push_str(" )");
             }
             NodeScillaType::ScillaAddresseType(a) => {
-                let _ = (*a).visit(self)?;
+                let _ = (*a).node.visit(self)?;
             }
             NodeScillaType::PolyFunctionType(name, a) => {
                 self.script.push_str(&name.node);
-                let _ = (*a).visit(self)?;
+                let _ = (*a).node.visit(self)?;
             }
             NodeScillaType::TypeVarType(name) => {
                 self.script.push_str(&name.node);
@@ -332,7 +332,7 @@ impl AstConverting for BluebellFormatter {
         self.script.push_str("field ");
         let _ = node.identifier.node.visit(self)?;
         self.script.push_str(" : ");
-        let _ = node.type_name.visit(self)?;
+        let _ = node.type_name.node.visit(self)?;
         Ok(TraversalResult::SkipChildren)
     }
 
@@ -456,7 +456,7 @@ impl AstConverting for BluebellFormatter {
                 contract_type_arguments,
                 argument_list,
             } => {
-                let _ = identifier_name.visit(self)?;
+                let _ = identifier_name.node.visit(self)?;
                 if let Some(cta) = contract_type_arguments {
                     self.script.push_str(" ");
                     let _ = cta.visit(self)?;
@@ -608,7 +608,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str(&value.node);
             }
             NodePattern::Constructor(identifier, args) => {
-                let _ = identifier.visit(self)?;
+                let _ = identifier.node.visit(self)?;
 
                 for arg in args.iter() {
                     self.script.push_str(" ");
@@ -851,7 +851,7 @@ impl AstConverting for BluebellFormatter {
                 let _ = address_id.node.visit(self)?;
                 self.script.push_str(" as ");
 
-                let _ = address_type.visit(self)?;
+                let _ = address_type.node.visit(self)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
