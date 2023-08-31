@@ -280,9 +280,9 @@ impl AstConverting for BluebellFormatter {
             }
             NodeScillaType::MapType(key, value) => {
                 self.script.push_str("Map ");
-                let _ = key.visit(self)?;
+                let _ = key.node.visit(self)?;
                 self.script.push_str(" ");
-                let _ = value.visit(self)?;
+                let _ = value.node.visit(self)?;
             }
             NodeScillaType::FunctionType(a, b) => {
                 let _ = (*a).node.visit(self)?;
@@ -350,7 +350,7 @@ impl AstConverting for BluebellFormatter {
         }
 
         for field in node.address_fields.iter() {
-            let _ = field.visit(self)?;
+            let _ = field.node.visit(self)?;
             self.script.push_str(" ");
         }
 
@@ -379,9 +379,9 @@ impl AstConverting for BluebellFormatter {
                     let _ = t.visit(self)?;
                 }
                 self.script.push_str(" = ");
-                let _ = (*expression).visit(self)?;
+                let _ = (*expression).node.visit(self)?;
                 self.script.push_str(" in ");
-                let _ = (*containing_expression).visit(self)?;
+                let _ = (*containing_expression).node.visit(self)?;
                 self.indent_level -= 1;
             }
             NodeFullExpression::FunctionDeclaration {
@@ -397,7 +397,7 @@ impl AstConverting for BluebellFormatter {
                 let _ = type_annotation.visit(self)?;
                 self.script.push_str(") => ");
 
-                let _ = (*expression).visit(self)?;
+                let _ = (*expression).node.visit(self)?;
                 self.indent_level -= 1;
             }
             NodeFullExpression::FunctionCall {
@@ -474,7 +474,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str("tfun ");
                 self.script.push_str(&identifier_name.node);
                 self.script.push_str(" => ");
-                let _ = expression.visit(self)?;
+                let _ = expression.node.visit(self)?;
             }
             NodeFullExpression::TApp {
                 identifier_name,
@@ -522,7 +522,7 @@ impl AstConverting for BluebellFormatter {
         self.script.push_str("| ");
         let _ = node.pattern.visit(self)?;
         self.script.push_str(" => ");
-        let _ = node.expression.visit(self)?;
+        let _ = node.expression.node.visit(self)?;
         Ok(TraversalResult::SkipChildren)
     }
 
@@ -573,9 +573,9 @@ impl AstConverting for BluebellFormatter {
                 }
                 NodeValueLiteral::LiteralEmptyMap(key_type, value_type) => {
                     self.script.push_str("Emp ");
-                    let _ = key_type.visit(self)?;
+                    let _ = key_type.node.visit(self)?;
                     self.script.push_str(" ");
-                    let _ = value_type.visit(self)?;
+                    let _ = value_type.node.visit(self)?;
                 }
             },
             TreeTraversalMode::Exit => (),
@@ -706,7 +706,7 @@ impl AstConverting for BluebellFormatter {
             } => {
                 self.script.push_str(&left_hand_side.node);
                 self.script.push_str(" = ");
-                let _ = right_hand_side.visit(self)?;
+                let _ = right_hand_side.node.visit(self)?;
             }
             NodeStatement::ReadFromBC {
                 left_hand_side,
@@ -1007,7 +1007,7 @@ impl AstConverting for BluebellFormatter {
                         let _ = v.visit(self)?;
                     }
                     self.script.push_str(" = ");
-                    let _ = expression.visit(self)?;
+                    let _ = expression.node.visit(self)?;
                     self.indent_level -= 1;
                 }
                 NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
@@ -1062,7 +1062,7 @@ impl AstConverting for BluebellFormatter {
                 self.script.push_str("field ");
                 let _ = node.typed_identifier.visit(self)?;
                 self.script.push_str(" = ");
-                let _ = node.right_hand_side.visit(self)?;
+                let _ = node.right_hand_side.node.visit(self)?;
             }
             _ => (),
         }

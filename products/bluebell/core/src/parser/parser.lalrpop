@@ -461,10 +461,10 @@ pub AddressType: WithMetaData<NodeAddressType> = {
 //
 // @syntax addressTypeField
 // @return An address type field as an identifier name with a Scilla address type.
-pub AddressTypeFieldList: Vec<NodeAddressTypeField> = {
+pub AddressTypeFieldList: Vec<WithMetaData<NodeAddressTypeField>> = {
 	<first:AddressTypeField> <remaining:NextAddressTypeField*> =>
 	{
-		let mut ret: Vec<NodeAddressTypeField> = [first].to_vec();
+		let mut ret: Vec<WithMetaData<NodeAddressTypeField>> = [first].to_vec();
 		for x in remaining {
 			ret.push(x);
 		}
@@ -472,15 +472,19 @@ pub AddressTypeFieldList: Vec<NodeAddressTypeField> = {
 	}
 }
 
-pub NextAddressTypeField: NodeAddressTypeField = {
+pub NextAddressTypeField: WithMetaData<NodeAddressTypeField> = {
 	"," <a:AddressTypeField> => a
 }
 
-pub AddressTypeField: NodeAddressTypeField = {
-    "field" <identier_value:VariableIdentifier> ":" <type_name:ScillaType> => {
-        NodeAddressTypeField { 
-            identifier: identier_value, 
-            type_name: type_name
+pub AddressTypeField: WithMetaData<NodeAddressTypeField> = {
+    <start:@L> "field" <identier_value:VariableIdentifier> ":" <type_name:ScillaType> <end:@R> => {
+        WithMetaData::<NodeAddressTypeField> {
+            node: NodeAddressTypeField { 
+                identifier: identier_value, 
+                type_name: type_name
+            },
+            start,
+            end
         }
     }
 }
@@ -501,11 +505,31 @@ pub AddressTypeField: NodeAddressTypeField = {
 //
 // @syntax typeMapKey
 // @return A Scilla map key type as a meta identifier or an address type.
-pub TypeMapKey: NodeTypeMapKey = {
-    <identifier_name: MetaIdentifier> => NodeTypeMapKey::GenericMapKey(identifier_name),
-    "(" <identifier_name: MetaIdentifier> ")" => NodeTypeMapKey::EnclosedGenericId(identifier_name),
-    "(" <identifier_name: AddressType> ")" => NodeTypeMapKey::EnclosedAddressMapKeyType(identifier_name),
-    <identifier_name: AddressType> => NodeTypeMapKey::AddressMapKeyType(identifier_name),
+pub TypeMapKey: WithMetaData<NodeTypeMapKey> = {
+    <start:@L> <identifier_name: MetaIdentifier> <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::GenericMapKey(identifier_name),
+        start,
+        end
+    },
+    <start:@L> "(" <identifier_name: MetaIdentifier> ")" <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::EnclosedGenericId(identifier_name),
+        start,
+        end
+    },
+    <start:@L> "(" <identifier_name: AddressType> ")" <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::EnclosedAddressMapKeyType(identifier_name),
+        start,
+        end
+    },
+    <start:@L> <identifier_name: AddressType> <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::AddressMapKeyType(identifier_name),
+        start,
+        end
+    },
 };
 
 
@@ -525,11 +549,27 @@ pub TypeMapKey: NodeTypeMapKey = {
 //
 // @syntax typeMapValue
 // @return A Scilla map value type as a custom type identifier, an address type, a map key and value type, or a type allowed as a map value and used in parentheses.
-pub TypeMapValue: NodeTypeMapValue = {
-    <n:MetaIdentifier> => NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(n),
-    "Map" <k:TypeMapKey> <v:TypeMapValue> => NodeTypeMapValue::MapKeyValue(Box::new(NodeTypeMapEntry { key: k, value: v })),
-    "(" <t:TypeMapValueAllowingTypeArguments> ")" => NodeTypeMapValue::MapValueParanthesizedType(Box::new(t)),
-    <t:AddressType> => NodeTypeMapValue::MapValueAddressType(Box::new(t)),
+pub TypeMapValue:  WithMetaData<NodeTypeMapValue> = {
+    <start:@L> <n:MetaIdentifier> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(n),
+        start,
+        end
+    },
+    <start:@L> "Map" <k:TypeMapKey> <v:TypeMapValue> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapKeyValue(Box::new(NodeTypeMapEntry { key:    k, value: v })),
+        start,
+    end
+    },
+    <start:@L> "(" <t:TypeMapValueAllowingTypeArguments> ")" <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapValueParanthesizedType(Box::new(t)),
+        start,
+        end
+    },
+    <start:@L> <t:AddressType> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapValueAddressType(Box::new(t)),
+        start,
+        end
+    },
 }
 
 
@@ -769,43 +809,92 @@ pub ContractTypeArguments: NodeContractTypeArguments= {
 //
 // @syntax fullExpression
 // @return A full expression in Scilla.
-pub FullExpression : NodeFullExpression = {
-	"let" <identifier_name:RegularId> <type_annotation:TypeAnnotation?>
+pub FullExpression : WithMetaData<NodeFullExpression> = {
+	<start:@L> "let" <identifier_name:RegularId> <type_annotation:TypeAnnotation?>
 	"=" <expression:FullExpression> "in" <containing_expression:FullExpression>
-    => NodeFullExpression::LocalVariableDeclaration{
-        identifier_name,
-        type_annotation,
-        expression: Box::new(expression),
-        containing_expression: Box::new(containing_expression)
-    },
-    "fun" "(" <identier_value:RegularId> <t:TypeAnnotation> ")" "=>" <expression:FullExpression> => NodeFullExpression::FunctionDeclaration{
-		identier_value:identier_value,
-		type_annotation: t,
-		expression: Box::new(expression)
-     },
-     <function_name:VariableIdentifier> <argument_list:VariableIdentifier+> => 
-     NodeFullExpression::FunctionCall{
-     	function_name:function_name,
-     	argument_list: argument_list
-     },
-     <atomic_expression:AtomicExpression> => NodeFullExpression::ExpressionAtomic(Box::new(atomic_expression)),
-     "builtin" <b:RegularId> <targs:ContractTypeArguments?> <xs:BuiltinArguments> => NodeFullExpression::ExpressionBuiltin{b:b, targs:targs, xs:xs},
-    "{" <m:MessageEntry> <messages:NextMessageEntry*> "}"=>  {
-        let mut message_entries: Vec<NodeMessageEntry> = Vec::new();
-        message_entries.push(m);
-        for message in messages {
-            message_entries.push(message);
+    <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::LocalVariableDeclaration{
+                identifier_name,
+                type_annotation,
+                expression: Box::new(expression),
+                containing_expression: Box::new(containing_expression)
+            },
+            start,
+            end
+        },
+    <start:@L> "fun" "(" <identier_value:RegularId> <t:TypeAnnotation> ")" "=>" <expression:FullExpression> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::FunctionDeclaration{
+        		identier_value:identier_value,
+        		type_annotation: t,
+        		expression: Box::new(expression)
+             },
+             start,
+             end
+         },
+     <start:@L> <function_name:VariableIdentifier> <argument_list:VariableIdentifier+> <end:@R> => 
+         WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::FunctionCall{
+             	function_name:function_name,
+             	argument_list: argument_list
+             },
+             start,
+             end
+         },
+     <start:@L> <atomic_expression:AtomicExpression> <end:@R> => 
+         WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::ExpressionAtomic(
+                Box::new(atomic_expression)),
+             start,
+             end
+         },    
+    <start:@L> "builtin" <b:RegularId> <targs:ContractTypeArguments?> <xs:BuiltinArguments> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::ExpressionBuiltin{b:b, targs:targs, xs:xs},
+             start,
+             end
+         },
+    <start:@L> "{" <m:MessageEntry> <messages:NextMessageEntry*> "}"<end:@R> => 
+        WithMetaData::<NodeFullExpression> { node:  {
+                let mut message_entries: Vec<NodeMessageEntry> = Vec::new();
+                message_entries.push(m);
+                for message in messages {
+                    message_entries.push(message);
+                }
+                NodeFullExpression::Message(message_entries)
+            },
+            start,
+            end
+        },
+    <start:@L> "match" <match_expression:VariableIdentifier> "with" <clauses:PatternMatchExpressionClause+> "end" <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::Match{
+        	   match_expression,
+        	   clauses
+            },
+            start,
+            end
+        },
+    <start:@L> <identifier_name:MetaIdentifier> <contract_type_arguments:ContractTypeArguments?>
+    <argument_list:VariableIdentifier*> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::ConstructorCall{ identifier_name, contract_type_arguments, argument_list},
+            start,
+            end
+        },
+    <start:@L> "tfun" <identifier_name:TemplateTypeId> "=>" <expression:FullExpression> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::TemplateFunction{identifier_name, expression: Box::new(expression)},
+            start,
+            end
+        },
+    <start:@L> "@" <identifier_name:VariableIdentifier> <type_arguments:TypeArgument+> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::TApp{identifier_name,type_arguments},
+            start,
+            end
         }
-        NodeFullExpression::Message(message_entries)
-    },
-    "match" <match_expression:VariableIdentifier> "with" <clauses:PatternMatchExpressionClause+> "end" => NodeFullExpression::Match{
-    	match_expression,
-    	clauses
-    },
-    <identifier_name:MetaIdentifier> <contract_type_arguments:ContractTypeArguments?>
-    <argument_list:VariableIdentifier*> => NodeFullExpression::ConstructorCall{ identifier_name, contract_type_arguments, argument_list},
-    "tfun" <identifier_name:TemplateTypeId> "=>" <expression:FullExpression> => NodeFullExpression::TemplateFunction{identifier_name, expression: Box::new(expression)},
-    "@" <identifier_name:VariableIdentifier> <type_arguments:TypeArgument+> => NodeFullExpression::TApp{identifier_name,type_arguments}
 };
 
 

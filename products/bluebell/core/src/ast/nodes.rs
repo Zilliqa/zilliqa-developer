@@ -166,13 +166,13 @@ pub enum NodeTypeArgument {
     GenericTypeArgument(WithMetaData<NodeMetaIdentifier>),
     TemplateTypeArgument(WithMetaData<String>),
     AddressTypeArgument(WithMetaData<NodeAddressType>),
-    MapTypeArgument(NodeTypeMapKey, NodeTypeMapValue),
+    MapTypeArgument(WithMetaData<NodeTypeMapKey>, WithMetaData<NodeTypeMapValue>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeScillaType {
     GenericTypeWithArgs(WithMetaData<NodeMetaIdentifier>, Vec<NodeTypeArgument>),
-    MapType(NodeTypeMapKey, NodeTypeMapValue),
+    MapType(WithMetaData<NodeTypeMapKey>, WithMetaData<NodeTypeMapValue>),
     FunctionType(
         Box<WithMetaData<NodeScillaType>>,
         Box<WithMetaData<NodeScillaType>>,
@@ -185,8 +185,8 @@ pub enum NodeScillaType {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTypeMapEntry {
-    pub key: NodeTypeMapKey,
-    pub value: NodeTypeMapValue,
+    pub key: WithMetaData<NodeTypeMapKey>,
+    pub value: WithMetaData<NodeTypeMapValue>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -199,21 +199,21 @@ pub struct NodeAddressTypeField {
 pub struct NodeAddressType {
     pub identifier: WithMetaData<NodeTypeNameIdentifier>,
     pub type_name: WithMetaData<String>,
-    pub address_fields: Vec<NodeAddressTypeField>,
+    pub address_fields: Vec<WithMetaData<NodeAddressTypeField>>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeFullExpression {
     LocalVariableDeclaration {
         identifier_name: WithMetaData<String>,
-        expression: Box<NodeFullExpression>,
+        expression: Box<WithMetaData<NodeFullExpression>>,
         type_annotation: Option<NodeTypeAnnotation>,
-        containing_expression: Box<NodeFullExpression>,
+        containing_expression: Box<WithMetaData<NodeFullExpression>>,
     },
     FunctionDeclaration {
         identier_value: WithMetaData<String>,
         type_annotation: NodeTypeAnnotation,
-        expression: Box<NodeFullExpression>,
+        expression: Box<WithMetaData<NodeFullExpression>>,
     },
     FunctionCall {
         function_name: WithMetaData<NodeVariableIdentifier>,
@@ -237,7 +237,7 @@ pub enum NodeFullExpression {
     },
     TemplateFunction {
         identifier_name: WithMetaData<String>,
-        expression: Box<NodeFullExpression>,
+        expression: Box<WithMetaData<NodeFullExpression>>,
     },
     TApp {
         identifier_name: WithMetaData<NodeVariableIdentifier>,
@@ -257,7 +257,7 @@ pub enum NodeMessageEntry {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodePatternMatchExpressionClause {
     pub pattern: NodePattern,
-    pub expression: NodeFullExpression,
+    pub expression: WithMetaData<NodeFullExpression>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -276,7 +276,7 @@ pub enum NodeValueLiteral {
     LiteralInt(WithMetaData<NodeTypeNameIdentifier>, WithMetaData<String>),
     LiteralHex(WithMetaData<String>),
     LiteralString(WithMetaData<String>),
-    LiteralEmptyMap(NodeTypeMapKey, NodeTypeMapValue),
+    LiteralEmptyMap(WithMetaData<NodeTypeMapKey>, WithMetaData<NodeTypeMapValue>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -323,7 +323,7 @@ pub enum NodeStatement {
     },
     Bind {
         left_hand_side: WithMetaData<String>,
-        right_hand_side: Box<NodeFullExpression>,
+        right_hand_side: Box<WithMetaData<NodeFullExpression>>,
     },
     ReadFromBC {
         left_hand_side: WithMetaData<String>,
@@ -460,7 +460,7 @@ pub enum NodeLibrarySingleDefinition {
     LetDefinition {
         variable_name: WithMetaData<String>,
         type_annotation: Option<NodeTypeAnnotation>,
-        expression: NodeFullExpression,
+        expression: WithMetaData<NodeFullExpression>,
     },
     TypeDefinition(
         // TODO: Enum definition
@@ -481,12 +481,12 @@ pub struct NodeContractDefinition {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeContractField {
     pub typed_identifier: NodeTypedIdentifier,
-    pub right_hand_side: NodeFullExpression,
+    pub right_hand_side: WithMetaData<NodeFullExpression>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeWithConstraint {
-    pub expression: Box<NodeFullExpression>,
+    pub expression: Box<WithMetaData<NodeFullExpression>>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -519,12 +519,12 @@ pub enum NodeTypeAlternativeClause {
 pub enum NodeTypeMapValueArguments {
     EnclosedTypeMapValue(Box<NodeTypeMapValueAllowingTypeArguments>),
     GenericMapValueArgument(WithMetaData<NodeMetaIdentifier>),
-    MapKeyValueType(NodeTypeMapKey, NodeTypeMapValue),
+    MapKeyValueType(WithMetaData<NodeTypeMapKey>, WithMetaData<NodeTypeMapValue>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValueAllowingTypeArguments {
-    TypeMapValueNoArgs(NodeTypeMapValue),
+    TypeMapValueNoArgs(WithMetaData<NodeTypeMapValue>),
     TypeMapValueWithArgs(
         WithMetaData<NodeMetaIdentifier>,
         Vec<NodeTypeMapValueArguments>,

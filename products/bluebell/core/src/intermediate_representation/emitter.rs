@@ -351,8 +351,8 @@ impl AstConverting for IrEmitter {
                 }
             }
             NodeScillaType::MapType(key, value) => {
-                let _ = key.visit(self)?;
-                let _ = value.visit(self)?;
+                let _ = key.node.visit(self)?;
+                let _ = value.node.visit(self)?;
                 // TODO: Pop the two and create type Map<X,Y>
                 unimplemented!()
             }
@@ -421,8 +421,8 @@ impl AstConverting for IrEmitter {
                 type_annotation: _,
                 containing_expression,
             } => {
-                expression.visit(self)?;
-                containing_expression.visit(self)?;
+                expression.node.visit(self)?;
+                containing_expression.node.visit(self)?;
                 unimplemented!();
             }
             NodeFullExpression::FunctionDeclaration {
@@ -432,7 +432,7 @@ impl AstConverting for IrEmitter {
             } => {
                 // identier_value.visit(self)?;
                 type_annotation.visit(self)?;
-                expression.visit(self)?;
+                expression.node.visit(self)?;
 
                 unimplemented!();
             }
@@ -568,7 +568,7 @@ impl AstConverting for IrEmitter {
                     mem::swap(&mut success_block, &mut self.current_block);
                     self.current_body.blocks.push(success_block);
 
-                    let _ = clause.expression.visit(self)?;
+                    let _ = clause.expression.node.visit(self)?;
                     let expr_instr = self.pop_instruction()?;
                     let result_sym = self.convert_instruction_to_symbol(expr_instr);
                     phi_results.push(result_sym);
@@ -886,7 +886,7 @@ impl AstConverting for IrEmitter {
                 right_hand_side,
             } => {
                 // Generating instruction and setting its name
-                let _ = right_hand_side.visit(self)?;
+                let _ = right_hand_side.node.visit(self)?;
 
                 let mut right_hand_side = self.pop_instruction()?;
                 let symbol = IrIdentifier {
@@ -1314,7 +1314,7 @@ impl AstConverting for IrEmitter {
                 }
                 */
 
-                expression.visit(self)?;
+                expression.node.visit(self)?;
                 unimplemented!();
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
@@ -1388,7 +1388,7 @@ impl AstConverting for IrEmitter {
         println!("{:#?}", node.typed_identifier);
 
         let mut variable = self.pop_variable_declaration()?;
-        let _ = node.right_hand_side.visit(self)?;
+        let _ = node.right_hand_side.node.visit(self)?;
         let initializer = self.pop_instruction()?;
         variable.name.kind = IrIndentifierKind::State;
 
