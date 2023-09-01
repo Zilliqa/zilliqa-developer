@@ -2,6 +2,7 @@ use crate::ast::converting::AstConverting;
 use crate::ast::nodes::*;
 use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
+use crate::parser::lexer::SourcePosition;
 
 /// `BluebellFormatter` is a structure responsible for generating a formatted script from an AST.
 /// It stores the current indentation level for the partially generated script `script`.
@@ -51,6 +52,10 @@ impl BluebellFormatter {
 }
 
 impl AstConverting for BluebellFormatter {
+    fn push_source_position(&mut self, _start: &SourcePosition, _end: &SourcePosition) {}
+
+    fn pop_source_position(&mut self) {}
+
     fn emit_byte_str(
         &mut self,
         mode: TreeTraversalMode,
@@ -223,11 +228,11 @@ impl AstConverting for BluebellFormatter {
                 let _ = value.node.visit(self)?;
             }
             NodeTypeMapValue::MapKeyValue(value) => {
-                let _ = (*value).visit(self)?;
+                let _ = (*value).node.visit(self)?;
             }
             NodeTypeMapValue::MapValueParanthesizedType(value) => {
                 self.script.push_str("(");
-                let _ = (*value).visit(self)?;
+                let _ = (*value).node.visit(self)?;
                 self.script.push_str(")");
             }
             NodeTypeMapValue::MapValueAddressType(value) => {

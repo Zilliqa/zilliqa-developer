@@ -155,8 +155,8 @@ pub enum NodeTypeMapKey {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValue {
     MapValueTypeOrEnumLikeIdentifier(WithMetaData<NodeMetaIdentifier>),
-    MapKeyValue(Box<NodeTypeMapEntry>),
-    MapValueParanthesizedType(Box<NodeTypeMapValueAllowingTypeArguments>),
+    MapKeyValue(Box<WithMetaData<NodeTypeMapEntry>>),
+    MapValueParanthesizedType(Box<WithMetaData<NodeTypeMapValueAllowingTypeArguments>>),
     MapValueAddressType(Box<WithMetaData<NodeAddressType>>),
 }
 
@@ -500,22 +500,22 @@ pub struct NodeWithConstraint {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeComponentDefinition {
-    TransitionComponent(Box<NodeTransitionDefinition>),
-    ProcedureComponent(Box<NodeProcedureDefinition>),
+    TransitionComponent(Box<WithMetaData<NodeTransitionDefinition>>),
+    ProcedureComponent(Box<WithMetaData<NodeProcedureDefinition>>),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeProcedureDefinition {
     pub name: WithMetaData<NodeComponentId>,
     pub parameters: WithMetaData<NodeComponentParameters>,
-    pub body: NodeComponentBody,
+    pub body: WithMetaData<NodeComponentBody>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct NodeTransitionDefinition {
     pub name: WithMetaData<NodeComponentId>,
     pub parameters: WithMetaData<NodeComponentParameters>,
-    pub body: NodeComponentBody,
+    pub body: WithMetaData<NodeComponentBody>,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -529,7 +529,7 @@ pub enum NodeTypeAlternativeClause {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub enum NodeTypeMapValueArguments {
-    EnclosedTypeMapValue(Box<NodeTypeMapValueAllowingTypeArguments>),
+    EnclosedTypeMapValue(Box<WithMetaData<NodeTypeMapValueAllowingTypeArguments>>),
     GenericMapValueArgument(WithMetaData<NodeMetaIdentifier>),
     MapKeyValueType(WithMetaData<NodeTypeMapKey>, WithMetaData<NodeTypeMapValue>),
 }
@@ -539,6 +539,6 @@ pub enum NodeTypeMapValueAllowingTypeArguments {
     TypeMapValueNoArgs(WithMetaData<NodeTypeMapValue>),
     TypeMapValueWithArgs(
         WithMetaData<NodeMetaIdentifier>,
-        Vec<NodeTypeMapValueArguments>,
+        Vec<WithMetaData<NodeTypeMapValueArguments>>,
     ),
 }

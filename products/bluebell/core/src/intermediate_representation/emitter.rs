@@ -3,6 +3,7 @@ use crate::ast::nodes::*;
 use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
+use crate::parser::lexer::SourcePosition;
 
 use std::mem;
 
@@ -212,6 +213,14 @@ impl IrEmitter {
 }
 
 impl AstConverting for IrEmitter {
+    fn push_source_position(&mut self, _start: &SourcePosition, _end: &SourcePosition) {
+        unimplemented!()
+    }
+
+    fn pop_source_position(&mut self) {
+        unimplemented!()
+    }
+
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
@@ -1442,7 +1451,7 @@ impl AstConverting for IrEmitter {
         }
 
         // Function body
-        let _ = node.body.visit(self)?;
+        let _ = node.body.node.visit(self)?;
 
         // Exit
         let mut body = self.pop_function_body()?;

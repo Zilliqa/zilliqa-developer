@@ -604,7 +604,13 @@ pub TypeMapValue:  WithMetaData<NodeTypeMapValue> = {
         end
     },
     <start:@L> "Map" <k:TypeMapKey> <v:TypeMapValue> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
-        node: NodeTypeMapValue::MapKeyValue(Box::new(NodeTypeMapEntry { key:    k, value: v })),
+        node: NodeTypeMapValue::MapKeyValue(Box::new(
+            WithMetaData::<NodeTypeMapEntry> {
+                node: NodeTypeMapEntry { key:    k, value: v },
+                start: start.clone(),
+                end: end.clone()
+            }
+        )),
         start,
     end
     },
@@ -636,10 +642,23 @@ pub TypeMapValue:  WithMetaData<NodeTypeMapValue> = {
 //
 // @syntax typeMapValueArguments
 // @return A Scilla map value type with optional type arguments, as a meta identifier, or as a map type.
-pub TypeMapValueArguments: NodeTypeMapValueArguments = {
-    "(" <type_map_value:TypeMapValueAllowingTypeArguments> ")" => NodeTypeMapValueArguments::EnclosedTypeMapValue(Box::new(type_map_value)),
-    <identifier_name:MetaIdentifier> => NodeTypeMapValueArguments::GenericMapValueArgument(identifier_name),
-    "Map" <key_type:TypeMapKey> <value_type:TypeMapValue> => NodeTypeMapValueArguments::MapKeyValueType(key_type, value_type)
+pub TypeMapValueArguments: WithMetaData<NodeTypeMapValueArguments> = {
+    <start:@L> "(" <type_map_value:TypeMapValueAllowingTypeArguments> ")" <end:@R> => 
+    WithMetaData::<NodeTypeMapValueArguments> {
+        node: NodeTypeMapValueArguments::EnclosedTypeMapValue(Box::new(type_map_value)),
+        start,
+        end
+    },
+    <start:@L> <identifier_name:MetaIdentifier> <end:@R> => WithMetaData::<NodeTypeMapValueArguments> { 
+        node: NodeTypeMapValueArguments::GenericMapValueArgument(identifier_name),
+        start,
+        end
+    },
+    <start:@L> "Map" <key_type:TypeMapKey> <value_type:TypeMapValue> <end:@R> => WithMetaData::<NodeTypeMapValueArguments> {
+        node: NodeTypeMapValueArguments::MapKeyValueType(key_type, value_type),
+        start,
+        end
+    }
 }
 
 
@@ -844,9 +863,19 @@ pub TypeAlternativeClause: WithMetaData<NodeTypeAlternativeClause> = {
 //
 // @syntax typeMapValueAllowingTypeArguments
 // @return A Scilla map value type that allows for type arguments or a Scilla map value type without type arguments.
-pub TypeMapValueAllowingTypeArguments: NodeTypeMapValueAllowingTypeArguments = {
-    <n:MetaIdentifier> <args:TypeMapValueArguments+> => NodeTypeMapValueAllowingTypeArguments::TypeMapValueWithArgs(n, args),
-    <t:TypeMapValue> => NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(t),
+pub TypeMapValueAllowingTypeArguments: WithMetaData<NodeTypeMapValueAllowingTypeArguments> = {
+    <start:@L> <n:MetaIdentifier> <args:TypeMapValueArguments+> <end:@R> => 
+    WithMetaData::<NodeTypeMapValueAllowingTypeArguments> {
+        node: NodeTypeMapValueAllowingTypeArguments::TypeMapValueWithArgs(n, args),
+        start,
+        end
+    },
+    <start:@L> <t:TypeMapValue> <end:@R> => 
+    WithMetaData::<NodeTypeMapValueAllowingTypeArguments> {
+        node: NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(t),
+        start,
+        end
+    }
 }
 
 
@@ -1571,8 +1600,13 @@ pub ComponentDefinition: WithMetaData<NodeComponentDefinition> = {
 //
 // @syntax transitionDefinition
 // @return A Scilla transition definition with a name, parameters, and body.
-pub TransitionDefinition : NodeTransitionDefinition = 
- "transition" <name:ComponentId> <parameters:ComponentParameters> <body:ComponentBody> => NodeTransitionDefinition{name, parameters, body };
+pub TransitionDefinition : WithMetaData<NodeTransitionDefinition> = 
+<start:@L> "transition" <name:ComponentId> <parameters:ComponentParameters> <body:ComponentBody> <end:@R> => 
+    WithMetaData::<NodeTransitionDefinition> {
+        node: NodeTransitionDefinition{name, parameters, body },
+        start,
+        end
+    };
 
 
 
@@ -1586,12 +1620,16 @@ pub TransitionDefinition : NodeTransitionDefinition =
 //
 // @syntax procedureDefinition
 // @return A Scilla procedure definition with a name, parameters, and body.
-pub ProcedureDefinition: NodeProcedureDefinition = {
-    "procedure" 
+pub ProcedureDefinition: WithMetaData<NodeProcedureDefinition> = {
+    <start:@L> "procedure" 
     <name: ComponentId>
     <parameters:ComponentParameters>
-    <body: ComponentBody>
-    => NodeProcedureDefinition{name,parameters,body } 
+    <body: ComponentBody> <end:@R>
+    => WithMetaData::<NodeProcedureDefinition> {
+        node: NodeProcedureDefinition{name,parameters,body } ,
+        start,
+        end
+    }
 };
 
 
@@ -1605,9 +1643,13 @@ pub ProcedureDefinition: NodeProcedureDefinition = {
 //
 // @syntax componentBody
 // @return A Scilla component body with an optional statement block.
-pub ComponentBody: NodeComponentBody = {
-    <statement_block:StatementBlock?> "end" => NodeComponentBody{ statement_block }
-}
+pub ComponentBody: WithMetaData<NodeComponentBody> = {
+        <start:@L> <statement_block:StatementBlock?> "end" <end:@R> => WithMetaData::<NodeComponentBody>{ 
+            node: NodeComponentBody{ statement_block },
+            start,
+            end
+        }
+    }
 ;
 
 
