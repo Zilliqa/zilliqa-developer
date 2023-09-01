@@ -244,9 +244,9 @@ impl Component for AppLayout {
 }
 
 fn line_to_pixel_offset(line: usize) -> usize {
-    const FONT_SIZE: usize = 20; /* font size in pixels */
+    const FONT_SIZE: usize = 24; /* font size in pixels */
     const LINE_HEIGHT: f32 = 1.0; /* line height as a multiplier */
-
+    console::log!("Line ", line);
     (line - 1) * (FONT_SIZE as f32 * LINE_HEIGHT) as usize
 }
 
@@ -332,6 +332,24 @@ pub fn app() -> Html {
                 html! {
                     <div class="h-full w-full pl-10 bg-black">
                             <div class="editor-container h-full w-full bg-black  text-white text-left font-mono">
+                                {
+                                    if let Some(p) = state.current_position {
+                                        let (_, _, line, _) = p;
+                                        let pos = if line < usize::MAX/2 {
+                                            line_to_pixel_offset(line+1)
+                                        }
+                                        else
+                                        {
+                                            0
+                                        };
+                                        html! {
+                                        <div class="bg-blue-600 w-full h-6 absolute" style={format!("top: {}px", pos)}>
+                                        </div>
+                                        }
+                                    } else {
+                                        html! {}
+                                    }
+                                }
                                 <pre class="highlighted-code h-full w-full flex flex-col items-stretch hidden">
                                     <code class="language-scilla h-full w-full"> /* TODO: Fix highligther */
                                     {source_code.clone()}
@@ -342,6 +360,7 @@ pub fn app() -> Html {
                                     value={source_code}
                                     oninput={handle_source_code_change}
                                 />
+
                                 { for error_map.iter().map(|(line, error)| {
                                     html! {
                                         <div class="error-annotation" style={format!("top: {}px", line_to_pixel_offset(*line))}>

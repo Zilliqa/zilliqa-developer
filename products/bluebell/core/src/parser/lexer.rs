@@ -219,6 +219,9 @@ pub struct SourcePosition {
 }
 
 impl SourcePosition {
+    pub fn is_valid(&self) -> bool {
+        self.position < (usize::MAX >> 1)
+    }
     pub fn start_position() -> Self {
         Self {
             position: 0,

@@ -436,12 +436,13 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                         };
 
                         format!(
-                            "[0x{:02x}: 0x{:02x}] {:<width$}  ;; Stack: {}, Comment: {}",
+                            "[0x{:02x}: 0x{:02x}] {:<width$}  ;; Stack: {}, Comment: {}, Source: {:?}",
                             position,
                             instr.opcode.as_u8(),
                             instruction_value,
                             instr.stack_size,
                             instr.comment.clone().unwrap_or("".to_string()).trim(),
+                            instr.source_position,
                             width = 40
                         )
                     })
@@ -487,12 +488,13 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                             };
 
                             format!(
-                                "[0x{:02x}: 0x{:02x}] {:<width$} ;; Stack: {}, Comment: {}",
+                                "[0x{:02x}: 0x{:02x}] {:<width$} ;; Stack: {}, Comment: {}, Source: {:?}",
                                 position,
                                 instr.opcode.as_u8(),
                                 instruction_value,
                                 instr.stack_size,
                                 instr.comment.clone().unwrap_or("".to_string()).trim(),
+                                instr.source_position,
                                 width = 40
                             )
                         })

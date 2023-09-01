@@ -8,6 +8,7 @@ use crate::passes::debug_printer::DebugPrinter;
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
+use evm_assembly::instruction::EvmSourcePosition;
 use primitive_types::U256;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -154,6 +155,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                             let mut instr_copy = instr.clone();
                             let _ = instruction_printer.visit_instruction(TreeTraversalMode::Enter, &mut instr_copy, &mut symbol_table);
                             evm_block.set_next_instruction_comment(instruction_printer.value());
+
+                            let (l_pos, r_pos) = &instr.source_location;
+                            if l_pos.is_valid() && r_pos.is_valid() {
+                                let pos = EvmSourcePosition {
+                                    start: l_pos.position,
+                                    end: r_pos.position,
+                                    line: l_pos.line,
+                                    column: l_pos.column,
+                                };
+                                evm_block.set_next_instruction_location(pos);
+                            }
 
                             match &instr.operation {
                                 Operation::CallFunction {

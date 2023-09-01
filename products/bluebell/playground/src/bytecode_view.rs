@@ -3,9 +3,8 @@ use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use std::cell::RefCell;
 use std::rc::Rc;
-use web_sys::window;
+
 use yew::prelude::*;
-use yewdux::prelude::*;
 
 pub struct ByteCodeViewInstruction {
     pub label: Option<String>,

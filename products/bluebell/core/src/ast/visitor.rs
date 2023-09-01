@@ -6,6 +6,15 @@ pub trait AstVisitor {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String>;
 }
 
+impl<T: AstVisitor> AstVisitor for WithMetaData<T> {
+    fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
+        emitter.push_source_position(&self.start, &self.end);
+        let ret = self.node.visit(emitter);
+        emitter.pop_source_position();
+        ret
+    }
+}
+
 impl AstVisitor for NodeByteStr {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String> {
         let ret = emitter.emit_byte_str(TreeTraversalMode::Enter, self)?;

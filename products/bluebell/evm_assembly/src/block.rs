@@ -1,5 +1,5 @@
 use crate::function_signature::EvmFunctionSignature;
-use crate::instruction::EvmInstruction;
+use crate::instruction::{EvmInstruction, EvmSourcePosition};
 use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
 use crate::types::EvmTypeValue;
 use evm::Opcode;
@@ -137,7 +137,8 @@ pub struct EvmBlock {
 
     pub scope: Scope,
     pub comment: Option<String>, // stack_counter: i32,
-                                 // name_location: HashMap<String, i32>,
+    // name_location: HashMap<String, i32>,
+    pub source_position: Option<EvmSourcePosition>,
 }
 
 impl EvmBlock {
@@ -154,6 +155,7 @@ impl EvmBlock {
             produces: 0,
             scope: Scope::empty(arg_names.len() as i32),
             comment: None,
+            source_position: None,
         };
 
         for (i, name) in arg_names.iter().enumerate() {
@@ -169,6 +171,10 @@ impl EvmBlock {
 
     pub fn set_next_instruction_comment(&mut self, comment: String) {
         self.comment = Some(comment);
+    }
+
+    pub fn set_next_instruction_location(&mut self, position: EvmSourcePosition) {
+        self.source_position = Some(position);
     }
 
     pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
@@ -393,6 +399,7 @@ impl EvmBlock {
                 stack_size: 0, // TODO: Should be calculated using write_instruction
                 is_terminator,
                 comment: None,
+                source_position: None,
             };
 
             i += 1;
@@ -449,6 +456,9 @@ impl EvmBlock {
         let mut comment = None;
         mem::swap(&mut comment, &mut self.comment);
 
+        let mut source_position = None;
+        mem::swap(&mut source_position, &mut self.source_position);
+
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
@@ -458,6 +468,7 @@ impl EvmBlock {
             stack_size: self.scope.stack_counter,
             is_terminator: false,
             comment,
+            source_position,
         });
 
         self.update_stack(opcode);
@@ -469,6 +480,10 @@ impl EvmBlock {
 
         let mut comment = None;
         mem::swap(&mut comment, &mut self.comment);
+
+        let mut source_position = None;
+        mem::swap(&mut source_position, &mut self.source_position);
+
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
@@ -479,6 +494,7 @@ impl EvmBlock {
             stack_size: self.scope.stack_counter,
             is_terminator: false,
             comment,
+            source_position,
         });
 
         self.update_stack(opcode);

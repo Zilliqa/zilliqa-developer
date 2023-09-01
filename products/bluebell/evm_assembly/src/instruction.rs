@@ -1,6 +1,14 @@
 use evm::Opcode;
 
 #[derive(Debug, Clone)]
+pub struct EvmSourcePosition {
+    pub start: usize,
+    pub end: usize,
+    pub line: usize,
+    pub column: usize,
+}
+
+#[derive(Debug, Clone)]
 pub struct EvmInstruction {
     pub position: Option<u32>,
     pub opcode: Opcode,
@@ -11,6 +19,7 @@ pub struct EvmInstruction {
     pub stack_size: i32, // The number of elements on the stack since the start of the block before this instruction is executed
     pub is_terminator: bool,
     pub comment: Option<String>,
+    pub source_position: Option<EvmSourcePosition>,
 }
 
 impl EvmInstruction {

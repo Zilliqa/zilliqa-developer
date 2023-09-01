@@ -1,4 +1,5 @@
 // use strum_macros::{Display, EnumIter};
+
 use bluebell::support::evm::EvmCompiler;
 use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
@@ -8,8 +9,9 @@ use evm_assembly::observable_machine::ObservableMachine;
 use gloo_console as console;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
-use yewdux::prelude::Dispatch;
+
 use yewdux::prelude::Reducer;
 use yewdux::store::Store;
 
@@ -17,6 +19,9 @@ use yewdux::store::Store;
 #[store(storage = "local")]
 pub struct State {
     pub source_code: String,
+
+    pub pc_to_position: HashMap<usize, (usize, usize, usize, usize)>,
+    pub current_position: Option<(usize, usize, usize, usize)>,
 
     #[serde(skip)]
     pub bytecode_hex: String,
@@ -64,6 +69,8 @@ end
             executable: None,
             observable_machine: None,
             program_counter: 0,
+            current_position: None,
+            pc_to_position: HashMap::new(),
         }
     }
 }
@@ -106,6 +113,25 @@ impl Reducer<State> for StateMessage {
                     state.bytecode_hex = hex::encode(&exec.executable.bytecode.clone());
                     let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
 
+                    // Creating PC to source map
+                    state.pc_to_position = HashMap::new();
+                    let functions = &exec.executable.ir.functions;
+                    for function in functions {
+                        for block in &function.blocks {
+                            for instr in &block.instructions {
+                                let pc = match &instr.position {
+                                    Some(p) => p,
+                                    None => continue,
+                                };
+                                let source_pos = match &instr.source_position {
+                                    Some(p) => (p.start, p.end, p.line, p.column),
+                                    None => continue,
+                                };
+                                state.pc_to_position.insert(*pc as usize, source_pos);
+                            }
+                        }
+                    }
+
                     state.executable = Some(Rc::new(RefCell::new(exec.executable)));
                     state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
                         code.into(),
@@ -134,8 +160,12 @@ impl Reducer<State> for StateMessage {
                     machine.borrow_mut().step();
                     state.program_counter = if let Ok(pc) = machine.borrow_mut().machine.position()
                     {
+                        if let Some(pos) = state.pc_to_position.get(pc) {
+                            state.current_position = Some(*pos);
+                        }
                         *pc as u32
                     } else {
+                        state.current_position = None;
                         0
                     };
 
@@ -170,6 +200,8 @@ impl Clone for State {
             observable_machine,
             program_counter: self.program_counter,
             bytecode_hex: self.bytecode_hex.clone(),
+            pc_to_position: self.pc_to_position.clone(),
+            current_position: self.current_position.clone(),
         }
     }
 }
@@ -201,6 +233,8 @@ impl PartialEq for State {
             && self.source_code == other.source_code
             && self.program_counter == other.program_counter
             && self.bytecode_hex == other.bytecode_hex
+            && self.pc_to_position == other.pc_to_position
+            && self.current_position == other.current_position
     }
 }
 
