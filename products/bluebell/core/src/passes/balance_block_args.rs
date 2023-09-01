@@ -1,3 +1,5 @@
+use crate::parser::lexer::SourcePosition;
+
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use std::collections::HashSet;
@@ -147,6 +149,11 @@ impl IrPass for BalanceBlockArguments {
                                     type_reference: None,
                                     kind: IrIndentifierKind::VirtualRegister,
                                     is_definition: false,
+                                    source_location: (
+                                        // TODO:
+                                        SourcePosition::invalid_position(),
+                                        SourcePosition::invalid_position(),
+                                    ),
                                 };
 
                                 let op = Operation::TerminatingRef(ir_identifier);
@@ -154,6 +161,10 @@ impl IrPass for BalanceBlockArguments {
                                     ssa_name: None,
                                     result_type: None,
                                     operation: op,
+                                    source_location: (
+                                        SourcePosition::invalid_position(),
+                                        SourcePosition::invalid_position(),
+                                    ),
                                 }));
                             }
                         }

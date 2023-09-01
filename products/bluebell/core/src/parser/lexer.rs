@@ -219,6 +219,20 @@ pub struct SourcePosition {
 }
 
 impl SourcePosition {
+    pub fn start_position() -> Self {
+        Self {
+            position: 0,
+            line: 0,
+            column: 0,
+        }
+    }
+    pub fn invalid_position() -> Self {
+        Self {
+            position: usize::MAX,
+            line: usize::MAX,
+            column: usize::MAX,
+        }
+    }
     pub fn with_end(&self, new_position: usize) -> Self {
         let mut ret = self.clone();
         ret.column += new_position - ret.position;

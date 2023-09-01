@@ -48,6 +48,10 @@ impl IrEmitter {
             type_reference: None,
             kind: IrIndentifierKind::Namespace,
             is_definition: false,
+            source_location: (
+                SourcePosition::start_position(),
+                SourcePosition::start_position(),
+            ),
         };
         // TODO: Repeat similar code for all literals
         IrEmitter {
@@ -58,8 +62,19 @@ impl IrEmitter {
             namespace_stack: [ns].to_vec(),
             /// current_function: None,
             ir: Box::new(IntermediateRepresentation::new()),
-            source_positions: Vec::new(),
+            source_positions: [(
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            )]
+            .to_vec(), // TODO: this should not be necessary
         }
+    }
+
+    fn current_location(&self) -> (SourcePosition, SourcePosition) {
+        self.source_positions
+            .last()
+            .expect("Unable to determine source location")
+            .clone()
     }
 
     fn push_namespace(&mut self, mut ns: IrIdentifier) {
@@ -248,7 +263,11 @@ impl AstConverting for IrEmitter {
                     unimplemented!()
                 }
                 NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(name) => {
-                    let symbol = IrIdentifier::new(name.to_string(), IrIndentifierKind::Unknown);
+                    let symbol = IrIdentifier::new(
+                        name.to_string(),
+                        IrIndentifierKind::Unknown,
+                        self.current_location(),
+                    );
 
                     self.stack.push(StackObject::IrIdentifier(symbol));
                 }
@@ -288,12 +307,17 @@ impl AstConverting for IrEmitter {
         match node {
             NodeVariableIdentifier::VariableName(name) => {
                 let operation = Operation::ResolveSymbol {
-                    symbol: IrIdentifier::new(name.to_string(), IrIndentifierKind::VirtualRegister),
+                    symbol: IrIdentifier::new(
+                        name.to_string(),
+                        IrIndentifierKind::VirtualRegister,
+                        self.current_location(),
+                    ),
                 };
                 let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -483,6 +507,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::TemplateFunctionName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
 
                 let operation = Operation::CallExternalFunction { name, arguments };
@@ -491,6 +516,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
 
                 self.stack.push(StackObject::Instruction(instr));
@@ -542,6 +568,7 @@ impl AstConverting for IrEmitter {
                             left: main_expression_symbol.clone(),
                             right: expected_value,
                         },
+                        source_location: self.current_location(),
                     });
                     let case = self.convert_instruction_to_symbol(compare_instr);
 
@@ -571,6 +598,7 @@ impl AstConverting for IrEmitter {
                             ssa_name: None,
                             result_type: None,
                             operation: op,
+                            source_location: self.current_location(),
                         }));
                     self.current_block.terminated = true;
 
@@ -589,6 +617,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::Jump(finally_exit_label.clone()),
+                        source_location: self.current_location(),
                     });
                     self.current_block.instructions.push_back(exit_instruction);
 
@@ -609,6 +638,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Jump(finally_exit_label.clone()),
+                    source_location: self.current_location(),
                 });
                 self.current_block.instructions.push_back(exit_instruction);
 
@@ -627,6 +657,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::PhiNode(phi_results),
+                        source_location: self.current_location(),
                     })));
                 // unimplemented!();
             }
@@ -660,6 +691,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
 
                 self.stack.push(StackObject::Instruction(instr));
@@ -729,6 +761,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -745,6 +778,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -825,6 +859,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::VirtualRegister,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
 
                 let right_hand_side = match &right_hand_side.node {
@@ -843,11 +878,13 @@ impl AstConverting for IrEmitter {
                                 type_reference: None,
                                 kind: IrIndentifierKind::State,
                                 is_definition: false,
+                                source_location: self.current_location(),
                             },
                             value: None,
                         },
                         value: symbol,
                     },
+                    source_location: self.current_location(),
                 });
 
                 Some(ret)
@@ -869,6 +906,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::VirtualRegister,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
                 (*right_hand_side).ssa_name = Some(symbol.clone());
                 self.current_block.instructions.push_back(right_hand_side);
@@ -884,11 +922,13 @@ impl AstConverting for IrEmitter {
                                 type_reference: None,
                                 kind: IrIndentifierKind::State,
                                 is_definition: false,
+                                source_location: self.current_location(),
                             },
                             value: None,
                         },
                         value: symbol,
                     },
+                    source_location: self.current_location(),
                 });
 
                 Some(ret)
@@ -907,6 +947,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::VirtualRegister,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
 
@@ -950,6 +991,7 @@ impl AstConverting for IrEmitter {
                 ssa_name: None,
                 result_type: None,
                 operation: Operation::AcceptTransfer,
+                source_location: self.current_location(),
             })),
             NodeStatement::Send { identifier_name: _ } => {
                 unimplemented!()
@@ -976,6 +1018,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Jump(match_exit.clone()),
+                    source_location: self.current_location(),
                 });
                 self.current_block.instructions.push_back(jump);
 
@@ -1026,6 +1069,7 @@ impl AstConverting for IrEmitter {
                             left: main_expression_symbol.clone(),
                             right: expected_value,
                         },
+                        source_location: self.current_location(),
                     });
 
                     let jump_if = Box::new(Instruction {
@@ -1036,6 +1080,7 @@ impl AstConverting for IrEmitter {
                             on_success: label_block.clone(),
                             on_failure: match_exit.clone(), // Exit or Placeholder - will be overwritten in next cycle
                         },
+                        source_location: self.current_location(),
                     });
                     self.current_block.instructions.push_back(jump_if);
 
@@ -1054,6 +1099,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::Jump(match_exit.clone()),
+                        source_location: self.current_location(),
                     });
                     clause_block.instructions.push_back(terminator_instr);
                     self.current_body.blocks.push(clause_block);
@@ -1091,6 +1137,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::ProcedureName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
 
                 let operation = Operation::CallFunction { name, arguments };
@@ -1099,6 +1146,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
 
                 // self.stack.push(StackObject::Instruction(instr));
@@ -1139,6 +1187,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 }));
             }
             NodeComponentId::WithTypeLikeName(name) => {
@@ -1148,6 +1197,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 }));
             }
         }
@@ -1467,6 +1517,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Return(None),
+                    source_location: self.current_location(),
                 }));
                 last_block.terminated = true;
             }

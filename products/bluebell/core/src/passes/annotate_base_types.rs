@@ -12,6 +12,7 @@ use crate::intermediate_representation::primitives::{
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::intermediate_representation::symbol_table::TypeInfo;
+use crate::parser::lexer::SourcePosition;
 use std::collections::HashSet;
 use std::mem;
 
@@ -257,12 +258,21 @@ impl IrPass for AnnotateBaseTypes {
                             type_reference: Some(return_type),
                             kind: IrIndentifierKind::TypeName,
                             is_definition: false,
+                            source_location: (
+                                // TODO:
+                                SourcePosition::invalid_position(),
+                                SourcePosition::invalid_position(),
+                            ),
                         }),
                         operation: Operation::CallStaticFunction {
                             name: symbol.clone(),
                             owner: None, // TODO:
                             arguments: Vec::new(),
                         },
+                        source_location: (
+                            SourcePosition::invalid_position(),
+                            SourcePosition::invalid_position(),
+                        ),
                     });
 
                     constructor_call.visit(self, symbol_table)?;

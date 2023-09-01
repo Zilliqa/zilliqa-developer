@@ -1,4 +1,6 @@
 use crate::intermediate_representation::symbol_table::SymbolTable;
+use crate::parser::lexer::SourcePosition;
+
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -35,16 +37,22 @@ pub struct IrIdentifier {
     pub type_reference: Option<String>,
     pub kind: IrIndentifierKind,
     pub is_definition: bool,
+    pub source_location: (SourcePosition, SourcePosition),
 }
 
 impl IrIdentifier {
-    pub fn new(unresolved: String, kind: IrIndentifierKind) -> Self {
+    pub fn new(
+        unresolved: String,
+        kind: IrIndentifierKind,
+        source_location: (SourcePosition, SourcePosition),
+    ) -> Self {
         Self {
             unresolved,
             resolved: None,
             type_reference: None,
             kind,
             is_definition: false,
+            source_location,
         }
     }
 
@@ -63,6 +71,7 @@ pub struct EnumValue {
     pub name: IrIdentifier,
     pub id: u64,
     pub data: Option<IrIdentifier>,
+    // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 impl EnumValue {
@@ -77,6 +86,7 @@ impl EnumValue {
 #[derive(Debug, Clone)]
 pub struct Tuple {
     pub fields: Vec<IrIdentifier>,
+    // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 impl Tuple {
@@ -92,6 +102,7 @@ impl Tuple {
 #[derive(Debug, Clone)]
 pub struct Variant {
     pub fields: Vec<EnumValue>, // (name, id, data)
+                                // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 impl Variant {
@@ -129,6 +140,7 @@ pub struct VariableDeclaration {
     pub name: IrIdentifier,
     pub typename: IrIdentifier,
     pub mutable: bool,
+    // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 impl VariableDeclaration {
@@ -144,6 +156,10 @@ impl VariableDeclaration {
                     IrIndentifierKind::VirtualRegister
                 },
                 is_definition: true,
+                source_location: (
+                    SourcePosition::invalid_position(),
+                    SourcePosition::invalid_position(),
+                ),
             },
             typename,
             mutable,
@@ -155,12 +171,14 @@ impl VariableDeclaration {
 pub struct FieldAddress {
     pub name: IrIdentifier,
     pub value: Option<Vec<u8>>, // TODO: Consider dropping this one
+                                // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 #[derive(Debug, Clone)]
 pub struct CaseClause {
     pub expression: IrIdentifier,
     pub label: IrIdentifier,
+    // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 #[derive(Debug, Clone)]
@@ -229,6 +247,7 @@ pub struct Instruction {
     pub ssa_name: Option<IrIdentifier>,
     pub result_type: Option<IrIdentifier>,
     pub operation: Operation,
+    pub source_location: (SourcePosition, SourcePosition),
 }
 
 #[derive(Debug, Clone)]
@@ -241,6 +260,7 @@ pub struct FunctionBlock {
     pub jump_required_arguments: HashMap<String, HashSet<String>>,
     pub instructions: VecDeque<Box<Instruction>>,
     pub terminated: bool,
+    // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 impl FunctionBlock {
@@ -268,6 +288,10 @@ impl FunctionBlock {
             type_reference: None,
             kind: IrIndentifierKind::BlockLabel,
             is_definition: true,
+            source_location: (
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            ),
         }
     }
 }
@@ -275,6 +299,7 @@ impl FunctionBlock {
 #[derive(Debug, Clone)]
 pub struct FunctionBody {
     pub blocks: Vec<Box<FunctionBlock>>,
+    // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
 impl FunctionBody {
