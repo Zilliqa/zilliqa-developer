@@ -530,6 +530,7 @@ impl AstConverting for IrEmitter {
             } => {
                 let _ = match_expression.visit(self)?;
                 let expression = self.pop_instruction()?;
+                let source_location = expression.source_location.clone();
 
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
@@ -560,6 +561,7 @@ impl AstConverting for IrEmitter {
                     // TODO: Pop instruction or symbol
                     let expected_value = self.pop_ir_identifier()?;
                     assert!(expected_value.kind == IrIndentifierKind::Unknown);
+                    let source_location = expected_value.source_location.clone();
 
                     let compare_instr = Box::new(Instruction {
                         ssa_name: None,
@@ -568,7 +570,7 @@ impl AstConverting for IrEmitter {
                             left: main_expression_symbol.clone(),
                             right: expected_value,
                         },
-                        source_location: self.current_location(),
+                        source_location: source_location.clone(),
                     });
                     let case = self.convert_instruction_to_symbol(compare_instr);
 
@@ -598,7 +600,7 @@ impl AstConverting for IrEmitter {
                             ssa_name: None,
                             result_type: None,
                             operation: op,
-                            source_location: self.current_location(),
+                            source_location,
                         }));
                     self.current_block.terminated = true;
 
@@ -610,6 +612,8 @@ impl AstConverting for IrEmitter {
 
                     let _ = clause.node.expression.visit(self)?;
                     let expr_instr = self.pop_instruction()?;
+                    let source_location = expr_instr.source_location.clone();
+
                     let result_sym = self.convert_instruction_to_symbol(expr_instr);
                     phi_results.push(result_sym);
 
@@ -617,7 +621,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::Jump(finally_exit_label.clone()),
-                        source_location: self.current_location(),
+                        source_location,
                     });
                     self.current_block.instructions.push_back(exit_instruction);
 
@@ -638,7 +642,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Jump(finally_exit_label.clone()),
-                    source_location: self.current_location(),
+                    source_location: source_location.clone(),
                 });
                 self.current_block.instructions.push_back(exit_instruction);
 
@@ -657,7 +661,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::PhiNode(phi_results),
-                        source_location: self.current_location(),
+                        source_location: source_location.clone(),
                     })));
                 // unimplemented!();
             }
