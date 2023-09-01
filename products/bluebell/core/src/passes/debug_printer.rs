@@ -234,7 +234,9 @@ impl IrPass for DebugPrinter {
                 owner: _,
                 arguments: _,
             } => unimplemented!(),
-            Operation::ResolveSymbol { symbol: _ } => unimplemented!(),
+            Operation::ResolveSymbol { symbol } => {
+                symbol.visit(self, symbol_table)?;
+            }
             Operation::Literal { data, typename } => {
                 typename.visit(self, symbol_table)?;
                 self.script.push_str(" ");

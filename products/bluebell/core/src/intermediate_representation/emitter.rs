@@ -34,6 +34,8 @@ pub struct IrEmitter {
     namespace_stack: Vec<IrIdentifier>,
 
     ir: Box<IntermediateRepresentation>,
+
+    source_positions: Vec<(SourcePosition, SourcePosition)>,
 }
 
 impl IrEmitter {
@@ -56,6 +58,7 @@ impl IrEmitter {
             namespace_stack: [ns].to_vec(),
             /// current_function: None,
             ir: Box::new(IntermediateRepresentation::new()),
+            source_positions: Vec::new(),
         }
     }
 
@@ -213,12 +216,12 @@ impl IrEmitter {
 }
 
 impl AstConverting for IrEmitter {
-    fn push_source_position(&mut self, _start: &SourcePosition, _end: &SourcePosition) {
-        unimplemented!()
+    fn push_source_position(&mut self, start: &SourcePosition, end: &SourcePosition) {
+        self.source_positions.push((start.clone(), end.clone()));
     }
 
     fn pop_source_position(&mut self) {
-        unimplemented!()
+        self.source_positions.pop();
     }
 
     fn emit_byte_str(
