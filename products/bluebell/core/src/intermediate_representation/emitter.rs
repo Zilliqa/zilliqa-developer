@@ -561,6 +561,7 @@ impl AstConverting for IrEmitter {
                     // TODO: Pop instruction or symbol
                     let expected_value = self.pop_ir_identifier()?;
                     assert!(expected_value.kind == IrIndentifierKind::Unknown);
+
                     let source_location = expected_value.source_location.clone();
 
                     let compare_instr = Box::new(Instruction {
@@ -1009,6 +1010,7 @@ impl AstConverting for IrEmitter {
             NodeStatement::MatchStmt { variable, clauses } => {
                 let _ = variable.visit(self)?;
                 let expression = self.pop_instruction()?;
+                let source_location = expression.source_location.clone();
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
                 let match_exit = self
@@ -1022,7 +1024,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Jump(match_exit.clone()),
-                    source_location: self.current_location(),
+                    source_location,
                 });
                 self.current_block.instructions.push_back(jump);
 
@@ -1040,6 +1042,7 @@ impl AstConverting for IrEmitter {
                         .new_block_label(&format!("clause_{}_block", i));
 
                     let last_instruction = &mut self.current_block.instructions.back_mut().unwrap();
+
                     match &mut last_instruction.operation {
                         Operation::Jump(ref mut value) => {
                             *value = label_condition.clone();
@@ -1065,6 +1068,7 @@ impl AstConverting for IrEmitter {
                     clause.node.pattern_expression.visit(self)?;
                     let expected_value = self.pop_ir_identifier()?;
                     assert!(expected_value.kind == IrIndentifierKind::Unknown);
+                    let source_location = expected_value.source_location.clone();
 
                     let jump_condition = Box::new(Instruction {
                         ssa_name: None,
@@ -1073,7 +1077,7 @@ impl AstConverting for IrEmitter {
                             left: main_expression_symbol.clone(),
                             right: expected_value,
                         },
-                        source_location: self.current_location(),
+                        source_location: source_location.clone(),
                     });
 
                     let jump_if = Box::new(Instruction {
@@ -1084,7 +1088,7 @@ impl AstConverting for IrEmitter {
                             on_success: label_block.clone(),
                             on_failure: match_exit.clone(), // Exit or Placeholder - will be overwritten in next cycle
                         },
-                        source_location: self.current_location(),
+                        source_location: source_location.clone(),
                     });
                     self.current_block.instructions.push_back(jump_if);
 
@@ -1103,7 +1107,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::Jump(match_exit.clone()),
-                        source_location: self.current_location(),
+                        source_location,
                     });
                     clause_block.instructions.push_back(terminator_instr);
                     self.current_body.blocks.push(clause_block);
@@ -1451,7 +1455,6 @@ impl AstConverting for IrEmitter {
         node: &NodeContractField,
     ) -> Result<TraversalResult, String> {
         let _ = node.typed_identifier.visit(self)?;
-        println!("{:#?}", node.typed_identifier);
 
         let mut variable = self.pop_variable_declaration()?;
         let _ = node.right_hand_side.visit(self)?;

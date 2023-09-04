@@ -169,31 +169,33 @@ impl Component for ByteCodeView {
                                                 html!{}
                                             }
                                         }
-                                        {
+
+
+                                        <div class={
+                                            if program_counter == instr.bytecode_position {
+                                              "p-2 rounded flex  items-start justify-start space-x-4 text-sm text-gray-700 bg-gray-300 whitespace-nowrap"
+                                          }
+                                          else
+                                          {
+                                             "p-2 rounded  flex  items-start justify-start space-x-4 text-sm text-gray-700 whitespace-nowrap"
+                                          }
+                                        } id={id}> // Assign the unique id here
+                                            <input type="checkbox" class="flex-0 form-checkbox min-h-5 min-w-5 h-5 w-5 text-blue-600 rounded" />
+                                            <div class="h-5">{instr.hex_bytecode_position.clone()}</div>
+                                            <div class="flex flex-col overflow-x-auto">
+                                                <div>{instr.text.clone()}</div>
+                                                                                        {
                                             if instr.comment.len() > 0 {
                                                 html! {
-                                                    <div class="flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap">
-                                                        <span class="h-5 w-5"></span>
-                                                        <div class="ml-4 font-mono text-xs text-gray-400">{instr.comment.clone()}</div>
+                                                    <div class="font-mono text-xs text-gray-400 text-sm text-gray-700 whitespace-nowrap">
+                                                        {instr.comment.clone()}
                                                     </div>
                                                 }
                                             } else {
                                                 html!{}
                                             }
                                         }
-
-                                        <div class={
-                                            if program_counter == instr.bytecode_position {
-                                              "p-2 rounded flex items-center space-x-4 text-sm text-gray-700 bg-gray-300 whitespace-nowrap"
-                                          }
-                                          else
-                                          {
-                                             "p-2 rounded  flex items-center space-x-4 text-sm text-gray-700 whitespace-nowrap"
-                                          }
-                                        } id={id}> // Assign the unique id here
-                                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded-full" />
-                                            <div>{instr.hex_bytecode_position.clone()}</div>
-                                            <div>{instr.text.clone()}</div>
+                                                </div>
                                         </div>
                                     </>
                                 }
