@@ -1,4 +1,7 @@
+use evm::Capture::Trap;
 use evm::Machine;
+use evm::Opcode;
+use primitive_types::H256;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -39,7 +42,32 @@ impl ObservableMachine {
         loop {
             match self.machine.step() {
                 Ok(()) => (),
-                Err(_res) => return,
+                Err(code) => match code {
+                    Trap(opcode) => {
+                        match opcode {
+                            Opcode::STATICCALL => {
+                                // Emulating static call
+                                let stack = self.machine.stack_mut();
+                                for _i in 0..6 {
+                                    if stack.pop().is_err() {
+                                        panic!("Stack empty!");
+                                    }
+                                }
+                                let v = stack.push(H256::zero());
+                                if v.is_err() {
+                                    panic!("Failed to push result to stack");
+                                }
+                                println!("Static call: {:?}", opcode)
+                            }
+                            _ => {
+                                panic!("Unhandled trap opcode.")
+                            }
+                        }
+                    }
+                    _ => {
+                        println!("Exit code encounterd: {:?}", code)
+                    }
+                },
             }
             if let Ok(p) = self.machine.position() {
                 if let Some(value) = self.positions_visited.get_mut(&(*p as u32)) {
@@ -47,6 +75,10 @@ impl ObservableMachine {
                 } else {
                     self.positions_visited.insert(*p as u32, 1);
                 }
+            } else {
+                // Breaking only when we've reached an invalid position
+                // This is to ignore issues of traps with static calls
+                return;
             }
         }
     }

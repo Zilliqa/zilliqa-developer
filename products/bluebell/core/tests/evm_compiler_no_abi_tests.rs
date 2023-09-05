@@ -262,7 +262,8 @@ end
 "#
             .to_string(),
         );
-        println!("{:?}", executable.label_positions);
+        println!("{:#?}", executable.label_positions);
+        println!("{:#?}", vm.positions_visited);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
         expect_was_visited!(vm, executable, "clause_0_condition_1");
         expect_was_visited!(vm, executable, "clause_1_condition_3");
