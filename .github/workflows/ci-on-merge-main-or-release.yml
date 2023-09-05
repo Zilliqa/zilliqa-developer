@@ -118,53 +118,6 @@ jobs:
           python config/workspace-status.py | grep FULL_VERSION_TAG | awk '{print $2}' > VERSION
           cat VERSION
 
-      - name: Configure AWS Credentials - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::816080630680:role/ecr-read-write
-          oidc-role: ${{ secrets.OIDC_ROLE }}
-
-      - name: Login to the registry - staging
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        uses: docker/login-action@v2
-        with:
-          registry: 816080630680.dkr.ecr.us-west-2.amazonaws.com
-
-      - name: "Build and push devex-apollo - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex-apollo == 'true'
-        run: |
-          VERSION=$(cat VERSION)
-          docker build -t devex-apollo:local products/devex-apollo
-          docker tag devex-apollo:local 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
-          docker push 816080630680.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
-
-      - name: "Build neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
-        run: |
-          cd products/neo-savant
-          mkdir -p savant-artifact/
-          docker build --build-arg DEPLOY_ENV="stg" -t "neo-savant:local" .
-          docker create --name extractstg "neo-savant:local"
-          docker cp extractstg:/usr/share/nginx/html/. "$(pwd)/savant-artifact/"
-          docker rm extractstg
-
-      - name: "Build and push Docker - developer-portal - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.developer-portal == 'true'
-        run: |
-          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_staging
-
-      - name: "Build and push Docker - neo-savant - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.neo-savant == 'true'
-        run: |
-          bazelisk run --test_output=all --keep_going //products/neo-savant:push_image_staging
-
-      - name: "Build and push Docker - devex - staging"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release' && steps.project-changed.outputs.devex == 'true'
-        run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_staging
-
       - name: Configure AWS Credentials - production
         if: github.event_name == 'release' && github.event.action == 'created'
         uses: Zilliqa/gh-actions-workflows/actions/configure-aws-credentials@v1
@@ -210,12 +163,12 @@ jobs:
       - name: "Build and push Docker - devex - production"
         if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.devex == 'true'
         run: |
-          bazelisk run --test_output=all --keep_going //products/devex:push_image_production
+          bazelisk run --test_output=all --keep_going //products/devex:push_image_prd
 
       ### BEGIN DEPLOYMENT STAGES
       - name: "Create application.bzl"
         run: |
-          echo 'APPLICATIONS = [' > cd/applications.bzl
+          echo 'APPLICATIONS_PROD = [' > cd/applications.bzl
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" || "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'docs') }}" = "true" ]; then
             echo '    "//products/developer-portal",' >> cd/applications.bzl
           fi
@@ -230,15 +183,6 @@ jobs:
           fi
           echo ']' >> cd/applications.bzl
           cat cd/applications.bzl
-
-      - name: "Creating staging update"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
-        run: |
-          bazelisk run //cd:update_staging
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          DEVOPS_ACCESS_TOKEN: ${{ secrets.DEVOPS_ACCESS_TOKEN }}
-          BUILD_URI_SUFFIX: ${{ github.head_ref }}
 
       - name: "Creating production update"
         if: github.event_name == 'release' && github.event.action == 'created'

@@ -165,18 +165,25 @@ container_image(
 )
 
 container_push(
-    name = "push_image_staging",
+    name = "push_image_dev",
     format = "Docker",
     image = ":image",
-    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "developer-explorer",
-
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
+    registry = "localhost:5001",
+    repository = "devex",
+    tag = "latest",
 )
 
 container_push(
-    name = "push_image_production",
+    name = "push_image_stg",
+    format = "Docker",
+    image = ":image",
+    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public",
+    repository = "devex",
+    tag = "$${IMAGE_TAG#*:}",
+)
+
+container_push(
+    name = "push_image_prd",
     format = "Docker",
     image = ":image",
     registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
@@ -191,22 +198,7 @@ container_push(
 
 pkg_tar(
     name = "cd_base",
-    srcs = glob(["products/devex/cd/base/*.yaml"]),
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
-    name = "staging-kustomization",
-    output = "products/devex/cd/overlays/staging/kustomization.yaml",
-    template = "products/devex/cd/overlays/staging/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_staging_patch",
-    srcs = ["products/devex/cd/overlays/staging/kustomization.yaml"],
+    srcs = glob(["cd/base/*.yaml"]),
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
@@ -215,13 +207,13 @@ pkg_tar(
 
 expand_workspace_status(
     name = "production-kustomization",
-    output = "products/devex/cd/overlays/production/kustomization.yaml",
-    template = "products/devex/cd/overlays/production/kustomization.tpl.yaml",
+    output = "cd/overlays/production/kustomization.yaml",
+    template = "cd/overlays/production/kustomization.tpl.yaml",
 )
 
 pkg_tar(
     name = "cd_production_patch",
-    srcs = ["products/devex/cd/overlays/production/kustomization.yaml"],
+    srcs = ["cd/overlays/production/kustomization.yaml"],
     mode = "0755",
     package_dir = "",
     strip_prefix = ".",
