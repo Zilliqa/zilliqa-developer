@@ -213,6 +213,7 @@ dependencies = [
  "hex",
  "lalrpop",
  "lalrpop-util",
+ "log",
  "primitive-types",
  "regex",
  "serde",
@@ -233,6 +234,7 @@ dependencies = [
  "gloo-utils",
  "hex",
  "js-sys",
+ "log",
  "primitive-types",
  "regex",
  "serde",
@@ -240,6 +242,7 @@ dependencies = [
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "wasm-logger",
  "web-sys",
  "yew",
  "yew-router",
@@ -631,6 +634,7 @@ version = "0.1.0"
 dependencies = [
  "evm",
  "hex",
+ "log",
  "primitive-types",
  "serde",
  "serde_json",
@@ -2045,6 +2049,17 @@ name = "wasm-bindgen-shared"
 version = "0.2.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca6ad05a4870b2bf5fe995117d3728437bd27d7cd5f06f13c17443ef369775a1"
+
+[[package]]
+name = "wasm-logger"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "074649a66bb306c8f2068c9016395fa65d8e08d2affcbf95acf3c24c3ab19718"
+dependencies = [
+ "log",
+ "wasm-bindgen",
+ "web-sys",
+]
 
 [[package]]
 name = "web-sys"

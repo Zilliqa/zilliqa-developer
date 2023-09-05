@@ -13,7 +13,8 @@ use crate::intermediate_representation::primitives::{
 use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::intermediate_representation::symbol_table::TypeInfo;
 use crate::parser::lexer::SourcePosition;
-use std::collections::HashSet;
+
+use log::info;
 use std::mem;
 
 pub struct AnnotateBaseTypes {
@@ -305,7 +306,7 @@ impl IrPass for AnnotateBaseTypes {
                     {
                         symbol.resolved = Some(resolved_name);
                     } else {
-                        println!("Not resolved!!");
+                        info!("Not resolved!!");
                     }
 
                     /*

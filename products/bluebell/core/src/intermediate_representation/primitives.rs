@@ -2,7 +2,8 @@ use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::parser::lexer::SourcePosition;
 
 use std::collections::HashMap;
-use std::collections::HashSet;
+
+use std::collections::BTreeSet;
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -253,11 +254,11 @@ pub struct Instruction {
 #[derive(Debug, Clone)]
 pub struct FunctionBlock {
     pub name: IrIdentifier,
-    pub block_arguments: HashSet<String>,
-    pub enters_from: HashSet<String>,
-    pub exits_to: HashSet<String>,
-    pub defined_ssas: HashSet<String>,
-    pub jump_required_arguments: HashMap<String, HashSet<String>>,
+    pub block_arguments: BTreeSet<String>,
+    pub enters_from: BTreeSet<String>,
+    pub exits_to: BTreeSet<String>,
+    pub defined_ssas: BTreeSet<String>,
+    pub jump_required_arguments: HashMap<String, BTreeSet<String>>,
     pub instructions: VecDeque<Box<Instruction>>,
     pub terminated: bool,
     // TODO:     pub source_location: (SourcePosition,SourcePosition)
@@ -271,10 +272,10 @@ impl FunctionBlock {
     pub fn new_from_symbol(name: IrIdentifier) -> Box<Self> {
         Box::new(Self {
             name,
-            block_arguments: HashSet::new(),
-            enters_from: HashSet::new(),
-            exits_to: HashSet::new(),
-            defined_ssas: HashSet::new(),
+            block_arguments: BTreeSet::new(),
+            enters_from: BTreeSet::new(),
+            exits_to: BTreeSet::new(),
+            defined_ssas: BTreeSet::new(),
             jump_required_arguments: HashMap::new(),
             instructions: VecDeque::new(),
             terminated: false,

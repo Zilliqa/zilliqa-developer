@@ -4,7 +4,7 @@ use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
 use crate::parser::lexer::SourcePosition;
-
+use log::info;
 use std::mem;
 
 #[derive(Debug, Clone)]
@@ -814,8 +814,8 @@ impl AstConverting for IrEmitter {
             }
             NodePattern::Constructor(name, args) => {
                 if args.len() > 0 {
-                    println!("Name: {:#?}", name);
-                    println!("Args: {:#?}", args);
+                    info!("Name: {:#?}", name);
+                    info!("Args: {:#?}", args);
 
                     unimplemented!();
                 }

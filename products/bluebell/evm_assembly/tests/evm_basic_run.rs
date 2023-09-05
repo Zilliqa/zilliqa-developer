@@ -89,7 +89,7 @@ mod tests {
         builder
             .define_function("hello", ["Uint256"].to_vec(), "Uint256")
             .build(|code_builder| {
-                let mut entry = EvmBlock::new(None, [].to_vec(), "entry");
+                let mut entry = EvmBlock::new(None, [].to_vec().into_iter().collect(), "entry");
 
                 let fnc = code_builder.context.get_function("fibonacci").unwrap();
                 entry.call(fnc, ["Uint256".to_string()].to_vec());
@@ -98,10 +98,10 @@ mod tests {
                 entry.jump_if_to("success");
                 entry.jump_to("finally");
 
-                let mut success = EvmBlock::new(None, [].to_vec(), "success");
+                let mut success = EvmBlock::new(None, [].to_vec().into_iter().collect(), "success");
                 success.jump_to("finally");
 
-                let mut finally = EvmBlock::new(None, [].to_vec(), "finally");
+                let mut finally = EvmBlock::new(None, [].to_vec().into_iter().collect(), "finally");
 
                 finally.r#return();
                 [entry, success, finally].to_vec()

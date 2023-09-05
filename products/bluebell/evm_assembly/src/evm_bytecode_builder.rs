@@ -2,6 +2,7 @@ use crate::bytecode_ir::EvmBytecodeIr;
 use crate::compiler_context::EvmCompilerContext;
 use crate::executable::EvmExecutable;
 use crate::opcode_spec::OpcodeSpec;
+use std::collections::BTreeSet;
 use std::mem;
 
 use evm::Opcode;
@@ -90,7 +91,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         ret.define_function("__main__", [].to_vec(), "Uint256")
             .build(|_code_builder| {
                 // Placeholder block for the main function
-                [EvmBlock::new(None, [].to_vec(), "main_entry")].to_vec()
+                [EvmBlock::new(None, BTreeSet::new(), "main_entry")].to_vec()
             });
 
         ret
@@ -245,7 +246,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             }
         }
 
-        let mut switch_block = EvmBlock::new(None, [].to_vec(), "switch");
+        let mut switch_block = EvmBlock::new(None, BTreeSet::new(), "switch");
         switch_block.pop(); // 0 Oribabky remove dup1()?
         switch_block.push1([0x04].to_vec()); // Checking that the size of call args
         switch_block.calldatasize();
@@ -266,7 +267,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                 match function.blocks.first() {
                     Some(block) => {
                         let name = format!("load_args_{}", "function_name").to_string();
-                        let mut load_data_block = EvmBlock::new(None, [].to_vec(), &name);
+                        let mut load_data_block = EvmBlock::new(None, BTreeSet::new(), &name);
 
                         switch_block.jump_if_to(&load_data_block.name);
 
@@ -323,12 +324,12 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         switch_block.jump_to("fail");
 
-        let mut fail_block = EvmBlock::new(None, [].to_vec(), "fail");
+        let mut fail_block = EvmBlock::new(None, BTreeSet::new(), "fail");
         fail_block.push1([0x00].to_vec());
         fail_block.dup1();
         fail_block.revert();
 
-        let mut success_block = EvmBlock::new(None, [].to_vec(), "success");
+        let mut success_block = EvmBlock::new(None, BTreeSet::new(), "success");
         success_block.push1([0x00].to_vec());
         success_block.dup1();
         success_block.r#return();

@@ -9,6 +9,12 @@ pub struct EvmSourcePosition {
 }
 
 #[derive(Debug, Clone)]
+pub struct RustPosition {
+    pub filename: String,
+    pub line: usize,
+}
+
+#[derive(Debug, Clone)]
 pub struct EvmInstruction {
     pub position: Option<u32>,
     pub opcode: Opcode,
@@ -20,6 +26,7 @@ pub struct EvmInstruction {
     pub is_terminator: bool,
     pub comment: Option<String>,
     pub source_position: Option<EvmSourcePosition>,
+    pub rust_position: Option<RustPosition>,
 }
 
 impl EvmInstruction {

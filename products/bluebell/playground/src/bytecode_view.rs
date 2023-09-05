@@ -1,4 +1,5 @@
 use evm_assembly::executable::EvmExecutable;
+use evm_assembly::instruction::RustPosition;
 use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use std::cell::RefCell;
@@ -12,6 +13,7 @@ pub struct ByteCodeViewInstruction {
     pub hex_bytecode_position: String,
     pub text: String,
     pub comment: String,
+    pub rust_position: Option<RustPosition>,
 }
 
 pub struct ByteCodeView {
@@ -101,6 +103,7 @@ impl Component for ByteCodeView {
                         hex_bytecode_position: format!("0x{:02x}", bytecode_position).to_string(),
                         text: instruction_value,
                         comment: instr.comment.clone().unwrap_or("".to_string()),
+                        rust_position: instr.rust_position.clone(),
                     };
                     instructions.push(next_instr);
                     next_label = None;
@@ -184,17 +187,27 @@ impl Component for ByteCodeView {
                                             <div class="h-5">{instr.hex_bytecode_position.clone()}</div>
                                             <div class="flex flex-col overflow-x-auto">
                                                 <div>{instr.text.clone()}</div>
-                                                                                        {
-                                            if instr.comment.len() > 0 {
-                                                html! {
-                                                    <div class="font-mono text-xs text-gray-400 text-sm text-gray-700 whitespace-nowrap">
-                                                        {instr.comment.clone()}
-                                                    </div>
+                                            {
+                                                if instr.comment.len() > 0 {
+                                                    html! {
+                                                        <div class="font-mono text-xs text-gray-400 text-sm text-gray-700 whitespace-nowrap">
+                                                            {instr.comment.clone()}
+                                                        </div>
+                                                    }
+                                                } else {
+                                                    html!{}
                                                 }
-                                            } else {
-                                                html!{}
+                                            }{
+                                                if let Some(rp) = &instr.rust_position {
+                                                    html! {
+                                                        <div class="font-mono text-xs text-gray-400 text-sm text-gray-700 whitespace-nowrap">
+                                                            {rp.filename.clone()}{":"}{rp.line}
+                                                        </div>
+                                                    }
+                                                } else {
+                                                    html!{}
+                                                }
                                             }
-                                        }
                                                 </div>
                                         </div>
                                     </>

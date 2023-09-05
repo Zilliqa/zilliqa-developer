@@ -25,6 +25,9 @@ getrandom = { version = "0.2", features = ["js"] }
 yewdux = "0.9.3"
 gloo-timers = "0.3"
 
+log = "0.4.6"
+wasm-logger = "0.2.0"
+
 # Bluebell
 bluebell = { path = "../core" }
 

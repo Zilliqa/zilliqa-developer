@@ -265,6 +265,7 @@ end
         println!("{:?}", executable.label_positions);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
         expect_was_visited!(vm, executable, "clause_0_condition_1");
+        expect_was_visited!(vm, executable, "clause_1_condition_3");
         expect_not_visited!(vm, executable, "clause_0_block_2");
         expect_was_visited!(vm, executable, "clause_1_block_4");
         expect_was_visited!(vm, executable, "match_exit_0");

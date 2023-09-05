@@ -2,7 +2,7 @@ use crate::parser::lexer::SourcePosition;
 
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use crate::intermediate_representation::primitives::ConcreteFunction;
 use crate::intermediate_representation::primitives::IrIdentifier;
@@ -126,14 +126,14 @@ impl IrPass for BalanceBlockArguments {
             }
 
             // Combuting the common (combined) args
-            let mut args_required: HashSet<String> = HashSet::new();
+            let mut args_required: BTreeSet<String> = BTreeSet::new();
             for (_, set) in &block.jump_required_arguments {
                 for arg in set.iter() {
                     args_required.insert(arg.to_string());
                 }
             }
 
-            let empty_set = HashSet::new();
+            let empty_set = BTreeSet::new();
             for name in &block.exits_to {
                 let set = block
                     .jump_required_arguments

@@ -3,6 +3,7 @@ use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutput
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use std::collections::BTreeSet;
 use std::mem;
 // TODO: Generalize to support both EVM and LLVM
 
@@ -35,7 +36,7 @@ pub struct ScillaDebugBuiltins;
 impl BluebellModule for ScillaDebugBuiltins {
     fn attach(&self, specification: &mut EvmCompilerContext) {
         let _ = specification
-            .declare_function("builtin__print::<>", [].to_vec(), "Uint256")
+            .declare_function("builtin__print::<>", Vec::new(), "Uint256")
             .attach_runtime(|| {
                 fn custom_runtime(
                     input: &[u8],
@@ -145,9 +146,9 @@ impl BluebellModule for ScillaDebugBuiltins {
 
                     block.jump_to("loop_start");
 
-                    let mut loop_start = EvmBlock::new(Some(0), [].to_vec(), "loop_start");
-                    let mut loop_body = EvmBlock::new(Some(0), [].to_vec(), "loop_body");
-                    let mut loop_end = EvmBlock::new(Some(0), [].to_vec(), "loop_end");
+                    let mut loop_start = EvmBlock::new(Some(0), BTreeSet::new(), "loop_start");
+                    let mut loop_body = EvmBlock::new(Some(0), BTreeSet::new(), "loop_body");
+                    let mut loop_end = EvmBlock::new(Some(0), BTreeSet::new(), "loop_end");
 
                     loop_start.dup2();
                     loop_start.dup2();

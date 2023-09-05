@@ -10,6 +10,7 @@ use crate::intermediate_representation::primitives::{
     VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
+use log::info;
 
 pub struct DebugPrinter {
     script: String,
@@ -21,7 +22,7 @@ impl IrPass for DebugPrinter {
     }
 
     fn finalize(&mut self) {
-        println!("{}", self.script);
+        info!("{}", self.script);
     }
 
     fn visit_symbol_kind(

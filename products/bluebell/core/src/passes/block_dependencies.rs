@@ -4,8 +4,8 @@ use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::ConcreteFunction;
 use crate::intermediate_representation::primitives::IrIdentifier;
 use crate::intermediate_representation::primitives::IrIndentifierKind;
+use std::collections::BTreeSet;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 use crate::intermediate_representation::primitives::CaseClause;
 use crate::intermediate_representation::primitives::ContractField;
@@ -21,18 +21,18 @@ use std::mem;
 pub struct DeduceBlockDependencies {
     blocks: HashMap<String, FunctionBlock>,
 
-    defined_names: HashSet<String>,
-    used_names: HashSet<String>,
-    listed_jump_to: HashSet<String>,
+    defined_names: BTreeSet<String>,
+    used_names: BTreeSet<String>,
+    listed_jump_to: BTreeSet<String>,
 }
 
 impl DeduceBlockDependencies {
     pub fn new() -> Self {
         DeduceBlockDependencies {
             blocks: HashMap::new(),
-            defined_names: HashSet::new(),
-            used_names: HashSet::new(),
-            listed_jump_to: HashSet::new(),
+            defined_names: BTreeSet::new(),
+            used_names: BTreeSet::new(),
+            listed_jump_to: BTreeSet::new(),
         }
     }
 }
@@ -138,7 +138,7 @@ impl IrPass for DeduceBlockDependencies {
 
                     // Tracing arguments back to their origin
                     for variable in &block.block_arguments {
-                        let mut used: HashSet<String> = HashSet::new();
+                        let mut used: BTreeSet<String> = BTreeSet::new();
                         let mut edge_queue: VecDeque<(String, String)> = VecDeque::new();
                         for from in &block.enters_from {
                             edge_queue.push_back((from.to_string(), name.to_string()));
@@ -152,8 +152,8 @@ impl IrPass for DeduceBlockDependencies {
 
                             used.insert(from.clone());
 
-                            let required_block_args = match self.blocks.get(&to) {
-                                Some(to) => to.block_arguments.clone(),
+                            let required_block_args: BTreeSet<String> = match self.blocks.get(&to) {
+                                Some(to) => to.block_arguments.clone().into_iter().collect(),
                                 None => panic!("Unregistered block {}", to),
                             };
 
@@ -329,9 +329,9 @@ impl IrPass for DeduceBlockDependencies {
         block: &mut FunctionBlock,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        self.listed_jump_to = HashSet::new();
-        self.defined_names = HashSet::new();
-        self.used_names = HashSet::new();
+        self.listed_jump_to = BTreeSet::new();
+        self.defined_names = BTreeSet::new();
+        self.used_names = BTreeSet::new();
 
         let name = match &block.name.resolved {
             Some(n) => n.clone(),

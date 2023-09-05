@@ -11,13 +11,14 @@ use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::EvmSourcePosition;
 use primitive_types::U256;
 use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
 use sha3::{Digest, Keccak256};
 use std::mem;
+use log::{info};
 
 #[derive(Debug)]
 pub struct StateLayoutEntry {
@@ -99,7 +100,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 .map(|arg| arg.typename.unresolved.as_str())
                 .collect();
 
-            let arg_names: Vec<String> = func
+            let arg_names: BTreeSet<String> = func
                 .arguments
                 .iter()
                 .map(|arg| {
@@ -131,7 +132,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         if arg_names.len() != entry.block_arguments.len() {
                             panic!("Internal error: Function argument names differ from block names in length");
                         }
-                        if arg_names.clone().into_iter().collect::<HashSet<_>>() != entry.block_arguments {
+                        if arg_names != entry.block_arguments {
                             panic!("Internal error: Function argument names differ from block names in order");
                         }
                     }
@@ -145,7 +146,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
 
                         // Creating entry function
-                        let block_args : Vec<String> = block.block_arguments.clone().into_iter().collect();
+                        let block_args : BTreeSet<String> = block.block_arguments.clone();
 
                         let mut evm_block =
                             EvmBlock::new(None, block_args, &block_name);
@@ -167,6 +168,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                 evm_block.set_next_instruction_location(pos);
                             }
 
+
                             match &instr.operation {
                                 Operation::CallFunction {
                                     ref name,
@@ -174,14 +176,16 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                 } => {
                                     let mut exit_block = EvmBlock::new(
                                         Some(0),
-                                        ["result".to_string()].to_vec(),
+                                        ["result".to_string()].to_vec().into_iter().collect(),
                                         "exit_block",
                                     );
 
                                     // Adding return point
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.push_label("exit_block");
 
                                     for arg in arguments {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         let _ = match &arg.resolved {
                                             Some(a) => evm_block.duplicate_stack_name(&a),
                                             None => panic!("Unable to resolve {}", arg.unresolved),
@@ -196,6 +200,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             name
                                         ),
                                     };
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);                                     
                                     evm_block.jump_to(&label);
                                     mem::swap(&mut evm_block, &mut exit_block);
                                     ret.push(exit_block);
@@ -225,6 +231,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     // Copying arguments to stack
                                     for arg in arguments {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);                                         
                                         match &arg.resolved {
                                             Some(n) => match evm_block.duplicate_stack_name(n) {
                                                 Err(e) => panic!("{}", e),
@@ -248,6 +255,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         };
 
                                         // Precompiled or external function
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         evm_block.call(signature, args_types);
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
@@ -308,6 +316,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                             evm_block.push(value.to_bytes_unpadded());
                                             match evm_block.register_stack_name(ssa_name) {
                                                 Err(_) => {
@@ -371,10 +380,12 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     if let Err(e) = evm_block.duplicate_stack_name(value_name) {
                                         panic!("Unable to resolve value to be stored: {:?}", e);
                                     }
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.push_u256(address);
                                     evm_block.external_sstore();
                                 }
@@ -405,7 +416,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.push_u256(address);
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.external_sload();
                                     evm_block.register_stack_name(value_name);
                                 }
@@ -415,8 +428,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // TODO: Push value if exists and swap1, then jump
 
                                     while evm_block.scope.stack_counter > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         evm_block.pop();
                                     }
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.jump();
                                 }
                                 Operation::CallStaticFunction {
@@ -435,9 +450,13 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             panic!("Unable to resolve name {:?}", name.unresolved)
                                         }
                                     };
+
+                                    // TODO: Assumes that a static call just produces the Keccak of the name
+                                    // The "correct" to do would be to make this spec dependant
                                     let hash = Keccak256::digest(name);
                                     let mut selector = Vec::new();
                                     selector.extend_from_slice(&hash[..4]);
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.push(selector);
                                 }
                                 Operation::IsEqual {
@@ -445,6 +464,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref right,
                                 } => {
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     match &left.resolved {
                                         Some(l) => match evm_block.duplicate_stack_name(l) {
                                             Ok(()) => (),
@@ -460,6 +480,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         None => panic!("Unresolved left hand side"),
                                     }
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.eq();
                                 }
                                 Operation::Switch {
@@ -473,6 +494,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             None => panic!("Could not resolve case label"),
                                         };
                                         // TODO: This assumes order in cases
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         evm_block.jump_if_to(label);
                                     }
 
@@ -480,6 +502,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         Some(l) => l,
                                         None => panic!("Could not resolve default label"),
                                     };
+        
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.jump_to(label);
                                     // unimplemented!() // Add handling for other operations here
                                 }
@@ -493,16 +517,20 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     let jump_args = block
                                         .jump_required_arguments
                                         .get(label)
-                                        .unwrap_or(&HashSet::new())
+                                        .unwrap_or(&BTreeSet::new())
                                         .clone();
 
+                                    info!("Jump args: {:?}",jump_args);
                                     // Preserving the args to the next block
                                     pop_count -= jump_args.len() as i32;
 
                                     // Moving arguments
-                                    for (i, arg) in jump_args.iter().enumerate() {
+                                    // Notice the reversing of the arguments, since positions are in relative stack
+                                    // depth and consenquently the first argument becomes the deepest (highest number)
+                                    for (i, arg) in jump_args.iter().rev().enumerate() {
                                         let pos = pop_count+i as i32;
                                         evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' behind {}",pos,arg, pop_count).to_string()) ;
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         match evm_block.move_stack_name(&arg, pos) {
                                             Ok(()) => (),
                                             Err(e) => panic!("{:#?}", e),
@@ -512,10 +540,12 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
 
                                     while pop_count > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         evm_block.pop();
                                         pop_count -= 1;
                                     }
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.jump_to(label);
                                 }
                                 Operation::ConditionalJump {
@@ -545,17 +575,19 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     let success_jump_args = block
                                         .jump_required_arguments
                                         .get(success_label)
-                                        .unwrap_or(&HashSet::new())
+                                        .unwrap_or(&BTreeSet::new())
                                         .clone();
                                     let failure_jump_args = block
                                         .jump_required_arguments
                                         .get(failure_label)
-                                        .unwrap_or(&HashSet::new())
+                                        .unwrap_or(&BTreeSet::new())
                                         .clone();
 
+                                    info!("Jump args 2: {:?}",success_jump_args);
+
                                     if !success_jump_args.eq(&failure_jump_args) {
-                                        println!("A: {:#?}",success_jump_args);
-                                        println!("B: {:#?}",failure_jump_args);
+                                        info!("A: {:#?}",success_jump_args);
+                                        info!("B: {:#?}",failure_jump_args);
 
                                         panic!("Block termination must require same number of subsequent variable dependencies.");
                                     }
@@ -566,8 +598,11 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     assert!(pop_count>=0);
 
                                     // Putting all arguments on the stack and preparing to pop before jumping
-                                    for (i, arg) in success_jump_args.iter().enumerate() {
+                                    // Notice the reversing of the arguments, since positions are in relative stack
+                                    // depth and consenquently the first argument becomes the deepest (highest number)
+                                    for (i, arg) in success_jump_args.iter().rev().enumerate() {
                                         let pos = pop_count+i as i32;
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);                                         
                                         evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' to {}",i, arg, pos).to_string()) ;
                                         //assert_eq!(pos, evm_block.scope.stack_counter+1 - (success_jump_args.len() - i) as i32);
 
@@ -582,25 +617,29 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     pop_count-= 1;
 
                                     if pop_count > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         evm_block.set_next_instruction_comment(format!("Preserving jump condition and preparing stack deletion {}", pop_count).to_string());
                                         evm_block.swap(pop_count);
                                     }
 
                                     while pop_count > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                         evm_block.pop();
                                         pop_count -= 1;
                                     }
 
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.jump_if_to(success_label);
 
                                     // TODO: manage stack
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
                                     evm_block.jump_to(failure_label);
                                 }
                                 Operation::TerminatingRef (_) => {
                                     // Ignore terminating ref as this will just be pop at the end of the block.
                                 }
                                 _ => {
-                                    println!("Unhandled instruction: {:#?}", instr);
+                                    info!("Unhandled instruction: {:#?}", instr);
                                     unimplemented!() // Add handling for other operations here
                                 }
                             }
@@ -657,7 +696,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         self.write_function_definitions_to_module()?;
 
         self.builder.finalize_blocks();
-        println!("{}", self.builder.generate_evm_assembly());
+        info!("{}", self.builder.generate_evm_assembly());
         Ok(self.builder.build())
     }
 }

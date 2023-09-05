@@ -13,6 +13,7 @@ use inkwell::module::Module;
 use inkwell::types::{BasicTypeEnum /*, StructType */, VoidType};
 use inkwell::values::FunctionValue;
 use inkwell::OptimizationLevel;
+use log::error;
 use std::collections::HashMap;
 
 enum LlvmType<'ctx> {
@@ -240,14 +241,14 @@ impl LlvmBackend {
                 }
 
                 let line = &script[line_start..line_end];
-                println!("Line {},{}:{}", line_counter, char_counter, line);
-                print!(
+                error!("Line {},{}:{}", line_counter, char_counter, line);
+                error!(
                     "{}",
                     " ".repeat(
                         char_counter + format!("Line {},{}:", line_counter, char_counter).len()
                     )
                 );
-                println!("{}", "^".repeat(pos[1] - pos[0]));
+                error!("{}", "^".repeat(pos[1] - pos[0]));
 
                 /*
                 TODO:
@@ -256,7 +257,7 @@ impl LlvmBackend {
                     line: line_counter,
                     column: char_counter,
                 };
-                println!("{}", my_error);
+                error!("{}", my_error);
                 */
                 return Err("Failed to compile".to_string());
             }

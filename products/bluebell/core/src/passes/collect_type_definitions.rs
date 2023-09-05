@@ -11,6 +11,7 @@ use crate::intermediate_representation::primitives::{
     VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
+use log::info;
 
 pub struct CollectTypeDefinitionsPass {
     namespace_stack: Vec<String>,
@@ -280,8 +281,8 @@ impl IrPass for CollectTypeDefinitionsPass {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => {
-                println!("Types: {:#?}\n\n", symbol_table.type_of_table);
-                println!("Aliases: {:#?}\n\n", symbol_table.aliases);
+                info!("Types: {:#?}\n\n", symbol_table.type_of_table);
+                info!("Aliases: {:#?}\n\n", symbol_table.aliases);
                 panic!("Not handled.");
             }
         }
