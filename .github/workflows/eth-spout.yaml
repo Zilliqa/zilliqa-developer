@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "main"
-      - "faucet-workflow"
+      - "faucet-workflow" # TODO: Remove
     paths:
       - "products/eth-spout/**"
     tags:
