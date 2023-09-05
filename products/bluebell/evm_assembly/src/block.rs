@@ -1,46 +1,50 @@
 use crate::function_signature::EvmFunctionSignature;
-use crate::instruction::EvmInstruction;
+use crate::instruction::{EvmInstruction, EvmSourcePosition, RustPosition};
 use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
 use crate::types::EvmTypeValue;
 use evm::Opcode;
+use log::{info, warn};
+use primitive_types::U256;
+use std::collections::BTreeSet;
 use std::collections::HashMap;
+use std::mem;
+
+pub const ALLOCATION_POINTER: u8 = 0x40;
+pub const MEMORY_OFFSET: u8 = 0x80;
 
 #[derive(Debug, Clone)]
-pub struct EvmBlock {
-    pub name: String,
-    pub position: Option<usize>,
-    pub instructions: Vec<EvmInstruction>,
-    pub entry_from: Vec<usize>,
-    pub is_entry: bool,
-    pub is_terminated: bool,
-    pub is_lookup_table: bool,
-
-    pub consumes: i32,
-    pub produces: i32,
-    stack_counter: i32,
-
+pub struct Scope {
+    pub stack_counter: i32,
+    arg_count: i32,
+    entry_stack_counter: i32,
     name_location: HashMap<String, i32>,
+    location_name: HashMap<i32, String>,
 }
 
-impl EvmBlock {
-    pub fn new(position: Option<usize>, name: &str) -> Self {
-        let mut ret = Self {
-            name: name.to_string(),
-            position,
-            instructions: Vec::new(),
-            entry_from: Vec::new(),
-            is_entry: false,
-            is_terminated: false,
-            is_lookup_table: false,
-            consumes: 0,
-            produces: 0,
+impl Scope {
+    pub fn empty(arg_count: i32) -> Self {
+        Scope {
             stack_counter: 0,
+            entry_stack_counter: arg_count,
+            arg_count,
             name_location: HashMap::new(),
-        };
+            location_name: HashMap::new(),
+        }
+    }
 
-        ret.jumpdest();
+    pub fn new(parent: Scope, arg_count: i32) -> Self {
+        let mut ret = parent.clone();
+        ret.entry_stack_counter = ret.stack_counter + arg_count;
 
         ret
+    }
+
+    pub fn relative_stack_counter(&self) -> i32 {
+        (self.stack_counter - self.entry_stack_counter) as i32
+    }
+
+    pub fn arg_count(&self) -> i32 {
+        self.arg_count
     }
 
     pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
@@ -48,8 +52,18 @@ impl EvmBlock {
             return Err(format!("SSA name {} already exists", name));
         }
 
+        assert!(
+            self.entry_stack_counter > self.stack_counter,
+            "Attempting to register too many function arguments"
+        );
+
         // TODO: assumes that args are first in, last out
-        self.name_location.insert(name.to_string(), -arg_number);
+        self.name_location.insert(name.to_string(), arg_number);
+        self.location_name.insert(arg_number, name.to_string());
+
+        warn!("Registering argument '{}' at position {}", name, arg_number);
+
+        self.stack_counter += 1;
 
         // TODO: Consider pruning of the names
 
@@ -60,21 +74,224 @@ impl EvmBlock {
         if self.name_location.contains_key(name) {
             return Err(format!("SSA name {} already exists", name));
         }
+        assert!(self.stack_counter > 0);
 
-        println!("Registering stack entry: {}: {}", name, self.stack_counter);
         self.name_location
-            .insert(name.to_string(), self.stack_counter);
+            .insert(name.to_string(), self.stack_counter - 1);
+        self.location_name
+            .insert(self.stack_counter - 1, name.to_string());
+
+        warn!(
+            "Registering vreg '{}' at position {}",
+            name,
+            self.stack_counter - 1
+        );
 
         // TODO: Consider pruning of the names
 
         Ok(())
     }
 
+    pub fn register_alias(&mut self, source: &str, dest: &str) -> Result<(), String> {
+        // TODO: Create separate alias record to deal with this
+        if self.name_location.contains_key(dest) {
+            return Err(format!("SSA name {} already exists", dest));
+        }
+
+        info!("Registering alias '{}' to '{}'", dest, source);
+
+        if let Some(value) = self.name_location.get(source) {
+            let value = *value as i32;
+            self.name_location.insert(dest.to_string(), value);
+            self.location_name.insert(value, dest.to_string());
+            Ok(())
+        } else {
+            return Err(format!("SSA name {} does not exists", dest));
+        }
+    }
+
+    fn update_stack(&mut self, opcode: Opcode) -> i32 {
+        let consumes: i32 = opcode.stack_consumed();
+        let produces: i32 = opcode.stack_produced();
+
+        let before = self.stack_counter;
+
+        self.stack_counter -= consumes;
+        let ret = self.entry_stack_counter - self.stack_counter;
+        self.stack_counter += produces;
+
+        let after = self.stack_counter;
+
+        // Trimming locations
+        for depth in after..before {
+            let name = match self.location_name.get(&depth) {
+                Some(name) => name.clone(),
+                _ => continue,
+            };
+
+            self.location_name.remove(&depth);
+            self.name_location.remove(&name);
+        }
+
+        ret
+    }
+
+    fn swap(&mut self, depth1: i32) {
+        let name1: Option<String> = match self.location_name.get(&depth1) {
+            Some(n) => Some(n.clone()),
+            None => None,
+        };
+
+        let name2: Option<String> = match self.location_name.get(&0) {
+            Some(n) => Some(n.clone()),
+            None => None,
+        };
+
+        if let Some(name1) = &name1 {
+            self.location_name.remove(&depth1);
+            self.name_location.remove(name1);
+        }
+
+        if let Some(name2) = name2 {
+            self.location_name.remove(&0);
+            self.name_location.remove(&name2);
+
+            self.name_location.insert(name2.to_string(), depth1);
+            self.location_name.insert(depth1, name2.to_string());
+        }
+
+        if let Some(name1) = name1 {
+            self.name_location.insert(name1.to_string(), 0);
+            self.location_name.insert(0, name1.to_string());
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct EvmBlock {
+    pub name: String,
+    pub position: Option<u32>,
+    pub instructions: Vec<EvmInstruction>,
+    pub entry_from: Vec<u32>,
+    pub is_entry: bool,
+    pub is_terminated: bool,
+    pub is_lookup_table: bool,
+
+    pub consumes: i32,
+    pub produces: i32,
+
+    pub scope: Scope,
+    pub comment: Option<String>, // stack_counter: i32,
+    // name_location: HashMap<String, i32>,
+
+    // Debug info
+    pub source_position: Option<EvmSourcePosition>,
+    pub rust_position: Option<RustPosition>,
+    pub block_arugments: Option<BTreeSet<String>>,
+}
+
+impl EvmBlock {
+    pub fn new(position: Option<u32>, arg_names: BTreeSet<String>, name: &str) -> Self {
+        let mut ret = Self {
+            name: name.to_string(),
+            position,
+            instructions: Vec::new(),
+            entry_from: Vec::new(),
+            is_entry: false,
+            is_terminated: false,
+            is_lookup_table: false,
+            consumes: 0,
+            produces: 0,
+            scope: Scope::empty(arg_names.len() as i32),
+            comment: None,
+            source_position: None,
+            rust_position: None,
+            block_arugments: Some(arg_names.clone()),
+        };
+
+        info!("Args: {:?}", arg_names);
+        for (i, name) in arg_names.iter().enumerate() {
+            match ret.register_arg_name(name, i as i32) {
+                Err(e) => panic!("{}", e),
+                _ => (),
+            }
+        }
+        ret.jumpdest();
+
+        ret
+    }
+
+    pub fn set_next_instruction_comment(&mut self, comment: String) {
+        self.comment = Some(comment);
+    }
+
+    pub fn set_next_instruction_location(&mut self, position: EvmSourcePosition) {
+        self.source_position = Some(position);
+    }
+
+    pub fn set_next_rust_position(&mut self, filename: String, line: usize) {
+        self.rust_position = Some(RustPosition { line, filename });
+    }
+
+    pub fn register_arg_name(&mut self, name: &str, arg_number: i32) -> Result<(), String> {
+        self.scope.register_arg_name(name, arg_number)
+    }
+
+    pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
+        self.scope.register_stack_name(name)
+    }
+
+    pub fn register_alias(&mut self, source: &str, dest: &str) -> Result<(), String> {
+        self.scope.register_alias(source, dest)
+    }
+
+    fn update_stack(&mut self, opcode: Opcode) {
+        let deepest_visit = self.scope.update_stack(opcode);
+
+        // Updating how deeply in the stack we consume
+        if deepest_visit > 0 {
+            self.consumes = std::cmp::max(self.consumes, deepest_visit);
+        }
+
+        // TODO: Track all argument variables and verify that they were used.
+    }
+
+    pub fn move_value(&mut self, from: i32, to: i32) -> Result<(), String> {
+        info!("- Moving {} to {}", from, to);
+        if from == to {
+            return Ok(());
+        }
+
+        // Ensuring that we are handling the corner
+        // case where eihter from or to is 0 correctly:
+        // Net result will be a single swap since swap(0) is noop
+        let (a, b) = if from < to { (from, to) } else { (to, from) };
+
+        self.swap(a);
+        self.swap(b);
+        self.swap(a);
+
+        Ok(())
+    }
+
+    pub fn move_stack_name(&mut self, name: &str, pos: i32) -> Result<(), String> {
+        match self.scope.name_location.get(name) {
+            Some(depth) => {
+                let orig_pos = self.scope.stack_counter - depth - 1;
+                info!("- Moving '{:?}' {} -> {}", name, orig_pos, pos);
+
+                self.move_value(orig_pos, pos)
+            }
+            None => Err("Stack overflow.".to_string()),
+        }
+    }
+
     pub fn duplicate_stack_name(&mut self, name: &str) -> Result<(), String> {
-        match self.name_location.get(name) {
+        match self.scope.name_location.get(name) {
             Some(pos) => {
-                let n = self.stack_counter - pos + 1;
-                match n {
+                let distance = self.scope.stack_counter - pos;
+                info!("Duplicating '{}' at {}, relative {}", name, pos, distance);
+                match distance {
                     1 => {
                         self.dup1();
                         Ok(())
@@ -139,11 +356,21 @@ impl EvmBlock {
                         self.dup16();
                         Ok(())
                     }
-                    _ => Err("Stack overflow.".to_string()),
+                    _ => panic!("{}", "Stack overflow.".to_string()),
                 }
             }
-            None => Err(format!("Failed to find SSA name {} on stack", name)),
+            None => panic!("{}", format!("Failed to find SSA name {} on stack", name)),
         }
+    }
+
+    pub fn alloca_static(&mut self, size: u64) {
+        self.push1([ALLOCATION_POINTER].to_vec());
+        self.mload(); // Stack element is the pointer to be left on stack
+        self.dup1();
+        self.push_u64(size);
+        self.add();
+        self.push1([ALLOCATION_POINTER].to_vec());
+        self.mstore();
     }
 
     pub fn call_internal(
@@ -161,33 +388,38 @@ impl EvmBlock {
         };
         // TODO: Deal with internal calls
         // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4
-        self.push1([0x40].to_vec());
+
+        self.push1([ALLOCATION_POINTER].to_vec());
         self.mload(); // Stack element is the pointer
 
-        for (i, _) in args.iter().enumerate().rev() {
-            self.dup1();
+        for (i, _arg) in args.iter().enumerate().rev() {
+            self.swap1();
+            self.dup2();
             self.push1([(i * 0x20) as u8].to_vec());
             self.add();
-            self.push1([0x20].to_vec()); // Length of the argument, TODO: Get length
             self.mstore();
         }
 
-        for (i, arg) in args.iter().enumerate().rev() {
+        for (i, _) in args.iter().enumerate().rev() {
             let j = i + args.len();
-            self.dup1();
+
+            self.push1([0x20].to_vec()); // Length of the argument, TODO: Get length
+
+            self.dup2();
             self.push1([(j * 0x20) as u8].to_vec());
             self.add();
-            let _ = self.duplicate_stack_name(arg); // TODO: Propagate error if this fails
             self.mstore();
         }
 
-        let gas = EvmTypeValue::Uint32(21000); // TODO: How to compute this or where to get it from
+        let gas = EvmTypeValue::Uint32(0x1337); // TODO: How to compute this or where to get it from
         let address = EvmTypeValue::Uint32(address);
-        let argsize = EvmTypeValue::Uint32(2 * (args.len() * 0x20) as u32); // Each argument is 32 byte long
+        let argsize = EvmTypeValue::Uint32((args.len() * 0x20) as u32); // Each argument is 32 byte long
 
         self.push([0x20].to_vec()); //return size, TODO: Compute the size of the return type
+
         self.dup2(); //
         self.push(argsize.to_bytes_unpadded());
+
         self.dup4(); // p
         self.push(address.to_bytes_unpadded());
         self.push(gas.to_bytes_unpadded());
@@ -204,7 +436,8 @@ impl EvmBlock {
     ) -> (Vec<EvmBlock>, Vec<u8>) {
         let mut blocks: Vec<EvmBlock> = Vec::new();
         let mut block_counter = 0;
-        let mut current_block = EvmBlock::new(Some(0), &format!("block{}", block_counter));
+        let mut current_block =
+            EvmBlock::new(Some(0), BTreeSet::new(), &format!("block{}", block_counter));
         current_block.is_entry = true;
         block_counter += 1;
 
@@ -216,13 +449,16 @@ impl EvmBlock {
             let mut collect_args = opcode.bytecode_arguments();
             // TODO: Use write_instruction
             let mut instr = EvmInstruction {
-                position: Some(i),
+                position: Some(i as u32),
                 opcode,
                 arguments: Vec::new(),
                 unresolved_label: None,
 
                 stack_size: 0, // TODO: Should be calculated using write_instruction
                 is_terminator,
+                comment: None,
+                source_position: None,
+                rust_position: None,
             };
 
             i += 1;
@@ -238,7 +474,11 @@ impl EvmBlock {
 
             if instr.opcode == Opcode::JUMPDEST {
                 blocks.push(current_block);
-                current_block = EvmBlock::new(instr.position, &format!("block{}", block_counter));
+                current_block = EvmBlock::new(
+                    instr.position,
+                    BTreeSet::new(),
+                    &format!("block{}", block_counter),
+                );
 
                 block_counter += 1;
             }
@@ -256,7 +496,7 @@ impl EvmBlock {
                 }
             }
         }
-        println!("Terminating {} / {}", i, bytecode.len());
+
         let mut data: Vec<u8> = Vec::new();
         while i < bytecode.len() {
             data.push(bytecode[i]);
@@ -267,55 +507,55 @@ impl EvmBlock {
         (blocks, data)
     }
 
-    fn update_stack(&mut self, opcode: Opcode) {
-        let consumes: i32 = opcode.stack_consumed();
-        let produces: i32 = opcode.stack_produced();
-
-        self.stack_counter -= consumes;
-
-        if self.stack_counter < 0 {
-            self.consumes = std::cmp::max(self.consumes, -self.stack_counter);
-        }
-
-        self.stack_counter += produces;
-
-        println!(
-            "{}",
-            format!(
-                "Code: {:?} -> {} {}",
-                opcode.to_string(),
-                produces - consumes,
-                self.stack_counter
-            )
-        );
-
-        /*
-        if self.stack_counter < 0 {
-            panic!("Encountered negative stack counter.");
-        }
-        */
-    }
-
     pub fn write_instruction(
         &mut self,
         opcode: Opcode,
         unresolved_label: Option<String>,
     ) -> &mut Self {
+        let mut comment = None;
+        mem::swap(&mut comment, &mut self.comment);
+
+        let mut source_position = None;
+        mem::swap(&mut source_position, &mut self.source_position);
+
+        let mut rust_position = None;
+        mem::swap(&mut rust_position, &mut self.rust_position);
+
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
             arguments: [].to_vec(),
             unresolved_label,
 
-            stack_size: self.stack_counter as usize,
+            stack_size: self.scope.stack_counter,
             is_terminator: false,
+            comment,
+            source_position,
+            rust_position,
         });
-
+        info!(
+            "Wrote {:?}",
+            self.instructions.last().unwrap().opcode.to_string()
+        );
+        info!(" - before: {}", self.scope.stack_counter);
         self.update_stack(opcode);
+        info!(" - after: {}", self.scope.stack_counter);
+
         self
     }
 
     pub fn write_instruction_with_args(&mut self, opcode: Opcode, arguments: Vec<u8>) -> &mut Self {
+        assert!(opcode.bytecode_arguments() == arguments.len());
+
+        let mut comment = None;
+        mem::swap(&mut comment, &mut self.comment);
+
+        let mut source_position = None;
+        mem::swap(&mut source_position, &mut self.source_position);
+
+        let mut rust_position = None;
+        mem::swap(&mut rust_position, &mut self.rust_position);
+
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
@@ -323,11 +563,20 @@ impl EvmBlock {
 
             unresolved_label: None,
 
-            stack_size: self.stack_counter as usize,
+            stack_size: self.scope.stack_counter,
             is_terminator: false,
+            comment,
+            source_position,
+            rust_position,
         });
+        info!(
+            "Wrote {:?}",
+            self.instructions.last().unwrap().opcode.to_string()
+        );
+        info!(" - before: {}", self.scope.stack_counter);
 
         self.update_stack(opcode);
+        info!(" - after: {}", self.scope.stack_counter);
         self
     }
 
@@ -484,6 +733,10 @@ impl EvmBlock {
         self.write_instruction(Opcode::JUMP, None)
     }
 
+    pub fn push_label(&mut self, label: &str) -> &mut Self {
+        self.write_instruction(Opcode::PUSH4, Some(label.to_string()))
+    }
+
     pub fn jump_if_to(&mut self, label: &str) -> &mut Self {
         self.write_instruction(Opcode::PUSH4, Some(label.to_string()));
         self.write_instruction(Opcode::JUMPI, None)
@@ -506,6 +759,20 @@ impl EvmBlock {
         self.write_instruction(Opcode::PUSH0, None)
     }
     */
+
+    pub fn push_u64(&mut self, arg: u64) -> &mut Self {
+        self.push(arg.to_be_bytes().to_vec())
+    }
+
+    pub fn push_u32(&mut self, arg: u32) -> &mut Self {
+        self.push(arg.to_be_bytes().to_vec())
+    }
+
+    pub fn push_u256(&mut self, arg: U256) -> &mut Self {
+        let mut bytes = [0u8; 32];
+        arg.to_big_endian(&mut bytes);
+        self.push(Vec::from(bytes))
+    }
 
     pub fn push(&mut self, arguments: Vec<u8>) -> &mut Self {
         match arguments.len() {
@@ -550,34 +817,42 @@ impl EvmBlock {
     }
 
     pub fn push1(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 1);
         self.write_instruction_with_args(Opcode::PUSH1, arguments)
     }
 
     pub fn push2(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 2);
         self.write_instruction_with_args(Opcode::PUSH2, arguments)
     }
 
     pub fn push3(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 3);
         self.write_instruction_with_args(Opcode::PUSH3, arguments)
     }
 
     pub fn push4(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 4);
         self.write_instruction_with_args(Opcode::PUSH4, arguments)
     }
 
     pub fn push5(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 5);
         self.write_instruction_with_args(Opcode::PUSH5, arguments)
     }
 
     pub fn push6(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 6);
         self.write_instruction_with_args(Opcode::PUSH6, arguments)
     }
 
     pub fn push7(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 7);
         self.write_instruction_with_args(Opcode::PUSH7, arguments)
     }
 
     pub fn push8(&mut self, arguments: Vec<u8>) -> &mut Self {
+        assert!(arguments.len() == 8);
         self.write_instruction_with_args(Opcode::PUSH8, arguments)
     }
 
@@ -741,67 +1016,105 @@ impl EvmBlock {
         self.write_instruction(Opcode::DUP16, None)
     }
 
+    pub fn swap(&mut self, depth: i32) -> &mut Self {
+        match depth {
+            0 => self,
+            1 => self.swap1(),
+            2 => self.swap2(),
+            3 => self.swap3(),
+            4 => self.swap4(),
+            5 => self.swap5(),
+            6 => self.swap6(),
+            7 => self.swap7(),
+            8 => self.swap8(),
+            9 => self.swap9(),
+            10 => self.swap10(),
+            11 => self.swap11(),
+            12 => self.swap12(),
+            13 => self.swap13(),
+            14 => self.swap14(),
+            15 => self.swap15(),
+            _ => panic!("Swap depth must be at least 0 and lower than 16"),
+        }
+    }
+
     pub fn swap1(&mut self) -> &mut Self {
+        self.scope.swap(1);
         self.write_instruction(Opcode::SWAP1, None)
     }
 
     pub fn swap2(&mut self) -> &mut Self {
+        self.scope.swap(2);
         self.write_instruction(Opcode::SWAP2, None)
     }
 
     pub fn swap3(&mut self) -> &mut Self {
+        self.scope.swap(3);
         self.write_instruction(Opcode::SWAP3, None)
     }
 
     pub fn swap4(&mut self) -> &mut Self {
+        self.scope.swap(4);
         self.write_instruction(Opcode::SWAP4, None)
     }
 
     pub fn swap5(&mut self) -> &mut Self {
+        self.scope.swap(5);
         self.write_instruction(Opcode::SWAP5, None)
     }
 
     pub fn swap6(&mut self) -> &mut Self {
+        self.scope.swap(6);
         self.write_instruction(Opcode::SWAP6, None)
     }
 
     pub fn swap7(&mut self) -> &mut Self {
+        self.scope.swap(7);
         self.write_instruction(Opcode::SWAP7, None)
     }
 
     pub fn swap8(&mut self) -> &mut Self {
+        self.scope.swap(8);
         self.write_instruction(Opcode::SWAP8, None)
     }
 
     pub fn swap9(&mut self) -> &mut Self {
+        self.scope.swap(9);
         self.write_instruction(Opcode::SWAP9, None)
     }
 
     pub fn swap10(&mut self) -> &mut Self {
+        self.scope.swap(10);
         self.write_instruction(Opcode::SWAP10, None)
     }
 
     pub fn swap11(&mut self) -> &mut Self {
+        self.scope.swap(11);
         self.write_instruction(Opcode::SWAP11, None)
     }
 
     pub fn swap12(&mut self) -> &mut Self {
+        self.scope.swap(12);
         self.write_instruction(Opcode::SWAP12, None)
     }
 
     pub fn swap13(&mut self) -> &mut Self {
+        self.scope.swap(13);
         self.write_instruction(Opcode::SWAP13, None)
     }
 
     pub fn swap14(&mut self) -> &mut Self {
+        self.scope.swap(14);
         self.write_instruction(Opcode::SWAP14, None)
     }
 
     pub fn swap15(&mut self) -> &mut Self {
+        self.scope.swap(15);
         self.write_instruction(Opcode::SWAP15, None)
     }
 
     pub fn swap16(&mut self) -> &mut Self {
+        self.scope.swap(16);
         self.write_instruction(Opcode::SWAP16, None)
     }
 

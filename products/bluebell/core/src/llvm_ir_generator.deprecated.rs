@@ -6,6 +6,7 @@ use inkwell::module::Module;
 use inkwell::types::AnyTypeEnum;
 use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::{builder::Builder, context::Context};
+use log::error;
 use std::collections::HashMap;
 
 type Scope<'a> = HashMap<String, inkwell::values::BasicValueEnum<'a>>;
@@ -111,11 +112,6 @@ impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
                 let size = match size.get_sign_extended_constant() {
                     Some(s) => s,
                     None => 100, // TODO: This needs fixing for structs - get the size
-                                 /*{
-                                     println!("Failed to convert {:?}", size);
-                                     println!("- Type: {:?}", typevalue);
-                                     unimplemented!()
-                                 }*/
                 };
                 if size > data_size {
                     data_size = size;
@@ -415,7 +411,7 @@ impl<'ctx, 'module> LlvmIrGenerator<'ctx, 'module> {
                         }
                     }
                     _ => {
-                        println!("Unhandled instruction: {:#?}", instr);
+                        error!("Unhandled instruction: {:#?}", instr);
                         unimplemented!() // Add handling for other operations here
                     }
                 }

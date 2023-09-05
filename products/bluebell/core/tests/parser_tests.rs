@@ -1,14 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use bluebell::parser::lexer;
-    use bluebell::parser::lexer::Lexer;
-    use bluebell::parser::parser;
 
-    use std::collections::HashMap;
-    use std::env;
-    use std::fs::File;
-    use std::io::Read;
-    use std::process;
+    use bluebell::parser::parser;
 
     macro_rules! check_ok {
         ($parser:ty, $result:expr) => {

@@ -3,7 +3,8 @@ use crate::ast::nodes::*;
 use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
-
+use crate::parser::lexer::SourcePosition;
+use log::info;
 use std::mem;
 
 #[derive(Debug, Clone)]
@@ -33,6 +34,8 @@ pub struct IrEmitter {
     namespace_stack: Vec<IrIdentifier>,
 
     ir: Box<IntermediateRepresentation>,
+
+    source_positions: Vec<(SourcePosition, SourcePosition)>,
 }
 
 impl IrEmitter {
@@ -45,6 +48,10 @@ impl IrEmitter {
             type_reference: None,
             kind: IrIndentifierKind::Namespace,
             is_definition: false,
+            source_location: (
+                SourcePosition::start_position(),
+                SourcePosition::start_position(),
+            ),
         };
         // TODO: Repeat similar code for all literals
         IrEmitter {
@@ -55,7 +62,19 @@ impl IrEmitter {
             namespace_stack: [ns].to_vec(),
             /// current_function: None,
             ir: Box::new(IntermediateRepresentation::new()),
+            source_positions: [(
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            )]
+            .to_vec(), // TODO: this should not be necessary
         }
+    }
+
+    fn current_location(&self) -> (SourcePosition, SourcePosition) {
+        self.source_positions
+            .last()
+            .expect("Unable to determine source location")
+            .clone()
     }
 
     fn push_namespace(&mut self, mut ns: IrIdentifier) {
@@ -85,7 +104,7 @@ impl IrEmitter {
                     self.ir.symbol_table.name_generator.new_intermediate()
                 };
                 instruction.ssa_name = Some(symbol.clone());
-                self.current_block.instructions.push(instruction);
+                self.current_block.instructions.push_back(instruction);
                 symbol
             }
         };
@@ -212,6 +231,14 @@ impl IrEmitter {
 }
 
 impl AstConverting for IrEmitter {
+    fn push_source_position(&mut self, start: &SourcePosition, end: &SourcePosition) {
+        self.source_positions.push((start.clone(), end.clone()));
+    }
+
+    fn pop_source_position(&mut self) {
+        self.source_positions.pop();
+    }
+
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
@@ -236,7 +263,11 @@ impl AstConverting for IrEmitter {
                     unimplemented!()
                 }
                 NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(name) => {
-                    let symbol = IrIdentifier::new(name.to_string(), IrIndentifierKind::Unknown);
+                    let symbol = IrIdentifier::new(
+                        name.to_string(),
+                        IrIndentifierKind::Unknown,
+                        self.current_location(),
+                    );
 
                     self.stack.push(StackObject::IrIdentifier(symbol));
                 }
@@ -276,12 +307,17 @@ impl AstConverting for IrEmitter {
         match node {
             NodeVariableIdentifier::VariableName(name) => {
                 let operation = Operation::ResolveSymbol {
-                    symbol: IrIdentifier::new(name.to_string(), IrIndentifierKind::VirtualRegister),
+                    symbol: IrIdentifier::new(
+                        name.to_string(),
+                        IrIndentifierKind::VirtualRegister,
+                        self.current_location(),
+                    ),
                 };
                 let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -421,14 +457,8 @@ impl AstConverting for IrEmitter {
                 type_annotation: _,
                 containing_expression,
             } => {
-                println!("Expression:\n{:#?}\n\n", expression);
                 expression.visit(self)?;
-                println!("Stack: {} = {:#?}", identifier_name, self.stack.last());
-
-                println!("----->");
                 containing_expression.visit(self)?;
-                println!(">{} Stack: {:#?}", identifier_name, self.stack.last());
-
                 unimplemented!();
             }
             NodeFullExpression::FunctionDeclaration {
@@ -448,7 +478,7 @@ impl AstConverting for IrEmitter {
             } => {
                 unimplemented!();
             }
-            NodeFullExpression::ExpressionAtomic(expr) => match &**expr {
+            NodeFullExpression::ExpressionAtomic(expr) => match &(**expr).node {
                 NodeAtomicExpression::AtomicSid(identifier) => {
                     let _ = identifier.visit(self)?;
                 }
@@ -462,7 +492,7 @@ impl AstConverting for IrEmitter {
                 }
 
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
-                for arg in xs.arguments.iter() {
+                for arg in xs.node.arguments.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
                     let instruction = self.pop_instruction()?;
@@ -477,6 +507,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::TemplateFunctionName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
 
                 let operation = Operation::CallExternalFunction { name, arguments };
@@ -485,6 +516,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
 
                 self.stack.push(StackObject::Instruction(instr));
@@ -498,6 +530,7 @@ impl AstConverting for IrEmitter {
             } => {
                 let _ = match_expression.visit(self)?;
                 let expression = self.pop_instruction()?;
+                let source_location = expression.source_location.clone();
 
                 let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
@@ -510,9 +543,9 @@ impl AstConverting for IrEmitter {
                 // Checking for catch all
                 let mut catch_all: Option<&NodePatternMatchExpressionClause> = None;
                 for clause in clauses.iter() {
-                    match clause.pattern {
+                    match clause.node.pattern.node {
                         NodePattern::Wildcard => {
-                            catch_all = Some(clause);
+                            catch_all = Some(&clause.node);
                             break;
                         }
                         _ => {}
@@ -522,27 +555,14 @@ impl AstConverting for IrEmitter {
                 let mut phi_results: Vec<IrIdentifier> = Vec::new();
 
                 for clause in clauses.iter() {
-                    match &clause.pattern {
-                        NodePattern::Wildcard => continue,
-                        NodePattern::Binder(_name) => {
-                            unimplemented!()
-                        }
-                        NodePattern::Constructor(name, args) => {
-                            if args.len() > 0 {
-                                println!("Name: {:#?}", name);
-                                println!("Args: {:#?}", args);
-
-                                unimplemented!();
-                            }
-
-                            let _ = name.visit(self);
-                        }
-                    }
+                    clause.node.pattern.visit(self)?;
 
                     // Creating compare instruction
                     // TODO: Pop instruction or symbol
                     let expected_value = self.pop_ir_identifier()?;
                     assert!(expected_value.kind == IrIndentifierKind::Unknown);
+
+                    let source_location = expected_value.source_location.clone();
 
                     let compare_instr = Box::new(Instruction {
                         ssa_name: None,
@@ -551,6 +571,7 @@ impl AstConverting for IrEmitter {
                             left: main_expression_symbol.clone(),
                             right: expected_value,
                         },
+                        source_location: source_location.clone(),
                     });
                     let case = self.convert_instruction_to_symbol(compare_instr);
 
@@ -574,11 +595,14 @@ impl AstConverting for IrEmitter {
                         on_success: success_label,
                         on_failure: fail_label.clone(),
                     };
-                    self.current_block.instructions.push(Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: op,
-                    }));
+                    self.current_block
+                        .instructions
+                        .push_back(Box::new(Instruction {
+                            ssa_name: None,
+                            result_type: None,
+                            operation: op,
+                            source_location,
+                        }));
                     self.current_block.terminated = true;
 
                     // Finishing current_block and moving it onto
@@ -587,8 +611,10 @@ impl AstConverting for IrEmitter {
                     mem::swap(&mut success_block, &mut self.current_block);
                     self.current_body.blocks.push(success_block);
 
-                    let _ = clause.expression.visit(self)?;
+                    let _ = clause.node.expression.visit(self)?;
                     let expr_instr = self.pop_instruction()?;
+                    let source_location = expr_instr.source_location.clone();
+
                     let result_sym = self.convert_instruction_to_symbol(expr_instr);
                     phi_results.push(result_sym);
 
@@ -596,8 +622,9 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::Jump(finally_exit_label.clone()),
+                        source_location,
                     });
-                    self.current_block.instructions.push(exit_instruction);
+                    self.current_block.instructions.push_back(exit_instruction);
 
                     // Pushing sucess block and creating fail block
 
@@ -616,8 +643,9 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Jump(finally_exit_label.clone()),
+                    source_location: source_location.clone(),
                 });
-                self.current_block.instructions.push(exit_instruction);
+                self.current_block.instructions.push_back(exit_instruction);
 
                 if let Some(_) = catch_all {
                     unimplemented!();
@@ -634,6 +662,7 @@ impl AstConverting for IrEmitter {
                         ssa_name: None,
                         result_type: None,
                         operation: Operation::PhiNode(phi_results),
+                        source_location: source_location.clone(),
                     })));
                 // unimplemented!();
             }
@@ -667,6 +696,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
 
                 self.stack.push(StackObject::Instruction(instr));
@@ -736,6 +766,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -752,6 +783,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation,
+                    source_location: self.current_location(),
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
@@ -771,14 +803,28 @@ impl AstConverting for IrEmitter {
     fn emit_pattern(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodePattern,
+        node: &NodePattern,
     ) -> Result<TraversalResult, String> {
-        /*
-        match node {
+        match &node {
+            NodePattern::Wildcard => {
+                unimplemented!()
+            }
+            NodePattern::Binder(_name) => {
+                unimplemented!()
+            }
+            NodePattern::Constructor(name, args) => {
+                if args.len() > 0 {
+                    info!("Name: {:#?}", name);
+                    info!("Args: {:#?}", args);
 
+                    unimplemented!();
+                }
+
+                let _ = name.visit(self);
+            }
         }
-        */
-        unimplemented!();
+
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_argument_pattern(
         &mut self,
@@ -809,19 +855,88 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         let instr = match node {
             NodeStatement::Load {
-                left_hand_side: _,
-                right_hand_side: _,
+                left_hand_side,
+                right_hand_side,
             } => {
-                unimplemented!()
+                let symbol = IrIdentifier {
+                    unresolved: left_hand_side.to_string(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::VirtualRegister,
+                    is_definition: false,
+                    source_location: self.current_location(),
+                };
+
+                let right_hand_side = match &right_hand_side.node {
+                    NodeVariableIdentifier::VariableName(name) => name,
+                    _ => panic!("Load of state {:#?}", right_hand_side.node),
+                };
+
+                let ret = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::StateLoad {
+                        address: FieldAddress {
+                            name: IrIdentifier {
+                                unresolved: right_hand_side.to_string(),
+                                resolved: None,
+                                type_reference: None,
+                                kind: IrIndentifierKind::State,
+                                is_definition: false,
+                                source_location: self.current_location(),
+                            },
+                            value: None,
+                        },
+                        value: symbol,
+                    },
+                    source_location: self.current_location(),
+                });
+
+                Some(ret)
             }
             NodeStatement::RemoteFetch(_remote_stmt) => {
                 unimplemented!()
             }
             NodeStatement::Store {
-                left_hand_side: _,
-                right_hand_side: _,
+                left_hand_side,
+                right_hand_side,
             } => {
-                unimplemented!()
+                // Generating instruction and setting its name
+                let _ = right_hand_side.visit(self)?;
+
+                let mut right_hand_side = self.pop_instruction()?;
+                let symbol = IrIdentifier {
+                    unresolved: left_hand_side.to_string(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::VirtualRegister,
+                    is_definition: false,
+                    source_location: self.current_location(),
+                };
+                (*right_hand_side).ssa_name = Some(symbol.clone());
+                self.current_block.instructions.push_back(right_hand_side);
+
+                let ret = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::StateStore {
+                        address: FieldAddress {
+                            name: IrIdentifier {
+                                unresolved: left_hand_side.to_string(),
+                                resolved: None,
+                                type_reference: None,
+                                kind: IrIndentifierKind::State,
+                                is_definition: false,
+                                source_location: self.current_location(),
+                            },
+                            value: None,
+                        },
+                        value: symbol,
+                    },
+                    source_location: self.current_location(),
+                });
+
+                Some(ret)
             }
             NodeStatement::Bind {
                 left_hand_side,
@@ -837,10 +952,11 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::VirtualRegister,
                     is_definition: false,
+                    source_location: self.current_location(),
                 };
                 (*right_hand_side).ssa_name = Some(symbol);
 
-                right_hand_side
+                Some(right_hand_side)
             }
             NodeStatement::ReadFromBC {
                 left_hand_side: _,
@@ -876,11 +992,12 @@ impl AstConverting for IrEmitter {
             } => {
                 unimplemented!()
             }
-            NodeStatement::Accept => Box::new(Instruction {
+            NodeStatement::Accept => Some(Box::new(Instruction {
                 ssa_name: None,
                 result_type: None,
                 operation: Operation::AcceptTransfer,
-            }),
+                source_location: self.current_location(),
+            })),
             NodeStatement::Send { identifier_name: _ } => {
                 unimplemented!()
             }
@@ -890,17 +1007,158 @@ impl AstConverting for IrEmitter {
             NodeStatement::Throw { error_variable: _ } => {
                 unimplemented!()
             }
-            NodeStatement::MatchStmt {
-                variable: _,
-                clauses: _,
-            } => {
-                unimplemented!()
+            NodeStatement::MatchStmt { variable, clauses } => {
+                let _ = variable.visit(self)?;
+                let expression = self.pop_instruction()?;
+                let source_location = expression.source_location.clone();
+                let main_expression_symbol = self.convert_instruction_to_symbol(expression);
+
+                let match_exit = self
+                    .ir
+                    .symbol_table
+                    .name_generator
+                    .new_block_label("match_exit");
+
+                // Termingating current block with placeholder label
+                let jump = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation: Operation::Jump(match_exit.clone()),
+                    source_location,
+                });
+                self.current_block.instructions.push_back(jump);
+
+                for (i, clause) in clauses.iter().enumerate() {
+                    // Terminating previous block
+                    let label_condition = self
+                        .ir
+                        .symbol_table
+                        .name_generator
+                        .new_block_label(&format!("clause_{}_condition", i));
+                    let label_block = self
+                        .ir
+                        .symbol_table
+                        .name_generator
+                        .new_block_label(&format!("clause_{}_block", i));
+
+                    let last_instruction = &mut self.current_block.instructions.back_mut().unwrap();
+
+                    match &mut last_instruction.operation {
+                        Operation::Jump(ref mut value) => {
+                            *value = label_condition.clone();
+                        }
+                        Operation::ConditionalJump {
+                            expression: _,
+                            on_success: _,
+                            ref mut on_failure,
+                        } => {
+                            *on_failure = label_condition.clone();
+                        }
+                        _ => {
+                            panic!("Expected previous block to be a terminating jump.");
+                        }
+                    }
+
+                    // Instating condition checking block as self.current_block
+                    let mut clause_condition_block =
+                        FunctionBlock::new_from_symbol(label_condition);
+                    mem::swap(&mut clause_condition_block, &mut self.current_block);
+                    self.current_body.blocks.push(clause_condition_block);
+
+                    clause.node.pattern_expression.visit(self)?;
+                    let expected_value = self.pop_ir_identifier()?;
+                    assert!(expected_value.kind == IrIndentifierKind::Unknown);
+                    let source_location = expected_value.source_location.clone();
+
+                    let jump_condition = Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: Operation::IsEqual {
+                            left: main_expression_symbol.clone(),
+                            right: expected_value,
+                        },
+                        source_location: source_location.clone(),
+                    });
+
+                    let jump_if = Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: Operation::ConditionalJump {
+                            expression: self.convert_instruction_to_symbol(jump_condition),
+                            on_success: label_block.clone(),
+                            on_failure: match_exit.clone(), // Exit or Placeholder - will be overwritten in next cycle
+                        },
+                        source_location: source_location.clone(),
+                    });
+                    self.current_block.instructions.push_back(jump_if);
+
+                    let mut clause_block = match &clause.node.statement_block {
+                        Some(statement_block) => {
+                            // Condition block
+                            statement_block.visit(self)?;
+                            self.pop_function_block()?
+                        }
+                        None => FunctionBlock::new("empty_block".to_string()),
+                    };
+
+                    clause_block.name = label_block.clone();
+
+                    let terminator_instr = Box::new(Instruction {
+                        ssa_name: None,
+                        result_type: None,
+                        operation: Operation::Jump(match_exit.clone()),
+                        source_location,
+                    });
+                    clause_block.instructions.push_back(terminator_instr);
+                    self.current_body.blocks.push(clause_block);
+                }
+
+                let mut match_exit_block = FunctionBlock::new_from_symbol(match_exit);
+                mem::swap(&mut match_exit_block, &mut self.current_block);
+
+                self.current_body.blocks.push(match_exit_block);
+                // self.current_body.blocks.extend(case_blocks);
+                None
             }
             NodeStatement::CallProc {
-                component_id: _,
-                arguments: _,
+                component_id,
+                arguments: call_args,
             } => {
-                unimplemented!()
+                let mut arguments: Vec<IrIdentifier> = [].to_vec();
+                for arg in call_args.iter() {
+                    // TODO: xs should be rename .... not clear what this is, but it means function arguments
+                    let _ = arg.visit(self)?;
+                    let instruction = self.pop_instruction()?;
+
+                    let symbol = self.convert_instruction_to_symbol(instruction);
+                    arguments.push(symbol);
+                }
+
+                let name = match &component_id.node {
+                    NodeComponentId::WithTypeLikeName(_) => unimplemented!(),
+                    NodeComponentId::WithRegularId(n) => n,
+                };
+
+                let name = IrIdentifier {
+                    unresolved: name.to_string(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::ProcedureName,
+                    is_definition: false,
+                    source_location: self.current_location(),
+                };
+
+                let operation = Operation::CallFunction { name, arguments };
+
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                    source_location: self.current_location(),
+                });
+
+                // self.stack.push(StackObject::Instruction(instr));
+                Some(instr)
             }
             NodeStatement::Iterate {
                 identifier_name: _,
@@ -910,7 +1168,10 @@ impl AstConverting for IrEmitter {
             }
         };
 
-        self.current_block.instructions.push(instr);
+        match instr {
+            Some(instr) => self.current_block.instructions.push_back(instr),
+            None => (),
+        }
         Ok(TraversalResult::SkipChildren)
     }
 
@@ -934,6 +1195,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 }));
             }
             NodeComponentId::WithTypeLikeName(name) => {
@@ -943,6 +1205,7 @@ impl AstConverting for IrEmitter {
                     type_reference: None,
                     kind: IrIndentifierKind::ComponentName,
                     is_definition: false,
+                    source_location: self.current_location(),
                 }));
             }
         }
@@ -1028,7 +1291,8 @@ impl AstConverting for IrEmitter {
         assert!(typename.kind == IrIndentifierKind::Unknown);
         typename.kind = IrIndentifierKind::TypeName;
 
-        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, false, typename));
+        let s =
+            StackObject::VariableDeclaration(VariableDeclaration::new(name.node, false, typename));
         self.stack.push(s);
 
         Ok(TraversalResult::SkipChildren)
@@ -1105,8 +1369,8 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeLibrarySingleDefinition::LetDefinition {
-                variable_name,
-                type_annotation,
+                variable_name: _,
+                type_annotation: _,
                 expression,
             } => {
                 /*
@@ -1119,21 +1383,8 @@ impl AstConverting for IrEmitter {
                     // TODO: self.current_function
                 }
                 */
-                println!("Stack size: {}", self.stack.len());
 
-                println!("{:#?}", variable_name);
-                println!("{:#?}", type_annotation);
-                println!("{:#?}", expression);
-
-                println!("Expression:\n{:#?}\n\n", expression);
                 expression.visit(self)?;
-
-                println!("{:#?}", expression);
-
-                println!("Stack size: {}", self.stack.len());
-                println!("{:#?}", self.stack);
-
-                println!("Pop stack and push whatever is defined");
                 unimplemented!();
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
@@ -1201,9 +1452,24 @@ impl AstConverting for IrEmitter {
     fn emit_contract_field(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodeContractField,
+        node: &NodeContractField,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        let _ = node.typed_identifier.visit(self)?;
+
+        let mut variable = self.pop_variable_declaration()?;
+        let _ = node.right_hand_side.visit(self)?;
+        let initializer = self.pop_instruction()?;
+        variable.name.kind = IrIndentifierKind::State;
+
+        let field = ContractField {
+            namespace: self.current_namespace.clone(),
+            variable,
+            initializer,
+        };
+
+        self.ir.fields_definitions.push(field);
+
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_with_constraint(
         &mut self,
@@ -1238,7 +1504,7 @@ impl AstConverting for IrEmitter {
         let _ = node.name.visit(self)?;
 
         let mut arguments: Vec<VariableDeclaration> = [].to_vec();
-        for arg in node.parameters.parameters.iter() {
+        for arg in node.parameters.node.parameters.iter() {
             let _ = arg.visit(self)?;
             let ir_arg = self.pop_variable_declaration()?;
             arguments.push(ir_arg);
@@ -1254,10 +1520,11 @@ impl AstConverting for IrEmitter {
             if !last_block.terminated {
                 // let last_block = last_block.clone();
                 // Terminates the block with a void return in the event it is not terminated.
-                last_block.instructions.push(Box::new(Instruction {
+                last_block.instructions.push_back(Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Return(None),
+                    source_location: self.current_location(),
                 }));
                 last_block.terminated = true;
             }
@@ -1266,6 +1533,7 @@ impl AstConverting for IrEmitter {
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
         function_name.kind = IrIndentifierKind::TransitionName;
+        function_name.is_definition = true;
 
         // TODO: Decude return type from body
 

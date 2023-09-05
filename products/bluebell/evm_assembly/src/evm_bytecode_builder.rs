@@ -1,23 +1,19 @@
+use crate::bytecode_ir::EvmBytecodeIr;
 use crate::compiler_context::EvmCompilerContext;
+use crate::executable::EvmExecutable;
+use crate::opcode_spec::OpcodeSpec;
+use std::collections::BTreeSet;
+use std::mem;
+
 use evm::Opcode;
 
 use std::collections::HashMap;
 
 use crate::block::EvmBlock;
 use crate::evm_decompiler::EvmAssemblyGenerator;
-
 use crate::function::EvmFunction;
 use crate::opcode_spec::{create_opcode_spec, OpcodeSpecification};
-
-/*
-    codebuilder
-        .new_function("name", ["arg1", "arg2"])
-        .build(|block_builder| {
-            block.if(|block_builder| {
-            })
-
-        })
-*/
+use crate::types::EvmType;
 
 pub struct FunctionBuilder<'a, 'ctx> {
     pub builder: &'a mut EvmByteCodeBuilder<'ctx>,
@@ -30,7 +26,33 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
         F: Fn(&mut EvmByteCodeBuilder<'ctx>) -> Vec<EvmBlock>,
     {
         self.function.blocks = builder(&mut self.builder);
-        self.builder.functions.push(self.function);
+
+        let _signature = &self.function.signature.clone().unwrap();
+        // if first_block.consumes
+
+        match self.function.compute_stack_difference() {
+            Err(e) => panic!("{}", e),
+            _ => (),
+        }
+
+        /*
+        TODO:
+        if self.function.consumes != signature.arguments.len().try_into().unwrap() {
+           panic!("{}", format!("Function consumes {} but expects {}",self.function.consumes,signature.arguments.len() ))
+        }
+        */
+
+        if self.function.produces > 1 {
+            panic!(
+                "{}",
+                format!(
+                    "Function produces {} but at the moment we only support 1 return argument",
+                    self.function.produces
+                )
+            )
+        }
+
+        self.builder.ir.functions.push_back(self.function);
     }
 }
 
@@ -42,33 +64,34 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx>> {
 
 pub struct EvmByteCodeBuilder<'ctx> {
     pub context: &'ctx mut EvmCompilerContext,
-    pub functions: Vec<EvmFunction>,
-    pub data: Vec<(String, Vec<u8>)>,
-    pub unused_blocks: Vec<EvmBlock>,
+    pub ir: EvmBytecodeIr,
+
     pub bytecode: Vec<u8>,
-    pub opcode_specs: HashMap<u8, OpcodeSpecification>,
+    pub opcode_specs: HashMap<u8, OpcodeSpecification>, // TODO: Should be deleted
     pub auxiliary_data: Vec<u8>,
     pub was_finalized: bool,
+    pub create_abi_boilerplate: bool,
+    pub label_positions: HashMap<String, u32>,
 }
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
-    pub fn new(context: &'ctx mut EvmCompilerContext) -> Self {
+    pub fn new(context: &'ctx mut EvmCompilerContext, create_abi_boilerplate: bool) -> Self {
         let mut ret = Self {
             context,
-            functions: Vec::new(),
-            data: Vec::new(),
-            unused_blocks: Vec::new(),
+            ir: EvmBytecodeIr::new(),
             bytecode: Vec::new(),
             opcode_specs: create_opcode_spec(),
             auxiliary_data: Vec::new(),
             was_finalized: false,
+            create_abi_boilerplate,
+            label_positions: HashMap::new(),
         };
 
         // Reserving the start of the bytecode for the "entry" function
         ret.define_function("__main__", [].to_vec(), "Uint256")
             .build(|_code_builder| {
                 // Placeholder block for the main function
-                [EvmBlock::new(None, "main_entry")].to_vec()
+                [EvmBlock::new(None, BTreeSet::new(), "main_entry")].to_vec()
             });
 
         ret
@@ -97,15 +120,21 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             EvmBlock::extract_blocks_from_bytecode(&bytes, &opcode_specs);
 
         let (functions, unused_blocks) = EvmFunction::extract_functions(&blocks);
+        let ir = EvmBytecodeIr {
+            functions: functions.into(),
+            data: Vec::new(),
+            unused_blocks,
+        };
         Self {
             context,
-            functions,
-            bytecode: bytes,
-            unused_blocks,
+            ir,
             opcode_specs,
             auxiliary_data,
-            data: Vec::new(),
+            bytecode: bytes,
+
             was_finalized: false,
+            create_abi_boilerplate: false,
+            label_positions: HashMap::new(),
         }
     }
 
@@ -127,15 +156,21 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         self
     }
 
-    pub fn build(&mut self) -> Vec<u8> {
+    pub fn build(&mut self) -> EvmExecutable {
         let mut bytecode = Vec::new();
-
         self.finalize_blocks();
 
         // Generating bytecode
-        for function in self.functions.iter_mut() {
+        for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
+                    // Sanity check that arguments matches
+                    assert!(
+                        instruction.opcode.bytecode_arguments() == instruction.arguments.len(),
+                        "Sanity check failed while writing byte code."
+                    );
+
+                    // Writing code
                     bytecode.push(instruction.opcode.as_u8());
                     bytecode.extend(instruction.arguments.clone());
                 }
@@ -144,20 +179,29 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         bytecode.push(Opcode::STOP.as_u8());
 
-        for (_, payload) in &self.data {
+        for (_, payload) in &self.ir.data {
             bytecode.extend(payload);
         }
 
-        bytecode
+        let mut ir = EvmBytecodeIr::new();
+        mem::swap(&mut ir, &mut self.ir);
+
+        // TODO: Make block table
+        EvmExecutable {
+            bytecode,
+            label_positions: self.label_positions.clone(),
+            ir,
+        }
     }
 
     pub fn finalize_blocks(&mut self) {
         if self.was_finalized {
             return;
         }
+
         // Building entry function
         let mut main = {
-            let mut binding = self.functions.first_mut();
+            let mut binding = self.ir.functions.front_mut();
             let main = match binding {
                 Some(ref mut main) => main,
                 _ => panic!("Expected the reserved main function."),
@@ -173,18 +217,36 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         };
 
         // Making sure that there is value attached to the contract call
-        first_block.push1([0x80].to_vec());
-        first_block.push1([0x40].to_vec());
-        first_block.mstore();
-        first_block.external_callvalue();
-        first_block.dup1();
-        first_block.iszero();
-        first_block.jump_if_to("switch");
-        first_block.push1([0x00].to_vec());
-        first_block.dup1();
-        first_block.revert();
+        if self.create_abi_boilerplate {
+            first_block.push1([0x80].to_vec());
+            first_block.push1([0x40].to_vec());
+            first_block.mstore();
+            first_block.external_callvalue();
+            first_block.dup1();
+            first_block.iszero();
+            first_block.jump_if_to("switch");
+            first_block.push1([0x00].to_vec());
+            first_block.dup1();
+            first_block.revert();
+        } else {
+            first_block.push1([0x80].to_vec());
+            first_block.push1([0x40].to_vec());
+            first_block.mstore();
 
-        let mut switch_block = EvmBlock::new(None, "switch");
+            // Adding return address
+            first_block.push_label("success");
+            if let Some(fnc) = &self.ir.functions.get(1) {
+                if let Some(block) = fnc.blocks.first() {
+                    first_block.jump_to(&block.name);
+                } else {
+                    first_block.jump();
+                }
+            } else {
+                first_block.jump();
+            }
+        }
+
+        let mut switch_block = EvmBlock::new(None, BTreeSet::new(), "switch");
         switch_block.pop(); // 0 Oribabky remove dup1()?
         switch_block.push1([0x04].to_vec()); // Checking that the size of call args
         switch_block.calldatasize();
@@ -195,14 +257,66 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         switch_block.push1([0xe0].to_vec());
         switch_block.shr();
 
-        for (i, function) in self.functions.iter().enumerate() {
+        let mut data_loading_blocks: Vec<EvmBlock> = Vec::new();
+        for (i, function) in self.ir.functions.iter().enumerate() {
+            // Skipping the entry function (the one we are building now)
             if i > 0 {
-                // Skipping the entry function
                 switch_block.dup1();
                 switch_block.push(function.selector.clone());
                 switch_block.eq();
                 match function.blocks.first() {
-                    Some(block) => switch_block.jump_if_to(&block.name),
+                    Some(block) => {
+                        let name = format!("load_args_{}", "function_name").to_string();
+                        let mut load_data_block = EvmBlock::new(None, BTreeSet::new(), &name);
+
+                        switch_block.jump_if_to(&load_data_block.name);
+
+                        let signature = function.signature.clone().unwrap();
+
+                        load_data_block.pop(); // Remove the user function selector from the stack
+
+                        // Checking that the size of call args
+                        // TODO: Assumptino is that all arguments are 256-bits
+                        let args_size = 0x04 + 0x20 * signature.arguments.len();
+                        load_data_block.push_u64(args_size.try_into().unwrap());
+                        load_data_block.calldatasize();
+                        load_data_block.lt();
+                        load_data_block.jump_if_to("fail");
+
+                        // Adding return address
+                        load_data_block.push_label("success");
+
+                        // Loading data
+                        for (i, arg) in signature.arguments.iter().enumerate() {
+                            if let EvmType::String = arg {
+                                // TODO: We only support loading of 32 byte strings.
+                                // TODO: Count non-zero characters and push to the stack
+                                let size = 32;
+                                load_data_block.alloca_static(4 + size);
+                                // First four bytes store size
+                                load_data_block.push_u32(size as u32);
+                                load_data_block.push_u32(256 - 32);
+                                load_data_block.shl();
+                                load_data_block.dup2();
+                                load_data_block.mstore();
+
+                                load_data_block.dup1();
+                                load_data_block.push1([0x04].to_vec());
+                                load_data_block.add();
+
+                                load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
+                                load_data_block.calldataload();
+                                load_data_block.swap1();
+                                load_data_block.mstore();
+                            } else {
+                                load_data_block.push_u64((0x04 + 0x20 * i).try_into().unwrap());
+                                load_data_block.calldataload();
+                            }
+                        }
+
+                        load_data_block.jump_to(&block.name);
+                        data_loading_blocks.push(load_data_block);
+                    }
                     _ => panic!("Function does not have a block."),
                 };
             }
@@ -210,15 +324,28 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
         switch_block.jump_to("fail");
 
-        let mut fail_block = EvmBlock::new(None, "fail");
+        let mut fail_block = EvmBlock::new(None, BTreeSet::new(), "fail");
         fail_block.push1([0x00].to_vec());
         fail_block.dup1();
         fail_block.revert();
 
-        main.blocks.push(switch_block);
-        main.blocks.push(fail_block);
+        let mut success_block = EvmBlock::new(None, BTreeSet::new(), "success");
+        success_block.push1([0x00].to_vec());
+        success_block.dup1();
+        success_block.r#return();
 
-        self.functions[0] = main;
+        if self.create_abi_boilerplate {
+            main.blocks.push(switch_block);
+            for block in data_loading_blocks {
+                main.blocks.push(block);
+            }
+            main.blocks.push(fail_block);
+            main.blocks.push(success_block);
+        } else {
+            main.blocks.push(success_block);
+        }
+
+        self.ir.functions[0] = main;
 
         // Resolving labels
         self.resolve_positions();
@@ -229,17 +356,24 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
     }
 
     pub fn resolve_positions(&mut self) {
-        let mut position = 0;
-        let mut label_positions = HashMap::new();
+        let mut position: u32 = 0;
+        self.label_positions = HashMap::new();
 
         // Creating code positions
-        for function in self.functions.iter_mut() {
-            for block in function.blocks.iter_mut() {
+        for function in self.ir.functions.iter_mut() {
+            for (i, block) in function.blocks.iter_mut().enumerate() {
                 block.position = Some(position);
-                label_positions.insert(block.name.clone(), position);
+                self.label_positions.insert(block.name.clone(), position);
+                if i == 0 {
+                    let function_name = match &function.signature {
+                        Some(v) => v.name.clone(),
+                        None => panic!("Invalid function signature {:?}", function),
+                    };
+                    self.label_positions.insert(function_name, position);
+                }
                 for instruction in block.instructions.iter_mut() {
                     instruction.position = Some(position);
-                    position += 1 + instruction.expected_args_length();
+                    position += 1 + instruction.expected_args_length() as u32;
                 }
             }
         }
@@ -248,22 +382,22 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         position += 1;
 
         // Creating data positions
-        for (name, payload) in &self.data {
-            label_positions.insert(name.to_string(), position);
-            position += payload.len();
+        for (name, payload) in &self.ir.data {
+            self.label_positions.insert(name.to_string(), position);
+            position += payload.len() as u32;
         }
 
         // Updating labels
-        for function in self.functions.iter_mut() {
+        for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
                     if let Some(name) = &instruction.unresolved_label {
-                        match label_positions.get(name) {
+                        match self.label_positions.get(name) {
                             Some(p) => {
-                                instruction.u64_to_arg_big_endian(*p);
+                                instruction.u32_to_arg_big_endian(*p);
                             }
                             None => {
-                                panic!("Label not found!");
+                                panic!("Label not found {:#?}!", name);
                             }
                         }
                     }
@@ -278,6 +412,7 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
         let mut script = "Unused blocks:\n\n".to_string();
 
         let unused_blocks = self
+            .ir
             .unused_blocks
             .iter()
             .map(|block| {
@@ -285,36 +420,32 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                     .instructions
                     .iter()
                     .map(|instr| {
-                        if instr.arguments.len() > 0 {
+                        let position = match instr.position {
+                            Some(v) => v,
+                            None => 0,
+                        };
+                        let instruction_value = if instr.arguments.len() > 0 {
                             let argument: String = instr
                                 .arguments
                                 .iter()
                                 .map(|byte| format!("{:02x}", byte).to_string())
                                 .collect();
-                            let position = match instr.position {
-                                Some(v) => v,
-                                None => 0,
-                            };
-                            format!(
-                                "[0x{:02x}: 0x{:02x}] {} 0x{}",
-                                position,
-                                instr.opcode.as_u8(),
-                                instr.opcode.to_string(),
-                                argument
-                            )
+
+                            format!("{} 0x{}", instr.opcode.to_string(), argument).to_string()
                         } else {
-                            let position = match instr.position {
-                                Some(v) => v,
-                                None => 0,
-                            };
-                            format!(
-                                "[0x{:02x}: 0x{:02x}] {}  ;; {}",
-                                position,
-                                instr.opcode.as_u8(),
-                                instr.opcode.to_string(),
-                                instr.stack_size
-                            )
-                        }
+                            instr.opcode.to_string()
+                        };
+
+                        format!(
+                            "[0x{:02x}: 0x{:02x}] {:<width$}  ;; Stack: {}, Comment: {}, Source: {:?}",
+                            position,
+                            instr.opcode.as_u8(),
+                            instruction_value,
+                            instr.stack_size,
+                            instr.comment.clone().unwrap_or("".to_string()).trim(),
+                            instr.source_position,
+                            width = 40
+                        )
                     })
                     .collect::<Vec<String>>()
                     .join("\n");
@@ -331,7 +462,7 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
             .join("\n\n");
         script.push_str(&unused_blocks);
 
-        for function in &self.functions {
+        for function in &self.ir.functions {
             let code_blocks = function
                 .blocks
                 .iter()
@@ -340,36 +471,33 @@ impl EvmAssemblyGenerator for EvmByteCodeBuilder<'_> {
                         .instructions
                         .iter()
                         .map(|instr| {
-                            if instr.arguments.len() > 0 {
+                            let position = match instr.position {
+                                Some(v) => v,
+                                None => 0,
+                            };
+
+                            let instruction_value = if instr.arguments.len() > 0 {
                                 let argument: String = instr
                                     .arguments
                                     .iter()
                                     .map(|byte| format!("{:02x}", byte).to_string())
                                     .collect();
-                                let position = match instr.position {
-                                    Some(v) => v,
-                                    None => 0,
-                                };
-                                format!(
-                                    "[0x{:02x}: 0x{:02x}] {} 0x{}",
-                                    position,
-                                    instr.opcode.as_u8(),
-                                    instr.opcode.to_string(),
-                                    argument
-                                )
+
+                                format!("{} 0x{}", instr.opcode.to_string(), argument).to_string()
                             } else {
-                                let position = match instr.position {
-                                    Some(v) => v,
-                                    None => 0,
-                                };
-                                format!(
-                                    "[0x{:02x}: 0x{:02x}] {} ;; {}",
-                                    position,
-                                    instr.opcode.as_u8(),
-                                    instr.opcode.to_string(),
-                                    instr.stack_size
-                                )
-                            }
+                                instr.opcode.to_string()
+                            };
+
+                            format!(
+                                "[0x{:02x}: 0x{:02x}] {:<width$} ;; Stack: {}, Comment: {}, Source: {:?}",
+                                position,
+                                instr.opcode.as_u8(),
+                                instruction_value,
+                                instr.stack_size,
+                                instr.comment.clone().unwrap_or("".to_string()).trim(),
+                                instr.source_position,
+                                width = 40
+                            )
                         })
                         .collect::<Vec<String>>()
                         .join("\n");

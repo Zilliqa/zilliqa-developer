@@ -1,0 +1,13 @@
+scilla_version 0
+
+library HelloWorld
+contract HelloWorld()
+
+field welcome_msg : String = ""
+
+transition setHello (msg : String)
+  x = builtin print msg;
+  (* value = "Hello world";
+  x = builtin print value; *)
+  welcome_msg := msg
+end

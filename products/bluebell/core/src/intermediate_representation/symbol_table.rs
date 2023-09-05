@@ -1,3 +1,4 @@
+use crate::constants::NAMESPACE_SEPARATOR;
 use crate::intermediate_representation::name_generator::NameGenerator;
 use std::collections::HashMap;
 
@@ -21,7 +22,7 @@ impl TypeInfo {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SymbolTable {
     pub aliases: HashMap<String, String>,
     pub type_of_table: HashMap<String, Box<TypeInfo>>,
@@ -51,6 +52,53 @@ impl SymbolTable {
         let _ = ret.declare_type("String");
 
         ret
+    }
+
+    pub fn resolve_qualified_name(
+        &mut self,
+        basename: &String,
+        current_namespace: &Option<String>,
+    ) -> Option<String> {
+        match &current_namespace {
+            None => (),
+            Some(namespace) => {
+                let mut namespaces = namespace.split(NAMESPACE_SEPARATOR).collect::<Vec<&str>>();
+
+                while !namespaces.is_empty() {
+                    let full_name = format!(
+                        "{}{}{}",
+                        namespaces.join(NAMESPACE_SEPARATOR),
+                        NAMESPACE_SEPARATOR,
+                        basename
+                    );
+
+                    let full_name = if let Some(aliased_name) = self.aliases.get(&full_name) {
+                        aliased_name
+                    } else {
+                        &full_name
+                    };
+
+                    if let Some(_) = self.typename_of(full_name) {
+                        return Some(full_name.to_string());
+                    }
+
+                    // Remove the last level of the namespace
+                    namespaces.pop();
+                }
+            }
+        }
+
+        let lookup = if let Some(aliased_name) = self.aliases.get(basename) {
+            aliased_name
+        } else {
+            basename
+        };
+
+        if let Some(_) = self.typename_of(lookup) {
+            return Some(lookup.to_string());
+        }
+
+        None
     }
 
     pub fn get_name_generator(&mut self) -> &mut NameGenerator {

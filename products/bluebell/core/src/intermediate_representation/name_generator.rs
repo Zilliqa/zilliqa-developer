@@ -1,8 +1,9 @@
 use crate::intermediate_representation::primitives::{
     FunctionBlock, IrIdentifier, IrIndentifierKind,
 };
+use crate::parser::lexer::SourcePosition;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NameGenerator {
     anonymous_type_number: u64,
     intermediate_counter: u64,
@@ -26,6 +27,10 @@ impl NameGenerator {
             type_reference: None,
             kind: IrIndentifierKind::TypeName,
             is_definition: false,
+            source_location: (
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            ),
         }
     }
 
@@ -39,6 +44,10 @@ impl NameGenerator {
             type_reference: None,
             kind: IrIndentifierKind::TypeName,
             is_definition: true,
+            source_location: (
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            ),
         }
     }
 
@@ -58,6 +67,10 @@ impl NameGenerator {
             type_reference: None,
             kind: IrIndentifierKind::VirtualRegisterIntermediate,
             is_definition: true,
+            source_location: (
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            ),
         }
     }
 }

@@ -8,13 +8,15 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-type InlineGenericsFn = fn(&mut EvmBlock, Vec<String>) -> Result<(), String>;
+type InlineGenericsFn =
+    fn(&mut EvmCompilerContext, &mut EvmBlock, Vec<String>) -> Result<Vec<EvmBlock>, String>;
 
 pub struct EvmCompilerContext {
     type_declarations: HashMap<String, EvmType>,
 
     pub function_declarations: HashMap<String, EvmFunctionSignature>,
     pub inline_generics: HashMap<String, InlineGenericsFn>,
+
     /// Scilla types -> EVM types
     precompiles: BTreeMap<H160, PrecompileFn>,
     precompile_addresses: HashMap<String, u32>,
@@ -71,7 +73,11 @@ impl EvmCompilerContext {
     }
 
     pub fn create_builder<'ctx>(&'ctx mut self) -> EvmByteCodeBuilder<'ctx> {
-        EvmByteCodeBuilder::new(self)
+        EvmByteCodeBuilder::new(self, true)
+    }
+
+    pub fn create_builder_no_abi_support<'ctx>(&'ctx mut self) -> EvmByteCodeBuilder<'ctx> {
+        EvmByteCodeBuilder::new(self, false)
     }
 
     pub fn declare_integer(&mut self, name: &str, bits: usize) {
@@ -89,6 +95,17 @@ impl EvmCompilerContext {
     pub fn declare_address(&mut self, name: &str) {
         self.type_declarations
             .insert(name.to_string(), EvmType::String);
+    }
+
+    pub fn declare_dynamic_string(&mut self, name: &str) {
+        self.type_declarations
+            .insert(name.to_string(), EvmType::String);
+    }
+
+    pub fn declare_opaque_type(&mut self, _name: &str) {
+        unimplemented!()
+        // self.type_declarations
+        //     .insert(name.to_string(), EvmType::Opaque);
     }
 
     pub fn declare_inline_generics(

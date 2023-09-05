@@ -1,13 +1,31 @@
+use crate::constants::TreeTraversalMode;
+use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::Operation;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
 };
+use crate::passes::debug_printer::DebugPrinter;
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use evm_assembly::executable::EvmExecutable;
+use evm_assembly::instruction::EvmSourcePosition;
+use primitive_types::U256;
+use std::collections::HashMap;
+use std::collections::BTreeSet;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
+use sha3::{Digest, Keccak256};
+use std::mem;
+use log::{info};
+
+#[derive(Debug)]
+pub struct StateLayoutEntry {
+    pub address_offset: U256,
+    pub size: u64,
+    pub initializer: U256,
+}
 
 /// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
 /// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.
@@ -22,14 +40,53 @@ pub struct EvmBytecodeGenerator<'ctx> {
     /// high-level, platform-independent representation used for code optimization before
     /// it's translated into the target bytecode.
     ir: Box<IntermediateRepresentation>,
+
+    // TODO: State allocation - TODO: move to IR and setup using pass
+    state_layout: HashMap<String, StateLayoutEntry>,
 }
 
 impl<'ctx> EvmBytecodeGenerator<'ctx> {
     /// This constructs a new `EvmBytecodeGenerator`. It takes an existing EVM compiler context
     /// and a boxed intermediate representation (IR) of the program.  
-    pub fn new(context: &'ctx mut EvmCompilerContext, ir: Box<IntermediateRepresentation>) -> Self {
-        let builder = context.create_builder();
-        Self { builder, ir }
+    pub fn new(
+        context: &'ctx mut EvmCompilerContext,
+        ir: Box<IntermediateRepresentation>,
+        abi_support: bool,
+    ) -> Self {
+        let builder = if abi_support {
+            context.create_builder()
+        } else {
+            context.create_builder_no_abi_support()
+        };
+        Self {
+            builder,
+            ir,
+            state_layout: HashMap::new(),
+        }
+    }
+
+    /// TODO:
+    pub fn build_state_layout(&mut self) -> Result<(), String> {
+        // TODO: Add support for immutables
+        let mut address_offset: u64 = 4919;
+
+        for field in &self.ir.fields_definitions {
+            let name = &field.variable.name.unresolved;
+            let address = U256::from(address_offset);
+            let initializer = U256::from(0);
+
+            let state = StateLayoutEntry {
+                address_offset: address,
+                size: 1, // TODO:
+                initializer,
+            };
+
+            self.state_layout.insert(name.to_string(), state);
+            address_offset += 1;
+        }
+
+        Ok(())
+        //        unimplemented!()
     }
 
     /// This function writes function definitions from the IR to the EVM module.
@@ -41,6 +98,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 .arguments
                 .iter()
                 .map(|arg| arg.typename.unresolved.as_str())
+                .collect();
+
+            let arg_names: BTreeSet<String> = func
+                .arguments
+                .iter()
+                .map(|arg| {
+                    arg.name
+                        .resolved
+                        .clone()
+                        .expect("Unresolved function argument name")
+                })
                 .collect();
 
             let function_name = func
@@ -57,27 +125,91 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 .define_function(&function_name, arg_types, return_type)
                 .build(|code_builder| {
                     let mut ret: Vec<EvmBlock> = Vec::new();
+                    let mut symbol_table = self.ir.symbol_table.clone();
+
+                    // TODO: Check that arg_names matches length of the arguments in the first block
+                    if let Some(entry) = func.body.blocks.first() {
+                        if arg_names.len() != entry.block_arguments.len() {
+                            panic!("Internal error: Function argument names differ from block names in length");
+                        }
+                        if arg_names != entry.block_arguments {
+                            panic!("Internal error: Function argument names differ from block names in order");
+                        }
+                    }
 
                     // Return PC + Arguments are expected to be on the stack
-
                     for block in &func.body.blocks {
                         let block_name = match block.name.qualified_name() {
                             Ok(b) => b,
                             Err(_) => panic!("Failed to get qualified name."),
                         };
-                        let mut blk = EvmBlock::new(None, &block_name);
 
-                        println!("Block: {:#?}", block);
+
+                        // Creating entry function
+                        let block_args : BTreeSet<String> = block.block_arguments.clone();
+
+                        let mut evm_block =
+                            EvmBlock::new(None, block_args, &block_name);
+
                         for instr in &block.instructions {
-                            match instr.operation {
+                            let mut instruction_printer = DebugPrinter::new();
+                            let mut instr_copy = instr.clone();
+                            let _ = instruction_printer.visit_instruction(TreeTraversalMode::Enter, &mut instr_copy, &mut symbol_table);
+                            evm_block.set_next_instruction_comment(instruction_printer.value());
+
+                            let (l_pos, r_pos) = &instr.source_location;
+                            if l_pos.is_valid() && r_pos.is_valid() {
+                                let pos = EvmSourcePosition {
+                                    start: l_pos.position,
+                                    end: r_pos.position,
+                                    line: l_pos.line,
+                                    column: l_pos.column,
+                                };
+                                evm_block.set_next_instruction_location(pos);
+                            }
+
+
+                            match &instr.operation {
+                                Operation::CallFunction {
+                                    ref name,
+                                    ref arguments,
+                                } => {
+                                    let mut exit_block = EvmBlock::new(
+                                        Some(0),
+                                        ["result".to_string()].to_vec().into_iter().collect(),
+                                        "exit_block",
+                                    );
+
+                                    // Adding return point
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.push_label("exit_block");
+
+                                    for arg in arguments {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        let _ = match &arg.resolved {
+                                            Some(a) => evm_block.duplicate_stack_name(&a),
+                                            None => panic!("Unable to resolve {}", arg.unresolved),
+                                        };
+                                    }
+
+                                    // Jumping to function
+                                    let label = match &name.resolved {
+                                        Some(v) => v,
+                                        None => panic!(
+                                            "Unresolved function name in function call {:?}",
+                                            name
+                                        ),
+                                    };
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);                                     
+                                    evm_block.jump_to(&label);
+                                    mem::swap(&mut evm_block, &mut exit_block);
+                                    ret.push(exit_block);
+                                }
                                 Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
                                 } => {
-                                    let _ = name;
-                                    let _ = arguments;
-                                    println!("\n");
-                                    println!("Argumnets: {:?}", arguments);
 
                                     // Invoking
                                     let qualified_name = match &name.resolved {
@@ -85,20 +217,34 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         None => {
                                             // TODO: Fix error propagation
                                             panic!(
-                                                "{}",
-                                                format!(
-                                                    "Encountered unresolved function name {}",
-                                                    name.unresolved
-                                                )
+                                                "Encountered unresolved function name {}",
+                                                name.unresolved
                                             )
                                         }
                                     };
 
-                                    let ctx = &code_builder.context;
+                                    let mut ctx = &mut code_builder.context;
                                     // We have three types of calls:
                                     // - Precompiles / external function
                                     // - Inline assembler generics
                                     // - Internal calls
+
+                                    // Copying arguments to stack
+                                    for arg in arguments {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);                                         
+                                        match &arg.resolved {
+                                            Some(n) => match evm_block.duplicate_stack_name(n) {
+                                                Err(e) => panic!("{}", e),
+                                                _ => (),
+                                            },
+                                            None => panic!("Argument name was not resolved"),
+                                        }
+                                    }
+
+                                    let args_types: Vec<String> = arguments
+                                        .iter()
+                                        .map(|arg| arg.type_reference.clone().unwrap())
+                                        .collect();
 
                                     if ctx.function_declarations.contains_key(qualified_name) {
                                         let signature = match ctx.get_function(qualified_name) {
@@ -107,37 +253,24 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 "Internal error: Unable to retrieve function"
                                             ),
                                         };
-                                        let mut args: Vec<String> = Vec::new();
-                                        println!("Resolving arguments {:?}", arguments);
-                                        for arg in arguments {
-                                            match &arg.resolved {
-                                                Some(n) => args.push(n.to_string()),
-                                                None => panic!("Argument name was not resolved"),
-                                            }
-                                        }
-                                        // Precompiled or external function
-                                        blk.call(signature, args);
-                                    } else if ctx.inline_generics.contains_key(&name.unresolved) {
-                                        // Copying arguments
-                                        for arg in arguments {
-                                            match &arg.resolved {
-                                                Some(n) => match blk.duplicate_stack_name(n) {
-                                                    Err(e) => panic!("{}", e),
-                                                    _ => (),
-                                                },
-                                                None => panic!("Argument name was not resolved"),
-                                            }
-                                        }
 
+                                        // Precompiled or external function
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        evm_block.call(signature, args_types);
+                                    } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
-                                        let f = ctx.inline_generics.get(&name.unresolved).unwrap();
-                                        let args: Vec<String> = arguments
-                                            .iter()
-                                            .map(|arg| arg.resolved.clone().unwrap())
-                                            .collect();
-                                        match f(&mut blk, args) {
-                                            Ok(v) => v,
+
+                                        let block_generator =
+                                            ctx.inline_generics.get(&name.unresolved).unwrap();
+                                        let new_blocks =
+                                            block_generator(&mut ctx, &mut evm_block, args_types);
+                                        match new_blocks {
+                                            Ok(new_blocks) => {
+                                                for block in new_blocks {
+                                                    ret.push(block);
+                                                }
+                                            }
                                             Err(e) => {
                                                 panic!("Error in external call: {}", e);
                                             }
@@ -175,13 +308,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 _ => panic!("Could not resolve SSA qualified name"),
                                             };
                                             let payload = data.clone().into_bytes();
-                                            code_builder.data.push((ssa_name, payload));
+                                            code_builder.ir.data.push((ssa_name, payload));
+
+                                            // TODO: Load data from code into memory
+                                            // TODO: We need a way to reference the data section
                                             todo!()
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
-                                            blk.push(value.to_bytes_unpadded());
-                                            match blk.register_stack_name(ssa_name) {
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                            evm_block.push(value.to_bytes_unpadded());
+                                            match evm_block.register_stack_name(ssa_name) {
                                                 Err(_) => {
                                                     panic!("Failed to register SSA stack name.")
                                                 }
@@ -200,28 +337,350 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     }
                                 }
-                                Operation::Return(ref value) => {
-                                    match value {
-                                        Some(_value) => {
-                                            todo!();
-                                            // TODO: write return to the stack
-                                            // blk.r#return();
-                                        }
-                                        None => {
-                                            blk.push([0x00].to_vec());
-                                            blk.dup1();
-                                            blk.r#return();
-                                        }
+                                Operation::ResolveSymbol { ref symbol } => {
+                                    let source = match &symbol.resolved {
+                                        Some(v) => v,
+                                        None => panic!("Unresolved symbol: {:?}", symbol),
+                                    };
+                                    let dest = match &instr.ssa_name {
+                                        Some(v) => match &v.resolved {
+                                            Some(x) => x,
+                                            _ => panic!("Alias symbol name was unresolved."),
+                                        },
+                                        _ => panic!("Alias with no SSA name are not supported"),
+                                    };
+
+                                    if let Err(e) = evm_block.register_alias(source, dest) {
+                                        panic!("Failed registering alias: {:?}", e);
                                     }
                                 }
+                                Operation::StateStore {
+                                    ref address,
+                                    ref value,
+                                } => {
+                                    // TODO: Ensure that we used resolved address name
+                                    let binding = &self.state_layout.get(&address.name.unresolved);
+                                    let state = match binding {
+                                        Some(v) => v,
+                                        None => panic!(
+                                            "{}",
+                                            format!(
+                                                "Unable to find state {}",
+                                                address.name.unresolved
+                                            )
+                                        ),
+                                    };
+
+                                    let address = state.address_offset;
+
+                                    let value_name = match &value.resolved {
+                                        Some(v) => v,
+                                        None => {
+                                            panic!("{}", format!("Unable to resolve {:?}", value))
+                                        }
+                                    };
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    if let Err(e) = evm_block.duplicate_stack_name(value_name) {
+                                        panic!("Unable to resolve value to be stored: {:?}", e);
+                                    }
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.push_u256(address);
+                                    evm_block.external_sstore();
+                                }
+
+                                Operation::StateLoad {
+                                    ref address,
+                                    ref value,
+                                } => {
+                                    // TODO: Ensure that we used resolved address name
+                                    let binding = &self.state_layout.get(&address.name.unresolved);
+                                    let state = match binding {
+                                        Some(v) => v,
+                                        None => panic!(
+                                            "{}",
+                                            format!(
+                                                "Unable to find state {}",
+                                                address.name.unresolved
+                                            )
+                                        ),
+                                    };
+
+                                    let address = state.address_offset;
+
+                                    let value_name = match &value.resolved {
+                                        Some(v) => v,
+                                        None => {
+                                            panic!("{}", format!("Unable to resolve {:?}", value))
+                                        }
+                                    };
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.push_u256(address);
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.external_sload();
+                                    evm_block.register_stack_name(value_name);
+                                }
+                                Operation::Return(ref _value) => {
+                                    // Assumes that the next element on the stack is return pointer
+                                    // TODO: Pop all elements that were not used yet.
+                                    // TODO: Push value if exists and swap1, then jump
+
+                                    while evm_block.scope.stack_counter > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        evm_block.pop();
+                                    }
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.jump();
+                                }
+                                Operation::CallStaticFunction {
+                                    // TODO: Poor name
+                                    ref name,
+                                    owner: _,
+                                    ref arguments,
+                                } => {
+                                    if arguments.len() > 0 {
+                                        // TODO: Pack data
+                                        unimplemented!();
+                                    }
+                                    let name = match &name.resolved {
+                                        Some(n) => n,
+                                        None => {
+                                            panic!("Unable to resolve name {:?}", name.unresolved)
+                                        }
+                                    };
+
+                                    // TODO: Assumes that a static call just produces the Keccak of the name
+                                    // The "correct" to do would be to make this spec dependant
+                                    let hash = Keccak256::digest(name);
+                                    let mut selector = Vec::new();
+                                    selector.extend_from_slice(&hash[..4]);
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.push(selector);
+                                }
+                                Operation::IsEqual {
+                                    ref left,
+                                    ref right,
+                                } => {
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    match &left.resolved {
+                                        Some(l) => match evm_block.duplicate_stack_name(l) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        },
+                                        None => panic!("Unresolved left hand side"),
+                                    }
+                                    match &right.resolved {
+                                        Some(r) => match evm_block.duplicate_stack_name(r) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        },
+                                        None => panic!("Unresolved left hand side"),
+                                    }
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.eq();
+                                }
+                                Operation::Switch {
+                                    // TODO: Deprecated?
+                                    ref cases,
+                                    ref on_default,
+                                } => {
+                                    for case in cases {
+                                        let label = match &case.label.resolved {
+                                            Some(l) => l,
+                                            None => panic!("Could not resolve case label"),
+                                        };
+                                        // TODO: This assumes order in cases
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        evm_block.jump_if_to(label);
+                                    }
+
+                                    let label = match &on_default.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve default label"),
+                                    };
+        
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.jump_to(label);
+                                    // unimplemented!() // Add handling for other operations here
+                                }
+                                Operation::Jump(label) => {
+                                    let label = match &label.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve default label"),
+                                    };
+
+                                    let mut pop_count = evm_block.scope.stack_counter;
+                                    let jump_args = block
+                                        .jump_required_arguments
+                                        .get(label)
+                                        .unwrap_or(&BTreeSet::new())
+                                        .clone();
+
+                                    info!("Jump args: {:?}",jump_args);
+                                    // Preserving the args to the next block
+                                    pop_count -= jump_args.len() as i32;
+
+                                    // Moving arguments
+                                    // Notice the reversing of the arguments, since positions are in relative stack
+                                    // depth and consenquently the first argument becomes the deepest (highest number)
+                                    for (i, arg) in jump_args.iter().rev().enumerate() {
+                                        let pos = pop_count+i as i32;
+                                        evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' behind {}",pos,arg, pop_count).to_string()) ;
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        match evm_block.move_stack_name(&arg, pos) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        }
+
+                                    }
+
+
+                                    while pop_count > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        evm_block.pop();
+                                        pop_count -= 1;
+                                    }
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.jump_to(label);
+                                }
+                                Operation::ConditionalJump {
+                                    ref expression,
+                                    ref on_success,
+                                    ref on_failure,
+                                } => {
+
+                                    match &expression.resolved {
+                                        Some(name) => evm_block.duplicate_stack_name(&name),
+                                        None => panic!("Expression does not have a SSA name"),
+                                    };
+
+                                    let mut pop_count = evm_block.scope.stack_counter;
+
+                                    let success_label = match &on_success.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve on_success label"),
+                                    };
+
+                                    let failure_label = match &on_failure.resolved {
+                                        Some(l) => l,
+                                        None => panic!("Could not resolve on_failure label"),
+                                    };
+                                    // TODO: Fix this such that it is done properly
+
+                                    let success_jump_args = block
+                                        .jump_required_arguments
+                                        .get(success_label)
+                                        .unwrap_or(&BTreeSet::new())
+                                        .clone();
+                                    let failure_jump_args = block
+                                        .jump_required_arguments
+                                        .get(failure_label)
+                                        .unwrap_or(&BTreeSet::new())
+                                        .clone();
+
+                                    info!("Jump args 2: {:?}",success_jump_args);
+
+                                    if !success_jump_args.eq(&failure_jump_args) {
+                                        info!("A: {:#?}",success_jump_args);
+                                        info!("B: {:#?}",failure_jump_args);
+
+                                        panic!("Block termination must require same number of subsequent variable dependencies.");
+                                    }
+
+
+                                    // Preserving the args to the next block and the condition                                    
+                                    pop_count -= success_jump_args.len()  as i32;
+                                    assert!(pop_count>=0);
+
+                                    // Putting all arguments on the stack and preparing to pop before jumping
+                                    // Notice the reversing of the arguments, since positions are in relative stack
+                                    // depth and consenquently the first argument becomes the deepest (highest number)
+                                    for (i, arg) in success_jump_args.iter().rev().enumerate() {
+                                        let pos = pop_count+i as i32;
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);                                         
+                                        evm_block.set_next_instruction_comment(format!("Moving argument {} '{}' to {}",i, arg, pos).to_string()) ;
+                                        //assert_eq!(pos, evm_block.scope.stack_counter+1 - (success_jump_args.len() - i) as i32);
+
+                                        match evm_block.move_stack_name(&arg, pos) {
+                                            Ok(()) => (),
+                                            Err(e) => panic!("{:#?}", e),
+                                        }
+                                    }
+
+                                    // Making room for the condition
+                                    assert!(pop_count>0);
+                                    pop_count-= 1;
+
+                                    if pop_count > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        evm_block.set_next_instruction_comment(format!("Preserving jump condition and preparing stack deletion {}", pop_count).to_string());
+                                        evm_block.swap(pop_count);
+                                    }
+
+                                    while pop_count > 0 {
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                        evm_block.pop();
+                                        pop_count -= 1;
+                                    }
+
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.jump_if_to(success_label);
+
+                                    // TODO: manage stack
+                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize); 
+                                    evm_block.jump_to(failure_label);
+                                }
+                                Operation::TerminatingRef (_) => {
+                                    // Ignore terminating ref as this will just be pop at the end of the block.
+                                }
                                 _ => {
-                                    println!("Unhandled instruction: {:#?}", instr);
+                                    info!("Unhandled instruction: {:#?}", instr);
                                     unimplemented!() // Add handling for other operations here
+                                }
+                            }
+
+                            // Handling SSA
+                            if let Some(ssa_name) = &instr.ssa_name {
+                                let ssa_name = match &ssa_name.resolved {
+                                    Some(x) => x,
+                                    _ => panic!("SSA symbol name was unresolved."),
+                                };
+
+                                match instr.operation {
+                                    Operation::ResolveSymbol { symbol: _ }
+                                    | Operation::StateStore {
+                                        address: _,
+                                        value: _,
+                                    }
+                                    | Operation::StateLoad {
+                                        address: _,
+                                        value: _,
+                                    }
+                                    | Operation::Literal {
+                                        data: _,
+                                        typename: _,
+                                    } => (), // Literals are handled in the first match statement
+                                    _ => {
+                                        match evm_block.register_stack_name(ssa_name) {
+                                        Err(_) => {
+                                            panic!(
+                                                "Failed to register SSA stack name: {}.",
+                                                ssa_name
+                                            );
+                                        }
+                                        _ => (),
+                                    }
+                                    }
                                 }
                             }
                         }
 
-                        ret.push(blk);
+                        ret.push(evm_block);
                     }
 
                     ret
@@ -231,11 +690,13 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         Ok(0)
     }
 
-    pub fn build_executable(&mut self) -> Result<Vec<u8>, String> {
+    pub fn build_executable(&mut self) -> Result<EvmExecutable, String> {
+        self.build_state_layout()?;
+
         self.write_function_definitions_to_module()?;
 
         self.builder.finalize_blocks();
-        println!("{}", self.builder.generate_evm_assembly());
+        info!("{}", self.builder.generate_evm_assembly());
         Ok(self.builder.build())
     }
 }

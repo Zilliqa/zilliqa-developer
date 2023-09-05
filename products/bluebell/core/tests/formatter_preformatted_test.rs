@@ -4,14 +4,14 @@ mod tests {
     use bluebell::formatter::BluebellFormatter;
     use bluebell::parser::lexer;
     use bluebell::parser::lexer::Lexer;
+    use bluebell::parser::lexer::SourcePosition;
     use bluebell::parser::parser;
-    use bluebell::ParserError;
-    use bluebell::*;
+    use bluebell::parser::ParserError;
+
     use diffy::{create_patch, PatchFormatter};
     use std::fs;
     use std::fs::File;
     use std::io::Read;
-    use std::process::Command;
 
     fn strip_comments(input: &str) -> String {
         let re = regex::Regex::new(r"[ ]*\(\*([^*]|\*+[^*)])*\*+\)\n*").unwrap();
@@ -52,11 +52,11 @@ mod tests {
                 formatted == script
             }
             Err(error) => {
-                let ret = error.clone();
+                let _ret = error.clone();
                 let message = format!("Syntax error {:?}", error);
-                let mut pos: Vec<usize> = [].to_vec();
+                let mut pos: Vec<SourcePosition> = [].to_vec();
                 error.map_location(|l| {
-                    pos.push(l);
+                    pos.push(l.clone());
                     l
                 });
 
@@ -75,7 +75,7 @@ mod tests {
                             line_start = n + 1;
                         }
                     }
-                    if !should_stop && n == pos[0] {
+                    if !should_stop && n == pos[0].position {
                         should_stop = true;
                     }
 
@@ -102,7 +102,7 @@ mod tests {
                         char_counter + format!("Line {},{}:", line_counter, char_counter).len()
                     )
                 );
-                println!("{}", "^".repeat(pos[1] - pos[0]));
+                println!("{}", "^".repeat(pos[1].position - pos[0].position));
 
                 let my_error = ParserError {
                     message,

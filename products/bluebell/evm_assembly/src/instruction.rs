@@ -1,15 +1,32 @@
 use evm::Opcode;
 
 #[derive(Debug, Clone)]
+pub struct EvmSourcePosition {
+    pub start: usize,
+    pub end: usize,
+    pub line: usize,
+    pub column: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct RustPosition {
+    pub filename: String,
+    pub line: usize,
+}
+
+#[derive(Debug, Clone)]
 pub struct EvmInstruction {
-    pub position: Option<usize>,
+    pub position: Option<u32>,
     pub opcode: Opcode,
     pub arguments: Vec<u8>,
 
     pub unresolved_label: Option<String>,
 
-    pub stack_size: usize, // The number of elements on the stack since the start of the block before this instruction is executed
+    pub stack_size: i32, // The number of elements on the stack since the start of the block before this instruction is executed
     pub is_terminator: bool,
+    pub comment: Option<String>,
+    pub source_position: Option<EvmSourcePosition>,
+    pub rust_position: Option<RustPosition>,
 }
 
 impl EvmInstruction {
@@ -24,7 +41,7 @@ impl EvmInstruction {
         Some(u64::from_be_bytes(buf))
     }
 
-    pub fn u64_to_arg_big_endian(&mut self, value: usize) {
+    pub fn u32_to_arg_big_endian(&mut self, value: u32) {
         let bytes = value.to_be_bytes();
         let mut leading_zeros = 0;
         for byte in &bytes {
@@ -37,16 +54,16 @@ impl EvmInstruction {
 
         let argument_size = self.expected_args_length();
 
-        if leading_zeros == 8 {
+        if leading_zeros == 4 {
             // If the u64 value is zero, we still need to ensure that the argument size is correct
-            let leading_zero_bytes = argument_size - 8;
+            let leading_zero_bytes = argument_size - 4;
             if leading_zero_bytes > 0 {
                 self.arguments = vec![0; leading_zero_bytes];
             } else {
                 self.arguments = vec![];
             }
         } else {
-            let actual_size = 8 - leading_zeros;
+            let actual_size = 4 - leading_zeros;
             if actual_size > argument_size {
                 // If the actual size is greater than the expected size, remove leading zeros
                 self.arguments = bytes[leading_zeros..].to_vec();

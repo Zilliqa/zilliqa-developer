@@ -70,6 +70,12 @@ pub trait IrPass {
         con_type: &mut ConcreteType,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
+    fn visit_contract_field(
+        &mut self,
+        mode: TreeTraversalMode,
+        function_kind: &mut ContractField,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String>;
     fn visit_function_kind(
         &mut self,
         mode: TreeTraversalMode,
@@ -82,10 +88,21 @@ pub trait IrPass {
         con_function: &mut ConcreteFunction,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
+
+    fn visit_case_clause(
+        &mut self,
+        mode: TreeTraversalMode,
+        con_function: &mut CaseClause,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String>;
     fn visit_primitives(
+        // TODO Remove
         &mut self,
         mode: TreeTraversalMode,
         primitives: &mut IntermediateRepresentation,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
+
+    fn initiate(&mut self);
+    fn finalize(&mut self);
 }

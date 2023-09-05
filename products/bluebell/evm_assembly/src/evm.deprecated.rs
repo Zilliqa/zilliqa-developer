@@ -82,8 +82,6 @@ pub fn evm_test() {
         Vec::new(),
     );
 
-    println!("exit_reason: {:?}", exit_reason);
-    println!("Finished: {:?}", result);
     // Make sure the execution succeeded.
     // assert!(exit_reason == ExitReason::Succeed(ExitSucceed::Returned));
 

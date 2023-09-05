@@ -2,6 +2,8 @@ use crate::constants::NAMESPACE_SEPARATOR;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::pass_executor::PassExecutor;
+use crate::intermediate_representation::primitives::CaseClause;
+use crate::intermediate_representation::primitives::ContractField;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -9,6 +11,7 @@ use crate::intermediate_representation::primitives::{
     VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
+use log::info;
 
 pub struct CollectTypeDefinitionsPass {
     namespace_stack: Vec<String>,
@@ -23,54 +26,6 @@ impl CollectTypeDefinitionsPass {
             current_namespace: None,
             current_type: None,
         }
-    }
-
-    fn resolve_qualified_name(
-        &self,
-        basename: &String,
-        symbol_table: &mut SymbolTable,
-    ) -> Option<String> {
-        match &self.current_namespace {
-            None => (),
-            Some(namespace) => {
-                let mut namespaces = namespace.split(NAMESPACE_SEPARATOR).collect::<Vec<&str>>();
-
-                while !namespaces.is_empty() {
-                    let full_name = format!(
-                        "{}{}{}",
-                        namespaces.join(NAMESPACE_SEPARATOR),
-                        NAMESPACE_SEPARATOR,
-                        basename
-                    );
-
-                    let full_name = if let Some(aliased_name) = symbol_table.aliases.get(&full_name)
-                    {
-                        aliased_name
-                    } else {
-                        &full_name
-                    };
-
-                    if let Some(_) = symbol_table.typename_of(full_name) {
-                        return Some(full_name.to_string());
-                    }
-
-                    // Remove the last level of the namespace
-                    namespaces.pop();
-                }
-            }
-        }
-
-        let lookup = if let Some(aliased_name) = symbol_table.aliases.get(basename) {
-            aliased_name
-        } else {
-            basename
-        };
-
-        if let Some(_) = symbol_table.typename_of(lookup) {
-            return Some(lookup.to_string());
-        }
-
-        None
     }
 
     fn push_namespace(&mut self, namespace: String) {
@@ -89,6 +44,9 @@ impl CollectTypeDefinitionsPass {
 }
 
 impl IrPass for CollectTypeDefinitionsPass {
+    fn initiate(&mut self) {}
+    fn finalize(&mut self) {}
+
     fn visit_concrete_type(
         &mut self,
         _mode: TreeTraversalMode,
@@ -144,6 +102,22 @@ impl IrPass for CollectTypeDefinitionsPass {
                 self.pop_namespace();
             }
         }
+        Ok(TraversalResult::SkipChildren)
+    }
+
+    fn visit_contract_field(
+        &mut self,
+        _mode: TreeTraversalMode,
+        field: &mut ContractField,
+        symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        let _ = field.namespace.visit(self, symbol_table)?;
+        self.push_namespace(field.namespace.qualified_name()?);
+
+        field.variable.visit(self, symbol_table)?;
+        field.initializer.visit(self, symbol_table)?;
+
+        self.pop_namespace();
         Ok(TraversalResult::SkipChildren)
     }
 
@@ -226,11 +200,32 @@ impl IrPass for CollectTypeDefinitionsPass {
     fn visit_concrete_function(
         &mut self,
         _mode: TreeTraversalMode,
-        _fnc: &mut ConcreteFunction,
-        _symbol_table: &mut SymbolTable,
+        fnc: &mut ConcreteFunction,
+        symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        // TODO: collect type of function
-        Ok(TraversalResult::Continue)
+        let _ = fnc.namespace.visit(self, symbol_table)?;
+        self.push_namespace(fnc.namespace.qualified_name()?);
+
+        let _ = fnc.name.visit(self, symbol_table)?;
+        let qualified_name = fnc.name.qualified_name()?;
+
+        let mut args_types: Vec<String> = Vec::new();
+        for arg in fnc.arguments.iter_mut() {
+            arg.visit(self, symbol_table)?;
+            args_types.push(arg.typename.qualified_name()?);
+        }
+
+        // TODO: Get return type from body if not set in the definition
+        fnc.body.visit(self, symbol_table)?;
+
+        // Declaring
+        let return_type = "TODO";
+        symbol_table.declare_function_type(&qualified_name, &args_types, return_type)?;
+
+        self.current_type = None;
+        self.pop_namespace();
+
+        Ok(TraversalResult::SkipChildren)
     }
 
     fn visit_symbol_kind(
@@ -259,10 +254,16 @@ impl IrPass for CollectTypeDefinitionsPass {
                             format!("{}{}{}", namespace, NAMESPACE_SEPARATOR, symbol.unresolved)
                                 .to_string();
                         symbol.resolved = Some(typename.clone());
+                    } else {
+                        symbol.resolved = Some(symbol.unresolved.clone());
                     }
                 } else if let Some(resolved_name) =
-                    self.resolve_qualified_name(&symbol.unresolved, symbol_table)
+                    symbol_table.resolve_qualified_name(&symbol.unresolved, &self.current_namespace)
                 {
+                    // TODO: Consider whether this is needed.
+                    // It appears that currently this is only triggered
+                    // by builtin type defintions which really ought to have
+                    // is_definition = true
                     symbol.resolved = Some(resolved_name);
                 }
             }
@@ -280,8 +281,9 @@ impl IrPass for CollectTypeDefinitionsPass {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => {
-                println!("Types: {:#?}\n\n", symbol_table.type_of_table);
-                println!("Aliases: {:#?}\n\n", symbol_table.aliases);
+                info!("Types: {:#?}\n\n", symbol_table.type_of_table);
+                info!("Aliases: {:#?}\n\n", symbol_table.aliases);
+                panic!("Not handled.");
             }
         }
         Ok(TraversalResult::Continue)
@@ -327,6 +329,14 @@ impl IrPass for CollectTypeDefinitionsPass {
         &mut self,
         _mode: TreeTraversalMode,
         _block: &mut FunctionBlock,
+        _symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        Ok(TraversalResult::Continue)
+    }
+    fn visit_case_clause(
+        &mut self,
+        _mode: TreeTraversalMode,
+        _con_function: &mut CaseClause,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)

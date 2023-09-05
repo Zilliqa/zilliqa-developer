@@ -3,8 +3,8 @@ use crate::types::{EvmType, EvmTypeValue};
 #[derive(Debug, Clone)]
 pub struct EvmFunctionSignature {
     pub name: String,
-    arguments: Vec<EvmType>,
-    return_type: EvmType,
+    pub arguments: Vec<EvmType>,
+    pub return_type: EvmType,
 
     pub external_address: Option<u32>,
 }

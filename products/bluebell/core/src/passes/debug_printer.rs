@@ -1,6 +1,8 @@
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::pass_executor::PassExecutor;
+use crate::intermediate_representation::primitives::CaseClause;
+use crate::intermediate_representation::primitives::ContractField;
 use crate::intermediate_representation::primitives::Instruction;
 use crate::intermediate_representation::primitives::{
     ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
@@ -8,12 +10,21 @@ use crate::intermediate_representation::primitives::{
     VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
+use log::info;
 
 pub struct DebugPrinter {
     script: String,
 }
 
 impl IrPass for DebugPrinter {
+    fn initiate(&mut self) {
+        self.script = "".to_string();
+    }
+
+    fn finalize(&mut self) {
+        info!("{}", self.script);
+    }
+
     fn visit_symbol_kind(
         &mut self,
         _mode: TreeTraversalMode,
@@ -35,6 +46,7 @@ impl IrPass for DebugPrinter {
             IrIndentifierKind::VirtualRegister => self.script.push_str("%"),
             IrIndentifierKind::VirtualRegisterIntermediate => self.script.push_str("%"),
             IrIndentifierKind::Memory => self.script.push_str("%"),
+            IrIndentifierKind::State => self.script.push_str("#"),
 
             IrIndentifierKind::Unknown => self.script.push_str("?"),
         }
@@ -138,8 +150,19 @@ impl IrPass for DebugPrinter {
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match operation {
+            Operation::TerminatingRef(identifier) => {
+                self.script.push_str("; unused variable ");
+                identifier.visit(self, symbol_table)?;
+            }
             Operation::Noop => {
                 self.script.push_str("noop");
+            }
+            Operation::Switch { cases, on_default } => {
+                self.script.push_str("switch ");
+                for case in cases.iter_mut() {
+                    case.visit(self, symbol_table)?;
+                }
+                on_default.visit(self, symbol_table)?;
             }
             Operation::Jump(identifier) => {
                 self.script.push_str("jmp ");
@@ -157,8 +180,17 @@ impl IrPass for DebugPrinter {
                 self.script.push_str(" ");
                 on_failure.visit(self, symbol_table)?;
             }
-            Operation::MemLoad => self.script.push_str("load [TODO]"),
-            Operation::MemStore => self.script.push_str("store [TODO]"),
+            Operation::MemLoad => self.script.push_str("mload [TODO]"),
+            Operation::MemStore => self.script.push_str("mstore [TODO]"),
+            Operation::StateLoad {
+                address: _,
+                value: _,
+            } => self.script.push_str("sstore [TODO]"),
+            Operation::StateStore {
+                address: _,
+                value: _,
+            } => self.script.push_str("sstore [TODO]"),
+
             Operation::IsEqual { left, right } => {
                 self.script.push_str("eq ");
                 left.visit(self, symbol_table)?;
@@ -203,7 +235,9 @@ impl IrPass for DebugPrinter {
                 owner: _,
                 arguments: _,
             } => unimplemented!(),
-            Operation::ResolveSymbol { symbol: _ } => unimplemented!(),
+            Operation::ResolveSymbol { symbol } => {
+                symbol.visit(self, symbol_table)?;
+            }
             Operation::Literal { data, typename } => {
                 typename.visit(self, symbol_table)?;
                 self.script.push_str(" ");
@@ -227,7 +261,9 @@ impl IrPass for DebugPrinter {
                         self.script.push_str(" ");
                         r.visit(self, symbol_table)?;
                     }
-                    &mut None => todo!(),
+                    &mut None => {
+                        self.script.push_str(" void");
+                    }
                 };
             }
             Operation::Revert(arg) => {
@@ -275,7 +311,37 @@ impl IrPass for DebugPrinter {
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         block.name.visit(self, symbol_table)?;
-        self.script.push_str(":\n");
+        self.script.push_str(":");
+        self.script.push_str("\n    ;; arguments:");
+        for arg in &block.block_arguments {
+            self.script.push_str(" ");
+            self.script.push_str(&arg);
+            self.script.push_str(",");
+        }
+        self.script.push_str("\n    ;; enters_from:");
+        for arg in &block.enters_from {
+            self.script.push_str(" ");
+            self.script.push_str(&arg);
+            self.script.push_str(",");
+        }
+        self.script.push_str("\n    ;; exits_to:");
+        for arg in &block.exits_to {
+            self.script.push_str(" ");
+            self.script.push_str(&arg);
+            self.script.push_str(",");
+        }
+
+        self.script.push_str("\n    ;; jump args:");
+        for (name, args) in &block.jump_required_arguments {
+            self.script.push_str("\n    ;;   * ");
+            self.script.push_str(&name);
+            for arg in args {
+                self.script.push_str("\n    ;;        - ");
+                self.script.push_str(&arg);
+            }
+        }
+
+        self.script.push_str("\n");
         for instr in block.instructions.iter_mut() {
             instr.visit(self, symbol_table)?;
         }
@@ -326,6 +392,17 @@ impl IrPass for DebugPrinter {
             }
         }
         Ok(TraversalResult::SkipChildren)
+    }
+
+    fn visit_contract_field(
+        &mut self,
+        _mode: TreeTraversalMode,
+        _function_kind: &mut ContractField,
+        _symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        self.script
+            .push_str(";; TODO: field emitter not implemented!\n");
+        Ok(TraversalResult::Continue)
     }
 
     fn visit_function_kind(
@@ -390,13 +467,21 @@ impl IrPass for DebugPrinter {
         match mode {
             TreeTraversalMode::Enter => {
                 // TODO: Emit scilla version etc
-                // unimplemented!()
+                unimplemented!()
             }
-            TreeTraversalMode::Exit => {
-                println!("{}", self.script);
-            }
+            TreeTraversalMode::Exit => {}
         }
+
         Ok(TraversalResult::Continue)
+    }
+
+    fn visit_case_clause(
+        &mut self,
+        _mode: TreeTraversalMode,
+        _con_function: &mut CaseClause,
+        _symbol_table: &mut SymbolTable,
+    ) -> Result<TraversalResult, String> {
+        unimplemented!()
     }
 }
 

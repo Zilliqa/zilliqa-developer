@@ -1,13 +1,57 @@
 use primitive_types::U256;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Value;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EvmTypeValue {
     Uint32(u32),
     Uint64(u64),
     Uint256(U256),
+    String(String),
     // Address(Address),
     // Add more types as needed
     StackReference(u32),
+}
+
+impl Serialize for EvmTypeValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // TODO: Update to match whatever is the standard for Ethereum
+        match self {
+            EvmTypeValue::Uint32(value) => serializer.serialize_u32(*value),
+            EvmTypeValue::Uint64(value) => serializer.serialize_u64(*value),
+            EvmTypeValue::Uint256(value) => {
+                let s = value.to_string();
+                serializer.serialize_str(&s)
+            }
+            EvmTypeValue::String(value) => serializer.serialize_str(value),
+            EvmTypeValue::StackReference(value) => serializer.serialize_u32(*value),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for EvmTypeValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // TODO: Update to match whatever is the standard for Ethereum
+        let value: Value = Deserialize::deserialize(deserializer)?;
+
+        match value {
+            Value::Number(num) => {
+                if num.is_u64() {
+                    Ok(EvmTypeValue::Uint64(num.as_u64().unwrap()))
+                } else {
+                    Err(serde::de::Error::custom("Invalid integer value"))
+                }
+            }
+            Value::String(s) => Ok(EvmTypeValue::String(s)),
+            _ => Err(serde::de::Error::custom("Unsupported type")),
+        }
+    }
 }
 
 impl EvmTypeValue {
@@ -26,6 +70,7 @@ impl EvmTypeValue {
         match self {
             EvmTypeValue::Uint32(value) => value.to_be_bytes().to_vec(),
             EvmTypeValue::Uint64(value) => value.to_be_bytes().to_vec(),
+            EvmTypeValue::String(value) => value.as_bytes().to_vec(),
             // EvmTypeValue::Uint256(value) => pad_byte_array(value.to_big_endian(/* &mut [u8] */).to_vec()),
             // TODO EvmTypeValue::Address(value) => pad_byte_array(value.as_bytes().to_vec()),
             // Handle other types here

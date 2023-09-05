@@ -1,25 +1,11 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
-    use bluebell::contract_executor::UnsafeContractExecutor;
-    use bluebell::intermediate_representation::emitter::IrEmitter;
-    use bluebell::intermediate_representation::symbol_table::SymbolTable;
-    use bluebell::llvm_ir_generator::LlvmIrGenerator;
-    use bluebell::name_generator::NameGenerator;
-    use bluebell::pass_executor::PassExecutor;
-    use bluebell::passes::annotate_base_types::AnnotateBaseTypes;
-    use bluebell::passes::collect_type_definitions::CollectTypeDefinitionsPass;
-    use bluebell::primitives_debug_printer::DebugPrinter;
-    use bluebell::support::llvm::UnsafeLlvmTestExecutor;
-    use core::ffi::c_char;
-    use core::ffi::CStr;
-    use inkwell::context::Context;
-    use inkwell::targets::{InitializationConfig, Target};
 
-    use bluebell::parser;
     use bluebell::parser::lexer;
     use bluebell::parser::lexer::Lexer;
-    use bluebell::ParserError;
+    use bluebell::parser::parser;
+    use bluebell::parser::ParserError;
 
     use std::fs;
     use std::fs::File;
@@ -37,7 +23,7 @@ mod tests {
         assert!(errors.len() == 0);
 
         match parser.parse(&mut errors, lexer) {
-            Ok(ast) => {
+            Ok(_ast) => {
                 /* TODO: Fix
                 let mut name_generator = NameGenerator::new();
 
@@ -226,7 +212,6 @@ mod tests {
             let path_str = path.to_string_lossy().into_owned();
 
             // Run the .scilla file using your Scilla execution command
-            println!("- Compiling to LLVM IR {}", path_str);
             let ret = parse_and_emit(path_str);
             success = ret && success;
         }

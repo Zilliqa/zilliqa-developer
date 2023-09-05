@@ -194,6 +194,9 @@ pub struct Lexer<'input> {
     line: usize,
     /// The current character number within the current line being tokenized.
     character: usize,
+
+    /// The last position the lexer visited
+    last_position: usize,
 }
 
 impl<'input> Lexer<'input> {
@@ -201,22 +204,63 @@ impl<'input> Lexer<'input> {
         Lexer {
             chars: input.char_indices().peekable(),
             document: input,
-            line: 1,
-            character: 1,
+            line: 0, // Note: We use machine indices, not human indices
+            character: 0,
+            last_position: 0,
         }
     }
 }
 
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Default)]
+pub struct SourcePosition {
+    pub position: usize,
+    pub line: usize,
+    pub column: usize,
+}
+
+impl SourcePosition {
+    pub fn is_valid(&self) -> bool {
+        self.position < (usize::MAX >> 1)
+    }
+    pub fn start_position() -> Self {
+        Self {
+            position: 0,
+            line: 0,
+            column: 0,
+        }
+    }
+    pub fn invalid_position() -> Self {
+        Self {
+            position: usize::MAX,
+            line: usize::MAX,
+            column: usize::MAX,
+        }
+    }
+    pub fn with_end(&self, new_position: usize) -> Self {
+        let mut ret = self.clone();
+        ret.column += new_position - ret.position;
+        ret.position = new_position;
+        ret
+    }
+}
+
 impl<'input> Iterator for Lexer<'input> {
-    type Item = Spanned<Token<&'input str>, usize, ParseError>;
+    type Item = Spanned<Token<&'input str>, SourcePosition, ParseError>;
 
     // <(usize, Token, usize, usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some((start, ch)) = self.chars.next() {
-            let (token, end): (Token<&'input str>, usize) = {
+            let source_position = SourcePosition {
+                position: start,
+                line: self.line,
+                column: self.character,
+            };
+
+            let (token, end): (Token<&'input str>, SourcePosition) = {
                 let look_ahead = self.chars.peek().map(|(_, next_ch)| *next_ch);
-                self.character += ch.len_utf8();
+                self.character += start - self.last_position;
+                self.last_position = start;
 
                 let next_is_alpha_num_under = look_ahead
                     .map(|c| c.is_alphanumeric() || c == '_')
@@ -232,20 +276,38 @@ impl<'input> Iterator for Lexer<'input> {
                     continue;
                 } else if ch == '=' && look_ahead == Some('>') {
                     self.chars.next();
-                    (Token::DoubleArrow, start + 2 * ch.len_utf8())
+                    (
+                        Token::DoubleArrow,
+                        source_position.with_end(start + 2 * ch.len_utf8()),
+                    )
                 } else if ch == '-' && look_ahead == Some('>') {
                     self.chars.next();
-                    (Token::Arrow, start + 2 * ch.len_utf8())
+                    (
+                        Token::Arrow,
+                        source_position.with_end(start + 2 * ch.len_utf8()),
+                    )
                 } else if ch == '-' && !next_is_numeric {
-                    (Token::Minus, start + ch.len_utf8())
+                    (
+                        Token::Minus,
+                        source_position.with_end(start + ch.len_utf8()),
+                    )
                 } else if ch == '<' && look_ahead == Some('-') {
                     self.chars.next();
-                    (Token::LeftArrow, start + 2 * ch.len_utf8())
+                    (
+                        Token::LeftArrow,
+                        source_position.with_end(start + 2 * ch.len_utf8()),
+                    )
                 } else if ch == ':' && look_ahead == Some('=') {
                     self.chars.next();
-                    (Token::ColonEquals, start + 2 * ch.len_utf8())
+                    (
+                        Token::ColonEquals,
+                        source_position.with_end(start + 2 * ch.len_utf8()),
+                    )
                 } else if ch == '_' && !next_is_alpha_num_under {
-                    (Token::Underscore, start + ch.len_utf8())
+                    (
+                        Token::Underscore,
+                        source_position.with_end(start + ch.len_utf8()),
+                    )
                 } else if ch == '(' && look_ahead == Some('*') {
                     // Consume comment
 
@@ -269,23 +331,59 @@ impl<'input> Iterator for Lexer<'input> {
                     // let s = &self.document[start + 2..end - 1]; // +2: skip `(*`
                     // (Token::Comment(s), end)
                 } else {
-                    let (token, end): (Token<&'input str>, usize) = match ch {
-                        '+' => (Token::Plus, start + ch.len_utf8()),
-                        '*' => (Token::Asterisk, start + ch.len_utf8()),
-                        ';' => (Token::Semicolon, start + ch.len_utf8()),
-                        ':' => (Token::Colon, start + ch.len_utf8()),
-                        '.' => (Token::Dot, start + ch.len_utf8()),
-                        '|' => (Token::Pipe, start + ch.len_utf8()),
-                        '[' => (Token::OpenBracket, start + ch.len_utf8()),
-                        ']' => (Token::CloseBracket, start + ch.len_utf8()),
-                        '(' => (Token::OpenParen, start + ch.len_utf8()),
-                        ')' => (Token::CloseParen, start + ch.len_utf8()),
-                        '{' => (Token::OpenBrace, start + ch.len_utf8()),
-                        '}' => (Token::CloseBrace, start + ch.len_utf8()),
-                        ',' => (Token::Comma, start + ch.len_utf8()),
-                        '&' => (Token::Ampersand, start + ch.len_utf8()),
-                        '@' => (Token::At, start + ch.len_utf8()),
-                        '=' => (Token::Equals, start + ch.len_utf8()),
+                    let (token, end): (Token<&'input str>, SourcePosition) = match ch {
+                        '+' => (Token::Plus, source_position.with_end(start + ch.len_utf8())),
+                        '*' => (
+                            Token::Asterisk,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        ';' => (
+                            Token::Semicolon,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        ':' => (
+                            Token::Colon,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        '.' => (Token::Dot, source_position.with_end(start + ch.len_utf8())),
+                        '|' => (Token::Pipe, source_position.with_end(start + ch.len_utf8())),
+                        '[' => (
+                            Token::OpenBracket,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        ']' => (
+                            Token::CloseBracket,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        '(' => (
+                            Token::OpenParen,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        ')' => (
+                            Token::CloseParen,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        '{' => (
+                            Token::OpenBrace,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        '}' => (
+                            Token::CloseBrace,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        ',' => (
+                            Token::Comma,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        '&' => (
+                            Token::Ampersand,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
+                        '@' => (Token::At, source_position.with_end(start + ch.len_utf8())),
+                        '=' => (
+                            Token::Equals,
+                            source_position.with_end(start + ch.len_utf8()),
+                        ),
                         _ => {
                             let token_str: &str = &self.document[start..];
                             let mut index = 0;
@@ -302,204 +400,317 @@ impl<'input> Iterator for Lexer<'input> {
                                 token_str
                             };
 
-                            let (token, end): (Token<&'input str>, usize) = match keyword_token {
-                                KEYWORD_FORALL => {
-                                    self.chars.nth(KEYWORD_FORALL.len() - 2);
-                                    (Token::Forall, start + KEYWORD_FORALL.len())
-                                }
-                                KEYWORD_BUILTIN => {
-                                    self.chars.nth(KEYWORD_BUILTIN.len() - 2);
-                                    (Token::Builtin, start + KEYWORD_BUILTIN.len())
-                                }
-                                KEYWORD_LIBRARY => {
-                                    self.chars.nth(KEYWORD_LIBRARY.len() - 2);
-                                    (Token::Library, start + KEYWORD_LIBRARY.len())
-                                }
-                                KEYWORD_IMPORT => {
-                                    self.chars.nth(KEYWORD_IMPORT.len() - 2);
-                                    (Token::Import, start + KEYWORD_IMPORT.len())
-                                }
-                                KEYWORD_LET => {
-                                    self.chars.nth(KEYWORD_LET.len() - 2);
-                                    (Token::Let, start + KEYWORD_LET.len())
-                                }
-                                KEYWORD_IN => {
-                                    self.chars.nth(KEYWORD_IN.len() - 2);
-                                    (Token::In, start + KEYWORD_IN.len())
-                                }
-                                KEYWORD_MATCH => {
-                                    self.chars.nth(KEYWORD_MATCH.len() - 2);
-                                    (Token::Match, start + KEYWORD_MATCH.len())
-                                }
-                                KEYWORD_WITH => {
-                                    self.chars.nth(KEYWORD_WITH.len() - 2);
-                                    (Token::With, start + KEYWORD_WITH.len())
-                                }
-                                KEYWORD_END => {
-                                    self.chars.nth(KEYWORD_END.len() - 2);
-                                    (Token::End, start + KEYWORD_END.len())
-                                }
-                                KEYWORD_FUN => {
-                                    self.chars.nth(KEYWORD_FUN.len() - 2);
-                                    (Token::Fun, start + KEYWORD_FUN.len())
-                                }
-                                KEYWORD_TFUN => {
-                                    self.chars.nth(KEYWORD_TFUN.len() - 2);
-                                    (Token::Tfun, start + KEYWORD_TFUN.len())
-                                }
-                                KEYWORD_CONTRACT => {
-                                    self.chars.nth(KEYWORD_CONTRACT.len() - 2);
-                                    (Token::Contract, start + KEYWORD_CONTRACT.len())
-                                }
-                                KEYWORD_TRANSITION => {
-                                    self.chars.nth(KEYWORD_TRANSITION.len() - 2);
-                                    (Token::Transition, start + KEYWORD_TRANSITION.len())
-                                }
-                                KEYWORD_SEND => {
-                                    self.chars.nth(KEYWORD_SEND.len() - 2);
-                                    (Token::Send, start + KEYWORD_SEND.len())
-                                }
-                                KEYWORD_FIELD => {
-                                    self.chars.nth(KEYWORD_FIELD.len() - 2);
-                                    (Token::Field, start + KEYWORD_FIELD.len())
-                                }
-                                KEYWORD_ACCEPT => {
-                                    self.chars.nth(KEYWORD_ACCEPT.len() - 2);
-                                    (Token::Accept, start + KEYWORD_ACCEPT.len())
-                                }
-                                KEYWORD_EXISTS => {
-                                    self.chars.nth(KEYWORD_EXISTS.len() - 2);
-                                    (Token::Exists, start + KEYWORD_EXISTS.len())
-                                }
-                                KEYWORD_DELETE => {
-                                    self.chars.nth(KEYWORD_DELETE.len() - 2);
-                                    (Token::Delete, start + KEYWORD_DELETE.len())
-                                }
-                                KEYWORD_THROW => {
-                                    self.chars.nth(KEYWORD_THROW.len() - 2);
-                                    (Token::Throw, start + KEYWORD_THROW.len())
-                                }
-                                KEYWORD_MAP => {
-                                    self.chars.nth(KEYWORD_MAP.len() - 2);
-                                    (Token::Map, start + KEYWORD_MAP.len())
-                                }
-                                KEYWORD_SCILLA_VERSION => {
-                                    self.chars.nth(KEYWORD_SCILLA_VERSION.len() - 2);
-                                    (Token::ScillaVersion, start + KEYWORD_SCILLA_VERSION.len())
-                                }
-                                KEYWORD_TYPE => {
-                                    self.chars.nth(KEYWORD_TYPE.len() - 2);
-                                    (Token::Type, start + KEYWORD_TYPE.len())
-                                }
-                                KEYWORD_OF => {
-                                    self.chars.nth(KEYWORD_OF.len() - 2);
-                                    (Token::Of, start + KEYWORD_OF.len())
-                                }
-                                KEYWORD_AS => {
-                                    self.chars.nth(KEYWORD_AS.len() - 2);
-                                    (Token::As, start + KEYWORD_AS.len())
-                                }
-                                KEYWORD_PROCEDURE => {
-                                    self.chars.nth(KEYWORD_PROCEDURE.len() - 2);
-                                    (Token::Procedure, start + KEYWORD_PROCEDURE.len())
-                                }
-                                KEYWORD_EMP => {
-                                    self.chars.nth(KEYWORD_EMP.len() - 2);
-                                    (Token::Emp, start + KEYWORD_EMP.len())
-                                }
-                                KEYWORD_EVENT => {
-                                    self.chars.nth(KEYWORD_EVENT.len() - 2);
-                                    (Token::Event, start + KEYWORD_EVENT.len())
-                                }
-                                KEYWORD_EVENT_TYPE => {
-                                    self.chars.nth(KEYWORD_EVENT_TYPE.len() - 2);
-                                    (Token::EventType, start + KEYWORD_EVENT_TYPE.len())
-                                }
-                                _ => {
-                                    // Handle other cases here
-                                    let bystr_with_size = Regex::new(r"^ByStr[0-9]+").unwrap();
-
-                                    let signed_integer = Regex::new(r"^[+-]?[0-9]+").unwrap();
-                                    let hex_number =
-                                        Regex::new(r"^0(x|X)([a-fA-F0-9][a-fA-F0-9])*").unwrap();
-                                    let string_literal = Regex::new(r#"^"(?:\\.|[^"])*""#).unwrap();
-                                    let regular_id = Regex::new(r"^[a-z][a-zA-Z0-9_]*").unwrap();
-                                    let template_type_id =
-                                        Regex::new(r"^['][A-Z][a-zA-Z0-9_]*").unwrap();
-                                    let custom_type_id =
-                                        Regex::new(r"^[A-Z][a-zA-Z0-9_]*").unwrap();
-                                    let special_id = Regex::new(r"^[_][a-zA-Z0-9_]*").unwrap();
-
-                                    if let Some(mat) = bystr_with_size.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-
-                                        (Token::ByStrWithSize(s), end)
-                                    } else if token_str.starts_with(KEYWORD_BYSTR) {
-                                        self.chars.nth(KEYWORD_BYSTR.len() - 2);
-                                        (Token::ByStr, start + KEYWORD_BYSTR.len())
-                                    } else if let Some(mat) = hex_number.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-
-                                        (Token::HexNumber(s), end)
-                                    } else if let Some(mat) = signed_integer.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-                                        (Token::Number(s), end)
-                                    } else if let Some(mat) = string_literal.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-
-                                        (Token::StringLiteral(s), end)
-                                    } else if let Some(mat) = regular_id.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-
-                                        (Token::Identifier(s), end)
-                                    } else if let Some(mat) = template_type_id.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-
-                                        (Token::TemplateIdentifier(s), end)
-                                    } else if let Some(mat) = custom_type_id.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2);
-                                        }
-                                        (Token::CustomIdentifier(s), end)
-                                    } else if let Some(mat) = special_id.find(token_str) {
-                                        let end = start + mat.end();
-                                        let s = &self.document[start..end];
-                                        if mat.end() > 1 {
-                                            self.chars.nth(end - start - 2); // -2, because we already consumed the first char
-                                        }
-
-                                        (Token::SpecialIdentifier(s), end)
-                                    } else {
-                                        (Token::Unknown, start)
+                            let (token, end): (Token<&'input str>, SourcePosition) =
+                                match keyword_token {
+                                    KEYWORD_FORALL => {
+                                        self.chars.nth(KEYWORD_FORALL.len() - 2);
+                                        (
+                                            Token::Forall,
+                                            source_position.with_end(start + KEYWORD_FORALL.len()),
+                                        )
                                     }
-                                }
-                            };
+                                    KEYWORD_BUILTIN => {
+                                        self.chars.nth(KEYWORD_BUILTIN.len() - 2);
+                                        (
+                                            Token::Builtin,
+                                            source_position.with_end(start + KEYWORD_BUILTIN.len()),
+                                        )
+                                    }
+                                    KEYWORD_LIBRARY => {
+                                        self.chars.nth(KEYWORD_LIBRARY.len() - 2);
+                                        (
+                                            Token::Library,
+                                            source_position.with_end(start + KEYWORD_LIBRARY.len()),
+                                        )
+                                    }
+                                    KEYWORD_IMPORT => {
+                                        self.chars.nth(KEYWORD_IMPORT.len() - 2);
+                                        (
+                                            Token::Import,
+                                            source_position.with_end(start + KEYWORD_IMPORT.len()),
+                                        )
+                                    }
+                                    KEYWORD_LET => {
+                                        self.chars.nth(KEYWORD_LET.len() - 2);
+                                        (
+                                            Token::Let,
+                                            source_position.with_end(start + KEYWORD_LET.len()),
+                                        )
+                                    }
+                                    KEYWORD_IN => {
+                                        self.chars.nth(KEYWORD_IN.len() - 2);
+                                        (
+                                            Token::In,
+                                            source_position.with_end(start + KEYWORD_IN.len()),
+                                        )
+                                    }
+                                    KEYWORD_MATCH => {
+                                        self.chars.nth(KEYWORD_MATCH.len() - 2);
+                                        (
+                                            Token::Match,
+                                            source_position.with_end(start + KEYWORD_MATCH.len()),
+                                        )
+                                    }
+                                    KEYWORD_WITH => {
+                                        self.chars.nth(KEYWORD_WITH.len() - 2);
+                                        (
+                                            Token::With,
+                                            source_position.with_end(start + KEYWORD_WITH.len()),
+                                        )
+                                    }
+                                    KEYWORD_END => {
+                                        self.chars.nth(KEYWORD_END.len() - 2);
+                                        (
+                                            Token::End,
+                                            source_position.with_end(start + KEYWORD_END.len()),
+                                        )
+                                    }
+                                    KEYWORD_FUN => {
+                                        self.chars.nth(KEYWORD_FUN.len() - 2);
+                                        (
+                                            Token::Fun,
+                                            source_position.with_end(start + KEYWORD_FUN.len()),
+                                        )
+                                    }
+                                    KEYWORD_TFUN => {
+                                        self.chars.nth(KEYWORD_TFUN.len() - 2);
+                                        (
+                                            Token::Tfun,
+                                            source_position.with_end(start + KEYWORD_TFUN.len()),
+                                        )
+                                    }
+                                    KEYWORD_CONTRACT => {
+                                        self.chars.nth(KEYWORD_CONTRACT.len() - 2);
+                                        (
+                                            Token::Contract,
+                                            source_position
+                                                .with_end(start + KEYWORD_CONTRACT.len()),
+                                        )
+                                    }
+                                    KEYWORD_TRANSITION => {
+                                        self.chars.nth(KEYWORD_TRANSITION.len() - 2);
+                                        (
+                                            Token::Transition,
+                                            source_position
+                                                .with_end(start + KEYWORD_TRANSITION.len()),
+                                        )
+                                    }
+                                    KEYWORD_SEND => {
+                                        self.chars.nth(KEYWORD_SEND.len() - 2);
+                                        (
+                                            Token::Send,
+                                            source_position.with_end(start + KEYWORD_SEND.len()),
+                                        )
+                                    }
+                                    KEYWORD_FIELD => {
+                                        self.chars.nth(KEYWORD_FIELD.len() - 2);
+                                        (
+                                            Token::Field,
+                                            source_position.with_end(start + KEYWORD_FIELD.len()),
+                                        )
+                                    }
+                                    KEYWORD_ACCEPT => {
+                                        self.chars.nth(KEYWORD_ACCEPT.len() - 2);
+                                        (
+                                            Token::Accept,
+                                            source_position.with_end(start + KEYWORD_ACCEPT.len()),
+                                        )
+                                    }
+                                    KEYWORD_EXISTS => {
+                                        self.chars.nth(KEYWORD_EXISTS.len() - 2);
+                                        (
+                                            Token::Exists,
+                                            source_position.with_end(start + KEYWORD_EXISTS.len()),
+                                        )
+                                    }
+                                    KEYWORD_DELETE => {
+                                        self.chars.nth(KEYWORD_DELETE.len() - 2);
+                                        (
+                                            Token::Delete,
+                                            source_position.with_end(start + KEYWORD_DELETE.len()),
+                                        )
+                                    }
+                                    KEYWORD_THROW => {
+                                        self.chars.nth(KEYWORD_THROW.len() - 2);
+                                        (
+                                            Token::Throw,
+                                            source_position.with_end(start + KEYWORD_THROW.len()),
+                                        )
+                                    }
+                                    KEYWORD_MAP => {
+                                        self.chars.nth(KEYWORD_MAP.len() - 2);
+                                        (
+                                            Token::Map,
+                                            source_position.with_end(start + KEYWORD_MAP.len()),
+                                        )
+                                    }
+                                    KEYWORD_SCILLA_VERSION => {
+                                        self.chars.nth(KEYWORD_SCILLA_VERSION.len() - 2);
+                                        (
+                                            Token::ScillaVersion,
+                                            source_position
+                                                .with_end(start + KEYWORD_SCILLA_VERSION.len()),
+                                        )
+                                    }
+                                    KEYWORD_TYPE => {
+                                        self.chars.nth(KEYWORD_TYPE.len() - 2);
+                                        (
+                                            Token::Type,
+                                            source_position.with_end(start + KEYWORD_TYPE.len()),
+                                        )
+                                    }
+                                    KEYWORD_OF => {
+                                        self.chars.nth(KEYWORD_OF.len() - 2);
+                                        (
+                                            Token::Of,
+                                            source_position.with_end(start + KEYWORD_OF.len()),
+                                        )
+                                    }
+                                    KEYWORD_AS => {
+                                        self.chars.nth(KEYWORD_AS.len() - 2);
+                                        (
+                                            Token::As,
+                                            source_position.with_end(start + KEYWORD_AS.len()),
+                                        )
+                                    }
+                                    KEYWORD_PROCEDURE => {
+                                        self.chars.nth(KEYWORD_PROCEDURE.len() - 2);
+                                        (
+                                            Token::Procedure,
+                                            source_position
+                                                .with_end(start + KEYWORD_PROCEDURE.len()),
+                                        )
+                                    }
+                                    KEYWORD_EMP => {
+                                        self.chars.nth(KEYWORD_EMP.len() - 2);
+                                        (
+                                            Token::Emp,
+                                            source_position.with_end(start + KEYWORD_EMP.len()),
+                                        )
+                                    }
+                                    KEYWORD_EVENT => {
+                                        self.chars.nth(KEYWORD_EVENT.len() - 2);
+                                        (
+                                            Token::Event,
+                                            source_position.with_end(start + KEYWORD_EVENT.len()),
+                                        )
+                                    }
+                                    KEYWORD_EVENT_TYPE => {
+                                        self.chars.nth(KEYWORD_EVENT_TYPE.len() - 2);
+                                        (
+                                            Token::EventType,
+                                            source_position
+                                                .with_end(start + KEYWORD_EVENT_TYPE.len()),
+                                        )
+                                    }
+                                    _ => {
+                                        // Handle other cases here
+                                        let bystr_with_size = Regex::new(r"^ByStr[0-9]+").unwrap();
+
+                                        let signed_integer = Regex::new(r"^[+-]?[0-9]+").unwrap();
+                                        let hex_number =
+                                            Regex::new(r"^0(x|X)([a-fA-F0-9][a-fA-F0-9])*")
+                                                .unwrap();
+                                        let string_literal =
+                                            Regex::new(r#"^"(?:\\.|[^"])*""#).unwrap();
+                                        let regular_id =
+                                            Regex::new(r"^[a-z][a-zA-Z0-9_]*").unwrap();
+                                        let template_type_id =
+                                            Regex::new(r"^['][A-Z][a-zA-Z0-9_]*").unwrap();
+                                        let custom_type_id =
+                                            Regex::new(r"^[A-Z][a-zA-Z0-9_]*").unwrap();
+                                        let special_id = Regex::new(r"^[_][a-zA-Z0-9_]*").unwrap();
+
+                                        if let Some(mat) = bystr_with_size.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+
+                                            (Token::ByStrWithSize(s), source_position.with_end(end))
+                                        } else if token_str.starts_with(KEYWORD_BYSTR) {
+                                            self.chars.nth(KEYWORD_BYSTR.len() - 2);
+                                            (
+                                                Token::ByStr,
+                                                source_position
+                                                    .with_end(start + KEYWORD_BYSTR.len()),
+                                            )
+                                        } else if let Some(mat) = hex_number.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+
+                                            (Token::HexNumber(s), source_position.with_end(end))
+                                        } else if let Some(mat) = signed_integer.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+                                            (Token::Number(s), source_position.with_end(end))
+                                        } else if let Some(mat) = string_literal.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+
+                                            (Token::StringLiteral(s), source_position.with_end(end))
+                                        } else if let Some(mat) = regular_id.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+
+                                            (Token::Identifier(s), source_position.with_end(end))
+                                        } else if let Some(mat) = template_type_id.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+
+                                            (
+                                                Token::TemplateIdentifier(s),
+                                                source_position.with_end(end),
+                                            )
+                                        } else if let Some(mat) = custom_type_id.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                            }
+                                            (
+                                                Token::CustomIdentifier(s),
+                                                source_position.with_end(end),
+                                            )
+                                        } else if let Some(mat) = special_id.find(token_str) {
+                                            let end = start + mat.end();
+                                            let s = &self.document[start..end];
+                                            if mat.end() > 1 {
+                                                self.chars.nth(end - start - 2);
+                                                // -2, because we already consumed the first char
+                                            }
+
+                                            (
+                                                Token::SpecialIdentifier(s),
+                                                source_position.with_end(end),
+                                            )
+                                        } else {
+                                            (Token::Unknown, source_position.with_end(start))
+                                        }
+                                    }
+                                };
 
                             (token, end)
                         }
@@ -508,7 +719,7 @@ impl<'input> Iterator for Lexer<'input> {
                 }
             };
 
-            return Some(Ok((start, token, end)));
+            return Some(Ok((source_position, token, end)));
         }
 
         None

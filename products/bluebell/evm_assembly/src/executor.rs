@@ -2,6 +2,7 @@ use crate::compiler_context::EvmCompilerContext;
 use crate::io_interface::CustomMemoryAccount;
 use crate::io_interface::EvmIoInterface;
 use crate::types::EvmTypeValue;
+use evm::backend::Apply;
 use evm::executor::stack::MemoryStackState;
 use evm::executor::stack::StackExecutor;
 use evm::executor::stack::StackSubstateMetadata;
@@ -9,23 +10,40 @@ use evm::Config;
 use primitive_types::H160;
 use primitive_types::U256;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::str::FromStr;
+
+use crate::executable::EvmExecutable;
 
 pub struct EvmExecutor<'a> {
     context: &'a EvmCompilerContext,
-    code: Vec<u8>, // state: MemoryStackState,
+    pub executable: EvmExecutable,
+}
+
+#[derive(Debug, Clone)]
+pub struct ExecutorResult {
+    pub changeset: HashMap<String, Option<String>>,
+    pub result: String,
 }
 
 impl<'a> EvmExecutor<'a> {
-    pub fn new(context: &'a EvmCompilerContext, code: Vec<u8>) -> Self {
-        Self { context, code }
+    pub fn new(context: &'a EvmCompilerContext, executable: EvmExecutable) -> Self {
+        Self {
+            context,
+            executable,
+        }
     }
 
-    pub fn execute(&self, name: &str, args: Vec<EvmTypeValue>) {
+    pub fn get_label_position(&self, label: &str) -> Option<u32> {
+        self.executable.label_positions.get(label).copied()
+    }
+
+    pub fn execute(&self, name: &str, args: Vec<EvmTypeValue>) -> ExecutorResult {
+        println!("Code: {}", hex::encode(self.executable.bytecode.clone()));
         let input = self
             .context
             .get_function(name)
-            .expect("REASON")
+            .expect(&format!("Function name {} not found", name).to_string())
             .generate_transaction_data(args);
 
         // Initialized the state of EVM's memory.
@@ -39,7 +57,7 @@ impl<'a> EvmExecutor<'a> {
                 nonce: U256::one(),
                 balance: U256::from(10000000),
                 storage: BTreeMap::new(),
-                code: self.code.clone(),
+                code: self.executable.bytecode.clone(),
             },
         );
 
@@ -57,9 +75,10 @@ impl<'a> EvmExecutor<'a> {
         // Prepare the executor.
         let backend = EvmIoInterface::new(state); //MemoryBackend::new(&vicinity, state);
         let metadata = StackSubstateMetadata::new(u64::MAX, &config);
-        let state = MemoryStackState::new(metadata, &backend);
+        let mem_state = MemoryStackState::new(metadata, &backend);
         let precompiles = self.context.get_precompiles();
-        let mut executor = StackExecutor::new_with_precompiles(state, &config, &precompiles);
+        let mut executor = StackExecutor::new_with_precompiles(mem_state, &config, &precompiles);
+        println!("Execute input: {}", hex::encode(input.clone()));
 
         // Call the 0x10 contract using the 0xf0 user.
         // Use the input variable.
@@ -72,7 +91,37 @@ impl<'a> EvmExecutor<'a> {
             Vec::new(),
         );
 
+        let (state_apply, _logs) = executor.into_state().deconstruct();
         println!("Exit reason: {:#?}", exit_reason);
         println!("Result: {:#?}", result);
+        // println!("Logs: {:#?}", logs);
+        // let mut ret: HashMap< String, Option<String>> = HashMap::new();
+        let mut ret = ExecutorResult {
+            changeset: HashMap::new(),
+            result: format!("{:?}", result),
+        };
+
+        for update in state_apply {
+            match update {
+                Apply::Modify {
+                    address,
+                    basic: _,
+                    code: _,
+                    storage,
+                    reset_storage: _,
+                } => {
+                    for (k, v) in storage {
+                        let key = format!("{:?}.{:?}", address, k);
+                        ret.changeset.insert(key, Some(format!("{:?}", v)));
+                    }
+                }
+                Apply::Delete { address } => {
+                    let key = format!("{:?}", address);
+                    ret.changeset.insert(key, None);
+                }
+            }
+        }
+
+        ret
     }
 }

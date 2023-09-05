@@ -1,7 +1,10 @@
 use crate::ast::nodes::*;
 use crate::constants::{TraversalResult, TreeTraversalMode};
-
+use crate::parser::lexer::SourcePosition;
 pub trait AstConverting {
+    fn push_source_position(&mut self, start: &SourcePosition, end: &SourcePosition) -> ();
+    fn pop_source_position(&mut self) -> ();
+
     fn emit_byte_str(
         &mut self,
         mode: TreeTraversalMode,

@@ -4,4 +4,6 @@ members = [
     "core",
     "evm_assembly",
     "cli",
+    "playground",
+
 ]

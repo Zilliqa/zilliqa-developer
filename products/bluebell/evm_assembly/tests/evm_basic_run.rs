@@ -22,7 +22,6 @@ fn test_precompile(
     _backend: &dyn Backend,
     _is_static: bool,
 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-    println!("Running precompile!");
     let gas_needed = match required_gas(input) {
         Ok(i) => i,
         Err(err) => return Err(PrecompileFailure::Error { exit_status: err }),
@@ -63,7 +62,7 @@ mod tests {
     use crate::test_precompile;
     use crate::{EvmCompilerContext, EvmTypeValue};
     use evm_assembly::block::EvmBlock;
-    use evm_assembly::EvmAssemblyGenerator;
+
     use evm_assembly::EvmByteCodeBuilder;
 
     #[test]
@@ -85,32 +84,30 @@ mod tests {
 
         ///////
         // Executable
-        let mut builder = EvmByteCodeBuilder::new(&mut specification);
+        let mut builder = EvmByteCodeBuilder::new(&mut specification, true);
 
         builder
             .define_function("hello", ["Uint256"].to_vec(), "Uint256")
             .build(|code_builder| {
-                let mut entry = EvmBlock::new(None, "entry");
+                let mut entry = EvmBlock::new(None, [].to_vec().into_iter().collect(), "entry");
 
                 let fnc = code_builder.context.get_function("fibonacci").unwrap();
-                entry.call(fnc, [EvmTypeValue::Uint32(10)].to_vec());
+                entry.call(fnc, ["Uint256".to_string()].to_vec());
 
                 entry.push1([1].to_vec());
                 entry.jump_if_to("success");
                 entry.jump_to("finally");
 
-                let mut success = EvmBlock::new(None, "success");
+                let mut success = EvmBlock::new(None, [].to_vec().into_iter().collect(), "success");
                 success.jump_to("finally");
 
-                let mut finally = EvmBlock::new(None, "finally");
+                let mut finally = EvmBlock::new(None, [].to_vec().into_iter().collect(), "finally");
 
                 finally.r#return();
                 [entry, success, finally].to_vec()
             });
 
         let executable = builder.build();
-        println!("{}", builder.generate_evm_assembly());
-        println!("Code: {}", hex::encode(executable.clone()));
 
         let executor = EvmExecutor::new(&specification, executable);
         executor.execute("hello", [EvmTypeValue::Uint32(10)].to_vec());
