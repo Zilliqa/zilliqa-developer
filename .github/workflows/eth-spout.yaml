@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "main"
+      - "faucet-workflow"
     paths:
       - "products/eth-spout/**"
     tags:
@@ -39,11 +40,21 @@ jobs:
           driver-opts: |
             image=moby/buildkit:master
 
-      - name: Docker Login
+      - name: "Authenticate to Google Cloud"
+        id: google-auth
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service_account: "${{ secrets.GCP_PRD_GITHUB_SA_DOCKER_REGISTRY }}"
+          create_credentials_file: true
+
+      - name: Login to the registry
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          registry: asia-docker.pkg.dev
+          username: "oauth2accesstoken"
+          password: "${{ steps.google-auth.outputs.access_token }}"
 
       - name: Docker Metadata action
         id: meta
