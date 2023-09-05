@@ -1,3 +1,4 @@
+use evm::Capture::Exit;
 use evm::Capture::Trap;
 use evm::Machine;
 use evm::Opcode;
@@ -43,10 +44,14 @@ impl ObservableMachine {
             match self.machine.step() {
                 Ok(()) => (),
                 Err(code) => match code {
+                    Exit(_value) => {
+                        return;
+                    }
                     Trap(opcode) => {
                         match opcode {
                             Opcode::STATICCALL => {
                                 // Emulating static call
+                                // TODO: Attach runtime!
                                 let stack = self.machine.stack_mut();
                                 for _i in 0..6 {
                                     if stack.pop().is_err() {
@@ -57,15 +62,11 @@ impl ObservableMachine {
                                 if v.is_err() {
                                     panic!("Failed to push result to stack");
                                 }
-                                println!("Static call: {:?}", opcode)
                             }
                             _ => {
                                 panic!("Unhandled trap opcode.")
                             }
                         }
-                    }
-                    _ => {
-                        println!("Exit code encounterd: {:?}", code)
                     }
                 },
             }
