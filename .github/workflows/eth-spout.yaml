@@ -8,6 +8,7 @@ on:
       - "products/eth-spout/**"
     tags:
       - "*"
+  workflow_dispatch:
 
 jobs:
   push_to_registry:
