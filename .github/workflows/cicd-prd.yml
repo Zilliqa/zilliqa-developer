@@ -1,4 +1,4 @@
-name: "CICD"
+name: "CICD production"
 
 on:
   # Test run before merging
@@ -19,7 +19,7 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: ${{ github.actor != 'dependabot[bot]' }}
+    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
     name: "Build and push images"
     strategy:
       fail-fast: false
@@ -27,12 +27,11 @@ jobs:
         application: [eth-spout]
         include:
           - application: eth-spout
-            docker_domain: asia-docker.pkg.dev
-            registry_prd: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
             image_name: eth-spout
             path: products/eth-spout
     env:
-      DEFAULT_BRANCH: main
+      DOCKER_DOMAIN: asia-docker.pkg.dev
+      REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -42,7 +41,6 @@ jobs:
           fetch-depth: 0
 
       - name: "Authenticate to Google Cloud - prod"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         id: google-auth
         uses: "google-github-actions/auth@v1"
         with:
@@ -52,23 +50,20 @@ jobs:
           create_credentials_file: true
 
       - name: Login to the registry - prod
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         uses: docker/login-action@v2
         with:
-          registry: ${{ matrix.docker_domain }}
+          registry: ${{ env.DOCKER_DOMAIN }}
           username: "oauth2accesstoken"
           password: "${{ steps.google-auth.outputs.access_token }}"
 
       - name: Get tag version - prod
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         id: set-tag
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:
-          tag: ${{ matrix.registry_prd }}/${{ matrix.image_name }}
+          tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
           length: 8
 
       - name: "Build and push ${{ matrix.application }} - prod"
-        if: github.ref_name == env.DEFAULT_BRANCH && github.event_name != 'release'
         env:
           ENVIRONMENT: stg
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
