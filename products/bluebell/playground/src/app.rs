@@ -8,11 +8,10 @@ use yew::prelude::*;
 use yewdux::prelude::*;
 
 use crate::bytecode_view::ByteCodeView;
+use crate::dropdown::Dropdown;
 use crate::machine_view::MachineView;
 use crate::state::{State, StateMessage};
 use crate::vm_remote::VmRemoteControl;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsValue;
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {
@@ -332,6 +331,9 @@ pub fn app() -> Html {
                 html! {
                     <div class="h-full w-full pl-10 bg-black">
                             <div class="editor-container h-full w-full bg-black  text-white text-left font-mono">
+                                <div class="w-full flex items-center justify-center py-2">
+                                    <Dropdown items={["hello".to_string(), "world".to_string()].to_vec()}    on_item_click={|_v| {}}    />
+                                </div>
                                 {
                                     if let Some(p) = state.current_position {
                                         let (_, _, line, _) = p;
