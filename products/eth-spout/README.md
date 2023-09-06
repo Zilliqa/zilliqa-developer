@@ -4,11 +4,6 @@
 
 A static site which lets users request funds from a pre-configured account.
 
-## Non-features
-
-* Rate limiting of any kind
-* A fancy UI
-
 ## Configuration
 
 All configuration is passed via environment variables.
@@ -21,3 +16,4 @@ All configuration is passed via environment variables.
 | `PRIVATE_KEY` | The private key of the account to send funds from. Required. |
 | `ETH_AMOUNT` | The amount to send for each request in Eth. Defaults to `1`. |
 | `EXPLORER_URL` | The URL to a block explorer for this chain, used to provide a link to the transaction after a request succeeds. Optional. |
+| `MINIMUM_SECONDS_BETWEEN_REQUESTS` | The minimum time between each request to send funds to the same address. Set to `0` to disable rate limiting. Defaults to `300`. |
