@@ -24,11 +24,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [eth-spout]
+        application: [eth-spout, bluebell-playground]
         include:
           - application: eth-spout
             image_name: eth-spout
             path: products/eth-spout
+          - application: bluebell-playground
+            image_name: bluebell-playground
+            path: products/bluebell
+
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
