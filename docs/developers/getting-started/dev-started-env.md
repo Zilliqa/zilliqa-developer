@@ -34,6 +34,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **EVM URL**            | [https://evm-api-dev.zilliqa.com/](https://evm-api-dev.zilliqa.com/) |
 | **Faucet**             | [**Link**](https://dev-wallet.zilliqa.com/home?network=testnet)      |
 | **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa?network=testnet)             |
+| **EVM Block Explorer** | [**Link**](https://otterscan.testnet.zilliqa.com)                    |
 | **WebSocket endpoint** | `wss://dev-ws.zilliqa.com`                                           |
 | **Chain ID**           | 333                                                                  |
 | **EVM Chain ID**       | 33101                                                                |
