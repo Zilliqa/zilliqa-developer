@@ -1,0 +1,72 @@
+name: "CICD production"
+
+on:
+  # Test run before merging
+  pull_request:
+    branches:
+      - main
+  # On merged
+  push:
+    branches:
+      - main
+  # On released
+  release:
+    types: [created]
+
+jobs:
+  build-docker:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-22.04
+    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
+    name: "Build and push images"
+    strategy:
+      fail-fast: false
+      matrix:
+        application: [eth-spout]
+        include:
+          - application: eth-spout
+            image_name: eth-spout
+            path: products/eth-spout
+    env:
+      DOCKER_DOMAIN: asia-docker.pkg.dev
+      REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+
+      - name: "Authenticate to Google Cloud - prod"
+        id: google-auth
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service_account: "${{ secrets.GCP_PRD_GITHUB_SA_DOCKER_REGISTRY }}"
+          create_credentials_file: true
+
+      - name: Login to the registry - prod
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_DOMAIN }}
+          username: "oauth2accesstoken"
+          password: "${{ steps.google-auth.outputs.access_token }}"
+
+      - name: Get tag version - prod
+        id: set-tag
+        uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
+        with:
+          tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
+          length: 8
+
+      - name: "Build and push ${{ matrix.application }} - prod"
+        env:
+          ENVIRONMENT: stg
+          IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
