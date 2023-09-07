@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+use crate::intermediate_representation::symbol_table::StateLayoutEntry;
 use crate::constants::TreeTraversalMode;
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::Operation;
@@ -10,8 +12,6 @@ use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::EvmSourcePosition;
 use primitive_types::U256;
-use std::collections::HashMap;
-use std::collections::BTreeSet;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
@@ -20,12 +20,6 @@ use sha3::{Digest, Keccak256};
 use std::mem;
 use log::{info};
 
-#[derive(Debug)]
-pub struct StateLayoutEntry {
-    pub address_offset: U256,
-    pub size: u64,
-    pub initializer: U256,
-}
 
 /// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
 /// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.
@@ -42,7 +36,7 @@ pub struct EvmBytecodeGenerator<'ctx> {
     ir: Box<IntermediateRepresentation>,
 
     // TODO: State allocation - TODO: move to IR and setup using pass
-    state_layout: HashMap<String, StateLayoutEntry>,
+
 }
 
 impl<'ctx> EvmBytecodeGenerator<'ctx> {
@@ -61,7 +55,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         Self {
             builder,
             ir,
-            state_layout: HashMap::new(),
+
         }
     }
 
@@ -81,7 +75,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                 initializer,
             };
 
-            self.state_layout.insert(name.to_string(), state);
+            self.ir.symbol_table.state_layout.insert(name.to_string(), state);
             address_offset += 1;
         }
 
@@ -359,7 +353,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref value,
                                 } => {
                                     // TODO: Ensure that we used resolved address name
-                                    let binding = &self.state_layout.get(&address.name.unresolved);
+                                    let binding = &self.ir.symbol_table.state_layout.get(&address.name.unresolved);
                                     let state = match binding {
                                         Some(v) => v,
                                         None => panic!(
@@ -395,7 +389,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref value,
                                 } => {
                                     // TODO: Ensure that we used resolved address name
-                                    let binding = &self.state_layout.get(&address.name.unresolved);
+                                    let binding = &self.ir.symbol_table.state_layout.get(&address.name.unresolved);
                                     let state = match binding {
                                         Some(v) => v,
                                         None => panic!(

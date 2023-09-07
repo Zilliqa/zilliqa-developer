@@ -1,5 +1,6 @@
 use crate::constants::NAMESPACE_SEPARATOR;
 use crate::intermediate_representation::name_generator::NameGenerator;
+use primitive_types::U256;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -23,10 +24,18 @@ impl TypeInfo {
 }
 
 #[derive(Debug, Clone)]
+pub struct StateLayoutEntry {
+    pub address_offset: U256,
+    pub size: u64,
+    pub initializer: U256,
+}
+
+#[derive(Debug, Clone)]
 pub struct SymbolTable {
     pub aliases: HashMap<String, String>,
     pub type_of_table: HashMap<String, Box<TypeInfo>>,
     pub name_generator: NameGenerator,
+    pub state_layout: HashMap<String, StateLayoutEntry>,
 }
 
 impl SymbolTable {
@@ -37,6 +46,7 @@ impl SymbolTable {
             aliases: HashMap::new(),
             type_of_table,
             name_generator: NameGenerator::new(),
+            state_layout: HashMap::new(),
         };
 
         // TODO: Get types from RuntimeModule

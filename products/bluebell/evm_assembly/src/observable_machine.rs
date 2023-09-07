@@ -2,6 +2,7 @@ use evm::Capture::Exit;
 use evm::Capture::Trap;
 use evm::Machine;
 use evm::Opcode;
+use log::info;
 use primitive_types::H256;
 
 use std::collections::HashMap;
@@ -33,13 +34,40 @@ impl ObservableMachine {
     pub fn step(&mut self) {
         match self.machine.step() {
             Ok(()) => (),
-            Err(res) => {
-                self.failed = true;
-                self.error_message = Some(format!("{:?}", res).to_string());
-            }
+            Err(code) => match code {
+                Exit(_value) => {
+                    return;
+                }
+                Trap(opcode) => {
+                    match opcode {
+                        Opcode::STATICCALL => {
+                            // Emulating static call
+                            // TODO: Attach runtime!
+                            info!("Executed static call");
+                            let stack = self.machine.stack_mut();
+                            for _i in 0..6 {
+                                if stack.pop().is_err() {
+                                    panic!("Stack empty!");
+                                }
+                            }
+                            let v = stack.push(H256::zero());
+                            if v.is_err() {
+                                panic!("Failed to push result to stack");
+                            }
+                        }
+                        _ => {
+                            self.failed = true;
+                            self.error_message = Some(format!("{:?}", opcode).to_string());
+                            panic!("Unhandled trap opcode.")
+                        }
+                    }
+                }
+            },
         }
     }
+
     pub fn run(&mut self) {
+        // TODO:  Refactor to use self.step
         loop {
             match self.machine.step() {
                 Ok(()) => (),
@@ -52,6 +80,7 @@ impl ObservableMachine {
                             Opcode::STATICCALL => {
                                 // Emulating static call
                                 // TODO: Attach runtime!
+                                info!("Executed static call");
                                 let stack = self.machine.stack_mut();
                                 for _i in 0..6 {
                                     if stack.pop().is_err() {
