@@ -1,0 +1,1833 @@
+use crate::ast::nodes::*;
+use crate::parser::lexer;
+
+grammar<'err, 'input>(errors: &'err mut Vec<lexer::ParseError>);
+
+
+
+extern {
+    type Location = lexer::SourcePosition;
+    type Error = lexer::ParseError;
+
+    enum lexer::Token<&'input str> {
+        "+" => lexer::Token::Plus,
+        "*" => lexer::Token::Asterisk,
+        ";" => lexer::Token::Semicolon,
+        ":" => lexer::Token::Colon,
+        "." => lexer::Token::Dot,
+        "|" => lexer::Token::Pipe,
+        "[" => lexer::Token::OpenBracket,
+        "]" => lexer::Token::CloseBracket,
+        "(" => lexer::Token::OpenParen,
+        ")" => lexer::Token::CloseParen,
+        "{" => lexer::Token::OpenBrace,
+        "}" => lexer::Token::CloseBrace,
+        "," => lexer::Token::Comma,
+        "=>" => lexer::Token::DoubleArrow,
+        "->" => lexer::Token::Arrow,
+        "=" => lexer::Token::Equals,
+        "&" => lexer::Token::Ampersand,
+        "<-" => lexer::Token::LeftArrow,
+        ":=" => lexer::Token::ColonEquals,
+        "@" => lexer::Token::At,
+        "-" => lexer::Token::Minus,
+        "_" => lexer::Token::Underscore,
+        "forall" => lexer::Token::Forall,
+        "builtin" => lexer::Token::Builtin,
+        "library" => lexer::Token::Library,
+        "import" => lexer::Token::Import,
+        "let" => lexer::Token::Let,
+        "in" => lexer::Token::In,
+        "match" => lexer::Token::Match,
+        "with" => lexer::Token::With,
+        "end" => lexer::Token::End,
+        "fun" => lexer::Token::Fun,
+        "tfun" => lexer::Token::Tfun,
+        "contract" => lexer::Token::Contract,
+        "transition" => lexer::Token::Transition,
+        "send" => lexer::Token::Send,
+        "event" => lexer::Token::Event,
+        "Event" => lexer::Token::EventType,
+        "field" => lexer::Token::Field,
+        "accept" => lexer::Token::Accept,
+        "exists" => lexer::Token::Exists,
+        "delete" => lexer::Token::Delete,
+        "throw" => lexer::Token::Throw,
+        "Map" => lexer::Token::Map,
+        "scilla_version" => lexer::Token::ScillaVersion,
+        "type" => lexer::Token::Type,
+        "of" => lexer::Token::Of,
+        "as" => lexer::Token::As,
+        "procedure" => lexer::Token::Procedure,
+        "Emp" => lexer::Token::Emp,
+        "ByStr" => lexer::Token::ByStr,
+
+        r"ByStr[0-9]+" => lexer::Token::ByStrWithSize(<&'input str>), 
+        
+        r"[+-]?[0-9]+" => lexer::Token::Number(<&'input str>), 
+        r"0(x|X)([a-fA-F0-9][a-fA-F0-9])*" => lexer::Token::HexNumber(<&'input str>), 
+        r#""(?:\\.|[^"])*""# => lexer::Token::StringLiteral(<&'input str>), 
+
+        r"[a-z][a-zA-Z0-9_]*" => lexer::Token::Identifier(<&'input str>), 
+        r"[_][a-zA-Z0-9_]*" => lexer::Token::SpecialIdentifier(<&'input str>), 
+        r"[A-Z][a-zA-Z0-9_]*" => lexer::Token::CustomIdentifier(<&'input str>), 
+        r"['][A-Z][a-zA-Z0-9_]*" => lexer::Token::TemplateIdentifier(<&'input str>), 
+    }
+}
+
+
+
+
+// The rule that defines a byte string type in Scilla.
+// A byte string type in Scilla is a built-in type that represents a sequence of bytes.
+// The `BYSTR` keyword is used to define a byte string type in Scilla.
+//
+// <typeByteStr> ::= "ByStr" <digit>+
+//
+// This rule allows for byte string types to be defined in a Scilla contract.
+//
+// @syntax typeByteStr
+// @return A byte string type in Scilla.
+pub ByteString : NodeByteStr = {
+	<start:@L> <node:r"ByStr[0-9]+"> <end:@R> => NodeByteStr::Type(WithMetaData::<String> {
+        node: String::from(node),
+        start,
+        end
+    }),
+
+}
+
+
+
+// The rule that defines an identifier type name in Scilla.
+// An identifier type name is a custom type name, a byte string type name, or an event type name.
+// An identifier type name consists of the following components:
+//
+// TODO: Missing BNF
+//
+// This rule allows for identifier type names to be defined in a Scilla contract.
+//
+// @syntax identifierTypeName
+// @return An identifier type name as a custom type name, a byte string type name, or an event type name.
+pub TypeNameIdentifier: WithMetaData<NodeTypeNameIdentifier> = {
+	<start:@L> <node:ByteString> <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
+        node: NodeTypeNameIdentifier::EventType,  
+        start,
+        end
+    },
+    <start:@L> "Event" <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
+        node: NodeTypeNameIdentifier::EventType,  
+        start,
+        end
+    },
+    <start:@L> <node:TypeOrEnumLikeIdentifierId> <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
+        node: NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(node),	
+        start,
+        end
+    }
+}
+
+
+// The rule that defines a single Scilla import name.
+// An imported name allows a Scilla program to use a type or function defined in another Scilla program.
+// An imported name can be a regular name or an alias for a name.
+// An imported name consists of the following components:
+//
+// <importedName> ::= (<identifierTypeName> | 'ByStr' <digit>+ | 'Event') ['as' (<identifierTypeName> | 'ByStr' <digit>+ | 'Event')]
+//
+// This rule allows for a single imported name to be specified with an optional alias.
+//
+// @syntax importedName
+// @return A single imported name with an optional alias.
+pub ImportedName: WithMetaData<NodeImportedName> = {
+	<start:@L> <node:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeImportedName> {
+        node: NodeImportedName::RegularImport(node),
+        start,
+        end
+    },
+	<start:@L> <n:TypeNameIdentifier> "as" <v:TypeNameIdentifier> <end:@R> => 
+        WithMetaData::<NodeImportedName> {
+            node: NodeImportedName::AliasedImport(n,v),
+            start,
+            end
+        }
+}
+
+
+//
+// The rule that defines Scilla import declarations.
+// An import declaration allows a Scilla program to use types and functions defined in other Scilla programs.
+// This rule follows following grammar:
+//
+// <importDeclarations> ::= 'import' <importedName>+
+//
+// The rule allows for multiple imported names to be specified in a single import declaration.
+//
+// @syntax importDeclarations
+// @return A list of one or more imported names.
+//
+pub ImportDeclarations: WithMetaData<NodeImportDeclarations> = {
+	<prev:ImportDeclarations>
+	<start:@L> "import" <n:ImportedName> <end:@R> => 
+        WithMetaData::<NodeImportDeclarations> {
+            node: {
+    		let mut ret = NodeImportDeclarations {
+    			import_list: prev.node.import_list.clone()
+    		};
+    		ret.import_list.push(n);
+    		ret
+    	},
+        start,
+        end
+    },
+	<start:@L> "import" <n:ImportedName+> <end:@R>  => WithMetaData::<NodeImportDeclarations> {
+        node: NodeImportDeclarations {
+    		import_list: n
+	   },
+       start,
+       end
+    }
+}
+
+
+// The rule that defines a meta identifier in Scilla.
+// A meta identifier is an identifier in a Scilla contract that can be in a namespace or a hexspace.
+// A meta identifier consists of the following components:
+//
+// <metaIdentifier> ::= <identifierRegular> ['.' <identifierRegular>]
+//                    | <hex> '.' <identifierRegular> 
+//                    | 'ByStr'<digit>+
+// <identifierRegular> ::= <upperCaseCharacter><alphaNumericUnderscore>* | 'ByStr'<digit>+ | 'Event'
+// TODO: Transalate regex
+// <hex> ::= [0][x]([a-fA-F0-9] [a-fA-F0-9])*
+//
+// This rule allows for meta identifiers to be defined in a Scilla contract.
+//
+// @syntax metaIdentifier
+// @return A meta identifier as a Scilla identifier name in a namespace or a hexspace, or a ByStr value.
+
+pub MetaIdentifier : WithMetaData<NodeMetaIdentifier> = {
+	<start:@L> <node:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node: NodeMetaIdentifier::MetaName(node),
+        start,
+        end
+    },
+	<start:@L> <l:TypeNameIdentifier> "." <r:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node: NodeMetaIdentifier::MetaNameInNamespace(l,r),
+        start,
+        end
+    },
+	<start:@L> <l:HexNumber> "." <r:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node: NodeMetaIdentifier::MetaNameInHexspace(l,r),
+        start,
+        end
+    },
+	<start:@L> "ByStr" <end:@R> => WithMetaData::<NodeMetaIdentifier> {
+        node:  NodeMetaIdentifier::ByteString,
+        start,
+        end
+    },
+}
+
+
+
+// The rule that defines a variable identifier in Scilla.
+// A variable identifier is an identifier used to name variables in a Scilla contract.
+// A variable identifier consists of the following components:
+//
+// <variableIdentifier> ::= <identiferRegular>
+//                       | <identiferSpecial> 
+//                       | (<typeTypeOrEnumLikeIdentifierName> | 'ByStr' <digit>+ | 'Event') '.' <identiferRegular>
+// <identiferRegular> ::= <lowerCaseCharacterOrUnderscore><alphaNumericUnderscore>* 
+// <identiferSpecial> ::= "_" <alphaNumericUnderscore>*
+// <typeTypeOrEnumLikeIdentifierName> ::= <upperCaseCharacter><alphaNumericUnderscore>*
+//
+// This rule allows for variable identifiers to be defined in a Scilla contract.
+//
+// @syntax variableIdentifier
+// @return A variable identifier as an identifier name with an optional namespace.
+pub VariableIdentifier : WithMetaData<NodeVariableIdentifier> = {
+	<start:@L> <node:RegularId> <end:@R> => WithMetaData::<NodeVariableIdentifier> { 
+        node: NodeVariableIdentifier::VariableName(node),
+        start,
+        end
+    },
+	<start:@L> <node:SpecialId> <end:@R> => WithMetaData::<NodeVariableIdentifier> { 
+        node:  NodeVariableIdentifier::SpecialIdentifier(node),
+        start,
+        end
+    },
+
+	<start:@L> <n:TypeNameIdentifier> "." <r:RegularId>  <end:@R> => WithMetaData::<NodeVariableIdentifier> { 
+        node: NodeVariableIdentifier::VariableInNamespace(n,r),
+        start,
+        end
+    },
+}
+
+
+// The rule that defines the arguments for a built-in function in Scilla.
+// Built-in functions in Scilla can have either variable arguments or no arguments at all.
+// This rule defines the arguments for a built-in function and consists of the following components:
+//
+// <builtinArguments> ::= <variableIdentifier>+  
+//                    | '(' ')'  
+//
+// This rule allows for built-in functions to be defined with variable arguments or no arguments at all.
+//
+// @syntax builtinArguments
+// @return The arguments for a built-in function as either variable identifiers or an empty set of parentheses. 
+pub BuiltinArguments: WithMetaData<NodeBuiltinArguments> = {
+	<start:@L> <prev:BuiltinArguments>
+	<n:VariableIdentifier> <end:@R> => 
+    WithMetaData::<NodeBuiltinArguments> {
+        node: {
+    		let mut ret = NodeBuiltinArguments {
+    			arguments: prev.node.arguments.clone()
+    		};
+    		ret.arguments.push(n);
+    		ret
+    	},
+        start,
+        end
+    },
+	<start:@L> <n:VariableIdentifier> <end:@R> =>     WithMetaData::<NodeBuiltinArguments> {
+        node: NodeBuiltinArguments {
+    		arguments: vec![n]
+	    },
+        start,
+        end
+    },
+    <start:@L> "(" ")" <end:@R> =>
+        WithMetaData::<NodeBuiltinArguments> { 
+        node: NodeBuiltinArguments {
+     		arguments: vec![]
+	    },
+        start,
+        end
+    }
+}
+
+pub RemainingTypes: WithMetaData<NodeScillaType> = {
+    <start:@L> <meta_identifier: MetaIdentifier> <arguments: TypeArgument*> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::GenericTypeWithArgs(meta_identifier, arguments),
+        start,
+        end
+    },
+    <start:@L> "Map" <key_type: TypeMapKey> <value_type: TypeMapValue> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::MapType(key_type, value_type),
+        start,
+        end
+    },
+    <start:@L> "(" <type_name: ScillaType> ")" <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::EnclosedType(Box::new(type_name)),
+        start,
+        end
+    },
+    <start:@L> <address_type: AddressType> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::ScillaAddresseType(Box::new(address_type)),
+        start,
+        end
+    },
+    <start:@L> "forall" <template_variable: TemplateTypeId> "." <type_name: RemainingTypes> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::PolyFunctionType(template_variable, Box::new(type_name)),
+        start,
+        end
+    },
+    <start:@L> <template_variable: TemplateTypeId> <end:@R> => WithMetaData::<NodeScillaType> { 
+        node:  NodeScillaType::TypeVarType(template_variable),
+        start,
+        end
+    }	
+}
+
+pub FunctionSignature: WithMetaData<NodeScillaType> = {
+	<start:@L> <from_type: RemainingTypes> "->" <to_type: FunctionSignature> <end:@R> => WithMetaData::<NodeScillaType> {
+        node: NodeScillaType::FunctionType(Box::new(from_type), Box::new(to_type)),
+        start,
+        end
+    },
+	<start:@L> <from_type: RemainingTypes> "->" <to_type: RemainingTypes> <end:@R> => WithMetaData::<NodeScillaType> {
+        node:  NodeScillaType::FunctionType(Box::new(from_type), Box::new(to_type)),
+        start,
+        end
+    },
+}
+
+
+// The rule that defines a Scilla type.
+// A Scilla type is the data type of a Scilla expression or identifier.
+// A Scilla type consists of the following components:
+//
+// <scillaType> ::= <metaIdentifier> <typeArgument>* 
+//                 | 'Map' <typeMapKey> <typeMapValue> 
+//                 | <scillaType> '->' <scillaType> 
+//                 | '(' <scillaType> ')' 
+//                 | <addressType> 
+//                 | 'forall' <templateTypeIdentifier> '.' <scillaType> 
+//                 | <templateTypeIdentifier>
+// <templateTypeIdentifier> ::= "'" <upperCaseCharacter> <alphaNumericUnderscore>*;
+//
+// This rule allows for Scilla types to be specified as a type identifier or keyword with optional type arguments, key type and value type, source type and target type, enclosed type, address type, or type variable.
+//
+// @syntax scillaType
+// @return A Scilla type as a type identifier or keyword with optional type arguments, key type and value type, source type and target type, enclosed type, address type, or type variable.
+pub ScillaType: WithMetaData<NodeScillaType> = {	
+	 <f:FunctionSignature> => f,
+	 <x:RemainingTypes> => x	 
+}
+
+
+
+// The rule that defines a Scilla type argument.
+// A Scilla type argument is a type that can be passed as an argument to a Scilla function.
+// A Scilla type argument consists of the following components:
+//
+// <typeArgument> ::= '(' <scillaType> ')'
+//                  | <metaIdentifier>
+//                  | "'" <upperCaseCharacter> <alphaNumericUnderscore>*
+//                  | <addressType>
+//                  | 'Map' <typeMapKey> <typeMapValue>
+// 
+//
+// This rule allows for Scilla type arguments to be specified as a Scilla type name, meta identifier, template type identifier, address type or map type.
+//
+// @syntax typeArgument
+// @return A Scilla type argument as a Scilla type name, meta identifier, template type identifier, address type or map type.
+pub TypeArgument: WithMetaData<NodeTypeArgument> = {
+    <start:@L> "(" <t:ScillaType> ")" <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::EnclosedTypeArgument(Box::new(t)),
+        start,
+        end
+    },
+    <start:@L> <i:MetaIdentifier> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::GenericTypeArgument(i),
+        start,
+        end
+    },
+    <start:@L> <t:TemplateTypeId> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::TemplateTypeArgument(t),
+        start,
+        end
+    },
+    <start:@L> <a:AddressType> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::AddressTypeArgument(a),
+        start,
+        end
+    },
+    <start:@L> "Map" <k:TypeMapKey> <v:TypeMapValue> <end:@R> =>
+    WithMetaData::<NodeTypeArgument> {
+        node: NodeTypeArgument::MapTypeArgument(k, v),
+        start,
+        end
+    },
+}
+
+
+
+// The rule that defines a Scilla address type.
+// A Scilla address type is a type that represents an address on the blockchain.
+// A Scilla address type consists of the following components:
+//
+// <addressType> ::= <baseAddressType> "with" ("end" | "contract" [<addressTypeField> {"," <addressTypeField>}*] "end" | "library" "end" | <specialIdentifier> "end") ["contract" [<addressTypeField> {"," <addressTypeField>}*] | "library" | <specialIdentifier>] "end" 
+// <baseAddressType> ::= <upperCaseCharacter> <alphaNumericUnderscore>* | "ByStr" <digit>+ | "Event"
+// <specialIdentifier> ::= "_" <alphaNumericUnderscore>*
+// <addressTypeField> ::= <identifierRegular> ":" <scillaType>
+//
+// This rule allows for Scilla address types to be specified with different components and options.
+// Scilla address types can be defined as an address with no additional fields, an address with contract fields, an address with library fields, or an address with code fields.
+//
+// @syntax addressType
+// @return A Scilla address type.
+pub AddressType: WithMetaData<NodeAddressType> = {
+	<start:@L> <type_name: TypeNameIdentifier> "with" "end" <end:@R> => WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name: WithMetaData::<String> {
+                node: "".to_string(),
+                start: start.clone(),
+                end: end.clone(),
+            },
+            address_fields: vec![]
+        },
+        start,
+        end
+    },
+	<start:@L> <type_name: TypeNameIdentifier> "with"  "contract" <address_fields: AddressTypeFieldList?> "end" <end:@R> => 
+    WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name: WithMetaData::<String> {
+                node: "contract".to_string(),
+                start: start.clone(),
+                end: end.clone()
+            },
+            address_fields: address_fields.unwrap_or([].to_vec())
+        },
+        start,
+        end
+    },
+	<start:@L> <type_name: TypeNameIdentifier> "with" "library" "end" <end:@R> => 
+    WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name:  WithMetaData::<String> {
+                node: "library".to_string(),
+                start: start.clone(),
+                end: end.clone()
+            },
+            address_fields: vec![]
+        },
+        start,
+        end
+    },
+	<start:@L> <type_name: TypeNameIdentifier> "with" <special_identifier:SpecialId> "end" <end:@R> => 
+    WithMetaData::<NodeAddressType> { 
+        node: NodeAddressType {
+            identifier: type_name,
+            type_name: special_identifier,
+            address_fields: vec![]
+        },
+        start,
+        end
+    }
+};
+
+
+// The rule that defines an address type field in Scilla.
+// An address type field is a field in a Scilla contract that has an address type and an identifier name.
+// An address type field consists of the following components:
+//
+// <addressTypeField> ::= "field" <identifierRegular> ":" <scillaType>
+// <identifierRegular> ::= <lowerCaseCharacterOrUnderscore> <alphaNumericUnderscore>*
+//
+// This rule allows for address type fields to be defined in a Scilla contract.
+//
+// @syntax addressTypeField
+// @return An address type field as an identifier name with a Scilla address type.
+pub AddressTypeFieldList: Vec<WithMetaData<NodeAddressTypeField>> = {
+	<first:AddressTypeField> <remaining:NextAddressTypeField*> =>
+	{
+		let mut ret: Vec<WithMetaData<NodeAddressTypeField>> = [first].to_vec();
+		for x in remaining {
+			ret.push(x);
+		}
+		ret
+	}
+}
+
+pub NextAddressTypeField: WithMetaData<NodeAddressTypeField> = {
+	"," <a:AddressTypeField> => a
+}
+
+pub AddressTypeField: WithMetaData<NodeAddressTypeField> = {
+    <start:@L> "field" <identier_value:VariableIdentifier> ":" <type_name:ScillaType> <end:@R> => {
+        WithMetaData::<NodeAddressTypeField> {
+            node: NodeAddressTypeField { 
+                identifier: identier_value, 
+                type_name: type_name
+            },
+            start,
+            end
+        }
+    }
+}
+
+
+
+// The rule that defines a Scilla map key type.
+// A Scilla map key type is a type that can be used as the key in a Scilla map.
+// A Scilla map key type consists of the following components:
+//
+// <typeMapKey> ::= <metaIdentifier>
+//                 | '(' <metaIdentifier> ')'
+//                 | '(' <addressType> ')'
+//                 | <addressType>
+// 
+//
+// This rule allows for Scilla map key types to be specified as a meta identifier or an address type.
+//
+// @syntax typeMapKey
+// @return A Scilla map key type as a meta identifier or an address type.
+pub TypeMapKey: WithMetaData<NodeTypeMapKey> = {
+    <start:@L> <identifier_name: MetaIdentifier> <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::GenericMapKey(identifier_name),
+        start,
+        end
+    },
+    <start:@L> "(" <identifier_name: MetaIdentifier> ")" <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::EnclosedGenericId(identifier_name),
+        start,
+        end
+    },
+    <start:@L> "(" <identifier_name: AddressType> ")" <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::EnclosedAddressMapKeyType(identifier_name),
+        start,
+        end
+    },
+    <start:@L> <identifier_name: AddressType> <end:@R> =>
+    WithMetaData::<NodeTypeMapKey> {
+        node: NodeTypeMapKey::AddressMapKeyType(identifier_name),
+        start,
+        end
+    },
+};
+
+
+
+// The rule that defines a Scilla map value type.
+// A Scilla map value type is a type that can be used as the value in a Scilla map.
+// A Scilla map value type consists of the following components:
+//
+// <typeMapValue> ::= <metaIdentifier>
+//                  | "Map" <typeMapKey> <typeMapValue>
+//                  | "(" <typeMapValueAllowingTypeArguments> ")"
+//                  | <addressType>
+//
+// This rule allows for Scilla map value types to be specified as a custom type identifier or an address type.
+// Additionally, it allows for the specification of a key and value type for the map value type.
+// The rule also allows for a type that is allowed as a map value to be used in parentheses.
+//
+// @syntax typeMapValue
+// @return A Scilla map value type as a custom type identifier, an address type, a map key and value type, or a type allowed as a map value and used in parentheses.
+pub TypeMapValue:  WithMetaData<NodeTypeMapValue> = {
+    <start:@L> <n:MetaIdentifier> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapValueTypeOrEnumLikeIdentifier(n),
+        start,
+        end
+    },
+    <start:@L> "Map" <k:TypeMapKey> <v:TypeMapValue> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapKeyValue(Box::new(
+            WithMetaData::<NodeTypeMapEntry> {
+                node: NodeTypeMapEntry { key:    k, value: v },
+                start: start.clone(),
+                end: end.clone()
+            }
+        )),
+        start,
+    end
+    },
+    <start:@L> "(" <t:TypeMapValueAllowingTypeArguments> ")" <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapValueParanthesizedType(Box::new(t)),
+        start,
+        end
+    },
+    <start:@L> <t:AddressType> <end:@R> =>  WithMetaData::<NodeTypeMapValue> {
+        node: NodeTypeMapValue::MapValueAddressType(Box::new(t)),
+        start,
+        end
+    },
+}
+
+
+
+// The rule that defines arguments for a Scilla map value type.
+// A Scilla map value type is a type that can be used as the value in a Scilla map.
+// A Scilla map value type consists of the following components:
+//
+// <typeMapValueArguments> ::= '(' <typeMapValueAllowingTypeArguments> ')'  
+//                            | <metaIdentifier>
+//                            | 'Map' <typeMapKey> <typeMapValue>  
+// 
+//
+// This rule allows for Scilla map value types to be specified with type arguments, as a meta identifier,
+// or as a map type with a key type and a value type. The rule returns the specified Scilla map value type.
+//
+// @syntax typeMapValueArguments
+// @return A Scilla map value type with optional type arguments, as a meta identifier, or as a map type.
+pub TypeMapValueArguments: WithMetaData<NodeTypeMapValueArguments> = {
+    <start:@L> "(" <type_map_value:TypeMapValueAllowingTypeArguments> ")" <end:@R> => 
+    WithMetaData::<NodeTypeMapValueArguments> {
+        node: NodeTypeMapValueArguments::EnclosedTypeMapValue(Box::new(type_map_value)),
+        start,
+        end
+    },
+    <start:@L> <identifier_name:MetaIdentifier> <end:@R> => WithMetaData::<NodeTypeMapValueArguments> { 
+        node: NodeTypeMapValueArguments::GenericMapValueArgument(identifier_name),
+        start,
+        end
+    },
+    <start:@L> "Map" <key_type:TypeMapKey> <value_type:TypeMapValue> <end:@R> => WithMetaData::<NodeTypeMapValueArguments> {
+        node: NodeTypeMapValueArguments::MapKeyValueType(key_type, value_type),
+        start,
+        end
+    }
+}
+
+
+
+
+
+// The top-level rule that defines a Scilla program.
+// A Scilla program is defined by following grammar:
+//              
+// <program> ::= 'scilla_version' <digit>+ [<importDeclarations>] 
+//               [<libraryDefinition>] <contractDefinition> EOF
+//
+// 
+// This rule is the starting point for parsing a Scilla program.
+//
+// @syntax program
+// @return A Scilla program consisting of a version number, optional import declarations, optional library definition, and a contract definition.
+
+pub Program: NodeProgram = {
+    "scilla_version" <version:SignedInteger>
+    <import_declarations:ImportDeclarations?>
+    <library_definition:LibraryDefinition?>
+    <contract_definition:ContractDefinition> => NodeProgram {
+        version, import_declarations, library_definition, contract_definition
+    }
+}
+
+
+
+// The rule that defines a Scilla library definition.
+// A library definition allows a Scilla program to define reusable code components that can be shared among multiple contracts.
+// A library definition consists of the following components:
+//
+// <libraryDefinition> ::= 'library' <libraryName> <librarySingleDefinition>*
+// <libraryName> ::= <upperCaseCharacter><alphaNumericUnderscore>* | 'ByStr'<digit>+ | 'Event'
+//
+//
+// This rule allows for multiple library definitions to be specified within a single library definition.
+//
+// @syntax libraryDefinition
+// @return A Scilla library definition with a library name and zero or more library definitions. 
+pub LibraryDefinition: WithMetaData<NodeLibraryDefinition> = {
+    <start:@L> "library" 
+    <l:TypeNameIdentifier>
+    <d:LibrarySingleDefinition*> <end:@R> => WithMetaData::<NodeLibraryDefinition> {
+        node: NodeLibraryDefinition {
+            name: l,
+            definitions: d
+        },
+        start,
+        end
+    },
+}
+
+
+
+// The rule that defines a single Scilla library definition.
+// A library definition allows a Scilla program to define reusable code components that can be shared among multiple contracts.
+// A single library definition can be a constant definition, a type definition, or a type variation definition.
+// A library definition consists of the following components:
+//
+// <librarySingleDefinition> ::= 'let' <variableName> [':' <typeName>] '=' <expression>
+//                             | 'type' <typeName>
+//                             | 'type' <typeName> '=' <typeAlternativeClause>+
+//  
+// <variableName> ::= [a-z]<alphaNumericUnderscore>*
+// <typeName> ::= <identifierRegular>
+// 
+//
+// This rule allows for a single library definition to be specified with optional type annotation, expression, or type variations.
+//
+// @syntax librarySingleDefinition
+// @return A single Scilla library definition with a name, optional type annotation, optional expression, and optional type variations.
+pub LibrarySingleDefinition: WithMetaData<NodeLibrarySingleDefinition> = {
+	<start:@L> "let" <variable_name: RegularId>
+	 <type_annotation: TypeAnnotation?> 
+	 "=" <expression: FullExpression> <end:@R> => WithMetaData::<NodeLibrarySingleDefinition> { 
+        node:       NodeLibrarySingleDefinition::LetDefinition {
+            variable_name: variable_name,
+            type_annotation: type_annotation,
+            expression: expression.into()
+        },
+        start,
+        end
+    },
+	<start:@L> "type" <type_name: TypeNameIdentifier> <end:@R> => WithMetaData::<NodeLibrarySingleDefinition> { 
+        node: NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
+        start,
+        end
+    },
+	<start:@L>  "type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> <end:@R> => WithMetaData::<NodeLibrarySingleDefinition> { 
+        node: NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations)),
+        start,
+        end
+    }
+
+    // TODO: Langauge extension for review
+    // // Struct
+    // "type" <type_name: TypeNameIdentifier> '=' '{' 
+    //     <p:ParameterPair?> <next_params:NextParameterPair*>
+    // '}' => {
+    //        let mut parameters: Vec<NodeParameterPair> = Vec::new();
+    //        if let Some(pair) = p {
+    //             parameters.push(pair);
+    //        }
+    //        
+    //        for p in next_params {
+    //            parameters.push(p);
+    //        }
+    //        
+    //        NodeLibrarySingleDefinition::StructDefinition(type_name, parameters) 
+    //     }    
+    // }
+
+
+    // "type" <type_name: TypeNameIdentifier> <template_args:> => NodeLibrarySingleDefinition::TypeDefinition(type_name, None),
+    // "type" <type_name: TypeNameIdentifier> "=" <variations:TypeAlternativeClause+> => NodeLibrarySingleDefinition::TypeDefinition(type_name, Some(variations))    
+}
+
+
+
+// The rule that defines a typed identifier in Scilla.
+// A typed identifier is an identifier that has an associated Scilla type annotation.
+// A typed identifier consists of the following components:
+//
+// <typedIdentifier> ::= <identifierRegular> <typeAnnotation>
+// <identifierRegular> ::= <lowerCaseCharacterOrUnderscore> <alphaNumericUnderscore>*
+//
+// This rule allows for typed identifiers to be defined in a Scilla program.
+//
+// @syntax typedIdentifier
+// @return A typed identifier as an identifier name with an associated Scilla type annotation.
+pub TypedIdentifier: WithMetaData<NodeTypedIdentifier> = {
+    <start:@L> <identifier_name: RegularId>
+    <annotation: TypeAnnotation> <end:@R>
+    => WithMetaData::<NodeTypedIdentifier> {
+        node: NodeTypedIdentifier {identifier_name, annotation },
+        start,
+        end
+    }
+};
+
+
+// The rule that defines a type annotation in Scilla.
+// A type annotation is a Scilla type that is assigned to a variable or field to indicate the type of data it holds.
+// A type annotation consists of the following components:
+//
+// <typeAnnotation> ::= ':' <scillaType>
+//
+// This rule allows for type annotations to be added to variables or fields in a Scilla contract.
+//
+// @syntax typeAnnotation
+// @return A Scilla type as a type annotation for a variable or field.
+pub TypeAnnotation: WithMetaData< NodeTypeAnnotation> = {
+<start:@L> ":" <type_name:ScillaType> <end:@R> => 
+    WithMetaData::<NodeTypeAnnotation> {
+        node: NodeTypeAnnotation {type_name: type_name },
+        start,
+        end
+    }
+}
+
+
+// The rule that defines a Scilla type alternative clause.
+// A type alternative clause defines an alternative type for a type definition.
+// A type alternative clause consists of the following components:
+//
+// <typeAlternativeClause> ::= 
+//       '|' <typeClauseExpression> ['of' <typeArgument>+]
+// <typeClauseExpression> ::= <identifierTypeName> | <typeByteStr> | <typeEvent>
+//
+// This rule allows for a single type alternative clause to be specified with optional type arguments.
+//
+// @syntax typeAlternativeClause
+// @return A Scilla type alternative clause with a type name and optional type arguments.
+pub TypeAlternativeClause: WithMetaData<NodeTypeAlternativeClause> = {
+	<start:@L> "|" <n:TypeNameIdentifier> <end:@R> => WithMetaData::<NodeTypeAlternativeClause> { 
+        node: NodeTypeAlternativeClause::ClauseType(n),
+        start,
+        end
+    },
+	<start:@L> "|" <n:TypeNameIdentifier> "of" <t:TypeArgument+> <end:@R>  => WithMetaData::<NodeTypeAlternativeClause> {
+		node: NodeTypeAlternativeClause::ClauseTypeWithArgs(n, t),
+        start,
+        end
+	}
+}
+
+
+
+
+
+// The rule that defines a Scilla map value type that allows for type arguments.
+// A Scilla map value type is a type that can be used as the value in a Scilla map.
+// A Scilla map value type can allow for type arguments to be passed to it.
+// A Scilla map value type with type arguments consists of the following components:
+//
+// <typeMapValueAllowingTypeArguments> ::= <metaIdentifier> <typeMapValueArguments>+
+//                                       | <typeMapValue>
+//
+// This rule allows for Scilla map value types to be specified with or without type arguments.
+//
+// @syntax typeMapValueAllowingTypeArguments
+// @return A Scilla map value type that allows for type arguments or a Scilla map value type without type arguments.
+pub TypeMapValueAllowingTypeArguments: WithMetaData<NodeTypeMapValueAllowingTypeArguments> = {
+    <start:@L> <n:MetaIdentifier> <args:TypeMapValueArguments+> <end:@R> => 
+    WithMetaData::<NodeTypeMapValueAllowingTypeArguments> {
+        node: NodeTypeMapValueAllowingTypeArguments::TypeMapValueWithArgs(n, args),
+        start,
+        end
+    },
+    <start:@L> <t:TypeMapValue> <end:@R> => 
+    WithMetaData::<NodeTypeMapValueAllowingTypeArguments> {
+        node: NodeTypeMapValueAllowingTypeArguments::TypeMapValueNoArgs(t),
+        start,
+        end
+    }
+}
+
+
+// The rule that defines type arguments for a Scilla contract.
+// Type arguments are used to specify the types of variables, functions, and expressions in a Scilla contract.
+// Type arguments consist of a list of types enclosed in braces.
+//
+// <contractTypeArguments> ::= '{' <typeArgument>* '}'
+//
+// @syntax contractTypeArguments
+// @return A list of type arguments enclosed in braces. 
+pub ContractTypeArguments: WithMetaData<NodeContractTypeArguments> = {
+    <start:@L> "{" <type_arguments: TypeArgument*> "}" <end:@R> => 
+    WithMetaData::<NodeContractTypeArguments> {
+        node: NodeContractTypeArguments{ type_arguments: type_arguments },
+        start,
+        end
+    }
+}
+
+
+
+// The rule that defines a full expression in Scilla.
+// A full expression is an expression in Scilla that can be a local variable declaration, function call, apply expression,
+// atomic expression, builtin function call, message entry, pattern match, data constructor call, template function, or type application.
+//
+// <fullExpression> ::= 'let' <identifierRegular> [<typeAnnotation>] '=' <fullExpression> 'in' <fullExpression>
+//                    | 'fun' '(' <identifierRegular> <typeAnnotation> ')' '=>' <fullExpression>
+//                    | <variableIdentifier> (<variableIdentifier>)+
+//                    | <atomicExpression>
+//                    | 'builtin' <identifierRegular> [<contractTypeArguments>] <builtinArguments>
+//                    | '{' <messageEntry> (';' <messageEntry>)* '}'
+//                    | 'match' <variableIdentifier> 'with' <patternMatchExpressionClause>* 'end'
+//                    | <metaIdentifier> [<contractTypeArguments>] <variableIdentifier>*
+//                    | 'tfun' '[' <templateType> '=>' <fullExpression>
+//                    | '@' <variableIdentifier> <typeArgument>+
+// <identifierRegular> ::= <lowerCaseCharacterOrUnderscore> <alphaNumericUnderscore>*
+// <templateType> ::= "'" <upperCaseCharacter> <alphaNumericUnderscore>*
+// 
+//
+// @syntax fullExpression
+// @return A full expression in Scilla.
+pub FullExpression : WithMetaData<NodeFullExpression> = {
+	<start:@L> "let" <identifier_name:RegularId> <type_annotation:TypeAnnotation?>
+	"=" <expression:FullExpression> "in" <containing_expression:FullExpression>
+    <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::LocalVariableDeclaration{
+                identifier_name,
+                type_annotation,
+                expression: Box::new(expression),
+                containing_expression: Box::new(containing_expression)
+            },
+            start,
+            end
+        },
+    <start:@L> "fun" "(" <identier_value:RegularId> <t:TypeAnnotation> ")" "=>" <expression:FullExpression> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::FunctionDeclaration{
+        		identier_value:identier_value,
+        		type_annotation: t,
+        		expression: Box::new(expression)
+             },
+             start,
+             end
+         },
+     <start:@L> <function_name:VariableIdentifier> <argument_list:VariableIdentifier+> <end:@R> => 
+         WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::FunctionCall{
+             	function_name:function_name,
+             	argument_list: argument_list
+             },
+             start,
+             end
+         },
+     <start:@L> <atomic_expression:AtomicExpression> <end:@R> => 
+         WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::ExpressionAtomic(
+                Box::new(atomic_expression)),
+             start,
+             end
+         },    
+    <start:@L> "builtin" <b:RegularId> <targs:ContractTypeArguments?> <xs:BuiltinArguments> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::ExpressionBuiltin{b:b, targs:targs, xs:xs},
+             start,
+             end
+         },
+    <start:@L> "{" <m:MessageEntry> <messages:NextMessageEntry*> "}"<end:@R> => 
+        WithMetaData::<NodeFullExpression> { node:  {
+                let mut message_entries: Vec<WithMetaData<NodeMessageEntry>> = Vec::new();
+                message_entries.push(m);
+                for message in messages {
+                    message_entries.push(message);
+                }
+                NodeFullExpression::Message(message_entries)
+            },
+            start,
+            end
+        },
+    <start:@L> "match" <match_expression:VariableIdentifier> "with" <clauses:PatternMatchExpressionClause+> "end" <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::Match{
+        	   match_expression,
+        	   clauses
+            },
+            start,
+            end
+        },
+    <start:@L> <identifier_name:MetaIdentifier> <contract_type_arguments:ContractTypeArguments?>
+    <argument_list:VariableIdentifier*> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::ConstructorCall{ identifier_name, contract_type_arguments, argument_list},
+            start,
+            end
+        },
+    <start:@L> "tfun" <identifier_name:TemplateTypeId> "=>" <expression:FullExpression> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::TemplateFunction{identifier_name, expression: Box::new(expression)},
+            start,
+            end
+        },
+    <start:@L> "@" <identifier_name:VariableIdentifier> <type_arguments:TypeArgument+> <end:@R> => 
+        WithMetaData::<NodeFullExpression> { 
+            node: NodeFullExpression::TApp{identifier_name,type_arguments},
+            start,
+            end
+        }
+};
+
+
+
+// The rule that defines a pattern match expression clause in Scilla.
+// A pattern match expression clause is a clause that allows for pattern matching in a Scilla contract.
+// A pattern match expression clause consists of the following components:
+//
+// <patternMatchExpressionClause> ::= '|' <pattern> '=>' <fullExpression>
+//
+// This rule allows for pattern match expression clauses to be defined in a Scilla contract.
+//
+// @syntax patternMatchExpressionClause
+// @return A pattern match expression clause as a pattern expression with a corresponding full expression.
+pub PatternMatchExpressionClause: WithMetaData<NodePatternMatchExpressionClause> = {
+	<start:@L> "|" <p:Pattern> "=>" <e:FullExpression> <end:@R> => WithMetaData::<NodePatternMatchExpressionClause> {
+        node: NodePatternMatchExpressionClause { pattern: p, expression: e },
+        start,
+        end
+    }
+}
+
+
+// The rule that defines a pattern in Scilla.
+// A pattern is a value or a structure that can be matched against a given expression in Scilla.
+// A pattern consists of one of the following:
+//
+// <pattern> ::= '_' 
+//              | <identifierRegular> { <argumentPattern> }*
+//              | <metaIdentifier> { <argumentPattern> }*
+// <identifierRegular> ::= <lowerCaseCharacterOrUnderscore> <alphaNumericUnderscore>*
+// <metaIdentifier> ::= [A-Z_] <alphaNumericUnderscore>*
+//
+// This rule allows for patterns to be defined in a Scilla contract.
+//
+// @syntax pattern
+// @return A pattern that can be matched against a given expression in Scilla.
+pub Pattern: WithMetaData<NodePattern> = {
+	<start:@L> "_" <end:@R> => 
+    WithMetaData::<NodePattern> {
+        node: NodePattern::Wildcard,
+        start,
+        end
+    },
+	<start:@L> <identifier_name: RegularId> <end:@R> => 
+    WithMetaData::<NodePattern> {
+        node: NodePattern::Binder(identifier_name),
+        start,
+        end
+    },
+	<start:@L> <meta: MetaIdentifier> <constructor_arguments: ArgumentPattern*> <end:@R> =>
+    WithMetaData::<NodePattern> {
+        node: 		NodePattern::Constructor(meta, constructor_arguments),
+        start,
+        end
+    },
+}
+
+
+
+// The rule that defines an argument pattern in Scilla.
+// An argument pattern is a pattern used to match arguments in a Scilla function or procedure.
+// An argument pattern can consist of a wildcard, a binding identifier, a meta-identifier, or a pattern expression.
+// A pattern expression can be used to match more complex argument patterns.
+//
+// <argumentPattern> ::= '_'                                    
+//                     | <lowerCaseCharacterOrUnderscore><alphaNumericUnderscore>*          
+//                     | <metaIdentifier>                                        
+//                     | '(' <pattern> ')'  
+//
+// @syntax argumentPattern
+// @return An argument pattern as a wildcard, a binding identifier, a meta-identifier, or a pattern expression.
+pub ArgumentPattern: WithMetaData<NodeArgumentPattern> = {
+    <start:@L> "_" <end:@R> => 
+        WithMetaData::<NodeArgumentPattern> {
+            node: NodeArgumentPattern::WildcardArgument,
+            start,
+            end
+        },
+    <start:@L> <binding_identifier: RegularId> <end:@R> => 
+        WithMetaData::<NodeArgumentPattern> {
+            node: NodeArgumentPattern::BinderArgument(binding_identifier),
+            start,
+            end
+        },
+    <start:@L> <identifier_name: MetaIdentifier> <end:@R> => 
+        WithMetaData::<NodeArgumentPattern> {
+            node: NodeArgumentPattern::ConstructorArgument(identifier_name),
+            start,
+            end
+        },
+    <start:@L> "(" <pattern_expression:Pattern> ")" 
+        <end:@R> => 
+            WithMetaData::<NodeArgumentPattern> {
+                node: NodeArgumentPattern::PatternArgument(Box::new(pattern_expression)),
+                start,
+                end
+            },
+}
+
+
+// The rule that defines a message entry in Scilla.
+// A message entry is a key-value pair in a Scilla message that consists of an identifier name and a value.
+// A message entry consists of the following components:
+//
+// <messageEntry> ::= <variableIdentifier> ':' <valueLiteral>
+//                  | <variableIdentifier> ':' <variableIdentifier>
+//
+// This rule allows for message entries to be defined in a Scilla message.
+//
+// @syntax messageEntry
+// @return A message entry as a key-value pair in a Scilla message that consists of an identifier name and a value.
+pub NextMessageEntry: WithMetaData<NodeMessageEntry> = {
+	 ";" <message:MessageEntry> => message
+}
+
+pub MessageEntry: WithMetaData<NodeMessageEntry> = {
+    <start:@L> <i:VariableIdentifier> ":" <v:ValueLiteral> <end:@R> => 
+    WithMetaData::<NodeMessageEntry> {
+        node: NodeMessageEntry::MessageLiteral(i, v),
+        start,
+        end
+    },
+    <start:@L> <i:VariableIdentifier> ":" <v:VariableIdentifier> <end:@R> => WithMetaData::<NodeMessageEntry> {
+        node: NodeMessageEntry::MessageVariable(i, v),
+        start,
+        end
+    }        
+}
+
+
+// The rule that defines an atomic expression in Scilla.
+// An atomic expression is a Scilla expression that is not composed of any other sub-expressions.
+// An atomic expression can be a variable identifier or a value literal.
+//
+// <atomicExpression> ::= <variableIdentifier> | <valueLiteral>
+//
+// @syntax atomicExpression
+// @return A Scilla atomic expression, which can be a variable identifier or a value literal.
+pub AtomicExpression: WithMetaData<NodeAtomicExpression> = {
+	<start:@L> <variable_identifier:VariableIdentifier> <end:@R> => 
+    WithMetaData::<NodeAtomicExpression> {
+        node: NodeAtomicExpression::AtomicSid(variable_identifier),
+        start,
+        end
+    },
+    <start:@L> <value_literal:ValueLiteral> <end:@R> => 
+    WithMetaData::<NodeAtomicExpression> {
+        node: NodeAtomicExpression::AtomicLit(value_literal),
+        start,
+        end
+    },
+};
+
+
+
+// The rule that defines a value literal in Scilla.
+// A value literal is a literal representation of a value in Scilla.
+// A value literal can be one of the following types:
+//
+// <valueLiteral> ::=  <identifierToken> <digit>+
+//                   | <hex>
+//                   | 'True' | 'False'
+//                   | <string>
+//                   | 'Emp' <typeMapKey> <typeMapValue>
+// TODO: Transalate regex
+// <hex> ::= [0][x]([a-fA-F0-9] [a-fA-F0-9])*
+// <string> ::= '"' ~[\r\n"]* '"'
+//
+// This rule allows for value literals to be defined in Scilla.
+//
+// @syntax valueLiteral
+// @return A value literal as a signed or unsigned integer, a hexadecimal value, a string, or an empty map.
+pub ValueLiteral: WithMetaData<NodeValueLiteral> = {
+	<start:@L> <n: TypeNameIdentifier> <v: SignedInteger> <end:@L> => 
+    WithMetaData::<NodeValueLiteral> { 
+        node: NodeValueLiteral::LiteralInt(n, v),
+        start,
+        end,
+    },
+     <start:@L> <node: HexNumber> <end:@R> => 
+     WithMetaData::<NodeValueLiteral> { 
+        node: NodeValueLiteral::LiteralHex(node),
+        start,
+        end,
+    },
+     <start:@L> <s: StringLiteral> <end:@R> => 
+     WithMetaData::<NodeValueLiteral> { 
+        node: NodeValueLiteral::LiteralString(s),
+        start,
+        end,
+    },
+     <start:@L> "Emp" <key_type: TypeMapKey>  <value_type: TypeMapValue> <end:@R> => 
+     WithMetaData::<NodeValueLiteral> { 
+        node: {
+    		NodeValueLiteral::LiteralEmptyMap(key_type, value_type)
+    	},
+        start,
+        end,
+    },        
+}; 
+
+
+
+// The rule that defines a statement in Scilla.
+// A statement is an expression that is executed in a Scilla contract.
+// A statement consists of one or more components, depending on its type.
+// The following are the types of statements in Scilla:
+//
+// <statement>
+//    ::= <identifierRegular> '<-' <variableIdentifier>                                                     
+//     | <remoteFetchStatement>
+//     | <identifierRegular> ':=' <variableIdentifier>                                                    
+//     | <identifierRegular> '=' <fullExpression>
+//     | <identifierRegular> '<-' '&' (<typeTypeOrEnumLikeIdentifierName> | <typeByteStr> | <typeEvent>) [<blockchainFetchArguments>]    
+//     | <identifierRegular> '<-' <identifierRegular> mapAccess+                    
+//     | <identifierRegular> '<-' 'exists' <identifierRegular> mapAccess+     
+//     | <identifierRegular> mapAccess+ ':=' <variableIdentifier>                                 
+//     | 'delete' <identifierRegular> mapAccess+                                        
+//     | 'accept'                                                                                       
+//     | 'send' <variableIdentifier>                                                                                   
+//     | 'event' <variableIdentifier>                                                                                  
+//     | 'throw' [<variableIdentifier>]
+//     | 'match' <variableIdentifier> 'with' patternMatchClause+ 'end'                   
+//     | <componentId> <variableIdentifier>*                                                           
+//     | 'forall' <variableIdentifier> componentId                                                           
+// <identifierRegular> ::= <lowerCaseCharacterOrUnderscore><alphaNumericUnderscore>*
+//         
+// This rule allows for statements to be defined in a Scilla contract.
+//
+// @syntax statement
+// @return A statement as an expression to be executed in a Scilla contract.
+pub Statement: NodeStatement = {
+	<identifier_name:RegularId> "<-" <right_hand_side:VariableIdentifier> => 
+                NodeStatement::Load {
+                    left_hand_side: identifier_name,
+                    right_hand_side
+                },
+    <r:RemoteFetchStatement> => NodeStatement::RemoteFetch(Box::new(r)),
+   <identifier_name:RegularId> ":=" <right_hand_side:VariableIdentifier> => 
+        NodeStatement::Store {
+            left_hand_side: identifier_name,
+            right_hand_side
+        },
+    <identifier_name:RegularId> "=" <right_hand_side:FullExpression> => 
+        NodeStatement::Bind {
+            left_hand_side: identifier_name,
+            right_hand_side: Box::new(right_hand_side)
+        },
+
+    <identifier_name:RegularId> "<-" "&" <type_name:TypeNameIdentifier> <arguments:BlockchainFetchArguments?> => 
+        NodeStatement::ReadFromBC {
+            left_hand_side: identifier_name, 
+            type_name,
+            arguments
+        },
+    <identifier_name:RegularId> "<-" <right_hand_side:RegularId> <keys:MapAccess+> => 
+        NodeStatement::MapGet {
+            left_hand_side: identifier_name,
+            right_hand_side,
+            keys
+        },
+    <identifier_name:RegularId> "<-" "exists" <right_hand_side:RegularId> <keys:MapAccess+> => 
+       NodeStatement::MapGetExists {
+           left_hand_side: identifier_name,
+           right_hand_side,
+           keys
+       },
+    <identifier_name:RegularId> <keys:MapAccess+> ":=" <right_hand_side:VariableIdentifier> => 
+        NodeStatement::MapUpdate {
+            left_hand_side: identifier_name,
+            keys,
+            right_hand_side
+        },
+   "delete" <identifier_name:RegularId> <keys:MapAccess+> => 
+       NodeStatement::MapUpdateDelete {
+           left_hand_side: identifier_name,
+           keys
+       },
+   "accept" => NodeStatement::Accept,
+   "send" <identifier_name:VariableIdentifier> => NodeStatement::Send {
+       identifier_name
+   },
+    "event" <identifier_name:VariableIdentifier> => NodeStatement::CreateEvnt {
+        identifier_name
+    },
+    "throw" <error_variable:VariableIdentifier?> => NodeStatement::Throw {
+        error_variable
+    },
+    "match" <variable:VariableIdentifier> "with" <clauses:PatternMatchClause+> "end" => NodeStatement::MatchStmt {
+        variable,
+        clauses
+    },
+    <component_id:ComponentId> <arguments:VariableIdentifier*> => 
+        NodeStatement::CallProc {
+            component_id,
+            arguments: arguments.to_vec()
+        },
+    "forall" <identifier_name:VariableIdentifier> <component_id:ComponentId> => 
+        NodeStatement::Iterate {
+            identifier_name,
+            component_id
+        }
+}
+
+pub NextStatement :  NodeStatement = {
+	 ";" <statement:Statement>  => statement
+}
+
+
+
+// The rule that defines a Scilla statement block.
+// A Scilla statement block is a sequence of one or more Scilla statements separated by semicolons.
+// A Scilla statement block consists of the following components:
+//
+// <statementBlock> ::= <statement> ';' <statementBlock>
+//                    | <statement>
+//
+// This rule allows for a Scilla statement block to be specified as a sequence of one or more Scilla statements separated by semicolons.
+//
+// @syntax statementBlock
+// @return A Scilla statement block as a sequence of one or more Scilla statements separated by semicolons.
+pub StatementBlock: WithMetaData<NodeStatementBlock> = { 
+	<start:@L> <first_statement: Statement> <statement_list:NextStatement*> <end:@R> => 
+    WithMetaData::<NodeStatementBlock> {
+        node: {
+    		let mut statements: Vec<NodeStatement> = [].to_vec();
+            statements.push(first_statement);
+            for stmt in statement_list {
+                statements.push(stmt);
+            }
+    		NodeStatementBlock {
+    			statements
+    		}
+    	},
+        start,
+        end
+    }
+}
+
+
+// The rule that defines Scilla blockchain fetch arguments.
+// Scilla blockchain fetch arguments are the list of variable identifiers that can be passed to a blockchain fetch function.
+// Scilla blockchain fetch arguments consists of the following components:
+//
+// <blockchainFetchArguments> ::= '(' <variableIdentifier>+ ')'
+//
+// This rule allows for Scilla blockchain fetch arguments to be specified as a list of variable identifiers.
+//
+// @syntax blockchainFetchArguments
+// @return Scilla blockchain fetch arguments as a list of variable identifiers.
+pub BlockchainFetchArguments: NodeBlockchainFetchArguments = {
+    "(" <arguments:VariableIdentifier+> ")" => NodeBlockchainFetchArguments{ arguments }
+}
+
+
+
+// The rule that defines a Scilla component ID.
+// A Scilla component ID specifies an identifier for a Scilla component.
+// A Scilla component ID consists of the following components:
+//
+// <componentId> ::= <typeName> | <specialId> | <regularId>
+// <typeName>    ::= <upperCaseCharacter><alphaNumericUnderscore>*
+// <specialId>   ::= 'ByStr'<digit>+ | 'Event'
+// <regularId>   ::= <lowerCaseCharacterOrUnderscore><alphaNumericUnderscore>*
+//
+// This rule allows for a Scilla component ID to be specified with either a type name identifier or a regular identifier.
+//
+// @syntax componentId
+// @return A Scilla component ID with either an identifier with a type name or an identifier with a regular name.
+pub ComponentId:  WithMetaData<NodeComponentId> = {
+    <start:@L> <identifier:TypeNameIdentifier> <end:@R> => 
+    WithMetaData::<NodeComponentId> {
+        node: NodeComponentId::WithTypeLikeName(identifier),
+        start,
+        end
+    },
+    <start:@L> <identifier:RegularId> <end:@R>  => 
+    WithMetaData::<NodeComponentId> {
+        node: NodeComponentId::WithRegularId(identifier), 
+        start,
+        end
+    }
+
+}
+
+
+
+
+// The rule that defines a Scilla pattern match clause.
+// A Scilla pattern match clause is used to match the patterns of certain values and execute a set of statements accordingly.
+// A Scilla pattern match clause consists of the following components:
+//
+// <patternMatchClause> ::= '|' <pattern> '=>' [<statement> (';' <statement>)*]
+//
+// This rule allows for a Scilla pattern match clause to be specified with a pattern expression and a set of one or more Scilla statements to be executed if the pattern matches.
+//
+// @syntax patternMatchClause
+// @return A Scilla pattern match clause with a pattern expression and a set of one or more Scilla statements to be executed if the pattern matches.
+pub PatternMatchClause: WithMetaData<NodePatternMatchClause> = {
+   <start:@L> "|" <pattern_expression:Pattern> "=>" <statement_block:StatementBlock?> <end:@R>
+   => 
+   WithMetaData::<NodePatternMatchClause> {
+        node: NodePatternMatchClause {
+           pattern_expression: Box::new(pattern_expression),
+           statement_block: statement_block
+       },
+       start,
+       end
+   }
+}
+
+
+
+
+// The rule that defines a Scilla remote fetch statement.
+// A Scilla remote fetch statement is used to fetch data from a remote contract and assign it to a variable.
+// A Scilla remote fetch statement consists of the following components:
+//
+// <remoteFetchStatement> ::= 
+//     <identifierRegular> '<-' '&' <identifierRegular> '.' <variableIdentifier> 
+//   | <identifierRegular> '<-' '&' <identifierSpecial> '.' <identifierSpecial> 
+//   | <identifierRegular> '<-' '&' <identifierRegular> '.' <identifierRegular> <mapAccess>+ 
+//   | <identifierRegular> '<-' '&' 'exists' <identifierRegular> '.' <identifierRegular> <mapAccess>+
+//   | <identifierRegular> '<-' '&' <variableIdentifier> 'as' <addressType> 
+// <identifierRegular> ::= <lowerCaseCharacterOrUnderscore><alphaNumericUnderscore>*
+// <identifierSpecial> ::= "_" <alphaNumericUnderscore>*
+//
+//
+// This rule allows for a Scilla remote fetch statement to be specified with different combinations of the above components.
+//
+// @syntax remoteFetchStatement
+// @return A Scilla remote fetch statement with a left-hand side identifier, an address identifier, and optional member or map key access clauses and address type casting.
+pub RemoteFetchStatement: NodeRemoteFetchStatement = {
+    <left_hand_side:RegularId> "<-" "&"
+    <address_id:RegularId> "." <right_hand_side:VariableIdentifier>
+    => NodeRemoteFetchStatement::ReadStateMutable(
+        left_hand_side,
+        address_id,
+        right_hand_side
+    ),
+    <left_hand_side:RegularId> "<-" "&"
+    <address_id:SpecialId> "." <right_hand_side:SpecialId>
+    => NodeRemoteFetchStatement::ReadStateMutableSpecialId(
+        left_hand_side,
+        address_id,
+        right_hand_side
+    ),    
+    <left_hand_side:RegularId> "<-" "&"
+    <address_id:RegularId> "." <member_id:RegularId>
+    <map_accesses:MapAccess+>
+    => 
+        NodeRemoteFetchStatement::ReadStateMutableMapAccess(
+            left_hand_side,
+            address_id,
+            member_id,
+            map_accesses
+        )
+    ,
+    <left_hand_side:RegularId> "<-" "&" "exists"
+    <address_id:RegularId> "." <member_id:RegularId>
+    <map_accesses:MapAccess+>
+    => {
+        NodeRemoteFetchStatement::ReadStateMutableMapAccessExists(
+            left_hand_side,
+            address_id,
+            member_id,
+            map_accesses
+        )
+    },
+    <left_hand_side:RegularId> "<-" "&"
+    <address_id:VariableIdentifier> "as" <address_type:AddressType>
+    => NodeRemoteFetchStatement::ReadStateMutableCastAddress(
+        left_hand_side,
+        address_id,
+        address_type
+    ),
+}
+
+
+// The rule that defines a map access in Scilla.
+// A map access is a way to access a value in a Scilla map using a variable identifier.
+// A map access consists of the following components:
+//
+// <mapAccess> ::= "[" <variableIdentifier> "]"
+//
+// This rule allows for map access to be performed in a Scilla program.
+//
+// @syntax mapAccess
+// @return A map access as a variable identifier name in a Scilla map.
+pub MapAccess: WithMetaData<NodeMapAccess> = {
+    <start:@L> "[" <identifier_name:VariableIdentifier> "]" <end:@R> => WithMetaData::<NodeMapAccess> {
+        node:NodeMapAccess {identifier_name},
+        start,
+        end
+    } 
+};
+
+
+// The rule that defines a Scilla parameter pair.
+// A Scilla parameter pair specifies a parameter of a Scilla contract.
+// A Scilla parameter pair consists of the following components:
+//
+// <parameterPair> ::= <typedIdentifier>
+//
+// This rule allows for a Scilla parameter pair to be specified with an identifier with type.
+//
+// @syntax parameterPair
+// @return A Scilla parameter pair with an identifier with type.
+pub ParameterPair: WithMetaData<NodeParameterPair> = {
+    <start:@L> <identifier_with_type: TypedIdentifier> <end:@R>
+    => 
+    WithMetaData::<NodeParameterPair> {
+        node:  NodeParameterPair { identifier_with_type },
+        start,
+        end
+    }
+
+}
+
+
+pub NextParameterPair: WithMetaData<NodeParameterPair> = {
+    "," <p: ParameterPair>  => p
+}
+
+
+// The rule that defines Scilla component parameters.
+// A Scilla component parameter specifies a parameter of a Scilla component.
+// A Scilla component parameter consists of the following components:
+//
+// <componentParameters> ::= '(' [<parameterPair> (',' <parameterPair>)*]? ')' 
+//
+// This rule allows for Scilla component parameters to be specified with zero or more parameter pairs.
+//
+// @syntax componentParameters
+// @return Scilla component parameters with zero or more parameter pairs.
+pub ComponentParameters : WithMetaData<NodeComponentParameters> = {
+   <start:@L> "(" 
+   <p:ParameterPair?> <next_params:NextParameterPair*>
+   ")" <end:@R>
+   => WithMetaData::<NodeComponentParameters> {
+       node: {
+           let mut parameters: Vec<WithMetaData<NodeParameterPair>> = Vec::new();
+           if let Some(pair) = p {
+    	        parameters.push(pair);
+           }
+
+           for p in next_params {
+               parameters.push(p);
+           }
+
+           NodeComponentParameters { parameters }
+       },
+       start,
+       end
+    }
+};
+
+
+
+// The rule that defines a Scilla component definition.
+// A Scilla component definition specifies a component of a Scilla contract, which can either be a transition or a procedure.
+// A Scilla component definition consists of the following components:
+//
+// <componentDefinition> ::= <transitionDefinition> | <procedureDefinition>
+//
+// This rule allows for a Scilla component definition to be specified with either a transition definition or a procedure definition.
+//
+// @syntax componentDefinition
+// @return A Scilla component definition with either a transition definition or a procedure definition.
+pub ComponentDefinition: WithMetaData<NodeComponentDefinition> = {
+    <start:@L> <definition:TransitionDefinition> <end:@R> => 
+    WithMetaData::<NodeComponentDefinition> { 
+        node: NodeComponentDefinition::TransitionComponent(Box::new(definition)),
+        start,
+        end
+    },
+    <start:@L> <definition:ProcedureDefinition> <end:@R> => WithMetaData::<NodeComponentDefinition> {
+        node: NodeComponentDefinition::ProcedureComponent(Box::new(definition)),
+        start,
+        end
+    }
+}    
+
+
+
+// The rule that defines a Scilla transition definition.
+// A Scilla transition definition specifies a transition of a Scilla contract.
+// A Scilla transition definition consists of the following components:
+//
+// <transitionDefinition> ::= 'transition' <componentId> <componentParameters> <componentBody>
+//
+// This rule allows for a Scilla transition definition to be specified with a name, parameters, and body.
+//
+// @syntax transitionDefinition
+// @return A Scilla transition definition with a name, parameters, and body.
+pub TransitionDefinition : WithMetaData<NodeTransitionDefinition> = 
+<start:@L> "transition" <name:ComponentId> <parameters:ComponentParameters> <body:ComponentBody> <end:@R> => 
+    WithMetaData::<NodeTransitionDefinition> {
+        node: NodeTransitionDefinition{name, parameters, body },
+        start,
+        end
+    };
+
+
+
+// The rule that defines a Scilla procedure definition.
+// A Scilla procedure definition specifies a procedure of a Scilla contract.
+// A Scilla procedure definition consists of the following components:
+//
+// <procedureDefinition> ::= "procedure" <componentId> <componentParameters> <componentBody>
+// 
+// This rule allows for a Scilla procedure definition to be specified with a name, parameters, and body.
+//
+// @syntax procedureDefinition
+// @return A Scilla procedure definition with a name, parameters, and body.
+pub ProcedureDefinition: WithMetaData<NodeProcedureDefinition> = {
+    <start:@L> "procedure" 
+    <name: ComponentId>
+    <parameters:ComponentParameters>
+    <body: ComponentBody> <end:@R>
+    => WithMetaData::<NodeProcedureDefinition> {
+        node: NodeProcedureDefinition{name,parameters,body } ,
+        start,
+        end
+    }
+};
+
+
+// The rule that defines a Scilla component body.
+// A component body specifies the body of a Scilla component.
+// A component body consists of the following components:
+//
+// <componentBody> ::= [<statementBlock>] "end"
+//
+// This rule allows for a component body to be specified with an optional statement block.
+//
+// @syntax componentBody
+// @return A Scilla component body with an optional statement block.
+pub ComponentBody: WithMetaData<NodeComponentBody> = {
+        <start:@L> <statement_block:StatementBlock?> "end" <end:@R> => WithMetaData::<NodeComponentBody>{ 
+            node: NodeComponentBody{ statement_block },
+            start,
+            end
+        }
+    }
+;
+
+
+
+// The rule that defines a Scilla contract definition.
+// A contract definition specifies the main contract of a Scilla program.
+// A contract definition consists of the following components:
+//
+//
+// <contractDefinition> ::= 'contract' <contractName> '(' <contractParameters> ')' [<withConstraint>] [<field>*] [<componentDefinition>*]
+// <contractName> ::= <upperCaseCharacter><alphaNumericUnderscore>* | 'ByStr' <digit>+ | 'Event'
+// <contractParameters> ::= [<parameterPair> (',' <parameterPair>)*] 
+//
+// This rule allows for a contract definition to be specified with optional parameters, constraint, fields, and components.
+//
+// @syntax contract
+// @return A Scilla contract definition with a name, optional parameters, optional constraint, zero or more fields, and zero or more components.
+
+pub ContractDefinition: WithMetaData<NodeContractDefinition> = {
+    <start:@L> "contract" <contract_name:TypeNameIdentifier>
+        <parameters:ComponentParameters>
+        <constraint:WithConstraint?>
+        <fields:ContractField*>
+        <components:ComponentDefinition*> <end:@R>
+    => WithMetaData::<NodeContractDefinition> {
+        node: NodeContractDefinition {
+            contract_name,
+            parameters,
+            constraint,
+            fields,
+            components
+        },
+        start,
+        end
+    }
+};
+
+
+
+
+
+// The rule that defines a Scilla contract field.
+// A contract field specifies a variable that belongs to the contract state.
+// A contract field consists of the following components:
+//
+// <contractField> ::= "field" <typedIdentifier> "=" <fullExpression>
+//
+// This rule allows for a contract field to be specified with a typed identifier and a right-hand side expression.
+//
+// @syntax contractField
+// @return A Scilla contract field with a typed identifier and a right-hand side expression.
+
+pub ContractField : WithMetaData<NodeContractField> = 
+    <start:@L> "field" <typed_identifier:TypedIdentifier> "=" <right_hand_side:FullExpression> <end:@R>
+    => WithMetaData::<NodeContractField> {
+        node: NodeContractField{ typed_identifier, right_hand_side },
+        start,
+        end
+    };
+
+
+// The rule that defines a Scilla contract constraint.
+// A contract constraint specifies a condition that must be satisfied for the contract to be valid.
+// A contract constraint consists of the following components:
+//
+// <withConstraint> ::= "with" <fullExpression> "=>"
+//
+// This rule allows for a contract constraint to be specified with a boolean expression.
+//
+// @syntax withConstraint
+// @return A Scilla contract constraint with a boolean expression.
+pub WithConstraint: WithMetaData<NodeWithConstraint> = 
+    <start:@L> "with" <expression:FullExpression> "=>" <end:@R> => 
+    WithMetaData::<NodeWithConstraint> {
+        node: NodeWithConstraint { expression: Box::new(expression) },
+        start,
+        end
+    };    
+
+
+
+
+HexNumber: WithMetaData<String> = {
+   <start:@L> <node:r"0(x|X)([a-fA-F0-9][a-fA-F0-9])*"> <end:@R>  => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
+}
+
+
+// The rule that defines a Scilla integer.
+// A Scilla integer is a numeric value that can be positive or negative.
+// A Scilla integer consists of the following components:
+//
+// <integer> ::= ['-'] <digit>+
+//
+// This rule allows for Scilla integers to be specified as a numeric value that can be positive or negative.
+//
+// @syntax integer
+// @return A Scilla integer as a numeric value that can be positive or negative. 
+
+SignedInteger: WithMetaData<String> = {
+    <start:@L> <node:r"[+-]?[0-9]+"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
+}
+
+
+// The rule that defines a regular identifier in Scilla.
+// A regular identifier is a name that can be used to identify a variable or a function in a Scilla program.
+// A regular identifier consists of one or more characters from the following set:
+//
+// <identiferRegular> ::= <lowerCaseCharacterOrUnderscore> <alphaNumericUnderscore>* 
+//
+// This rule allows for regular identifiers to be defined in a Scilla program.
+//
+// @syntax identifierRegular
+// @return A regular identifier as a name that can be used to identify a variable or a function in a Scilla program.
+RegularId: WithMetaData<String> = {
+	<start:@L> <node:r"[a-z][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
+}
+
+
+// The rule that defines a special identifier in Scilla.
+// A special identifier is an identifier in a Scilla contract that starts with an underscore followed by alphanumeric characters.
+// 
+// <identiferSpecial> ::= "_" <alphaNumericUnderscore>*
+//
+// @syntax identifierSpecial
+// @return A special identifier as an identifier that starts with an underscore followed by alphanumeric characters.
+SpecialId: WithMetaData<String>  = {
+	<start:@L> <node:r"[_][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
+}
+
+
+// The rule that defines a custom type name in Scilla.
+// A custom type name is a user-defined type name in a Scilla contract.
+// A custom type name consists of a custom type identifier.
+//
+// <typeTypeOrEnumLikeIdentifierName> ::= <upperCaseCharacter> <alphaNumericUnderscore>* ;
+//
+// This rule allows for custom type names to be defined in a Scilla contract.
+//
+// @syntax typeTypeOrEnumLikeIdentifierName
+// @return A custom type name as a user-defined type name in a Scilla contract.
+TypeOrEnumLikeIdentifierId: WithMetaData<String> = {
+	<start:@L> <node:r"[A-Z][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    } 
+}
+
+TemplateTypeId: WithMetaData<String>  = {
+	<start:@L> <node:r"['][A-Z][a-zA-Z0-9_]*"> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    }
+}
+
+StringLiteral: WithMetaData<String> = {
+	<start:@L> <node:r#""(?:\\.|[^"])*""#> <end:@R> => WithMetaData::<String> {
+        node: node.to_string(),
+        start,
+        end
+    }
+}
+
+

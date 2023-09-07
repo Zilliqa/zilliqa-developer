@@ -67,6 +67,18 @@
       "pattern": "^https://stg-indexer-api.rialto.studio/zilliqa"
     },
     {
+      "pattern": "^http://evm-api-filters.zilliqa.com/"
+    },
+    {
+      "pattern": "^http://evm-api-filters-dev.zilliqa.com/"
+    },
+    {
+      "pattern": "^https://api.testnet.zilliqa.com/"
+    },
+    {
+      "pattern": "^http://evm-api-filters.testnet.zilliqa.com/"
+    },
+    {
       "pattern": "^https://coq.inria.fr"
     }
   ],
