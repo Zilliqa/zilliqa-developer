@@ -35,8 +35,6 @@ pub struct EvmBytecodeGenerator<'ctx> {
     /// it's translated into the target bytecode.
     ir: Box<IntermediateRepresentation>,
 
-    // TODO: State allocation - TODO: move to IR and setup using pass
-
 }
 
 impl<'ctx> EvmBytecodeGenerator<'ctx> {
@@ -359,8 +357,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         None => panic!(
                                             "{}",
                                             format!(
-                                                "Unable to find state {}",
-                                                address.name.unresolved
+                                                "Unable to find state {} (storing {})",
+                                                address.name.unresolved, value.unresolved
                                             )
                                         ),
                                     };
@@ -395,8 +393,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         None => panic!(
                                             "{}",
                                             format!(
-                                                "Unable to find state {}",
-                                                address.name.unresolved
+                                                "Unable to find state {} (loading to {})",
+                                                address.name.unresolved,
+                                                value.unresolved
                                             )
                                         ),
                                     };

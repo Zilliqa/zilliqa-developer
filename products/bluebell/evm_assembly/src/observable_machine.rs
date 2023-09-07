@@ -13,6 +13,7 @@ pub struct ObservableMachine {
     pub positions_visited: HashMap<u32, u32>,
     pub failed: bool,
     pub error_message: Option<String>,
+    pub storage: HashMap<String, String>,
 }
 
 impl ObservableMachine {
@@ -28,6 +29,7 @@ impl ObservableMachine {
             positions_visited: HashMap::new(),
             failed: false,
             error_message: None,
+            storage: HashMap::new(),
         }
     }
 
@@ -40,6 +42,19 @@ impl ObservableMachine {
                 }
                 Trap(opcode) => {
                     match opcode {
+                        Opcode::SSTORE => {
+                            let stack = self.machine.stack_mut();
+                            let address = match stack.pop() {
+                                Ok(v) => v,
+                                Err(_) => panic!("Stack empty!"),
+                            };
+                            let value = match stack.pop() {
+                                Ok(v) => v,
+                                Err(_) => panic!("Stack empty!"),
+                            };
+
+                            self.storage.insert(address.to_string(), value.to_string());
+                        }
                         Opcode::STATICCALL => {
                             // Emulating static call
                             // TODO: Attach runtime!
@@ -58,7 +73,7 @@ impl ObservableMachine {
                         _ => {
                             self.failed = true;
                             self.error_message = Some(format!("{:?}", opcode).to_string());
-                            panic!("Unhandled trap opcode.")
+                            panic!("Unhandled trap opcode {:?}", opcode)
                         }
                     }
                 }

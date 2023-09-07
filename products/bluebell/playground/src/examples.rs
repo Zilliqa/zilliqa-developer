@@ -13,7 +13,7 @@ end
 "#,
     ),
     (
-        "Hello state",
+        "State store",
         r#"scilla_version 0
 
 library HelloWorld
@@ -22,7 +22,7 @@ field welcome_msg : Uint64 = Uint64 0
 
 transition setHello ()
   x = Uint64 1;
-  welcome_msg <- x
+  welcome_msg := x
 end
 "#,
     ),
