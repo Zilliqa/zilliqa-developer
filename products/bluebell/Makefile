@@ -5,7 +5,7 @@ all: image/build-and-push
 SHELL := /bin/bash
 .SHELLFLAGS = -ec
 
-IMAGE_TAG ?= localhost:5001/eth-spout:latest
+IMAGE_TAG ?= localhost:5001/bluebell-playground:latest
 
 ## Build and push the Docker image
 image/build-and-push:
