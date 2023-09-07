@@ -9,9 +9,11 @@ use yewdux::prelude::*;
 
 use crate::bytecode_view::ByteCodeView;
 use crate::dropdown::Dropdown;
+use crate::examples::EXAMPLES;
 use crate::machine_view::MachineView;
 use crate::state::{State, StateMessage};
 use crate::vm_remote::VmRemoteControl;
+use gloo_timers::callback::Timeout;
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {
@@ -76,7 +78,17 @@ impl Component for AppLayout {
         let stop_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
 
         let run_button_click = Callback::from(move |_| {
-            console::log!("Run Button clicked 2");
+            let dispatch = Dispatch::<State>::new();
+            dispatch.reduce_mut(move |s| {
+                s.playing = !s.playing;
+                if s.playing {
+                    Timeout::new(500, move || {
+                        let dispatch = Dispatch::<State>::new();
+                        dispatch.apply(StateMessage::RunStep);
+                    })
+                    .forget();
+                }
+            });
         });
 
         let generate_menu = {
@@ -105,140 +117,151 @@ impl Component for AppLayout {
         };
 
         html! {
-                <div class="pl-20 h-screen w-screen">
-                  <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
-                    <div class="fixed inset-0 bg-gray-900/80"></div>
+        <div class="pl-20 h-screen w-screen">
+          <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-900/80"></div>
 
-                    <div class="fixed inset-0 flex">
-                      <div class="relative mr-16 flex w-full max-w-xs flex-1">
-                        <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
-                          <button type="button" class="-m-2.5 p-2.5">
-                            <span class="sr-only">{"Close sidebar"}</span>
-                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-
-                        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
-                          <div class="flex h-16 shrink-0 items-center">
-                            <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
-                          </div>
-                        <nav class="flex flex-1 flex-col">
-                            <ul role="list" class="-mx-2 flex-1 space-y-1">
-                                { for self.props.menu.iter().map(|item| generate_menu(item, false)) }
-                            </ul>
-                        </nav>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  /* Static sidebar for desktop */
-                  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-20 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
-                    <div class="flex h-16 shrink-0 items-center justify-center">
-                      <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" />
-                    </div>
-                        <nav class="mt-8">
-                            <ul role="list" class="flex flex-col items-center space-y-1">
-                                { for self.props.menu.iter().map(|item| generate_menu(item, true)) }
-                            </ul>
-                        </nav>
-                  </div>
-
-                  <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-                    <button type="button" class="-m-2.5 p-2.5 text-gray-400 lg:hidden">
-                      <span class="sr-only">{"Open sidebar"}</span>
-                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                      </svg>
-                    </button>
-                    <div class="flex-1 text-sm font-semibold leading-6 text-white">{"Dashboard"}</div>
-                    <a href="#">
-                      <span class="sr-only">{"Your profile"}</span>
-                      <img class="h-8 w-8 rounded-full bg-gray-800" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
-                    </a>
-                  </div>
-
-                  <main class="h-full w-full">
-                    <div class="xl:pr-96 h-full">
-                      <div class="relative h-full w-full">
-                        { for self.props.children.iter() }
-                        /* Main area */
-                      </div>
-                    </div>
-                  </main>
-                  <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
-                    {
-                        if let Some(executable) = &self.state.executable {
-                            html! { <ByteCodeView executable={executable} data={""} program_counter={self.state.program_counter} /> }
-                        } else {
-                            html! {
-                                <div>{"Nothing compiled yet."}</div>
-                            }
-                        }
-                    }
-                  </aside>
-                    {
-                              if let Some(_) = &self.state.executable {
-                                html!{
-        <VmRemoteControl>
-            <div class="flex flex-col items-center space-y-4">
-
-                <div
-                    class="p-2 bg-zinc-900 w-full text-gray-100 rounded-md flex items-center space-x-2"
-                >
-                    <span class="font-bold">{"PC:"}</span>
-                    <span>{format!("0x{:02x}", self.state.program_counter)}</span>
-                    <span>{format!("({})", self.state.program_counter)}</span>
+            <div class="fixed inset-0 flex">
+              <div class="relative mr-16 flex w-full max-w-xs flex-1">
+                <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
+                  <button type="button" class="-m-2.5 p-2.5">
+                    <span class="sr-only">{"Close sidebar"}</span>
+                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
 
-                <div class="flex items-center space-x-4">
-
-                        <button
-                        class="flex items-center justify-center bg-blue-600 text-white w-12 h-12 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
-                        onclick={step_button_click.clone()}
-                    >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
-        </svg>
-
-                    </button>
-
-                        <button
-                        class="flex items-center justify-center bg-green-600 text-white w-14 h-14 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-center"
-                        onclick={run_button_click.clone()}
-                    >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-        </svg>
-
-                    </button>
-
-                        <button
-                        class="flex items-center justify-center bg-red-600 text-white w-10 h-10 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
-                        onclick={stop_button_click.clone()}
-                    >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-        </svg>
-
-                    </button>
-
+                <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
+                  <div class="flex h-16 shrink-0 items-center">
+                    <img class="h-8 w-auto" src="img/logo.png" alt="Your Company" />
+                  </div>
+                <nav class="flex flex-1 flex-col">
+                    <ul role="list" class="-mx-2 flex-1 space-y-1">
+                        { for self.props.menu.iter().map(|item| generate_menu(item, false)) }
+                    </ul>
+                </nav>
                 </div>
+              </div>
             </div>
-        </VmRemoteControl>
+          </div>
 
+          /* Static sidebar for desktop */
+          <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-20 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
+            <div class="flex h-16 shrink-0 items-center justify-center">
+              <img class="h-8 w-auto" src="img/logo.png" alt="Your Company" />
+            </div>
+                <nav class="mt-8">
+                    <ul role="list" class="flex flex-col items-center space-y-1">
+                        { for self.props.menu.iter().map(|item| generate_menu(item, true)) }
+                    </ul>
+                </nav>
+          </div>
 
-                            }
-                            } else {
-                                html! {}
+          <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
+            <button type="button" class="-m-2.5 p-2.5 text-gray-400 lg:hidden">
+              <span class="sr-only">{"Open sidebar"}</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <div class="flex-1 text-sm font-semibold leading-6 text-white">{"Dashboard"}</div>
+            <a href="#">
+              <span class="sr-only">{"Your profile"}</span>
+              <img class="h-8 w-8 rounded-full bg-gray-800" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
+            </a>
+          </div>
 
-                            }
+          <main class="h-full w-full">
+            <div class="xl:pr-96 h-full">
+              <div class="relative h-full w-full">
+                { for self.props.children.iter() }
+                /* Main area */
+              </div>
+            </div>
+          </main>
+          <aside class="bg-white fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
+            {
+                if let Some(executable) = &self.state.executable {
+                    html! { <ByteCodeView executable={executable} data={""} program_counter={self.state.program_counter} /> }
+                } else {
+                    html! {
+                        <div>{"Nothing compiled yet."}</div>
+                    }
+                }
+            }
+          </aside>
+            {
+                      if let Some(_) = &self.state.executable {
+                        html!{
+                            <VmRemoteControl>
+                                <div class="flex flex-col items-center space-y-4">
+
+                                    <div
+                                        class="p-2 bg-zinc-900 w-full text-gray-100 rounded-md flex items-center space-x-2"
+                                    >
+                                        <span class="font-bold">{"PC:"}</span>
+                                        <span>{format!("0x{:02x}", self.state.program_counter)}</span>
+                                        <span>{format!("({})", self.state.program_counter)}</span>
+                                    </div>
+
+                                    <div class="flex items-center space-x-4">
+
+                                        <button
+                                            class="flex items-center justify-center bg-blue-600 text-white w-12 h-12 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
+                                            onclick={step_button_click.clone()}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
+                                            </svg>
+
+                                        </button>
+
+                                        <button
+                                            class="flex items-center justify-center bg-green-600 text-white w-14 h-14 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-center"
+                                            onclick={run_button_click.clone()}
+                                        >
+                                            {
+                                                if self.state.playing {
+                                                    html!{
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                                                        </svg>
+                                                    }
+                                                } else {
+                                                    html! {
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                                        </svg>
+                                                    }
+                                                }
+                                            }
+
+                                        </button>
+
+                                        <button
+                                            class="flex items-center justify-center bg-red-600 text-white w-10 h-10 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
+                                            onclick={stop_button_click.clone()}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                                            </svg>
+
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </VmRemoteControl>
 
                         }
-                </div>
-                        }
+                    } else {
+                        html! {}
+
+                    }
+
+                }
+        </div>
+                }
     }
 }
 
@@ -267,10 +290,17 @@ pub fn app() -> Html {
 
         Callback::from(move |_| {
             let dispatch = Dispatch::<State>::new();
-            dispatch.apply(StateMessage::CompileCode {
-                source_code: source_code.to_string(),
-            });
-            console::log!("Was here??");
+            dispatch.reduce_mut(move |s| s.compiling = true);
+
+            // Adding delay for improved UX
+            let source_code = source_code.clone();
+            Timeout::new(500, move || {
+                let dispatch = Dispatch::<State>::new();
+                dispatch.apply(StateMessage::CompileCode {
+                    source_code: source_code.to_string(),
+                });
+            })
+            .forget();
         })
     };
 
@@ -282,7 +312,6 @@ pub fn app() -> Html {
     let handle_source_code_change = {
         Dispatch::<State>::new().reduce_mut_callback_with(move |s, e: InputEvent| {
             let value = target_input_value(&e);
-
             s.source_code = value
         })
     };
@@ -323,6 +352,8 @@ pub fn app() -> Html {
 
     ].to_vec();
 
+    let is_compiling = state.compiling;
+
     html! {
         <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
 
@@ -332,7 +363,17 @@ pub fn app() -> Html {
                     <div class="h-full w-full pl-10 bg-black">
                             <div class="editor-container h-full w-full bg-black  text-white text-left font-mono">
                                 <div class="w-full flex items-center justify-center py-2">
-                                    <Dropdown items={["hello".to_string(), "world".to_string()].to_vec()}    on_item_click={|_v| {}}    />
+                                    <Dropdown items={EXAMPLES.iter().map(|item| item.0.to_string()).collect::<Vec<_>>()}    on_item_click={|i:usize| {
+                                        let value: String = EXAMPLES[i].1.to_string().clone();
+                                        Dispatch::<State>::new().reduce_mut(move | s| {
+                                            s.program_counter = 0;
+                                            s.executable = None;
+                                            s.observable_machine = None;
+                                            s.pc_to_position = HashMap::new();
+                                            s.current_position = None;
+                                            s.source_code = value
+                                        })
+                                    }}    />
                                 </div>
                                 {
                                     if let Some(p) = state.current_position {
@@ -371,13 +412,29 @@ pub fn app() -> Html {
                                     }
                                 })}
                             </div>
-                                <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
-                                    <button class="h-16 w-16 bg-indigo-600 text-lg text-white px-6 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150" onclick={compile_button_click.clone()}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                                        </svg>
-                                    </button>
-                                </div>
+
+                            <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
+                                <button onclick={compile_button_click.clone()} class={
+                                    if state.executable.is_none() {
+                                        "ease-in-out delay-150 transition transition-opacity opacity-1 h-16 w-16 bg-indigo-600 text-lg text-white px-2 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150 flex items-center justify-center"
+                                    } else {
+                                        "ease-in-out delay-150 transition transition-opacity opacity-0 h-16 w-16 bg-indigo-600 text-lg text-white px-2 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150 flex items-center justify-center"
+                                    }
+                                }>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class={
+                                        if is_compiling {
+                                            "w-6 h-6 animate-spin"
+                                        } else {
+                                            "w-6 h-6"
+                                        }
+                                    }>
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
+                                    </svg>
+                                </button>
+                            </div>
+
+
+
                     </div>
                 }
 

@@ -7,11 +7,12 @@ use bluebell::support::modules::ScillaDefaultTypes;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::observable_machine::ObservableMachine;
 use gloo_console as console;
+use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-
+use yewdux::prelude::Dispatch;
 use yewdux::prelude::Reducer;
 use yewdux::store::Store;
 
@@ -22,6 +23,12 @@ pub struct State {
 
     pub pc_to_position: HashMap<usize, (usize, usize, usize, usize)>,
     pub current_position: Option<(usize, usize, usize, usize)>,
+
+    #[serde(skip)]
+    pub compiling: bool,
+
+    #[serde(skip)]
+    pub playing: bool,
 
     #[serde(skip)]
     pub bytecode_hex: String,
@@ -65,6 +72,8 @@ transition setHello ()
 end
 "#,
             ),
+            compiling: false,
+            playing: false,
             bytecode_hex: "".to_string(),
             executable: None,
             observable_machine: None,
@@ -108,6 +117,9 @@ impl Reducer<State> for StateMessage {
                 compiler.attach(&default_types);
                 compiler.attach(&default_builtins);
                 compiler.attach(&debug);
+
+                state.compiling = false;
+                state.playing = false;
                 if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
                     state.source_code = source_code.clone();
                     state.bytecode_hex = hex::encode(&exec.executable.bytecode.clone());
@@ -151,6 +163,8 @@ impl Reducer<State> for StateMessage {
                 state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
                     code, data, 1024, 1024,
                 ))));
+                state.compiling = false;
+                state.playing = false;
                 true
             }
             StateMessage::RunStep => {
@@ -170,7 +184,13 @@ impl Reducer<State> for StateMessage {
                     };
 
                     console::log!("New PC:", state.program_counter);
-
+                    if state.playing {
+                        Timeout::new(500, move || {
+                            let dispatch = Dispatch::<State>::new();
+                            dispatch.apply(StateMessage::RunStep);
+                        })
+                        .forget();
+                    }
                     true
                 } else {
                     false
@@ -196,6 +216,8 @@ impl Clone for State {
         };
         Self {
             source_code: self.source_code.clone(),
+            compiling: self.compiling,
+            playing: self.playing,
             executable,
             observable_machine,
             program_counter: self.program_counter,
@@ -235,6 +257,8 @@ impl PartialEq for State {
             && self.bytecode_hex == other.bytecode_hex
             && self.pc_to_position == other.pc_to_position
             && self.current_position == other.current_position
+            && self.compiling == other.compiling
+            && self.playing == other.playing
     }
 }
 

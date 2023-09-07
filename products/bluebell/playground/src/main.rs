@@ -1,6 +1,7 @@
 mod app;
 mod bytecode_view;
 mod dropdown;
+mod examples;
 mod machine_view;
 mod state;
 mod vm_remote;

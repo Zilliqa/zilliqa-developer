@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Properties, Clone, PartialEq)]
 pub struct DropdownProps {
     pub items: Vec<String>,
-    pub on_item_click: Callback<String>,
+    pub on_item_click: Callback<usize>,
 }
 
 #[function_component(Dropdown)]
@@ -35,14 +35,13 @@ pub fn dropdown(props: &DropdownProps) -> Html {
                     html! {
                         <div class="z-10 mt-2 w-56 max-h-56 rounded-md bg-white" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                             <div class="py-1 h-24 overflow-y-auto" role="none">
-                                { for items.iter().map(|item| {
+                                { for items.iter().enumerate().map(|(i, item)| {
                                 let item_click = {
                                     let orig_item_click = on_item_click.clone();
-                                    let item = item.clone();
                                     let toggle_dropdown = toggle_dropdown.clone();
                                     move |e| {
-                                        toggle_dropdown(e); // Depending on the type of e, you may need to clone it.
-                                        orig_item_click.emit(item.clone()); // Clone item here.
+                                        toggle_dropdown(e);
+                                        orig_item_click.emit(i);
                                     }
                                 };
 
