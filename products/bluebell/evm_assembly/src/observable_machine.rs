@@ -4,6 +4,7 @@ use evm::Machine;
 use evm::Opcode;
 use log::info;
 use primitive_types::H256;
+use std::str::FromStr;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -54,6 +55,23 @@ impl ObservableMachine {
                             };
 
                             self.storage.insert(address.to_string(), value.to_string());
+                        }
+
+                        Opcode::SLOAD => {
+                            let stack = self.machine.stack_mut();
+                            let address = match stack.pop() {
+                                Ok(v) => v,
+                                Err(_) => panic!("Stack empty!"),
+                            };
+
+                            let value = match self.storage.get(&address.to_string()) {
+                                Some(v) => v.clone(),
+                                None => panic!("Unable to find value!"),
+                            };
+
+                            let _ = stack.push(
+                                H256::from_str(&value).expect("Failed to convert state to H256"),
+                            );
                         }
                         Opcode::STATICCALL => {
                             // Emulating static call
