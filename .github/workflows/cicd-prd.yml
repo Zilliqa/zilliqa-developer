@@ -1,10 +1,6 @@
 name: "CICD production"
 
 on:
-  # Test run before merging
-  pull_request:
-    branches:
-      - main
   # On merged
   push:
     branches:
@@ -19,20 +15,22 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
-    name: "Build and push images"
+    if: github.actor != 'dependabot[bot]'
+    name: "Deploy image"
     strategy:
       fail-fast: false
       matrix:
-        application: [eth-spout, bluebell-playground]
+        application: [bluebell-playground, eth-spout, neo-savant]
         include:
-          - application: eth-spout
-            image_name: eth-spout
-            path: products/eth-spout
           - application: bluebell-playground
             image_name: bluebell-playground
             path: products/bluebell
-
+          - application: eth-spout
+            image_name: eth-spout
+            path: products/eth-spout
+          - application: neo-savant
+            image_name: neo-savant
+            path: products/neo-savant
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
@@ -44,7 +42,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
 
-      - name: "Authenticate to Google Cloud - prod"
+      - name: "Authenticate to Google Cloud - production"
         id: google-auth
         uses: "google-github-actions/auth@v1"
         with:
@@ -53,24 +51,37 @@ jobs:
           service_account: "${{ secrets.GCP_PRD_GITHUB_SA_DOCKER_REGISTRY }}"
           create_credentials_file: true
 
-      - name: Login to the registry - prod
+      - name: Login to the registry - production
         uses: docker/login-action@v2
         with:
           registry: ${{ env.DOCKER_DOMAIN }}
           username: "oauth2accesstoken"
           password: "${{ steps.google-auth.outputs.access_token }}"
 
-      - name: Get tag version - prod
+      - name: Get tag version - production
+        if: github.event_name == 'push'
         id: set-tag
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:
           tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
           length: 8
 
-      - name: "Build and push ${{ matrix.application }} - prod"
+      - name: "Build and push ${{ matrix.application }} - production"
+        if: github.event_name == 'push'
         env:
-          ENVIRONMENT: stg
+          ENVIRONMENT: prd
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
+      - name: "Build and push ${{ matrix.application }} - production"
+        if: github.event_name == 'release'
+        env:
+          ENVIRONMENT: prd
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ github.ref_name }}
+          ENV_FILES_DECRYPTER_NONPRD: ${{ secrets.ENV_FILES_DECRYPTER_NONPRD }}
+          ENV_FILES_DECRYPTER_PRD: ${{ secrets.ENV_FILES_DECRYPTER_PRD }}
         run: |
           cd ${{ matrix.path }}
           make image/build-and-push
