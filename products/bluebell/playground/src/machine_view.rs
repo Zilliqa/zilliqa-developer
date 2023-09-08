@@ -55,7 +55,7 @@ impl Component for MachineView {
         let machine = &(observable_machine.borrow()).machine;
 
         html! {
-            <div class="bg-black min-h-full max-h-full h-screen w-full p-4">
+            <div class="bg-black min-h-full w-full p-4">
                 <h2 class="text-xl font-bold mb-4">{"EVM Machine State"}</h2>
                 <div class="grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2 gap-4">
                     <div class="p-4">
