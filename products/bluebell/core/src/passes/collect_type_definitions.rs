@@ -116,6 +116,7 @@ impl IrPass for CollectTypeDefinitionsPass {
 
         field.variable.visit(self, symbol_table)?;
         field.initializer.visit(self, symbol_table)?;
+        info!("Analyzing field {:?}", field.variable);
 
         self.pop_namespace();
         Ok(TraversalResult::SkipChildren)

@@ -64,6 +64,10 @@ impl SymbolTable {
         ret
     }
 
+    pub fn is_state(&self, name: &String) -> bool {
+        self.state_layout.get(name).is_some()
+    }
+
     pub fn resolve_qualified_name(
         &mut self,
         basename: &String,

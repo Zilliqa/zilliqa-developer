@@ -1,4 +1,4 @@
-pub static EXAMPLES: [(&str, &str); 4] = [
+pub static EXAMPLES: [(&str, &str); 3] = [
     (
         "Hello Builtin",
         r#"scilla_version 0
@@ -13,7 +13,7 @@ end
 "#,
     ),
     (
-        "Hello state",
+        "State store",
         r#"scilla_version 0
 
 library HelloWorld
@@ -22,7 +22,8 @@ field welcome_msg : Uint64 = Uint64 0
 
 transition setHello ()
   x = Uint64 1;
-  welcome_msg <- x
+  welcome_msg := x;
+  y <- welcome_msg
 end
 "#,
     ),
@@ -50,29 +51,31 @@ transition setHello ()
 end
 "#,
     ),
-    (
-        "Not working 1",
-        r#"scilla_version 0
+    /*
+        (
+            "Not working 1",
+            r#"scilla_version 0
 
-library HelloWorld
-contract HelloWorld()
+    library HelloWorld
+    contract HelloWorld()
 
-field welcome_msg : Uint64 = Uint64 0
-transition setHelloImpl(msg: Uint64)
-  welcome_msg := msg
-end
+    field welcome_msg : Uint64 = Uint64 0
+    transition setHelloImpl(msg: Uint64)
+      welcome_msg := msg
+    end
 
-transition setHello (msg : Uint64)
-  setHelloImpl msg;
-  msg <- welcome_msg;
-  x = builtin print msg
-end
+    transition setHello (msg : Uint64)
+      setHelloImpl msg;
+      msg <- welcome_msg;
+      x = builtin print msg
+    end
 
 
-transition printState()
-  msg <- welcome_msg;
-  x = builtin print msg
-end
-"#,
-    ),
+    transition printState()
+      msg <- welcome_msg;
+      x = builtin print msg
+    end
+    "#,
+        ),
+        */
 ];

@@ -863,7 +863,7 @@ impl AstConverting for IrEmitter {
                     resolved: None,
                     type_reference: None,
                     kind: IrIndentifierKind::VirtualRegister,
-                    is_definition: false,
+                    is_definition: true,
                     source_location: self.current_location(),
                 };
 
@@ -873,7 +873,7 @@ impl AstConverting for IrEmitter {
                 };
 
                 let ret = Box::new(Instruction {
-                    ssa_name: None,
+                    ssa_name: Some(symbol),
                     result_type: None,
                     operation: Operation::StateLoad {
                         address: FieldAddress {
@@ -887,7 +887,6 @@ impl AstConverting for IrEmitter {
                             },
                             value: None,
                         },
-                        value: symbol,
                     },
                     source_location: self.current_location(),
                 });

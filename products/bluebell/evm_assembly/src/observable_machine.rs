@@ -4,6 +4,7 @@ use evm::Machine;
 use evm::Opcode;
 use log::info;
 use primitive_types::H256;
+use std::str::FromStr;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -13,6 +14,7 @@ pub struct ObservableMachine {
     pub positions_visited: HashMap<u32, u32>,
     pub failed: bool,
     pub error_message: Option<String>,
+    pub storage: HashMap<H256, H256>,
 }
 
 impl ObservableMachine {
@@ -28,6 +30,7 @@ impl ObservableMachine {
             positions_visited: HashMap::new(),
             failed: false,
             error_message: None,
+            storage: HashMap::new(),
         }
     }
 
@@ -40,6 +43,34 @@ impl ObservableMachine {
                 }
                 Trap(opcode) => {
                     match opcode {
+                        Opcode::SSTORE => {
+                            let stack = self.machine.stack_mut();
+                            let address = match stack.pop() {
+                                Ok(v) => v,
+                                Err(_) => panic!("Stack empty!"),
+                            };
+                            let value = match stack.pop() {
+                                Ok(v) => v,
+                                Err(_) => panic!("Stack empty!"),
+                            };
+
+                            self.storage.insert(address, value);
+                        }
+
+                        Opcode::SLOAD => {
+                            let stack = self.machine.stack_mut();
+                            let address = match stack.pop() {
+                                Ok(v) => v,
+                                Err(_) => panic!("Stack empty!"),
+                            };
+
+                            let value = match self.storage.get(&address) {
+                                Some(v) => v.clone(),
+                                None => panic!("Unable to find value!"),
+                            };
+
+                            let _ = stack.push(value);
+                        }
                         Opcode::STATICCALL => {
                             // Emulating static call
                             // TODO: Attach runtime!
@@ -58,7 +89,7 @@ impl ObservableMachine {
                         _ => {
                             self.failed = true;
                             self.error_message = Some(format!("{:?}", opcode).to_string());
-                            panic!("Unhandled trap opcode.")
+                            panic!("Unhandled trap opcode {:?}", opcode)
                         }
                     }
                 }

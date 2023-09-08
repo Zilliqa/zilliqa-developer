@@ -1,5 +1,5 @@
-use crate::state::{State, StateMessage};
-use std::cell::RefCell;
+use crate::state::State;
+
 use std::rc::Rc;
 use yew::prelude::*;
 use yewdux::prelude::*;
@@ -44,10 +44,18 @@ impl Component for MachineView {
                 }
             }
         };
+
+        let mut storage: Vec<(String, String)> = (observable_machine.borrow())
+            .storage
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect();
+        storage.sort();
+
         let machine = &(observable_machine.borrow()).machine;
 
         html! {
-            <div class="bg-black min-h-full max-h-full h-screen w-full p-4">
+            <div class="bg-black min-h-full w-full p-4">
                 <h2 class="text-xl font-bold mb-4">{"EVM Machine State"}</h2>
                 <div class="grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2 gap-4">
                     <div class="p-4">
@@ -88,6 +96,26 @@ impl Component for MachineView {
                                 }
                             }) }
                         </div>
+                    </div>
+
+                    <div class="p-4 lg:col-span-2">
+                        <h3 class="text-lg font-semibold mb-2">{"Storage"}</h3>
+                        <ul class="pl-5">
+                            { for storage.iter().map(|(key, value)| {
+                                html! {
+                                    <li class="mb-2">
+                                        <div class="grid grid-cols-2 gap-1">
+                                            <div class="border rounded p-1 text-sm border-gray-800">
+                                                <p class="break-all font-bold">{key}</p>
+                                            </div>
+                                            <div class="border rounded p-1 text-sm border-gray-800">
+                                                <p class="break-all">{value}</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            }) }
+                        </ul>
                     </div>
 
                 </div>

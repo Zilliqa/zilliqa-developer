@@ -222,6 +222,7 @@ impl IrPass for AnnotateBaseTypes {
         symbol: &mut IrIdentifier,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
+        info!("Testing {:?}", symbol);
         match symbol.kind {
             IrIndentifierKind::Unknown => {
                 if let Some(typeinfo) = self.type_of(symbol, symbol_table) {
@@ -294,6 +295,22 @@ impl IrPass for AnnotateBaseTypes {
             _ => (),
         }
 
+        // Changing
+
+        if symbol.kind == IrIndentifierKind::VirtualRegister {
+            if let Some(resolved_name) =
+                symbol_table.resolve_qualified_name(&symbol.unresolved, &self.namespace)
+            {
+                if symbol_table.is_state(&resolved_name) {
+                    info!("Changing {} to state", resolved_name);
+                    symbol.kind = IrIndentifierKind::State;
+                }
+            } else {
+                // TODO: panic!("Could not resolve qualified name");
+            }
+        }
+
+        // Updating type
         match symbol.kind {
             IrIndentifierKind::BlockLabel => (),
             IrIndentifierKind::FunctionName
@@ -400,10 +417,13 @@ impl IrPass for AnnotateBaseTypes {
                 on_failure.visit(self, symbol_table)?;
                 "Void".to_string() // TODO: Fetch from somewhere
             }
-            Operation::StateLoad { address, value } => {
+            Operation::StateLoad { address } => {
                 address.name.visit(self, symbol_table)?;
+                let value = match &mut instr.ssa_name {
+                    Some(v) => v,
+                    None => panic!("Load does not assign value"),
+                };
                 value.visit(self, symbol_table)?;
-
                 let symbol_name = match &value.resolved {
                     Some(r) => r.clone(),
                     None => {

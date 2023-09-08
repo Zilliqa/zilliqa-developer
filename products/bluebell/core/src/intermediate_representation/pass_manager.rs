@@ -5,6 +5,7 @@ use crate::passes::balance_block_args::BalanceBlockArguments;
 use crate::passes::block_dependencies::DeduceBlockDependencies;
 use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
 use crate::passes::debug_printer::DebugPrinter;
+use crate::passes::state_allocator::StateCollector;
 
 pub struct PassManager {
     passes: Vec<Box<dyn IrPass>>,
@@ -19,6 +20,7 @@ impl PassManager {
         let mut ret = Self::new();
 
         ret.passes.push(Box::new(CollectTypeDefinitionsPass::new()));
+        ret.passes.push(Box::new(StateCollector::new()));
         ret.passes.push(Box::new(AnnotateBaseTypes::new()));
         ret.passes.push(Box::new(DeduceBlockDependencies::new()));
         ret.passes.push(Box::new(BalanceBlockArguments::new()));
