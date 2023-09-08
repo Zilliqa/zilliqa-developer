@@ -9,6 +9,7 @@ use std::{
 use anyhow::{anyhow, Result};
 use askama::Template;
 use axum::{extract::State, routing::get, Form, Router};
+use bech32::FromBase32;
 use ethers::{
     middleware::{nonce_manager::NonceManagerError, NonceManagerMiddleware, SignerMiddleware},
     providers::{Http, Middleware, Provider},
@@ -32,7 +33,7 @@ struct Home {
 
 enum RequestStatus {
     Sent(H256),
-    AddrErr(ConversionError),
+    AddrErr(anyhow::Error),
     SendErr(NonceManagerError<SignerMiddleware<Provider<Http>, LocalWallet>>),
     RateLimitErr(Duration),
 }
@@ -68,22 +69,71 @@ struct Request {
     address: String,
 }
 
-async fn request(State(state): State<Arc<AppState>>, Form(request): Form<Request>) -> Home {
-    // Only check the checksum of the address if it is not all in lowercase.
-    let address = if request.address.chars().all(|c| c.is_lowercase()) {
-        let addr = request
-            .address
-            .strip_prefix("0x")
-            .unwrap_or(&request.address);
-        addr.parse().map_err(ConversionError::FromHexError)
-    } else {
-        parse_checksummed(&request.address, None)
-    };
-    let address = match address {
-        Ok(a) => a,
+/// Parse an address as a bech32 address, given the expected human-readable part (HRP).
+///
+/// Returns `None` if this does not look like a bech32 address.
+/// Returns `Some(Err(_))` if it looks like a bech32 address, but the checksum or HRP is incorrect.
+fn parse_bech32(expected_hrp: &str, address: &str) -> Option<Result<Address>> {
+    let (hrp, data, _) = bech32::decode(address).ok()?;
+    if hrp != expected_hrp {
+        return Some(Err(anyhow!(
+            "invalid HRP of bech32 address: {hrp}, expected {expected_hrp}"
+        )));
+    }
+    let data = match Vec::<u8>::from_base32(&data) {
+        Ok(d) => d,
         Err(e) => {
-            eprintln!("{e:?}");
-            return home_inner(State(state), Some(RequestStatus::AddrErr(e))).await;
+            return Some(Err(e.into()));
+        }
+    };
+    if data.len() != Address::len_bytes() {
+        return Some(Err(anyhow!(
+            "invalid length after decoding: {}, expected {}",
+            data.len(),
+            Address::len_bytes()
+        )));
+    }
+    Some(Ok(Address::from_slice(&data)))
+}
+
+async fn request(State(state): State<Arc<AppState>>, Form(request): Form<Request>) -> Home {
+    // If we have a bech32 HRP configured, first try parsing the address as a bech32 address.
+    let bech32_address = state
+        .config
+        .bech32_hrp
+        .as_deref()
+        .and_then(|expected_hrp| parse_bech32(expected_hrp, &request.address));
+
+    let address = if let Some(a) = bech32_address {
+        match a {
+            Ok(a) => a,
+            Err(e) => {
+                eprintln!("{e:?}");
+                return home_inner(State(state), Some(RequestStatus::AddrErr(e))).await;
+            }
+        }
+    } else {
+        // The address must be in hexadecimal.
+        // Only check the checksum of the address if it is not all in lowercase.
+        let address = if request
+            .address
+            .chars()
+            .all(|c| !c.is_alphabetic() || c.is_lowercase())
+        {
+            let addr = request
+                .address
+                .strip_prefix("0x")
+                .unwrap_or(&request.address);
+            addr.parse().map_err(ConversionError::FromHexError)
+        } else {
+            parse_checksummed(&request.address, None)
+        };
+        match address {
+            Ok(a) => a,
+            Err(e) => {
+                eprintln!("{e:?}");
+                return home_inner(State(state), Some(RequestStatus::AddrErr(e.into()))).await;
+            }
         }
     };
 
@@ -139,6 +189,7 @@ struct Config {
     eth_amount: String,
     explorer_url: Option<String>,
     minimum_time_between_requests: Duration,
+    bech32_hrp: Option<String>,
 }
 
 fn env_var(key: &'static str) -> Result<String> {
@@ -160,6 +211,7 @@ impl Config {
             minimum_time_between_requests: env_var("MINIMUM_SECONDS_BETWEEN_REQUESTS")
                 .and_then(|t| Ok(Duration::from_secs(t.parse()?)))
                 .unwrap_or(Duration::from_secs(300)),
+            bech32_hrp: env_var("BECH32_HRP").ok(),
         })
     }
 }
