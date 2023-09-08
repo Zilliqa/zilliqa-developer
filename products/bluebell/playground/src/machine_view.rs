@@ -48,7 +48,7 @@ impl Component for MachineView {
         let mut storage: Vec<(String, String)> = (observable_machine.borrow())
             .storage
             .iter()
-            .map(|(k, v)| (k.clone(), v.clone()))
+            .map(|(k, v)| (k.to_string(), v.to_string()))
             .collect();
         storage.sort();
 

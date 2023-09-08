@@ -14,7 +14,7 @@ pub struct ObservableMachine {
     pub positions_visited: HashMap<u32, u32>,
     pub failed: bool,
     pub error_message: Option<String>,
-    pub storage: HashMap<String, String>,
+    pub storage: HashMap<H256, H256>,
 }
 
 impl ObservableMachine {
@@ -54,7 +54,7 @@ impl ObservableMachine {
                                 Err(_) => panic!("Stack empty!"),
                             };
 
-                            self.storage.insert(address.to_string(), value.to_string());
+                            self.storage.insert(address, value);
                         }
 
                         Opcode::SLOAD => {
@@ -64,14 +64,12 @@ impl ObservableMachine {
                                 Err(_) => panic!("Stack empty!"),
                             };
 
-                            let value = match self.storage.get(&address.to_string()) {
+                            let value = match self.storage.get(&address) {
                                 Some(v) => v.clone(),
                                 None => panic!("Unable to find value!"),
                             };
 
-                            let _ = stack.push(
-                                H256::from_str(&value).expect("Failed to convert state to H256"),
-                            );
+                            let _ = stack.push(value);
                         }
                         Opcode::STATICCALL => {
                             // Emulating static call

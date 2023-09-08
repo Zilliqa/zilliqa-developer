@@ -417,10 +417,13 @@ impl IrPass for AnnotateBaseTypes {
                 on_failure.visit(self, symbol_table)?;
                 "Void".to_string() // TODO: Fetch from somewhere
             }
-            Operation::StateLoad { address, value } => {
+            Operation::StateLoad { address } => {
                 address.name.visit(self, symbol_table)?;
+                let value = match &mut instr.ssa_name {
+                    Some(v) => v,
+                    None => panic!("Load does not assign value"),
+                };
                 value.visit(self, symbol_table)?;
-
                 let symbol_name = match &value.resolved {
                     Some(r) => r.clone(),
                     None => {

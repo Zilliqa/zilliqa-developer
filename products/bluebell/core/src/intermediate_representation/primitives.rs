@@ -201,7 +201,6 @@ pub enum Operation {
     MemStore,
     StateLoad {
         address: FieldAddress,
-        value: IrIdentifier,
     },
     StateStore {
         address: FieldAddress,

@@ -122,7 +122,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                     // TODO: Check that arg_names matches length of the arguments in the first block
                     if let Some(entry) = func.body.blocks.first() {
                         if arg_names.len() != entry.block_arguments.len() {
-                            panic!("Internal error: Function argument names differ from block names in length");
+                            panic!("Internal error: Function argument names differ from block names in length: {:?} vs {:?}", arg_names, entry.block_arguments);
                         }
                         if arg_names != entry.block_arguments {
                             panic!("Internal error: Function argument names differ from block names in order");
@@ -384,10 +384,14 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                 Operation::StateLoad {
                                     ref address,
-                                    ref value,
                                 } => {
                                     // TODO: Ensure that we used resolved address name
-                                    let binding = &self.ir.symbol_table.state_layout.get(&address.name.unresolved);
+                                    let binding = &self.ir.symbol_table.state_layout.get(&address.name.unresolved);                                    
+                                    let value = match &instr.ssa_name {
+                                        Some(v) => v,
+                                        None => panic!("Load does not assign value")
+
+                                    };
                                     let state = match binding {
                                         Some(v) => v,
                                         None => panic!(
@@ -652,7 +656,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
                                     | Operation::StateLoad {
                                         address: _,
-                                        value: _,
                                     }
                                     | Operation::Literal {
                                         data: _,

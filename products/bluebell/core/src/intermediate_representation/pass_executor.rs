@@ -177,11 +177,9 @@ impl PassExecutor for Operation {
 
                     ret
                 }
-                Operation::StateLoad { address, value } => {
-                    let ret = value.visit(pass, symbol_table);
-                    address.name.visit(pass, symbol_table)?;
-
-                    ret
+                Operation::StateLoad { address } => {
+                    //let ret = value.visit(pass, symbol_table);
+                    address.name.visit(pass, symbol_table)
                 }
                 Operation::MemLoad
                 | Operation::MemStore

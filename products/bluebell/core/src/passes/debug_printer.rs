@@ -182,10 +182,13 @@ impl IrPass for DebugPrinter {
             }
             Operation::MemLoad => self.script.push_str("mload [TODO]"),
             Operation::MemStore => self.script.push_str("mstore [TODO]"),
-            Operation::StateLoad {
-                address: _,
-                value: _,
-            } => self.script.push_str("sstore [TODO]"),
+            Operation::StateLoad { address } => {
+                self.script.push_str("sload ");
+                match &address.name.resolved {
+                    Some(n) => self.script.push_str(&n),
+                    None => self.script.push_str("UNRESOLVED"),
+                }
+            }
             Operation::StateStore {
                 address: _,
                 value: _,

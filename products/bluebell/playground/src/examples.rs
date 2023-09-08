@@ -22,7 +22,8 @@ field welcome_msg : Uint64 = Uint64 0
 
 transition setHello ()
   x = Uint64 1;
-  welcome_msg := x
+  welcome_msg := x;
+  y <- welcome_msg
 end
 "#,
     ),
