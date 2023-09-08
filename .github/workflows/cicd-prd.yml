@@ -20,7 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [bluebell-playground, devex, eth-spout, neo-savant]
+        application:
+          [bluebell-playground, developer-portal, devex, eth-spout, neo-savant]
         include:
           - application: bluebell-playground
             image_name: bluebell-playground
@@ -28,6 +29,9 @@ jobs:
           - application: devex
             image_name: devex
             path: products/devex
+          - application: developer-portal
+            image_name: developer-portal
+            path: products/developer-portal
           - application: eth-spout
             image_name: eth-spout
             path: products/eth-spout

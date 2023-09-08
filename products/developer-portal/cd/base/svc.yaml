@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: zilliqa-devportal
-  namespace: devportal
+  name: developer-portal
+  namespace: developer-portal
   labels:
-    "app.kubernetes.io/name": "zilliqa-devportal"
+    app.kubernetes.io/name: "developer-portal"
 spec:
   type: ClusterIP
   ports:
@@ -13,4 +13,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    "app.kubernetes.io/name": "zilliqa-devportal"
+    app.kubernetes.io/name: "developer-portal"

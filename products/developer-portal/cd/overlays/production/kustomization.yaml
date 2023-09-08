@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
   - certificate.yaml
+  - frontend-config.yaml
 
 patches:
   - target:
@@ -12,15 +13,15 @@ patches:
     patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: developer-portal.zilstg.dev
-      - op: replace
-        path: "/spec/rules/1/host"
-        value: stg-dev.zilliqa.com
+        value: dev.zilliqa.com
+      - op: remove
+        path: "/spec/rules/1"
       - op: replace
         path: /metadata/annotations
         value:
           kubernetes.io/ingress.class: gce
-          kubernetes.io/ingress.global-static-ip-name: developer-portal-zilstg-dev
+          kubernetes.io/ingress.global-static-ip-name: dev-zilliqa-com
           networking.gke.io/managed-certificates: developer-portal
+          networking.gke.io/v1beta1.FrontendConfig: developer-portal
 
-namespace: developer-portal-stg
+namespace: developer-portal-prd

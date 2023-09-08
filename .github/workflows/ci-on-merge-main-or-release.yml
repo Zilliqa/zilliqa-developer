@@ -60,9 +60,6 @@ jobs:
       - name: "Analyse project changes"
         id: project-changed
         run: |
-          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" || "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'docs') }}" = "true" ]; then
-            echo "developer-portal=true" >> $GITHUB_OUTPUT
-          fi
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex-apollo') }}" = "true" ]; then
             echo "devex-apollo=true" >> $GITHUB_OUTPUT
           fi
@@ -134,18 +131,10 @@ jobs:
           docker tag devex-apollo:local 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
           docker push 298213327629.dkr.ecr.us-west-2.amazonaws.com/devex-apollo:$VERSION
 
-      - name: "Build and push Docker - developer-portal - production"
-        if: github.event_name == 'release' && github.event.action == 'created' && steps.project-changed.outputs.developer-portal == 'true'
-        run: |
-          bazelisk run --test_output=all --keep_going //products/developer-portal:push_image_production
-
       ### BEGIN DEPLOYMENT STAGES
       - name: "Create application.bzl"
         run: |
           echo 'APPLICATIONS_PROD = [' > cd/applications.bzl
-          if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/developer-portal') }}" = "true" || "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'docs') }}" = "true" ]; then
-            echo '    "//products/developer-portal",' >> cd/applications.bzl
-          fi
           if [ "${{ contains(steps.changed-files.outputs.all_changed_and_modified_files, 'products/devex-apollo') }}" = "true" ]; then
             echo '    "//products/devex-apollo",' >> cd/applications.bzl
           fi

@@ -27,7 +27,7 @@ jobs:
         application: [developer-portal, devex, devex-apollo, neo-savant]
         include:
           - application: developer-portal
-            image_name: zilliqa-devportal
+            image_name: developer-portal
             path: products/developer-portal
           - application: devex
             image_name: devex

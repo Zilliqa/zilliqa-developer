@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zilliqa-devportal
-  namespace: devportal
+  name: developer-portal
+  namespace: developer-portal
   labels:
-    "app.kubernetes.io/name": "zilliqa-devportal"
+    app.kubernetes.io/name: "developer-portal"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      "app.kubernetes.io/name": "zilliqa-devportal"
+      app.kubernetes.io/name: "developer-portal"
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        "app.kubernetes.io/name": "zilliqa-devportal"
+        app.kubernetes.io/name: "developer-portal"
     spec:
       containers:
-        - image: zilliqa-devportal
-          name: zilliqa-devportal
+        - image: developer-portal
+          name: developer-portal
           ports:
             - containerPort: 80

@@ -4,4 +4,4 @@ metadata:
   name: developer-portal
 spec:
   domains:
-    - developer-portal.zilstg.dev
+    - dev.zilliqa.com
