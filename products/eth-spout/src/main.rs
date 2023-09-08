@@ -69,7 +69,17 @@ struct Request {
 }
 
 async fn request(State(state): State<Arc<AppState>>, Form(request): Form<Request>) -> Home {
-    let address = match parse_checksummed(&request.address, None) {
+    // Only check the checksum of the address if it is not all in lowercase.
+    let address = if request.address.chars().all(|c| c.is_lowercase()) {
+        let addr = request
+            .address
+            .strip_prefix("0x")
+            .unwrap_or(&request.address);
+        addr.parse().map_err(ConversionError::FromHexError)
+    } else {
+        parse_checksummed(&request.address, None)
+    };
+    let address = match address {
         Ok(a) => a,
         Err(e) => {
             eprintln!("{e:?}");
