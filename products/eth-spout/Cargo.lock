@@ -845,6 +845,7 @@ dependencies = [
  "askama",
  "askama_axum",
  "axum",
+ "bech32",
  "ethers",
  "serde",
  "tokio",
