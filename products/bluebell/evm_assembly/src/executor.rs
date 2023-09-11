@@ -16,7 +16,7 @@ use std::str::FromStr;
 use crate::executable::EvmExecutable;
 
 pub struct EvmExecutor<'a> {
-    context: &'a EvmCompilerContext,
+    pub context: &'a EvmCompilerContext,
     pub executable: EvmExecutable,
 }
 

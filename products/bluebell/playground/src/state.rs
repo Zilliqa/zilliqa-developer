@@ -5,6 +5,7 @@ use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
 use bluebell::support::modules::ScillaDefaultTypes;
 use evm_assembly::executable::EvmExecutable;
+use evm_assembly::function_signature::EvmFunctionSignature;
 use evm_assembly::observable_machine::ObservableMachine;
 use gloo_console as console;
 use gloo_timers::callback::Timeout;
@@ -35,6 +36,9 @@ pub struct State {
 
     #[serde(skip)]
     pub executable: Option<Rc<RefCell<EvmExecutable>>>,
+
+    #[serde(skip)]
+    pub functions: Vec<EvmFunctionSignature>,
 
     #[serde(skip)]
     pub observable_machine: Option<Rc<RefCell<ObservableMachine>>>,
@@ -76,6 +80,7 @@ end
             playing: false,
             bytecode_hex: "".to_string(),
             executable: None,
+            functions: [].to_vec(),
             observable_machine: None,
             program_counter: 0,
             current_position: None,
@@ -86,8 +91,8 @@ end
 
 pub enum StateMessage {
     Reset,
-    ResetMachine {
-        code: Rc<Vec<u8>>,
+    PrepareFunctionCall {
+        function_name: String,
         data: Rc<Vec<u8>>,
     }, // Add other messages here if needed
     RunStep,
@@ -107,7 +112,7 @@ impl Reducer<State> for StateMessage {
                 true
             }
             StateMessage::CompileCode { source_code } => {
-                let mut compiler = EvmCompiler::new_no_abi_support();
+                let mut compiler = EvmCompiler::new();
                 compiler.pass_manager_mut().enable_debug_printer();
 
                 let default_types = ScillaDefaultTypes {};
@@ -121,6 +126,12 @@ impl Reducer<State> for StateMessage {
                 state.compiling = false;
                 state.playing = false;
                 if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
+                    state.functions = exec
+                        .context
+                        .function_declarations
+                        .iter()
+                        .map(|(_k, v)| v.clone())
+                        .collect();
                     state.source_code = source_code.clone();
                     state.bytecode_hex = hex::encode(&exec.executable.bytecode.clone());
                     let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
@@ -157,11 +168,23 @@ impl Reducer<State> for StateMessage {
 
                 true
             }
-            StateMessage::ResetMachine { code, data } => {
+            StateMessage::PrepareFunctionCall {
+                function_name: _,
+                data,
+            } => {
                 // console::log!("Code: {}", hex::encode(&*code));
+                let code: Vec<u8> = if let Some(exec) = &state.executable {
+                    exec.borrow().bytecode.to_vec()
+                } else {
+                    [].to_vec()
+                };
+
                 console::log!("Resetting machine");
                 state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
-                    code, data, 1024, 1024,
+                    code.into(),
+                    data,
+                    1024,
+                    1024,
                 ))));
                 state.compiling = false;
                 state.playing = false;
@@ -217,6 +240,7 @@ impl Clone for State {
             compiling: self.compiling,
             playing: self.playing,
             executable,
+            functions: self.functions.clone(),
             observable_machine,
             program_counter: self.program_counter,
             bytecode_hex: self.bytecode_hex.clone(),

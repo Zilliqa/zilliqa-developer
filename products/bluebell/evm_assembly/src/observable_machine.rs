@@ -71,6 +71,21 @@ impl ObservableMachine {
 
                             let _ = stack.push(value);
                         }
+                        Opcode::CALLVALUE => {
+                            let stack = self.machine.stack_mut();
+                            // We always assume zero value caller (root call)
+                            let v = stack.push(H256::zero());
+                            if v.is_err() {
+                                panic!("Failed to push result to stack");
+                            }
+                        }
+                        Opcode::CALLDATASIZE => {
+                            panic!("Call size not set.")
+                        }
+                        Opcode::CALLDATALOAD => {
+                            panic!("Call data not loadable.")
+                        }
+
                         Opcode::STATICCALL => {
                             // Emulating static call
                             // TODO: Attach runtime!
@@ -123,6 +138,7 @@ impl ObservableMachine {
                                     panic!("Failed to push result to stack");
                                 }
                             }
+
                             _ => {
                                 panic!("Unhandled trap opcode.")
                             }

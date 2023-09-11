@@ -64,7 +64,7 @@ impl Component for VmRemoteControl {
         let is_dragging = self.is_dragging;
         html! {
             <div
-                class="cursor-grab border rounded-lg bg-gray-700  border-black p-5 w-72 min-w-56 max-w-100 h-28 select-none shadow-xl transition-transform ease-in-out duration-300"
+                class="cursor-grab border rounded-lg bg-gray-700  border-black p-5 w-72 min-w-56 max-w-100 min-h-28 max-h-64 shadow-xl transition-transform ease-in-out duration-300"
                 style={format!("position: absolute; right: {}px; bottom: {}px;", self.position.0, self.position.1)}
                 onmousedown={ctx.link().callback(|e: MouseEvent| {
                     e.prevent_default();

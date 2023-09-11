@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::rc::Rc;
+use web_sys::EventTarget;
 use yew::virtual_dom::VNode;
 
 use gloo_console as console;
@@ -116,6 +117,8 @@ impl Component for AppLayout {
             }
         };
 
+        let functions = self.state.functions.clone();
+
         html! {
         <div class="pl-20 h-screen w-screen">
           <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
@@ -198,11 +201,26 @@ impl Component for AppLayout {
                                 <div class="flex flex-col items-center space-y-4">
 
                                     <div
-                                        class="p-2 bg-zinc-900 w-full text-gray-100 rounded-md flex items-center space-x-2"
+                                        class="p-2 bg-zinc-900 w-full text-gray-100 rounded-md space-x-2 flex flex-col"
                                     >
-                                        <span class="font-bold">{"PC:"}</span>
-                                        <span>{format!("0x{:02x}", self.state.program_counter)}</span>
-                                        <span>{format!("({})", self.state.program_counter)}</span>
+                                        <div class="w-full" onmouseover={move |e: MouseEvent| e.stop_propagation()}
+                                         onmousedown={move |e: MouseEvent| e.stop_propagation()}
+                                         onmouseup={move |e: MouseEvent| e.stop_propagation()}>
+
+                                            <select class="w-full bg-zinc-900 p-2" onchange={move |e: Event| {
+                                                let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                                                console::log!(value)
+                                            }}>
+                                                {functions.iter().map(|v| html! {
+                                                    <option value={v.name.clone()}>{v.name.clone()}</option>
+                                                }).collect::<Vec<_>>()}
+                                            </select>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="font-bold">{"PC:"}</span>
+                                            <span>{format!("0x{:02x}", self.state.program_counter)}</span>
+                                            <span>{format!("({})", self.state.program_counter)}</span>
+                                        </div>
                                     </div>
 
                                     <div class="flex items-center space-x-4">
