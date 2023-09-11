@@ -168,12 +168,11 @@ impl Reducer<State> for StateMessage {
                 true
             }
             StateMessage::RunStep => {
-                console::log!("Attempting Step!");
                 if let Some(ref mut machine) = state.observable_machine {
-                    console::log!("Step!");
-                    machine.borrow_mut().step();
-                    state.program_counter = if let Ok(pc) = machine.borrow_mut().machine.position()
-                    {
+                    let mut machine = machine.borrow_mut();
+                    machine.step();
+
+                    state.program_counter = if let Ok(pc) = machine.machine.position() {
                         if let Some(pos) = state.pc_to_position.get(pc) {
                             state.current_position = Some(*pos);
                         }
@@ -183,7 +182,6 @@ impl Reducer<State> for StateMessage {
                         0
                     };
 
-                    console::log!("New PC:", state.program_counter);
                     if state.playing {
                         Timeout::new(500, move || {
                             let dispatch = Dispatch::<State>::new();

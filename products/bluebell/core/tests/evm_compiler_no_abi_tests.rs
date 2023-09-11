@@ -370,4 +370,30 @@ end
             ""
         );
     }
+
+    #[test]
+    fn test_redefinition_of_variables() {
+        test_compile_and_execute!(
+            "HelloWorld::setHello",
+            "[42]",
+            r#"scilla_version 0
+
+contract HelloWorld()
+field welcome_msg : Uint64 = Uint64 0
+
+transition setHelloImpl (msg : Uint64)
+    welcome_msg := msg
+end
+
+transition setHello (msg : Uint64)
+  setHelloImpl msg;
+  msg <- welcome_msg;
+  x = builtin print msg
+end
+"#,
+            ""
+        );
+        // TODO: test output - requires a new module
+        // assert!(false);
+    }
 }

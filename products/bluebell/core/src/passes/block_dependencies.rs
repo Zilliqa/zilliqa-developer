@@ -349,7 +349,13 @@ impl IrPass for DeduceBlockDependencies {
                         || id.kind == IrIndentifierKind::VirtualRegisterIntermediate
                     {
                         match &id.resolved {
-                            Some(name) => self.defined_names.insert(name.clone()),
+                            Some(name) => {
+                                // We only define a variable if it was not used before. If it was used before
+                                // it should be registered as a block argument.
+                                if !self.used_names.contains(name) {
+                                    self.defined_names.insert(name.clone());
+                                }
+                            }
                             None => panic!("Encountered unresolved SSA name"),
                         };
                     }
