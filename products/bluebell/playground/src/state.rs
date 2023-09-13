@@ -112,21 +112,12 @@ pub enum StateMessage {
     CompileCode {
         source_code: String,
     },
-    Log {
-        level: String,
-        value: String,
-    },
 }
 
 impl Reducer<State> for StateMessage {
     fn apply(self, mut orig_state: Rc<State>) -> Rc<State> {
         let state = Rc::make_mut(&mut orig_state);
         match self {
-            StateMessage::Log { level, value } => {
-                // TODO: Keep logs in state to allow console like output.
-                console::log!("LLOGG: {} - {}", level, value);
-                true
-            }
             StateMessage::Reset => {
                 state.observable_machine = None;
                 state.executable = None;

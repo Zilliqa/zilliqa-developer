@@ -814,9 +814,6 @@ impl AstConverting for IrEmitter {
             }
             NodePattern::Constructor(name, args) => {
                 if args.len() > 0 {
-                    info!("Name: {:#?}", name);
-                    info!("Args: {:#?}", args);
-
                     unimplemented!();
                 }
 

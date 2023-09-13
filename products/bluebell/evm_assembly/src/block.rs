@@ -98,8 +98,6 @@ impl Scope {
             return Err(format!("SSA name {} already exists", dest));
         }
 
-        info!("Registering alias '{}' to '{}'", dest, source);
-
         if let Some(value) = self.name_location.get(source) {
             let value = *value as i32;
             self.name_location.insert(dest.to_string(), value);
@@ -209,7 +207,6 @@ impl EvmBlock {
             block_arugments: Some(arg_names.clone()),
         };
 
-        info!("Args: {:?}", arg_names);
         for (i, name) in arg_names.iter().enumerate() {
             match ret.register_arg_name(name, i as i32) {
                 Err(e) => panic!("{}", e),
@@ -257,7 +254,6 @@ impl EvmBlock {
     }
 
     pub fn move_value(&mut self, from: i32, to: i32) -> Result<(), String> {
-        info!("- Moving {} to {}", from, to);
         if from == to {
             return Ok(());
         }
@@ -278,8 +274,6 @@ impl EvmBlock {
         match self.scope.name_location.get(name) {
             Some(depth) => {
                 let orig_pos = self.scope.stack_counter - depth - 1;
-                info!("- Moving '{:?}' {} -> {}", name, orig_pos, pos);
-
                 self.move_value(orig_pos, pos)
             }
             None => Err("Stack overflow.".to_string()),
@@ -290,7 +284,7 @@ impl EvmBlock {
         match self.scope.name_location.get(name) {
             Some(pos) => {
                 let distance = self.scope.stack_counter - pos;
-                info!("Duplicating '{}' at {}, relative {}", name, pos, distance);
+
                 match distance {
                     1 => {
                         self.dup1();
@@ -533,13 +527,7 @@ impl EvmBlock {
             source_position,
             rust_position,
         });
-        info!(
-            "Wrote {:?}",
-            self.instructions.last().unwrap().opcode.to_string()
-        );
-        info!(" - before: {}", self.scope.stack_counter);
         self.update_stack(opcode);
-        info!(" - after: {}", self.scope.stack_counter);
 
         self
     }
@@ -569,14 +557,8 @@ impl EvmBlock {
             source_position,
             rust_position,
         });
-        info!(
-            "Wrote {:?}",
-            self.instructions.last().unwrap().opcode.to_string()
-        );
-        info!(" - before: {}", self.scope.stack_counter);
 
         self.update_stack(opcode);
-        info!(" - after: {}", self.scope.stack_counter);
         self
     }
 

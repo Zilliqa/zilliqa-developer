@@ -514,7 +514,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         .unwrap_or(&BTreeSet::new())
                                         .clone();
 
-                                    info!("Jump args: {:?}",jump_args);
                                     // Preserving the args to the next block
                                     pop_count -= jump_args.len() as i32;
 
@@ -548,7 +547,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref on_failure,
                                 } => {
 
-                                    match &expression.resolved {
+                                    let _ = match &expression.resolved {
                                         Some(name) => evm_block.duplicate_stack_name(&name),
                                         None => panic!("Expression does not have a SSA name"),
                                     };
@@ -577,12 +576,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         .unwrap_or(&BTreeSet::new())
                                         .clone();
 
-                                    info!("Jump args 2: {:?}",success_jump_args);
-
                                     if !success_jump_args.eq(&failure_jump_args) {
-                                        info!("A: {:#?}",success_jump_args);
-                                        info!("B: {:#?}",failure_jump_args);
-
                                         panic!("Block termination must require same number of subsequent variable dependencies.");
                                     }
 
@@ -633,7 +627,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Ignore terminating ref as this will just be pop at the end of the block.
                                 }
                                 _ => {
-                                    info!("Unhandled instruction: {:#?}", instr);
                                     unimplemented!() // Add handling for other operations here
                                 }
                             }
@@ -689,7 +682,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         self.write_function_definitions_to_module()?;
 
         self.builder.finalize_blocks();
-        info!("{}", self.builder.generate_evm_assembly());
         Ok(self.builder.build())
     }
 }

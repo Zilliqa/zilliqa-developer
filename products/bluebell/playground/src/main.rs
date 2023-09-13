@@ -5,9 +5,12 @@ mod examples;
 mod machine_view;
 mod state;
 mod vm_remote;
+mod vm_remote_layout;
 
-use crate::state::State;
-use crate::state::StateMessage;
+mod logger;
+
+use crate::logger::LoggerMessage;
+use crate::logger::LoggerState;
 use yewdux::prelude::Dispatch;
 
 use app::App;
@@ -29,8 +32,8 @@ impl Log for CaptureLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let dispatch = Dispatch::<State>::new();
-            dispatch.apply(StateMessage::Log {
+            let dispatch = Dispatch::<LoggerState>::new();
+            dispatch.apply(LoggerMessage::Log {
                 level: record.level().to_string(),
                 value: record.args().to_string(),
             });

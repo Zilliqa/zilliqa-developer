@@ -89,7 +89,6 @@ impl ObservableMachine {
                         Opcode::STATICCALL => {
                             // Emulating static call
                             // TODO: Attach runtime!
-                            info!("Executed static call");
                             let stack = self.machine.stack_mut();
                             for _i in 0..6 {
                                 if stack.pop().is_err() {
@@ -126,7 +125,6 @@ impl ObservableMachine {
                             Opcode::STATICCALL => {
                                 // Emulating static call
                                 // TODO: Attach runtime!
-                                info!("Executed static call");
                                 let stack = self.machine.stack_mut();
                                 for _i in 0..6 {
                                     if stack.pop().is_err() {

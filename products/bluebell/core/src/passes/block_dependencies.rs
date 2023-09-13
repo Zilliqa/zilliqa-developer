@@ -225,7 +225,6 @@ impl IrPass for DeduceBlockDependencies {
         symbol: &mut IrIdentifier,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        info!("Analysing {:#?}", symbol);
         match symbol.kind {
             IrIndentifierKind::VirtualRegister | IrIndentifierKind::VirtualRegisterIntermediate => {
                 match &symbol.resolved {
