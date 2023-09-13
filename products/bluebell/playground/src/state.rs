@@ -4,9 +4,11 @@ use bluebell::support::evm::EvmCompiler;
 use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
 use bluebell::support::modules::ScillaDefaultTypes;
+use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::function_signature::EvmFunctionSignature;
 use evm_assembly::observable_machine::ObservableMachine;
+use evm_assembly::types::EvmTypeValue;
 use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
@@ -24,12 +26,19 @@ pub struct State {
 
     pub pc_to_position: HashMap<usize, (usize, usize, usize, usize)>,
     pub current_position: Option<(usize, usize, usize, usize)>,
+    pub data: String,
+
+    #[serde(skip)]
+    pub context: Option<Rc<RefCell<EvmCompilerContext>>>,
 
     #[serde(skip)]
     pub compiling: bool,
 
     #[serde(skip)]
     pub playing: bool,
+
+    #[serde(skip)]
+    pub function_loaded: bool,
 
     #[serde(skip)]
     pub bytecode_hex: String,
@@ -49,6 +58,7 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
+        console::log!("Creating new state");
         State {
             source_code: String::from(
                 r#"scilla_version 0
@@ -76,8 +86,10 @@ transition setHello ()
 end
 "#,
             ),
+            context: None,
             compiling: false,
             playing: false,
+            function_loaded: false,
             bytecode_hex: "".to_string(),
             executable: None,
             functions: [].to_vec(),
@@ -85,6 +97,7 @@ end
             program_counter: 0,
             current_position: None,
             pc_to_position: HashMap::new(),
+            data: "".to_string(),
         }
     }
 }
@@ -93,11 +106,15 @@ pub enum StateMessage {
     Reset,
     PrepareFunctionCall {
         function_name: String,
-        data: Rc<Vec<u8>>,
+        arguments: String,
     }, // Add other messages here if needed
     RunStep,
     CompileCode {
         source_code: String,
+    },
+    Log {
+        level: String,
+        value: String,
     },
 }
 
@@ -105,6 +122,11 @@ impl Reducer<State> for StateMessage {
     fn apply(self, mut orig_state: Rc<State>) -> Rc<State> {
         let state = Rc::make_mut(&mut orig_state);
         match self {
+            StateMessage::Log { level, value } => {
+                // TODO: Keep logs in state to allow console like output.
+                console::log!("LLOGG: {} - {}", level, value);
+                true
+            }
             StateMessage::Reset => {
                 state.observable_machine = None;
                 state.executable = None;
@@ -125,6 +147,11 @@ impl Reducer<State> for StateMessage {
 
                 state.compiling = false;
                 state.playing = false;
+                state.function_loaded = false;
+
+                state.data = "0x00".to_string();
+                console::log!("Compiling code");
+
                 if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
                     state.functions = exec
                         .context
@@ -162,6 +189,14 @@ impl Reducer<State> for StateMessage {
                         1024,
                         1024,
                     ))));
+
+                    // Preserving the context so it can be used later
+                    let context = Rc::new(RefCell::new(EvmCompilerContext::new()));
+                    {
+                        let mut context = context.borrow_mut();
+                        std::mem::swap(&mut *context, &mut compiler.context)
+                    }
+                    state.context = Some(context);
                 } else {
                     console::error!("Compilation failed!");
                 }
@@ -169,8 +204,8 @@ impl Reducer<State> for StateMessage {
                 true
             }
             StateMessage::PrepareFunctionCall {
-                function_name: _,
-                data,
+                function_name,
+                arguments,
             } => {
                 // console::log!("Code: {}", hex::encode(&*code));
                 let code: Vec<u8> = if let Some(exec) = &state.executable {
@@ -178,6 +213,25 @@ impl Reducer<State> for StateMessage {
                 } else {
                     [].to_vec()
                 };
+
+                let args: Vec<EvmTypeValue> = if arguments == "" {
+                    [].to_vec()
+                } else {
+                    serde_json::from_str(&arguments).expect("Failed to deserialize arguments")
+                };
+
+                let data: Rc<Vec<u8>> = if let Some(context) = &state.context {
+                    context
+                        .borrow_mut()
+                        .get_function(&function_name)
+                        .expect(&format!("Function name {} not found", function_name).to_string())
+                        .generate_transaction_data(args)
+                        .into()
+                } else {
+                    Rc::new([].to_vec())
+                };
+
+                state.data = hex::encode(&*data);
 
                 console::log!("Resetting machine");
                 state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
@@ -188,6 +242,8 @@ impl Reducer<State> for StateMessage {
                 ))));
                 state.compiling = false;
                 state.playing = false;
+                state.function_loaded = true;
+
                 true
             }
             StateMessage::RunStep => {
@@ -225,6 +281,12 @@ impl Reducer<State> for StateMessage {
 
 impl Clone for State {
     fn clone(&self) -> Self {
+        console::log!("Cloning 1");
+        let context = if let Some(c) = &self.context {
+            Some(Rc::clone(&c))
+        } else {
+            None
+        };
         let executable = if let Some(e) = &self.executable {
             Some(Rc::clone(&e))
         } else {
@@ -235,17 +297,21 @@ impl Clone for State {
         } else {
             None
         };
+        console::log!(format!("Cloning 2: {}", self.function_loaded));
         Self {
             source_code: self.source_code.clone(),
             compiling: self.compiling,
             playing: self.playing,
+            function_loaded: self.function_loaded,
             executable,
+            context,
             functions: self.functions.clone(),
             observable_machine,
             program_counter: self.program_counter,
             bytecode_hex: self.bytecode_hex.clone(),
             pc_to_position: self.pc_to_position.clone(),
             current_position: self.current_position.clone(),
+            data: self.data.clone(),
         }
     }
 }
@@ -281,6 +347,8 @@ impl PartialEq for State {
             && self.current_position == other.current_position
             && self.compiling == other.compiling
             && self.playing == other.playing
+            && self.function_loaded == other.function_loaded
+            && self.data == other.data
     }
 }
 

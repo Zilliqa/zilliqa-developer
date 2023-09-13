@@ -94,7 +94,13 @@ impl Component for AppLayout {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let functions = self.state.functions.clone();
+        let functions_clone = self.state.functions.clone();
+        let signature = self.function_signature.clone();
+        let arguments = self.arguments.clone();
+
         let step_button_click = self.dispatch.apply_callback(|_| StateMessage::RunStep);
+        let eject_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
         let stop_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
         let set_function_signature = ctx
             .link()
@@ -103,19 +109,46 @@ impl Component for AppLayout {
             .link()
             .callback(|value| AppLayoutMessage::SetArguments(value));
 
-        let run_button_click = Callback::from(move |_| {
-            let dispatch = Dispatch::<State>::new();
-            dispatch.reduce_mut(move |s| {
-                s.playing = !s.playing;
-                if s.playing {
-                    Timeout::new(500, move || {
+        console::log!(format!("Function load: {}", self.state.function_loaded));
+
+        let run_button_click = {
+            let load_function = !self.state.function_loaded;
+            let maybe_function_signature = signature.clone();
+            let argument_list = arguments.clone();
+            Callback::from(move |_| {
+                if load_function {
+                    let maybe_function_signature = maybe_function_signature.clone();
+                    if let Some(function_signature) = maybe_function_signature {
+                        let function_name = function_signature.name.clone();
                         let dispatch = Dispatch::<State>::new();
-                        dispatch.apply(StateMessage::RunStep);
+                        let mut arguments = "".to_string();
+                        for (i, arg) in argument_list.iter().enumerate() {
+                            if i > 0 {
+                                arguments.push_str(",");
+                            }
+                            arguments.push_str(&format!("{}", arg).to_string());
+                        }
+                        dispatch.apply(StateMessage::PrepareFunctionCall {
+                            function_name,
+                            arguments,
+                        });
+                    }
+                } else {
+                    let dispatch = Dispatch::<State>::new();
+                    dispatch.reduce_mut(move |s| {
+                        console::log!("Playing");
+                        s.playing = !s.playing;
+                        if s.playing {
+                            Timeout::new(500, move || {
+                                let dispatch = Dispatch::<State>::new();
+                                dispatch.apply(StateMessage::RunStep);
+                            })
+                            .forget();
+                        }
                     })
-                    .forget();
                 }
-            });
-        });
+            })
+        };
 
         let generate_menu = {
             let selected_view = self.props.view as u32;
@@ -141,11 +174,6 @@ impl Component for AppLayout {
                 }
             }
         };
-
-        let functions = self.state.functions.clone();
-        let functions_clone = self.state.functions.clone();
-        let signature = self.function_signature.clone();
-        let arguments = self.arguments.clone();
 
         html! {
         <div class="pl-20 h-screen w-screen">
@@ -312,8 +340,19 @@ impl Component for AppLayout {
                                             </button>
 
                                             <button
-                                                class="flex items-center justify-center bg-red-600 text-white w-10 h-10 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
+                                                class="flex items-center justify-center bg-orange-600 text-white w-12 h-12 rounded-full hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
                                                 onclick={stop_button_click.clone()}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                                                </svg>
+
+                                            </button>
+
+
+                                            <button
+                                                class="flex items-center justify-center bg-red-600 text-white w-8 h-8 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
+                                                onclick={eject_button_click.clone()}
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                   <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
