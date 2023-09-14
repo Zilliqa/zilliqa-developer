@@ -4,7 +4,7 @@ use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::ConcreteFunction;
 use crate::intermediate_representation::primitives::IrIdentifier;
 use crate::intermediate_representation::primitives::IrIndentifierKind;
-use log::info;
+
 use std::collections::BTreeSet;
 use std::collections::HashMap;
 

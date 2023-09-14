@@ -3,6 +3,7 @@ use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutput
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use log::{error, info};
 use std::collections::BTreeSet;
 use std::mem;
 // TODO: Generalize to support both EVM and LLVM
@@ -45,7 +46,7 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _backend: &dyn Backend,
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    println!("");
+                    info!("\n");
                     Ok((
                         PrecompileOutput {
                             output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
@@ -78,7 +79,7 @@ impl BluebellModule for ScillaDebugBuiltins {
                             last_8[0], last_8[1], last_8[2], last_8[3], last_8[4], last_8[5],
                             last_8[6], last_8[7],
                         ]);
-                        print!("{}", v);
+                        info!("{}", format!("{}", v));
                     }
                     Ok((
                         PrecompileOutput {
@@ -107,8 +108,8 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
                     match std::str::from_utf8(input) {
-                        Ok(v) => println!("{}", v),
-                        Err(_) => println!("{}", hex::encode(input)),
+                        Ok(v) => info!("{}", format!("{}\n", v)),
+                        Err(_) => error!("{}", format!("{}\n", hex::encode(input))),
                     };
 
                     Ok((
@@ -211,10 +212,6 @@ impl BluebellModule for ScillaDefaultBuiltins {
                     _backend: &dyn Backend,
                     is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    println!("Running precompile {:?}!", input);
-                    println!("Len: {} / {}", input.len() / 32, input.len());
-                    println!("Context: {:#?}", context);
-                    println!("Static: {}", is_static);
                     let gas_needed = 20;
 
                     if let Some(gas_limit) = gas_limit {

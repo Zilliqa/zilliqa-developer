@@ -179,6 +179,7 @@ impl Reducer<State> for StateMessage {
                         [].to_vec().into(),
                         1024,
                         1024,
+                        None, // TODO: Add prefcompiles
                     ))));
 
                     // Preserving the context so it can be used later
@@ -222,6 +223,12 @@ impl Reducer<State> for StateMessage {
                     Rc::new([].to_vec())
                 };
 
+                let precompiles = if let Some(context) = &state.context {
+                    Some(context.borrow_mut().get_precompiles())
+                } else {
+                    None
+                };
+
                 state.data = hex::encode(&*data);
 
                 console::log!("Resetting machine");
@@ -230,6 +237,7 @@ impl Reducer<State> for StateMessage {
                     data,
                     1024,
                     1024,
+                    precompiles,
                 ))));
                 state.compiling = false;
                 state.playing = false;

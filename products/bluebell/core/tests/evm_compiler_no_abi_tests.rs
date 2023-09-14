@@ -106,7 +106,7 @@ mod tests {
 
         println!("Executable code: {:#}", hex::encode(code.clone()));
 
-        let mut vm = ObservableMachine::new(Rc::new(code), Rc::new(data), 1024, 10000);
+        let mut vm = ObservableMachine::new(Rc::new(code), Rc::new(data), 1024, 10000, None);
         vm.run();
 
         (vm, executor.executable)

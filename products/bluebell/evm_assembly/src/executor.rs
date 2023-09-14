@@ -7,6 +7,7 @@ use evm::executor::stack::MemoryStackState;
 use evm::executor::stack::StackExecutor;
 use evm::executor::stack::StackSubstateMetadata;
 use evm::Config;
+use log::info;
 use primitive_types::H160;
 use primitive_types::U256;
 use std::collections::BTreeMap;
@@ -39,7 +40,6 @@ impl<'a> EvmExecutor<'a> {
     }
 
     pub fn execute(&self, name: &str, args: Vec<EvmTypeValue>) -> ExecutorResult {
-        println!("Code: {}", hex::encode(self.executable.bytecode.clone()));
         let input = self
             .context
             .get_function(name)
@@ -78,7 +78,6 @@ impl<'a> EvmExecutor<'a> {
         let mem_state = MemoryStackState::new(metadata, &backend);
         let precompiles = self.context.get_precompiles();
         let mut executor = StackExecutor::new_with_precompiles(mem_state, &config, &precompiles);
-        println!("Execute input: {}", hex::encode(input.clone()));
 
         // Call the 0x10 contract using the 0xf0 user.
         // Use the input variable.
@@ -92,10 +91,9 @@ impl<'a> EvmExecutor<'a> {
         );
 
         let (state_apply, _logs) = executor.into_state().deconstruct();
-        println!("Exit reason: {:#?}", exit_reason);
-        println!("Result: {:#?}", result);
-        // println!("Logs: {:#?}", logs);
-        // let mut ret: HashMap< String, Option<String>> = HashMap::new();
+        info!("Exit reason: {:#?}", exit_reason);
+        info!("Result: {:#?}", result);
+
         let mut ret = ExecutorResult {
             changeset: HashMap::new(),
             result: format!("{:?}", result),
