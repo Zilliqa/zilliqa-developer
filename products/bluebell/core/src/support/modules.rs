@@ -133,7 +133,26 @@ impl BluebellModule for ScillaDebugBuiltins {
                     None => panic!("Internal error: Unable to retrieve function"),
                 };
                 let subcall_arg_types: Vec<String> = [arg.clone()].to_vec();
+                // TODO: There is some issue with this function
+                /*
+                                MVP error:
+                scilla_version 0
 
+                library HelloWorld
+                type Bool =
+                  | True
+                  | False
+
+                contract HelloWorld()
+
+                transition setHello (msg : Uint64)
+                  is_owner = True;
+                  match is_owner with
+                  | True =>
+                    x = builtin print msg
+                  end
+                end
+                                */
                 // TODO: In the event of string, this is not one to one
                 if arg == "String" {
                     // Putting string onto stack so it is accessible to our precompile function
@@ -180,8 +199,8 @@ impl BluebellModule for ScillaDebugBuiltins {
                     ret.push(loop_body);
                 } else {
                     block.call(signature, subcall_arg_types);
-                    block.swap1(); // Moving the result so it does not get popped
-                                   // block.pop(); // Removing result
+                    // block.swap1(); // Moving the result so it does not get popped
+                    block.pop(); // Removing result
                 }
 
                 block.pop(); // Removing the argument that was to be printed

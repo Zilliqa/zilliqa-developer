@@ -3,10 +3,10 @@ scilla_version 0
 library HelloWorld
 contract HelloWorld()
 
-field welcome_msg : String = ""
+field welcome_msg : Uint64 = Uint64 0
 
-transition setHello (msg : String)
-  x = builtin print msg;
+transition setHello (msg : Uint64)
+  x = builtin print__impl msg;
   (* value = "Hello world";
   x = builtin print value; *)
   welcome_msg := msg

@@ -346,7 +346,7 @@ transition setHello (msg : Uint64)
   is_owner = True;
   match is_owner with
   | True =>
-    x = builtin print msg
+    x = builtin print__impl msg
   end
 end
 "#,

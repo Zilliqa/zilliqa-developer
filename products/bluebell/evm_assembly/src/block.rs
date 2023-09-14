@@ -4,7 +4,7 @@ use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
 use crate::types::EvmTypeValue;
 use evm::Opcode;
 use log::info;
-use log::warn;
+
 use primitive_types::U256;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
@@ -16,7 +16,7 @@ pub const MEMORY_OFFSET: u8 = 0x80;
 #[derive(Debug, Clone)]
 pub struct Scope {
     pub stack_counter: i32,
-    arg_count: i32,
+    pub arg_count: i32,
     entry_stack_counter: i32,
     name_location: HashMap<String, i32>,
     location_name: HashMap<i32, String>,
@@ -79,7 +79,8 @@ impl Scope {
             self.location_name.remove(&depth);
             self.name_location.remove(name);
         }
-        assert!(self.stack_counter > 0);
+
+        assert!(self.stack_counter + self.arg_count > 0);
 
         self.name_location
             .insert(name.to_string(), self.stack_counter - 1);
@@ -116,6 +117,18 @@ impl Scope {
         self.stack_counter -= consumes;
         let ret = self.entry_stack_counter - self.stack_counter;
         self.stack_counter += produces;
+        if self.stack_counter < 0 {
+            info!(
+                "Stack counter: {} {} {}",
+                before,
+                self.stack_counter,
+                opcode.to_string()
+            );
+            info!("Code: {:#?}", self);
+        }
+
+        // Note that we allow the stack to be exceed by exactly one element for the return address
+        assert!(self.stack_counter + self.arg_count >= -1);
 
         let after = self.stack_counter;
 
@@ -188,6 +201,19 @@ pub struct EvmBlock {
 }
 
 impl EvmBlock {
+    pub fn to_string(&self) -> String {
+        let mut ret: String = "".to_string();
+        ret.push_str(&self.name);
+        ret.push_str(":\n");
+        for instr in &self.instructions {
+            ret.push_str("  ");
+            ret.push_str(&instr.to_opcode_string());
+            ret.push_str("\n");
+        }
+
+        ret
+    }
+
     pub fn new(position: Option<u32>, arg_names: BTreeSet<String>, name: &str) -> Self {
         let mut ret = Self {
             name: name.to_string(),
@@ -242,14 +268,15 @@ impl EvmBlock {
     }
 
     fn update_stack(&mut self, opcode: Opcode) {
+        if opcode == Opcode::JUMP {
+            info!("{}", self.to_string());
+        }
         let deepest_visit = self.scope.update_stack(opcode);
 
         // Updating how deeply in the stack we consume
         if deepest_visit > 0 {
             self.consumes = std::cmp::max(self.consumes, deepest_visit);
         }
-
-        // TODO: Track all argument variables and verify that they were used.
     }
 
     pub fn move_value(&mut self, from: i32, to: i32) -> Result<(), String> {
