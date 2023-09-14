@@ -1,6 +1,5 @@
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 load(":defs.bzl", "mkdocs_html")
 
 # TODO:
@@ -126,7 +125,7 @@ container_push(
     format = "Docker",
     image = ":image",
     registry = "localhost:5001",
-    repository = "zilliqa-devportal",
+    repository = "developer-portal",
     tag = "latest",
 )
 
@@ -135,44 +134,15 @@ container_push(
     format = "Docker",
     image = ":image",
     registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public",
-    repository = "zilliqa-devportal",
+    repository = "developer-portal",
     tag = "$${IMAGE_TAG#*:}",
 )
 
 container_push(
-    name = "push_image_production",
+    name = "push_image_prd",
     format = "Docker",
     image = ":image",
-    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "zilliqa-devportal",
-
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
-)
-
-###
-# CD update
-
-pkg_tar(
-    name = "cd_base",
-    srcs = glob(["products/devportal/cd/base/*.yaml"]),
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
-    name = "production-kustomization",
-    output = "products/devportal/cd/overlays/production/kustomization.yaml",
-    template = "products/devportal/cd/overlays/production/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_production_patch",
-    srcs = ["products/devportal/cd/overlays/production/kustomization.yaml"],
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
+    registry = "asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public",
+    repository = "developer-portal",
+    tag = "$${IMAGE_TAG#*:}",
 )
