@@ -72,7 +72,13 @@ impl Scope {
 
     pub fn register_stack_name(&mut self, name: &str) -> Result<(), String> {
         if self.name_location.contains_key(name) {
-            return Err(format!("SSA name {} already exists", name));
+            let depth = match self.name_location.get(name) {
+                Some(depth) => depth.clone(),
+                _ => return Err("Unable to find the depth of existing SSA name".to_string()),
+            };
+
+            self.location_name.remove(&depth);
+            self.name_location.remove(name);
         }
         assert!(self.stack_counter > 0);
 
@@ -423,6 +429,7 @@ impl EvmBlock {
 
         self.swap1(); // Removing stack pointer.
         self.pop();
+
         self
     }
 

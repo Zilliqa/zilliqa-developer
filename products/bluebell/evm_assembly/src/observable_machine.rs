@@ -166,24 +166,30 @@ impl ObservableMachine {
 
                             let ret = if let Some(precompile_set) = &self.precompile_set {
                                 if let Some(f) = precompile_set.get(&address) {
-                                    let mem = self.machine.memory().data();
-                                    let end = args_offset + args_size;
-                                    //let
-                                    let input = &mem[args_offset..end]; //args_offset, args_offset+args_size);
-                                    info!("{:#?}", input);
-                                    // TODO: Integrate these properly
-                                    let dummy_context = Context {
-                                        address: H160::zero(),
-                                        caller: H160::zero(),
-                                        apparent_value: U256::zero(),
+                                    let ret = {
+                                        let mem = self.machine.memory().data();
+                                        let end = args_offset + args_size;
+                                        //let
+                                        let input = &mem[args_offset..end]; //args_offset, args_offset+args_size);
+                                        info!("{:#?}", input);
+                                        // TODO: Integrate these properly
+                                        let dummy_context = Context {
+                                            address: H160::zero(),
+                                            caller: H160::zero(),
+                                            apparent_value: U256::zero(),
+                                        };
+                                        let dummy_backend = EvmIoInterface::new(BTreeMap::new());
+
+                                        f(input, Some(gas), &dummy_context, &dummy_backend, true)
                                     };
-                                    let dummy_backend = EvmIoInterface::new(BTreeMap::new());
 
-                                    let ret =
-                                        f(input, Some(gas), &dummy_context, &dummy_backend, true);
-
-                                    // TODO: Write ret to memory
-                                    H256::zero()
+                                    if let Ok(_ret) = ret {
+                                        let _mem = self.machine.memory_mut().data();
+                                        // TODO: Write ret to memory
+                                        H256::zero()
+                                    } else {
+                                        H256::zero()
+                                    }
                                 } else {
                                     H256::zero()
                                 }
