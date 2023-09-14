@@ -30,7 +30,7 @@ impl Reducer<LoggerState> for LoggerMessage {
         let state = Rc::make_mut(&mut orig_state);
         match self {
             LoggerMessage::Log { level, value } => {
-                console::log!("LLOGG X: {} - {}", level.clone(), value.clone());
+                console::log!("TERMINAL:", level.clone(), value.clone());
                 state.log.push((level, value));
                 true
             }

@@ -75,8 +75,6 @@ impl Component for AppLayout {
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
-        console::log!(format!("Function load: {}", self.state.function_loaded));
-
         let generate_menu = {
             let selected_view = self.props.view as u32;
             move |item: &MenuItem, is_desktop: bool| {
@@ -195,7 +193,6 @@ impl Component for AppLayout {
 fn line_to_pixel_offset(line: usize) -> usize {
     const FONT_SIZE: usize = 24; /* font size in pixels */
     const LINE_HEIGHT: f32 = 1.0; /* line height as a multiplier */
-    console::log!("Line ", line);
     (line - 1) * (FONT_SIZE as f32 * LINE_HEIGHT) as usize
 }
 

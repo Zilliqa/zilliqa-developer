@@ -30,7 +30,6 @@ fn h160_to_usize(address: H160) -> usize {
     let bytes = address.as_fixed_bytes();
     let mut result = 0usize;
 
-    // Depending on architecture (32-bit or 64-bit), you may need fewer bytes
     for &byte in bytes.iter().rev().take(std::mem::size_of::<usize>()).rev() {
         result = (result << 8) | (byte as usize);
     }
@@ -155,15 +154,6 @@ impl ObservableMachine {
                                 (gas, address, args_offset, args_size, ret_offset, ret_size)
                             };
 
-                            info!(
-                                "{}",
-                                format!(
-                                    "Call:\n{:?}\n{:?}\n{:?}\n{:?}\n{:?}\n{:?}",
-                                    gas, address, args_offset, args_size, ret_offset, ret_size
-                                )
-                            );
-                            info!("{:#?}", self.precompile_set);
-
                             let ret = if let Some(precompile_set) = &self.precompile_set {
                                 if let Some(f) = precompile_set.get(&address) {
                                     let ret = {
@@ -171,7 +161,7 @@ impl ObservableMachine {
                                         let end = args_offset + args_size;
                                         //let
                                         let input = &mem[args_offset..end]; //args_offset, args_offset+args_size);
-                                        info!("{:#?}", input);
+
                                         // TODO: Integrate these properly
                                         let dummy_context = Context {
                                             address: H160::zero(),

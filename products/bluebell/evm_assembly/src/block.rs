@@ -87,12 +87,6 @@ impl Scope {
         self.location_name
             .insert(self.stack_counter - 1, name.to_string());
 
-        warn!(
-            "Registering vreg '{}' at position {}",
-            name,
-            self.stack_counter - 1
-        );
-
         // TODO: Consider pruning of the names
 
         Ok(())

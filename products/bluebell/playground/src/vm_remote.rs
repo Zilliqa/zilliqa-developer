@@ -25,7 +25,7 @@ pub struct VmRemote {
 pub enum VmRemoteMessage {
     UpdateState(Rc<State>),
     UpdateFunctionSignature(Option<EvmFunctionSignature>),
-    SetArguments(Vec<String>),
+    SetArgument(usize, String),
 }
 
 impl Component for VmRemote {
@@ -64,10 +64,11 @@ impl Component for VmRemote {
                 } else {
                     0
                 };
+
                 self.arguments = vec![String::new(); n];
             }
-            VmRemoteMessage::SetArguments(args) => {
-                self.arguments = args;
+            VmRemoteMessage::SetArgument(i, v) => {
+                self.arguments[i] = v;
             }
         }
         true
@@ -85,11 +86,9 @@ impl Component for VmRemote {
         let set_function_signature = ctx
             .link()
             .callback(|value| VmRemoteMessage::UpdateFunctionSignature(value));
-        let set_arguments = ctx
+        let set_argument = ctx
             .link()
-            .callback(|value| VmRemoteMessage::SetArguments(value));
-
-        console::log!(format!("Function load: {}", self.state.function_loaded));
+            .callback(|(i, value)| VmRemoteMessage::SetArgument(i, value));
 
         let run_button_click = {
             let load_function = !self.state.function_loaded;
@@ -116,7 +115,6 @@ impl Component for VmRemote {
                 } else {
                     let dispatch = Dispatch::<State>::new();
                     dispatch.reduce_mut(move |s| {
-                        console::log!("Playing");
                         s.playing = !s.playing;
                         if s.playing {
                             Timeout::new(500, move || {
@@ -167,17 +165,13 @@ impl Component for VmRemote {
                          onmousedown={move |e: MouseEvent| e.stop_propagation()}
                          onmouseup={move |e: MouseEvent| e.stop_propagation()}>
                                 {signature.arguments.iter().zip(arguments.iter()).enumerate().map(|(i, (t, v))| {
-                                    let arguments = arguments.clone();
-                                    let set_arguments = set_arguments.clone();
+                                    let set_argument = set_argument.clone();
                                     html! {
                                         <div>
                                             <label>{format!("{:?}", t)}</label>
-                                            <input key={format!("input{}",i)} value={format!("{}", v)} onkeyup={move |e:KeyboardEvent| {
+                                            <input key={format!("input{}",i)} value={format!("{}", v)} oninput={move |e:InputEvent| {
                                                     let value = e.target_unchecked_into::<HtmlInputElement>().value();
-                                                    let mut arguments = arguments.clone();
-                                                    arguments[i] = value.clone();
-                                                    set_arguments.emit(arguments);
-                                                    console::log!(format!("Arg {} is '{}'", i, value));
+                                                    set_argument.emit((i, value));
                                                 }} />
                                         </div>
                                     }

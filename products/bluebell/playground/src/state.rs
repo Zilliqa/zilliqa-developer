@@ -58,7 +58,6 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        console::log!("Creating new state");
         State {
             source_code: String::from(
                 r#"scilla_version 0
@@ -141,7 +140,6 @@ impl Reducer<State> for StateMessage {
                 state.function_loaded = false;
 
                 state.data = "0x00".to_string();
-                console::log!("Compiling code");
 
                 if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
                     state.functions = exec
@@ -199,12 +197,13 @@ impl Reducer<State> for StateMessage {
                 function_name,
                 arguments,
             } => {
-                // console::log!("Code: {}", hex::encode(&*code));
                 let code: Vec<u8> = if let Some(exec) = &state.executable {
                     exec.borrow().bytecode.to_vec()
                 } else {
                     [].to_vec()
                 };
+
+                let arguments = format!("[{}]", arguments);
 
                 let args: Vec<EvmTypeValue> = if arguments == "" {
                     [].to_vec()
@@ -231,7 +230,6 @@ impl Reducer<State> for StateMessage {
 
                 state.data = hex::encode(&*data);
 
-                console::log!("Resetting machine");
                 state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
                     code.into(),
                     data,
@@ -280,7 +278,6 @@ impl Reducer<State> for StateMessage {
 
 impl Clone for State {
     fn clone(&self) -> Self {
-        console::log!("Cloning 1");
         let context = if let Some(c) = &self.context {
             Some(Rc::clone(&c))
         } else {
@@ -296,7 +293,7 @@ impl Clone for State {
         } else {
             None
         };
-        console::log!(format!("Cloning 2: {}", self.function_loaded));
+
         Self {
             source_code: self.source_code.clone(),
             compiling: self.compiling,

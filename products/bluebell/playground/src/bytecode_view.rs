@@ -128,7 +128,6 @@ impl Component for ByteCodeView {
             }
             ByteCodeViewMessage::ScrollToPosition(index) => {
                 // Set up a new timeout to scroll to the element after a slight delay
-                console::log!("Scrolling");
                 let id = format!("instr-{}", index);
                 self.timeout.take();
                 self.timeout = Some(Timeout::new(100, move || {
