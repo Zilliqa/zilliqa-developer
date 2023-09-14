@@ -421,6 +421,8 @@ impl EvmBlock {
         // TODO: How come self.external_call(); does not call the precompile?
         self.external_staticcall();
 
+        self.swap1(); // Removing stack pointer.
+        self.pop();
         self
     }
 
