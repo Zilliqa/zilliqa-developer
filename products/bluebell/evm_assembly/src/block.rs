@@ -3,7 +3,8 @@ use crate::instruction::{EvmInstruction, EvmSourcePosition, RustPosition};
 use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
 use crate::types::EvmTypeValue;
 use evm::Opcode;
-use log::{info, warn};
+use log::info;
+use log::warn;
 use primitive_types::U256;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
@@ -60,8 +61,6 @@ impl Scope {
         // TODO: assumes that args are first in, last out
         self.name_location.insert(name.to_string(), arg_number);
         self.location_name.insert(arg_number, name.to_string());
-
-        warn!("Registering argument '{}' at position {}", name, arg_number);
 
         self.stack_counter += 1;
 
@@ -134,33 +133,33 @@ impl Scope {
         ret
     }
 
-    fn swap(&mut self, depth1: i32) {
-        let name1: Option<String> = match self.location_name.get(&depth1) {
+    fn swap(&mut self, depth: i32) {
+        let name_at_depth: Option<String> = match self.location_name.get(&depth) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        let name2: Option<String> = match self.location_name.get(&0) {
+        let name_at_zero: Option<String> = match self.location_name.get(&0) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        if let Some(name1) = &name1 {
-            self.location_name.remove(&depth1);
-            self.name_location.remove(name1);
+        if let Some(name_at_depth) = &name_at_depth {
+            self.location_name.remove(&depth);
+            self.name_location.remove(name_at_depth);
         }
 
-        if let Some(name2) = name2 {
+        if let Some(name_at_zero) = name_at_zero {
             self.location_name.remove(&0);
-            self.name_location.remove(&name2);
+            self.name_location.remove(&name_at_zero);
 
-            self.name_location.insert(name2.to_string(), depth1);
-            self.location_name.insert(depth1, name2.to_string());
+            self.name_location.insert(name_at_zero.to_string(), depth);
+            self.location_name.insert(depth, name_at_zero.to_string());
         }
 
-        if let Some(name1) = name1 {
-            self.name_location.insert(name1.to_string(), 0);
-            self.location_name.insert(0, name1.to_string());
+        if let Some(name_at_depth) = name_at_depth {
+            self.name_location.insert(name_at_depth.to_string(), 0);
+            self.location_name.insert(0, name_at_depth.to_string());
         }
     }
 }
@@ -281,6 +280,11 @@ impl EvmBlock {
     }
 
     pub fn duplicate_stack_name(&mut self, name: &str) -> Result<(), String> {
+        info!(
+            "{}",
+            format!("Registered names: {:#?}", self.scope.name_location)
+        );
+
         match self.scope.name_location.get(name) {
             Some(pos) => {
                 let distance = self.scope.stack_counter - pos;
@@ -353,7 +357,7 @@ impl EvmBlock {
                     _ => panic!("{}", "Stack overflow.".to_string()),
                 }
             }
-            None => panic!("{}", format!("Failed to find SSA name {} on stack", name)),
+            None => Err(format!("Failed to find SSA name {} on stack", name)),
         }
     }
 

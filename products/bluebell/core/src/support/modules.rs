@@ -187,7 +187,6 @@ impl BluebellModule for ScillaDebugBuiltins {
                 block.pop(); // Removing the argument that was to be printed
             }
 
-            block.pop(); // TODO: This ought to not be there. Double check if you have miscalculated the stack or figure out why it is needed.
             Ok(ret)
         });
     }

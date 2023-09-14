@@ -10,6 +10,7 @@ use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::EvmSourcePosition;
+use log::warn;
 use primitive_types::U256;
 use std::collections::BTreeSet;
 
@@ -223,7 +224,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                         match &arg.resolved {
                                             Some(n) => match evm_block.duplicate_stack_name(n) {
-                                                Err(e) => panic!("{}", e),
+                                                Err(e) => {
+                                                    warn!("{:#?}", evm_block);
+                                                    panic!("{} in {}", e, evm_block.name)
+                                                }
                                                 _ => (),
                                             },
                                             None => panic!("Argument name was not resolved"),
