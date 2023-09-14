@@ -17,7 +17,7 @@ spec:
                 name: devex
                 port:
                   number: 80
-    - host: dev-devex.zilliqa.com
+    - host: devex.zilliqa.com
       http:
         paths:
           - path: /

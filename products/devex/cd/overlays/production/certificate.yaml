@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: devex
+spec:
+  domains:
+    - devex.zilliqa.com

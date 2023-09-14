@@ -6,6 +6,5 @@ APPLICATIONS_STAGING = []
 
 APPLICATIONS_PROD = [
     "//products/developer-portal",
-    "//products/devex",
     "//products/devex-apollo",
 ]
