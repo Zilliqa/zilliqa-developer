@@ -166,9 +166,9 @@ impl BluebellModule for ScillaDebugBuiltins {
 
                     block.jump_to("loop_start");
 
-                    let mut loop_start = EvmBlock::new(Some(0), BTreeSet::new(), "loop_start");
-                    let mut loop_body = EvmBlock::new(Some(0), BTreeSet::new(), "loop_body");
-                    let mut loop_end = EvmBlock::new(Some(0), BTreeSet::new(), "loop_end");
+                    let mut loop_start = EvmBlock::new(None, BTreeSet::new(), "loop_start");
+                    let mut loop_body = EvmBlock::new(None, BTreeSet::new(), "loop_body");
+                    let mut loop_end = EvmBlock::new(None, BTreeSet::new(), "loop_end");
 
                     loop_start.dup2();
                     loop_start.dup2();

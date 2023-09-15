@@ -465,7 +465,7 @@ impl EvmBlock {
         let mut blocks: Vec<EvmBlock> = Vec::new();
         let mut block_counter = 0;
         let mut current_block =
-            EvmBlock::new(Some(0), BTreeSet::new(), &format!("block{}", block_counter));
+            EvmBlock::new(None, BTreeSet::new(), &format!("block{}", block_counter));
         current_block.is_entry = true;
         block_counter += 1;
 

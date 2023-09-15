@@ -138,8 +138,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         // Creating entry function
                         let block_args : BTreeSet<String> = block.block_arguments.clone();
 
-                        let mut evm_block =
-                            EvmBlock::new(None, block_args, &block_name);
+                        let mut evm_block = // EvmBlock::new(None, block_args, &block_name);
+                            code_builder.new_evm_block_with_args(&block_name, block_args);
+                            // EvmBlock::new(None, block_args, &block_name);
 
                         for instr in &block.instructions {
                             let mut instruction_printer = DebugPrinter::new();
@@ -165,7 +166,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref arguments,
                                 } => {
                                     let mut exit_block = EvmBlock::new(
-                                        Some(0),
+                                        None,
                                         ["result".to_string()].to_vec().into_iter().collect(),
                                         "exit_block",
                                     );
@@ -192,6 +193,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     };
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+
+                                    // Note that we do not need to add scopes to function jumps as these are 
+                                    // outside of the function scope                                    
                                     evm_block.jump_to(&label);
                                     mem::swap(&mut evm_block, &mut exit_block);
                                     ret.push(exit_block);
@@ -493,7 +497,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         };
                                         // TODO: This assumes order in cases
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.jump_if_to(label);
+                                        evm_block.jump_if_to(&code_builder.add_scope_to_label(label));
                                     }
 
                                     let label = match &on_default.resolved {
@@ -502,7 +506,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     };
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_to(label);
+                                    evm_block.jump_to(&code_builder.add_scope_to_label(label));
                                     // unimplemented!() // Add handling for other operations here
                                 }
                                 Operation::Jump(label) => {
@@ -543,7 +547,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_to(label);
+                                    evm_block.jump_to(&code_builder.add_scope_to_label(label));
                                 }
                                 Operation::ConditionalJump {
                                     ref expression,
@@ -621,11 +625,11 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_if_to(success_label);
+                                    evm_block.jump_if_to(&code_builder.add_scope_to_label(success_label));
 
                                     // TODO: manage stack
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_to(failure_label);
+                                    evm_block.jump_to(&code_builder.add_scope_to_label(failure_label));
                                 }
                                 Operation::TerminatingRef (_) => {
                                     // Ignore terminating ref as this will just be pop at the end of the block.
