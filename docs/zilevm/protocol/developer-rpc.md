@@ -24,6 +24,7 @@ description: Specification of ZILEVM RPC Endpoint
 - `eth_protocolVersion`
 - `eth_chainId`
 - `eth_mining (alway returns false)`
+- `eth_getBlockByHash`
 - `eth_getBlockTransactionCountByHash`
 - `eth_getBlockTransactionCountByNumber`
 - `eth_getUncleCountByBlockHash`
