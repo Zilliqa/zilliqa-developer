@@ -138,9 +138,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         // Creating entry function
                         let block_args : BTreeSet<String> = block.block_arguments.clone();
 
-                        let mut evm_block = // EvmBlock::new(None, block_args, &block_name);
+                        let mut evm_block = 
                             code_builder.new_evm_block_with_args(&block_name, block_args);
-                            // EvmBlock::new(None, block_args, &block_name);
 
                         for instr in &block.instructions {
                             let mut instruction_printer = DebugPrinter::new();
@@ -165,15 +164,14 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref name,
                                     ref arguments,
                                 } => {
-                                    let mut exit_block = EvmBlock::new(
-                                        None,
-                                        ["result".to_string()].to_vec().into_iter().collect(),
-                                        "exit_block",
-                                    );
+                                    // TODO: Progate result, but note that in some. Formerly we used ["result".to_string()], but Scilla 
+                                    // transitions does not return any value, so that does not make sense.
+                                    // Bottom line is that it does not make sense to implement return values before we have actually functions (not transitions or procedures) 
+                                    let mut exit_block = code_builder.new_evm_block_with_args("exit_block", [].to_vec().into_iter().collect());
 
                                     // Adding return point
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.push_label("exit_block");
+                                    evm_block.push_label(&exit_block.name);
 
                                     for arg in arguments {
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);

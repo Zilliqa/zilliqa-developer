@@ -3,6 +3,7 @@ use crate::compiler_context::EvmCompilerContext;
 use crate::executable::EvmExecutable;
 use crate::opcode_spec::OpcodeSpec;
 use std::collections::BTreeSet;
+use std::collections::HashSet;
 use std::mem;
 
 use evm::Opcode;
@@ -78,6 +79,7 @@ pub struct EvmByteCodeBuilder<'ctx> {
     pub label_positions: HashMap<String, u32>,
 
     pub current_function_name: Option<String>,
+    pub used_block_names: HashSet<String>,
 }
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
@@ -92,6 +94,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             create_abi_boilerplate,
             label_positions: HashMap::new(),
             current_function_name: None,
+            used_block_names: HashSet::new(),
         };
 
         // Reserving the start of the bytecode for the "entry" function
@@ -106,11 +109,15 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
     }
 
     pub fn new_evm_block(&mut self, name: &str) -> EvmBlock {
-        EvmBlock::new(None, BTreeSet::new(), &self.add_scope_to_label(name))
+        EvmBlock::new(
+            None,
+            BTreeSet::new(),
+            &self.generate_unique_block_name(name),
+        )
     }
 
     pub fn new_evm_block_with_args(&mut self, name: &str, args: BTreeSet<String>) -> EvmBlock {
-        EvmBlock::new(None, args, &self.add_scope_to_label(name))
+        EvmBlock::new(None, args, &self.generate_unique_block_name(name))
     }
 
     pub fn set_current_function_name(&mut self, name: String) {
@@ -119,6 +126,19 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
 
     pub fn clear_current_function_name(&mut self) {
         self.current_function_name = None;
+    }
+
+    pub fn generate_unique_block_name(&mut self, name: &str) -> String {
+        let base = self.add_scope_to_label(name);
+        let mut candidate = base.clone();
+        let mut i = 1;
+        while self.used_block_names.contains(&candidate) {
+            candidate = format!("{}.{}", base, i).to_string();
+            i += 1;
+        }
+        self.used_block_names.insert(candidate.clone());
+
+        candidate
     }
 
     pub fn add_scope_to_label(&mut self, name: &str) -> String {
@@ -170,6 +190,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             create_abi_boilerplate: false,
             label_positions: HashMap::new(),
             current_function_name: None,
+            used_block_names: HashSet::new(),
         }
     }
 
