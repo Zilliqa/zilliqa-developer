@@ -134,11 +134,10 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                             Err(_) => panic!("Failed to get qualified name."),
                         };
 
-
                         // Creating entry function
                         let block_args : BTreeSet<String> = block.block_arguments.clone();
 
-                        let mut evm_block = 
+                        let mut evm_block =
                             code_builder.new_evm_block_with_args(&block_name, block_args);
 
                         for instr in &block.instructions {
@@ -172,7 +171,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Adding return point
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.push_label(&exit_block.name);
-
+                                    warn!("Function '{:?}' arguments: {:#?}", name, arguments);
                                     for arg in arguments {
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                         let _ = match &arg.resolved {

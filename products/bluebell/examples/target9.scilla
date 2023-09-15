@@ -3,8 +3,7 @@ scilla_version 0
 contract HelloWorld()
 field welcome_msg : Uint64 = Uint64 0
 
-transition setValue ()
-  x = Uint64 1337;
+transition setValue (x: Uint64)
   welcome_msg := x
 end
 
@@ -15,6 +14,10 @@ end
 
 
 transition setHello ()
-  setValue;
+  x = Uint64 1337;
+  setValue x;
+  readValue;
+  x = Uint64 7331;
+  setValue x;
   readValue
 end

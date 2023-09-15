@@ -27,8 +27,38 @@ use bluebell::intermediate_representation::pass_manager::PassManager;
 use bluebell::parser::lexer;
 use bluebell::parser::lexer::Lexer;
 use bluebell::parser::{parser, ParserError};
-
 use evm_assembly::types::EvmTypeValue;
+use log::{Log, Metadata, Record};
+
+struct CaptureLogger {}
+
+impl CaptureLogger {
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+impl Log for CaptureLogger {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
+        // self.delegate.enabled(metadata)
+        true
+    }
+
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            print!("{}", record.args().to_string());
+        }
+    }
+
+    fn flush(&self) {}
+}
+
+// Later, you'd set the logger as:
+fn setup_logger() {
+    let logger = Box::new(CaptureLogger::new());
+    log::set_boxed_logger(logger).unwrap();
+    log::set_max_level(log::LevelFilter::Info);
+}
 
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellOutputFormat {
@@ -261,6 +291,7 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
 }
 
 fn main() {
+    setup_logger();
     let args = Args::parse();
 
     let features = args.features();

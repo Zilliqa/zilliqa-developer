@@ -5,6 +5,7 @@ use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
 use crate::parser::lexer::SourcePosition;
 use log::info;
+use log::warn;
 use std::mem;
 
 #[derive(Debug, Clone)]
@@ -1121,6 +1122,7 @@ impl AstConverting for IrEmitter {
                 arguments: call_args,
             } => {
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
+                warn!("Emitter call '{:?}' with {:#?}", component_id, call_args);
                 for arg in call_args.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;

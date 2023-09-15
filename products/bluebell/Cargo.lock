@@ -349,6 +349,7 @@ dependencies = [
  "evm",
  "evm_assembly",
  "hex",
+ "log",
  "primitive-types",
  "serde",
  "serde_json",
