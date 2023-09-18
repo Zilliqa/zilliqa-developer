@@ -1,18 +1,22 @@
+use crate::executable::TypeSourceMap;
 use crate::io_interface::EvmIoInterface;
 use evm::executor::stack::PrecompileFn;
-use log::info;
+use evm::Capture;
+use evm::ExitReason;
+use evm::Trap;
+
 use primitive_types::U256;
 use std::collections::BTreeMap;
 
 use evm::Capture::Exit;
-use evm::Capture::Trap;
+use evm::Capture::Trap as CaptureTrap;
 use evm::Context;
 use evm::Machine;
 use evm::Opcode;
 
 use primitive_types::{H160, H256};
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
 pub type EvmPrecompileSet = BTreeMap<H160, PrecompileFn>;
@@ -20,6 +24,9 @@ pub type EvmPrecompileSet = BTreeMap<H160, PrecompileFn>;
 pub struct ObservableMachine {
     pub machine: Machine,
     pub positions_visited: HashMap<u32, u32>,
+    pub lines_visited_ordered: Vec<u32>,
+    pub lines_visited: HashSet<u32>,
+    pub position_to_line: HashMap<usize, usize>,
     pub failed: bool,
     pub error_message: Option<String>,
     pub storage: HashMap<H256, H256>,
@@ -49,6 +56,9 @@ impl ObservableMachine {
         Self {
             machine: Machine::new(code, data, stack_limit, memory_limit),
             positions_visited: HashMap::new(),
+            lines_visited_ordered: Vec::new(),
+            lines_visited: HashSet::new(),
+            position_to_line: HashMap::new(),
             failed: false,
             error_message: None,
             storage: HashMap::new(),
@@ -56,14 +66,21 @@ impl ObservableMachine {
         }
     }
 
-    pub fn step(&mut self) {
+    pub fn set_source_map(&mut self, source_map: &TypeSourceMap) {
+        self.position_to_line = source_map
+            .iter()
+            .map(|(k, (_, _, line, _))| (*k, *line))
+            .collect::<HashMap<_, _>>();
+    }
+
+    pub fn step(&mut self) -> Result<(), Capture<ExitReason, Trap>> {
         match self.machine.step() {
             Ok(()) => (),
             Err(code) => match code {
-                Exit(_value) => {
-                    return;
+                Exit(ref _value) => {
+                    return Err(code);
                 }
-                Trap(opcode) => {
+                CaptureTrap(opcode) => {
                     match opcode {
                         Opcode::SSTORE => {
                             let stack = self.machine.stack_mut();
@@ -201,48 +218,43 @@ impl ObservableMachine {
                 }
             },
         }
+
+        if let Ok(p) = self.machine.position() {
+            if let Some(value) = self.positions_visited.get_mut(&(*p as u32)) {
+                *value = *value + 1;
+            } else {
+                self.positions_visited.insert(*p as u32, 1);
+            }
+
+            if let Some(line) = self.position_to_line.get(p) {
+                self.lines_visited.insert(*line as u32);
+                let should_add = if let Some(last) = self.lines_visited_ordered.last() {
+                    *last == *line as u32
+                } else {
+                    false
+                };
+
+                if should_add {
+                    self.lines_visited_ordered.push(*line as u32);
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub fn run(&mut self) {
-        // TODO:  Refactor to use self.step
         loop {
-            match self.machine.step() {
+            match self.step() {
                 Ok(()) => (),
                 Err(code) => match code {
                     Exit(_value) => {
                         return;
                     }
-                    Trap(opcode) => {
-                        match opcode {
-                            Opcode::STATICCALL => {
-                                // Emulating static call
-                                // TODO: Attach runtime!
-                                let stack = self.machine.stack_mut();
-                                for _i in 0..6 {
-                                    if stack.pop().is_err() {
-                                        panic!("Stack empty!");
-                                    }
-                                }
-                                let v = stack.push(H256::zero());
-                                if v.is_err() {
-                                    panic!("Failed to push result to stack");
-                                }
-                            }
-
-                            _ => {
-                                panic!("Unhandled trap opcode.")
-                            }
-                        }
-                    }
+                    _ => (),
                 },
             }
-            if let Ok(p) = self.machine.position() {
-                if let Some(value) = self.positions_visited.get_mut(&(*p as u32)) {
-                    *value = *value + 1;
-                } else {
-                    self.positions_visited.insert(*p as u32, 1);
-                }
-            } else {
+            if self.machine.position().is_err() {
                 // Breaking only when we've reached an invalid position
                 // This is to ignore issues of traps with static calls
                 return;
@@ -256,5 +268,13 @@ impl ObservableMachine {
 
     pub fn did_not_visit_program_counter(&self, pc: u32) -> bool {
         None == self.positions_visited.get(&pc)
+    }
+
+    pub fn did_visit_line(&self, pc: u32) -> bool {
+        None != self.lines_visited.get(&pc)
+    }
+
+    pub fn did_not_visit_line(&self, pc: u32) -> bool {
+        None == self.lines_visited.get(&pc)
     }
 }

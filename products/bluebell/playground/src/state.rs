@@ -153,32 +153,19 @@ impl Reducer<State> for StateMessage {
                     let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
 
                     // Creating PC to source map
-                    state.pc_to_position = HashMap::new();
-                    let functions = &exec.executable.ir.functions;
-                    for function in functions {
-                        for block in &function.blocks {
-                            for instr in &block.instructions {
-                                let pc = match &instr.position {
-                                    Some(p) => p,
-                                    None => continue,
-                                };
-                                let source_pos = match &instr.source_position {
-                                    Some(p) => (p.start, p.end, p.line, p.column),
-                                    None => continue,
-                                };
-                                state.pc_to_position.insert(*pc as usize, source_pos);
-                            }
-                        }
-                    }
+                    state.pc_to_position = exec.executable.get_source_map();
 
                     state.executable = Some(Rc::new(RefCell::new(exec.executable)));
-                    state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
+                    let mut observable_machine = ObservableMachine::new(
                         code.into(),
                         [].to_vec().into(),
                         1024,
                         1024,
                         None, // TODO: Add prefcompiles
-                    ))));
+                    );
+                    observable_machine.set_source_map(&state.pc_to_position);
+
+                    state.observable_machine = Some(Rc::new(RefCell::new(observable_machine)));
 
                     // Preserving the context so it can be used later
                     let context = Rc::new(RefCell::new(EvmCompilerContext::new()));
@@ -230,13 +217,12 @@ impl Reducer<State> for StateMessage {
 
                 state.data = hex::encode(&*data);
 
-                state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
-                    code.into(),
-                    data,
-                    1024,
-                    1024,
-                    precompiles,
-                ))));
+                let mut observable_machine =
+                    ObservableMachine::new(code.into(), data, 1024, 1024, precompiles);
+
+                observable_machine.set_source_map(&state.pc_to_position);
+
+                state.observable_machine = Some(Rc::new(RefCell::new(observable_machine)));
                 state.compiling = false;
                 state.playing = false;
                 state.function_loaded = true;
@@ -247,7 +233,7 @@ impl Reducer<State> for StateMessage {
                 if let Some(ref mut machine) = state.observable_machine {
                     let mut machine = machine.borrow_mut();
                     machine.step();
-
+                    console::log!(format!("{:#?}", machine.lines_visited_ordered));
                     state.program_counter = if let Ok(pc) = machine.machine.position() {
                         if let Some(pos) = state.pc_to_position.get(pc) {
                             state.current_position = Some(*pos);
