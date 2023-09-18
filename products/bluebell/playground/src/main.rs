@@ -6,6 +6,7 @@ mod machine_view;
 mod state;
 mod vm_remote;
 mod vm_remote_layout;
+mod vm_remote_state;
 
 mod logger;
 

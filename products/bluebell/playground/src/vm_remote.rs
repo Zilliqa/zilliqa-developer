@@ -1,49 +1,48 @@
-use evm_assembly::function_signature::EvmFunctionSignature;
-
+use crate::state::{State, StateMessage};
+use crate::vm_remote_layout::VmRemoteControlLayout;
+use crate::vm_remote_state::{VmRemoteMessage, VmRemoteState};
+use gloo_timers::callback::Timeout;
 use std::rc::Rc;
-
-use gloo_console as console;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
-
-use crate::state::{State, StateMessage};
-use crate::vm_remote_layout::VmRemoteControlLayout;
-use gloo_timers::callback::Timeout;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct VmRemoteProps {}
 
 pub struct VmRemote {
     props: VmRemoteProps,
-    dispatch: Dispatch<State>,
-    state: Rc<State>,
-    function_signature: Option<EvmFunctionSignature>,
-    arguments: Vec<String>,
+    vm_dispatch: Dispatch<State>,
+    vm_state: Rc<State>,
+
+    dispatch: Dispatch<VmRemoteState>,
+    state: Rc<VmRemoteState>,
 }
 
-pub enum VmRemoteMessage {
-    UpdateState(Rc<State>),
-    UpdateFunctionSignature(Option<EvmFunctionSignature>),
-    SetArgument(usize, String),
+pub enum VmComponentMessage {
+    UpdateVmState(Rc<State>),
+    UpdateVmRemoteState(Rc<VmRemoteState>),
 }
 
 impl Component for VmRemote {
-    type Message = VmRemoteMessage;
+    type Message = VmComponentMessage;
     type Properties = VmRemoteProps;
 
     fn create(ctx: &Context<Self>) -> Self {
         let props = ctx.props().clone();
 
-        let state_callback = ctx.link().callback(VmRemoteMessage::UpdateState);
-        let dispatch = Dispatch::<State>::subscribe(state_callback);
+        let vm_state_callback = ctx.link().callback(VmComponentMessage::UpdateVmState);
+        let vm_dispatch = Dispatch::<State>::subscribe(vm_state_callback);
+
+        let state_callback = ctx.link().callback(VmComponentMessage::UpdateVmRemoteState);
+        let dispatch = Dispatch::<VmRemoteState>::subscribe(state_callback);
 
         Self {
             props: props.clone(),
+            vm_state: vm_dispatch.get(),
+            vm_dispatch,
             state: dispatch.get(),
             dispatch,
-            function_signature: None,
-            arguments: [].to_vec(),
         }
     }
 
@@ -54,44 +53,36 @@ impl Component for VmRemote {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            VmRemoteMessage::UpdateState(state) => {
-                self.state = state;
+            VmComponentMessage::UpdateVmState(state) => {
+                self.vm_state = state;
             }
-            VmRemoteMessage::UpdateFunctionSignature(signature) => {
-                self.function_signature = signature;
-                let n = if let Some(signature) = &self.function_signature {
-                    signature.arguments.len()
-                } else {
-                    0
-                };
 
-                self.arguments = vec![String::new(); n];
-            }
-            VmRemoteMessage::SetArgument(i, v) => {
-                self.arguments[i] = v;
+            VmComponentMessage::UpdateVmRemoteState(state) => {
+                self.state = state;
             }
         }
         true
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let functions = self.state.functions.clone();
-        let functions_clone = self.state.functions.clone();
-        let signature = self.function_signature.clone();
-        let arguments = self.arguments.clone();
+    fn view(&self, _ctx: &Context<Self>) -> Html {
+        let functions = self.vm_state.functions.clone();
+        let functions_clone = self.vm_state.functions.clone();
+        let signature = self.state.function_signature.clone();
+        let arguments = self.state.arguments.clone();
 
-        let step_button_click = self.dispatch.apply_callback(|_| StateMessage::RunStep);
-        let eject_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
-        let stop_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
-        let set_function_signature = ctx
-            .link()
-            .callback(|value| VmRemoteMessage::UpdateFunctionSignature(value));
-        let set_argument = ctx
-            .link()
-            .callback(|(i, value)| VmRemoteMessage::SetArgument(i, value));
+        let step_button_click = self.vm_dispatch.apply_callback(|_| StateMessage::RunStep);
+        let eject_button_click = self.vm_dispatch.apply_callback(|_| StateMessage::Reset);
+        let stop_button_click = self.vm_dispatch.apply_callback(|_| StateMessage::Reset);
+
+        let set_function_signature = self
+            .dispatch
+            .apply_callback(|value| VmRemoteMessage::UpdateFunctionSignature(value));
+        let set_argument = self
+            .dispatch
+            .apply_callback(|(i, value)| VmRemoteMessage::SetArgument(i, value));
 
         let run_button_click = {
-            let load_function = !self.state.function_loaded;
+            let load_function = !self.vm_state.function_loaded;
             let maybe_function_signature = signature.clone();
             let argument_list = arguments.clone();
             Callback::from(move |_| {
@@ -154,8 +145,8 @@ impl Component for VmRemote {
                         </div>
                         <div class="flex items-center">
                             <span class="font-bold">{"PC:"}</span>
-                            <span>{format!("0x{:02x}", self.state.program_counter)}</span>
-                            <span>{format!("({})", self.state.program_counter)}</span>
+                            <span>{format!("0x{:02x}", self.vm_state.program_counter)}</span>
+                            <span>{format!("({})", self.vm_state.program_counter)}</span>
                         </div>
                     </div>
                     { if let Some(signature) = signature {
@@ -194,7 +185,7 @@ impl Component for VmRemote {
                                     onclick={run_button_click.clone()}
                                 >
                                     {
-                                        if self.state.playing {
+                                        if self.vm_state.playing {
                                             html!{
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />

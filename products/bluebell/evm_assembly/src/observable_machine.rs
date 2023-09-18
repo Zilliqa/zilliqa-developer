@@ -229,9 +229,9 @@ impl ObservableMachine {
             if let Some(line) = self.position_to_line.get(p) {
                 self.lines_visited.insert(*line as u32);
                 let should_add = if let Some(last) = self.lines_visited_ordered.last() {
-                    *last == *line as u32
+                    *last != *line as u32
                 } else {
-                    false
+                    true
                 };
 
                 if should_add {

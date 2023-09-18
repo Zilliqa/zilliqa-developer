@@ -178,7 +178,7 @@ impl Component for AppLayout {
             {
                 if let Some(_) = &self.state.executable {
                     html! {
-                        <VmRemote />
+                        <VmRemote key="remote" />
 
                     }
                 } else {
