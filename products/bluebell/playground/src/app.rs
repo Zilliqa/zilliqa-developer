@@ -1,3 +1,4 @@
+use crate::logger::LoggerView;
 use crate::vm_remote_layout::VmRemoteControlLayout;
 use evm_assembly::function_signature::EvmFunctionSignature;
 use std::collections::HashMap;
@@ -277,6 +278,7 @@ pub fn app() -> Html {
     ].to_vec();
 
     let is_compiling = state.compiling;
+    let show_console = true;
 
     html! {
         <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
@@ -284,81 +286,83 @@ pub fn app() -> Html {
             { if *current_view == 0 {
 
                 html! {
-                    <div class="h-full w-full pl-10 bg-black">
-                            <div class="editor-container h-full w-full bg-black  text-white text-left font-mono">
-                                <div class="w-full flex items-center justify-center py-2">
-                                    <Dropdown items={EXAMPLES.iter().map(|item| item.0.to_string()).collect::<Vec<_>>()}    on_item_click={|i:usize| {
-                                        let value: String = EXAMPLES[i].1.to_string().clone();
-                                        Dispatch::<State>::new().reduce_mut(move | s| {
-                                            s.program_counter = 0;
-                                            s.executable = None;
-                                            s.observable_machine = None;
-                                            s.pc_to_position = HashMap::new();
-                                            s.current_position = None;
-                                            s.source_code = value
-                                        })
-                                    }}    />
-                                </div>
-                                {
-                                    if let Some(p) = state.current_position {
-                                        let (_, _, line, _) = p;
-                                        let pos = if line < usize::MAX/2 {
-                                            line_to_pixel_offset(line+1)
-                                        }
-                                        else
-                                        {
-                                            0
-                                        };
-                                        html! {
-                                        <div class="bg-blue-600 w-full h-6 absolute" style={format!("top: {}px", pos)}>
-                                        </div>
-                                        }
-                                    } else {
-                                        html! {}
-                                    }
-                                }
-                                <pre class="highlighted-code h-full w-full flex flex-col items-stretch hidden">
-                                    <code class="language-scilla h-full w-full"> /* TODO: Fix highligther */
-                                    {source_code.clone()}
-                                    </code>
-                                </pre>
-                                <textarea
-                                    class="overlay-textarea text-white outline-0 text-left font-mono h-full w-full focus:none"
-                                    value={source_code}
-                                    oninput={handle_source_code_change}
-                                />
-
-                                { for error_map.iter().map(|(line, error)| {
-                                    html! {
-                                        <div class="error-annotation" style={format!("top: {}px", line_to_pixel_offset(*line))}>
-                                            { error }
-                                        </div>
-                                    }
-                                })}
+                    <div class="h-full w-full flex flex-col pl-10 bg-black">
+                        <div class="editor-container flex-1 w-full bg-black  text-white text-left font-mono">
+                            <div class="w-full flex items-center justify-center py-2">
+                                <Dropdown items={EXAMPLES.iter().map(|item| item.0.to_string()).collect::<Vec<_>>()}    on_item_click={|i:usize| {
+                                    let value: String = EXAMPLES[i].1.to_string().clone();
+                                    Dispatch::<State>::new().reduce_mut(move | s| {
+                                        s.program_counter = 0;
+                                        s.executable = None;
+                                        s.observable_machine = None;
+                                        s.pc_to_position = HashMap::new();
+                                        s.current_position = None;
+                                        s.source_code = value
+                                    })
+                                }}    />
                             </div>
+                            {
+                                if let Some(p) = state.current_position {
+                                    let (_, _, line, _) = p;
+                                    let pos = if line < usize::MAX/2 {
+                                        line_to_pixel_offset(line+1)
+                                    }
+                                    else
+                                    {
+                                        0
+                                    };
+                                    html! {
+                                    <div class="bg-blue-600 w-full h-6 absolute" style={format!("top: {}px", pos)}>
+                                    </div>
+                                    }
+                                } else {
+                                    html! {}
+                                }
+                            }
+                            <pre class="highlighted-code h-full w-full flex flex-col items-stretch hidden">
+                                <code class="language-scilla h-full w-full"> /* TODO: Fix highligther */
+                                {source_code.clone()}
+                                </code>
+                            </pre>
+                            <textarea
+                                class="overlay-textarea text-white outline-0 text-left font-mono h-full w-full focus:none"
+                                value={source_code}
+                                oninput={handle_source_code_change}
+                            />
 
-                            <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
-                                <button onclick={compile_button_click.clone()} class={
-                                    if state.executable.is_none() {
-                                        "ease-in-out delay-150 transition transition-opacity opacity-1 h-16 w-16 bg-indigo-600 text-lg text-white px-2 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150 flex items-center justify-center"
+                            { for error_map.iter().map(|(line, error)| {
+                                html! {
+                                    <div class="error-annotation" style={format!("top: {}px", line_to_pixel_offset(*line))}>
+                                        { error }
+                                    </div>
+                                }
+                            })}
+                        </div>
+
+
+                            <LoggerView />
+
+
+
+                        <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
+                            <button onclick={compile_button_click.clone()} class={
+                                if state.executable.is_none() {
+                                    "ease-in-out delay-150 transition transition-opacity opacity-1 h-16 w-16 bg-indigo-600 text-lg text-white px-2 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150 flex items-center justify-center"
+                                } else {
+                                    "ease-in-out delay-150 transition transition-opacity opacity-0 h-16 w-16 bg-indigo-600 text-lg text-white px-2 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150 flex items-center justify-center"
+                                }
+                            }>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class={
+                                    if is_compiling {
+                                        "w-6 h-6 animate-spin"
                                     } else {
-                                        "ease-in-out delay-150 transition transition-opacity opacity-0 h-16 w-16 bg-indigo-600 text-lg text-white px-2 py-2 rounded-full shadow-sm hover:bg-indigo-700 focus:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-200 active:bg-indigo-800 transition duration-150 flex items-center justify-center"
+                                        "w-6 h-6"
                                     }
                                 }>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class={
-                                        if is_compiling {
-                                            "w-6 h-6 animate-spin"
-                                        } else {
-                                            "w-6 h-6"
-                                        }
-                                    }>
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                                    </svg>
-                                </button>
-                            </div>
-
-
-
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 }
 
