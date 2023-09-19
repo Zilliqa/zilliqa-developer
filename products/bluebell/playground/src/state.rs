@@ -4,6 +4,8 @@ use bluebell::support::evm::EvmCompiler;
 use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
 use bluebell::support::modules::ScillaDefaultTypes;
+use evm::Capture::Exit;
+use evm::ExitReason;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::function_signature::EvmFunctionSignature;
@@ -54,6 +56,9 @@ pub struct State {
 
     #[serde(skip)]
     pub program_counter: u32, // Forces state update on step
+
+    #[serde(skip)]
+    pub exit_message: Option<String>,
 }
 
 impl Default for State {
@@ -97,6 +102,7 @@ end
             current_position: None,
             pc_to_position: HashMap::new(),
             data: "".to_string(),
+            exit_message: None,
         }
     }
 }
@@ -226,13 +232,34 @@ impl Reducer<State> for StateMessage {
                 state.compiling = false;
                 state.playing = false;
                 state.function_loaded = true;
-
+                state.exit_message = None;
                 true
             }
             StateMessage::RunStep => {
                 if let Some(ref mut machine) = state.observable_machine {
                     let mut machine = machine.borrow_mut();
-                    machine.step();
+
+                    match machine.step() {
+                        Ok(()) => (),
+                        Err(code) => match code {
+                            Exit(value) => {
+                                console::log!(format!("Exit {:#?}", value));
+                                state.playing = false;
+                                state.function_loaded = false;
+                                match value {
+                                    ExitReason::Succeed(_) => {
+                                        console::log!("SUCCESS");
+                                    }
+                                    _ => {
+                                        state.exit_message =
+                                            Some(format!("{:?}", value).to_string());
+                                    }
+                                }
+                            }
+                            _ => (),
+                        },
+                    }
+
                     console::log!(format!("{:#?}", machine.lines_visited_ordered));
                     state.program_counter = if let Ok(pc) = machine.machine.position() {
                         if let Some(pos) = state.pc_to_position.get(pc) {
@@ -245,7 +272,7 @@ impl Reducer<State> for StateMessage {
                     };
 
                     if state.playing {
-                        Timeout::new(500, move || {
+                        Timeout::new(20, move || {
                             let dispatch = Dispatch::<State>::new();
                             dispatch.apply(StateMessage::RunStep);
                         })
@@ -294,6 +321,7 @@ impl Clone for State {
             pc_to_position: self.pc_to_position.clone(),
             current_position: self.current_position.clone(),
             data: self.data.clone(),
+            exit_message: self.exit_message.clone(),
         }
     }
 }
@@ -331,6 +359,7 @@ impl PartialEq for State {
             && self.playing == other.playing
             && self.function_loaded == other.function_loaded
             && self.data == other.data
+            && self.exit_message == other.exit_message
     }
 }
 
