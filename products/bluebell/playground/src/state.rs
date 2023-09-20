@@ -58,7 +58,7 @@ pub struct State {
     pub program_counter: u32, // Forces state update on step
 
     #[serde(skip)]
-    pub exit_message: Option<String>,
+    pub exit_message: Option<(bool, String)>,
 
     #[serde(skip)]
     pub breakpoints: HashSet<u32>,
@@ -262,13 +262,14 @@ impl Reducer<State> for StateMessage {
                                 match value {
                                     ExitReason::Succeed(_) => {}
                                     _ => {
-                                        state.exit_message = Some(
+                                        state.exit_message = Some((
+                                            true,
                                             format!(
                                                 "{:?} at {:#02x}",
                                                 value, state.program_counter
                                             )
                                             .to_string(),
-                                        );
+                                        ));
                                     }
                                 }
                             }
@@ -291,7 +292,7 @@ impl Reducer<State> for StateMessage {
                     }
 
                     if state.playing {
-                        Timeout::new(20, move || {
+                        Timeout::new(5, move || {
                             let dispatch = Dispatch::<State>::new();
                             dispatch.apply(StateMessage::RunStep);
                         })

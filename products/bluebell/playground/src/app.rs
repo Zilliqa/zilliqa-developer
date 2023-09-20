@@ -283,10 +283,16 @@ pub fn app() -> Html {
     html! {
         <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
         {
-            if let Some(exit_message) = exit_message {
+            if let Some((is_error, exit_message)) = exit_message {
                 html! {
                     <div class="z-10 pointer-events-none fixed inset-x-0 bottom-0 sm:flex sm:justify-center sm:px-6 sm:pb-5 lg:px-8">
-                      <div class="pointer-events-auto flex items-center justify-between gap-x-6 bg-red-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5">
+                      <div class={
+                            if *is_error {
+                                "pointer-events-auto flex items-center justify-between gap-x-6 bg-red-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5"
+                            } else {
+                                "pointer-events-auto flex items-center justify-between gap-x-6 bg-yellow-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5"
+                            }
+                        }>
                         <p class="text-sm leading-6 text-white">
                           <a href="#">
                             <strong class="font-semibold">{"Execution failed"}</strong>
