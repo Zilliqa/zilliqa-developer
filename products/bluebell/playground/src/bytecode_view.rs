@@ -191,7 +191,7 @@ impl Component for ByteCodeView {
                                             <input type="checkbox" class="flex-0 form-checkbox min-h-5 min-w-5 h-5 w-5 text-blue-600 rounded"
                                                    oninput={move |e:InputEvent| {
                                                         let value = e.target_unchecked_into::<HtmlInputElement>().checked();
-                                                        console::log!(value, instruction_position);
+
                                                         let dispatch = Dispatch::<State>::new();
                                                         if value {
                                                             dispatch.apply(StateMessage::AddBreakPoint(instruction_position));

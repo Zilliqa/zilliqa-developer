@@ -83,7 +83,13 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
     /// It loops over all function definitions in the IR and creates corresponding function definitions
     /// in the EVM module using the byte code builder.
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
-        for func in &self.ir.function_definitions {
+        for func in &mut self.ir.function_definitions {
+            /// TODO: Debug code
+            /*
+            let mut ir_printer = DebugPrinter::new();
+            let _ = ir_printer.visit_concrete_function(TreeTraversalMode::Enter, func, &mut self.ir.symbol_table);
+            info!("{}", format!("IR: {}", ir_printer.value()));
+            */
             let arg_types: Vec<&str> = func
                 .arguments
                 .iter()
@@ -127,6 +133,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                         }
                     }
 
+
+
+
                     // Return PC + Arguments are expected to be on the stack
                     for block in &func.body.blocks {
                         let block_name = match block.name.qualified_name() {
@@ -166,7 +175,16 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // TODO: Progate result, but note that in some. Formerly we used ["result".to_string()], but Scilla 
                                     // transitions does not return any value, so that does not make sense.
                                     // Bottom line is that it does not make sense to implement return values before we have actually functions (not transitions or procedures) 
-                                    let mut exit_block = code_builder.new_evm_block_with_args("exit_block", [].to_vec().into_iter().collect());
+
+                                    // All function arguments must be added as arguments to the next block since these are copied 
+                                    // and not moved.
+                                    let exit_block_args: BTreeSet<String> = arguments.iter().map(|arg| {
+                                        match &arg.resolved {
+                                            Some(a) =>a.clone(),
+                                            None => panic!("Unable to resolve {}", arg.unresolved),
+                                        }
+                                    }).collect();
+                                    let mut exit_block = code_builder.new_evm_block_with_args("exit_block", exit_block_args);
 
                                     // Adding return point
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);

@@ -268,9 +268,6 @@ impl EvmBlock {
     }
 
     fn update_stack(&mut self, opcode: Opcode) {
-        if opcode == Opcode::JUMP {
-            info!("{}", self.to_string());
-        }
         let deepest_visit = self.scope.update_stack(opcode);
 
         // Updating how deeply in the stack we consume
