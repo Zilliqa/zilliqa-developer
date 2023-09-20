@@ -15,7 +15,7 @@ use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use yewdux::prelude::Dispatch;
 use yewdux::prelude::Reducer;
@@ -59,6 +59,9 @@ pub struct State {
 
     #[serde(skip)]
     pub exit_message: Option<String>,
+
+    #[serde(skip)]
+    pub breakpoints: HashSet<u32>,
 }
 
 impl Default for State {
@@ -103,6 +106,7 @@ end
             pc_to_position: HashMap::new(),
             data: "".to_string(),
             exit_message: None,
+            breakpoints: HashSet::new(),
         }
     }
 }
@@ -117,6 +121,8 @@ pub enum StateMessage {
     CompileCode {
         source_code: String,
     },
+    AddBreakPoint(u32),
+    RemoveBreakPoint(u32),
 }
 
 impl Reducer<State> for StateMessage {
@@ -127,6 +133,14 @@ impl Reducer<State> for StateMessage {
                 state.observable_machine = None;
                 state.executable = None;
                 state.bytecode_hex = "".to_string();
+                true
+            }
+            StateMessage::AddBreakPoint(point) => {
+                state.breakpoints.insert(point);
+                true
+            }
+            StateMessage::RemoveBreakPoint(point) => {
+                state.breakpoints.remove(&point);
                 true
             }
             StateMessage::CompileCode { source_code } => {
@@ -243,16 +257,18 @@ impl Reducer<State> for StateMessage {
                         Ok(()) => (),
                         Err(code) => match code {
                             Exit(value) => {
-                                console::log!(format!("Exit {:#?}", value));
                                 state.playing = false;
                                 state.function_loaded = false;
                                 match value {
-                                    ExitReason::Succeed(_) => {
-                                        console::log!("SUCCESS");
-                                    }
+                                    ExitReason::Succeed(_) => {}
                                     _ => {
-                                        state.exit_message =
-                                            Some(format!("{:?}", value).to_string());
+                                        state.exit_message = Some(
+                                            format!(
+                                                "{:?} at {:#02x}",
+                                                value, state.program_counter
+                                            )
+                                            .to_string(),
+                                        );
                                     }
                                 }
                             }
@@ -260,7 +276,6 @@ impl Reducer<State> for StateMessage {
                         },
                     }
 
-                    console::log!(format!("{:#?}", machine.lines_visited_ordered));
                     state.program_counter = if let Ok(pc) = machine.machine.position() {
                         if let Some(pos) = state.pc_to_position.get(pc) {
                             state.current_position = Some(*pos);
@@ -270,6 +285,10 @@ impl Reducer<State> for StateMessage {
                         state.current_position = None;
                         0
                     };
+
+                    if state.breakpoints.contains(&state.program_counter) {
+                        state.playing = false;
+                    }
 
                     if state.playing {
                         Timeout::new(20, move || {
@@ -322,6 +341,7 @@ impl Clone for State {
             current_position: self.current_position.clone(),
             data: self.data.clone(),
             exit_message: self.exit_message.clone(),
+            breakpoints: self.breakpoints.clone(),
         }
     }
 }
@@ -360,6 +380,7 @@ impl PartialEq for State {
             && self.function_loaded == other.function_loaded
             && self.data == other.data
             && self.exit_message == other.exit_message
+            && self.breakpoints == other.breakpoints
     }
 }
 
