@@ -21,9 +21,7 @@ impl IrPass for DebugPrinter {
         self.script = "".to_string();
     }
 
-    fn finalize(&mut self) {
-        info!("{}", self.script);
-    }
+    fn finalize(&mut self) {}
 
     fn visit_symbol_kind(
         &mut self,

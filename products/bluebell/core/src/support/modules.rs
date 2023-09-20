@@ -3,6 +3,7 @@ use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutput
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use log::{error, info};
 use std::collections::BTreeSet;
 use std::mem;
 // TODO: Generalize to support both EVM and LLVM
@@ -45,7 +46,7 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _backend: &dyn Backend,
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    println!("");
+                    info!("\n");
                     Ok((
                         PrecompileOutput {
                             output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
@@ -78,7 +79,7 @@ impl BluebellModule for ScillaDebugBuiltins {
                             last_8[0], last_8[1], last_8[2], last_8[3], last_8[4], last_8[5],
                             last_8[6], last_8[7],
                         ]);
-                        print!("{}", v);
+                        info!("{}", format!("{}", v));
                     }
                     Ok((
                         PrecompileOutput {
@@ -107,8 +108,8 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
                     match std::str::from_utf8(input) {
-                        Ok(v) => println!("{}", v),
-                        Err(_) => println!("{}", hex::encode(input)),
+                        Ok(v) => info!("{}", format!("{}\n", v)),
+                        Err(_) => error!("{}", format!("{}\n", hex::encode(input))),
                     };
 
                     Ok((
@@ -132,7 +133,26 @@ impl BluebellModule for ScillaDebugBuiltins {
                     None => panic!("Internal error: Unable to retrieve function"),
                 };
                 let subcall_arg_types: Vec<String> = [arg.clone()].to_vec();
+                // TODO: There is some issue with this function
+                /*
+                                MVP error:
+                scilla_version 0
 
+                library HelloWorld
+                type Bool =
+                  | True
+                  | False
+
+                contract HelloWorld()
+
+                transition setHello (msg : Uint64)
+                  is_owner = True;
+                  match is_owner with
+                  | True =>
+                    x = builtin print msg
+                  end
+                end
+                                */
                 // TODO: In the event of string, this is not one to one
                 if arg == "String" {
                     // Putting string onto stack so it is accessible to our precompile function
@@ -146,9 +166,9 @@ impl BluebellModule for ScillaDebugBuiltins {
 
                     block.jump_to("loop_start");
 
-                    let mut loop_start = EvmBlock::new(Some(0), BTreeSet::new(), "loop_start");
-                    let mut loop_body = EvmBlock::new(Some(0), BTreeSet::new(), "loop_body");
-                    let mut loop_end = EvmBlock::new(Some(0), BTreeSet::new(), "loop_end");
+                    let mut loop_start = EvmBlock::new(None, BTreeSet::new(), "loop_start");
+                    let mut loop_body = EvmBlock::new(None, BTreeSet::new(), "loop_body");
+                    let mut loop_end = EvmBlock::new(None, BTreeSet::new(), "loop_end");
 
                     loop_start.dup2();
                     loop_start.dup2();
@@ -179,14 +199,13 @@ impl BluebellModule for ScillaDebugBuiltins {
                     ret.push(loop_body);
                 } else {
                     block.call(signature, subcall_arg_types);
-                    block.swap1(); // Moving the result so it does not get popped
-                                   // block.pop(); // Removing result
+                    // block.swap1(); // Moving the result so it does not get popped
+                    block.pop(); // Removing result
                 }
 
                 block.pop(); // Removing the argument that was to be printed
             }
 
-            block.pop(); // TODO: This ought to not be there. Double check if you have miscalculated the stack or figure out why it is needed.
             Ok(ret)
         });
     }
@@ -211,10 +230,6 @@ impl BluebellModule for ScillaDefaultBuiltins {
                     _backend: &dyn Backend,
                     is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    println!("Running precompile {:?}!", input);
-                    println!("Len: {} / {}", input.len() / 32, input.len());
-                    println!("Context: {:#?}", context);
-                    println!("Static: {}", is_static);
                     let gas_needed = 20;
 
                     if let Some(gas_limit) = gas_limit {

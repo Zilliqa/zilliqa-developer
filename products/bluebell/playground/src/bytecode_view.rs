@@ -1,9 +1,13 @@
+use crate::state::State;
+use crate::state::StateMessage;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::RustPosition;
 use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use std::cell::RefCell;
 use std::rc::Rc;
+use web_sys::HtmlInputElement;
+use yewdux::prelude::Dispatch;
 
 use yew::prelude::*;
 
@@ -128,7 +132,6 @@ impl Component for ByteCodeView {
             }
             ByteCodeViewMessage::ScrollToPosition(index) => {
                 // Set up a new timeout to scroll to the element after a slight delay
-                console::log!("Scrolling");
                 let id = format!("instr-{}", index);
                 self.timeout.take();
                 self.timeout = Some(Timeout::new(100, move || {
@@ -159,6 +162,8 @@ impl Component for ByteCodeView {
                                 if program_counter == instr.bytecode_position {
                                     ctx.link().send_message(ByteCodeViewMessage::ScrollToPosition(index));
                                 }
+
+                                let instruction_position =  instr.bytecode_position ;
                                 html! {
                                     <>
                                         {
@@ -175,7 +180,7 @@ impl Component for ByteCodeView {
 
 
                                         <div class={
-                                            if program_counter == instr.bytecode_position {
+                                          if program_counter == instruction_position {
                                               "p-2 rounded flex  items-start justify-start space-x-4 text-sm text-gray-700 bg-gray-300 whitespace-nowrap"
                                           }
                                           else
@@ -183,7 +188,19 @@ impl Component for ByteCodeView {
                                              "p-2 rounded  flex  items-start justify-start space-x-4 text-sm text-gray-700 whitespace-nowrap"
                                           }
                                         } id={id}> // Assign the unique id here
-                                            <input type="checkbox" class="flex-0 form-checkbox min-h-5 min-w-5 h-5 w-5 text-blue-600 rounded" />
+                                            <input type="checkbox" class="flex-0 form-checkbox min-h-5 min-w-5 h-5 w-5 text-blue-600 rounded"
+                                                   oninput={move |e:InputEvent| {
+                                                        let value = e.target_unchecked_into::<HtmlInputElement>().checked();
+                                                        console::log!(value, instruction_position);
+                                                        let dispatch = Dispatch::<State>::new();
+                                                        if value {
+                                                            dispatch.apply(StateMessage::AddBreakPoint(instruction_position));
+                                                        } else {
+                                                            dispatch.apply(StateMessage::RemoveBreakPoint(instruction_position));
+                                                        }
+                                                    }}
+
+                                             />
                                             <div class="h-5">{instr.hex_bytecode_position.clone()}</div>
                                             <div class="flex flex-col overflow-x-auto">
                                                 <div>{instr.text.clone()}</div>

@@ -14,7 +14,7 @@ use evm_assembly::executable::EvmExecutable;
 use evm_assembly::executor::EvmExecutor;
 
 pub struct EvmCompiler {
-    context: EvmCompilerContext,
+    pub context: EvmCompilerContext,
     ir_emitter: IrEmitter,
     pass_manager: PassManager,
     abi_support: bool,

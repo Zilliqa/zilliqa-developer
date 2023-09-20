@@ -1,5 +1,8 @@
+use crate::logger::LoggerView;
+
 use std::collections::HashMap;
 use std::rc::Rc;
+
 use yew::virtual_dom::VNode;
 
 use gloo_console as console;
@@ -12,7 +15,7 @@ use crate::dropdown::Dropdown;
 use crate::examples::EXAMPLES;
 use crate::machine_view::MachineView;
 use crate::state::{State, StateMessage};
-use crate::vm_remote::VmRemoteControl;
+use crate::vm_remote::VmRemote;
 use gloo_timers::callback::Timeout;
 
 #[derive(Clone, PartialEq)]
@@ -32,7 +35,6 @@ pub struct AppLayoutProps {
 
 pub struct AppLayout {
     props: AppLayoutProps,
-    data: String,
     dispatch: Dispatch<State>,
     state: Rc<State>,
 }
@@ -53,7 +55,6 @@ impl Component for AppLayout {
 
         Self {
             props: props.clone(),
-            data: "".to_string(),
             state: dispatch.get(),
             dispatch,
         }
@@ -74,23 +75,6 @@ impl Component for AppLayout {
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
-        let step_button_click = self.dispatch.apply_callback(|_| StateMessage::RunStep);
-        let stop_button_click = self.dispatch.apply_callback(|_| StateMessage::Reset);
-
-        let run_button_click = Callback::from(move |_| {
-            let dispatch = Dispatch::<State>::new();
-            dispatch.reduce_mut(move |s| {
-                s.playing = !s.playing;
-                if s.playing {
-                    Timeout::new(500, move || {
-                        let dispatch = Dispatch::<State>::new();
-                        dispatch.apply(StateMessage::RunStep);
-                    })
-                    .forget();
-                }
-            });
-        });
-
         let generate_menu = {
             let selected_view = self.props.view as u32;
             move |item: &MenuItem, is_desktop: bool| {
@@ -192,83 +176,23 @@ impl Component for AppLayout {
             }
           </aside>
             {
-                      if let Some(_) = &self.state.executable {
-                        html!{
-                            <VmRemoteControl>
-                                <div class="flex flex-col items-center space-y-4">
-
-                                    <div
-                                        class="p-2 bg-zinc-900 w-full text-gray-100 rounded-md flex items-center space-x-2"
-                                    >
-                                        <span class="font-bold">{"PC:"}</span>
-                                        <span>{format!("0x{:02x}", self.state.program_counter)}</span>
-                                        <span>{format!("({})", self.state.program_counter)}</span>
-                                    </div>
-
-                                    <div class="flex items-center space-x-4">
-
-                                        <button
-                                            class="flex items-center justify-center bg-blue-600 text-white w-12 h-12 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
-                                            onclick={step_button_click.clone()}
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
-                                            </svg>
-
-                                        </button>
-
-                                        <button
-                                            class="flex items-center justify-center bg-green-600 text-white w-14 h-14 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-center"
-                                            onclick={run_button_click.clone()}
-                                        >
-                                            {
-                                                if self.state.playing {
-                                                    html!{
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                                                        </svg>
-                                                    }
-                                                } else {
-                                                    html! {
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                                                        </svg>
-                                                    }
-                                                }
-                                            }
-
-                                        </button>
-
-                                        <button
-                                            class="flex items-center justify-center bg-red-600 text-white w-10 h-10 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
-                                            onclick={stop_button_click.clone()}
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-                                            </svg>
-
-                                        </button>
-
-                                    </div>
-                                </div>
-                            </VmRemoteControl>
-
-                        }
-                    } else {
-                        html! {}
+                if let Some(_) = &self.state.executable {
+                    html! {
+                        <VmRemote key="remote" />
 
                     }
-
+                } else {
+                    html! {}
                 }
+            }
         </div>
-                }
+        }
     }
 }
 
 fn line_to_pixel_offset(line: usize) -> usize {
     const FONT_SIZE: usize = 24; /* font size in pixels */
     const LINE_HEIGHT: f32 = 1.0; /* line height as a multiplier */
-    console::log!("Line ", line);
     (line - 1) * (FONT_SIZE as f32 * LINE_HEIGHT) as usize
 }
 
@@ -284,6 +208,7 @@ pub fn app() -> Html {
     let set_current_view = move |i| {
         current_view_state.set(i);
     };
+    let exit_message = &state.exit_message;
 
     let compile_button_click = {
         let source_code = source_code.clone();
@@ -353,15 +278,47 @@ pub fn app() -> Html {
     ].to_vec();
 
     let is_compiling = state.compiling;
+    let show_console = true;
 
     html! {
         <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
-
-            { if *current_view == 0 {
-
+        {
+            if let Some((is_error, exit_message)) = exit_message {
                 html! {
-                    <div class="h-full w-full pl-10 bg-black">
-                            <div class="editor-container h-full w-full bg-black  text-white text-left font-mono">
+                    <div class="z-10 pointer-events-none fixed inset-x-0 bottom-0 sm:flex sm:justify-center sm:px-6 sm:pb-5 lg:px-8">
+                      <div class={
+                            if *is_error {
+                                "pointer-events-auto flex items-center justify-between gap-x-6 bg-red-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5"
+                            } else {
+                                "pointer-events-auto flex items-center justify-between gap-x-6 bg-yellow-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5"
+                            }
+                        }>
+                        <p class="text-sm leading-6 text-white">
+                          <a href="#">
+                            <strong class="font-semibold">{"Execution failed"}</strong>
+                            <svg viewBox="0 0 2 2" class="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true"><circle cx="1" cy="1" r="1" /></svg>
+                            {exit_message}<span aria-hidden="true"></span>
+                          </a>
+                        </p>
+                        <button type="button" class="-m-1.5 flex-none p-1.5">
+                          <span class="sr-only">{"Dismiss"}</span>
+                          <svg class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                }
+
+            } else {
+                 html!{}
+            }
+        }
+                { if *current_view == 0 {
+
+                    html! {
+                        <div class="h-full w-full flex flex-col pl-10 bg-black">
+                            <div class="editor-container flex-1 w-full bg-black  text-white text-left font-mono">
                                 <div class="w-full flex items-center justify-center py-2">
                                     <Dropdown items={EXAMPLES.iter().map(|item| item.0.to_string()).collect::<Vec<_>>()}    on_item_click={|i:usize| {
                                         let value: String = EXAMPLES[i].1.to_string().clone();
@@ -413,6 +370,11 @@ pub fn app() -> Html {
                                 })}
                             </div>
 
+
+                                <LoggerView />
+
+
+
                             <div class="absolute -right-8 top-10 z-20 flex justify-center items-center">
                                 <button onclick={compile_button_click.clone()} class={
                                     if state.executable.is_none() {
@@ -432,45 +394,44 @@ pub fn app() -> Html {
                                     </svg>
                                 </button>
                             </div>
-
-
-
-                    </div>
-                }
-
-        } else if *current_view == 1 {
-                    html! {
-                        <MachineView  />
+                        </div>
                     }
-        } else  if *current_view == 2 {
 
-            let (before, byte_at_pc, after) = if program_counter * 2 < bytecode_hex.len() {
-                let (start, rest) = bytecode_hex.split_at(program_counter * 2);
-                let (byte, end) = rest.split_at(2);
-                (start, byte, end)
-            } else {
-                (&bytecode_hex[..], "", "")
-            };
+                } else if *current_view == 1 {
+                            html! {
+                                <MachineView  />
+                            }
+                } else  if *current_view == 2 {
+
+                    let (before, byte_at_pc, after) = if program_counter * 2 < bytecode_hex.len() {
+                        let (start, rest) = bytecode_hex.split_at(program_counter * 2);
+                        let (byte, end) = rest.split_at(2);
+                        (start, byte, end)
+                    } else {
+                        (&bytecode_hex[..], "", "")
+                    };
 
 
-            html! {
-                <div class="h-full w-full pl-10 bg-black">
-                    <div
-                        id="bytecode"
-                        class="text-left break-words w-full h-screen bg-black text-white font-mono focus:none outline:none"
-                    >
-                        { before }
-                        <span class="bg-yellow-600 text-black px-1">{ byte_at_pc }</span>
-                        { after }
-                    </div>
-                </div>
+                    html! {
+                        <div class="h-full w-full pl-10 bg-black">
+                            <div
+                                id="bytecode"
+                                class="text-left break-words w-full h-screen bg-black text-white font-mono focus:none outline:none"
+                            >
+                                { before }
+                                <span class="bg-yellow-600 text-black px-1">{ byte_at_pc }</span>
+                                { after }
+                            </div>
+                        </div>
+                    }
+                } else {
+                    html! {
+                        <div>{"Undefined view"}</div>
+                    }
+                }
             }
-        } else {
-            html! {
-                <div>{"Undefined view"}</div>
-            }
-        }
-    }
+
+
         </AppLayout>
     }
 }

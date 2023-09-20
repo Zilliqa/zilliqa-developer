@@ -10,6 +10,8 @@ bluebell = { path = "../core" }
 
 # CLI
 clap = { version = "4.3.11", features = ["derive"] }
+log = "0.4.6"
+
 
 # DEPRECATED
 # # LLVM stuff

@@ -3,6 +3,6 @@ scilla_version 0
 library HelloWorld
 contract HelloWorld()
 
-transition setHello (msg : String)
-  x = builtin print msg
+transition setHello (msg : Uint64)
+  x = builtin print__impl msg
 end

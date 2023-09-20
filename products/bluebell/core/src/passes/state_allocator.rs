@@ -13,7 +13,6 @@ use crate::intermediate_representation::primitives::{
     VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
-use log::info;
 
 pub struct StateCollector {
     namespace_stack: Vec<String>,
@@ -71,7 +70,6 @@ impl IrPass for StateCollector {
 
         field.variable.visit(self, symbol_table)?;
         field.initializer.visit(self, symbol_table)?;
-        info!("Analyzing field {:?}", field.variable);
 
         let name = match &field.variable.name.resolved {
             Some(n) => n,
@@ -158,7 +156,6 @@ impl IrPass for StateCollector {
         symbol: &mut IrIdentifier,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        info!("Visiting symbol {:?}", symbol);
         Ok(TraversalResult::Continue)
     }
 

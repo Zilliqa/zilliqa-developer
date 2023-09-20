@@ -106,7 +106,7 @@ mod tests {
 
         println!("Executable code: {:#}", hex::encode(code.clone()));
 
-        let mut vm = ObservableMachine::new(Rc::new(code), Rc::new(data), 1024, 10000);
+        let mut vm = ObservableMachine::new(Rc::new(code), Rc::new(data), 1024, 10000, None);
         vm.run();
 
         (vm, executor.executable)
@@ -114,15 +114,21 @@ mod tests {
 
     macro_rules! expect_was_visited {
         ($vm:expr, $executable:expr, $label:expr) => {
-            assert!($vm.did_visit_program_counter($executable.get_label_position($label).unwrap()));
+            if let Some(label) = $executable.get_label_position($label) {
+                assert!($vm.did_visit_program_counter(label));
+            } else {
+                panic!("{}", format!("Label '{}' not found.", $label));
+            }
         };
     }
 
     macro_rules! expect_not_visited {
         ($vm:expr, $executable:expr, $label:expr) => {
-            assert!(
-                $vm.did_not_visit_program_counter($executable.get_label_position($label).unwrap())
-            );
+            if let Some(label) = $executable.get_label_position($label) {
+                assert!($vm.did_not_visit_program_counter(label));
+            } else {
+                panic!("{}", format!("Label '{}' not found.", $label));
+            }
         };
     }
 
@@ -145,12 +151,12 @@ end
 "#
             .to_string(),
         );
-
+        println!("{:#?}", executable.label_positions);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
-        expect_was_visited!(vm, executable, "clause_0_condition_1");
-        expect_was_visited!(vm, executable, "clause_0_block_2");
-        expect_was_visited!(vm, executable, "match_exit_0");
-        expect_was_visited!(vm, executable, "success");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_condition_1");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_block_2");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::match_exit_0");
+        expect_was_visited!(vm, executable, "__entry_function__::success");
     }
 
     #[test]
@@ -172,12 +178,12 @@ end
 "#
             .to_string(),
         );
-
+        println!("{:#?}", executable.label_positions);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
-        expect_was_visited!(vm, executable, "clause_0_condition_1");
-        expect_not_visited!(vm, executable, "clause_0_block_2");
-        expect_was_visited!(vm, executable, "match_exit_0");
-        expect_was_visited!(vm, executable, "success");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_condition_1");
+        expect_not_visited!(vm, executable, "HelloWorld::setHello::clause_0_block_2");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::match_exit_0");
+        expect_was_visited!(vm, executable, "__entry_function__::success");
     }
 
     #[test]
@@ -200,13 +206,13 @@ end
 "#
             .to_string(),
         );
-
+        println!("{:#?}", executable.label_positions);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
-        expect_was_visited!(vm, executable, "clause_0_condition_1");
-        expect_was_visited!(vm, executable, "clause_0_block_2");
-        expect_not_visited!(vm, executable, "clause_1_block_4");
-        expect_was_visited!(vm, executable, "match_exit_0");
-        expect_was_visited!(vm, executable, "success");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_condition_1");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_block_2");
+        expect_not_visited!(vm, executable, "HelloWorld::setHello::clause_1_block_4");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::match_exit_0");
+        expect_was_visited!(vm, executable, "__entry_function__::success");
     }
 
     #[test]
@@ -229,13 +235,13 @@ end
 "#
             .to_string(),
         );
-        println!("{:?}", executable.label_positions);
+        println!("{:#?}", executable.label_positions);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
-        expect_was_visited!(vm, executable, "clause_0_condition_1");
-        expect_not_visited!(vm, executable, "clause_0_block_2");
-        expect_was_visited!(vm, executable, "clause_1_block_4");
-        expect_was_visited!(vm, executable, "match_exit_0");
-        expect_was_visited!(vm, executable, "success");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_condition_1");
+        expect_not_visited!(vm, executable, "HelloWorld::setHello::clause_0_block_2");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_1_block_4");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::match_exit_0");
+        expect_was_visited!(vm, executable, "__entry_function__::success");
     }
 
     #[test]
@@ -263,14 +269,13 @@ end
             .to_string(),
         );
         println!("{:#?}", executable.label_positions);
-        println!("{:#?}", vm.positions_visited);
         expect_was_visited!(vm, executable, "HelloWorld::setHello");
-        expect_was_visited!(vm, executable, "clause_0_condition_1");
-        expect_was_visited!(vm, executable, "clause_1_condition_3");
-        expect_not_visited!(vm, executable, "clause_0_block_2");
-        expect_was_visited!(vm, executable, "clause_1_block_4");
-        expect_was_visited!(vm, executable, "match_exit_0");
-        expect_was_visited!(vm, executable, "success");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_0_condition_1");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_1_condition_3");
+        expect_not_visited!(vm, executable, "HelloWorld::setHello::clause_0_block_2");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::clause_1_block_4");
+        expect_was_visited!(vm, executable, "HelloWorld::setHello::match_exit_0");
+        expect_was_visited!(vm, executable, "__entry_function__::success");
     }
 
     #[test]
@@ -346,7 +351,7 @@ transition setHello (msg : Uint64)
   is_owner = True;
   match is_owner with
   | True =>
-    x = builtin print msg
+    x = builtin print__impl msg
   end
 end
 "#,
@@ -369,5 +374,31 @@ end
 "#,
             ""
         );
+    }
+
+    #[test]
+    fn test_redefinition_of_variables() {
+        test_compile_and_execute!(
+            "HelloWorld::setHello",
+            "[42]",
+            r#"scilla_version 0
+
+contract HelloWorld()
+field welcome_msg : Uint64 = Uint64 0
+
+transition setHelloImpl (msg : Uint64)
+    welcome_msg := msg
+end
+
+transition setHello (msg : Uint64)
+  setHelloImpl msg;
+  msg <- welcome_msg;
+  x = builtin print msg
+end
+"#,
+            ""
+        );
+        // TODO: test output - requires a new module
+        // assert!(false);
     }
 }

@@ -116,7 +116,6 @@ impl IrPass for CollectTypeDefinitionsPass {
 
         field.variable.visit(self, symbol_table)?;
         field.initializer.visit(self, symbol_table)?;
-        info!("Analyzing field {:?}", field.variable);
 
         self.pop_namespace();
         Ok(TraversalResult::SkipChildren)
@@ -282,8 +281,6 @@ impl IrPass for CollectTypeDefinitionsPass {
         match mode {
             TreeTraversalMode::Enter => (),
             TreeTraversalMode::Exit => {
-                info!("Types: {:#?}\n\n", symbol_table.type_of_table);
-                info!("Aliases: {:#?}\n\n", symbol_table.aliases);
                 panic!("Not handled.");
             }
         }

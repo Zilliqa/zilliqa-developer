@@ -4,13 +4,18 @@ use bluebell::support::evm::EvmCompiler;
 use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::ScillaDefaultBuiltins;
 use bluebell::support::modules::ScillaDefaultTypes;
+use evm::Capture::Exit;
+use evm::ExitReason;
+use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
+use evm_assembly::function_signature::EvmFunctionSignature;
 use evm_assembly::observable_machine::ObservableMachine;
+use evm_assembly::types::EvmTypeValue;
 use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use yewdux::prelude::Dispatch;
 use yewdux::prelude::Reducer;
@@ -23,6 +28,10 @@ pub struct State {
 
     pub pc_to_position: HashMap<usize, (usize, usize, usize, usize)>,
     pub current_position: Option<(usize, usize, usize, usize)>,
+    pub data: String,
+
+    #[serde(skip)]
+    pub context: Option<Rc<RefCell<EvmCompilerContext>>>,
 
     #[serde(skip)]
     pub compiling: bool,
@@ -31,16 +40,28 @@ pub struct State {
     pub playing: bool,
 
     #[serde(skip)]
+    pub function_loaded: bool,
+
+    #[serde(skip)]
     pub bytecode_hex: String,
 
     #[serde(skip)]
     pub executable: Option<Rc<RefCell<EvmExecutable>>>,
 
     #[serde(skip)]
+    pub functions: Vec<EvmFunctionSignature>,
+
+    #[serde(skip)]
     pub observable_machine: Option<Rc<RefCell<ObservableMachine>>>,
 
     #[serde(skip)]
     pub program_counter: u32, // Forces state update on step
+
+    #[serde(skip)]
+    pub exit_message: Option<(bool, String)>,
+
+    #[serde(skip)]
+    pub breakpoints: HashSet<u32>,
 }
 
 impl Default for State {
@@ -72,28 +93,36 @@ transition setHello ()
 end
 "#,
             ),
+            context: None,
             compiling: false,
             playing: false,
+            function_loaded: false,
             bytecode_hex: "".to_string(),
             executable: None,
+            functions: [].to_vec(),
             observable_machine: None,
             program_counter: 0,
             current_position: None,
             pc_to_position: HashMap::new(),
+            data: "".to_string(),
+            exit_message: None,
+            breakpoints: HashSet::new(),
         }
     }
 }
 
 pub enum StateMessage {
     Reset,
-    ResetMachine {
-        code: Rc<Vec<u8>>,
-        data: Rc<Vec<u8>>,
+    PrepareFunctionCall {
+        function_name: String,
+        arguments: String,
     }, // Add other messages here if needed
     RunStep,
     CompileCode {
         source_code: String,
     },
+    AddBreakPoint(u32),
+    RemoveBreakPoint(u32),
 }
 
 impl Reducer<State> for StateMessage {
@@ -106,8 +135,16 @@ impl Reducer<State> for StateMessage {
                 state.bytecode_hex = "".to_string();
                 true
             }
+            StateMessage::AddBreakPoint(point) => {
+                state.breakpoints.insert(point);
+                true
+            }
+            StateMessage::RemoveBreakPoint(point) => {
+                state.breakpoints.remove(&point);
+                true
+            }
             StateMessage::CompileCode { source_code } => {
-                let mut compiler = EvmCompiler::new_no_abi_support();
+                let mut compiler = EvmCompiler::new();
                 compiler.pass_manager_mut().enable_debug_printer();
 
                 let default_types = ScillaDefaultTypes {};
@@ -120,60 +157,127 @@ impl Reducer<State> for StateMessage {
 
                 state.compiling = false;
                 state.playing = false;
+                state.function_loaded = false;
+
+                state.data = "0x00".to_string();
+
                 if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
+                    state.functions = exec
+                        .context
+                        .function_declarations
+                        .iter()
+                        .map(|(_k, v)| v.clone())
+                        .collect();
                     state.source_code = source_code.clone();
                     state.bytecode_hex = hex::encode(&exec.executable.bytecode.clone());
                     let code: Vec<u8> = (&*exec.executable.bytecode).to_vec();
 
                     // Creating PC to source map
-                    state.pc_to_position = HashMap::new();
-                    let functions = &exec.executable.ir.functions;
-                    for function in functions {
-                        for block in &function.blocks {
-                            for instr in &block.instructions {
-                                let pc = match &instr.position {
-                                    Some(p) => p,
-                                    None => continue,
-                                };
-                                let source_pos = match &instr.source_position {
-                                    Some(p) => (p.start, p.end, p.line, p.column),
-                                    None => continue,
-                                };
-                                state.pc_to_position.insert(*pc as usize, source_pos);
-                            }
-                        }
-                    }
+                    state.pc_to_position = exec.executable.get_source_map();
 
                     state.executable = Some(Rc::new(RefCell::new(exec.executable)));
-                    state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
+                    let mut observable_machine = ObservableMachine::new(
                         code.into(),
                         [].to_vec().into(),
                         1024,
                         1024,
-                    ))));
+                        None, // TODO: Add prefcompiles
+                    );
+                    observable_machine.set_source_map(&state.pc_to_position);
+
+                    state.observable_machine = Some(Rc::new(RefCell::new(observable_machine)));
+
+                    // Preserving the context so it can be used later
+                    let context = Rc::new(RefCell::new(EvmCompilerContext::new()));
+                    {
+                        let mut context = context.borrow_mut();
+                        std::mem::swap(&mut *context, &mut compiler.context)
+                    }
+                    state.context = Some(context);
                 } else {
                     console::error!("Compilation failed!");
                 }
 
                 true
             }
-            StateMessage::ResetMachine { code, data } => {
-                // console::log!("Code: {}", hex::encode(&*code));
-                console::log!("Resetting machine");
-                state.observable_machine = Some(Rc::new(RefCell::new(ObservableMachine::new(
-                    code, data, 1024, 1024,
-                ))));
+            StateMessage::PrepareFunctionCall {
+                function_name,
+                arguments,
+            } => {
+                let code: Vec<u8> = if let Some(exec) = &state.executable {
+                    exec.borrow().bytecode.to_vec()
+                } else {
+                    [].to_vec()
+                };
+
+                let arguments = format!("[{}]", arguments);
+
+                let args: Vec<EvmTypeValue> = if arguments == "" {
+                    [].to_vec()
+                } else {
+                    serde_json::from_str(&arguments).expect("Failed to deserialize arguments")
+                };
+
+                let data: Rc<Vec<u8>> = if let Some(context) = &state.context {
+                    context
+                        .borrow_mut()
+                        .get_function(&function_name)
+                        .expect(&format!("Function name {} not found", function_name).to_string())
+                        .generate_transaction_data(args)
+                        .into()
+                } else {
+                    Rc::new([].to_vec())
+                };
+
+                let precompiles = if let Some(context) = &state.context {
+                    Some(context.borrow_mut().get_precompiles())
+                } else {
+                    None
+                };
+
+                state.data = hex::encode(&*data);
+
+                let mut observable_machine =
+                    ObservableMachine::new(code.into(), data, 1024, 1024, precompiles);
+
+                observable_machine.set_source_map(&state.pc_to_position);
+
+                state.observable_machine = Some(Rc::new(RefCell::new(observable_machine)));
                 state.compiling = false;
                 state.playing = false;
+                state.function_loaded = true;
+                state.exit_message = None;
                 true
             }
             StateMessage::RunStep => {
-                console::log!("Attempting Step!");
                 if let Some(ref mut machine) = state.observable_machine {
-                    console::log!("Step!");
-                    machine.borrow_mut().step();
-                    state.program_counter = if let Ok(pc) = machine.borrow_mut().machine.position()
-                    {
+                    let mut machine = machine.borrow_mut();
+
+                    match machine.step() {
+                        Ok(()) => (),
+                        Err(code) => match code {
+                            Exit(value) => {
+                                state.playing = false;
+                                state.function_loaded = false;
+                                match value {
+                                    ExitReason::Succeed(_) => {}
+                                    _ => {
+                                        state.exit_message = Some((
+                                            true,
+                                            format!(
+                                                "{:?} at {:#02x}",
+                                                value, state.program_counter
+                                            )
+                                            .to_string(),
+                                        ));
+                                    }
+                                }
+                            }
+                            _ => (),
+                        },
+                    }
+
+                    state.program_counter = if let Ok(pc) = machine.machine.position() {
                         if let Some(pos) = state.pc_to_position.get(pc) {
                             state.current_position = Some(*pos);
                         }
@@ -183,9 +287,12 @@ impl Reducer<State> for StateMessage {
                         0
                     };
 
-                    console::log!("New PC:", state.program_counter);
+                    if state.breakpoints.contains(&state.program_counter) {
+                        state.playing = false;
+                    }
+
                     if state.playing {
-                        Timeout::new(500, move || {
+                        Timeout::new(5, move || {
                             let dispatch = Dispatch::<State>::new();
                             dispatch.apply(StateMessage::RunStep);
                         })
@@ -204,6 +311,11 @@ impl Reducer<State> for StateMessage {
 
 impl Clone for State {
     fn clone(&self) -> Self {
+        let context = if let Some(c) = &self.context {
+            Some(Rc::clone(&c))
+        } else {
+            None
+        };
         let executable = if let Some(e) = &self.executable {
             Some(Rc::clone(&e))
         } else {
@@ -214,16 +326,23 @@ impl Clone for State {
         } else {
             None
         };
+
         Self {
             source_code: self.source_code.clone(),
             compiling: self.compiling,
             playing: self.playing,
+            function_loaded: self.function_loaded,
             executable,
+            context,
+            functions: self.functions.clone(),
             observable_machine,
             program_counter: self.program_counter,
             bytecode_hex: self.bytecode_hex.clone(),
             pc_to_position: self.pc_to_position.clone(),
             current_position: self.current_position.clone(),
+            data: self.data.clone(),
+            exit_message: self.exit_message.clone(),
+            breakpoints: self.breakpoints.clone(),
         }
     }
 }
@@ -259,6 +378,10 @@ impl PartialEq for State {
             && self.current_position == other.current_position
             && self.compiling == other.compiling
             && self.playing == other.playing
+            && self.function_loaded == other.function_loaded
+            && self.data == other.data
+            && self.exit_message == other.exit_message
+            && self.breakpoints == other.breakpoints
     }
 }
 

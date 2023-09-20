@@ -3,6 +3,7 @@ use crate::compiler_context::EvmCompilerContext;
 use crate::executable::EvmExecutable;
 use crate::opcode_spec::OpcodeSpec;
 use std::collections::BTreeSet;
+use std::collections::HashSet;
 use std::mem;
 
 use evm::Opcode;
@@ -25,9 +26,13 @@ impl<'a, 'ctx> FunctionBuilder<'a, 'ctx> {
     where
         F: Fn(&mut EvmByteCodeBuilder<'ctx>) -> Vec<EvmBlock>,
     {
-        self.function.blocks = builder(&mut self.builder);
+        let signature = &self.function.signature.clone().unwrap();
 
-        let _signature = &self.function.signature.clone().unwrap();
+        self.builder
+            .set_current_function_name(signature.name.clone());
+        self.function.blocks = builder(&mut self.builder);
+        self.builder.clear_current_function_name();
+
         // if first_block.consumes
 
         match self.function.compute_stack_difference() {
@@ -72,6 +77,9 @@ pub struct EvmByteCodeBuilder<'ctx> {
     pub was_finalized: bool,
     pub create_abi_boilerplate: bool,
     pub label_positions: HashMap<String, u32>,
+
+    pub current_function_name: Option<String>,
+    pub used_block_names: HashSet<String>,
 }
 
 impl<'ctx> EvmByteCodeBuilder<'ctx> {
@@ -85,16 +93,62 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             was_finalized: false,
             create_abi_boilerplate,
             label_positions: HashMap::new(),
+            current_function_name: None,
+            used_block_names: HashSet::new(),
         };
 
         // Reserving the start of the bytecode for the "entry" function
         ret.define_function("__main__", [].to_vec(), "Uint256")
-            .build(|_code_builder| {
+            .build(|code_builder| {
                 // Placeholder block for the main function
-                [EvmBlock::new(None, BTreeSet::new(), "main_entry")].to_vec()
+                [code_builder.new_evm_block("main_entry")].to_vec()
+                // EvmBlock::new(None, BTreeSet::new(), &code_builder.add_scope_to_label("main_entry"))
             });
 
         ret
+    }
+
+    pub fn new_evm_block(&mut self, name: &str) -> EvmBlock {
+        EvmBlock::new(
+            None,
+            BTreeSet::new(),
+            &self.generate_unique_block_name(name),
+        )
+    }
+
+    pub fn new_evm_block_with_args(&mut self, name: &str, args: BTreeSet<String>) -> EvmBlock {
+        EvmBlock::new(None, args, &self.generate_unique_block_name(name))
+    }
+
+    pub fn set_current_function_name(&mut self, name: String) {
+        self.current_function_name = Some(name);
+    }
+
+    pub fn clear_current_function_name(&mut self) {
+        self.current_function_name = None;
+    }
+
+    pub fn generate_unique_block_name(&mut self, name: &str) -> String {
+        let base = self.add_scope_to_label(name);
+        let mut candidate = base.clone();
+        let mut i = 1;
+        while self.used_block_names.contains(&candidate) {
+            candidate = format!("{}.{}", base, i).to_string();
+            i += 1;
+        }
+        self.used_block_names.insert(candidate.clone());
+
+        candidate
+    }
+
+    pub fn add_scope_to_label(&mut self, name: &str) -> String {
+        let candidate = if let Some(current_function_name) = &self.current_function_name {
+            format!("{}::{}", current_function_name, name)
+        } else {
+            name.to_string()
+        };
+
+        candidate
     }
 
     pub fn define_function<'a>(
@@ -135,6 +189,8 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             was_finalized: false,
             create_abi_boilerplate: false,
             label_positions: HashMap::new(),
+            current_function_name: None,
+            used_block_names: HashSet::new(),
         }
     }
 
@@ -216,6 +272,12 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             None => panic!("Function does not have a main block."),
         };
 
+        self.set_current_function_name("__entry_function__".to_string());
+        let mut switch_block = self.new_evm_block("switch");
+        let mut fail_block = self.new_evm_block("fail");
+        let mut success_block = self.new_evm_block("success");
+        self.clear_current_function_name();
+
         // Making sure that there is value attached to the contract call
         if self.create_abi_boilerplate {
             first_block.push1([0x80].to_vec());
@@ -224,7 +286,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             first_block.external_callvalue();
             first_block.dup1();
             first_block.iszero();
-            first_block.jump_if_to("switch");
+            first_block.jump_if_to(&switch_block.name);
             first_block.push1([0x00].to_vec());
             first_block.dup1();
             first_block.revert();
@@ -234,7 +296,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             first_block.mstore();
 
             // Adding return address
-            first_block.push_label("success");
+            first_block.push_label(&success_block.name);
             if let Some(fnc) = &self.ir.functions.get(1) {
                 if let Some(block) = fnc.blocks.first() {
                     first_block.jump_to(&block.name);
@@ -246,29 +308,31 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
             }
         }
 
-        let mut switch_block = EvmBlock::new(None, BTreeSet::new(), "switch");
         switch_block.pop(); // 0 Oribabky remove dup1()?
         switch_block.push1([0x04].to_vec()); // Checking that the size of call args
         switch_block.calldatasize();
         switch_block.lt();
-        switch_block.jump_if_to("fail");
+        switch_block.jump_if_to(&fail_block.name);
         switch_block.push1([0x00].to_vec());
         switch_block.calldataload();
         switch_block.push1([0xe0].to_vec());
         switch_block.shr();
 
         let mut data_loading_blocks: Vec<EvmBlock> = Vec::new();
-        for (i, function) in self.ir.functions.iter().enumerate() {
+        let functions = self.ir.functions.clone();
+        for (i, function) in functions.iter().enumerate() {
             // Skipping the entry function (the one we are building now)
             if i > 0 {
+                // Ensuring that we are producing unique block names
+                let signature = &function.signature.clone().unwrap();
+                self.set_current_function_name(signature.name.clone());
+
                 switch_block.dup1();
                 switch_block.push(function.selector.clone());
                 switch_block.eq();
                 match function.blocks.first() {
                     Some(block) => {
-                        let name = format!("load_args_{}", "function_name").to_string();
-                        let mut load_data_block = EvmBlock::new(None, BTreeSet::new(), &name);
-
+                        let mut load_data_block = self.new_evm_block("load_args");
                         switch_block.jump_if_to(&load_data_block.name);
 
                         let signature = function.signature.clone().unwrap();
@@ -281,10 +345,10 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                         load_data_block.push_u64(args_size.try_into().unwrap());
                         load_data_block.calldatasize();
                         load_data_block.lt();
-                        load_data_block.jump_if_to("fail");
+                        load_data_block.jump_if_to(&fail_block.name);
 
                         // Adding return address
-                        load_data_block.push_label("success");
+                        load_data_block.push_label(&success_block.name);
 
                         // Loading data
                         for (i, arg) in signature.arguments.iter().enumerate() {
@@ -317,19 +381,19 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                         load_data_block.jump_to(&block.name);
                         data_loading_blocks.push(load_data_block);
                     }
-                    _ => panic!("Function does not have a block."),
+                    _ => panic!("Function does not have any blocks."),
                 };
             }
+
+            self.clear_current_function_name();
         }
 
-        switch_block.jump_to("fail");
+        switch_block.jump_to(&fail_block.name);
 
-        let mut fail_block = EvmBlock::new(None, BTreeSet::new(), "fail");
         fail_block.push1([0x00].to_vec());
         fail_block.dup1();
         fail_block.revert();
 
-        let mut success_block = EvmBlock::new(None, BTreeSet::new(), "success");
         success_block.push1([0x00].to_vec());
         success_block.dup1();
         success_block.r#return();

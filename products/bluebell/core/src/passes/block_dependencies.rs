@@ -4,7 +4,7 @@ use crate::intermediate_representation::pass_executor::PassExecutor;
 use crate::intermediate_representation::primitives::ConcreteFunction;
 use crate::intermediate_representation::primitives::IrIdentifier;
 use crate::intermediate_representation::primitives::IrIndentifierKind;
-use log::info;
+
 use std::collections::BTreeSet;
 use std::collections::HashMap;
 
@@ -225,7 +225,6 @@ impl IrPass for DeduceBlockDependencies {
         symbol: &mut IrIdentifier,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        info!("Analysing {:#?}", symbol);
         match symbol.kind {
             IrIndentifierKind::VirtualRegister | IrIndentifierKind::VirtualRegisterIntermediate => {
                 match &symbol.resolved {
@@ -349,7 +348,13 @@ impl IrPass for DeduceBlockDependencies {
                         || id.kind == IrIndentifierKind::VirtualRegisterIntermediate
                     {
                         match &id.resolved {
-                            Some(name) => self.defined_names.insert(name.clone()),
+                            Some(name) => {
+                                // We only define a variable if it was not used before. If it was used before
+                                // it should be registered as a block argument.
+                                if !self.used_names.contains(name) {
+                                    self.defined_names.insert(name.clone());
+                                }
+                            }
                             None => panic!("Encountered unresolved SSA name"),
                         };
                     }
