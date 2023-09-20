@@ -84,12 +84,12 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
     /// in the EVM module using the byte code builder.
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
         for func in &mut self.ir.function_definitions {
-            /// TODO: Debug code
             /*
             let mut ir_printer = DebugPrinter::new();
             let _ = ir_printer.visit_concrete_function(TreeTraversalMode::Enter, func, &mut self.ir.symbol_table);
             info!("{}", format!("IR: {}", ir_printer.value()));
             */
+
             let arg_types: Vec<&str> = func
                 .arguments
                 .iter()

@@ -128,8 +128,6 @@ impl Component for VmRemote {
             ("$__none__$".to_string(), true)
         };
 
-        info!("Name {}", function_name.clone());
-
         html! {
             <VmRemoteControlLayout>
                 <div class="flex flex-col items-center space-y-4">

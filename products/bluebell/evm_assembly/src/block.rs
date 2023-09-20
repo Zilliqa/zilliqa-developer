@@ -117,15 +117,6 @@ impl Scope {
         self.stack_counter -= consumes;
         let ret = self.entry_stack_counter - self.stack_counter;
         self.stack_counter += produces;
-        if self.stack_counter < 0 {
-            info!(
-                "Stack counter: {} {} {}",
-                before,
-                self.stack_counter,
-                opcode.to_string()
-            );
-            info!("Code: {:#?}", self);
-        }
 
         // Note that we allow the stack to be exceed by exactly one element for the return address
         assert!(self.stack_counter + self.arg_count >= -1);
@@ -304,11 +295,6 @@ impl EvmBlock {
     }
 
     pub fn duplicate_stack_name(&mut self, name: &str) -> Result<(), String> {
-        info!(
-            "{}",
-            format!("Registered names: {:#?}", self.scope.name_location)
-        );
-
         match self.scope.name_location.get(name) {
             Some(pos) => {
                 let distance = self.scope.stack_counter - pos;

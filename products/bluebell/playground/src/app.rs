@@ -279,7 +279,7 @@ pub fn app() -> Html {
     ].to_vec();
 
     let is_compiling = state.compiling;
-    let show_console = false;
+    let show_console = true;
 
     html! {
             <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
@@ -327,8 +327,8 @@ pub fn app() -> Html {
                     { if *current_view == 0 {
 
                         html! {
-                            <div class="h-full w-full flex flex-col pl-10 bg-black">
-                                <div class="editor-container flex-1 w-full bg-black  text-white text-left font-mono">
+                            <div class="h-full w-full flex flex-col bg-black">
+                                <div class="ml-10  editor-container flex-1 w-full bg-black  text-white text-left font-mono">
                                     <div class="w-full flex items-center justify-center py-2">
                                         <Dropdown items={EXAMPLES.iter().map(|item| item.0.to_string()).collect::<Vec<_>>()}    on_item_click={|i:usize| {
                                             let value: String = EXAMPLES[i].1.to_string().clone();
