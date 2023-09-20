@@ -21,6 +21,13 @@ use yewdux::prelude::Dispatch;
 use yewdux::prelude::Reducer;
 use yewdux::store::Store;
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum ExecutionStatus {
+    Succeeded,
+    Paused,
+    Failed,
+}
+
 #[derive(Store, Serialize, Deserialize)]
 #[store(storage = "local")]
 pub struct State {
@@ -58,7 +65,7 @@ pub struct State {
     pub program_counter: u32, // Forces state update on step
 
     #[serde(skip)]
-    pub exit_message: Option<(bool, String)>,
+    pub exit_message: Option<(ExecutionStatus, String)>,
 
     #[serde(skip)]
     pub breakpoints: HashSet<u32>,
@@ -186,6 +193,7 @@ impl Reducer<State> for StateMessage {
                     observable_machine.set_source_map(&state.pc_to_position);
 
                     state.observable_machine = Some(Rc::new(RefCell::new(observable_machine)));
+                    state.breakpoints = HashSet::new();
 
                     // Preserving the context so it can be used later
                     let context = Rc::new(RefCell::new(EvmCompilerContext::new()));
@@ -260,10 +268,19 @@ impl Reducer<State> for StateMessage {
                                 state.playing = false;
                                 state.function_loaded = false;
                                 match value {
-                                    ExitReason::Succeed(_) => {}
+                                    ExitReason::Succeed(value) => {
+                                        state.exit_message = Some((
+                                            ExecutionStatus::Succeeded,
+                                            format!(
+                                                "{:?} at {:#02x}",
+                                                value, state.program_counter
+                                            )
+                                            .to_string(),
+                                        ));
+                                    }
                                     _ => {
                                         state.exit_message = Some((
-                                            true,
+                                            ExecutionStatus::Failed,
                                             format!(
                                                 "{:?} at {:#02x}",
                                                 value, state.program_counter

@@ -47,7 +47,7 @@ impl Reducer<LoggerState> for LoggerMessage {
 }
 
 pub struct LoggerView {
-    // dispatch: Dispatch<LoggerState>,
+    dispatch: Dispatch<LoggerState>, // Ignore unused warning. Dispatcher needs to be present for state to update
     state: Rc<LoggerState>,
 }
 
@@ -64,7 +64,7 @@ impl Component for LoggerView {
         let dispatch = Dispatch::<LoggerState>::subscribe(state_callback);
         Self {
             state: dispatch.get(),
-            //            dispatch,
+            dispatch,
         }
     }
 
@@ -84,9 +84,9 @@ impl Component for LoggerView {
                     <button class="py-2 px-4 border-b-2 border-blue-500 text-white hover:border-blue-700 rounded-l">
                         {"Console"}
                     </button>
-                    <button class="py-2 px-4 border-b-2 border-transparent text-gray-500 rounded-r hover:border-blue-700 hover:text-white">
+                    /* Consider whether errors should have separate tab <button class="py-2 px-4 border-b-2 border-transparent text-gray-500 rounded-r hover:border-blue-700 hover:text-white">
                         {"Errors"}
-                    </button>
+                    </button> */
                 </div>
                     <textarea
                         class="w-full bg-zinc-800 flex-1 text-white outline-0 text-left font-mono focus:none"
@@ -103,8 +103,8 @@ impl LoggerView {
         self.state
             .log
             .iter()
-            .map(|(level, message)| format!("[{}] {}", level, message))
+            .map(|(_level, message)| message.to_string())
             .collect::<Vec<String>>()
-            .join("\n")
+            .join("")
     }
 }
