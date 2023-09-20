@@ -279,7 +279,7 @@ pub fn app() -> Html {
     ].to_vec();
 
     let is_compiling = state.compiling;
-    let show_console = true;
+    let show_console = false;
 
     html! {
             <AppLayout key={*current_view} menu={menu} on_select_view={set_current_view} view={*current_view}>
@@ -381,7 +381,13 @@ pub fn app() -> Html {
                                 </div>
 
 
-                                    <LoggerView />
+                                {
+                                    if show_console {
+                                        html! { <LoggerView /> }
+                                    } else {
+                                        html! {}
+                                    }
+                                }
 
 
 
