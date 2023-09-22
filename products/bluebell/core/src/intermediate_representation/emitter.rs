@@ -4,7 +4,7 @@ use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
 use crate::parser::lexer::SourcePosition;
-use log::info;
+
 use log::warn;
 use std::mem;
 
@@ -1479,9 +1479,7 @@ impl AstConverting for IrEmitter {
         _mode: TreeTraversalMode,
         _node: &NodeComponentDefinition,
     ) -> Result<TraversalResult, String> {
-        // TODO:
         Ok(TraversalResult::Continue)
-        //        unimplemented!();
     }
     fn emit_procedure_definition(
         &mut self,

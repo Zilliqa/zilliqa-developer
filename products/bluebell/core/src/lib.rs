@@ -13,3 +13,4 @@ pub mod evm_bytecode_generator;
 // pub mod llvm_ir_generator;
 pub mod parser;
 pub mod support;
+pub mod testing;
