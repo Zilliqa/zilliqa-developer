@@ -277,4 +277,12 @@ impl ObservableMachine {
     pub fn did_not_visit_line(&self, pc: u32) -> bool {
         None == self.lines_visited.get(&pc)
     }
+
+    pub fn has_record(&self, key: &H256, value: &H256) -> bool {
+        // Check if the key exists in storage and if its value matches the given value
+        match self.storage.get(&key) {
+            Some(stored_value) => *stored_value == *value,
+            None => false,
+        }
+    }
 }
