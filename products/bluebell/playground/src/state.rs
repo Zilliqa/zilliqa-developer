@@ -168,7 +168,8 @@ impl Reducer<State> for StateMessage {
 
                 state.data = "0x00".to_string();
 
-                if let Ok(exec) = compiler.executable_from_script(source_code.to_string()) {
+                let result = compiler.executable_from_script(source_code.to_string());
+                if let Ok(exec) = result {
                     state.functions = exec
                         .context
                         .function_declarations
@@ -203,6 +204,9 @@ impl Reducer<State> for StateMessage {
                     }
                     state.context = Some(context);
                 } else {
+                    if let Err(e) = result {
+                        console::error!(format!("{:#?}", e));
+                    }
                     console::error!("Compilation failed!");
                 }
 
