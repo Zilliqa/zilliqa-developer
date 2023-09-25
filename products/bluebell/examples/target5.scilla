@@ -1,7 +1,7 @@
 scilla_version 0
 
-library HelloWorld
-contract HelloWorld()
+library HelloDebugModule
+contract HelloDebugModule()
 
 field welcome_msg : Uint64 = Uint64 0
 
