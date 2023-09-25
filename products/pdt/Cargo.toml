@@ -1,0 +1,11 @@
+[workspace]
+members = [
+  "pdtlib",
+  "pdtbq",
+  "pdt",
+  "pdtdb",
+  "pdtpsql",
+  "pdtdb/psql_derive",
+  "pdtparse",
+  "pdtlisten",
+]
