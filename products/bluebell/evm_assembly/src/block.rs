@@ -381,6 +381,43 @@ impl EvmBlock {
         self.mstore();
     }
 
+    pub fn allocate_object(&mut self, value: Vec<u8>) {
+        let chunks = (value.len() + 31) / 32;
+        let padded_length = chunks * 32;
+
+        self.alloca_static((4 + padded_length).try_into().unwrap());
+        self.push_u32(value.len().try_into().unwrap());
+        self.dup2();
+        self.mstore();
+
+        self.dup1(); // Adding rolling pointer
+        self.push1([4].to_vec());
+        self.add();
+
+        for i in 0..chunks {
+            let start = i * 32;
+            let mut end = (i + 1) * 32;
+            if end > value.len() {
+                end = value.len();
+            }
+            let mut byte_slice: Vec<u8> = value[start..end].into();
+            while byte_slice.len() < 32 {
+                byte_slice.push(0);
+            }
+
+            self.push(byte_slice);
+            self.dup2();
+            self.mstore();
+
+            if i != chunks - 1 {
+                self.push1([32].to_vec());
+                self.add();
+            }
+        }
+
+        self.pop(); // Removing rolling pointer
+    }
+
     pub fn call_internal(
         &mut self,
         _function: &EvmFunctionSignature,

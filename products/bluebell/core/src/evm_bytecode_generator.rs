@@ -310,6 +310,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     match qualified_name.as_str() {
                                         "String" => {
+                                            /*
                                             let ssa_name = match instr
                                                 .ssa_name
                                                 .clone()
@@ -319,12 +320,18 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 Ok(v) => v,
                                                 _ => panic!("Could not resolve SSA qualified name"),
                                             };
-                                            let payload = data.clone().into_bytes();
-                                            code_builder.ir.data.push((ssa_name, payload));
+                                            */
+                                            let payload = data.clone(); 
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                            let payload = payload.as_bytes();
+                                            evm_block.allocate_object(payload.to_vec());
+                                            match evm_block.register_stack_name(ssa_name) {
+                                                Err(_) => {
+                                                    panic!("Failed to register SSA stack name.")
+                                                }
+                                                _ => (),
+                                            }
 
-                                            // TODO: Load data from code into memory
-                                            // TODO: We need a way to reference the data section
-                                            todo!()
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
