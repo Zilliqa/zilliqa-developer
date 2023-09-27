@@ -296,9 +296,7 @@ impl AstConverting for IrEmitter {
         _mode: TreeTraversalMode,
         _node: &NodeMetaIdentifier,
     ) -> Result<TraversalResult, String> {
-        // TODO:
         Ok(TraversalResult::Continue)
-        //        unimplemented!();
     }
     fn emit_variable_identifier(
         &mut self,
