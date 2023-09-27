@@ -3,9 +3,11 @@ use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutput
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use evm_assembly::types::EvmType;
 use log::{error, info};
 use std::collections::BTreeSet;
 use std::mem;
+use std::str::FromStr;
 // TODO: Generalize to support both EVM and LLVM
 
 pub trait BluebellModule {
@@ -124,6 +126,37 @@ impl BluebellModule for ScillaDebugBuiltins {
                 custom_runtime
             });
 
+        let _ = specification
+            .declare_function("panic::<String>", ["String"].to_vec(), "Uint256")
+            .attach_runtime(|| {
+                fn custom_runtime(
+                    input: &[u8],
+                    _gas_limit: Option<u64>,
+                    _context: &EvmContext,
+                    _backend: &dyn Backend,
+                    _is_static: bool,
+                ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+                    println!("WAS Here??");
+                    match std::str::from_utf8(input) {
+                        Ok(v) => panic!("{}", v),
+                        Err(_) => panic!(
+                            "While panicking: Failed to decode '{}'",
+                            format!("{}\n", hex::encode(input))
+                        ),
+                    };
+
+                    Ok((
+                        PrecompileOutput {
+                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+                            output: input.to_vec(),
+                        },
+                        0,
+                    ))
+                }
+
+                custom_runtime
+            });
+
         let _ = specification.declare_inline_generics("builtin__print", |ctx, block, arg_types| {
             let mut ret: Vec<EvmBlock> = Vec::new();
             for arg in arg_types {
@@ -180,7 +213,13 @@ impl BluebellModule for ScillaDebugBuiltins {
                     loop_body.dup2(); // Counter / offset
                     loop_body.add();
                     loop_body.mload();
-                    loop_body.call(signature, subcall_arg_types);
+                    loop_body.call(
+                        signature,
+                        subcall_arg_types
+                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect(),
+                    );
                     loop_body.pop(); // Removing result
 
                     loop_body.push([0x20].to_vec()); // Incrementing counter
@@ -198,7 +237,13 @@ impl BluebellModule for ScillaDebugBuiltins {
                     ret.push(loop_start);
                     ret.push(loop_body);
                 } else {
-                    block.call(signature, subcall_arg_types);
+                    block.call(
+                        signature,
+                        subcall_arg_types
+                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect(),
+                    );
                     // block.swap1(); // Moving the result so it does not get popped
                     block.pop(); // Removing result
                 }

@@ -168,6 +168,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
 
                             match &instr.operation {
+                                /*
                                 Operation::CallFunction {
                                     ref name,
                                     ref arguments,
@@ -189,7 +190,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Adding return point
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.push_label(&exit_block.name);
-                                    warn!("Function '{:?}' arguments: {:#?}", name, arguments);
+                                    println!("Function '{:?}' arguments: {:#?}", name, arguments);
                                     for arg in arguments {
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                         let _ = match &arg.resolved {
@@ -199,6 +200,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     }
 
                                     // Jumping to function
+                                    // TODO: Check that internal function is defined and throw an error if not.
                                     let label = match &name.resolved {
                                         Some(v) => v,
                                         None => panic!(
@@ -215,7 +217,12 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     mem::swap(&mut evm_block, &mut exit_block);
                                     ret.push(exit_block);
                                 }
-                                Operation::CallExternalFunction {
+                                */
+                                Operation::CallFunction {
+                                    ref name,
+                                    ref arguments,
+                                }                                
+                                | Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
                                 } => {
@@ -288,7 +295,43 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             }
                                         }
                                     } else {
-                                        panic!("{}", format!("{} not found.", qualified_name));
+                                        // Internal function call
+                                        let exit_block_args: BTreeSet<String> = arguments.iter().map(|arg| {
+                                            match &arg.resolved {
+                                                Some(a) =>a.clone(),
+                                                None => panic!("Unable to resolve {}", arg.unresolved),
+                                            }
+                                        }).collect();
+                                        let mut exit_block = code_builder.new_evm_block_with_args("exit_block", exit_block_args);
+
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                        evm_block.push_label(&exit_block.name);
+                                        println!("Function '{:?}' arguments: {:#?}", name, arguments);
+                                        for arg in arguments {
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                            let _ = match &arg.resolved {
+                                                Some(a) => evm_block.duplicate_stack_name(&a),
+                                                None => panic!("Unable to resolve {}", arg.unresolved),
+                                            };
+                                        }
+
+                                        // Jumping to function
+                                        // TODO: Check that internal function is defined and throw an error if not.
+                                        let label = match &name.resolved {
+                                            Some(v) => v,
+                                            None => panic!(
+                                                "Unresolved function name in function call {:?}",
+                                                name
+                                            ),
+                                        };
+
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+
+                                        // Note that we do not need to add scopes to function jumps as these are 
+                                        // outside of the function scope                                    
+                                        evm_block.jump_to(&label);
+                                        mem::swap(&mut evm_block, &mut exit_block);
+                                        ret.push(exit_block);
                                     }
                                 }
 

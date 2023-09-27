@@ -3,7 +3,7 @@ mod tests {
     use bluebell::testing::test_execution_path;
 
     #[test]
-    fn test_visiting() {
+    fn test_panic() {
         test_execution_path(
             "PanicExample::TriggerPanic",
             "[42]",

@@ -1,6 +1,7 @@
 use crate::function_signature::EvmFunctionSignature;
 use crate::instruction::{EvmInstruction, EvmSourcePosition, RustPosition};
 use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
+use crate::types::EvmType;
 use crate::types::EvmTypeValue;
 use evm::Opcode;
 use log::info;
@@ -426,7 +427,7 @@ impl EvmBlock {
         todo!()
     }
 
-    pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<String>) -> &mut Self {
+    pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmType>) -> &mut Self {
         let address = match function.external_address {
             Some(a) => a,
             None => panic!("TODO: Internal calls not supported yet."),
@@ -437,9 +438,17 @@ impl EvmBlock {
         self.push1([ALLOCATION_POINTER].to_vec());
         self.mload(); // Stack element is the pointer
 
-        for (i, _arg) in args.iter().enumerate().rev() {
+        for (i, arg) in args.iter().enumerate().rev() {
+            // Stack:
+            // argN   => p
+            // p         argN
+            //           p
+
             self.swap1();
             self.dup2();
+
+            // Size of arg i:
+            println!("Arg: {:?}", arg);
             self.push1([(i * 0x20) as u8].to_vec());
             self.add();
             self.mstore();

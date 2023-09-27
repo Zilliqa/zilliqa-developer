@@ -485,7 +485,11 @@ impl IrPass for AnnotateBaseTypes {
                 // TODO: Should return the same type as left and right
                 "Uint256".to_string()
             }
-            Operation::CallExternalFunction {
+            Operation::CallFunction {            
+                ref mut name,
+                arguments,                
+            } // We do not distinguish between CallFunction and CallExternalFunction
+            | Operation::CallExternalFunction {
                 ref mut name,
                 arguments,
             } => {
@@ -519,14 +523,6 @@ impl IrPass for AnnotateBaseTypes {
                 // The value of the SSA is the return type of the function
                 // TODO: To this end we need to resolve the type refernce from the resolved name
                 name.type_reference = Some(function_type.clone()); // TODO: Should contain return type as this is a function pointer
-
-                "TODO-lookup".to_string()
-            }
-            Operation::CallFunction { name, arguments } => {
-                name.visit(self, symbol_table)?;
-                for arg in arguments.iter_mut() {
-                    arg.visit(self, symbol_table)?;
-                }
 
                 "TODO-lookup".to_string()
             }
