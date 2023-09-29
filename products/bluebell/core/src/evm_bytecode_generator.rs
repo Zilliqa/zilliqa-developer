@@ -1,3 +1,5 @@
+use std::str::FromStr;
+use evm_assembly::types::EvmType;
 use crate::constants::TreeTraversalMode;
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::Operation;
@@ -275,7 +277,11 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                         // Precompiled or external function
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.call(signature, args_types);
+
+                                        // TODO: Consider if argument mapping should be managed by the runtime module
+                                        evm_block.call(signature, args_types                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect());
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
@@ -318,12 +324,20 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         // Jumping to function
                                         // TODO: Check that internal function is defined and throw an error if not.
                                         let label = match &name.resolved {
-                                            Some(v) => v,
+                                            Some(v) => {
+                                            // TODO: "Rsplit" hack to compensate for that the labels does not contain function parameter types
+                                                if let Some(index) = v.rfind("::<") {
+                                                    &v[..index]
+                                                } else {
+                                                    v
+                                                }                                                
+                                            }
                                             None => panic!(
                                                 "Unresolved function name in function call {:?}",
                                                 name
                                             ),
                                         };
+                                        println!("Jumping to label {} {:?}",label, name.resolved);
 
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
 

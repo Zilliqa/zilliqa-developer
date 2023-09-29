@@ -436,21 +436,44 @@ impl EvmBlock {
         // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4
 
         self.push1([ALLOCATION_POINTER].to_vec());
+        // Stack:
+        // arg N  => arg N
+        //        => p
+        //        => p
+
         self.mload(); // Stack element is the pointer
+        self.dup1();
 
-        for (i, arg) in args.iter().enumerate().rev() {
+        for (_i, arg) in args.iter().enumerate().rev() {
             // Stack:
-            // argN   => p
-            // p         argN
-            //           p
+            // arg N  => p
+            // p      => p
+            // p      => arg N
+            self.swap2();
 
-            self.swap1();
-            self.dup2();
+            // Stack:
+            // p      => p_next = p + argsize
+            // arg N  => arg N
+            //        => p
+            match arg {
+                EvmType::Bytes(size) | EvmType::Int(size) | EvmType::Uint(size) => {
+                    self.dup2();
+                    self.push1([(size / 8) as u8].to_vec());
+                    self.add();
+                    self.swap2();
+                }
+                _ => {
+                    // In the default case we assume 256 bit word
+                    self.dup2();
+                    self.push1([0x20].to_vec());
+                    self.add();
+                    self.swap2();
+                }
+            }
 
             // Size of arg i:
             println!("Arg: {:?}", arg);
-            self.push1([(i * 0x20) as u8].to_vec());
-            self.add();
+
             self.mstore();
         }
 

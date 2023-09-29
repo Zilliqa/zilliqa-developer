@@ -494,7 +494,7 @@ impl IrPass for AnnotateBaseTypes {
                 arguments,
             } => {
                 name.visit(self, symbol_table)?;
-                let mut template_type_args: String = "".to_string();
+                let mut argument_type_args: String = "".to_string();
                 for (i, arg) in arguments.iter_mut().enumerate() {
                     arg.visit(self, symbol_table)?;
                     let type_name = match &arg.type_reference {
@@ -508,16 +508,19 @@ impl IrPass for AnnotateBaseTypes {
                         }
                     };
                     if i > 0 {
-                        template_type_args.push_str(",");
+                        argument_type_args.push_str(",");
                     }
-                    template_type_args.push_str(type_name);
+                    argument_type_args.push_str(type_name);
                 }
 
                 // In the event of a template function, we use the unresolved name
                 // as the function may not yet exist
-                let name_value = &name.unresolved;
+                let name_value = match &name.resolved {
+                    Some(v) => v,
+                    None => &name.unresolved
+                };
 
-                let function_type = format!("{}::<{}>", name_value, template_type_args).to_string();
+                let function_type = format!("{}::<{}>", name_value, argument_type_args).to_string();
                 name.resolved = Some(function_type.clone());
 
                 // The value of the SSA is the return type of the function
