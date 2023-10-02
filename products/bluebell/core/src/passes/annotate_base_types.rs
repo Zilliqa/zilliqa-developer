@@ -485,9 +485,9 @@ impl IrPass for AnnotateBaseTypes {
                 // TODO: Should return the same type as left and right
                 "Uint256".to_string()
             }
-            Operation::CallFunction {            
+            Operation::CallFunction {
                 ref mut name,
-                arguments,                
+                arguments,
             } // We do not distinguish between CallFunction and CallExternalFunction
             | Operation::CallExternalFunction {
                 ref mut name,

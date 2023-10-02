@@ -96,11 +96,7 @@ impl BluebellModule for ScillaDebugBuiltins {
             });
 
         let _ = specification
-            .declare_function(
-                "builtin__print__impl::<String>",
-                ["String"].to_vec(),
-                "Uint256",
-            )
+            .declare_function("print::<String>", ["String"].to_vec(), "Uint256")
             .attach_runtime(|| {
                 fn custom_runtime(
                     input: &[u8],
@@ -109,9 +105,27 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _backend: &dyn Backend,
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    match std::str::from_utf8(input) {
-                        Ok(v) => info!("{}", format!("{}\n", v)),
-                        Err(_) => error!("{}", format!("{}\n", hex::encode(input))),
+                    assert!(input.len() > 32);
+                    let (head, tail) = input.split_at(32);
+                    let location_bytes = head[28..].try_into().expect("");
+                    let location = u32::from_be_bytes(location_bytes) as usize;
+                    assert_eq!(location, 0x20);
+
+                    let length_bytes = tail[0..4]
+                        .try_into()
+                        .expect("Failed to extract string length");
+                    let length = u32::from_be_bytes(length_bytes) as usize;
+
+                    assert!(length <= (tail.len() - 4).try_into().unwrap());
+                    let s = &tail[4..];
+
+                    assert_eq!(length, s.len());
+                    match std::str::from_utf8(&s) {
+                        Ok(v) => info!("{}", v),
+                        Err(_) => panic!(
+                            "While panicking: Failed to decode '{}'",
+                            format!("{}\n", hex::encode(input))
+                        ),
                     };
 
                     Ok((
@@ -125,7 +139,6 @@ impl BluebellModule for ScillaDebugBuiltins {
 
                 custom_runtime
             });
-
         let _ = specification
             .declare_function("panic::<String>", ["String"].to_vec(), "Uint256")
             .attach_runtime(|| {
@@ -136,8 +149,22 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _backend: &dyn Backend,
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    println!("WAS Here??");
-                    match std::str::from_utf8(input) {
+                    assert!(input.len() > 32);
+                    let (head, tail) = input.split_at(32);
+                    let location_bytes = head[28..].try_into().expect("");
+                    let location = u32::from_be_bytes(location_bytes) as usize;
+                    assert_eq!(location, 0x20);
+
+                    let length_bytes = tail[0..4]
+                        .try_into()
+                        .expect("Failed to extract string length");
+                    let length = u32::from_be_bytes(length_bytes) as usize;
+
+                    assert!(length <= (tail.len() - 4).try_into().unwrap());
+                    let s = &tail[4..];
+
+                    assert_eq!(length, s.len());
+                    match std::str::from_utf8(&s) {
                         Ok(v) => panic!("{}", v),
                         Err(_) => panic!(
                             "While panicking: Failed to decode '{}'",

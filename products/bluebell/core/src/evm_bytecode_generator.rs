@@ -1,5 +1,3 @@
-use std::str::FromStr;
-use evm_assembly::types::EvmType;
 use crate::constants::TreeTraversalMode;
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::Operation;
@@ -12,9 +10,11 @@ use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::EvmSourcePosition;
+use evm_assembly::types::EvmType;
 use log::warn;
 use primitive_types::U256;
 use std::collections::BTreeSet;
+use std::str::FromStr;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
@@ -223,7 +223,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                 Operation::CallFunction {
                                     ref name,
                                     ref arguments,
-                                }                                
+                                }
                                 | Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
@@ -330,7 +330,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                     &v[..index]
                                                 } else {
                                                     v
-                                                }                                                
+                                                }
                                             }
                                             None => panic!(
                                                 "Unresolved function name in function call {:?}",
@@ -378,9 +378,9 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 _ => panic!("Could not resolve SSA qualified name"),
                                             };
                                             */
-                                            let payload = data.clone(); 
+                                            let payload = data.clone();
                                             evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                            let payload = payload.as_bytes();
+                                            let payload = payload[1..payload.len()-1].as_bytes();
                                             evm_block.allocate_object(payload.to_vec());
                                             match evm_block.register_stack_name(ssa_name) {
                                                 Err(_) => {
