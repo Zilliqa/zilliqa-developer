@@ -393,7 +393,6 @@ nav:
           - RPC: zilevm/protocol/developer-rpc.md
   - Zilliqa 2:
       - Overview: zq2/index.md
-      - FAQ: zq2/faq.md
   - Exchanges:
       - Exchange Integration:
           - Getting Started:
