@@ -16,6 +16,7 @@ pub struct EvmCompilerContext {
 
     pub function_declarations: HashMap<String, EvmFunctionSignature>,
     pub inline_generics: HashMap<String, InlineGenericsFn>,
+    pub special_variables: HashMap<String, InlineGenericsFn>,
 
     /// Scilla types -> EVM types
     precompiles: BTreeMap<H160, PrecompileFn>,
@@ -66,6 +67,7 @@ impl EvmCompilerContext {
             type_declarations: HashMap::new(),
             function_declarations: HashMap::new(),
             inline_generics: HashMap::new(),
+            special_variables: HashMap::new(),
             precompile_addresses: HashMap::new(),
             precompiles: BTreeMap::new(),
             contract_offset: 5,
@@ -106,6 +108,19 @@ impl EvmCompilerContext {
         unimplemented!()
         // self.type_declarations
         //     .insert(name.to_string(), EvmType::Opaque);
+    }
+
+    pub fn declare_special_variable(
+        &mut self,
+        name: &str,
+        typename: &str,
+        builder: InlineGenericsFn,
+    ) -> Result<(), String> {
+        if self.special_variables.contains_key(name) {
+            return Err(format!("Special variable {} already exists", name).to_string());
+        }
+        self.special_variables.insert(name.to_string(), builder);
+        Ok(())
     }
 
     pub fn declare_inline_generics(

@@ -31,6 +31,10 @@ impl BluebellModule for ScillaDefaultTypes {
         context.declare_unsigned_integer("Uint128", 128);
         context.declare_unsigned_integer("Uint256", 256);
 
+        for i in 0..=32 {
+            context.declare_unsigned_integer(&format!("ByStr{}", i), i * 8);
+        }
+
         context.declare_dynamic_string("String");
     }
 }
@@ -334,6 +338,16 @@ impl BluebellModule for ScillaDefaultBuiltins {
             Ok(())
         });
         */
+
+        let _ = specification.declare_special_variable(
+            "_sender",
+            "ByteStr32",
+            |_ctx, block, _arg_types| {
+                // TODO: Check that the number of arguments is two and otherwise return an error
+                unimplemented!();
+                Ok([].to_vec())
+            },
+        );
 
         // Assuming you have a 'specification' object available...
         // Implementing `add`:

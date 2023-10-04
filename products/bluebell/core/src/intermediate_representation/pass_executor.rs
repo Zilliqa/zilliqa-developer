@@ -230,6 +230,10 @@ impl PassExecutor for Operation {
                     symbol.visit(pass, symbol_table)?;
                     Ok(TraversalResult::Continue)
                 }
+                Operation::ResolveContextResource { symbol } => {
+                    symbol.visit(pass, symbol_table)?;
+                    Ok(TraversalResult::Continue)
+                }
                 Operation::Literal { data: _, typename } => {
                     typename.visit(pass, symbol_table)?;
                     Ok(TraversalResult::Continue)

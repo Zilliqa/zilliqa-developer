@@ -367,17 +367,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     match qualified_name.as_str() {
                                         "String" => {
-                                            /*
-                                            let ssa_name = match instr
-                                                .ssa_name
-                                                .clone()
-                                                .unwrap()
-                                                .qualified_name()
-                                            {
-                                                Ok(v) => v,
-                                                _ => panic!("Could not resolve SSA qualified name"),
-                                            };
-                                            */
                                             let payload = data.clone();
                                             evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                             let payload = payload[1..payload.len()-1].as_bytes();

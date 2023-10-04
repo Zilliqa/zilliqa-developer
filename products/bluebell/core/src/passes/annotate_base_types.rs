@@ -583,6 +583,18 @@ impl IrPass for AnnotateBaseTypes {
                     }
                 }
             }
+            Operation::ResolveContextResource { symbol } => {
+                symbol.visit(self, symbol_table)?;
+                match &symbol.type_reference {
+                    Some(t) => t.clone(),
+                    None => {
+                        return Err(format!(
+                            "Unable to determine type for {}",
+                            symbol.unresolved
+                        ));
+                    }
+                }
+            }            
             Operation::Literal { data, typename } => {
                 typename.visit(self, symbol_table)?;
 

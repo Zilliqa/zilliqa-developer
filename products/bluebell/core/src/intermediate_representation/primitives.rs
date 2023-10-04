@@ -21,6 +21,8 @@ pub enum IrIndentifierKind {
     Namespace,
     BlockLabel,
 
+    ContextResource,
+
     // Storage and reference
     VirtualRegister,
     VirtualRegisterIntermediate,
@@ -229,6 +231,9 @@ pub enum Operation {
         arguments: Vec<IrIdentifier>,
     },
     ResolveSymbol {
+        symbol: IrIdentifier,
+    },
+    ResolveContextResource {
         symbol: IrIdentifier,
     },
     Literal {
