@@ -332,7 +332,6 @@ impl BluebellModule for ScillaDefaultBuiltins {
         /*
         let _ = specification.declare_inline_generics("alloca", |_ctx, block, arg_types| {
             // size
-
             block.push
             block.add();
             Ok(())
