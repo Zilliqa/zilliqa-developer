@@ -100,6 +100,30 @@ impl BluebellModule for ScillaDebugBuiltins {
             });
 
         let _ = specification
+            .declare_function("print::<ByStr20>", ["ByStr20"].to_vec(), "Uint256")
+            .attach_runtime(|| {
+                fn custom_runtime(
+                    input: &[u8],
+                    _gas_limit: Option<u64>,
+                    _context: &EvmContext,
+                    _backend: &dyn Backend,
+                    _is_static: bool,
+                ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+                    info!("{}", hex::encode(input));
+
+                    Ok((
+                        PrecompileOutput {
+                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+                            output: input.to_vec(),
+                        },
+                        0,
+                    ))
+                }
+
+                custom_runtime
+            });
+
+        let _ = specification
             .declare_function("print::<String>", ["String"].to_vec(), "Uint256")
             .attach_runtime(|| {
                 fn custom_runtime(
@@ -340,10 +364,9 @@ impl BluebellModule for ScillaDefaultBuiltins {
 
         let _ = specification.declare_special_variable(
             "_sender",
-            "ByteStr32",
-            |_ctx, block, _arg_types| {
-                // TODO: Check that the number of arguments is two and otherwise return an error
-                unimplemented!();
+            "ByStr20",
+            |_ctx, block| {
+                block.external_caller();
                 Ok([].to_vec())
             },
         );
