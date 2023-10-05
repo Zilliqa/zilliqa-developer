@@ -10,7 +10,7 @@ This guide will explain how to accomplish the following:
 2. Deploy a smart contract to the testnet.
 3. Have our new smart contract get the current price of ZIL from the oracle contract
 
-### Connecting to Zilliqa Testnet
+## Connecting to Zilliqa Testnet
 
 First we need to add the Zilliqa testnet to our metamask:
 
@@ -23,11 +23,11 @@ First we need to add the Zilliqa testnet to our metamask:
 
 Using the information above, follow this guide: [How to add a custom network to Metamask](https://support.metamask.io/hc/en-us/articles/360043227612-How-to-add-a-custom-network-RPC).
 
-### Deploy Smart Contract via Remix
+## Deploy Smart Contract via Remix
 
 Remix is great as it is a zero-setup tool for working with smart contracts, allowing us to easily demonstrate the Chainlink oracle contracts. But first - let’s inspect the contracts we’ll be working with!
 
-#### FeedConsumer
+## FeedConsumer
 
 This is the contract you will deploy. This is just a minimal example to demonstrate how to consume Chainlink data feeds on Zilliqa. You can extend this to be a decentralised borrowing and lending protocol, a DEX, game, NFT minting contract - anything you can think of!
 
@@ -74,14 +74,14 @@ contract FeedConsumer {
 
 Below is the interface of a contract that has already been deployed by the Zilliqa team. The oracle nodes publish data directly to the PriceFeed contract every other minute. There is one contract per asset.
 
-#### Contract Addresses
+## Contract Addresses
 
 - **ZIL / USD (Testnet)**: `0x845f152725A2FF60cb2F5a0E024B5A749f7551C0`
 - **USDT / USD (Testnet)**: `0xcb893BC5741672Ffc7A7992876253BE83f2c550D`
 - **ZIL / USD (Mainnet)**: `0x8245E42c7eBF756E7A18A59Fd828159f29587a23`
 - **USDT / USD (Mainnet)**: `0x54d10Ee86cd2C3258b23FDb78782F70e84966683`
 
-#### PriceFeedInterface
+## PriceFeedInterface
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -103,7 +103,7 @@ interface PriceFeedInterface {
 
 ```
 
-### Deploying FeedConsumer
+## Deploying FeedConsumer
 
 Now that we have inspected the smart contracts, let’s deploy FeedConsumer.
 
@@ -139,7 +139,7 @@ Remember since this is on-chain data, there are no floats / decimal numbers. So 
 
 There you have it! While this a simple demonstration, it should illuminate the wide range of possibilities that can be materialised on Zilliqa now that Chainlink oracles are active on the network.
 
-### Resources
+## Resources
 
 - [Chainlink Data Feeds](https://docs.chain.link/data-feeds)
 - [Using Data Feeds](https://docs.chain.link/data-feeds/using-data-feeds)
