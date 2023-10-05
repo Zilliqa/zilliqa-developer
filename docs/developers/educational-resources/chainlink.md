@@ -1,3 +1,17 @@
+---
+id: chainlink
+title: Zilliqa Chainlink Oracles
+keywords:
+  - zilliqa
+  - development
+  - oracles
+  - chainlink
+  - solidity
+description: Learn how to use Chainlink oracles on Zilliqa.
+---
+
+---
+
 # How to use Chainlink feeds with smart contracts on Zilliqa
 
 In this tutorial we will show you how to get the current ZIL/ USDT price from one of the Chainlink price feed oracles operating on the Zilliqa network.
