@@ -1,4 +1,4 @@
-## How to use Chainlink feeds with smart contracts on Zilliqa
+# How to use Chainlink feeds with smart contracts on Zilliqa
 
 In this tutorial we will show you how to get the current ZIL/ USDT price from one of the Chainlink price feed oracles operating on the Zilliqa network.
 
@@ -74,7 +74,7 @@ contract FeedConsumer {
 
 Below is the interface of a contract that has already been deployed by the Zilliqa team. The oracle nodes publish data directly to the PriceFeed contract every other minute. There is one contract per asset.
 
-#### Contract Addresses:
+#### Contract Addresses
 
 - **ZIL / USD (Testnet)**: `0x845f152725A2FF60cb2F5a0E024B5A749f7551C0`
 - **USDT / USD (Testnet)**: `0xcb893BC5741672Ffc7A7992876253BE83f2c550D`
@@ -107,7 +107,7 @@ interface PriceFeedInterface {
 
 Now that we have inspected the smart contracts, let’s deploy FeedConsumer.
 
-Go to https://remix.ethereum.org/. In the File Explorer tab, add both of the contracts under the contracts folder like this:
+Go to [Remix IDE](https://remix.ethereum.org/). In the File Explorer tab, add both of the contracts under the contracts folder like this:
 
 <img alt="Remix File Explorer" width="1600" src="../../../../assets/img/chainlink/remix-file-explorer.png" />
 
