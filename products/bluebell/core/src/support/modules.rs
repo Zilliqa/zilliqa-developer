@@ -362,14 +362,10 @@ impl BluebellModule for ScillaDefaultBuiltins {
         });
         */
 
-        let _ = specification.declare_special_variable(
-            "_sender",
-            "ByStr20",
-            |_ctx, block| {
-                block.external_caller();
-                Ok([].to_vec())
-            },
-        );
+        let _ = specification.declare_special_variable("_sender", "ByStr20", |_ctx, block| {
+            block.external_caller();
+            Ok([].to_vec())
+        });
 
         // Assuming you have a 'specification' object available...
         // Implementing `add`:

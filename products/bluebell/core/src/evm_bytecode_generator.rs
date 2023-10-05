@@ -372,7 +372,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 panic!("Error in external call: {}", e);
                                             }
                                         }
-                                        
                                     }
                                     else {
                                         panic!("Special variable {} not found", symbol.unresolved);

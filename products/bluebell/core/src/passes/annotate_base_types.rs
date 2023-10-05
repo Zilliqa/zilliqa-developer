@@ -594,7 +594,7 @@ impl IrPass for AnnotateBaseTypes {
                         ));
                     }
                 }
-            }            
+            }
             Operation::Literal { data, typename } => {
                 typename.visit(self, symbol_table)?;
 
