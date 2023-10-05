@@ -295,6 +295,7 @@ nav:
           - Confirmation: developers/transaction-lifecycle/dev-txn-confirmation.md
           - Receipt: developers/transaction-lifecycle/dev-txn-receipt.md
       - Educational Resources:
+          - Chainlink: developers/educational-resources/chainlink.md
           - Videos: developers/educational-resources/dev-education-videos.md
           - "Sample app RentOnZilliqa":
               - Introduction: "developers/educational-resources/sample-app-rentonzilliqa/dev-rentonzilliqa-introduction.md"
