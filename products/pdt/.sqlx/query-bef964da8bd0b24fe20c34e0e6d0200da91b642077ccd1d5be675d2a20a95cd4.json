@@ -4,7 +4,12 @@
   "describe": {
     "columns": [],
     "parameters": {
-      "Left": ["TextArray", "Int8Array", "TextArray", "NumericArray"]
+      "Left": [
+        "TextArray",
+        "Int8Array",
+        "TextArray",
+        "NumericArray"
+      ]
     },
     "nullable": []
   },
