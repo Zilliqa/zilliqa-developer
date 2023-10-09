@@ -69,6 +69,8 @@ enum Commands {
     ParseEvents,
     #[command(name = "listen")]
     Listen(ListenOptions),
+    #[command(name = "test")]
+    Test,
 }
 
 // #[derive(Debug, Args)]
@@ -364,5 +366,6 @@ async fn main() -> Result<()> {
             )
             .await
         }
+        Commands::Test => Ok(println!("Hello World")),
     }
 }
