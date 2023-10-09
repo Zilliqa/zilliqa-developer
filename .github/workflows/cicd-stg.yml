@@ -38,6 +38,9 @@ jobs:
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
+          - application: pdt
+            image_name: pdt
+            path: pdt
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
