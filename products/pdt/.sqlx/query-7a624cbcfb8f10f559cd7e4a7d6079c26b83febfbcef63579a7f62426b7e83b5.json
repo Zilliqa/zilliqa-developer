@@ -25,9 +25,16 @@
       }
     ],
     "parameters": {
-      "Left": ["TextArray"]
+      "Left": [
+        "TextArray"
+      ]
     },
-    "nullable": [true, true, true, true]
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
   },
   "hash": "7a624cbcfb8f10f559cd7e4a7d6079c26b83febfbcef63579a7f62426b7e83b5"
 }

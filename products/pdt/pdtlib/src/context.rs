@@ -179,7 +179,7 @@ fn make_unsigned<O, Retry>(
 ) -> Result<aws_smithy_http::operation::Operation<O, Retry>, std::convert::Infallible> {
     {
         let mut props = operation.properties_mut();
-        let mut signing_config = props
+        let signing_config = props
             .get_mut::<aws_sig_auth::signer::OperationSigningConfig>()
             .expect("has signing_config");
         signing_config.signing_requirements = aws_sig_auth::signer::SigningRequirements::Disabled;

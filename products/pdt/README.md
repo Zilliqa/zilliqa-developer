@@ -23,7 +23,7 @@ cargo run -- --download-dir=<your_download_dir> --unpack-dir=<your_unpacking_dir
 For Postgres, make sure your database is created and run
 
 ```bash
-cargo run -- --download-dir=<your_download_dir> --unpack-dir=<your_unpacking_dir> --postgres_url=<your_postgres_url> psqlmulti --nr-threads=<n> --batch-blocks=<n> --partition_size=10000
+cargo run -- --download-dir=<your_download_dir> --unpack-dir=<your_unpacking_dir> --postgres-url=<your_postgres_url> psqlmulti --nr-threads=<n> --batch-blocks=<n> --partition-size=10000
 ```
 
 All our import operations are multithreaded. Each thread will create a duplicate
