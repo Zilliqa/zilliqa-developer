@@ -5,7 +5,7 @@ WORKDIR /pdt
 
 RUN apt-get update -y && \
   apt-get upgrade -y && \
-  apt-get install -y protobuf-compiler build-essential cmake libssl-dev
+  apt-get install -y protobuf-compiler build-essential cmake
 
 RUN mkdir build
 
