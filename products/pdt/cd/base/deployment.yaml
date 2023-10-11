@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdt
+  namespace: pdt
+  labels:
+    "app.kubernetes.io/name": "pdt"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "pdt"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "pdt"
+    spec:
+      containers:
+        - image: pdt
+          name: pdt
+          ports:
+            - containerPort: 80
