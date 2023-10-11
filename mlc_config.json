@@ -80,12 +80,6 @@
     },
     {
       "pattern": "^https://coq.inria.fr"
-    },
-    {
-      "pattern": "https://support.metamask.io/hc/en-us/articles/360043227612-How-to-add-a-custom-network-RPC"
-    },
-    {
-      "pattern": "^https://defillama.com/"
     }
   ],
   "replacementPatterns": [],
@@ -104,6 +98,11 @@
       ],
       "headers": {
         "Accept-Encoding": "zstd, br, gzip, deflate"
+      }
+    },
+    {
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
       }
     }
   ]
