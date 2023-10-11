@@ -80,6 +80,12 @@
     },
     {
       "pattern": "^https://coq.inria.fr"
+    },
+    {
+      "pattern": "https://support.metamask.io/hc/en-us/articles/360043227612-How-to-add-a-custom-network-RPC"
+    },
+    {
+      "pattern": "^https://defillama.com/"
     }
   ],
   "replacementPatterns": [],
