@@ -5,7 +5,7 @@ WORKDIR /pdt
 
 RUN apt-get update -y && \
   apt-get upgrade -y && \
-  apt-get install -y protobuf-compiler build-essential cmake
+  apt-get install -y --no-install-recommends protobuf-compiler=3.12.4-1+deb11u1 build-essential=12.9 cmake=3.18.4-2+deb11u1
 
 RUN mkdir build
 
@@ -18,7 +18,9 @@ FROM debian:bullseye-slim
 
 RUN apt-get update -y && \
   apt-get upgrade -y && \
-  apt-get install -y ca-certificates
+  apt-get install -y --no-install-recommends ca-certificates=20210119 && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /pdt/build/pdt /pdt
 
