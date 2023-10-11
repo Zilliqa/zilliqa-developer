@@ -4,10 +4,6 @@ use anyhow::{anyhow, Result};
 use gcp_bigquery_client::model::table::Table;
 use gcp_bigquery_client::Client;
 
-
-
-
-
 #[derive(Clone, Debug)]
 pub struct BigQueryDatasetLocation {
     pub project_id: String,

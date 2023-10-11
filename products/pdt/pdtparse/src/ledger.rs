@@ -1,5 +1,5 @@
 use crate::Event;
-use anyhow::{Result};
+use anyhow::Result;
 use async_trait::async_trait;
 use sqlx::{query, types::Decimal, PgPool};
 
