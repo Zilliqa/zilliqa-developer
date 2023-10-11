@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::ops::Range;
 
-use anyhow::{Result};
+use anyhow::Result;
 use async_trait::async_trait;
 
 use crate::zqproj::{BlockInsertable, Inserter, InsertionErrors, PSQLInsertable};
