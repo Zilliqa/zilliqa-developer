@@ -366,6 +366,9 @@ async fn main() -> Result<()> {
             )
             .await
         }
-        Commands::Test => Ok(println!("Hello World")),
+        Commands::Test => {
+            println!("Hello World");
+            loop {}
+        }
     }
 }

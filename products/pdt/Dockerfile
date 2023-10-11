@@ -14,6 +14,12 @@ COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry cargo build && \
   mv /pdt/target/debug/pdt /pdt/build/
 
-FROM gcr.io/distroless/cc-debian11:latest
+FROM debian:bullseye-slim
+
+RUN apt-get update -y && \
+  apt-get upgrade -y && \
+  apt-get install -y ca-certificates
 
 COPY --from=builder /pdt/build/pdt /pdt
+
+CMD ["/pdt", "test"]
