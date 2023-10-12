@@ -9,4 +9,3 @@ spec:
     requests:
       storage: 128Gi
   storageClassName: standard
-  volumeName: pdt-pv
