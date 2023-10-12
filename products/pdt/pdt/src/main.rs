@@ -69,6 +69,8 @@ enum Commands {
     ParseEvents,
     #[command(name = "listen")]
     Listen(ListenOptions),
+    #[command(name = "test")]
+    Test,
 }
 
 // #[derive(Debug, Args)]
@@ -363,6 +365,10 @@ async fn main() -> Result<()> {
                     .expect("no network type -- did forget to set --network-type?"),
             )
             .await
+        }
+        Commands::Test => {
+            println!("Hello World");
+            loop {}
         }
     }
 }
