@@ -22,3 +22,10 @@ spec:
           name: pdt
           ports:
             - containerPort: 80
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pdt-pvc
