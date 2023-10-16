@@ -57,7 +57,7 @@ impl Trackable for TrackedTable {
     ) -> Result<(i64, i64)> {
         let mut result = client.job()
             .query(&self.location.dataset.project_id,
-                   QueryRequest::new(format!("SELECT block,offset_in_block FROM {} WHERE block >= {} AND block < {} ORDER BY block DESC, offset_in_block DESC LIMIT 1",
+                   QueryRequest::new(format!("SELECT block,offset_in_block FROM `{}` WHERE block >= {} AND block < {} ORDER BY block DESC, offset_in_block DESC LIMIT 1",
                                              self.location.get_table_desc(), blks.start, blks.end))).await?;
         if result.next_row() {
             // There was one!1

@@ -99,7 +99,7 @@ impl MetaTable for Meta {
         start: i64,
         nr_blks: i64,
     ) -> Result<Option<(i64, String)>> {
-        let query = format!("SELECT start_blk,nr_blks,client_id FROM {} WHERE start_blk <= {} and nr_blks >= {} - start_blk ORDER BY nr_blks DESC LIMIT 1",
+        let query = format!("SELECT start_blk,nr_blks,client_id FROM `{}` WHERE start_blk <= {} and nr_blks >= {} - start_blk ORDER BY nr_blks DESC LIMIT 1",
                             self.table.get_table_desc(), start, nr_blks + start);
         let mut result = client
             .job()
@@ -186,7 +186,7 @@ impl MetaTable for Meta {
         let mut result = client
             .job()
             .query(&self.table.dataset.project_id,
-                   QueryRequest::new(format!("SELECT start_blk, nr_blks FROM {} WHERE start_blk >= {} AND nr_blks > 0  ORDER BY start_blk ASC, nr_blks DESC LIMIT 1",
+                   QueryRequest::new(format!("SELECT start_blk, nr_blks FROM `{}` WHERE start_blk >= {} AND nr_blks > 0  ORDER BY start_blk ASC, nr_blks DESC LIMIT 1",
                                              self.table.get_table_desc(), blk_to_find))).await?;
         if result.next_row() {
             let start_blk = result
@@ -211,7 +211,7 @@ impl MetaTable for Meta {
         let _ = client
             .job()
             .query(&self.table.dataset.project_id,
-                   QueryRequest::new(format!("INSERT INTO {} (client_id, event_stamp, start_blk, nr_blks) VALUES (\"{}\",CURRENT_DATETIME(), {}, {})",
+                   QueryRequest::new(format!("INSERT INTO `{}` (client_id, event_stamp, start_blk, nr_blks) VALUES (\"{}\",CURRENT_DATETIME(), {}, {})",
                                              self.table.get_table_desc(),
                                              self.coords.client_id, range.start, range.end-range.start)))
             .await?;

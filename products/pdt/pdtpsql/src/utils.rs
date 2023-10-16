@@ -4,6 +4,7 @@ use anyhow::Result;
 use sqlx::{postgres::types::PgRange, query_as, PgPool};
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct SchemaColumn {
     column_name: Option<String>,
     data_type: Option<String>,
