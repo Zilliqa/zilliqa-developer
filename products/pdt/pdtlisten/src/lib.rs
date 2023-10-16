@@ -146,7 +146,6 @@ async fn get_block_by_hash(x: H256, provider: &Provider<Http>) -> Result<Block<T
 pub async fn listen(
     bq_project_id: &str,
     bq_dataset_id: &str,
-    service_account_key_file: &str,
     postgres_url: &str,
     api_url: &str,
 ) -> Result<()> {
@@ -168,14 +167,13 @@ pub async fn listen(
         .await?;
 
     println!("checking schemas..");
-    ZilliqaBQProject::ensure_schema(&loc, service_account_key_file).await?;
+    ZilliqaBQProject::ensure_schema(&loc).await?;
     ZilliqaPSQLProject::ensure_schema(&p_client).await?;
     println!("all good.");
 
     let zilliqa_bq_proj = ZilliqaBQProject::new(
         &loc,
         &coords.with_client_id("listen_bq"),
-        service_account_key_file,
         i64::MAX, //we don't need nr_blks, but max it out just in case
     )
     .await?;

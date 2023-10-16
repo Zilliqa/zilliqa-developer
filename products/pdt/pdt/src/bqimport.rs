@@ -3,7 +3,6 @@ use pdtdb::utils::ProcessCoordinates;
 use crate::importer::Importer;
 use crate::importers::TransactionMicroblockImporter;
 use crate::multi_import::import;
-#[allow(unused_imports)]
 use anyhow::{anyhow, Result};
 use pdtbq::bq::ZilliqaBQProject;
 use pdtbq::bq_utils::BigQueryDatasetLocation;
@@ -21,7 +20,6 @@ pub async fn bq_multi_import(
     start_blk: Option<i64>,
     project_id: &str,
     dataset_id: &str,
-    service_account_key_file: &str,
     duplicate_persistence: bool,
 ) -> Result<()> {
     // OK. Just go ..
@@ -39,13 +37,12 @@ pub async fn bq_multi_import(
 
     // Start off by creating the schema. Allocating a new BQ Object will do ..
     println!("Creating schema .. ");
-    ZilliqaBQProject::ensure_schema(&location, service_account_key_file).await?;
+    ZilliqaBQProject::ensure_schema(&location).await?;
 
     for idx in 0..nr_threads {
         let orig_unpack_dir = unpack_dir.to_string();
         let my_unpack_dir = Path::new(unpack_dir).join("..").join(format!("t{}", idx));
         let my_start_blk = start_blk.clone();
-        let key_file = service_account_key_file.to_string().clone();
         let my_coords = coords
             .with_client_id(&format!("t{}_{}", idx, coords.nr_machines))
             .with_machine_id(idx);
@@ -68,8 +65,7 @@ pub async fn bq_multi_import(
             let mut imp = TransactionMicroblockImporter::new();
             let max_block = imp.get_max_block(&exporter).await?;
             let nr_blocks: i64 = (max_block + 1).try_into()?;
-            let project =
-                ZilliqaBQProject::new(&location, &my_coords, &key_file, nr_blocks).await?;
+            let project = ZilliqaBQProject::new(&location, &my_coords, nr_blocks).await?;
             while !import(
                 &mut imp,
                 &exporter,
@@ -103,7 +99,6 @@ pub async fn reconcile_blocks(
     scale: i64,
     project_id: &str,
     dataset_id: &str,
-    service_account_key_file: &str,
 ) -> Result<()> {
     let client_id = format!("reconcile-blocks");
     let exporter = Exporter::new(&unpack_dir)?;
@@ -118,8 +113,7 @@ pub async fn reconcile_blocks(
         machine_id: 0,
         client_id: client_id.to_string(),
     };
-    let project =
-        ZilliqaBQProject::new(&location, &coords, service_account_key_file, max_block + 1).await?;
+    let project = ZilliqaBQProject::new(&location, &coords, max_block + 1).await?;
     // We should have coverage for every block, extant or not, up to the
     // last batch, which will be short.
     let mut blk: i64 = 0;
