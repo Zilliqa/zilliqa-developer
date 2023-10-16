@@ -2,13 +2,7 @@ use crate::download;
 /** Synchronise files */
 use crate::{context, context::Context, utils};
 use anyhow::{anyhow, Result};
-use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
-use std::fs::File;
-use std::io::Read;
-use std::io::Seek;
-use std::io::Write;
 use std::path::Path;
 use tokio::task::JoinSet;
 use walkdir::WalkDir;
@@ -106,7 +100,7 @@ impl Sync {
         source_key: &str,
         target_path: &Path,
         entries: &Vec<context::Entry>,
-        remove_old_files: bool,
+        _remove_old_files: bool, // TODO: implement this functionality
     ) -> Result<bool> {
         let mut stable = true;
         // Now sync each key in turn.

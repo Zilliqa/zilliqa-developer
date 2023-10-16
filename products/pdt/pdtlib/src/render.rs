@@ -5,9 +5,9 @@ use crate::meta;
 use crate::utils;
 use anyhow::{anyhow, Result};
 use std::collections::{HashMap, HashSet};
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::{fs, path};
 
 /** Tracks state for rendering from a download directory to an instantiation directory
  *  Essentially, we:

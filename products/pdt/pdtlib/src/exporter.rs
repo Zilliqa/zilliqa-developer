@@ -1,6 +1,6 @@
 // Exports data from persistence
 use crate::proto::{ProtoMicroBlock, ProtoMicroBlockKey, ProtoTransactionWithReceipt};
-use crate::{db, db::Db, meta, proto};
+use crate::{db::Db, meta};
 use anyhow::Result;
 use primitive_types::H256;
 use std::path::Path;

@@ -1,6 +1,5 @@
 // Here
-#[allow(unused_imports)]
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use pdtlib::proto::ByteArray;
 use primitive_types::H160;
 use sha2::{Digest, Sha256};

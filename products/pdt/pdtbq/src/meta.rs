@@ -1,5 +1,4 @@
 use crate::bq_utils;
-#[allow(unused_imports)]
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use gcp_bigquery_client::model::{
