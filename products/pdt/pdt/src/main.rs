@@ -26,7 +26,7 @@ struct Cli {
     #[arg(long, default_value = "/home/rrw/tmp/unpacked")]
     unpack_dir: String,
 
-    #[arg(long, default_value = "testnet-901")]
+    #[arg(long, default_value = "testnet-925")]
     network: String,
 
     #[arg(long, value_enum)]
@@ -139,7 +139,7 @@ struct ListenOptions {
     #[arg(long)]
     dataset_id: String,
 
-    #[arg(long, default_value = "rrw-bigquery-test-id")]
+    #[arg(long, default_value = "prj-c-data-analytics-3xs14wez")]
     project_id: String,
 
     #[arg(long)]
@@ -163,8 +163,10 @@ async fn download_persistence(
     } else {
         if network_name.starts_with("mainnet-") {
             &NetworkType::Mainnet
-        } else {
+        } else if network_name.starts_with("testnet-") {
             &NetworkType::Testnet
+        } else {
+            panic!("Unexpected network type")
         }
     };
     let bucket_name = match network_type {
@@ -184,7 +186,7 @@ async fn download_persistence(
     incr.save_meta(max_block)?;
     println!("Max block {}", max_block);
 
-    let render = Renderer::new("testnet-901", download_dir, unpack_dir)?;
+    let render = Renderer::new(network_name, download_dir, unpack_dir)?;
     let recovery_points = render.get_recovery_points()?;
     println!(
         "persistence blocks: {:?} , state blocks: {:?}",

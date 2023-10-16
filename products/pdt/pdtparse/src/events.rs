@@ -19,6 +19,7 @@ pub enum ZRC2Event {
 pub struct MintedEvent {
     txn_id: String,
     block: i64,
+    #[allow(dead_code)]
     minter: String,
     recipient: String,
     amount: Decimal,
@@ -53,6 +54,7 @@ impl LedgerInsertable for MintedEvent {
 pub struct BurntEvent {
     txn_id: String,
     block: i64,
+    #[allow(dead_code)]
     burner: String,
     burn_account: String,
     amount: Decimal,
@@ -124,6 +126,7 @@ impl LedgerInsertable for TransferSuccessEvent {
 pub struct TransferFromSuccess {
     txn_id: String,
     block: i64,
+    #[allow(dead_code)]
     initiator: String,
     sender: String,
     recipient: String,
@@ -165,6 +168,7 @@ impl LedgerInsertable for TransferFromSuccess {
 pub struct OperatorSendSuccess {
     txn_id: String,
     block: i64,
+    #[allow(dead_code)]
     initiator: String,
     sender: String,
     recipient: String,
