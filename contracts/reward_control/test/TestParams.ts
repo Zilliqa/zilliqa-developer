@@ -37,16 +37,28 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     expect(await scillaRewardsParamsContract.contractadmin()).to.be.eq(firstAdmin.toLowerCase());
   });
 
-  it("Default base reward should be 20", async function () {
-    expect(await scillaRewardsParamsContract.base_reward_in_percent()).to.be.eq(20);
+  it("Percent precision should be 100", async function () {
+    expect(await scillaRewardsParamsContract.percent_precision()).to.be.eq(100);
   });
 
-  it("Default lookup reward should be 40", async function () {
-    expect(await scillaRewardsParamsContract.lookup_reward_in_percent()).to.be.eq(40);
+  it("Default base reward should be 2000", async function () {
+    expect(await scillaRewardsParamsContract.base_reward_in_percent()).to.be.eq(2000);
+  });
+
+  it("Default lookup reward should be 4000", async function () {
+    expect(await scillaRewardsParamsContract.lookup_reward_in_percent()).to.be.eq(4000);
   });
 
   it("Default coinbase reward per ds should be 204000000000000000", async function () {
     expect(await scillaRewardsParamsContract.coinbase_reward_per_ds()).to.be.eq(204000000000000000);
+  });
+
+  it("Default reward mul in millis should be 1668", async function () {
+    expect(await scillaRewardsParamsContract.reward_each_mul_in_millis()).to.be.eq(1668);
+  });
+
+  it("Default base_reward mul in millis should be 4726", async function () {
+    expect(await scillaRewardsParamsContract.base_reward_mul_in_millis()).to.be.eq(4726);
   });
 
   // changing the parameters by admin
@@ -66,10 +78,21 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     expect(await scillaRewardsParamsContract.coinbase_reward_per_ds()).to.be.eq(180000000000000000);
   });
 
+
+  it("Admin can change reward_each_mul_in_millis to 400", async function () {
+    let result1 = await scillaRewardsParamsContract.ChangeRewardEachMulInMillis(400);
+    expect(await scillaRewardsParamsContract.reward_each_mul_in_millis()).to.be.eq(400);
+  });
+
+  it("Admin can change reward_base_mul_in_millis to 392", async function () {
+    let result1 = await scillaRewardsParamsContract.ChangeBaseRewardMulInMillis(392);
+    expect(await scillaRewardsParamsContract.base_reward_mul_in_millis()).to.be.eq(392);
+  });
+
   // negative test cases
   it("A non admin wallet cannot set base reward", async function () {
     let acc_2 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_2)
-    
+
     const CALL_CONTRACT_FAILED = 7;
     try {
       let result = await scillaRewardsParamsContract.connect(acc_2).ChangeBaseReward(35);
@@ -87,7 +110,7 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
 
   it("A non admin wallet cannot set lookup reward", async function () {
     let acc_2 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_2)
-    
+
     const CALL_CONTRACT_FAILED = 7;
     try {
       let result = await scillaRewardsParamsContract.connect(acc_2).ChangeLookupReward(50);

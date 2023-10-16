@@ -249,7 +249,7 @@ transition SubmitNativeTransaction(recipient: ByStr20, amount: Uint128, tag: Str
   end
 end
 
-transition SubmitCustomTransaction(contract_address: ByStr20, transaction: MultiSigTransition)
+procedure SubmitCustomTransaction(contract_address: ByStr20, transaction: MultiSigTransition)
   tx = CustomTransaction contract_address transaction;
   SubmitTransaction tx
 end
@@ -339,6 +339,53 @@ transition ExecuteTransaction(transaction_id: Uint32)
     end
   end
 end
+
+(***************************************************)
+(*      Multisig Housekeeping Transitions          *)
+(***************************************************)
+
+(* Submit a new UpdateAdmin request *)
+transition SubmitCustomUpdateAdminTransaction (calleeContract : ByStr20, admin: ByStr20)
+  transaction = UpdateAdmin admin;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ClaimAdmin request *)
+transition SubmitCustomClaimAdminTransaction (calleeContract : ByStr20)
+  transaction = ClaimAdmin;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ChangeBaseReward request *)
+transition SubmitCustomChangeBaseRewardTransaction (calleeContract : ByStr20, base_reward_val: Uint32)
+  transaction = ChangeBaseReward base_reward_val;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ChangeLookupReward request *)
+transition SubmitCustomChangeLookupRewardTransaction (calleeContract : ByStr20, lookup_reward_val: Uint32)
+  transaction = ChangeLookupReward lookup_reward_val;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ChangeCoinbaseReward request *)
+transition SubmitCustomChangeCoinbaseRewardTransaction (calleeContract : ByStr20, coinbase_reward_val: Uint128)
+  transaction = ChangeCoinbaseReward coinbase_reward_val;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ChangeRewardEachMulInMillis request *)
+transition ChangeRewardEachMulInMillisTransaction (calleeContract: ByStr20, reward_in_millis: Uint32)
+  transaction = ChangeRewardEachMulInMillis reward_in_millis;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ChangeBaseRewardInMillis request *)
+transition ChangeBaseRewardMulInMillisTransaction (calleeContract: ByStr20, reward_in_millis: Uint32)
+  transaction = ChangeBaseRewardMulInMillis reward_in_millis;
+  SubmitCustomTransaction calleeContract transaction
+end
+
 
 transition AddFunds()
   accept;

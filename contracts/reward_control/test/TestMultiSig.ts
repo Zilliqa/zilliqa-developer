@@ -35,11 +35,10 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     utils.ensureZilliqa();
     utils.setZilliqaSignerToAccountByHardhatWallet(WALLET_INDEX_0);
     let owner_0 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_0);
-    let owner_1 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_1);
-    let owner_2 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_2);
-
     console.log(`Address 0 ${owner_0}`);
+    let owner_1 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_1);
     console.log(`Address 1 ${owner_1}`);
+    let owner_2 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_2);
     console.log(`Address 2 ${owner_2}`);
 
     const owner_list:string[] = [owner_0, owner_1, owner_2]
@@ -76,7 +75,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeBaseRewardTransaction(rewardsContractAddress, 25);
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
     console.log("Multisig txn id is: ", multisig_txn_id)
-    
+
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
     let result_2 = await scillaMultiSigRewardsParamContract.connect(acc_1).ExecuteTransaction(multisig_txn_id);
@@ -91,7 +90,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeLookupRewardTransaction(rewardsContractAddress, 35);
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
     console.log("Multisig txn id is: ", multisig_txn_id)
-    
+
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
     let result_2 = await scillaMultiSigRewardsParamContract.connect(acc_1).ExecuteTransaction(multisig_txn_id);
@@ -115,7 +114,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
   });
 
   // negative test cases
-  it("A wallet that is not in the mutli sig wallet list cannot submit transaction", async function () {
+  it("A wallet that is not in the multi sig wallet list cannot submit transaction", async function () {
     const rewardsContractAddress = scillaRewardsParamsContract.address
     let acc_3 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_3)
 
@@ -132,7 +131,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
 
   });
 
-  it("A wallet that is not in the mutli sig wallet list cannot sign transaction", async function () {
+  it("A wallet that is not in the multi sig wallet list cannot sign transaction", async function () {
     const rewardsContractAddress = scillaRewardsParamsContract.address
 
     let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
@@ -158,7 +157,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     
   });
 
-  it("A wallet that is not in the mutli sig wallet list cannot execute transaction", async function () {
+  it("A wallet that is not in the multi sig wallet list cannot execute transaction", async function () {
     const rewardsContractAddress = scillaRewardsParamsContract.address
 
     let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
