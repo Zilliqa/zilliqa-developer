@@ -5,3 +5,13 @@ resources:
   - ../../base
 
 namespace: pdt-staging
+
+patches:
+  - target:
+      kind: Deployment
+      name: pdt
+    patch: |-
+      - op: add
+        path: /spec/template/spec
+        value:
+          serviceAccountName: pdt
