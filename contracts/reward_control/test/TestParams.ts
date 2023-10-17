@@ -9,6 +9,7 @@ import * as utils from "../utils/utils.ts";
 let WALLET_INDEX_0 = 0
 let WALLET_INDEX_1 = 1
 let WALLET_INDEX_2 = 2
+const DEBUG = false;
 
 describe(utils.TestGeneral(0, "TestParams"), function () {
   // let hello: Contract;
@@ -18,11 +19,11 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     utils.ensureZilliqa();
     utils.setZilliqaSignerToAccountByHardhatWallet(WALLET_INDEX_0);
     let owner = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_0);
-    console.log(`Address ${owner}`);
+    if (DEBUG) { console.log(`Address ${owner}`); }
     scillaRewardsParamsContract = await hre.deployScillaContract("RewardsParams", owner);
     utils.checkScillaTransactionSuccess(scillaRewardsParamsContract);
 
-    console.log(`Rewards Params Contract: ${scillaRewardsParamsContract.address}`);
+    if (DEBUG) { console.log(`Rewards Params Contract: ${scillaRewardsParamsContract.address}`); }
     // console.log(`${JSON.stringify(scillaRewardsParamsContract)}`);
   });
 
@@ -170,7 +171,7 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     // utils.setZilliqaSignerToAccountByHardhatWallet(WALLET_INDEX_0);
     let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
     let newAdmin = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_1);
-    console.log(`Admin changing to: ${newAdmin}`);
+    if (DEBUG) { console.log(`Admin changing to: ${newAdmin}`); }
     let result1 = await scillaRewardsParamsContract.connect(acc_0).UpdateAdmin(newAdmin);
 
     // let us check the state of the stagingcontractadmin

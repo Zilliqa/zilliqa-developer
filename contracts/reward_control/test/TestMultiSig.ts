@@ -10,6 +10,8 @@ let WALLET_INDEX_0 = 0
 let WALLET_INDEX_1 = 1
 let WALLET_INDEX_2 = 2
 let WALLET_INDEX_3 = 3
+const DEBUG = false;
+
 
 interface ByStr20Type {
   constructor: string;
@@ -35,14 +37,14 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     utils.ensureZilliqa();
     utils.setZilliqaSignerToAccountByHardhatWallet(WALLET_INDEX_0);
     let owner_0 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_0);
-    console.log(`Address 0 ${owner_0}`);
+    if (DEBUG) { console.log(`Address 0 ${owner_0}`); }
     let owner_1 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_1);
-    console.log(`Address 1 ${owner_1}`);
+    if (DEBUG) { console.log(`Address 1 ${owner_1}`); }
     let owner_2 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_2);
-    console.log(`Address 2 ${owner_2}`);
+    if (DEBUG) { console.log(`Address 2 ${owner_2}`); }
 
     const owner_list:string[] = [owner_0, owner_1, owner_2]
-    console.log(owner_list)
+    if (DEBUG) { console.log(owner_list); }
 
     let num_of_required_signatures = 2
     scillaMultiSigRewardsParamContract = await hre.deployScillaContract("MultiSigWalletRewardsParam", owner_list, num_of_required_signatures);
@@ -50,12 +52,12 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     utils.checkScillaTransactionSuccess(scillaMultiSigRewardsParamContract);
 
     const multiSigAddress = scillaMultiSigRewardsParamContract.address
-    console.log(`MultiSig address is ${multiSigAddress}`);
+    if (DEBUG) { console.log(`MultiSig address is ${multiSigAddress}`); }
 
     scillaRewardsParamsContract = await hre.deployScillaContract("RewardsParams", multiSigAddress);
     utils.checkScillaTransactionSuccess(scillaRewardsParamsContract);
 
-    console.log(`Rewards Params Contract Address: ${scillaRewardsParamsContract.address}`);
+    if (DEBUG) { console.log(`Rewards Params Contract Address: ${scillaRewardsParamsContract.address}`); }
   });
 
   it("Contract should be deployed successfully", async function () {
@@ -74,7 +76,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
 
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeBaseRewardTransaction(rewardsContractAddress, 25);
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id)
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
 
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
@@ -89,7 +91,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
 
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeLookupRewardTransaction(rewardsContractAddress, 35);
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id)
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
 
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
@@ -98,14 +100,44 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     expect(await scillaRewardsParamsContract.lookup_reward_in_percent()).to.be.eq(35);
   });
 
+  it("Multi sig wallet can change RewardEachMulInMillis to 1234", async function () {
+    const rewardsContractAddress = scillaRewardsParamsContract.address
+    let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
+
+    let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeRewardEachMulInMillisTransaction(rewardsContractAddress, 1234);
+    const multisig_txn_id = result.receipt.event_logs[0].params[0].value
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
+
+    let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
+    let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
+    let result_2 = await scillaMultiSigRewardsParamContract.connect(acc_1).ExecuteTransaction(multisig_txn_id);
+
+    expect(await scillaRewardsParamsContract.reward_each_mul_in_millis()).to.be.eq(1234);
+  });
+
+  it("Multi sig wallet can change BaseRewardMulInMillis to 4567", async function () {
+    const rewardsContractAddress = scillaRewardsParamsContract.address
+    let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
+
+    let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeBaseRewardMulInMillisTransaction(rewardsContractAddress, 4567);
+    const multisig_txn_id = result.receipt.event_logs[0].params[0].value
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
+
+    let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
+    let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
+    let result_2 = await scillaMultiSigRewardsParamContract.connect(acc_1).ExecuteTransaction(multisig_txn_id);
+
+    expect(await scillaRewardsParamsContract.base_reward_mul_in_millis()).to.be.eq(4567);
+  });
+
   it("Multi sig wallet can change coinbase reward per ds to 180000000000000000", async function () {
     const rewardsContractAddress = scillaRewardsParamsContract.address
     let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
 
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeCoinbaseRewardTransaction(rewardsContractAddress, 180000000000000000);
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id)
-    
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
+
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
     let result_2 = await scillaMultiSigRewardsParamContract.connect(acc_1).ExecuteTransaction(multisig_txn_id);
@@ -139,7 +171,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeBaseRewardTransaction(rewardsContractAddress, 25);
     expect(result.receipt.success).to.be.true;
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id)
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
 
     let acc_3 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_3)
 
@@ -165,7 +197,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomChangeBaseRewardTransaction(rewardsContractAddress, 25);
     expect(result.receipt.success).to.be.true;
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id)
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
 
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
@@ -182,7 +214,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
       expect(result_2.receipt.errors[0][0]).to.equal(CALL_CONTRACT_FAILED);
 
     } catch (error) {
-      console.log("Error: ", error);
+      if (DEBUG) { console.log("Error: ", error); }
     }
     
   });
@@ -193,9 +225,11 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     let owner_2 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_2);
     let owner_3 = utils.getZilliqaAddressForAccountByHardhatWallet(WALLET_INDEX_3);
 
-    console.log(`Address 0 ${owner_0}`);
-    console.log(`Address 2 ${owner_2}`);
-    console.log(`Address 3 ${owner_3}`);
+    if (DEBUG)  {
+      console.log(`Address 0 ${owner_0}`);
+      console.log(`Address 2 ${owner_2}`);
+      console.log(`Address 3 ${owner_3}`);
+    }
 
     const owner_list:string[] = [owner_0, owner_2, owner_3]
 
@@ -205,14 +239,14 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     utils.checkScillaTransactionSuccess(scillaMultiSigRewardsParamContractNew);
 
     const multiSigAddressNew = scillaMultiSigRewardsParamContractNew.address
-    console.log(`New MultiSig address is ${multiSigAddressNew}`);
+    if (DEBUG) { console.log(`New MultiSig address is ${multiSigAddressNew}`); }
 
     // changing the admin wallet of the underlyiong rewards param contract to the new multisig
     let acc_0 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0)
     const rewardsContractAddress = scillaRewardsParamsContract.address
     let result = await scillaMultiSigRewardsParamContract.connect(acc_0).SubmitCustomUpdateAdminTransaction(rewardsContractAddress, multiSigAddressNew);
     const multisig_txn_id = result.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id)
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id) }
 
     let acc_1 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1)
     let result_1 = await scillaMultiSigRewardsParamContract.connect(acc_1).SignTransaction(multisig_txn_id);
@@ -223,7 +257,7 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     let acc_3 = utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_3)
     let result_3 = await scillaMultiSigRewardsParamContractNew.connect(acc_2).SubmitCustomClaimAdminTransaction(rewardsContractAddress);
     const multisig_txn_id_1 = result_3.receipt.event_logs[0].params[0].value
-    console.log("Multisig txn id is: ", multisig_txn_id_1)
+    if (DEBUG) { console.log("Multisig txn id is: ", multisig_txn_id_1) }
 
     let result_4 = await scillaMultiSigRewardsParamContractNew.connect(acc_3).SignTransaction(multisig_txn_id_1);
     let result_5 = await scillaMultiSigRewardsParamContractNew.connect(acc_3).ExecuteTransaction(multisig_txn_id_1);

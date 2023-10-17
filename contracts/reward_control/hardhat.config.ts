@@ -19,6 +19,21 @@ const config: HardhatUserConfig = {
   solidity: "0.8.19",
   defaultNetwork: "isolated_server",
   networks: {
+    zblockchain_isolated: {
+      url: "http://localhost:12005",
+      websocketUrl: "ws://localhost:12005/",
+      accounts: [
+        "d96e9eb5b782a80ea153c937fa83e5948485fbfc8b7e7c069d7b914dbc350aba",
+        "e53d1c3edaffc7a7bab5418eb836cf75819a82872b4a1a0f1c7fcf5c3e020b89",
+        "e7f59a4beb997a02a13e0d5e025b39a6f0adc64d37bb1e6a849a4863b4680411",
+        "589417286a3213dceb37f8f89bd164c3505a4cec9200c61f7c6db13a30a71b45",
+      ],
+      chainId: 0x80DE,
+      web3ClientVersion: "Zilliqa/v8.2",
+      protocolVersion: 0x41,
+      zilliqaNetwork: true,
+      miningState: false,
+    },
     zblockchain: {
       url: "http://localhost:12003",
       websocketUrl: "ws://localhost:12003/",

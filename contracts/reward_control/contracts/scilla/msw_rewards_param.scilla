@@ -375,13 +375,13 @@ transition SubmitCustomChangeCoinbaseRewardTransaction (calleeContract : ByStr20
 end
 
 (* Submit a new ChangeRewardEachMulInMillis request *)
-transition ChangeRewardEachMulInMillisTransaction (calleeContract: ByStr20, reward_in_millis: Uint32)
+transition SubmitCustomChangeRewardEachMulInMillisTransaction (calleeContract: ByStr20, reward_in_millis: Uint32)
   transaction = ChangeRewardEachMulInMillis reward_in_millis;
   SubmitCustomTransaction calleeContract transaction
 end
 
 (* Submit a new ChangeBaseRewardInMillis request *)
-transition ChangeBaseRewardMulInMillisTransaction (calleeContract: ByStr20, reward_in_millis: Uint32)
+transition SubmitCustomChangeBaseRewardMulInMillisTransaction (calleeContract: ByStr20, reward_in_millis: Uint32)
   transaction = ChangeBaseRewardMulInMillis reward_in_millis;
   SubmitCustomTransaction calleeContract transaction
 end

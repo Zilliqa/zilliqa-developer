@@ -99,7 +99,7 @@ transition ClaimAdmin()
   | Some admin =>
     e = { _eventname: "ClaimAdminOne"; new_admin: admin; sender: _sender };
     event e;
-  
+
     is_valid = builtin eq _sender admin;
     match is_valid with
     | True =>
