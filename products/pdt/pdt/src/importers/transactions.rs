@@ -1,6 +1,5 @@
 // Bigquery importer.
 use crate::importer::Importer;
-#[allow(unused_imports)]
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 

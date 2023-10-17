@@ -4,7 +4,7 @@ mod importers;
 mod multi_import;
 mod psqlimport;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use pdtlib::context::Context;
 use pdtlib::exporter::Exporter;
@@ -13,11 +13,9 @@ use pdtlib::incremental::Incremental;
 use pdtlib::render::Renderer;
 use pdtlisten::listen;
 use pdtparse::parse_zrc2;
-use std::env;
 
 #[derive(Parser)]
 /// Download and import Zilliqa 1 persistence.
-/// Set SERVICE_ACCOUNT_KEY to the location of a file containing your service account key.
 #[command(author, version, about, long_about = None)]
 struct Cli {
     #[arg(long, default_value = "/home/rrw/tmp/test")]
@@ -223,24 +221,7 @@ async fn dump_persistence(unpack_dir: &str) -> Result<()> {
     Ok(())
 }
 
-fn get_service_account_key_file(opt: &Option<String>) -> Result<String> {
-    if let Some(val) = env::var("SERVICE_ACCOUNT_KEY").ok() {
-        Ok(val.to_string())
-    } else {
-        Ok(opt
-            .as_ref()
-            .ok_or(anyhow!(
-                "Please set SERVICE_ACCOUNT_KEY or pass a key file name"
-            ))?
-            .to_string())
-    }
-}
-
-async fn bigquery_import_multi(
-    unpack_dir: &str,
-    opts: &MultiOptions,
-    service_account_key_file: &str,
-) -> Result<()> {
+async fn bigquery_import_multi(unpack_dir: &str, opts: &MultiOptions) -> Result<()> {
     bqimport::bq_multi_import(
         unpack_dir,
         opts.nr_threads,
@@ -248,7 +229,6 @@ async fn bigquery_import_multi(
         opts.start_block,
         &opts.project_id,
         &opts.dataset_id,
-        service_account_key_file,
         !opts.no_dup,
     )
     .await
@@ -283,17 +263,12 @@ async fn parse_events(token_type: &Option<TokenType>, postgres_url: &Option<Stri
     }
 }
 
-async fn bigquery_reconcile_blocks(
-    unpack_dir: &str,
-    opts: &ReconcileOptions,
-    service_account_key_file: &str,
-) -> Result<()> {
+async fn bigquery_reconcile_blocks(unpack_dir: &str, opts: &ReconcileOptions) -> Result<()> {
     bqimport::reconcile_blocks(
         unpack_dir,
         opts.batch_blocks,
         &opts.dataset_id,
         &opts.project_id,
-        service_account_key_file,
     )
     .await
 }
@@ -301,7 +276,6 @@ async fn bigquery_reconcile_blocks(
 async fn listen_outer(
     bq_project_id: &str,
     bq_dataset_id: &str,
-    service_account_key_file: &str,
     postgres_url: &str,
     network_type: &NetworkType,
 ) -> Result<()> {
@@ -309,14 +283,7 @@ async fn listen_outer(
         NetworkType::Testnet => DEV_API_URL,
         NetworkType::Mainnet => MAINNET_API_URL,
     };
-    listen(
-        bq_project_id,
-        bq_dataset_id,
-        service_account_key_file,
-        postgres_url,
-        api_url,
-    )
-    .await
+    listen(bq_project_id, bq_dataset_id, postgres_url, api_url).await
 }
 
 #[tokio::main]
@@ -334,33 +301,16 @@ async fn main() -> Result<()> {
             .await
         }
         Commands::DumpPersistence => dump_persistence(&cli.unpack_dir).await,
-        Commands::BQImportMulti(opts) => {
-            bigquery_import_multi(
-                &cli.unpack_dir,
-                opts,
-                &get_service_account_key_file(&opts.service_account_key_file)?,
-            )
-            .await
-        }
+        Commands::BQImportMulti(opts) => bigquery_import_multi(&cli.unpack_dir, opts).await,
         Commands::PSQLImportMulti(opts) => {
             psql_import_multi(&cli.unpack_dir, &cli.postgres_url, opts).await
         }
-        Commands::ReconcileBlocks(opts) => {
-            bigquery_reconcile_blocks(
-                &cli.unpack_dir,
-                opts,
-                &get_service_account_key_file(&opts.service_account_key_file)?,
-            )
-            .await
-        }
+        Commands::ReconcileBlocks(opts) => bigquery_reconcile_blocks(&cli.unpack_dir, opts).await,
         Commands::ParseEvents => parse_events(&cli.token_type, &cli.postgres_url).await,
         Commands::Listen(opts) => {
             listen_outer(
                 &opts.project_id,
                 &opts.dataset_id,
-                opts.service_account_key_file
-                    .as_ref()
-                    .expect("no service account key file"),
                 &cli.postgres_url
                     .expect("no postgres connection url -- did you forget to set --postgres-url?"),
                 &cli.network_type

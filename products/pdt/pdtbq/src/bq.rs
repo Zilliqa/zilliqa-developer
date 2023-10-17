@@ -1,14 +1,12 @@
+use crate::bq_client::client_from_default_credentials;
 use crate::bq_utils;
 use crate::tracked::TrackedTable;
-#[allow(unused_imports)]
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-#[allow(unused_imports)]
 use gcp_bigquery_client::model::{
-    dataset::Dataset, query_request::QueryRequest, range_partitioning::RangePartitioning,
+    dataset::Dataset, range_partitioning::RangePartitioning,
     range_partitioning_range::RangePartitioningRange, table::Table,
-    table_data_insert_all_request::TableDataInsertAllRequest, table_field_schema::TableFieldSchema,
-    table_schema::TableSchema,
+    table_field_schema::TableFieldSchema, table_schema::TableSchema,
 };
 use gcp_bigquery_client::Client;
 use pdtdb::tracked::Trackable;
@@ -44,11 +42,8 @@ pub struct ZilliqaBQProject {
 
 impl ZilliqaBQProject {
     /// Creates tables so that we can do this in a single thread.
-    pub async fn ensure_schema(
-        bq: &bq_utils::BigQueryDatasetLocation,
-        service_account_key_file: &str,
-    ) -> Result<()> {
-        let client = Client::from_service_account_key_file(service_account_key_file).await?;
+    pub async fn ensure_schema(bq: &bq_utils::BigQueryDatasetLocation) -> Result<()> {
+        let client = client_from_default_credentials().await?.client;
         let txn_location = bq_utils::BigQueryTableLocation::new(&bq, TRANSACTION_TABLE_ID);
         if let None = bq_utils::find_table(&client, &txn_location).await? {
             Self::create_transaction_table(&client, &txn_location).await?;
@@ -65,12 +60,11 @@ impl ZilliqaBQProject {
     pub async fn new(
         bq: &bq_utils::BigQueryDatasetLocation,
         coords: &ProcessCoordinates,
-        service_account_key_file: &str,
         nr_blks: i64,
     ) -> Result<Self> {
         // Application default creds don't work here because the auth library looks for a service
         // account key in the file you give it and, of course, it's not there ..
-        let my_client = Client::from_service_account_key_file(service_account_key_file).await?;
+        let my_client = client_from_default_credentials().await?.client;
         let zq_ds = if let Ok(ds) = my_client
             .dataset()
             .get(&bq.project_id, &bq.dataset_id)
