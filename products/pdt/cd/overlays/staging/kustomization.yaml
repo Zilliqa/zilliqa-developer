@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - service_account.yaml
 
 namespace: pdt-staging
 
