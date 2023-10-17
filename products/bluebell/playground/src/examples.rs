@@ -1,4 +1,4 @@
-pub static EXAMPLES: [(&str, &str); 3] = [
+pub static EXAMPLES: [(&str, &str); 4] = [
     (
         "Hello Builtin",
         r#"scilla_version 0
@@ -48,6 +48,18 @@ transition setHello ()
     x = builtin print__impl msg;
     y = builtin print__impl msg
   end
+end
+"#,
+    ),
+    (
+        "Special variables",
+        r#"
+scilla_version 0
+library HelloWorldContract
+contract HelloWorldExample()
+transition TriggerHelloWorld()
+  msg = _sender;
+  print msg
 end
 "#,
     ),
