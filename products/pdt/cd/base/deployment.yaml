@@ -17,6 +17,7 @@ spec:
       labels:
         "app.kubernetes.io/name": "pdt"
     spec:
+      serviceAccountName: default
       containers:
         - image: pdt
           name: pdt
