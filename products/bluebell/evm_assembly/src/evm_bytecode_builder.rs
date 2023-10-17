@@ -437,6 +437,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                 }
                 for instruction in block.instructions.iter_mut() {
                     instruction.position = Some(position);
+                    if let Some(label) = &instruction.label {
+                        self.label_positions.insert(label.to_string(), position);
+                    }
                     position += 1 + instruction.expected_args_length() as u32;
                 }
             }
@@ -455,7 +458,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
-                    if let Some(name) = &instruction.unresolved_label {
+                    if let Some(name) = &instruction.unresolved_argument_label {
                         match self.label_positions.get(name) {
                             Some(p) => {
                                 instruction.u32_to_arg_big_endian(*p);

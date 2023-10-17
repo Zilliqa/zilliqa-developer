@@ -60,6 +60,9 @@ impl SymbolTable {
         let _ = ret.declare_type("Uint32");
         let _ = ret.declare_type("Uint64");
         let _ = ret.declare_type("String");
+        let _ = ret.declare_type("ByStr20");
+
+        let _ = ret.declare_special_variable("_sender", "ByStr20");
 
         ret
     }
@@ -201,6 +204,14 @@ impl SymbolTable {
         self.type_of_table.insert(symbol.to_string(), typeinfo);
 
         Ok(symbol.to_string())
+    }
+
+    pub fn declare_special_variable(
+        &mut self,
+        name: &str,
+        typename: &str,
+    ) -> Result<String, String> {
+        self.declare_type_of(name, typename)
     }
 
     pub fn declare_type(&mut self, symbol: &str) -> Result<String, String> {

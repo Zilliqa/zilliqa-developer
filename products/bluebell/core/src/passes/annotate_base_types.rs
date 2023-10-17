@@ -485,12 +485,16 @@ impl IrPass for AnnotateBaseTypes {
                 // TODO: Should return the same type as left and right
                 "Uint256".to_string()
             }
-            Operation::CallExternalFunction {
+            Operation::CallFunction {
+                ref mut name,
+                arguments,
+            } // We do not distinguish between CallFunction and CallExternalFunction
+            | Operation::CallExternalFunction {
                 ref mut name,
                 arguments,
             } => {
                 name.visit(self, symbol_table)?;
-                let mut template_type_args: String = "".to_string();
+                let mut argument_type_args: String = "".to_string();
                 for (i, arg) in arguments.iter_mut().enumerate() {
                     arg.visit(self, symbol_table)?;
                     let type_name = match &arg.type_reference {
@@ -504,29 +508,24 @@ impl IrPass for AnnotateBaseTypes {
                         }
                     };
                     if i > 0 {
-                        template_type_args.push_str(",");
+                        argument_type_args.push_str(",");
                     }
-                    template_type_args.push_str(type_name);
+                    argument_type_args.push_str(type_name);
                 }
 
                 // In the event of a template function, we use the unresolved name
                 // as the function may not yet exist
-                let name_value = &name.unresolved;
+                let name_value = match &name.resolved {
+                    Some(v) => v,
+                    None => &name.unresolved
+                };
 
-                let function_type = format!("{}::<{}>", name_value, template_type_args).to_string();
+                let function_type = format!("{}::<{}>", name_value, argument_type_args).to_string();
                 name.resolved = Some(function_type.clone());
 
                 // The value of the SSA is the return type of the function
                 // TODO: To this end we need to resolve the type refernce from the resolved name
                 name.type_reference = Some(function_type.clone()); // TODO: Should contain return type as this is a function pointer
-
-                "TODO-lookup".to_string()
-            }
-            Operation::CallFunction { name, arguments } => {
-                name.visit(self, symbol_table)?;
-                for arg in arguments.iter_mut() {
-                    arg.visit(self, symbol_table)?;
-                }
 
                 "TODO-lookup".to_string()
             }
@@ -573,6 +572,18 @@ impl IrPass for AnnotateBaseTypes {
                 "TODO-lookup".to_string()
             }
             Operation::ResolveSymbol { symbol } => {
+                symbol.visit(self, symbol_table)?;
+                match &symbol.type_reference {
+                    Some(t) => t.clone(),
+                    None => {
+                        return Err(format!(
+                            "Unable to determine type for {}",
+                            symbol.unresolved
+                        ));
+                    }
+                }
+            }
+            Operation::ResolveContextResource { symbol } => {
                 symbol.visit(self, symbol_table)?;
                 match &symbol.type_reference {
                     Some(t) => t.clone(),

@@ -320,7 +320,22 @@ impl AstConverting for IrEmitter {
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeVariableIdentifier::SpecialIdentifier(_identifier) => unimplemented!(),
+            NodeVariableIdentifier::SpecialIdentifier(identifier) => {
+                let operation = Operation::ResolveContextResource {
+                    symbol: IrIdentifier::new(
+                        identifier.to_string(),
+                        IrIndentifierKind::ContextResource,
+                        self.current_location(),
+                    ),
+                };
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                    source_location: self.current_location(),
+                });
+                self.stack.push(StackObject::Instruction(instr));
+            }
             NodeVariableIdentifier::VariableInNamespace(_namespace, _identifier) => {
                 unimplemented!()
             }

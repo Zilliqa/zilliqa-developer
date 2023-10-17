@@ -41,6 +41,7 @@ impl IrPass for DebugPrinter {
             IrIndentifierKind::Event => self.script.push_str("@"),
             IrIndentifierKind::Namespace => self.script.push_str("@"),
             IrIndentifierKind::BlockLabel => self.script.push_str(":"),
+            IrIndentifierKind::ContextResource => self.script.push_str("~"),
             IrIndentifierKind::VirtualRegister => self.script.push_str("%"),
             IrIndentifierKind::VirtualRegisterIntermediate => self.script.push_str("%"),
             IrIndentifierKind::Memory => self.script.push_str("%"),
@@ -239,6 +240,10 @@ impl IrPass for DebugPrinter {
             Operation::ResolveSymbol { symbol } => {
                 symbol.visit(self, symbol_table)?;
             }
+            Operation::ResolveContextResource { symbol } => {
+                symbol.visit(self, symbol_table)?;
+            }
+
             Operation::Literal { data, typename } => {
                 typename.visit(self, symbol_table)?;
                 self.script.push_str(" ");

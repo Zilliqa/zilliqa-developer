@@ -10,9 +10,11 @@ use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::EvmSourcePosition;
+use evm_assembly::types::EvmType;
 use log::warn;
 use primitive_types::U256;
 use std::collections::BTreeSet;
+use std::str::FromStr;
 
 use evm_assembly::types::EvmTypeValue;
 use evm_assembly::EvmAssemblyGenerator;
@@ -171,51 +173,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                 Operation::CallFunction {
                                     ref name,
                                     ref arguments,
-                                } => {
-                                    // TODO: Progate result, but note that in some. Formerly we used ["result".to_string()], but Scilla 
-                                    // transitions does not return any value, so that does not make sense.
-                                    // Bottom line is that it does not make sense to implement return values before we have actually functions (not transitions or procedures) 
-
-                                    // All function arguments must be added as arguments to the next block since these are copied 
-                                    // and not moved.
-                                    let exit_block_args: BTreeSet<String> = arguments.iter().map(|arg| {
-                                        match &arg.resolved {
-                                            Some(a) =>a.clone(),
-                                            None => panic!("Unable to resolve {}", arg.unresolved),
-                                        }
-                                    }).collect();
-                                    let mut exit_block = code_builder.new_evm_block_with_args("exit_block", exit_block_args);
-
-                                    // Adding return point
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.push_label(&exit_block.name);
-                                    warn!("Function '{:?}' arguments: {:#?}", name, arguments);
-                                    for arg in arguments {
-                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        let _ = match &arg.resolved {
-                                            Some(a) => evm_block.duplicate_stack_name(&a),
-                                            None => panic!("Unable to resolve {}", arg.unresolved),
-                                        };
-                                    }
-
-                                    // Jumping to function
-                                    let label = match &name.resolved {
-                                        Some(v) => v,
-                                        None => panic!(
-                                            "Unresolved function name in function call {:?}",
-                                            name
-                                        ),
-                                    };
-
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-
-                                    // Note that we do not need to add scopes to function jumps as these are 
-                                    // outside of the function scope                                    
-                                    evm_block.jump_to(&label);
-                                    mem::swap(&mut evm_block, &mut exit_block);
-                                    ret.push(exit_block);
                                 }
-                                Operation::CallExternalFunction {
+                                | Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
                                 } => {
@@ -257,7 +216,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         .iter()
                                         .map(|arg| arg.type_reference.clone().unwrap())
                                         .collect();
-
+                                    info!("Looking {} up", qualified_name);
                                     if ctx.function_declarations.contains_key(qualified_name) {
                                         let signature = match ctx.get_function(qualified_name) {
                                             Some(s) => s,
@@ -268,7 +227,11 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                         // Precompiled or external function
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.call(signature, args_types);
+
+                                        // TODO: Consider if argument mapping should be managed by the runtime module
+                                        evm_block.call(signature, args_types                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect());
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
@@ -288,7 +251,51 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             }
                                         }
                                     } else {
-                                        panic!("{}", format!("{} not found.", qualified_name));
+                                        // Internal function call
+                                        let exit_block_args: BTreeSet<String> = arguments.iter().map(|arg| {
+                                            match &arg.resolved {
+                                                Some(a) =>a.clone(),
+                                                None => panic!("Unable to resolve {}", arg.unresolved),
+                                            }
+                                        }).collect();
+                                        let mut exit_block = code_builder.new_evm_block_with_args("exit_block", exit_block_args);
+
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                        evm_block.push_label(&exit_block.name);
+                                        println!("Function '{:?}' arguments: {:#?}", name, arguments);
+                                        for arg in arguments {
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                            let _ = match &arg.resolved {
+                                                Some(a) => evm_block.duplicate_stack_name(&a),
+                                                None => panic!("Unable to resolve {}", arg.unresolved),
+                                            };
+                                        }
+
+                                        // Jumping to function
+                                        // TODO: Check that internal function is defined and throw an error if not.
+                                        let label = match &name.resolved {
+                                            Some(v) => {
+                                            // TODO: "Rsplit" hack to compensate for that the labels does not contain function parameter types
+                                                if let Some(index) = v.rfind("::<") {
+                                                    &v[..index]
+                                                } else {
+                                                    v
+                                                }
+                                            }
+                                            None => panic!(
+                                                "Unresolved function name in function call {:?}",
+                                                name
+                                            ),
+                                        };
+                                        println!("Jumping to label {} {:?}",label, name.resolved);
+
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+
+                                        // Note that we do not need to add scopes to function jumps as these are 
+                                        // outside of the function scope                                    
+                                        evm_block.jump_to(&label);
+                                        mem::swap(&mut evm_block, &mut exit_block);
+                                        ret.push(exit_block);
                                     }
                                 }
 
@@ -310,21 +317,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     match qualified_name.as_str() {
                                         "String" => {
-                                            let ssa_name = match instr
-                                                .ssa_name
-                                                .clone()
-                                                .unwrap()
-                                                .qualified_name()
-                                            {
-                                                Ok(v) => v,
-                                                _ => panic!("Could not resolve SSA qualified name"),
-                                            };
-                                            let payload = data.clone().into_bytes();
-                                            code_builder.ir.data.push((ssa_name, payload));
+                                            let payload = data.clone();
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                            let payload = payload[1..payload.len()-1].as_bytes();
+                                            evm_block.allocate_object(payload.to_vec());
+                                            match evm_block.register_stack_name(ssa_name) {
+                                                Err(_) => {
+                                                    panic!("Failed to register SSA stack name.")
+                                                }
+                                                _ => (),
+                                            }
 
-                                            // TODO: Load data from code into memory
-                                            // TODO: We need a way to reference the data section
-                                            todo!()
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
@@ -347,6 +350,31 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 )
                                             );
                                         }
+                                    }
+                                }
+                                Operation::ResolveContextResource {ref symbol} => {
+                                    let mut ctx = &mut code_builder.context;
+
+                                    if ctx.special_variables.contains_key(&symbol.unresolved) {
+                                        // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
+                                        // Builtin assembly generator
+                                        let block_generator =
+                                            ctx.special_variables.get(&symbol.unresolved).unwrap();
+                                        let new_blocks =
+                                            block_generator(&mut ctx, &mut evm_block );
+                                        match new_blocks {
+                                            Ok(new_blocks) => {
+                                                for block in new_blocks {
+                                                    ret.push(block);
+                                                }
+                                            }
+                                            Err(e) => {
+                                                panic!("Error in external call: {}", e);
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        panic!("Special variable {} not found", symbol.unresolved);
                                     }
                                 }
                                 Operation::ResolveSymbol { ref symbol } => {

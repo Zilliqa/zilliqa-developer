@@ -64,7 +64,7 @@ impl EvmFunction {
                         // TODO: Check 0
                         continue;
                     }
-                    Opcode::JUMP | Opcode::JUMPI => &instr.unresolved_label,
+                    Opcode::JUMP | Opcode::JUMPI => &instr.unresolved_argument_label,
                     _ => continue,
                 };
 

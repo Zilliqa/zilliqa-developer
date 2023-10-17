@@ -3,9 +3,11 @@ use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutput
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
+use evm_assembly::types::EvmType;
 use log::{error, info};
 use std::collections::BTreeSet;
 use std::mem;
+use std::str::FromStr;
 // TODO: Generalize to support both EVM and LLVM
 
 pub trait BluebellModule {
@@ -28,6 +30,10 @@ impl BluebellModule for ScillaDefaultTypes {
         context.declare_unsigned_integer("Uint64", 64);
         context.declare_unsigned_integer("Uint128", 128);
         context.declare_unsigned_integer("Uint256", 256);
+
+        for i in 0..=32 {
+            context.declare_unsigned_integer(&format!("ByStr{}", i), i * 8);
+        }
 
         context.declare_dynamic_string("String");
     }
@@ -94,11 +100,7 @@ impl BluebellModule for ScillaDebugBuiltins {
             });
 
         let _ = specification
-            .declare_function(
-                "builtin__print__impl::<String>",
-                ["String"].to_vec(),
-                "Uint256",
-            )
+            .declare_function("print::<ByStr20>", ["ByStr20"].to_vec(), "Uint256")
             .attach_runtime(|| {
                 fn custom_runtime(
                     input: &[u8],
@@ -107,9 +109,95 @@ impl BluebellModule for ScillaDebugBuiltins {
                     _backend: &dyn Backend,
                     _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
-                    match std::str::from_utf8(input) {
-                        Ok(v) => info!("{}", format!("{}\n", v)),
-                        Err(_) => error!("{}", format!("{}\n", hex::encode(input))),
+                    info!("{}", hex::encode(input));
+
+                    Ok((
+                        PrecompileOutput {
+                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+                            output: input.to_vec(),
+                        },
+                        0,
+                    ))
+                }
+
+                custom_runtime
+            });
+
+        let _ = specification
+            .declare_function("print::<String>", ["String"].to_vec(), "Uint256")
+            .attach_runtime(|| {
+                fn custom_runtime(
+                    input: &[u8],
+                    _gas_limit: Option<u64>,
+                    _context: &EvmContext,
+                    _backend: &dyn Backend,
+                    _is_static: bool,
+                ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+                    assert!(input.len() > 32);
+                    let (head, tail) = input.split_at(32);
+                    let location_bytes = head[28..].try_into().expect("");
+                    let location = u32::from_be_bytes(location_bytes) as usize;
+                    assert_eq!(location, 0x20);
+
+                    let length_bytes = tail[0..4]
+                        .try_into()
+                        .expect("Failed to extract string length");
+                    let length = u32::from_be_bytes(length_bytes) as usize;
+
+                    assert!(length <= (tail.len() - 4).try_into().unwrap());
+                    let s = &tail[4..];
+
+                    assert_eq!(length, s.len());
+                    match std::str::from_utf8(&s) {
+                        Ok(v) => info!("{}", v),
+                        Err(_) => panic!(
+                            "While panicking: Failed to decode '{}'",
+                            format!("{}\n", hex::encode(input))
+                        ),
+                    };
+
+                    Ok((
+                        PrecompileOutput {
+                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+                            output: input.to_vec(),
+                        },
+                        0,
+                    ))
+                }
+
+                custom_runtime
+            });
+        let _ = specification
+            .declare_function("panic::<String>", ["String"].to_vec(), "Uint256")
+            .attach_runtime(|| {
+                fn custom_runtime(
+                    input: &[u8],
+                    _gas_limit: Option<u64>,
+                    _context: &EvmContext,
+                    _backend: &dyn Backend,
+                    _is_static: bool,
+                ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+                    assert!(input.len() > 32);
+                    let (head, tail) = input.split_at(32);
+                    let location_bytes = head[28..].try_into().expect("");
+                    let location = u32::from_be_bytes(location_bytes) as usize;
+                    assert_eq!(location, 0x20);
+
+                    let length_bytes = tail[0..4]
+                        .try_into()
+                        .expect("Failed to extract string length");
+                    let length = u32::from_be_bytes(length_bytes) as usize;
+
+                    assert!(length <= (tail.len() - 4).try_into().unwrap());
+                    let s = &tail[4..];
+
+                    assert_eq!(length, s.len());
+                    match std::str::from_utf8(&s) {
+                        Ok(v) => panic!("{}", v),
+                        Err(_) => panic!(
+                            "While panicking: Failed to decode '{}'",
+                            format!("{}\n", hex::encode(input))
+                        ),
                     };
 
                     Ok((
@@ -180,7 +268,13 @@ impl BluebellModule for ScillaDebugBuiltins {
                     loop_body.dup2(); // Counter / offset
                     loop_body.add();
                     loop_body.mload();
-                    loop_body.call(signature, subcall_arg_types);
+                    loop_body.call(
+                        signature,
+                        subcall_arg_types
+                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect(),
+                    );
                     loop_body.pop(); // Removing result
 
                     loop_body.push([0x20].to_vec()); // Incrementing counter
@@ -198,7 +292,13 @@ impl BluebellModule for ScillaDebugBuiltins {
                     ret.push(loop_start);
                     ret.push(loop_body);
                 } else {
-                    block.call(signature, subcall_arg_types);
+                    block.call(
+                        signature,
+                        subcall_arg_types
+                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect(),
+                    );
                     // block.swap1(); // Moving the result so it does not get popped
                     block.pop(); // Removing result
                 }
@@ -256,12 +356,16 @@ impl BluebellModule for ScillaDefaultBuiltins {
         /*
         let _ = specification.declare_inline_generics("alloca", |_ctx, block, arg_types| {
             // size
-
             block.push
             block.add();
             Ok(())
         });
         */
+
+        let _ = specification.declare_special_variable("_sender", "ByStr20", |_ctx, block| {
+            block.external_caller();
+            Ok([].to_vec())
+        });
 
         // Assuming you have a 'specification' object available...
         // Implementing `add`:

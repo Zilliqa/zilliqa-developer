@@ -1,3 +1,4 @@
+use core::str::FromStr;
 use primitive_types::U256;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
@@ -98,6 +99,39 @@ impl EvmType {
             EvmType::Address => "address".to_string(),
             EvmType::Bool => "bool".to_string(),
             EvmType::String => "string".to_string(),
+        }
+    }
+}
+
+impl FromStr for EvmType {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s_lower = s.to_ascii_lowercase();
+
+        if s_lower == "address" {
+            Ok(EvmType::Address)
+        } else if s_lower == "bool" {
+            Ok(EvmType::Bool)
+        } else if s_lower == "string" {
+            Ok(EvmType::String)
+        } else if s_lower.starts_with("uint") {
+            s[4..]
+                .parse::<usize>()
+                .map(|size| EvmType::Uint(size))
+                .map_err(|_| "Error parsing Uint size")
+        } else if s_lower.starts_with("int") {
+            s[3..]
+                .parse::<usize>()
+                .map(|size| EvmType::Int(size))
+                .map_err(|_| "Error parsing Int size")
+        } else if s_lower.starts_with("bystr") {
+            s[5..]
+                .parse::<usize>()
+                .map(|size| EvmType::Bytes(size))
+                .map_err(|_| "Error parsing Bytes size")
+        } else {
+            Err("Unknown type")
         }
     }
 }
