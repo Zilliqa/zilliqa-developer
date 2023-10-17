@@ -1,4 +1,3 @@
-// Importing necessary modules and types
 use bluebell::support::modules::BluebellModule;
 use bluebell::support::modules::ScillaDebugBuiltins;
 use std::ffi::CStr;
@@ -31,58 +30,48 @@ use bluebell::parser::{parser, ParserError};
 use evm_assembly::types::EvmTypeValue;
 use log::{Log, Metadata, Record};
 
-// Logger struct to capture logs
 struct CaptureLogger {}
 
-// Implementation of logger
 impl CaptureLogger {
-    // Constructor for CaptureLogger
     fn new() -> Self {
         Self {}
     }
 }
 
-// Implementing Log trait for CaptureLogger
 impl Log for CaptureLogger {
-    // Method to check if logging is enabled
     fn enabled(&self, _metadata: &Metadata) -> bool {
         // self.delegate.enabled(metadata)
         true
     }
 
-    // Method to log a record
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             print!("{}", record.args().to_string());
         }
     }
 
-    // Method to flush the logger
     fn flush(&self) {}
 }
 
-// Function to setup the logger
+// Later, you'd set the logger as:
 fn setup_logger() {
     let logger = Box::new(CaptureLogger::new());
     log::set_boxed_logger(logger).unwrap();
     log::set_max_level(log::LevelFilter::Info);
 }
 
-// Enum to define the output format of Bluebell
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellOutputFormat {
     LlvmIr,
     FormattedScilla,
 }
 
-// Enum to define the backend of Bluebell
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 enum BluebellBackend {
     Llvm,
     Evm,
 }
 
-// Enum to define the command of Bluebell
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellCommand {
     Emit {
@@ -109,7 +98,7 @@ enum BluebellCommand {
     },
 }
 
-// Struct to hold the arguments for Scilla compiler and executor
+/// Scilla compiler and executor
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -129,9 +118,7 @@ struct Args {
     mode: BluebellCommand,
 }
 
-// Implementation of Args struct
 impl Args {
-    // Method to get the features
     fn features(&self) -> Vec<String> {
         match &self.features_raw {
             Some(v) => v.split(",").map(|s| s.to_string()).collect(),
@@ -140,7 +127,6 @@ impl Args {
     }
 }
 
-// Function to run Bluebell with EVM backend
 fn bluebell_evm_run(
     ast: &NodeProgram,
     entry_point: String,
@@ -184,7 +170,6 @@ fn bluebell_evm_run(
     executable.execute(&entry_point, arguments);
 }
 
-// Function to run Bluebell with LLVM backend
 fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     // DEPRECATED
     panic!("LLVM support is DEPRECATED for now.");
@@ -305,43 +290,31 @@ fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
     */
 }
 
-// Main function
 fn main() {
-    // Setting up the logger
     setup_logger();
-    // Parsing the arguments
     let args = Args::parse();
 
-    // Getting the features
     let features = args.features();
     // Accessing the values
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
-    // Opening the file
     let mut file = File::open(args.filename).expect("Unable to open file");
     let mut script = String::new();
-    // Reading the file
     file.read_to_string(&mut script)
         .expect("Unable to read file");
 
-    // Creating a new lexer
     let lexer = Lexer::new(&script);
 
-    // Creating a new parser
     let parser = parser::ProgramParser::new();
 
-    // Parsing the script
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
-            // Running the appropriate command based on the mode
             match args.mode {
                 BluebellCommand::Run {
                     entry_point,
                     args: arguments,
                     backend,
                 } => match backend {
-                    // Running with LLVM backend
                     BluebellBackend::Llvm => bluebell_llvm_run(&ast, entry_point, args.debug),
-                    // Running with EVM backend
                     BluebellBackend::Evm => {
                         bluebell_evm_run(&ast, entry_point, arguments, features, args.debug)
                     }
@@ -361,7 +334,6 @@ fn main() {
             */
         }
         Err(error) => {
-            // Handling syntax errors
             let message = format!("Syntax error {:?}", error);
             let mut pos: Vec<lexer::SourcePosition> = [].to_vec();
             error.map_location(|l| {
@@ -403,7 +375,6 @@ fn main() {
                 line_end = script.len();
             }
 
-            // Printing the line with the error
             let line = &script[line_start..line_end];
             println!("Line {},{}:{}", line_counter, char_counter, line);
             print!(
@@ -414,16 +385,13 @@ fn main() {
                 println!("{}", "^".repeat(pos[1].position - pos[0].position));
             }
 
-            // Creating a new ParserError
             let my_error = ParserError {
                 message,
                 line: 0,   //error.location_line(),
                 column: 0, // err.location_column(),
             };
-            // Printing the error
             println!("{}", my_error);
 
-            // Exiting the process with an error code
             process::exit(-1);
         }
     }
