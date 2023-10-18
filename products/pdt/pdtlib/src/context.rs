@@ -5,7 +5,6 @@ use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_s3::operation::get_object::GetObjectOutput;
 use aws_sdk_s3::operation::get_object_attributes::GetObjectAttributesOutput;
 use aws_sdk_s3::{config::Region, Client};
-use aws_sig_auth::signer::SigningOptions;
 
 // Locations in the bucket.
 
@@ -163,18 +162,4 @@ impl Context {
             .await?;
         Ok(res)
     }
-}
-
-fn make_unsigned<O, Retry>(
-    mut operation: aws_smithy_http::operation::Operation<O, Retry>,
-) -> Result<aws_smithy_http::operation::Operation<O, Retry>, std::convert::Infallible> {
-    {
-        let mut props = operation.properties_mut();
-        let signing_config = props
-            .get_mut::<aws_sig_auth::signer::OperationSigningConfig>()
-            .expect("has signing_config");
-        signing_config.signing_requirements = aws_sig_auth::signer::SigningRequirements::Disabled;
-    }
-
-    Ok(operation)
 }
