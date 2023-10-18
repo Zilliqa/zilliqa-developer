@@ -39,7 +39,11 @@ impl Context {
     }
     pub async fn new(bucket_name: &str, network_name: &str, target_path: &str) -> Result<Self> {
         let region_provider = RegionProviderChain::first_try(Region::new("us-west-2")); // FIXME
-        let config = aws_config::from_env().region(region_provider).load().await;
+        let config = aws_config::from_env()
+            .no_credentials()
+            .region(region_provider)
+            .load()
+            .await;
         let client = aws_sdk_s3::Client::new(&config);
         Ok(Context {
             client,
@@ -87,12 +91,7 @@ impl Context {
                 .max_keys(ENTRIES_PER_REQUEST);
 
             caller = caller.set_continuation_token(token);
-            let res = caller
-                .customize()
-                .await?
-                .map_operation(make_unsigned)?
-                .send()
-                .await?;
+            let res = caller.send().await?;
             println!(
                 " {} objects with trunc {} next {:?}",
                 res.key_count, res.is_truncated, res.next_continuation_token
@@ -125,9 +124,6 @@ impl Context {
             .get_object_attributes()
             .bucket(self.bucket_name.clone())
             .key(object_key)
-            .customize()
-            .await?
-            .map_operation(make_unsigned)?
             .send()
             .await?;
         Ok(res)
@@ -139,9 +135,6 @@ impl Context {
             .get_object()
             .bucket(self.bucket_name.clone())
             .key(object_key)
-            .customize()
-            .await?
-            .map_operation(make_unsigned)?
             .send()
             .await?;
         Ok(res)
@@ -165,25 +158,8 @@ impl Context {
             .bucket(self.bucket_name.clone())
             .key(object_key)
             .range(format!("bytes={}-{}", offset, offset + nr_bytes - 1))
-            .customize()
-            .await?
-            .map_operation(make_unsigned)?
             .send()
             .await?;
         Ok(res)
     }
-}
-
-fn make_unsigned<O, Retry>(
-    mut operation: aws_smithy_http::operation::Operation<O, Retry>,
-) -> Result<aws_smithy_http::operation::Operation<O, Retry>, std::convert::Infallible> {
-    {
-        let mut props = operation.properties_mut();
-        let signing_config = props
-            .get_mut::<aws_sig_auth::signer::OperationSigningConfig>()
-            .expect("has signing_config");
-        signing_config.signing_requirements = aws_sig_auth::signer::SigningRequirements::Disabled;
-    }
-
-    Ok(operation)
 }
