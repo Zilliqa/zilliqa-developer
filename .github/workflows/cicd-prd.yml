@@ -26,18 +26,28 @@ jobs:
           - application: bluebell-playground
             image_name: bluebell-playground
             path: products/bluebell
+            tag_length: 8
+            tag_latest: false
           - application: devex
             image_name: devex
             path: products/devex
+            tag_length: 8
+            tag_latest: false
           - application: developer-portal
             image_name: developer-portal
             path: products/developer-portal
+            tag_length: 8
+            tag_latest: false
           - application: eth-spout
             image_name: eth-spout
             path: products/eth-spout
+            tag_length: 9
+            tag_latest: true
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
@@ -71,7 +81,7 @@ jobs:
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:
           tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
-          length: 8
+          length: ${{ matrix.tag_length }}
 
       - name: "Build and push ${{ matrix.application }} - production"
         if: github.event_name == 'push'
@@ -82,11 +92,31 @@ jobs:
           cd ${{ matrix.path }}
           make image/build-and-push
 
+      - name: "Build and push ${{ matrix.application }} tag latest - production"
+        if: matrix.tag_latest == true && github.event_name == 'push'
+        env:
+          ENVIRONMENT: prd
+          IMAGE_TAG: "${{ env.REGISTRY }}/${{ matrix.image_name }}:latest"
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
       - name: "Build and push ${{ matrix.application }} - production"
         if: github.event_name == 'release'
         env:
           ENVIRONMENT: prd
           IMAGE_TAG: ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ github.ref_name }}
+          ENV_FILES_DECRYPTER_NONPRD: ${{ secrets.ENV_FILES_DECRYPTER_NONPRD }}
+          ENV_FILES_DECRYPTER_PRD: ${{ secrets.ENV_FILES_DECRYPTER_PRD }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
+      - name: "Build and push ${{ matrix.application }} tag latest - production"
+        if: matrix.tag_latest == true && github.event_name == 'release'
+        env:
+          ENVIRONMENT: prd
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ matrix.image_name }}:latest
           ENV_FILES_DECRYPTER_NONPRD: ${{ secrets.ENV_FILES_DECRYPTER_NONPRD }}
           ENV_FILES_DECRYPTER_PRD: ${{ secrets.ENV_FILES_DECRYPTER_PRD }}
         run: |
