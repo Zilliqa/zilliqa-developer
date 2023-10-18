@@ -12,10 +12,10 @@ test = true
 
 [dependencies]
 anyhow = "1.0.71"
-aws-config = "0.55.2"
-aws-sdk-s3 = "0.27.0"
-aws-sig-auth = "0.55.2"
-aws-smithy-http = "0.55.2"
+aws-config = "0.56.1"
+aws-sdk-s3 = "0.33.0"
+aws-sig-auth = "0.56.1"
+aws-smithy-http = "0.56.1"
 clap = { version = "4.3.0", features = ["derive"] }
 eth_trie = { git = "https://github.com/carver/eth-trie.rs" }
 eyre = "0.6.8"
