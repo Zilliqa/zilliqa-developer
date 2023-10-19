@@ -21,7 +21,14 @@ jobs:
       fail-fast: false
       matrix:
         application:
-          [bluebell-playground, developer-portal, devex, eth-spout, neo-savant]
+          [
+            bluebell-playground,
+            developer-portal,
+            devex,
+            devex-apollo,
+            eth-spout,
+            neo-savant,
+          ]
         include:
           - application: bluebell-playground
             image_name: bluebell-playground
@@ -31,6 +38,11 @@ jobs:
           - application: devex
             image_name: devex
             path: products/devex
+            tag_length: 8
+            tag_latest: false
+          - application: devex-apollo
+            image_name: devex-apollo
+            path: products/devex-apollo
             tag_length: 8
             tag_latest: false
           - application: developer-portal
@@ -88,15 +100,6 @@ jobs:
         env:
           ENVIRONMENT: prd
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
-        run: |
-          cd ${{ matrix.path }}
-          make image/build-and-push
-
-      - name: "Build and push ${{ matrix.application }} tag latest - production"
-        if: matrix.tag_latest == true && github.event_name == 'push'
-        env:
-          ENVIRONMENT: prd
-          IMAGE_TAG: "${{ env.REGISTRY }}/${{ matrix.image_name }}:latest"
         run: |
           cd ${{ matrix.path }}
           make image/build-and-push
