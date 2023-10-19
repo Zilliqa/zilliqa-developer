@@ -139,32 +139,36 @@ impl Scope {
     }
 
     fn swap(&mut self, depth: i32) {
-        let name_at_depth: Option<String> = match self.location_name.get(&depth) {
+        let position = self.stack_counter - depth;
+
+        let name_at_position: Option<String> = match self.location_name.get(&position) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        let name_at_zero: Option<String> = match self.location_name.get(&0) {
+        let name_at_zero: Option<String> = match self.location_name.get(&self.stack_counter) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        if let Some(name_at_depth) = &name_at_depth {
-            self.location_name.remove(&depth);
-            self.name_location.remove(name_at_depth);
+        if let Some(name_at_position) = &name_at_position {
+            self.location_name.remove(&position);
+            self.name_location.remove(name_at_position);
         }
 
         if let Some(name_at_zero) = name_at_zero {
-            self.location_name.remove(&0);
+            self.location_name.remove(&self.stack_counter);
             self.name_location.remove(&name_at_zero);
 
-            self.name_location.insert(name_at_zero.to_string(), depth);
-            self.location_name.insert(depth, name_at_zero.to_string());
+            self.name_location
+                .insert(name_at_zero.to_string(), position);
+            self.location_name
+                .insert(position, name_at_zero.to_string());
         }
 
-        if let Some(name_at_depth) = name_at_depth {
-            self.name_location.insert(name_at_depth.to_string(), 0);
-            self.location_name.insert(0, name_at_depth.to_string());
+        if let Some(name_at_position) = name_at_position {
+            self.name_location.insert(name_at_position.to_string(), 0);
+            self.location_name.insert(0, name_at_position.to_string());
         }
     }
 }
@@ -528,9 +532,9 @@ impl EvmBlock {
 
         self.push1([ALLOCATION_POINTER].to_vec());
         // Stack:
-        // arg N  => arg N
-        //        => p
-        //        => p_data
+        // arg N     => arg N
+        // alloc_ptr => p
+        //           => p_data
 
         self.mload(); // Stack element is the pointer
 

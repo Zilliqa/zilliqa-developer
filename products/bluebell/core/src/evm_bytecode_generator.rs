@@ -147,7 +147,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                         // Creating entry function
                         let block_args : BTreeSet<String> = block.block_arguments.clone();
-
+                        
                         let mut evm_block =
                             code_builder.new_evm_block_with_args(&block_name, block_args);
 
@@ -203,7 +203,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         match &arg.resolved {
                                             Some(n) => match evm_block.duplicate_stack_name(n) {
                                                 Err(e) => {
-                                                    warn!("{:#?}", evm_block);
+                                                    print!("Block: {:#?}", evm_block);
                                                     panic!("{} in {}", e, evm_block.name)
                                                 }
                                                 _ => (),
@@ -216,7 +216,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         .iter()
                                         .map(|arg| arg.type_reference.clone().unwrap())
                                         .collect();
-                                    info!("Looking {} up", qualified_name);
+
                                     if ctx.function_declarations.contains_key(qualified_name) {
                                         let signature = match ctx.get_function(qualified_name) {
                                             Some(s) => s,
@@ -262,7 +262,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                         evm_block.push_label(&exit_block.name);
-                                        println!("Function '{:?}' arguments: {:#?}", name, arguments);
+
                                         for arg in arguments {
                                             evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                             let _ = match &arg.resolved {
@@ -287,8 +287,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 name
                                             ),
                                         };
-                                        println!("Jumping to label {} {:?}",label, name.resolved);
-
+                                    
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
 
                                         // Note that we do not need to add scopes to function jumps as these are 

@@ -131,14 +131,17 @@ pub fn test_execution_path(
     // 3. Check if the expected lines were visited
     for line in &expected_visited_lines {
         if vm.did_not_visit_line((*line).try_into().unwrap()) {
-            println!("{:#?}", vm.lines_visited);
+            println!("{:#?} vs {:#?}", vm.lines_visited, expected_visited_lines);
             panic!("Expected line {} to be visited but it wasn't.", line);
         }
     }
 
     for line in &expected_not_visited_lines {
         if vm.did_visit_line((*line).try_into().unwrap()) {
-            println!("{:#?}", vm.lines_visited);
+            println!(
+                "{:#?} vs {:#?}",
+                vm.lines_visited, expected_not_visited_lines
+            );
             panic!("Expected line {} to be not visited but it was.", line);
         }
     }
