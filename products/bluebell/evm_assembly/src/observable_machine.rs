@@ -4,9 +4,10 @@ use evm::executor::stack::PrecompileFn;
 use evm::Capture;
 use evm::ExitReason;
 use evm::Trap;
-
+use log::warn;
 use primitive_types::U256;
 use std::collections::BTreeMap;
+use std::str::FromStr;
 
 use evm::Capture::Exit;
 use evm::Capture::Trap as CaptureTrap;
@@ -31,6 +32,8 @@ pub struct ObservableMachine {
     pub error_message: Option<String>,
     pub storage: HashMap<H256, H256>,
     pub precompile_set: Option<EvmPrecompileSet>,
+
+    pub caller: H160,
 }
 
 fn h160_to_usize(address: H160) -> usize {
@@ -63,7 +66,13 @@ impl ObservableMachine {
             error_message: None,
             storage: HashMap::new(),
             precompile_set,
+            caller: H160::zero(),
         }
+    }
+
+    pub fn set_caller(&mut self, caller: String) {
+        let caller_address = H160::from_str(&caller).expect("Failed to parse caller address");
+        self.caller = caller_address;
     }
 
     pub fn set_source_map(&mut self, source_map: &TypeSourceMap) {
@@ -109,6 +118,13 @@ impl ObservableMachine {
                             };
 
                             let _ = stack.push(value);
+                        }
+                        Opcode::CALLER => {
+                            let stack = self.machine.stack_mut();
+
+                            let mut h256_bytes = [0u8; 32]; // Create h256_bytes[12..].copy_from_slice(&self.caller.0);
+
+                            stack.push(H256::from_slice(&h256_bytes));
                         }
                         Opcode::CALLVALUE => {
                             let stack = self.machine.stack_mut();
@@ -182,7 +198,7 @@ impl ObservableMachine {
                                         // TODO: Integrate these properly
                                         let dummy_context = Context {
                                             address: H160::zero(),
-                                            caller: H160::zero(),
+                                            caller: self.caller.clone(),
                                             apparent_value: U256::zero(),
                                         };
                                         let dummy_backend = EvmIoInterface::new(BTreeMap::new());
@@ -209,6 +225,7 @@ impl ObservableMachine {
                                 panic!("Failed to push result to stack");
                             }
                         }
+
                         _ => {
                             self.failed = true;
                             self.error_message = Some(format!("{:?}", opcode).to_string());

@@ -11,9 +11,9 @@ mod tests {
 --| scilla_version 0
 --| library HelloWorldContract
 --| contract HelloWorldExample()
---| transition TriggerHelloWorld()
+--> transition TriggerHelloWorld()
 -->   msg = "Hello world.";
--->   print msg
+--|   print msg (* TODO: Fix position propagation to such this line is captured *)
 --| end
         "#,
             "",
@@ -21,5 +21,7 @@ mod tests {
         );
     }
 
+    // TODO: Add test for stdout.
+    // TODO: Work out how to test panic
     // -->   panic msg
 }
