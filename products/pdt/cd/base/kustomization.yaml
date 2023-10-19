@@ -4,4 +4,5 @@ resources:
   - configmap.yaml
   - namespace.yaml
   - pvc.yaml
+  - cronjob.yaml
   - deployment.yaml
