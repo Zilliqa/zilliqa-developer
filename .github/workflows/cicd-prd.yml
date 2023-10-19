@@ -21,7 +21,14 @@ jobs:
       fail-fast: false
       matrix:
         application:
-          [bluebell-playground, developer-portal, devex, eth-spout, neo-savant]
+          [
+            bluebell-playground,
+            developer-portal,
+            devex,
+            devex-apollo,
+            eth-spout,
+            neo-savant,
+          ]
         include:
           - application: bluebell-playground
             image_name: bluebell-playground
@@ -31,6 +38,11 @@ jobs:
           - application: devex
             image_name: devex
             path: products/devex
+            tag_length: 8
+            tag_latest: false
+          - application: devex-apollo
+            image_name: devex-apollo
+            path: products/devex-apollo
             tag_length: 8
             tag_latest: false
           - application: developer-portal
