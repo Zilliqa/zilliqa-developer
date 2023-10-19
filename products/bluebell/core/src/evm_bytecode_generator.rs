@@ -87,7 +87,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
         for func in &mut self.ir.function_definitions {
             /*
-            let mut ir_printer = DebugPrintger::new();
+            let mut ir_printer = DebugPrinter::new();
             let _ = ir_printer.visit_concrete_function(TreeTraversalMode::Enter, func, &mut self.ir.symbol_table);
             info!("{}", format!("IR: {}", ir_printer.value()));
             */
