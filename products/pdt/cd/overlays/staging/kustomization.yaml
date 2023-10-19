@@ -3,5 +3,15 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - service_account.yaml
 
 namespace: pdt-staging
+
+patches:
+  - target:
+      kind: Deployment
+      name: pdt
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: pdt

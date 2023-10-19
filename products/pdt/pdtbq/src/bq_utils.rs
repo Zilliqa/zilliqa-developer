@@ -1,6 +1,5 @@
 // Here
-#[allow(unused_imports)]
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use gcp_bigquery_client::model::table::Table;
 use gcp_bigquery_client::Client;
 

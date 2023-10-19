@@ -38,7 +38,7 @@ impl Finder {
         // Scan the local filesystem
         let mut got = Vec::new();
         let dir_name = Path::new(prefix).parent().ok_or(eyre!("Not a directory"))?;
-        let base_name = Path::new(prefix)
+        let _ = Path::new(prefix)
             .file_name()
             .ok_or(eyre!("Invalid prefix"))?;
         let dir = fs::read_dir(dir_name)?;
@@ -135,7 +135,7 @@ pub fn range_from_path(path: &Path, prefix: &str) -> Result<Option<Range>> {
     let stem = os_stem
         .to_os_string()
         .into_string()
-        .map_err(|x| eyre!("Cannot convert string"))?;
+        .map_err(|_| eyre!("Cannot convert string"))?;
     if let Some(rest) = stem.strip_prefix(prefix) {
         // Yay. What is the offset?
         if let Ok(val) = rest.parse::<i64>() {

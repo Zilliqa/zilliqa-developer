@@ -29,18 +29,28 @@ jobs:
           - application: developer-portal
             image_name: developer-portal
             path: products/developer-portal
+            tag_length: 8
+            tag_latest: false
           - application: devex
             image_name: devex
             path: products/devex
+            tag_length: 8
+            tag_latest: false
           - application: devex-apollo
             image_name: devex-apollo
             path: products/devex-apollo
+            tag_length: 8
+            tag_latest: false
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
           - application: pdt
             image_name: pdt
             path: products/pdt
+            tag_length: 8
+            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
@@ -73,12 +83,21 @@ jobs:
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:
           tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
-          length: 8
+          length: ${{ matrix.tag_length }}
 
       - name: "Build and push ${{ matrix.application }} - staging"
         env:
           ENVIRONMENT: stg
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
+      - name: "Build and push ${{ matrix.application }} tag latest - staging"
+        if: ${{ matrix.tag_latest == true }}
+        env:
+          ENVIRONMENT: stg
+          IMAGE_TAG: "${{ env.REGISTRY }}/${{ matrix.image_name }}:latest"
         run: |
           cd ${{ matrix.path }}
           make image/build-and-push

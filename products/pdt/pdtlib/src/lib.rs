@@ -1,8 +1,5 @@
 // Currently empty
 
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 pub mod context;
 pub mod db;
 pub mod download;

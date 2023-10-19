@@ -1,11 +1,10 @@
 use crate::context;
 /// Retrieve the incremental db.
 use crate::context::{Context, INCREMENTAL_NAME};
-use crate::download;
 use crate::meta;
 use crate::sync;
 use crate::utils;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use std::path::Path;
 
 pub struct Incremental<'a> {
