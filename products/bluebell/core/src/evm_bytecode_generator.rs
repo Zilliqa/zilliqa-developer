@@ -87,7 +87,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
     pub fn write_function_definitions_to_module(&mut self) -> Result<u32, String> {
         for func in &mut self.ir.function_definitions {
             /*
-            let mut ir_printer = DebugPrinter::new();
+            let mut ir_printer = DebugPrintger::new();
             let _ = ir_printer.visit_concrete_function(TreeTraversalMode::Enter, func, &mut self.ir.symbol_table);
             info!("{}", format!("IR: {}", ir_printer.value()));
             */
@@ -147,7 +147,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                         // Creating entry function
                         let block_args : BTreeSet<String> = block.block_arguments.clone();
-                        
                         let mut evm_block =
                             code_builder.new_evm_block_with_args(&block_name, block_args);
 
@@ -287,7 +286,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 name
                                             ),
                                         };
-                                    
+
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
 
                                         // Note that we do not need to add scopes to function jumps as these are 
