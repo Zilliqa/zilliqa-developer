@@ -8,20 +8,18 @@ resources:
 namespace: pdt-staging
 
 patches:
-  - target:
-      kind: Deployment
-      name: pdt-cronjob
-    patch: |-
+  - patch: |-
       - op: replace
         path: /spec/jobTemplate/spec/template/spec/serviceAccountName
         value: pdt
-  - target:
+    target:
       kind: Deployment
-      name: pdt-listen
-    patch: |-
+      name: pdt-cronjob
+  - patch: |-
       - op: replace
         path: /spec/template/spec/serviceAccountName
         value: pdt
-
-patchesStrategicMerge:
-  - configmap.yaml
+    target:
+      kind: Deployment
+      name: pdt-listen
+  - path: configmap.yaml
