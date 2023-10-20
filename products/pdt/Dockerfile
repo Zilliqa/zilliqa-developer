@@ -1,4 +1,3 @@
-# Requires alpine to get openssl and build
 FROM rust:1.71.0-bullseye as builder
 
 WORKDIR /pdt
@@ -23,5 +22,3 @@ RUN apt-get update -y && \
   rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /pdt/build/pdt /pdt
-
-CMD ["/pdt", "test"]

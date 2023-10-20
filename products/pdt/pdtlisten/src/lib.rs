@@ -143,22 +143,13 @@ async fn get_block_by_hash(x: H256, provider: &Provider<Http>) -> Result<Block<T
     Ok(block)
 }
 
-pub async fn listen(
-    bq_project_id: &str,
-    bq_dataset_id: &str,
-    postgres_url: &str,
-    api_url: &str,
-) -> Result<()> {
+pub async fn listen_psql(postgres_url: &str, api_url: &str) -> Result<()> {
     let mut jobs = JoinSet::new();
     let coords = ProcessCoordinates {
         nr_machines: 1,
         batch_blks: 1,
         machine_id: 0,
         client_id: "listen".to_string(),
-    };
-    let loc = BigQueryDatasetLocation {
-        project_id: bq_project_id.to_string(),
-        dataset_id: bq_dataset_id.to_string(),
     };
 
     let p_client = PgPoolOptions::new()
@@ -167,16 +158,8 @@ pub async fn listen(
         .await?;
 
     println!("checking schemas..");
-    ZilliqaBQProject::ensure_schema(&loc).await?;
     ZilliqaPSQLProject::ensure_schema(&p_client).await?;
     println!("all good.");
-
-    let zilliqa_bq_proj = ZilliqaBQProject::new(
-        &loc,
-        &coords.with_client_id("listen_bq"),
-        i64::MAX, //we don't need nr_blks, but max it out just in case
-    )
-    .await?;
 
     let zilliqa_psql_proj = ZilliqaPSQLProject::new(
         postgres_url,
@@ -186,9 +169,6 @@ pub async fn listen(
         10000,
     )?;
 
-    let mut bq_importer = importer::BatchedImporter::new();
-    bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
-
     let provider = Provider::<Http>::try_from(api_url)?;
 
     let mut stream = provider
@@ -197,12 +177,9 @@ pub async fn listen(
         .map(|hash: H256| get_block_by_hash(hash, &provider))
         .buffered(MAX_TASKS);
 
-    // let http_client = HttpClientBuilder::default().build(DEV_API_URL)?;
-
     while let Some(block) = stream.next().await {
         match block {
             Ok(block) => {
-                let my_block = block.clone();
                 // let postgres go off and do its thing
 
                 // the projects themselves contain no state and should be cheap
@@ -221,14 +198,66 @@ pub async fn listen(
                         }
                     }
                 });
+            }
+            Err(e) => {
+                eprintln!("could not get block from hash due to error {:#?}", e);
+            }
+        }
+        println!("waiting for next block...");
+    }
+    println!("main: waiting for jobs to complete..");
+    while let Some(_) = jobs.join_next().await {
+        continue;
+    }
+    Ok(())
+}
 
+pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) -> Result<()> {
+    // let mut jobs = JoinSet::new();
+    let coords = ProcessCoordinates {
+        nr_machines: 1,
+        batch_blks: 1,
+        machine_id: 0,
+        client_id: "listen".to_string(),
+    };
+    let loc = BigQueryDatasetLocation {
+        project_id: bq_project_id.to_string(),
+        dataset_id: bq_dataset_id.to_string(),
+    };
+
+    println!("checking schemas..");
+    ZilliqaBQProject::ensure_schema(&loc).await?;
+    // ZilliqaPSQLProject::ensure_schema(&p_client).await?;
+    println!("all good.");
+
+    let zilliqa_bq_proj = ZilliqaBQProject::new(
+        &loc,
+        &coords.with_client_id("listen_bq"),
+        i64::MAX, //we don't need nr_blks, but max it out just in case
+    )
+    .await?;
+
+    let mut bq_importer = importer::BatchedImporter::new();
+    bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
+
+    let provider = Provider::<Http>::try_from(api_url)?;
+
+    let mut stream = provider
+        .watch_blocks()
+        .await?
+        .map(|hash: H256| get_block_by_hash(hash, &provider))
+        .buffered(MAX_TASKS);
+
+    while let Some(block) = stream.next().await {
+        match block {
+            Ok(block) => {
                 // OK, time to deal with bigquery
                 if bq_importer.buffers.is_none() {
                     bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
                 }
                 // convert our blocks and insert it into our buffer
                 match {
-                    let (bq_block, bq_txns) = convert_block_and_txns(&my_block)?;
+                    let (bq_block, bq_txns) = convert_block_and_txns(&block)?;
                     bq_importer.insert_into_buffer(bq_block, bq_txns)
                 } {
                     Ok(_) => (),
@@ -267,13 +296,6 @@ pub async fn listen(
                     });
                     bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
                 }
-                // jobs.spawn(async move {
-                //     match bq_insert_block_and_txns(
-                //         &my_block,
-                //         &my_bq_proj
-                //     ).await {
-                //     }
-                // });
             }
             Err(e) => {
                 eprintln!("could not get block from hash due to error {:#?}", e);
@@ -282,8 +304,6 @@ pub async fn listen(
         println!("waiting for next block...");
     }
     println!("main: waiting for jobs to complete..");
-    while let Some(_) = jobs.join_next().await {
-        continue;
-    }
+
     Ok(())
 }
