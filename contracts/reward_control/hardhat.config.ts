@@ -51,8 +51,8 @@ const config: HardhatUserConfig = {
       miningState: false,
     },
     zblockchain: {
-      url: "http://localhost:16003",
-      websocketUrl: "ws://localhost:16003/",
+      url: "http://localhost:12003",
+      websocketUrl: "ws://localhost:12003/",
       accounts: [
         "db11cfa086b92497c8ed5a4cc6edb3a5bfe3a640c43ffb9fc6aa0873c56f2ee3",
         "e53d1c3edaffc7a7bab5418eb836cf75819a82872b4a1a0f1c7fcf5c3e020b89",
