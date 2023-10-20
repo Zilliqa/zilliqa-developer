@@ -39,4 +39,4 @@ spec:
                   key: NETWORK_TYPE
           command: ["/bin/bash", "-c"]
           args:
-            - ./pdt --network-type $NETWORK_TYPE bqlisten --project-id $PROJECT_ID --dataset-id $DATASET_ID,
+            - ./pdt --network-type $NETWORK_TYPE bqlisten --project-id $PROJECT_ID --dataset-id $DATASET_ID
