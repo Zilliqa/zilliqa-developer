@@ -32,6 +32,7 @@ lint:
     - linters: [eslint]
       paths:
         - contracts/audited/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
+        - contracts/reward_control    # and again
     - linters: [ALL]
       paths:
         - needing-organisation/**/*
