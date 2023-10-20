@@ -24,10 +24,10 @@ function getPrivateKey(accountIndex) {
   if (accountIndex >= 0 && accountIndex < hre.network.config.accounts.length) {
     const privateKey = hre.network.config.accounts[accountIndex];
     // console.log(`Private Key for Account ${accountIndex}: ${privateKey}`);
-    return privateKey
+    return privateKey;
   } else {
     console.error(`Account ${accountIndex} not found in the configuration`);
-    return ""
+    return "";
   }
 }
 
@@ -76,13 +76,13 @@ export async function getZilliqaBlockchainForAccount(account: string) {
 
 export function setZilliqaSignerToAccountByHardhatWallet(accountIndex: number) {
   let zho = hre.zilliqa;
-  let pvt_key = getPrivateKey(accountIndex)
+  let pvt_key = getPrivateKey(accountIndex);
   // console.log(pvt_key)
   let address = zilliqaAddressFromPrivateKey(pvt_key);
-  
+
   console.log(`Setting default wallet for signing to: ${address}`);
   zho.getZilliqaJSObject().wallet.setDefault(address);
-  hre.setActiveAccount(accountIndex)
+  hre.setActiveAccount(accountIndex);
   // zho.getZilliqaJSObject().wallet.addByPrivateKey(pvt_key);
 }
 
@@ -99,14 +99,18 @@ export function getZilliqaAddressForAccount(account: string): string {
   return address;
 }
 
-export function getZilliqaAddressForAccountByHardhatWallet(accountIndex: number): string {
-  let pvt_key = getPrivateKey(accountIndex)
+export function getZilliqaAddressForAccountByHardhatWallet(
+  accountIndex: number
+): string {
+  let pvt_key = getPrivateKey(accountIndex);
   let address = zilliqaAddressFromPrivateKey(pvt_key);
   return address;
 }
 
-export function getZilliqaAccountForAccountByHardhatWallet(accountIndex: number): string {
-  let pvt_key = getPrivateKey(accountIndex)
+export function getZilliqaAccountForAccountByHardhatWallet(
+  accountIndex: number
+): string {
+  let pvt_key = getPrivateKey(accountIndex);
   // let address = zilliqaAddressFromPrivateKey(pvt_key);
   return new Account(pvt_key);
 }
