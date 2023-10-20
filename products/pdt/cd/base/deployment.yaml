@@ -37,14 +37,6 @@ spec:
                 configMapKeyRef:
                   name: pdt
                   key: NETWORK_TYPE
-          command: ["./pdt"]
+          command: ["/bin/bash", "-c"]
           args:
-            [
-              "--network-type",
-              "$NETWORK_TYPE",
-              "bqlisten",
-              "--project-id",
-              "$PROJECT_ID",
-              "--dataset-id",
-              "$DATASET_ID",
-            ]
+            - ./pdt --network-type $NETWORK_TYPE bqlisten --project-id $PROJECT_ID --dataset-id $DATASET_ID,
