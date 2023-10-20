@@ -13,7 +13,7 @@ patches:
         path: /spec/jobTemplate/spec/template/spec/serviceAccountName
         value: pdt
     target:
-      kind: Deployment
+      kind: CronJob
       name: pdt-cronjob
   - patch: |-
       - op: replace
