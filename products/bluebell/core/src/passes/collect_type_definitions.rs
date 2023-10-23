@@ -144,6 +144,11 @@ impl IrPass for CollectTypeDefinitionsPass {
             symbol_table
                 .aliases
                 .insert(enum_value.name.unresolved.clone(), resolved_name.clone());
+            info!(
+                "Alias {}: {}",
+                enum_value.name.unresolved.clone(),
+                resolved_name.clone()
+            );
 
             self.pop_namespace();
 
@@ -157,6 +162,10 @@ impl IrPass for CollectTypeDefinitionsPass {
             }
 
             symbol_table.declare_constructor(&resolved_name, &arguments, &return_type)?;
+            info!(
+                "Alias {:?}: {:?} {:?}",
+                &resolved_name, &arguments, &return_type
+            );
 
             // TODO: Set the constructor function signature and alias
 

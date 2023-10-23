@@ -64,6 +64,13 @@ impl SymbolTable {
 
         let _ = ret.declare_special_variable("_sender", "ByStr20");
 
+        ret.aliases
+            .insert("True".to_string(), "Bool::True".to_string());
+        ret.aliases
+            .insert("False".to_string(), "Bool::False".to_string());
+        let _ = ret.declare_constructor("Bool::True", &[].to_vec(), "Bool");
+        let _ = ret.declare_constructor("Bool::False", &[].to_vec(), "Bool");
+
         ret
     }
 
@@ -195,6 +202,7 @@ impl SymbolTable {
         arguments: &Vec<String>,
         return_type: &str,
     ) -> Result<String, String> {
+        println!("Declaring constructor {}", symbol);
         self.declare_function_or_constructor_type(symbol, arguments, return_type, true)
     }
 
