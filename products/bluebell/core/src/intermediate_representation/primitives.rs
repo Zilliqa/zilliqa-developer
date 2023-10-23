@@ -374,14 +374,14 @@ pub struct IntermediateRepresentation {
 }
 
 impl IntermediateRepresentation {
-    pub fn new() -> Self {
+    pub fn new(symbol_table: SymbolTable) -> Self {
         IntermediateRepresentation {
             version: "".to_string(),
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
             fields_definitions: Vec::new(),
             lambda_functions: Vec::new(),
-            symbol_table: SymbolTable::new(),
+            symbol_table,
         }
     }
 }

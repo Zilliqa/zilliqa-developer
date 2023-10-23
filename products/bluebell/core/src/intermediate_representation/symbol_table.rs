@@ -38,42 +38,11 @@ pub struct SymbolTable {
     pub state_layout: HashMap<String, StateLayoutEntry>,
 }
 
+pub trait SymbolTableConstructor {
+    fn new_symbol_table(&self) -> SymbolTable;
+}
+
 impl SymbolTable {
-    pub fn new() -> Self {
-        let type_of_table = HashMap::new();
-
-        let mut ret = SymbolTable {
-            aliases: HashMap::new(),
-            type_of_table,
-            name_generator: NameGenerator::new(),
-            state_layout: HashMap::new(),
-        };
-
-        // TODO: Get types from RuntimeModule
-        // TODO: Deal with potential errors
-        let _ = ret.declare_type("Int8");
-        let _ = ret.declare_type("Int16");
-        let _ = ret.declare_type("Int32");
-        let _ = ret.declare_type("Int64");
-        let _ = ret.declare_type("Uint8");
-        let _ = ret.declare_type("Uint16");
-        let _ = ret.declare_type("Uint32");
-        let _ = ret.declare_type("Uint64");
-        let _ = ret.declare_type("String");
-        let _ = ret.declare_type("ByStr20");
-
-        let _ = ret.declare_special_variable("_sender", "ByStr20");
-
-        ret.aliases
-            .insert("True".to_string(), "Bool::True".to_string());
-        ret.aliases
-            .insert("False".to_string(), "Bool::False".to_string());
-        let _ = ret.declare_constructor("Bool::True", &[].to_vec(), "Bool");
-        let _ = ret.declare_constructor("Bool::False", &[].to_vec(), "Bool");
-
-        ret
-    }
-
     pub fn is_state(&self, name: &String) -> bool {
         self.state_layout.get(name).is_some()
     }

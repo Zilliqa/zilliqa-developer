@@ -1,3 +1,5 @@
+use crate::intermediate_representation::name_generator::NameGenerator;
+use crate::intermediate_representation::symbol_table::{SymbolTable, SymbolTableConstructor};
 use evm::backend::Backend;
 use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
 use evm::{Context as EvmContext, ExitError, ExitSucceed};
@@ -6,12 +8,50 @@ use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::types::EvmType;
 use log::{error, info};
 use std::collections::BTreeSet;
+use std::collections::HashMap;
 use std::mem;
 use std::str::FromStr;
+
 // TODO: Generalize to support both EVM and LLVM
 
 pub trait BluebellModule {
     fn attach(&self, context: &mut EvmCompilerContext);
+}
+
+impl SymbolTableConstructor for EvmCompilerContext {
+    fn new_symbol_table(&self) -> SymbolTable {
+        let type_of_table = HashMap::new();
+
+        let mut ret = SymbolTable {
+            aliases: HashMap::new(),
+            type_of_table,
+            name_generator: NameGenerator::new(),
+            state_layout: HashMap::new(),
+        };
+
+        // TODO: Get types from self
+        let _ = ret.declare_type("Int8");
+        let _ = ret.declare_type("Int16");
+        let _ = ret.declare_type("Int32");
+        let _ = ret.declare_type("Int64");
+        let _ = ret.declare_type("Uint8");
+        let _ = ret.declare_type("Uint16");
+        let _ = ret.declare_type("Uint32");
+        let _ = ret.declare_type("Uint64");
+        let _ = ret.declare_type("String");
+        let _ = ret.declare_type("ByStr20");
+
+        let _ = ret.declare_special_variable("_sender", "ByStr20");
+
+        ret.aliases
+            .insert("True".to_string(), "Bool::True".to_string());
+        ret.aliases
+            .insert("False".to_string(), "Bool::False".to_string());
+        let _ = ret.declare_constructor("Bool::True", &[].to_vec(), "Bool");
+        let _ = ret.declare_constructor("Bool::False", &[].to_vec(), "Bool");
+
+        ret
+    }
 }
 
 pub struct ScillaDefaultTypes;

@@ -3,8 +3,8 @@ use crate::ast::nodes::*;
 use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
+use crate::intermediate_representation::symbol_table::{SymbolTable, SymbolTableConstructor};
 use crate::parser::lexer::SourcePosition;
-
 use log::warn;
 use std::mem;
 
@@ -40,7 +40,7 @@ pub struct IrEmitter {
 }
 
 impl IrEmitter {
-    pub fn new() -> Self {
+    pub fn new(symbol_table: SymbolTable) -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         let ns = IrIdentifier {
@@ -62,7 +62,7 @@ impl IrEmitter {
             current_namespace: ns.clone(),
             namespace_stack: [ns].to_vec(),
             /// current_function: None,
-            ir: Box::new(IntermediateRepresentation::new()),
+            ir: Box::new(IntermediateRepresentation::new(symbol_table)),
             source_positions: [(
                 SourcePosition::invalid_position(),
                 SourcePosition::invalid_position(),
@@ -213,6 +213,10 @@ impl IrEmitter {
     }
 
     pub fn emit(&mut self, node: &NodeProgram) -> Result<Box<IntermediateRepresentation>, String> {
+        // Copying original symbol table to create a new instance of the IR at the end
+        // of traversing
+        let symbol_table = self.ir.symbol_table.clone();
+
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
@@ -224,7 +228,7 @@ impl IrEmitter {
         // Annotating symbols with types
 
         // Returning
-        let mut ret = Box::new(IntermediateRepresentation::new());
+        let mut ret = Box::new(IntermediateRepresentation::new(symbol_table));
         mem::swap(&mut self.ir, &mut ret);
 
         Ok(ret)
