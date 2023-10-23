@@ -264,8 +264,8 @@ async fn bigquery_reconcile_blocks(unpack_dir: &str, opts: &ReconcileOptions) ->
     bqimport::reconcile_blocks(
         unpack_dir,
         opts.batch_blocks,
-        &opts.dataset_id,
         &opts.project_id,
+        &opts.dataset_id,
     )
     .await
 }
