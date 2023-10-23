@@ -14,12 +14,26 @@ patches:
         value: pdt
     target:
       kind: CronJob
-      name: pdt-cronjob
+      name: pdt-cronjob-testnet
+  - patch: |-
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: CronJob
+      name: pdt-cronjob-mainnet
   - patch: |-
       - op: replace
         path: /spec/template/spec/serviceAccountName
         value: pdt
     target:
       kind: Deployment
-      name: pdt-listen
+      name: pdt-listen-testnet
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: Deployment
+      name: pdt-listen-mainnet
   - path: configmap.yaml

@@ -117,7 +117,7 @@ pub async fn reconcile_blocks(
     // We should have coverage for every block, extant or not, up to the
     // last batch, which will be short.
     let mut blk: i64 = 0;
-    while blk < max_block {
+    while (blk + scale) < max_block {
         let span = std::cmp::min(scale, max_block - (blk + scale));
         println!("blk {} span {}", blk, span);
         match project.is_txn_range_covered_by_entry(blk, span).await? {
