@@ -10,7 +10,7 @@ data:
   NETWORK_TYPE_TESTNET: "testnet"
   NETWORK_TYPE_MAINNET: "mainnet"
   NETWORK_TESTNET: "testnet-v925"
-  NETWORK_MAINNET: "mainnet-v901"
+  NETWORK_MAINNET: "mainnet-v920"
   DOWNLOAD_DIR: "/data/download"
   UNPACK_DIR: "/data/download"
   NR_THREADS: "1"
