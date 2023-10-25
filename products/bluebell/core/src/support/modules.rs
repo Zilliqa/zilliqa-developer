@@ -50,6 +50,12 @@ impl SymbolTableConstructor for EvmCompilerContext {
         let _ = ret.declare_constructor("Bool::True", &[].to_vec(), "Bool");
         let _ = ret.declare_constructor("Bool::False", &[].to_vec(), "Bool");
 
+        // Adding function types
+        for (name, (args, return_type)) in self.raw_function_declarations.iter() {
+            // info!("Declaring {:#?}",f);
+            ret.declare_function_type(&name, args, &return_type);
+        }
+
         ret
     }
 }
@@ -58,6 +64,7 @@ pub struct ScillaDefaultTypes;
 impl BluebellModule for ScillaDefaultTypes {
     // TODO: Generalise to support both LLVM and EVM
     fn attach(&self, context: &mut EvmCompilerContext) {
+        context.declare_integer("Bool", 1);
         context.declare_integer("Int8", 8);
         context.declare_integer("Int16", 16);
         context.declare_integer("Int32", 32);
@@ -252,6 +259,36 @@ impl BluebellModule for ScillaDebugBuiltins {
                 custom_runtime
             });
 
+        let _ = specification
+            .declare_function("print::<Bool>", ["Bool"].to_vec(), "Uint256")
+            .attach_runtime(|| {
+                fn custom_runtime(
+                    input: &[u8],
+                    _gas_limit: Option<u64>,
+                    _context: &EvmContext,
+                    _backend: &dyn Backend,
+                    _is_static: bool,
+                ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+                    info!("Was here??");
+
+                    if input.iter().all(|&byte| byte == 0) {
+                        info!("false");
+                    } else {
+                        info!("true");
+                    }
+
+                    Ok((
+                        PrecompileOutput {
+                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+                            output: input.to_vec(),
+                        },
+                        0,
+                    ))
+                }
+
+                custom_runtime
+            });
+
         let _ = specification.declare_inline_generics("builtin__print", |ctx, block, arg_types| {
             let mut ret: Vec<EvmBlock> = Vec::new();
             for arg in arg_types {
@@ -392,6 +429,16 @@ impl BluebellModule for ScillaDefaultBuiltins {
                 custom_runtime
             });
 
+        let _ = specification
+            .declare_function(
+                "builtin__eq::<Uint64,Uint64>",
+                ["Uint64", "Uint64"].to_vec(),
+                "Bool",
+            )
+            .attach_assembly(|block| {
+                block.eq();
+            });
+
         // Memory management
         /*
         let _ = specification.declare_inline_generics("alloca", |_ctx, block, arg_types| {
@@ -455,11 +502,6 @@ impl BluebellModule for ScillaDefaultBuiltins {
             Ok([].to_vec())
         });
 
-        let _ = specification.declare_inline_generics("builtin__eq", |_ctx, block, _arg_types| {
-            block.eq();
-            Ok([].to_vec())
-        });
-
         let _ = specification.declare_inline_generics("builtin__gt", |_ctx, block, _arg_types| {
             block.gt();
             Ok([].to_vec())
@@ -476,11 +518,10 @@ impl BluebellModule for ScillaDefaultBuiltins {
         });
 
         // Implementing boolean builtins:
-        let _ =
-            specification.declare_inline_generics("builtin__andb", |_ctx, block, _arg_types| {
-                block.and();
-                Ok([].to_vec())
-            });
+        let _ = specification.declare_inline_generics("builtin__and", |_ctx, block, _arg_types| {
+            block.and();
+            Ok([].to_vec())
+        });
 
         let _ = specification.declare_inline_generics("builtin__orb", |_ctx, block, _arg_types| {
             block.or();

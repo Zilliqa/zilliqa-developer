@@ -1,8 +1,9 @@
 use crate::block::EvmBlock;
 use crate::evm_bytecode_builder::EvmByteCodeBuilder;
-use crate::function_signature::EvmFunctionSignature;
+use crate::function_signature::{AssemblyBuilderFn, EvmFunctionSignature};
 use crate::types::EvmType;
 use evm::executor::stack::PrecompileFn;
+use log::info;
 use primitive_types::H160;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -14,7 +15,9 @@ type SpecialVariableFn =
     fn(&mut EvmCompilerContext, &mut EvmBlock) -> Result<Vec<EvmBlock>, String>;
 
 pub struct EvmCompilerContext {
-    type_declarations: HashMap<String, EvmType>,
+    pub raw_function_declarations: HashMap<String, (Vec<String>, String)>,
+
+    pub type_declarations: HashMap<String, EvmType>,
 
     pub function_declarations: HashMap<String, EvmFunctionSignature>,
     pub inline_generics: HashMap<String, InlineGenericsFn>,
@@ -48,9 +51,11 @@ impl<'a> EvmPrecompileBuilder<'a> {
 
         let address = {
             let value = index;
-            let padded_string = format!("{:0>40}", value.to_string()); // Pad with leading zeros to 40 characters
+            // Convert `value: u32` to a hexadecimal string, pad it with leading zeros to 40 characters, and then convert it to `H160`
+            let padded_string = format!("{:0>40}", format!("{:x}", value)); // Pad with leading zeros to 40 characters
             H160::from_str(&padded_string).unwrap()
         };
+        info!("Attaching {} to address {:?}", name, address);
 
         self.signature.external_address = Some(index);
         self.context
@@ -61,11 +66,23 @@ impl<'a> EvmPrecompileBuilder<'a> {
 
         Ok(())
     }
+
+    pub fn attach_assembly(&mut self, builder: AssemblyBuilderFn) -> Result<(), String> {
+        let name = self.signature.name.clone();
+        self.signature.inline_assembly_generator = Some(builder);
+        self.context
+            .function_declarations
+            .insert(name.clone(), self.signature.clone());
+
+        Ok(())
+    }
 }
 
 impl EvmCompilerContext {
     pub fn new() -> Self {
         Self {
+            raw_function_declarations: HashMap::new(),
+
             type_declarations: HashMap::new(),
             function_declarations: HashMap::new(),
             inline_generics: HashMap::new(),
@@ -144,6 +161,14 @@ impl EvmCompilerContext {
         return_type: &str,
     ) -> EvmPrecompileBuilder {
         // TODO: check if the function already exists
+
+        self.raw_function_declarations.insert(
+            name.to_string(),
+            (
+                arg_types.iter().map(|x| x.to_string()).collect(),
+                return_type.to_string(),
+            ),
+        );
 
         let return_type = self
             .type_declarations

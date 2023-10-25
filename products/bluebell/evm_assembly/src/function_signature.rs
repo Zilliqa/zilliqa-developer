@@ -1,4 +1,7 @@
+use crate::block::EvmBlock;
 use crate::types::{EvmType, EvmTypeValue};
+
+pub type AssemblyBuilderFn = fn(&mut EvmBlock);
 
 #[derive(Debug, Clone)]
 pub struct EvmFunctionSignature {
@@ -6,6 +9,7 @@ pub struct EvmFunctionSignature {
     pub arguments: Vec<EvmType>,
     pub return_type: EvmType,
 
+    pub inline_assembly_generator: Option<AssemblyBuilderFn>,
     pub external_address: Option<u32>,
 }
 
@@ -15,6 +19,7 @@ impl EvmFunctionSignature {
             name,
             arguments,
             return_type: return_type.clone(),
+            inline_assembly_generator: None,
             external_address: None,
         }
     }

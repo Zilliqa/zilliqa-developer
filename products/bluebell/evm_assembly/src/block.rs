@@ -522,9 +522,20 @@ impl EvmBlock {
     }
 
     pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmType>) -> &mut Self {
+        if let Some(generator) = function.inline_assembly_generator {
+            generator(self);
+            return self;
+        }
+
         let address = match function.external_address {
             Some(a) => a,
-            None => panic!("TODO: Internal calls not supported yet."),
+            None => {
+                info!("{:#?}", function);
+                panic!(
+                    "TODO: Internal calls' not supported yet. Attempted to call {}",
+                    function.name
+                )
+            }
         };
         // TODO: Deal with internal calls
         // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4

@@ -527,7 +527,17 @@ impl IrPass for AnnotateBaseTypes {
                 // TODO: To this end we need to resolve the type refernce from the resolved name
                 name.type_reference = Some(function_type.clone()); // TODO: Should contain return type as this is a function pointer
 
-                "TODO-lookup".to_string()
+                let type_info = match symbol_table.type_of(&function_type) {
+                    Some(v) => {
+                        match v.return_type {
+                            Some(r) => r,
+                            None => "Void".to_string() // TODO: Get value from somewhere
+                        }
+                    }
+                    None => panic!("Undeclared function {}", function_type)
+                };
+
+                type_info
             }
             Operation::CallStaticFunction {
                 name,

@@ -14,7 +14,8 @@ use evm::Capture::Trap as CaptureTrap;
 use evm::Context;
 use evm::Machine;
 use evm::Opcode;
-
+use log::error;
+use log::info;
 use primitive_types::{H160, H256};
 
 use std::collections::{HashMap, HashSet};
@@ -144,7 +145,7 @@ impl ObservableMachine {
                         Opcode::STATICCALL => {
                             // Emulating static call
                             // TODO: Attach runtime!
-
+                            info!("Static call");
                             let (gas, address, args_offset, args_size, ret_offset, ret_size) = {
                                 let stack = self.machine.stack_mut();
                                 let gas: u64 = match stack.pop() {
@@ -211,12 +212,15 @@ impl ObservableMachine {
                                         // TODO: Write ret to memory
                                         H256::zero()
                                     } else {
+                                        error!("Result error in static call");
                                         H256::zero()
                                     }
                                 } else {
+                                    error!("Contract on address {:?} not found", address);
                                     H256::zero()
                                 }
                             } else {
+                                error!("Precompile set not found");
                                 H256::zero()
                             };
 
