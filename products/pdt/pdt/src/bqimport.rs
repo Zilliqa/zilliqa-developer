@@ -53,13 +53,17 @@ pub async fn bq_multi_import(
 
         jobs.spawn(async move {
             println!("Sync persistence to {:?}", &my_unpack_dir);
-            let unpack_str = my_unpack_dir
-                .to_str()
-                .ok_or(anyhow!("Cannot render thread-specific data dir"))?;
-            // Sync persistence
-            if duplicate_persistence {
-                pdtlib::utils::dup_directory(&orig_unpack_dir, &unpack_str)?;
-            }
+            let unpack_str = if nr_threads > 1 {
+                let new_unpack_dir = my_unpack_dir
+                    .to_str()
+                    .ok_or(anyhow!("Cannot render thread-specific data dir"))?;
+                // Sync persistence
+                pdtlib::utils::dup_directory(&orig_unpack_dir, &new_unpack_dir)?;
+                new_unpack_dir
+            } else {
+                &orig_unpack_dir
+            };
+
             println!("Starting thread {}/{}", idx, nr_threads);
             let exporter = Exporter::new(&unpack_str)?;
             let mut imp = TransactionMicroblockImporter::new();

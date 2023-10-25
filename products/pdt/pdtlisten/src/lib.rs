@@ -227,7 +227,6 @@ pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) 
 
     println!("checking schemas..");
     ZilliqaBQProject::ensure_schema(&loc).await?;
-    // ZilliqaPSQLProject::ensure_schema(&p_client).await?;
     println!("all good.");
 
     let zilliqa_bq_proj = ZilliqaBQProject::new(
