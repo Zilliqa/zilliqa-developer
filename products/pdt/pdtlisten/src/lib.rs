@@ -245,7 +245,7 @@ pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) 
 
     let provider = Provider::<Http>::try_from(api_url)?;
 
-    let stream = listen_blocks(&provider);
+    let stream = listen_blocks(&provider, zilliqa_bq_proj.get_latest_block().await?);
     pin!(stream);
 
     while let Some(blocks) = TokioStreamExt::next(&mut stream).await {

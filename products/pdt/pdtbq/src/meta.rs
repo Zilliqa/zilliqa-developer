@@ -86,6 +86,26 @@ impl Meta {
             }
         }
     }
+
+    pub async fn find_max_block(&self, client: &Client) -> Result<Option<i64>> {
+        let query = format!(
+            "SELECT start_blk,nr_blks FROM `{}` ORDER BY start_blk DESC LIMIT 1",
+            self.table.get_table_desc()
+        );
+        let mut result = client
+            .job()
+            .query(&self.table.dataset.project_id, QueryRequest::new(&query))
+            .await?;
+        if result.next_row() {
+            let block = result
+                .get_i64(0)?
+                .ok_or(anyhow!("No start_blk in record"))?;
+            let number = result.get_i64(1)?.ok_or(anyhow!("No nr_blks in record"))?;
+            Ok(Some(block + number))
+        } else {
+            Ok(None)
+        }
+    }
 }
 
 #[async_trait]

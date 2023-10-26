@@ -260,6 +260,10 @@ impl ZilliqaBQProject {
     pub fn get_max_query_rows(&self) -> usize {
         MAX_QUERY_ROWS
     }
+
+    pub async fn get_latest_block(&self) -> Result<Option<i64>> {
+        return self.microblocks.get_max_meta_block(&self.bq_client).await;
+    }
 }
 
 #[async_trait]

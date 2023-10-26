@@ -43,6 +43,10 @@ impl TrackedTable {
             meta,
         })
     }
+
+    pub async fn get_max_meta_block(&self, client: &Client) -> Result<Option<i64>> {
+        return self.meta.find_max_block(client).await;
+    }
 }
 
 #[async_trait]

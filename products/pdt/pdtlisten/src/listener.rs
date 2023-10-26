@@ -50,6 +50,7 @@ async fn get_block(
     let last_seen_block_number_unwrap = if let Some(_block_number) = last_seen_block_number {
         _block_number.clone()
     } else {
+        // if does not know last_seen_block, assumes it was just the one before
         block_number - 1
     };
 
@@ -72,10 +73,11 @@ async fn get_block(
 /// Polls in an interval for new blocks, tracking using `last_seen_block_number`
 pub fn listen_blocks(
     provider: &Provider<Http>,
+    from_block: Option<i64>,
 ) -> impl Stream<Item = Result<Vec<Block<Transaction>>>> + '_ {
     try_stream! {
         let mut interval = interval(Duration::from_secs(15));
-        let mut last_seen_block_number: Option<U64> = None;
+        let mut last_seen_block_number: Option<U64> = from_block.map(U64::from);
         loop {
             interval.tick().await;
             let blocks = get_block(provider, &mut last_seen_block_number).await?;
