@@ -1,4 +1,4 @@
-pub static EXAMPLES: [(&str, &str); 4] = [
+pub static EXAMPLES: [(&str, &str); 5] = [
     (
         "Hello Builtin",
         r#"scilla_version 0
@@ -50,6 +50,30 @@ transition setHello ()
   end
 end
 "#,
+    ),
+    (
+        "Simple Logic",
+        r#"scilla_version 0
+
+      library BasicLogic
+      
+      contract BasicLogic()
+      
+      transition testValue (msg: Uint64)
+        reference = Uint64 11;
+        is_owner = builtin eq msg reference;
+        logic_reference = False;
+        is_false = builtin eq logic_reference is_owner;
+        match is_false with
+        | True =>
+          msg = "The values were different";
+          print msg
+        | False =>
+          msg = "The values were equal";
+          print msg
+        end
+      end      
+      "#,
     ),
     (
         "Special variables",

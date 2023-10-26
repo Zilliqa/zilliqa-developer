@@ -496,7 +496,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     let mut ctx = &mut code_builder.context;
                                     if let Some(constructor) = &ctx.default_constructors.get(name) {
-                                        info!("Found module-defined default constructor for {}", name);
                                         constructor(&mut evm_block);
                                     } else {
                                         // Falling back to plain enum type naming with no data associated
