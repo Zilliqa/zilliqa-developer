@@ -40,6 +40,7 @@ async fn get_block_by_number(x: U64, provider: &Provider<Http>) -> Result<Block<
     Ok(block)
 }
 
+/// Fetches the most recent block number and compares against `last_seen_block_number` and retrieves all blocks in between
 async fn get_block(
     provider: &Provider<Http>,
     last_seen_block_number: &mut Option<U64>,
@@ -53,7 +54,7 @@ async fn get_block(
     };
 
     if block_number <= last_seen_block_number_unwrap {
-        // Already seen this black
+        // Already seen this block
         return Ok(Vec::new());
     }
 
@@ -68,17 +69,17 @@ async fn get_block(
     Ok(blocks)
 }
 
+/// Polls in an interval for new blocks, tracking using `last_seen_block_number`
 pub fn listen_blocks(
     provider: &Provider<Http>,
 ) -> impl Stream<Item = Result<Vec<Block<Transaction>>>> + '_ {
     try_stream! {
         let mut interval = interval(Duration::from_secs(15));
-        let mut last_seen_number: Option<U64> = None;
+        let mut last_seen_block_number: Option<U64> = None;
         loop {
             interval.tick().await;
-            let blocks = get_block(provider, &mut last_seen_number).await?;
+            let blocks = get_block(provider, &mut last_seen_block_number).await?;
             yield blocks
-
         }
     }
 }
