@@ -226,7 +226,6 @@ async fn bigquery_import_multi(unpack_dir: &str, opts: &MultiOptions) -> Result<
         opts.start_block,
         &opts.project_id,
         &opts.dataset_id,
-        !opts.no_dup,
     )
     .await
 }
