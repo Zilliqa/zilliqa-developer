@@ -216,6 +216,10 @@ pub async fn listen_psql(postgres_url: &str, api_url: &str) -> Result<()> {
     Ok(())
 }
 
+/// Have implemented a listening system that queries the latest found block in the meta table.
+/// This allows continuity from last listen or import was carried out
+/// The listen also keeps track blocks that it has encountered before, discarding any seen blocks
+/// If encounters a gap of block received with last seen, tries to patch it
 pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) -> Result<()> {
     // let mut jobs = JoinSet::new();
     let coords = ProcessCoordinates {
