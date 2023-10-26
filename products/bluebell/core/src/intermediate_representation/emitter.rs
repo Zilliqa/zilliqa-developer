@@ -788,8 +788,19 @@ impl AstConverting for IrEmitter {
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeValueLiteral::LiteralHex(_value) => {
-                unimplemented!();
+            NodeValueLiteral::LiteralHex(value) => {
+                let typename = self.ir.symbol_table.name_generator.hex_type();
+                let operation = Operation::Literal {
+                    data: value.to_string(),
+                    typename,
+                };
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                    source_location: self.current_location(),
+                });
+                self.stack.push(StackObject::Instruction(instr));
             }
             NodeValueLiteral::LiteralString(value) => {
                 let typename = self.ir.symbol_table.name_generator.string_type();
