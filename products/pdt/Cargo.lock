@@ -3227,6 +3227,7 @@ name = "pdtlisten"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-stream",
  "ethers",
  "gcp-bigquery-client 0.17.0",
  "jsonrpsee",
@@ -3237,6 +3238,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio",
+ "tokio-stream",
 ]
 
 [[package]]

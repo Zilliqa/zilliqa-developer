@@ -20,7 +20,6 @@ pub async fn bq_multi_import(
     start_blk: Option<i64>,
     project_id: &str,
     dataset_id: &str,
-    duplicate_persistence: bool,
 ) -> Result<()> {
     // OK. Just go ..
     let mut jobs = JoinSet::new();

@@ -1,7 +1,8 @@
 mod importer;
+mod listener;
 mod types;
 use anyhow::{anyhow, bail, Context, Result};
-use ethers::prelude::*;
+use ethers::{prelude::*, providers::StreamExt};
 use jsonrpsee::{core::client::ClientT, http_client::HttpClient, rpc_params};
 use pdtbq::{bq::ZilliqaBQProject, bq_utils::BigQueryDatasetLocation};
 use pdtdb::{
@@ -14,7 +15,11 @@ use serde::Serialize;
 use serde_json::{from_value, to_value, Value};
 use sqlx::postgres::PgPoolOptions;
 use std::{marker::PhantomData, time::Duration};
+use tokio::pin;
 use tokio::task::JoinSet;
+use tokio_stream::StreamExt as TokioStreamExt;
+
+use crate::listener::listen_blocks;
 
 const MAX_TASKS: usize = 50;
 
@@ -171,13 +176,12 @@ pub async fn listen_psql(postgres_url: &str, api_url: &str) -> Result<()> {
 
     let provider = Provider::<Http>::try_from(api_url)?;
 
-    let mut stream = provider
-        .watch_blocks()
-        .await?
-        .map(|hash: H256| get_block_by_hash(hash, &provider))
-        .buffered(MAX_TASKS);
+    let mut stream = StreamExt::map(provider.watch_blocks().await?, |hash: H256| {
+        get_block_by_hash(hash, &provider)
+    })
+    .buffered(MAX_TASKS);
 
-    while let Some(block) = stream.next().await {
+    while let Some(block) = StreamExt::next(&mut stream).await {
         match block {
             Ok(block) => {
                 // let postgres go off and do its thing
@@ -241,29 +245,28 @@ pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) 
 
     let provider = Provider::<Http>::try_from(api_url)?;
 
-    let mut stream = provider
-        .watch_blocks()
-        .await?
-        .map(|hash: H256| get_block_by_hash(hash, &provider))
-        .buffered(MAX_TASKS);
+    let stream = listen_blocks(&provider);
+    pin!(stream);
 
-    while let Some(block) = stream.next().await {
-        match block {
-            Ok(block) => {
-                // OK, time to deal with bigquery
-                if bq_importer.buffers.is_none() {
-                    bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
-                }
-                // convert our blocks and insert it into our buffer
-                match {
-                    let (bq_block, bq_txns) = convert_block_and_txns(&block)?;
-                    bq_importer.insert_into_buffer(bq_block, bq_txns)
-                } {
-                    Ok(_) => (),
-                    Err(err) => {
-                        eprintln!("conversion to bq failed due to {:?}", err);
+    while let Some(blocks) = TokioStreamExt::next(&mut stream).await {
+        match blocks {
+            Ok(blocks) => {
+                for block in blocks {
+                    if bq_importer.buffers.is_none() {
+                        bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
+                    }
+                    // convert our blocks and insert it into our buffer
+                    match {
+                        let (bq_block, bq_txns) = convert_block_and_txns(&block)?;
+                        bq_importer.insert_into_buffer(bq_block, bq_txns)
+                    } {
+                        Ok(_) => (),
+                        Err(err) => {
+                            eprintln!("conversion to bq failed due to {:?}", err);
+                        }
                     }
                 }
+
                 // if we've got enough blocks in hand
                 if bq_importer.n_blocks() >= MAX_TASKS {
                     let my_bq_proj = zilliqa_bq_proj.clone();
