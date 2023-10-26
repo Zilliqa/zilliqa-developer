@@ -494,13 +494,19 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
-                                    // TODO: Assumes that a static call just produces the Keccak of the name
-                                    // The "correct" to do would be to make this spec dependant
-                                    let hash = Keccak256::digest(name);
-                                    let mut selector = Vec::new();
-                                    selector.extend_from_slice(&hash[..4]);
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.push(selector);
+                                    let mut ctx = &mut code_builder.context;
+                                    if let Some(constructor) = &ctx.default_constructors.get(name) {
+                                        info!("Found module-defined default constructor for {}", name);
+                                        constructor(&mut evm_block);
+                                    } else {
+                                        // Falling back to plain enum type naming with no data associated
+                                        // for custom types.
+                                        let hash = Keccak256::digest(name);
+                                        let mut selector = Vec::new();
+                                        selector.extend_from_slice(&hash[..4]);
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                        evm_block.push(selector);
+                                    }
                                 }
                                 Operation::IsEqual {
                                     ref left,

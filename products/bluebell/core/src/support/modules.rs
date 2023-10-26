@@ -83,6 +83,13 @@ impl BluebellModule for ScillaDefaultTypes {
         }
 
         context.declare_dynamic_string("String");
+
+        context.declare_default_constructor("Bool::False", |block| {
+            block.push([0].to_vec());
+        });
+        context.declare_default_constructor("Bool::True", |block| {
+            block.push([1].to_vec());
+        });
     }
 }
 
@@ -432,6 +439,16 @@ impl BluebellModule for ScillaDefaultBuiltins {
         let _ = specification
             .declare_function(
                 "builtin__eq::<Uint64,Uint64>",
+                ["Uint64", "Uint64"].to_vec(),
+                "Bool",
+            )
+            .attach_assembly(|block| {
+                block.eq();
+            });
+
+        let _ = specification
+            .declare_function(
+                "builtin__eq::<Bool,Bool>",
                 ["Uint64", "Uint64"].to_vec(),
                 "Bool",
             )

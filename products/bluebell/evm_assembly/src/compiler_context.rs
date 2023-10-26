@@ -18,7 +18,7 @@ pub struct EvmCompilerContext {
     pub raw_function_declarations: HashMap<String, (Vec<String>, String)>,
 
     pub type_declarations: HashMap<String, EvmType>,
-
+    pub default_constructors: HashMap<String, AssemblyBuilderFn>,
     pub function_declarations: HashMap<String, EvmFunctionSignature>,
     pub inline_generics: HashMap<String, InlineGenericsFn>,
     pub special_variables: HashMap<String, SpecialVariableFn>,
@@ -83,6 +83,7 @@ impl EvmCompilerContext {
         Self {
             raw_function_declarations: HashMap::new(),
 
+            default_constructors: HashMap::new(),
             type_declarations: HashMap::new(),
             function_declarations: HashMap::new(),
             inline_generics: HashMap::new(),
@@ -152,6 +153,11 @@ impl EvmCompilerContext {
         }
         self.inline_generics.insert(name.to_string(), builder);
         Ok(())
+    }
+
+    pub fn declare_default_constructor(&mut self, name: &str, constructor: AssemblyBuilderFn) {
+        self.default_constructors
+            .insert(name.to_string(), constructor);
     }
 
     pub fn declare_function(
