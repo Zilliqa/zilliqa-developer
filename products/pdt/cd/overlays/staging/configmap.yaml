@@ -14,4 +14,4 @@ data:
   DOWNLOAD_DIR: "/data/download"
   UNPACK_DIR: "/data/download"
   NR_THREADS: "1"
-BATCH_BLOCKS: "10000"
+  BATCH_BLOCKS: "10000"
