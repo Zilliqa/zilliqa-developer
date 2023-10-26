@@ -29,7 +29,7 @@ async fn get_block_by_number(x: U64, provider: &Provider<Http>) -> Result<Block<
         // the sleep duration is set arbitrarily.
         tokio::time::sleep(Duration::from_millis(1000)).await;
         raw_block = provider
-            .request("eth_getBlockByHash", [serialize(x), serialize(true)])
+            .request("eth_getBlockByNumber", [serialize(x), serialize(true)])
             .await?;
         raw_block["nonce"] = serde_json::to_value("0x0000000000000000")?;
 
