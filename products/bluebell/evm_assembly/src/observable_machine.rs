@@ -193,8 +193,12 @@ impl ObservableMachine {
                                     let ret = {
                                         let mem = self.machine.memory().data();
                                         let end = args_offset + args_size;
-                                        //let
-                                        let input = &mem[args_offset..end]; //args_offset, args_offset+args_size);
+
+                                        let input = if args_size > 0 {
+                                            &mem[args_offset..end]
+                                        } else {
+                                            &[]
+                                        };
 
                                         // TODO: Integrate these properly
                                         let dummy_context = Context {

@@ -629,7 +629,6 @@ impl IrPass for AnnotateBaseTypes {
                     }
                 }
             }
-            Operation::AcceptTransfer => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::PhiNode(inputs) => {
                 let mut type_name = None;
                 for input in inputs.iter_mut() {

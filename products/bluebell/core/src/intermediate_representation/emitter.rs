@@ -1024,12 +1024,28 @@ impl AstConverting for IrEmitter {
             } => {
                 unimplemented!()
             }
-            NodeStatement::Accept => Some(Box::new(Instruction {
-                ssa_name: None,
-                result_type: None,
-                operation: Operation::AcceptTransfer,
-                source_location: self.current_location(),
-            })),
+            NodeStatement::Accept => {
+                let mut arguments: Vec<IrIdentifier> = [].to_vec();
+                let name = IrIdentifier {
+                    unresolved: "__intrinsic_accept_transfer".to_string(), // TODO: Register somewhere globally
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::ProcedureName,
+                    is_definition: false,
+                    source_location: self.current_location(),
+                };
+
+                let operation = Operation::CallFunction { name, arguments };
+                // TODO: Location from component_id
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                    source_location: self.current_location(),
+                });
+
+                Some(instr)
+            }
             NodeStatement::Send { identifier_name: _ } => {
                 unimplemented!()
             }

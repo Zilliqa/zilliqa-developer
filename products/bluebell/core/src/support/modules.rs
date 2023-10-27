@@ -90,6 +90,8 @@ impl BluebellModule for ScillaDefaultTypes {
         context.declare_default_constructor("Bool::True", |block| {
             block.push([1].to_vec());
         });
+
+        // TODO: Functions to be moved out to another
     }
 }
 
@@ -137,6 +139,31 @@ impl BluebellModule for ScillaDebugBuiltins {
                         ]);
                         info!("{}", format!("{}", v));
                     }
+                    Ok((
+                        PrecompileOutput {
+                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
+                            output: input.to_vec(),
+                        },
+                        0,
+                    ))
+                }
+
+                custom_runtime
+            });
+
+        // TODO: Make runtime module that does this for the real chain
+        let _ = specification
+            .declare_function("__intrinsic_accept_transfer::<>", Vec::new(), "Uint256")
+            .attach_runtime(|| {
+                fn custom_runtime(
+                    input: &[u8],
+                    _gas_limit: Option<u64>,
+                    _context: &EvmContext,
+                    _backend: &dyn Backend,
+                    _is_static: bool,
+                ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
+                    info!("--- ACCEPTING FUNDS [DEBUG FUNCTION] ---");
+                    println!("--- ACCEPTING FUNDS [DEBUG FUNCTION] ---");
                     Ok((
                         PrecompileOutput {
                             output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),

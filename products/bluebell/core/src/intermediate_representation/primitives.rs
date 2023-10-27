@@ -240,7 +240,6 @@ pub enum Operation {
         data: String,
         typename: IrIdentifier,
     },
-    AcceptTransfer,
     PhiNode(Vec<IrIdentifier>),
 
     Return(Option<IrIdentifier>),

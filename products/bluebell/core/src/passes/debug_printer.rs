@@ -249,7 +249,6 @@ impl IrPass for DebugPrinter {
                 self.script.push_str(" ");
                 self.script.push_str(&data);
             }
-            Operation::AcceptTransfer => self.script.push_str("accept"),
             Operation::PhiNode(arguments) => {
                 self.script.push_str("phi [");
                 for (i, arg) in arguments.iter_mut().enumerate() {

@@ -682,6 +682,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Ignore terminating ref as this will just be pop at the end of the block.
                                 }
                                 _ => {
+                                    panic!("Unhandled operation {:#?}",instr);
                                     unimplemented!() // Add handling for other operations here
                                 }
                             }

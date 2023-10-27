@@ -181,10 +181,9 @@ impl PassExecutor for Operation {
                     //let ret = value.visit(pass, symbol_table);
                     address.name.visit(pass, symbol_table)
                 }
-                Operation::MemLoad
-                | Operation::MemStore
-                | Operation::AcceptTransfer
-                | Operation::PhiNode(_) => Ok(TraversalResult::Continue),
+                Operation::MemLoad | Operation::MemStore | Operation::PhiNode(_) => {
+                    Ok(TraversalResult::Continue)
+                }
                 Operation::ConditionalJump {
                     expression,
                     on_success,
