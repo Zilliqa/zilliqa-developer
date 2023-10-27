@@ -91,10 +91,10 @@ transition setHello ()
   is_owner = False;
   match is_owner with
   | True =>
-    x = builtin print__impl msg
+    print msg
   | False =>
-    x = builtin print__impl msg;
-    y = builtin print__impl msg
+    print msg;
+    print msg
   end
 
 end

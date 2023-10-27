@@ -5,7 +5,8 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct TypeInfo {
-    pub name: String,
+    pub symbol_name: String,
+    pub typename: String,
     pub return_type: Option<String>,
     pub arguments: Vec<String>,
     pub constructor: bool,
@@ -100,20 +101,34 @@ impl SymbolTable {
 
     pub fn create_plain_typename(&self, typename: &str) -> Box<TypeInfo> {
         Box::new(TypeInfo {
-            name: typename.to_string(),
+            symbol_name: "".to_string(),
+            typename: typename.to_string(),
             return_type: None,
             arguments: Vec::new(),
             constructor: false,
         })
     }
 
-    pub fn type_of(&self, name: &str) -> Option<Box<TypeInfo>> {
+    pub fn type_of(&self, name: &str, namespace: &Option<String>) -> Option<Box<TypeInfo>> {
+        if let Some(namespace) = &namespace {
+            // Split the namespace into parts
+            let parts: Vec<&str> = namespace.split("::").collect();
+
+            // Iterate over the parts from most specific to least specific
+            for i in (0..=parts.len()).rev() {
+                let qualified_name = format!("{}::{}", parts[0..i].join("::"), name);
+                if let Some(value) = self.type_of_table.get(&qualified_name) {
+                    return Some(value.clone());
+                }
+            }
+        }
+
         self.type_of_table.get(name).cloned()
     }
 
     pub fn typename_of(&self, name: &str) -> Option<String> {
         if let Some(ti) = self.type_of_table.get(name) {
-            Some(ti.name.clone())
+            Some(ti.typename.clone())
         } else {
             None
         }
@@ -142,7 +157,8 @@ impl SymbolTable {
         signature.push_str(return_type);
 
         let typeinfo = Box::new(TypeInfo {
-            name: signature.clone(),
+            symbol_name: symbol.to_string(),
+            typename: signature.clone(),
             return_type: Some(return_type.to_string()),
             arguments: Vec::new(),
             constructor,

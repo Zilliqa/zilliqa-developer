@@ -259,10 +259,10 @@ transition setHello ()
 	x = False;
 	match x with
 	  | True =>
-	    a = builtin print__impl msg
+	    print msg
 	  | False =>
-	    a = builtin print__impl msg;
-	    b = builtin print__impl msg
+	    print msg;
+	    print msg
 	end
 end
 "#
@@ -289,8 +289,8 @@ contract HelloWorld()
 
 transition setHello ()
   msg = Uint64 12;
-  x = builtin print__impl msg;
-  y = builtin print__impl msg
+  print msg;
+  print msg
 end
 "#,
             ""
@@ -319,10 +319,10 @@ transition setHello ()
   is_owner = False;
   match is_owner with
   | True =>
-    x = builtin print__impl msg
+    print msg
   | False =>
-    x = builtin print__impl msg;
-    y = builtin print__impl msg
+    print msg;
+    print msg
   end
 
 end
@@ -351,7 +351,7 @@ transition setHello (msg : Uint64)
   is_owner = True;
   match is_owner with
   | True =>
-    x = builtin print__impl msg
+    print msg
   end
 end
 "#,
@@ -393,7 +393,7 @@ end
 transition setHello (msg : Uint64)
   setHelloImpl msg;
   msg <- welcome_msg;
-  x = builtin print msg
+  print msg
 end
 "#,
             ""

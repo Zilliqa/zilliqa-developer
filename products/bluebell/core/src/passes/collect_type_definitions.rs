@@ -228,6 +228,9 @@ impl IrPass for CollectTypeDefinitionsPass {
         fnc.body.visit(self, symbol_table)?;
 
         // Declaring
+
+        println!("{:#?}", fnc.name);
+        let qualified_name = format!("{}::<{}>", qualified_name, args_types.join(","));
         let return_type = "TODO";
         symbol_table.declare_function_type(&qualified_name, &args_types, return_type)?;
 

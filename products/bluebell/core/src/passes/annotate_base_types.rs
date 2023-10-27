@@ -52,7 +52,7 @@ impl AnnotateBaseTypes {
         symbol_table: &mut SymbolTable,
     ) -> Option<Box<TypeInfo>> {
         if let Some(name) = &symbol.resolved {
-            symbol_table.type_of(name)
+            symbol_table.type_of(name, &self.namespace)
         } else {
             None
         }
@@ -225,7 +225,7 @@ impl IrPass for AnnotateBaseTypes {
         match symbol.kind {
             IrIndentifierKind::Unknown => {
                 if let Some(typeinfo) = self.type_of(symbol, symbol_table) {
-                    symbol.type_reference = Some(typeinfo.name.clone());
+                    symbol.type_reference = Some(typeinfo.typename.clone());
 
                     // We only move constructors out of line
                     if !typeinfo.is_constructor() {
@@ -521,20 +521,32 @@ impl IrPass for AnnotateBaseTypes {
                 };
 
                 let function_type = format!("{}::<{}>", name_value, argument_type_args).to_string();
+                println!("Update 1: {:#?} -> {}", name, function_type);
+
+                let function_type = if let Some(typeinfo)= symbol_table.type_of(&function_type, &self.namespace) {
+                    typeinfo.symbol_name
+                } else {
+                    panic!("Unable to find symbol {}", function_type);
+                };
+
                 name.resolved = Some(function_type.clone());
+
 
                 // The value of the SSA is the return type of the function
                 // TODO: To this end we need to resolve the type refernce from the resolved name
                 name.type_reference = Some(function_type.clone()); // TODO: Should contain return type as this is a function pointer
 
-                let type_info = match symbol_table.type_of(&function_type) {
+                let type_info = match symbol_table.type_of(&function_type, &self.namespace) {
                     Some(v) => {
                         match v.return_type {
                             Some(r) => r,
                             None => "Void".to_string() // TODO: Get value from somewhere
                         }
                     }
-                    None => panic!("Undeclared function {}", function_type)
+                    None => {
+                        println!("{:#?}", symbol_table);
+                        panic!("Undeclared function {}", function_type)
+                    }
                 };
 
                 type_info
@@ -550,7 +562,7 @@ impl IrPass for AnnotateBaseTypes {
                 }
 
                 let return_type = if let Some(function_type) = &name.type_reference {
-                    let function_typeinfo = symbol_table.type_of(function_type);
+                    let function_typeinfo = symbol_table.type_of(function_type, &self.namespace);
 
                     if let Some(function_typeinfo) = function_typeinfo {
                         function_typeinfo.return_type.expect("").clone()

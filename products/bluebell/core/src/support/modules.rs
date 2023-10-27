@@ -120,11 +120,7 @@ impl BluebellModule for ScillaDebugBuiltins {
             });
 
         let _ = specification
-            .declare_function(
-                "builtin__print__impl::<Uint64>",
-                ["Uint64"].to_vec(),
-                "Uint256",
-            )
+            .declare_function("print::<Uint64>", ["Uint64"].to_vec(), "Uint256")
             .attach_runtime(|| {
                 fn custom_runtime(
                     input: &[u8],

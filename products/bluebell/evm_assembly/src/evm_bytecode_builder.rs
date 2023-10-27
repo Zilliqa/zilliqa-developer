@@ -464,6 +464,7 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                                 instruction.u32_to_arg_big_endian(*p);
                             }
                             None => {
+                                println!("Available labels: {:#?}", self.label_positions);
                                 panic!("Label not found {:#?}!", name);
                             }
                         }

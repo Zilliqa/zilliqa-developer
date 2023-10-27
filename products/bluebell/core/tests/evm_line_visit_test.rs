@@ -14,8 +14,8 @@ mod tests {
 --|
 --> transition setHello ()
 -->   msg = Uint64 12;
--->   x = builtin print__impl msg;
--->   y = builtin print__impl msg
+-->   print msg;
+-->   print msg
 --|  end
 "#,
             "",
