@@ -139,6 +139,9 @@ struct ListenOptions {
 
     #[arg(long, default_value = "prj-c-data-analytics-3xs14wez")]
     project_id: String,
+
+    #[arg(long, default_value = "5")]
+    buffer_size: usize,
 }
 
 const TESTNET_BUCKET: &str = "301978b4-0c0a-4b6b-ad7b-3a2f63c5182c";
@@ -281,12 +284,13 @@ async fn bigquery_listen_outer(
     bq_project_id: &str,
     bq_dataset_id: &str,
     network_type: &NetworkType,
+    block_buffer_size: usize,
 ) -> Result<()> {
     let api_url = match network_type {
         NetworkType::Testnet => DEV_API_URL,
         NetworkType::Mainnet => MAINNET_API_URL,
     };
-    listen_bq(bq_project_id, bq_dataset_id, api_url).await
+    listen_bq(bq_project_id, bq_dataset_id, api_url, block_buffer_size).await
 }
 
 #[tokio::main]
@@ -325,6 +329,7 @@ async fn main() -> Result<()> {
                 &opts.dataset_id,
                 &cli.network_type
                     .expect("no network type -- did forget to set --network-type?"),
+                opts.buffer_size,
             )
             .await
         }

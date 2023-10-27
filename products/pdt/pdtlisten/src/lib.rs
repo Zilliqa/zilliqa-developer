@@ -220,7 +220,12 @@ pub async fn listen_psql(postgres_url: &str, api_url: &str) -> Result<()> {
 /// This allows continuity from last listen or import was carried out
 /// The listen also keeps track blocks that it has encountered before, discarding any seen blocks
 /// If encounters a gap of block received with last seen, tries to patch it
-pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) -> Result<()> {
+pub async fn listen_bq(
+    bq_project_id: &str,
+    bq_dataset_id: &str,
+    api_url: &str,
+    block_buffer_size: usize,
+) -> Result<()> {
     // let mut jobs = JoinSet::new();
     let coords = ProcessCoordinates {
         nr_machines: 1,
@@ -271,7 +276,7 @@ pub async fn listen_bq(bq_project_id: &str, bq_dataset_id: &str, api_url: &str) 
                 }
 
                 // if we've got enough blocks in hand
-                if bq_importer.n_blocks() >= MAX_TASKS {
+                if bq_importer.n_blocks() >= block_buffer_size {
                     let my_bq_proj = zilliqa_bq_proj.clone();
                     let buffers = bq_importer.take_buffers()?;
                     let range = bq_importer
