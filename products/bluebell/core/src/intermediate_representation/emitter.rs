@@ -691,6 +691,8 @@ impl AstConverting for IrEmitter {
                 contract_type_arguments,
                 argument_list,
             } => {
+                self.push_source_position(&identifier_name.start, &identifier_name.end);
+
                 let _ = identifier_name.visit(self)?;
 
                 // Expecting function name symbol
@@ -712,13 +714,15 @@ impl AstConverting for IrEmitter {
                     owner: None, // We cannot deduce the type from the AST
                     arguments,
                 };
+
                 let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
                     operation,
                     source_location: self.current_location(),
                 });
-
+                println!("Current source location: {:#?}", self.current_location());
+                self.pop_source_position();
                 self.stack.push(StackObject::Instruction(instr));
             }
             NodeFullExpression::TemplateFunction {
@@ -1172,8 +1176,9 @@ impl AstConverting for IrEmitter {
                 component_id,
                 arguments: call_args,
             } => {
+                self.push_source_position(&component_id.start, &component_id.end);
+
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
-                warn!("Emitter call '{:?}' with {:#?}", component_id, call_args);
                 for arg in call_args.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
@@ -1198,7 +1203,7 @@ impl AstConverting for IrEmitter {
                 };
 
                 let operation = Operation::CallFunction { name, arguments };
-
+                // TODO: Location from component_id
                 let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
@@ -1206,6 +1211,7 @@ impl AstConverting for IrEmitter {
                     source_location: self.current_location(),
                 });
 
+                self.pop_source_position();
                 // self.stack.push(StackObject::Instruction(instr));
                 Some(instr)
             }

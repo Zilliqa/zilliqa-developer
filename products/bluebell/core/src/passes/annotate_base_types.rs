@@ -521,7 +521,6 @@ impl IrPass for AnnotateBaseTypes {
                 };
 
                 let function_type = format!("{}::<{}>", name_value, argument_type_args).to_string();
-                println!("Update 1: {:#?} -> {}", name, function_type);
 
                 let function_type = if let Some(typeinfo)= symbol_table.type_of(&function_type, &self.namespace) {
                     typeinfo.symbol_name
