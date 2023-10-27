@@ -36,7 +36,7 @@ impl NameGenerator {
 
     pub fn hex_type(&self) -> IrIdentifier {
         IrIdentifier {
-            unresolved: "String".to_string(), // TODO: Correct structure would be Dynamic Byte String
+            unresolved: "String".to_string(), // TODO: Correct structure would be Dynamic Byte String, see https://scilla-cookbook.org/recipes/scilla-recipes/addresses
             resolved: None,
             type_reference: None,
             kind: IrIndentifierKind::TypeName,
