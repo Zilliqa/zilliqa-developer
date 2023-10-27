@@ -137,4 +137,36 @@ end
             "+0x1000000000000000000000000000000000000000.0x0000000000000000000000000000000000000000000000000000000000001337=0x000000000000000000000000000000000000000000000000000000000000002a"
         );
     }
+
+    #[test]
+    fn test_conditional_set_state_combined_logic() {
+        // TODO: Test case not working
+        test_compile_and_execute_full_evm!(
+            "HelloWorld::setHello",
+            "[42]",
+            r#"scilla_version 0
+
+            library HelloWorld
+            
+            contract HelloWorld()
+            field welcome_msg : Uint64 = Uint64 0
+
+            transition setHello (msg: Uint64)
+              zero = Uint64 0;
+              test = Uint64 42;
+              is_owner = builtin eq msg test;
+              test2 = False;
+              is_false = builtin eq test2 is_owner;
+              match is_false with
+              | True =>
+                welcome_msg := zero
+              | _ =>
+                welcome_msg := msg 
+              end
+            end
+            
+"#,
+            "+0x1000000000000000000000000000000000000000.0x0000000000000000000000000000000000000000000000000000000000001337=0x000000000000000000000000000000000000000000000000000000000000002a"
+        );
+    }
 }
