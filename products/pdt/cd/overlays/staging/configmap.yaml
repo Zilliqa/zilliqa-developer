@@ -15,3 +15,4 @@ data:
   UNPACK_DIR: "/data/download"
   NR_THREADS: "1"
   BATCH_BLOCKS: "10000"
+  BUFFER_SIZE: "5"
