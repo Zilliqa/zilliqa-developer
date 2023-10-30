@@ -27,3 +27,4 @@ sqlx = { version = "0.7.1", features = [
   "tls-native-tls",
 ] }
 ethers = "2.0.10"
+serde_with = "3.4.0"

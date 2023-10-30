@@ -2,19 +2,19 @@ mod importer;
 mod listener;
 mod types;
 use anyhow::{anyhow, bail, Context, Result};
-use ethers::{prelude::*, providers::StreamExt};
+use ethers::{prelude::*, providers::StreamExt, utils::hex};
 use jsonrpsee::{core::client::ClientT, http_client::HttpClient, rpc_params};
 use pdtbq::{bq::ZilliqaBQProject, bq_utils::BigQueryDatasetLocation};
 use pdtdb::{
     utils::ProcessCoordinates,
-    values::{BQMicroblock, BQTransaction, PSQLMicroblock, PSQLTransaction},
+    values::{BQMicroblock, BQTransaction, PSQLMicroblock, PSQLTransaction, ZILTransactionBody},
     zqproj::{Inserter, ZilliqaDBProject},
 };
 use pdtpsql::psql::ZilliqaPSQLProject;
 use serde::Serialize;
 use serde_json::{from_value, to_value, Value};
 use sqlx::postgres::PgPoolOptions;
-use std::{marker::PhantomData, time::Duration};
+use std::{collections::HashMap, marker::PhantomData, time::Duration};
 use tokio::pin;
 use tokio::task::JoinSet;
 use tokio_stream::StreamExt as TokioStreamExt;
@@ -33,15 +33,29 @@ async fn get_block_info(number: U64, client: &HttpClient) -> Result<types::GetTx
 
 fn convert_block_and_txns(
     block: &Block<Transaction>,
+    zil_txn_bodies: &Vec<ZILTransactionBody>,
 ) -> Result<(BQMicroblock, Vec<BQTransaction>)> {
     let my_block = block.clone();
     let bq_block = BQMicroblock::from_eth(&my_block)?;
     let version = bq_block.header_version;
+    let zil_transactions: HashMap<&str, ZILTransactionBody> = zil_txn_bodies
+        .into_iter()
+        .map(|x| (x.id.as_str(), x.clone()))
+        .collect();
+
     let mut txn_errs = vec![];
     let bq_transactions: Vec<BQTransaction> = my_block
         .transactions
         .into_iter()
-        .map(|txn| BQTransaction::from_eth(&txn, version))
+        .map(|txn| {
+            if let Some(zil_txn_body) =
+                zil_transactions.get(hex::encode(&txn.hash.as_bytes()).as_str())
+            {
+                BQTransaction::from_eth_with_zil_txn_bodies(&txn, zil_txn_body, version)
+            } else {
+                Err(anyhow!("some transaction zil body not found"))
+            }
+        })
         .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
         .collect();
     if !txn_errs.is_empty() {
@@ -264,9 +278,9 @@ pub async fn listen_bq(
                     bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
                 }
 
-                for block in blocks {
+                for (block, zil_txn_bodies) in blocks {
                     // convert our blocks and insert it into our buffer
-                    convert_block_and_txns(&block)
+                    convert_block_and_txns(&block, &zil_txn_bodies)
                         .and_then(|(bq_block, bq_txns)| {
                             bq_importer.insert_into_buffer(bq_block, bq_txns)
                         })

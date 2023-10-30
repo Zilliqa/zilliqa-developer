@@ -5,9 +5,33 @@ use ethers::{
 
 use anyhow::Result;
 use async_stream::try_stream;
+use pdtdb::values::ZILTransactionBody;
 use serde_json::{to_value, Value};
 use tokio::time::{interval, Duration};
 use tokio_stream::Stream;
+
+async fn get_zil_transaction_bodies_from_block(
+    block_number: U64,
+    provider: &Provider<Http>,
+) -> Result<Vec<ZILTransactionBody>> {
+    let mut raw_zil_txn_bodies: Value = provider
+        .request("GetTxnBodiesForTxBlock", [block_number.to_string()])
+        .await?;
+
+    // Serialise all receipts again
+    if let Some(txn_bodies) = raw_zil_txn_bodies.as_array_mut() {
+        txn_bodies.into_iter().for_each(|value| {
+            if let Some(v) = value.get_mut("receipt") {
+                *v = Value::String(v.to_string());
+            }
+        })
+    }
+
+    let zil_txn_bodies: Vec<ZILTransactionBody> =
+        serde_json::from_value::<Vec<ZILTransactionBody>>(raw_zil_txn_bodies)?;
+
+    Ok(zil_txn_bodies)
+}
 
 async fn get_block_by_number(x: U64, provider: &Provider<Http>) -> Result<Block<Transaction>> {
     println!("found block with number {:?}, getting block info", x);
@@ -44,7 +68,7 @@ async fn get_block_by_number(x: U64, provider: &Provider<Http>) -> Result<Block<
 async fn get_block(
     provider: &Provider<Http>,
     last_seen_block_number: &mut Option<U64>,
-) -> Result<Vec<Block<Transaction>>> {
+) -> Result<Vec<(Block<Transaction>, Vec<ZILTransactionBody>)>> {
     let block_number = provider.get_block_number().await?;
 
     let last_seen_block_number_unwrap = if let Some(_block_number) = last_seen_block_number {
@@ -59,10 +83,11 @@ async fn get_block(
         return Ok(Vec::new());
     }
 
-    let mut blocks: Vec<Block<Transaction>> = Vec::new();
+    let mut blocks: Vec<(Block<Transaction>, Vec<ZILTransactionBody>)> = Vec::new();
     for _block_number in last_seen_block_number_unwrap.as_u64() + 1..=block_number.as_u64() {
         let block = get_block_by_number(_block_number.into(), provider).await?;
-        blocks.push(block);
+        let txn_bodies = get_zil_transaction_bodies_from_block(block_number, provider).await?;
+        blocks.push((block, txn_bodies));
     }
 
     *last_seen_block_number = Some(block_number);
@@ -74,7 +99,7 @@ async fn get_block(
 pub fn listen_blocks(
     provider: &Provider<Http>,
     from_block: Option<i64>,
-) -> impl Stream<Item = Result<Vec<Block<Transaction>>>> + '_ {
+) -> impl Stream<Item = Result<Vec<(Block<Transaction>, Vec<ZILTransactionBody>)>>> + '_ {
     try_stream! {
         let mut interval = interval(Duration::from_secs(15));
         let mut last_seen_block_number: Option<U64> = from_block.map(U64::from);
