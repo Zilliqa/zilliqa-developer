@@ -3,12 +3,47 @@ use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::*;
 use crate::intermediate_representation::symbol_table::SymbolTable;
 
+/// `PassExecutor` is a trait that provides a method for visiting and altering
+/// the Intermediate Representation (IR) primitives. It is used by the `PassManager`
+/// to traverse the IR and apply transformations.
+///
+/// The `visit` method takes a mutable reference to the `IrPass` and the `SymbolTable`.
+/// It returns a `Result` with the `TraversalResult` and a `String` in case of an error.
+/// The traversult result determines how the algorithm proceeds in visiting subsequent nodes
+/// in the IR.
 pub trait PassExecutor {
     fn visit(
         &mut self,
         pass: &mut dyn IrPass,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String>;
+}
+
+/// The `IntermediateRepresentation` struct represents the Scilla Intermediate Representation (IR).
+/// It contains definitions for types, contract fields, and functions.
+///
+/// The `run_pass` method is used to run a pass on the IR. It takes a mutable reference to the `IrPass`
+/// and initiates the pass, visits each type definition, contract field, and function definition in the IR,
+/// and finalizes the pass. It returns a `Result` with the `TraversalResult` and a `String` in case of an error.
+impl IntermediateRepresentation {
+    pub fn run_pass(&mut self, pass: &mut dyn IrPass) -> Result<TraversalResult, String> {
+        pass.initiate();
+
+        for type_def in &mut self.type_definitions {
+            type_def.visit(pass, &mut self.symbol_table)?;
+        }
+
+        for contract_field in &mut self.fields_definitions {
+            contract_field.visit(pass, &mut self.symbol_table)?;
+        }
+
+        for function_def in &mut self.function_definitions {
+            function_def.visit(pass, &mut self.symbol_table)?;
+        }
+
+        pass.finalize();
+        Ok(TraversalResult::Continue)
+    }
 }
 
 impl PassExecutor for IrIndentifierKind {
@@ -472,26 +507,5 @@ impl PassExecutor for CaseClause {
             }
             _ => Ok(TraversalResult::Continue),
         }
-    }
-}
-
-impl IntermediateRepresentation {
-    pub fn run_pass(&mut self, pass: &mut dyn IrPass) -> Result<TraversalResult, String> {
-        pass.initiate();
-
-        for type_def in &mut self.type_definitions {
-            type_def.visit(pass, &mut self.symbol_table)?;
-        }
-
-        for contract_field in &mut self.fields_definitions {
-            contract_field.visit(pass, &mut self.symbol_table)?;
-        }
-
-        for function_def in &mut self.function_definitions {
-            function_def.visit(pass, &mut self.symbol_table)?;
-        }
-
-        pass.finalize();
-        Ok(TraversalResult::Continue)
     }
 }

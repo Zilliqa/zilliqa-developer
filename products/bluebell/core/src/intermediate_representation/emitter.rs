@@ -9,34 +9,84 @@ use log::info;
 
 use std::mem;
 
+/// Byte Code Generation Process
+///
+/// The process of generating byte code from Scilla source code involves several steps and transformations.
+/// Here is a high-level overview of the process:
+///
+/// ```plaintext
+/// [Scilla source code]
+///        |
+///        v
+/// [Abstract Syntax Tree (AST)]
+///        |
+///        | (AstConverting)
+///        v
+/// [Intermediate Representation (IR)]
+///        |
+///        | (PassManager)
+///        v
+/// [Optimized Intermediate Representation]
+///        |
+///        | (EvmBytecodeGenerator)
+///        v
+/// [EVM Bytecode]
+/// ```
+///
+/// Each arrow (`|        v`) represents a transformation or a step in the process.
+/// The name in parentheses (e.g., `(AstConverting)`) is the component or the process that performs the transformation.
+///
+/// 1. Scilla source code is parsed into an Abstract Syntax Tree (AST).
+/// 2. The AST is converted into an Intermediate Representation (IR) using the `AstConverting` trait.
+/// 3. The IR is optimized using the `PassManager`.
+/// 4. The optimized IR is then converted into EVM bytecode using the `EvmBytecodeGenerator`.
+///
+
+/// `StackObject` is an enum representing the different types of objects that can be placed on the stack during the conversion process.
+/// It includes EnumValue, IrIdentifier, Instruction, VariableDeclaration, FunctionBody, and FunctionBlock.
 #[derive(Debug, Clone)]
 enum StackObject {
+    /// Represents an EnumValue object on the stack.
     EnumValue(EnumValue),
 
+    /// Represents an IrIdentifier object on the stack.
     IrIdentifier(IrIdentifier),
+
+    /// Represents an Instruction object on the stack.
     Instruction(Box<Instruction>),
 
+    /// Represents a VariableDeclaration object on the stack.
     VariableDeclaration(VariableDeclaration),
+
+    /// Represents a FunctionBody object on the stack.
     FunctionBody(Box<FunctionBody>),
+
+    /// Represents a FunctionBlock object on the stack.
     FunctionBlock(Box<FunctionBlock>),
 }
 
+/// The `IrEmitter` struct is used for bookkeeping during the conversion of a Scilla AST to an intermediate representation.
+/// It implements the `AstConverting` trait, which is a generic trait for AST conversions.
 pub struct IrEmitter {
+    /// Stack of objects used during the conversion process.
     stack: Vec<StackObject>,
 
-    // Used for transition and procedure
+    /// Current function block being processed.
     current_block: Box<FunctionBlock>,
+
+    /// Current function body being processed.
     current_body: Box<FunctionBody>,
 
-    // Used for let function declarations
-    //    current_state: Option< Box< ComputableState > >,
-
-    // Other
+    /// Current namespace being processed.
     current_namespace: IrIdentifier,
+
+    /// Stack of namespaces used during the conversion process.
     namespace_stack: Vec<IrIdentifier>,
 
+    /// Intermediate representation of the AST.
     ir: Box<IntermediateRepresentation>,
 
+    /// Source positions of the AST nodes.
     source_positions: Vec<(SourcePosition, SourcePosition)>,
 }
 

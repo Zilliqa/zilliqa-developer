@@ -3,6 +3,7 @@ use crate::intermediate_representation::name_generator::NameGenerator;
 use primitive_types::U256;
 use std::collections::HashMap;
 
+/// Struct representing the type information of a symbol.
 #[derive(Debug, Clone)]
 pub struct TypeInfo {
     pub symbol_name: String,
@@ -12,18 +13,22 @@ pub struct TypeInfo {
     pub constructor: bool,
 }
 
+/// Implementation of TypeInfo struct.
 impl TypeInfo {
+    /// Checks if the TypeInfo is a function.
     pub fn is_function(&self) -> bool {
         match self.return_type {
             Some(_) => true,
             None => false,
         }
     }
+    /// Checks if the TypeInfo is a constructor.
     pub fn is_constructor(&self) -> bool {
         self.constructor
     }
 }
 
+/// Struct representing the state layout entry.
 #[derive(Debug, Clone)]
 pub struct StateLayoutEntry {
     pub address_offset: U256,
@@ -31,6 +36,7 @@ pub struct StateLayoutEntry {
     pub initializer: U256,
 }
 
+/// Struct representing the symbol table.
 #[derive(Debug, Clone)]
 pub struct SymbolTable {
     pub aliases: HashMap<String, String>,
@@ -39,15 +45,19 @@ pub struct SymbolTable {
     pub state_layout: HashMap<String, StateLayoutEntry>,
 }
 
+/// Trait for constructing a new symbol table.
 pub trait SymbolTableConstructor {
     fn new_symbol_table(&self) -> SymbolTable;
 }
 
+/// Implementation of SymbolTable struct.
 impl SymbolTable {
+    /// Checks if the given name is a state.
     pub fn is_state(&self, name: &String) -> bool {
         self.state_layout.get(name).is_some()
     }
 
+    /// Resolves the qualified name of a symbol.
     pub fn resolve_qualified_name(
         &mut self,
         basename: &String,
@@ -95,10 +105,12 @@ impl SymbolTable {
         None
     }
 
+    /// Returns a mutable reference to the name generator.
     pub fn get_name_generator(&mut self) -> &mut NameGenerator {
         &mut self.name_generator
     }
 
+    /// Creates a plain typename.
     pub fn create_plain_typename(&self, typename: &str) -> Box<TypeInfo> {
         Box::new(TypeInfo {
             symbol_name: "".to_string(),
@@ -109,6 +121,7 @@ impl SymbolTable {
         })
     }
 
+    /// Returns the type of a symbol.
     pub fn type_of(&self, name: &str, namespace: &Option<String>) -> Option<Box<TypeInfo>> {
         if let Some(namespace) = &namespace {
             // Split the namespace into parts
@@ -126,6 +139,7 @@ impl SymbolTable {
         self.type_of_table.get(name).cloned()
     }
 
+    /// Returns the typename of a symbol.
     pub fn typename_of(&self, name: &str) -> Option<String> {
         if let Some(ti) = self.type_of_table.get(name) {
             Some(ti.typename.clone())
@@ -134,6 +148,7 @@ impl SymbolTable {
         }
     }
 
+    /// Checks if a symbol is a function.
     pub fn is_function(&self, name: &str) -> bool {
         if let Some(ti) = self.type_of_table.get(name) {
             ti.is_function()
@@ -142,6 +157,7 @@ impl SymbolTable {
         }
     }
 
+    /// Declares a function or constructor type.
     pub fn declare_function_or_constructor_type(
         &mut self,
         symbol: &str,
@@ -172,6 +188,7 @@ impl SymbolTable {
         Ok(symbol.to_string())
     }
 
+    /// Declares a function type.
     pub fn declare_function_type(
         &mut self,
         symbol: &str,
@@ -181,6 +198,7 @@ impl SymbolTable {
         self.declare_function_or_constructor_type(symbol, arguments, return_type, false)
     }
 
+    /// Declares a constructor.
     pub fn declare_constructor(
         &mut self,
         symbol: &str,
@@ -191,6 +209,7 @@ impl SymbolTable {
         self.declare_function_or_constructor_type(symbol, arguments, return_type, true)
     }
 
+    /// Declares the type of a symbol.
     pub fn declare_type_of(&mut self, symbol: &str, typename: &str) -> Result<String, String> {
         let typeinfo = self.create_plain_typename(typename);
 
@@ -199,6 +218,7 @@ impl SymbolTable {
         Ok(symbol.to_string())
     }
 
+    /// Declares a special variable.
     pub fn declare_special_variable(
         &mut self,
         name: &str,
@@ -207,10 +227,12 @@ impl SymbolTable {
         self.declare_type_of(name, typename)
     }
 
+    /// Declares a type.
     pub fn declare_type(&mut self, symbol: &str) -> Result<String, String> {
         self.declare_type_of(symbol, symbol)
     }
 
+    /// Declares an alias for a symbol.
     pub fn declare_alias(&mut self, alias: &str, symbol: &str) -> Result<String, String> {
         self.aliases.insert(alias.to_string(), symbol.to_string());
         Ok(symbol.to_string())
