@@ -17,7 +17,7 @@ use crate::intermediate_representation::symbol_table::SymbolTable;
 pub struct StateCollector {
     namespace_stack: Vec<String>,
     current_namespace: Option<String>,
-    current_type: Option<String>,
+    // current_type: Option<String>,
     address_offset: u64,
 }
 
@@ -26,7 +26,7 @@ impl StateCollector {
         StateCollector {
             namespace_stack: Vec::new(),
             current_namespace: None,
-            current_type: None,
+            // current_type: None,
             address_offset: 4919, // TODO:
         }
     }
@@ -153,7 +153,7 @@ impl IrPass for StateCollector {
     fn visit_symbol_name(
         &mut self,
         _mode: TreeTraversalMode,
-        symbol: &mut IrIdentifier,
+        _symbol: &mut IrIdentifier,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
@@ -161,9 +161,9 @@ impl IrPass for StateCollector {
 
     fn visit_primitives(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         _primitives: &mut IntermediateRepresentation,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

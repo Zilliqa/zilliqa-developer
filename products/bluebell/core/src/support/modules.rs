@@ -6,7 +6,7 @@ use evm::{Context as EvmContext, ExitError, ExitSucceed};
 use evm_assembly::block::EvmBlock;
 use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::types::EvmType;
-use log::{error, info};
+use log::info;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::mem;
@@ -53,7 +53,7 @@ impl SymbolTableConstructor for EvmCompilerContext {
         // Adding function types
         for (name, (args, return_type)) in self.raw_function_declarations.iter() {
             // info!("Declaring {:#?}",f);
-            ret.declare_function_type(&name, args, &return_type);
+            let _ = ret.declare_function_type(&name, args, &return_type);
         }
 
         ret
@@ -276,14 +276,6 @@ impl BluebellModule for ScillaDebugBuiltins {
                             format!("{}\n", hex::encode(input))
                         ),
                     };
-
-                    Ok((
-                        PrecompileOutput {
-                            output_type: PrecompileOutputType::Exit(ExitSucceed::Returned),
-                            output: input.to_vec(),
-                        },
-                        0,
-                    ))
                 }
 
                 custom_runtime
@@ -433,9 +425,9 @@ impl BluebellModule for ScillaDefaultBuiltins {
                 fn custom_runtime(
                     input: &[u8],
                     gas_limit: Option<u64>,
-                    context: &EvmContext,
+                    _context: &EvmContext,
                     _backend: &dyn Backend,
-                    is_static: bool,
+                    _is_static: bool,
                 ) -> Result<(PrecompileOutput, u64), PrecompileFailure> {
                     let gas_needed = 20;
 

@@ -24,7 +24,7 @@ use yewdux::store::Store;
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExecutionStatus {
     Succeeded,
-    Paused,
+    // Unused Paused,
     Failed,
 }
 

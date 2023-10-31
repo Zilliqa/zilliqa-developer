@@ -35,7 +35,7 @@ pub struct AppLayoutProps {
 
 pub struct AppLayout {
     props: AppLayoutProps,
-    dispatch: Dispatch<State>,
+    _dispatch: Dispatch<State>,
     state: Rc<State>,
 }
 
@@ -56,7 +56,7 @@ impl Component for AppLayout {
         Self {
             props: props.clone(),
             state: dispatch.get(),
-            dispatch,
+            _dispatch: dispatch,
         }
     }
 
@@ -289,7 +289,7 @@ pub fn app() -> Html {
                           <div class={
                                 match *error_code {
                                     ExecutionStatus::Succeeded => "pointer-events-auto flex items-center justify-between gap-x-6 bg-green-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5",
-                                    ExecutionStatus::Paused => "pointer-events-auto flex items-center justify-between gap-x-6 bg-yellow-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5",
+                                    // Unused ExecutionStatus::Paused => "pointer-events-auto flex items-center justify-between gap-x-6 bg-yellow-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5",
                                     ExecutionStatus::Failed => "pointer-events-auto flex items-center justify-between gap-x-6 bg-red-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5"
                                 }
                             }>
@@ -299,7 +299,7 @@ pub fn app() -> Html {
     {
                                 match *error_code {
                                     ExecutionStatus::Succeeded => "Execution suceeded",
-                                    ExecutionStatus::Paused => "Execution paused",
+                                    // Unused ExecutionStatus::Paused => "Execution paused",
                                     ExecutionStatus::Failed => "Execution failed"
                                 }
                             }

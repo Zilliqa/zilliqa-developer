@@ -393,7 +393,7 @@ impl IrPass for AnnotateBaseTypes {
     ) -> Result<TraversalResult, String> {
         // TODO: These types should be stored somewhere (in the symbol table maybe?)
         let typename = match &mut instr.operation {
-            Operation::TerminatingRef(identifier) => {
+            Operation::TerminatingRef(_identifier) => {
                 "Void".to_string() // TODO: Fetch from somewhere
             }
             Operation::Noop => "Void".to_string(), // TODO: Fetch from somewhere

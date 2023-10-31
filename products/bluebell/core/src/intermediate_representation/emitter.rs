@@ -3,10 +3,10 @@ use crate::ast::nodes::*;
 use crate::ast::visitor::AstVisitor;
 use crate::constants::{TraversalResult, TreeTraversalMode};
 use crate::intermediate_representation::primitives::*;
-use crate::intermediate_representation::symbol_table::{SymbolTable, SymbolTableConstructor};
+use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::parser::lexer::SourcePosition;
 use log::info;
-use log::warn;
+
 use std::mem;
 
 #[derive(Debug, Clone)]
@@ -472,7 +472,7 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeFullExpression::LocalVariableDeclaration {
-                identifier_name,
+                identifier_name: _,
                 expression,
                 type_annotation: _,
                 containing_expression,
@@ -545,147 +545,151 @@ impl AstConverting for IrEmitter {
                 unimplemented!();
             }
             NodeFullExpression::Match {
-                match_expression,
-                clauses,
+                match_expression: _,
+                clauses: _,
             } => {
-                info!("Match statement");
-                let _ = match_expression.visit(self)?;
-                let expression = self.pop_instruction()?;
-                let source_location = expression.source_location.clone();
+                unimplemented!();
+            } /* TODO: {
 
-                let main_expression_symbol = self.convert_instruction_to_symbol(expression);
+            info!("Match statement");
+            let _ = match_expression.visit(self)?;
+            let expression = self.pop_instruction()?;
+            let source_location = expression.source_location.clone();
 
-                let finally_exit_label = self
-                    .ir
-                    .symbol_table
-                    .name_generator
-                    .new_block_label("match_finally");
+            let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
-                let mut phi_results: Vec<IrIdentifier> = Vec::new();
+            let finally_exit_label = self
+            .ir
+            .symbol_table
+            .name_generator
+            .new_block_label("match_finally");
 
-                for clause in clauses.iter() {
-                    info!("Next clause");
-                    let fail_label = self
-                        .ir
-                        .symbol_table
-                        .name_generator
-                        .new_block_label("match_fail");
-                    todo!("Catch all is untested."); //
+            let mut phi_results: Vec<IrIdentifier> = Vec::new();
 
-                    match &clause.node.pattern.node {
-                        NodePattern::Wildcard => {
-                            info!("Dealing with wildcard");
-                            // Doing nothing as we will just write the instructions to the current block
-                        }
-                        NodePattern::Binder(_) => {
-                            unimplemented!()
-                        }
-                        NodePattern::Constructor(name, args) => {
-                            info!("Setting {} up", name);
-                            clause.node.pattern.visit(self)?;
+            for clause in clauses.iter() {
+            info!("Next clause");
+            let fail_label = self
+            .ir
+            .symbol_table
+            .name_generator
+            .new_block_label("match_fail");
+            todo!("Catch all is untested."); //
 
-                            // Creating compare instruction
-                            // TODO: Pop instruction or symbol
-                            let expected_value = self.pop_ir_identifier()?;
-                            assert!(expected_value.kind == IrIndentifierKind::Unknown);
-
-                            let source_location = expected_value.source_location.clone();
-
-                            let compare_instr = Box::new(Instruction {
-                                ssa_name: None,
-                                result_type: None,
-                                operation: Operation::IsEqual {
-                                    left: main_expression_symbol.clone(),
-                                    right: expected_value,
-                                },
-                                source_location: source_location.clone(),
-                            });
-                            let case = self.convert_instruction_to_symbol(compare_instr);
-
-                            // Blocks for success
-
-                            let success_label = self
-                                .ir
-                                .symbol_table
-                                .name_generator
-                                .new_block_label("match_success");
-                            let mut success_block =
-                                FunctionBlock::new_from_symbol(success_label.clone());
-
-                            // Terminating current block
-                            let op = Operation::ConditionalJump {
-                                expression: case,
-                                on_success: success_label,
-                                on_failure: fail_label.clone(),
-                            };
-                            self.current_block
-                                .instructions
-                                .push_back(Box::new(Instruction {
-                                    ssa_name: None,
-                                    result_type: None,
-                                    operation: op,
-                                    source_location,
-                                }));
-
-                            // Finishing current_block and moving it onto
-                            // to the current body while preparing the success block
-                            // as current
-                            mem::swap(&mut success_block, &mut self.current_block);
-                            self.current_body.blocks.push(success_block);
-                        }
-                    }
-
-                    let _ = clause.node.expression.visit(self)?;
-                    let expr_instr = self.pop_instruction()?;
-                    let source_location = expr_instr.source_location.clone();
-
-                    let result_sym = self.convert_instruction_to_symbol(expr_instr);
-                    phi_results.push(result_sym);
-
-                    let exit_instruction = Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::Jump(finally_exit_label.clone()),
-                        source_location,
-                    });
-                    self.current_block.instructions.push_back(exit_instruction);
-                    self.current_block.terminated = true;
-                    // Pushing sucess block and creating fail block
-
-                    let mut fail_block = FunctionBlock::new_from_symbol(fail_label.clone());
-                    mem::swap(&mut fail_block, &mut self.current_block);
-                    self.current_body.blocks.push(fail_block);
-
-                    // let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_case");
-                    // let fail_block = FunctionBlock::new_from_symbol(fail_label);
-                }
-
-                // TODO: Catch all if needed
-
-                // Exiting
-                let exit_instruction = Box::new(Instruction {
-                    ssa_name: None,
-                    result_type: None,
-                    operation: Operation::Jump(finally_exit_label.clone()),
-                    source_location: source_location.clone(),
-                });
-                self.current_block.instructions.push_back(exit_instruction);
-
-                // Attaching exit block
-                let mut finally_exit_block =
-                    FunctionBlock::new_from_symbol(finally_exit_label.clone());
-                mem::swap(&mut finally_exit_block, &mut self.current_block);
-                self.current_body.blocks.push(finally_exit_block);
-
-                self.stack
-                    .push(StackObject::Instruction(Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::PhiNode(phi_results),
-                        source_location: source_location.clone(),
-                    })));
-                // unimplemented!();
+            match &clause.node.pattern.node {
+            NodePattern::Wildcard => {
+            info!("Dealing with wildcard");
+            // Doing nothing as we will just write the instructions to the current block
             }
+            NodePattern::Binder(_) => {
+            unimplemented!()
+            }
+            NodePattern::Constructor(name, args) => {
+            info!("Setting {} up", name);
+            clause.node.pattern.visit(self)?;
+
+            // Creating compare instruction
+            // TODO: Pop instruction or symbol
+            let expected_value = self.pop_ir_identifier()?;
+            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+
+            let source_location = expected_value.source_location.clone();
+
+            let compare_instr = Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::IsEqual {
+            left: main_expression_symbol.clone(),
+            right: expected_value,
+            },
+            source_location: source_location.clone(),
+            });
+            let case = self.convert_instruction_to_symbol(compare_instr);
+
+            // Blocks for success
+
+            let success_label = self
+            .ir
+            .symbol_table
+            .name_generator
+            .new_block_label("match_success");
+            let mut success_block =
+            FunctionBlock::new_from_symbol(success_label.clone());
+
+            // Terminating current block
+            let op = Operation::ConditionalJump {
+            expression: case,
+            on_success: success_label,
+            on_failure: fail_label.clone(),
+            };
+            self.current_block
+            .instructions
+            .push_back(Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: op,
+            source_location,
+            }));
+
+            // Finishing current_block and moving it onto
+            // to the current body while preparing the success block
+            // as current
+            mem::swap(&mut success_block, &mut self.current_block);
+            self.current_body.blocks.push(success_block);
+            }
+            }
+
+            let _ = clause.node.expression.visit(self)?;
+            let expr_instr = self.pop_instruction()?;
+            let source_location = expr_instr.source_location.clone();
+
+            let result_sym = self.convert_instruction_to_symbol(expr_instr);
+            phi_results.push(result_sym);
+
+            let exit_instruction = Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::Jump(finally_exit_label.clone()),
+            source_location,
+            });
+            self.current_block.instructions.push_back(exit_instruction);
+            self.current_block.terminated = true;
+            // Pushing sucess block and creating fail block
+
+            let mut fail_block = FunctionBlock::new_from_symbol(fail_label.clone());
+            mem::swap(&mut fail_block, &mut self.current_block);
+            self.current_body.blocks.push(fail_block);
+
+            // let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_case");
+            // let fail_block = FunctionBlock::new_from_symbol(fail_label);
+            }
+
+            // TODO: Catch all if needed
+
+            // Exiting
+            let exit_instruction = Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::Jump(finally_exit_label.clone()),
+            source_location: source_location.clone(),
+            });
+            self.current_block.instructions.push_back(exit_instruction);
+
+            // Attaching exit block
+            let mut finally_exit_block =
+            FunctionBlock::new_from_symbol(finally_exit_label.clone());
+            mem::swap(&mut finally_exit_block, &mut self.current_block);
+            self.current_body.blocks.push(finally_exit_block);
+
+            self.stack
+            .push(StackObject::Instruction(Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::PhiNode(phi_results),
+            source_location: source_location.clone(),
+            })));
+            // unimplemented!();
+            }
+             */
             NodeFullExpression::ConstructorCall {
                 identifier_name,
                 contract_type_arguments,
@@ -1025,7 +1029,7 @@ impl AstConverting for IrEmitter {
                 unimplemented!()
             }
             NodeStatement::Accept => {
-                let mut arguments: Vec<IrIdentifier> = [].to_vec();
+                let arguments: Vec<IrIdentifier> = [].to_vec();
                 let name = IrIdentifier {
                     unresolved: "__intrinsic_accept_transfer".to_string(), // TODO: Register somewhere globally
                     resolved: None,

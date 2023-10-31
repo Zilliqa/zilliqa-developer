@@ -1,25 +1,16 @@
-use bluebell::support::modules::BluebellModule;
-use bluebell::support::modules::ScillaDebugBuiltins;
-use std::ffi::CStr;
-
-use clap::{Parser, Subcommand, ValueEnum};
-use std::fs::File;
-use std::io::Read;
-use std::os::raw::c_char;
-use std::process;
-
 use bluebell::ast::nodes::NodeProgram;
-use bluebell::contract_executor::UnsafeContractExecutor;
-use bluebell::intermediate_representation::emitter::IrEmitter;
-use bluebell::intermediate_representation::pass_manager::PassManager;
 use bluebell::parser::lexer;
 use bluebell::parser::lexer::Lexer;
 use bluebell::parser::{parser, ParserError};
-use bluebell::passes::debug_printer::DebugPrinter;
 use bluebell::support::evm::EvmCompiler;
+use bluebell::support::modules::ScillaDebugBuiltins;
 use bluebell::support::modules::{ScillaDefaultBuiltins, ScillaDefaultTypes};
+use clap::{Parser, Subcommand, ValueEnum};
 use evm_assembly::types::EvmTypeValue;
 use log::{Log, Metadata, Record};
+use std::fs::File;
+use std::io::Read;
+use std::process;
 
 // Logger struct to capture logs
 struct CaptureLogger {}
@@ -92,7 +83,7 @@ enum BluebellCommand {
         entry_point: String,
 
         /// Arguments to pass to function
-        #[arg(short, long, default_value_t= ("".to_string()))]
+        #[arg(short, long, default_value_t= String::new())]
         args: String,
     },
 }

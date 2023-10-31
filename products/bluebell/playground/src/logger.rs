@@ -47,7 +47,7 @@ impl Reducer<LoggerState> for LoggerMessage {
 }
 
 pub struct LoggerView {
-    dispatch: Dispatch<LoggerState>, // Ignore unused warning. Dispatcher needs to be present for state to update
+    _dispatch: Dispatch<LoggerState>, // Ignore unused warning. Dispatcher needs to be present for state to update
     state: Rc<LoggerState>,
 }
 
@@ -64,7 +64,7 @@ impl Component for LoggerView {
         let dispatch = Dispatch::<LoggerState>::subscribe(state_callback);
         Self {
             state: dispatch.get(),
-            dispatch,
+            _dispatch: dispatch,
         }
     }
 

@@ -6,7 +6,7 @@ use crate::evm_bytecode_generator::EvmBytecodeGenerator;
 use crate::intermediate_representation::emitter::IrEmitter;
 use crate::intermediate_representation::pass_manager::PassManager;
 
-use crate::intermediate_representation::symbol_table::{SymbolTable, SymbolTableConstructor};
+use crate::intermediate_representation::symbol_table::SymbolTableConstructor;
 use crate::parser::lexer;
 use crate::parser::lexer::Lexer;
 use crate::parser::parser;

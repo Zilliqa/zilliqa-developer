@@ -22,12 +22,12 @@ pub struct ByteCodeViewInstruction {
 
 pub struct ByteCodeView {
     props: ByteCodeViewProps,
-    selected_tab: usize,
+    // selected_tab: usize,
     instructions: Vec<ByteCodeViewInstruction>,
     timeout: Option<Timeout>,
 }
 pub enum ByteCodeViewMessage {
-    SelectTab(usize),
+    // SelectTab(usize),
     SetInstructions(Vec<ByteCodeViewInstruction>),
     ScrollToPosition(usize),
 }
@@ -67,7 +67,7 @@ impl Component for ByteCodeView {
 
         let mut ret = Self {
             props: props.clone(),
-            selected_tab: 0,
+            // selected_tab: 0,
             instructions: Vec::new(),
             timeout: None,
         };
@@ -122,10 +122,12 @@ impl Component for ByteCodeView {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            /*
             ByteCodeViewMessage::SelectTab(index) => {
                 self.selected_tab = index;
                 true
             }
+            */
             ByteCodeViewMessage::SetInstructions(instructions) => {
                 self.instructions = instructions;
                 true

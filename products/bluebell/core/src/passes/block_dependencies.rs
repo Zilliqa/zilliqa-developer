@@ -249,7 +249,7 @@ impl IrPass for DeduceBlockDependencies {
     fn visit_function_body(
         &mut self,
         mode: TreeTraversalMode,
-        function_body: &mut FunctionBody,
+        _function_body: &mut FunctionBody,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {

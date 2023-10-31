@@ -125,7 +125,7 @@ impl ObservableMachine {
 
                             let h256_bytes = [0u8; 32]; // Create h256_bytes[12..].copy_from_slice(&self.caller.0);
 
-                            stack.push(H256::from_slice(&h256_bytes));
+                            let _ = stack.push(H256::from_slice(&h256_bytes));
                         }
                         Opcode::CALLVALUE => {
                             let stack = self.machine.stack_mut();

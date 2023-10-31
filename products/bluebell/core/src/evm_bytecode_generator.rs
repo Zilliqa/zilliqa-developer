@@ -1,9 +1,7 @@
 use crate::constants::TreeTraversalMode;
 use crate::intermediate_representation::pass::IrPass;
+use crate::intermediate_representation::primitives::IntermediateRepresentation;
 use crate::intermediate_representation::primitives::Operation;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, IntermediateRepresentation,
-};
 use crate::intermediate_representation::symbol_table::StateLayoutEntry;
 use crate::passes::debug_printer::DebugPrinter;
 use evm_assembly::block::EvmBlock;
@@ -11,15 +9,12 @@ use evm_assembly::compiler_context::EvmCompilerContext;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::EvmSourcePosition;
 use evm_assembly::types::EvmType;
-use log::warn;
 use primitive_types::U256;
 use std::collections::BTreeSet;
 use std::str::FromStr;
 
 use evm_assembly::types::EvmTypeValue;
-use evm_assembly::EvmAssemblyGenerator;
 use evm_assembly::EvmByteCodeBuilder;
-use log::info;
 use sha3::{Digest, Keccak256};
 use std::mem;
 
@@ -463,7 +458,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     evm_block.push_u256(address);
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.external_sload();
-                                    evm_block.register_stack_name(value_name);
+                                    let _ = evm_block.register_stack_name(value_name);
                                 }
                                 Operation::Return(ref _value) => {
                                     // Assumes that the next element on the stack is return pointer
@@ -494,7 +489,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
-                                    let mut ctx = &mut code_builder.context;
+                                    let ctx = &mut code_builder.context;
                                     if let Some(constructor) = &ctx.default_constructors.get(name) {
                                         constructor(&mut evm_block);
                                     } else {
@@ -658,7 +653,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                 }
                                 _ => {
                                     panic!("Unhandled operation {:#?}",instr);
-                                    unimplemented!() // Add handling for other operations here
                                 }
                             }
 

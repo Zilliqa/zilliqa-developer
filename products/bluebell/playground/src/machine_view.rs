@@ -5,7 +5,7 @@ use yew::prelude::*;
 use yewdux::prelude::*;
 
 pub struct MachineView {
-    dispatch: Dispatch<State>,
+    _dispatch: Dispatch<State>,
     state: Rc<State>,
 }
 
@@ -22,7 +22,7 @@ impl Component for MachineView {
         let dispatch = Dispatch::<State>::subscribe(state_callback);
         Self {
             state: dispatch.get(),
-            dispatch,
+            _dispatch: dispatch,
         }
     }
 

@@ -86,13 +86,13 @@ fn format_hex_string(input: &str) -> Result<String, &'static str> {
 
     if input.contains("...") {
         // 66 = 2 for "0x" + 64 for H256
-        let required_zeros = 66 - input.len() + 3; // +3 for the length of "..."
+        let required_zeros: i64 = 66 - input.len() as i64 + 3; // +3 for the length of "..."
 
         if required_zeros < 0 {
             return Err("Input string is too long to be a valid H256 value.");
         }
 
-        let zeros = "0".repeat(required_zeros);
+        let zeros = "0".repeat(required_zeros as usize);
         Ok(input.replace("...", &zeros))
     } else {
         Ok(input.to_string())

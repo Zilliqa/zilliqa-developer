@@ -288,7 +288,7 @@ impl IrPass for CollectTypeDefinitionsPass {
         &mut self,
         mode: TreeTraversalMode,
         _primitives: &mut IntermediateRepresentation,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => (),
