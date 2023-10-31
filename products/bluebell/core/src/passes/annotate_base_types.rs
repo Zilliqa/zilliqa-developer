@@ -583,7 +583,7 @@ impl IrPass for AnnotateBaseTypes {
                     arg.visit(self, symbol_table)?;
                 }
 
-                "TODO-lookup".to_string()
+                unimplemented!()
             }
             Operation::ResolveSymbol { symbol } => {
                 symbol.visit(self, symbol_table)?;
