@@ -86,7 +86,11 @@ async fn get_block(
     let mut blocks: Vec<(Block<Transaction>, Vec<ZILTransactionBody>)> = Vec::new();
     for _block_number in last_seen_block_number_unwrap.as_u64() + 1..=block_number.as_u64() {
         let block = get_block_by_number(_block_number.into(), provider).await?;
-        let txn_bodies = get_zil_transaction_bodies_from_block(block_number, provider).await?;
+        let txn_bodies = if block.transactions.is_empty() {
+            Vec::default()
+        } else {
+            get_zil_transaction_bodies_from_block(block_number, provider).await?
+        };
         blocks.push((block, txn_bodies));
     }
 
