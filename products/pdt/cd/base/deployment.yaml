@@ -21,6 +21,7 @@ spec:
       containers:
         - image: pdt
           name: pdt-listen-testnet
+          imagePullPolicy: Always
           env:
             - name: PROJECT_ID
               valueFrom:
@@ -69,6 +70,7 @@ spec:
       containers:
         - image: pdt
           name: pdt-listen-mainnet
+          imagePullPolicy: Always
           env:
             - name: PROJECT_ID
               valueFrom:
