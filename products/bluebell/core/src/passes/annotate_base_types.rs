@@ -398,13 +398,6 @@ impl IrPass for AnnotateBaseTypes {
             }
             Operation::Noop => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::Jump(_) => "Void".to_string(), // TODO: Fetch from somewhere
-            Operation::Switch { cases, on_default } => {
-                for case in cases.iter_mut() {
-                    case.visit(self, symbol_table)?;
-                }
-                on_default.visit(self, symbol_table)?;
-                "TODO".to_string()
-            }
             Operation::ConditionalJump {
                 expression,
                 on_success,

@@ -164,12 +164,6 @@ impl PassExecutor for Operation {
         let children_ret = if let Ok(TraversalResult::Continue) = ret {
             match self {
                 Operation::TerminatingRef(identifier) => identifier.visit(pass, symbol_table),
-                Operation::Switch { cases, on_default } => {
-                    for case in cases.iter_mut() {
-                        case.visit(pass, symbol_table)?;
-                    }
-                    on_default.visit(pass, symbol_table)
-                }
                 Operation::Jump(identifier) => identifier.visit(pass, symbol_table),
                 Operation::StateStore { address, value } => {
                     let ret = value.visit(pass, symbol_table);

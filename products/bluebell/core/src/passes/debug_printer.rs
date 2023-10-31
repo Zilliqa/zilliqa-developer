@@ -156,13 +156,6 @@ impl IrPass for DebugPrinter {
             Operation::Noop => {
                 self.script.push_str("noop");
             }
-            Operation::Switch { cases, on_default } => {
-                self.script.push_str("switch ");
-                for case in cases.iter_mut() {
-                    case.visit(self, symbol_table)?;
-                }
-                on_default.visit(self, symbol_table)?;
-            }
             Operation::Jump(identifier) => {
                 self.script.push_str("jmp ");
                 identifier.visit(self, symbol_table)?;

@@ -184,11 +184,6 @@ pub enum Operation {
         on_success: IrIdentifier,
         on_failure: IrIdentifier,
     },
-
-    Switch {
-        cases: Vec<CaseClause>,
-        on_default: IrIdentifier,
-    },
     MemLoad,
     MemStore,
     StateLoad {

@@ -78,7 +78,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         }
 
         Ok(())
-        //        unimplemented!()
     }
 
     /// This function writes function definitions from the IR to the EVM module.
@@ -531,30 +530,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.eq();
-                                }
-                                Operation::Switch {
-                                    // TODO: Deprecated?
-                                    ref cases,
-                                    ref on_default,
-                                } => {
-                                    for case in cases {
-                                        let label = match &case.label.resolved {
-                                            Some(l) => l,
-                                            None => panic!("Could not resolve case label"),
-                                        };
-                                        // TODO: This assumes order in cases
-                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.jump_if_to(&code_builder.add_scope_to_label(label));
-                                    }
-
-                                    let label = match &on_default.resolved {
-                                        Some(l) => l,
-                                        None => panic!("Could not resolve default label"),
-                                    };
-
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_to(&code_builder.add_scope_to_label(label));
-                                    // unimplemented!() // Add handling for other operations here
                                 }
                                 Operation::Jump(label) => {
                                     let label = match &label.resolved {
