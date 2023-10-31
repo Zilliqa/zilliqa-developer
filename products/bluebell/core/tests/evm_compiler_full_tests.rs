@@ -141,6 +141,7 @@ end
     #[test]
     fn test_conditional_set_state_combined_logic() {
         // TODO: Test case not working
+
         test_compile_and_execute_full_evm!(
             "HelloWorld::setHello",
             "[42]",
