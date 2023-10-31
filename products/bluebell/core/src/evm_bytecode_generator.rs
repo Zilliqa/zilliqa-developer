@@ -2,7 +2,7 @@ use crate::constants::TreeTraversalMode;
 use crate::intermediate_representation::pass::IrPass;
 use crate::intermediate_representation::primitives::Operation;
 use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
+    ConcreteFunction, ConcreteType, IntermediateRepresentation,
 };
 use crate::intermediate_representation::symbol_table::StateLayoutEntry;
 use crate::passes::debug_printer::DebugPrinter;
@@ -739,37 +739,5 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
         self.builder.finalize_blocks();
         Ok(self.builder.build())
-    }
-}
-
-/// This impl block provides the lowering operations for our `EvmBytecodeGenerator`.
-/// Here we translate high-level intermediate representation (IR) constructs into
-/// lower-level constructs that are suitable for generating EVM bytecode.
-impl<'ctx> IrLowering for EvmBytecodeGenerator<'ctx> {
-    /// This function takes a `ConcreteType` and lowers it into a form suitable for generating
-    /// EVM bytecode. How exactly this is done will depend on the concrete type in question.
-    fn lower_concrete_type(&mut self, _con_type: &ConcreteType) {
-        // TODO: Implement
-        unimplemented!()
-    }
-
-    /// This function takes a `ConcreteFunction` and lowers it into a form suitable
-    /// for generating EVM bytecode. This typically involves translating the function's
-    /// high-level operations into equivalent sequences of low-level EVM operations.
-    fn lower_concrete_function(&mut self, _con_function: &ConcreteFunction) {
-        // TODO: Move write_function_definitions_to_module into this structure
-        unimplemented!()
-    }
-
-    /// This is the main interface for lowering. It takes an intermediate representation (IR)
-    /// and lowers all its types and function definitions.
-    fn lower(&mut self, primitives: &IntermediateRepresentation) {
-        for con_type in &primitives.type_definitions {
-            self.lower_concrete_type(con_type);
-        }
-
-        for con_function in &primitives.function_definitions {
-            self.lower_concrete_function(con_function);
-        }
     }
 }

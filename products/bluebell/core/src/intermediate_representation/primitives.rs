@@ -128,16 +128,6 @@ impl Variant {
     }
 }
 
-/*
-#[derive(Debug, Clone, PartialEq)]
-pub enum Identifier {
-    // TODO: Replace with symbol reference
-    ComponentName(String),
-    TypeName(String),
-    Event(String),
-}
-*/
-
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
     pub name: IrIdentifier,
@@ -383,10 +373,4 @@ impl IntermediateRepresentation {
             symbol_table,
         }
     }
-}
-
-pub trait IrLowering {
-    fn lower_concrete_type(&mut self, con_type: &ConcreteType);
-    fn lower_concrete_function(&mut self, con_function: &ConcreteFunction);
-    fn lower(&mut self, primitives: &IntermediateRepresentation);
 }
