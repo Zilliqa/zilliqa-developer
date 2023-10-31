@@ -133,7 +133,7 @@ impl EvmCompilerContext {
     pub fn declare_special_variable(
         &mut self,
         name: &str,
-        typename: &str,
+        _typename: &str,
         builder: SpecialVariableFn,
     ) -> Result<(), String> {
         if self.special_variables.contains_key(name) {

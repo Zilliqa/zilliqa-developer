@@ -2,7 +2,7 @@ use crate::state::State;
 use crate::state::StateMessage;
 use evm_assembly::executable::EvmExecutable;
 use evm_assembly::instruction::RustPosition;
-use gloo_console as console;
+
 use gloo_timers::callback::Timeout;
 use std::cell::RefCell;
 use std::rc::Rc;

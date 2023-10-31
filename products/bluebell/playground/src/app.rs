@@ -6,7 +6,6 @@ use std::rc::Rc;
 
 use yew::virtual_dom::VNode;
 
-use gloo_console as console;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;

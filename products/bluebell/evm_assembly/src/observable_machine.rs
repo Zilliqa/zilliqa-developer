@@ -4,7 +4,7 @@ use evm::executor::stack::PrecompileFn;
 use evm::Capture;
 use evm::ExitReason;
 use evm::Trap;
-use log::warn;
+
 use primitive_types::U256;
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -123,7 +123,7 @@ impl ObservableMachine {
                         Opcode::CALLER => {
                             let stack = self.machine.stack_mut();
 
-                            let mut h256_bytes = [0u8; 32]; // Create h256_bytes[12..].copy_from_slice(&self.caller.0);
+                            let h256_bytes = [0u8; 32]; // Create h256_bytes[12..].copy_from_slice(&self.caller.0);
 
                             stack.push(H256::from_slice(&h256_bytes));
                         }
@@ -146,7 +146,7 @@ impl ObservableMachine {
                             // Emulating static call
                             // TODO: Attach runtime!
                             info!("Static call");
-                            let (gas, address, args_offset, args_size, ret_offset, ret_size) = {
+                            let (gas, address, args_offset, args_size, _ret_offset, _ret_size) = {
                                 let stack = self.machine.stack_mut();
                                 let gas: u64 = match stack.pop() {
                                     Ok(g) => h160_to_usize(g.into()) as u64,

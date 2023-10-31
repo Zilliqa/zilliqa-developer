@@ -75,7 +75,7 @@ impl Backend for EvmIoInterface {
         self.state.contains_key(&address)
     }
 
-    fn basic(&self, address: H160) -> Basic {
+    fn basic(&self, _address: H160) -> Basic {
         Basic {
             balance: 0.into(),
             nonce: 0.into(),
