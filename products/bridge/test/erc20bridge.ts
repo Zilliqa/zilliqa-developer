@@ -5,12 +5,16 @@ import {
   switchNetwork,
   obtainCalls,
   confirmCall,
-  queryCall,
   dispatchCall,
   confirmResult,
   deliverResult,
 } from "./utils";
 import { ethers } from "hardhat";
+import {
+  ERC20Bridge__factory,
+  ERC20__factory,
+  MyToken__factory,
+} from "../typechain-types";
 
 describe("ERC20Bridge", function () {
   async function setup() {
@@ -115,13 +119,9 @@ describe("ERC20Bridge", function () {
       .withArgs(
         await bridge1.getAddress(),
         await token2.getAddress(),
-        new ethers.Interface([
-          "function mint(address,uint256)",
-        ]).encodeFunctionData("mint", [tester1.address, value]),
+        token2.interface.encodeFunctionData("mint", [tester1.address, value]),
         false,
-        new ethers.Interface([
-          "function finish(bool,bytes,uint256)",
-        ]).getFunction("finish").selector,
+        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
       )
       .to.emit(bridge1, "Started")
@@ -264,13 +264,12 @@ describe("ERC20Bridge", function () {
       .withArgs(
         await bridge2.getAddress(),
         await token1.getAddress(),
-        new ethers.Interface([
-          "function transfer(address,uint256)",
-        ]).encodeFunctionData("transfer", [tester2.address, value]),
+        token1.interface.encodeFunctionData("transfer", [
+          tester2.address,
+          value,
+        ]),
         false,
-        new ethers.Interface([
-          "function finish(bool,bytes,uint256)",
-        ]).getFunction("finish").selector,
+        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
       )
       .to.emit(bridge2, "Started")

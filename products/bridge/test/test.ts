@@ -12,6 +12,7 @@ import {
   deliverResult,
   queryCall,
 } from "./utils";
+import { ERC20Bridge__factory, Target__factory } from "../typechain-types";
 
 describe("Bridge", function () {
   async function setup() {
@@ -93,14 +94,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin1.getAddress(),
         await target2.getAddress(),
-        new ethers.Interface(["function test(uint256)"]).encodeFunctionData(
-          "test",
-          [num]
-        ),
+        Target__factory.createInterface().encodeFunctionData("test", [num]),
         false,
-        new ethers.Interface([
-          "function finish(bool,bytes,uint256)",
-        ]).getFunction("finish").selector,
+        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
       );
 
@@ -203,14 +199,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin1.getAddress(),
         await target2.getAddress(),
-        new ethers.Interface(["function test(uint256)"]).encodeFunctionData(
-          "test",
-          [num]
-        ),
+        Target__factory.createInterface().encodeFunctionData("test", [num]),
         false,
-        new ethers.Interface([
-          "function finish(bool,bytes,uint256)",
-        ]).getFunction("finish").selector,
+        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
       );
 
@@ -320,14 +311,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin1.getAddress(),
         await target2.getAddress(),
-        new ethers.Interface(["function test(uint256)"]).encodeFunctionData(
-          "test",
-          [num]
-        ),
+        Target__factory.createInterface().encodeFunctionData("test", [num]),
         true,
-        new ethers.Interface([
-          "function finish(bool,bytes,uint256)",
-        ]).getFunction("finish").selector,
+        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
       );
 
@@ -413,14 +399,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin2.getAddress(),
         await target1.getAddress(),
-        new ethers.Interface(["function test(uint256)"]).encodeFunctionData(
-          "test",
-          [num]
-        ),
+        Target__factory.createInterface().encodeFunctionData("test", [num]),
         false,
-        new ethers.Interface([
-          "function finish(bool,bytes,uint256)",
-        ]).getFunction("finish").selector,
+        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
       );
 
