@@ -10,13 +10,13 @@ Contracts that want to make remote calls must be deployed on the remote chains a
 
 Remote calls are relayed by a **relayer** **contract** on the Zilliqa chain and dispatched to the twin by another relayer contract on the remote chain. The caller contract sends the target address, the call data and the callback function selector used for handling the result to the relayer. The relayer contract emits a `Relayed` event containing these data and a nonce. When validators see the event in a finalized block, they confirm the relayed call by signing the hash of the data included in the event.
 
-![Relaying and dispatching remote calls](bridge1.png "Relaying and dispatching remote calls")
+![Relaying and dispatching remote calls](docs/diagrams/bridge1.png "Relaying and dispatching remote calls")
 
 The relayer contract on the Zilliqa chain is also a **collector** **contract** which receives validator signatures, verifies them against the current validator set and emits an `Echoed` event containing the signed hash and the signature. The validator set is retrieved by calling the collector's `getValidators()` function. When the Zilliqa consensus leader sees that events containing signatures by the supermajority of the validators got finalized, it can dispatch the relayed call by sending it to the relayer on the remote chain along with the signatures of the supermajority. Before doing so, it filters `Dispatched` events emitted by the relayer contract up to the latest block of the remote chain to find out if the previous leaders have already attempted to dispatch the call. If it does not find any event, it submits a transaction to the relay contract and passes the relayed call, its target, callback and nonce as parameters along with the signatures of the supermajorty of validators. The relayer contract verifies the signatures against the current validator set and invokes the twin contract, which sends the call data to the target contract with a gas limit that ensures there is anough gas left to complete the transaction by emitting an event that contains the success flag and the values returned by the target contract or an error that occured.
 
 When the Zilliqa validators see the finalized event, they sign the hash of the success flag, the result and the nonce, and submit their signatures to the collector contract on the Zilliqa chain. When events containing signatures of the supermajority of the validators get finalized, the next leader can submit a transaction that resumes the execution of the caller contract by passing it the result of the remote call. Before doing so, it filters `Resumed` events up to the latest block to check if another leader has already attempted to deliver the result to the caller contract. The success flag and the result are delivered as parameters of a call to a function that was specified by the caller contract as the callback handler.
 
-![Delivering the result of remote calls](bridge2.png "Delivering the result of remote calls")
+![Delivering the result of remote calls](docs/diagrams/bridge2.png "Delivering the result of remote calls")
 
 During the entire process, Zilliqa validators must keep track of pending remote calls. Remote calls can be uniquely identified based on the caller contract and the nonce.
 
@@ -24,7 +24,7 @@ During the entire process, Zilliqa validators must keep track of pending remote 
 
 The caller contract can also request a read-only remote call. In this case, the Zilliqa validators can perform the remote call independently from each other, and submit their signed success flags and results to the collector contract on the Zilliqa chain. As soon as the supermajority of them confirmed the result, a leader with deliver it to the caller contract.
 
-![Read-only remote calls](bridge3.png "Read-only remote calls")
+![Read-only remote calls](docs/diagrams/bridge3.png "Read-only remote calls")
 
 ### Limitations
 
@@ -39,7 +39,7 @@ There are a few things to keep in mind when designing applications using the pro
 
 To ensure that twins have the same address on both chains, the prototype deploys them using the same EOA with nonces synced accross chains. This shoud be replaced by counterfactual deployment using a factory contract in the future.
 
-![Deployment of bridges contracts](bridge0.png "Deployment of bridges contracts")
+![Deployment of bridges contracts](docs/diagrams/bridge0.png "Deployment of bridges contracts")
 
 ### Incentives
 
@@ -158,32 +158,32 @@ Features to be implemented include:
 
 Everything described above is the bottom layer in the following design:
 
-![UCCB layers](bridge.png "UCCB layers")
+![UCCB layers](docs/diagrams/bridge.png "UCCB layers")
 
 The middle layer are cross-chain applications that use the cross-chain conctract calls enabled by the bottom layer. Typical examples are token bridges introduced in more detail below. The top layer are existing fungible tokens and NFTs that can use the specific token bridge.
 
-### `ERC20` token bridge:
+### `ERC20` token bridge
 
 - the token holder approves the bridge contract and calls it to bridge the approved amount
 - the bridge contract transfers the amount to itself and triggers a remote call to its twin
 - the twin contract mints the same amount of the wrapped `ERC20` token to the token holder's address
 - the bridge contract emits an event in the callback function to inform the token holder
 - to transfer an amount back to the Zilliqa chain, a remote call in the other direction is used and the wrapped token is burned on the remote chain and the same amount of the original token is unlocked on Zilliqa
-  ![ERC20 token bridge](erc20.png "ERC20 token bridge")
+  ![ERC20 token bridge](docs/diagrams/erc20.png "ERC20 token bridge")
 
-### `ERC721` or `ERC1155` token bridges can be implemented with a shortcut:
+### `ERC721` or `ERC1155` token bridges can be implemented with a shortcut
 
 - the token holder transfers the token to the bridge contract which implements `ERC721Receiver` or `ERC1155Receiver` respectively
 - the bridge contract triggers a remote call to its twin when `onER721Received()` or `onERC1155Received()` is called
 - the rest works as described for `ERC20` above
-  ![ERC721 token bridge](erc721.png "ERC721 token bridge")
+  ![ERC721 token bridge](docs/diagrams/erc721.png "ERC721 token bridge")
 
 ### Native token bridge
 
 - the token holder calls a payable function of a the bridge contract to transfer some amount
 - the bridge contract triggers a remote call to its twin
 - the rest works as described for `ERC20` above
-  ![Native token bridge](native.png "Native token bridge")
+  ![Native token bridge](docs/diagrams/native.png "Native token bridge")
 
 ### Atomic token swaps
 
