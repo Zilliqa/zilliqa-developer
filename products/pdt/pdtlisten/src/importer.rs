@@ -53,7 +53,7 @@ impl BatchedImporter {
                     if block.block < range.start {
                         self.range = Some(block.block..range.end)
                     } else if block.block > range.end {
-                        self.range = Some(range.start..block.block)
+                        self.range = Some(range.start..block.block + 1) // range end not inclusive
                     }
                 } else {
                     self.range = Some(block.block..(block.block + 1))
