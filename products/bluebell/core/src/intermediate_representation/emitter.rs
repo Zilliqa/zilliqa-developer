@@ -268,7 +268,6 @@ impl IrEmitter {
         // of traversing
         let symbol_table = self.ir.symbol_table.clone();
 
-        info!("AST: {:#?}", node);
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
@@ -775,7 +774,6 @@ impl AstConverting for IrEmitter {
                     operation,
                     source_location: self.current_location(),
                 });
-                println!("Current source location: {:#?}", self.current_location());
                 self.pop_source_position();
                 self.stack.push(StackObject::Instruction(instr));
             }

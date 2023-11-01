@@ -40,7 +40,6 @@ mod tests {
                 let formatted = formatter.emit(&mut ast2);
 
                 if formatted != script {
-                    println!("AST: {:#?}\n\n", ast2);
                     println!("Orignial:\n{}\n\n", script);
                     println!("Formatted:\n{}\n\n", formatted);
                     let diff = create_patch(&script, &formatted);

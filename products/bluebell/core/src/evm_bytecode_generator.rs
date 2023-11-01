@@ -265,8 +265,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
 
                                         // Jumping to function
-                                        // TODO: Check that internal function is defined and throw an error if not.
-                                        println!("Resolving function name {:#?}",name);
+                                        // TODO: Check that internal function is defined and throw an error if not.                                        
                                         let label = match &name.resolved {
                                             Some(v) => {
                                             // TODO: "Rsplit" hack to compensate for that the labels does not contain function parameter types

@@ -563,7 +563,6 @@ impl IrPass for AnnotateBaseTypes {
                             .to_string());
                     }
                 } else {
-                    println!("Extra detail: {:#?}, {:#?}", name, arguments);
                     return Err(format!(
                         "Unable to determine return type of {:?}",
                         name.unresolved

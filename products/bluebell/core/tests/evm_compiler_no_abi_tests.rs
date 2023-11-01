@@ -53,10 +53,6 @@ mod tests {
         compiler.attach(&default_builtins);
         compiler.attach(&debug);
         let executable = compiler.executable_from_script(script.to_string())?;
-        println!(
-            "Produced code: {}",
-            hex::encode(&executable.executable.bytecode.clone())
-        );
 
         let arguments: Vec<EvmTypeValue> = if args == "" {
             [].to_vec()

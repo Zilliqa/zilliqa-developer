@@ -205,7 +205,6 @@ impl SymbolTable {
         arguments: &Vec<String>,
         return_type: &str,
     ) -> Result<String, String> {
-        println!("Declaring constructor {}", symbol);
         self.declare_function_or_constructor_type(symbol, arguments, return_type, true)
     }
 
