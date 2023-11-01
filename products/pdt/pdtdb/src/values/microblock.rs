@@ -1,7 +1,9 @@
+use std::ops::Mul;
+
 use crate::utils::{self};
 use anyhow::{anyhow, Result};
 use base64::Engine;
-use ethers::types::{Block, Transaction, Withdrawal};
+use ethers::types::{Block, Transaction, Withdrawal, U256};
 // use hex;
 use crate::zqproj::PSQLInsertable;
 use pdtlib::proto::ProtoMicroBlock;
@@ -271,6 +273,7 @@ impl BQMicroblock {
         ));
         let timestamp: i64 = val
             .timestamp
+            .mul(U256::from(1000)) // pad to convert: milliseconds -> microseconds
             .try_into()
             .expect("timestamp should fit in an i64!");
         let eth_parent_hash = Some(encode_u8(val.parent_hash.as_bytes()));
