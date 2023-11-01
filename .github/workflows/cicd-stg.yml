@@ -19,38 +19,49 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
+    #if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
     name: "Build and push images"
     strategy:
       fail-fast: false
       matrix:
-        application: [developer-portal, devex, devex-apollo, neo-savant]
+        application: [
+            # developer-portal,
+            # devex,
+            # devex-apollo,
+            # neo-savant,
+            snapshot-hub,
+          ]
         include:
-          - application: developer-portal
-            image_name: developer-portal
-            path: products/developer-portal
+          # - application: developer-portal
+          #   image_name: developer-portal
+          #   path: products/developer-portal
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: devex
+          #   image_name: devex
+          #   path: products/devex
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: devex-apollo
+          #   image_name: devex-apollo
+          #   path: products/devex-apollo
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: neo-savant
+          #   image_name: neo-savant
+          #   path: products/neo-savant
+          #   tag_length: 8
+          #   tag_latest: false
+          - application: snapshot-hub
+            image_name: snapshot-hub
+            path: products/snapshot-hub
             tag_length: 8
             tag_latest: false
-          - application: devex
-            image_name: devex
-            path: products/devex
-            tag_length: 8
-            tag_latest: false
-          - application: devex-apollo
-            image_name: devex-apollo
-            path: products/devex-apollo
-            tag_length: 8
-            tag_latest: false
-          - application: neo-savant
-            image_name: neo-savant
-            path: products/neo-savant
-            tag_length: 8
-            tag_latest: false
-          - application: pdt
-            image_name: pdt
-            path: products/pdt
-            tag_length: 8
-            tag_latest: false
+          # - application: pdt
+          #   image_name: pdt
+          #   path: products/pdt
+          #   tag_length: 8
+          #   tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public

@@ -28,6 +28,7 @@ jobs:
             devex-apollo,
             eth-spout,
             neo-savant,
+            snapshot-hub,
           ]
         include:
           - application: bluebell-playground
@@ -58,6 +59,11 @@ jobs:
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
+          - application: snapshot-hub
+            image_name: snapshot-hub
+            path: products/snapshot-hub
             tag_length: 8
             tag_latest: false
     env:
