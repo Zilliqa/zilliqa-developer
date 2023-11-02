@@ -29,7 +29,7 @@ jobs:
             # devex,
             # devex-apollo,
             # neo-savant,
-            snapshot-hub,
+            governance-api,
           ]
         include:
           # - application: developer-portal
@@ -52,9 +52,9 @@ jobs:
           #   path: products/neo-savant
           #   tag_length: 8
           #   tag_latest: false
-          - application: snapshot-hub
-            image_name: snapshot-hub
-            path: products/snapshot-hub
+          - application: governance-api
+            image_name: governance-api
+            path: products/governance-api
             tag_length: 8
             tag_latest: false
           # - application: pdt
