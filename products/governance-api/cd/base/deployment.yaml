@@ -21,4 +21,40 @@ spec:
         - image: governance-api
           name: governance-api
           ports:
-            - containerPort: 80
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: governance-api
+                  key: NODE_ENV
+            - name: PINATA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: governance-api
+                  key: PINATA_API_KEY
+            - name: PINATA_SECRET_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: governance-api
+                  key: PINATA_SECRET_API_KEY
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: governance-api
+                  key: POSTGRES_DB
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: governance-api
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: governance-api
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: governance-api
+                  key: POSTGRES_USER

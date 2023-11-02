@@ -5,6 +5,7 @@ resources:
   - ../../base
   - certificate.yaml
   - frontend-config.yaml
+  - secrets-app.yaml
 
 patches:
   - target:
