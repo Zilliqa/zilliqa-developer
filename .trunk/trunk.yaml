@@ -22,7 +22,7 @@ lint:
     - flake8@6.0.0
     - isort@5.12.0
     - black@23.1.0
-    - rustfmt@1.61.0    
+    - rustfmt@1.61.0
     # - shellcheck@0.9.0 - removed for being over-prissy and wanting tab indents - rrw 2023-04-25
   ignore:
     - linters: [gitleaks]
@@ -36,7 +36,7 @@ lint:
     - linters: [ALL]
       paths:
         - needing-organisation/**/*
-        - products/devex/public/*.js    
+        - products/devex/public/*.js
         - .devcontainer/*
         - .devcontainer/**
         - .trunk/*out/**
@@ -53,6 +53,7 @@ lint:
         - "**/templates/*"
         - "templates/**"
         - "**/templates/**"
+        - products/governance-api/**
 
 runtimes:
   enabled:
