@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: governance-api
+  namespace: governance-api
+  labels:
+    "app.kubernetes.io/name": "governance-api"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "governance-api"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "governance-api"
+    spec:
+      containers:
+        - image: governance-api
+          name: governance-api
+          ports:
+            - containerPort: 80
