@@ -43,17 +43,17 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 
 ## Developer Devnet
 
-|                                    | URL(s)                                                             |
-| :--------------------------------- | :----------------------------------------------------------------- |
-| **API URL**                        | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
-| **EVM URL**                        | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
-| **Faucet**                         | [**Link**](https://faucet.devnet.zilliqa.com)                      |
-| **Block Explorer**                 | [**Link**](https://devex.devnet.zilliqa.com)                       |
-| **EVM Block Explorer**             | [**Link**](https://otterscan.devnet.zilliqa.com)                   |
-| **WebSocket endpoint**             | `wss://wss.devnet.zilliqa.com`                                     |
-| **Chain ID**                       | 617                                                                |
-| **EVM Chain ID**                   | 33385                                                              |
-| **REWARD CONTROL CONTRACT ADDRES** | 0xE2d79664c088Aec94209F0E657642f8569FC12D8                         |
+|                                     | URL(s)                                                             |
+| :---------------------------------- | :----------------------------------------------------------------- |
+| **API URL**                         | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
+| **EVM URL**                         | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
+| **Faucet**                          | [**Link**](https://faucet.devnet.zilliqa.com)                      |
+| **Block Explorer**                  | [**Link**](https://devex.devnet.zilliqa.com)                       |
+| **EVM Block Explorer**              | [**Link**](https://otterscan.devnet.zilliqa.com)                   |
+| **WebSocket endpoint**              | `wss://wss.devnet.zilliqa.com`                                     |
+| **Chain ID**                        | 617                                                                |
+| **EVM Chain ID**                    | 33385                                                              |
+| **REWARD CONTROL CONTRACT ADDRESS** | 0xE2d79664c088Aec94209F0E657642f8569FC12D8                         |
 
 ## Isolated Server
 
