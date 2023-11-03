@@ -5,8 +5,8 @@ metadata:
   namespace: governance-api
   labels:
     "app.kubernetes.io/name": "governance-api"
-annotations:
-  cloud.google.com/backend-config: '{"default": "governance-api"}'
+  annotations:
+    cloud.google.com/backend-config: '{"default": "governance-api"}'
 spec:
   type: ClusterIP
   ports:
