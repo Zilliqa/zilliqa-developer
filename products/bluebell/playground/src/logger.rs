@@ -1,18 +1,13 @@
 // use strum_macros::{Display, EnumIter};
 
-use yew::prelude::*;
-
-use crate::Dispatch;
-use gloo_console as console;
-use yew::Component;
-use yew::Context;
-
-use serde::{Deserialize, Serialize};
-
 use std::rc::Rc;
 
-use yewdux::prelude::Reducer;
-use yewdux::store::Store;
+use gloo_console as console;
+use serde::{Deserialize, Serialize};
+use yew::{prelude::*, Component, Context};
+use yewdux::{prelude::Reducer, store::Store};
+
+use crate::Dispatch;
 
 #[derive(Store, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[store(storage = "local")]

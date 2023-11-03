@@ -1,12 +1,17 @@
-use crate::block::EvmBlock;
-use crate::evm_bytecode_builder::EvmByteCodeBuilder;
-use crate::function_signature::{AssemblyBuilderFn, EvmFunctionSignature};
-use crate::types::EvmType;
+use std::{
+    collections::{BTreeMap, HashMap},
+    str::FromStr,
+};
+
 use evm::executor::stack::PrecompileFn;
 use primitive_types::H160;
-use std::collections::BTreeMap;
-use std::collections::HashMap;
-use std::str::FromStr;
+
+use crate::{
+    block::EvmBlock,
+    evm_bytecode_builder::EvmByteCodeBuilder,
+    function_signature::{AssemblyBuilderFn, EvmFunctionSignature},
+    types::EvmType,
+};
 
 type InlineGenericsFn =
     fn(&mut EvmCompilerContext, &mut EvmBlock, Vec<String>) -> Result<Vec<EvmBlock>, String>;

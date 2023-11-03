@@ -1,22 +1,19 @@
-use crate::logger::LoggerView;
-use crate::state::ExecutionStatus;
+use std::{collections::HashMap, rc::Rc};
 
-use std::collections::HashMap;
-use std::rc::Rc;
-
-use yew::virtual_dom::VNode;
-
+use gloo_timers::callback::Timeout;
 use web_sys::HtmlInputElement;
-use yew::prelude::*;
+use yew::{prelude::*, virtual_dom::VNode};
 use yewdux::prelude::*;
 
-use crate::bytecode_view::ByteCodeView;
-use crate::dropdown::Dropdown;
-use crate::examples::EXAMPLES;
-use crate::machine_view::MachineView;
-use crate::state::{State, StateMessage};
-use crate::vm_remote::VmRemote;
-use gloo_timers::callback::Timeout;
+use crate::{
+    bytecode_view::ByteCodeView,
+    dropdown::Dropdown,
+    examples::EXAMPLES,
+    logger::LoggerView,
+    machine_view::MachineView,
+    state::{ExecutionStatus, State, StateMessage},
+    vm_remote::VmRemote,
+};
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {

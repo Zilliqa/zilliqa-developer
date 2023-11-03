@@ -1,15 +1,12 @@
-use crate::state::State;
-use crate::state::StateMessage;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::instruction::RustPosition;
+use std::{cell::RefCell, rc::Rc};
 
+use evm_assembly::{executable::EvmExecutable, instruction::RustPosition};
 use gloo_timers::callback::Timeout;
-use std::cell::RefCell;
-use std::rc::Rc;
 use web_sys::HtmlInputElement;
+use yew::prelude::*;
 use yewdux::prelude::Dispatch;
 
-use yew::prelude::*;
+use crate::state::{State, StateMessage};
 
 pub struct ByteCodeViewInstruction {
     pub label: Option<String>,

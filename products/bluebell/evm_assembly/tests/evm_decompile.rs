@@ -1,8 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use evm_assembly::compiler_context::EvmCompilerContext;
-
-    use evm_assembly::EvmByteCodeBuilder;
+    use evm_assembly::{compiler_context::EvmCompilerContext, EvmByteCodeBuilder};
 
     #[test]
     fn blah() {

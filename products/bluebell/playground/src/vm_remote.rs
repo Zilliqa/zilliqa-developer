@@ -1,12 +1,15 @@
-use crate::state::{State, StateMessage};
-use crate::vm_remote_layout::VmRemoteControlLayout;
-use crate::vm_remote_state::{VmRemoteMessage, VmRemoteState};
+use std::rc::Rc;
 
 use gloo_timers::callback::Timeout;
-use std::rc::Rc;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
+
+use crate::{
+    state::{State, StateMessage},
+    vm_remote_layout::VmRemoteControlLayout,
+    vm_remote_state::{VmRemoteMessage, VmRemoteState},
+};
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct VmRemoteProps {}

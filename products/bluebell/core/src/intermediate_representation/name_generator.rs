@@ -1,7 +1,7 @@
-use crate::intermediate_representation::primitives::{
-    FunctionBlock, IrIdentifier, IrIndentifierKind,
+use crate::{
+    intermediate_representation::primitives::{FunctionBlock, IrIdentifier, IrIndentifierKind},
+    parser::lexer::SourcePosition,
 };
-use crate::parser::lexer::SourcePosition;
 
 #[derive(Debug, Clone)]
 pub struct NameGenerator {

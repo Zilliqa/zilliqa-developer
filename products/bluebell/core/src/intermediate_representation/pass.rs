@@ -1,6 +1,7 @@
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::primitives::*;
-use crate::intermediate_representation::symbol_table::SymbolTable;
+use crate::{
+    constants::{TraversalResult, TreeTraversalMode},
+    intermediate_representation::{primitives::*, symbol_table::SymbolTable},
+};
 
 /// `IrPass` is an abstract pass that is used by the `PassManager` to manipulate the Intermediate Representation (IR).
 /// It provides methods to visit and potentially alter different parts of the IR during the traversal.

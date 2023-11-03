@@ -1,6 +1,8 @@
-use crate::ast::nodes::*;
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::parser::lexer::SourcePosition;
+use crate::{
+    ast::nodes::*,
+    constants::{TraversalResult, TreeTraversalMode},
+    parser::lexer::SourcePosition,
+};
 
 /// The `AstConverting` trait is used for converting an Abstract Syntax Tree (AST)
 /// to some other form, such as an internal or intermediate representation.

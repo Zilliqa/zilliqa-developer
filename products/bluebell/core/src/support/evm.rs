@@ -1,18 +1,16 @@
-use crate::ast::nodes::NodeProgram;
-use crate::support::modules::BluebellModule;
+use evm_assembly::{
+    compiler_context::EvmCompilerContext, executable::EvmExecutable, executor::EvmExecutor,
+};
 
-use crate::evm_bytecode_generator::EvmBytecodeGenerator;
-
-use crate::intermediate_representation::emitter::IrEmitter;
-use crate::intermediate_representation::pass_manager::PassManager;
-
-use crate::intermediate_representation::symbol_table::SymbolTableConstructor;
-use crate::parser::lexer;
-use crate::parser::lexer::Lexer;
-use crate::parser::parser;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::executor::EvmExecutor;
+use crate::{
+    ast::nodes::NodeProgram,
+    evm_bytecode_generator::EvmBytecodeGenerator,
+    intermediate_representation::{
+        emitter::IrEmitter, pass_manager::PassManager, symbol_table::SymbolTableConstructor,
+    },
+    parser::{lexer, lexer::Lexer, parser},
+    support::modules::BluebellModule,
+};
 
 pub struct EvmCompiler {
     pub context: EvmCompilerContext,

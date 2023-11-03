@@ -1,15 +1,15 @@
-use crate::support::evm::EvmCompiler;
-use crate::support::modules::ScillaDebugBuiltins;
-use crate::support::modules::ScillaDefaultBuiltins;
-use crate::support::modules::ScillaDefaultTypes;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::observable_machine::ObservableMachine;
-use evm_assembly::types::EvmTypeValue;
-use primitive_types::H256;
-use std::str::FromStr;
+use std::{rc::Rc, str::FromStr};
 
+use evm_assembly::{
+    executable::EvmExecutable, observable_machine::ObservableMachine, types::EvmTypeValue,
+};
+use primitive_types::H256;
 use serde_json;
-use std::rc::Rc;
+
+use crate::support::{
+    evm::EvmCompiler,
+    modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
+};
 
 pub fn create_vm_and_run_code(
     function_name: &str,

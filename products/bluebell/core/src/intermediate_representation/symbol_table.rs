@@ -1,7 +1,10 @@
-use crate::constants::NAMESPACE_SEPARATOR;
-use crate::intermediate_representation::name_generator::NameGenerator;
-use primitive_types::U256;
 use std::collections::HashMap;
+
+use primitive_types::U256;
+
+use crate::{
+    constants::NAMESPACE_SEPARATOR, intermediate_representation::name_generator::NameGenerator,
+};
 
 /// Struct representing the type information of a symbol.
 #[derive(Debug, Clone)]

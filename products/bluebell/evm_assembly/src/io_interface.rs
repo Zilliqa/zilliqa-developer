@@ -1,6 +1,7 @@
+use std::collections::BTreeMap;
+
 use evm::backend::{Backend, Basic};
 use primitive_types::{H160, H256, U256};
-use std::collections::BTreeMap;
 
 #[derive(Default, Clone, Debug, Eq, PartialEq)]
 pub struct CustomMemoryAccount {

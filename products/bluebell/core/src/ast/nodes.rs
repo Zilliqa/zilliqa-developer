@@ -1,5 +1,6 @@
-use crate::parser::lexer::SourcePosition;
 use std::fmt;
+
+use crate::parser::lexer::SourcePosition;
 
 /// A wrapper struct that adds source position to an AST node.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]

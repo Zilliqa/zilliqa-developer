@@ -1,5 +1,7 @@
-use crate::block::EvmBlock;
-use crate::types::{EvmType, EvmTypeValue};
+use crate::{
+    block::EvmBlock,
+    types::{EvmType, EvmTypeValue},
+};
 
 pub type AssemblyBuilderFn = fn(&mut EvmBlock);
 

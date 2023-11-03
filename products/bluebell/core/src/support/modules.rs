@@ -1,16 +1,21 @@
-use crate::intermediate_representation::name_generator::NameGenerator;
-use crate::intermediate_representation::symbol_table::{SymbolTable, SymbolTableConstructor};
-use evm::backend::Backend;
-use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
-use evm::{Context as EvmContext, ExitError, ExitSucceed};
-use evm_assembly::block::EvmBlock;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::types::EvmType;
+use std::{
+    collections::{BTreeSet, HashMap},
+    mem,
+    str::FromStr,
+};
+
+use evm::{
+    backend::Backend,
+    executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType},
+    Context as EvmContext, ExitError, ExitSucceed,
+};
+use evm_assembly::{block::EvmBlock, compiler_context::EvmCompilerContext, types::EvmType};
 use log::info;
-use std::collections::BTreeSet;
-use std::collections::HashMap;
-use std::mem;
-use std::str::FromStr;
+
+use crate::intermediate_representation::{
+    name_generator::NameGenerator,
+    symbol_table::{SymbolTable, SymbolTableConstructor},
+};
 
 // TODO: Generalize to support both EVM and LLVM
 

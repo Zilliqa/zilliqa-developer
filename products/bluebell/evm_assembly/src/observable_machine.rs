@@ -1,25 +1,19 @@
-use crate::executable::TypeSourceMap;
-use crate::io_interface::EvmIoInterface;
-use evm::executor::stack::PrecompileFn;
-use evm::Capture;
-use evm::ExitReason;
-use evm::Trap;
+use std::{
+    collections::{BTreeMap, HashMap, HashSet},
+    rc::Rc,
+    str::FromStr,
+};
 
-use primitive_types::U256;
-use std::collections::BTreeMap;
-use std::str::FromStr;
+use evm::{
+    executor::stack::PrecompileFn,
+    Capture,
+    Capture::{Exit, Trap as CaptureTrap},
+    Context, ExitReason, Machine, Opcode, Trap,
+};
+use log::{error, info};
+use primitive_types::{H160, H256, U256};
 
-use evm::Capture::Exit;
-use evm::Capture::Trap as CaptureTrap;
-use evm::Context;
-use evm::Machine;
-use evm::Opcode;
-use log::error;
-use log::info;
-use primitive_types::{H160, H256};
-
-use std::collections::{HashMap, HashSet};
-use std::rc::Rc;
+use crate::{executable::TypeSourceMap, io_interface::EvmIoInterface};
 
 pub type EvmPrecompileSet = BTreeMap<H160, PrecompileFn>;
 

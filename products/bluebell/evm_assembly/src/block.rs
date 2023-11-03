@@ -1,15 +1,18 @@
-use crate::function_signature::EvmFunctionSignature;
-use crate::instruction::{EvmInstruction, EvmSourcePosition, RustPosition};
-use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
-use crate::types::EvmType;
-use crate::types::EvmTypeValue;
+use std::{
+    collections::{BTreeSet, HashMap},
+    mem,
+};
+
 use evm::Opcode;
 use log::info;
-
 use primitive_types::U256;
-use std::collections::BTreeSet;
-use std::collections::HashMap;
-use std::mem;
+
+use crate::{
+    function_signature::EvmFunctionSignature,
+    instruction::{EvmInstruction, EvmSourcePosition, RustPosition},
+    opcode_spec::{OpcodeSpec, OpcodeSpecification},
+    types::{EvmType, EvmTypeValue},
+};
 
 pub const ALLOCATION_POINTER: u8 = 0x40;
 pub const MEMORY_OFFSET: u8 = 0x80;

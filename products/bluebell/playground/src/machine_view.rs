@@ -1,8 +1,9 @@
-use crate::state::State;
-
 use std::rc::Rc;
+
 use yew::prelude::*;
 use yewdux::prelude::*;
+
+use crate::state::State;
 
 pub struct MachineView {
     _dispatch: Dispatch<State>,

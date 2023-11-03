@@ -1,22 +1,25 @@
-use crate::constants::TreeTraversalMode;
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::primitives::IntermediateRepresentation;
-use crate::intermediate_representation::primitives::Operation;
-use crate::intermediate_representation::symbol_table::StateLayoutEntry;
-use crate::passes::debug_printer::DebugPrinter;
-use evm_assembly::block::EvmBlock;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::instruction::EvmSourcePosition;
-use evm_assembly::types::EvmType;
-use primitive_types::U256;
-use std::collections::BTreeSet;
-use std::str::FromStr;
+use std::{collections::BTreeSet, mem, str::FromStr};
 
-use evm_assembly::types::EvmTypeValue;
-use evm_assembly::EvmByteCodeBuilder;
+use evm_assembly::{
+    block::EvmBlock,
+    compiler_context::EvmCompilerContext,
+    executable::EvmExecutable,
+    instruction::EvmSourcePosition,
+    types::{EvmType, EvmTypeValue},
+    EvmByteCodeBuilder,
+};
+use primitive_types::U256;
 use sha3::{Digest, Keccak256};
-use std::mem;
+
+use crate::{
+    constants::TreeTraversalMode,
+    intermediate_representation::{
+        pass::IrPass,
+        primitives::{IntermediateRepresentation, Operation},
+        symbol_table::StateLayoutEntry,
+    },
+    passes::debug_printer::DebugPrinter,
+};
 
 /// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
 /// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.

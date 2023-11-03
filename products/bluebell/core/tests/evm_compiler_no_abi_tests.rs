@@ -1,17 +1,16 @@
 #[cfg(test)]
 mod tests {
-    use bluebell::support::evm::EvmCompiler;
-    use bluebell::support::modules::ScillaDebugBuiltins;
-    use bluebell::support::modules::ScillaDefaultBuiltins;
-    use bluebell::support::modules::ScillaDefaultTypes;
-    use evm_assembly::executable::EvmExecutable;
-    use evm_assembly::executor::ExecutorResult;
-    use evm_assembly::observable_machine::ObservableMachine;
-    use evm_assembly::types::EvmTypeValue;
-
-    use serde_json;
-
     use std::rc::Rc;
+
+    use bluebell::support::{
+        evm::EvmCompiler,
+        modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
+    };
+    use evm_assembly::{
+        executable::EvmExecutable, executor::ExecutorResult, observable_machine::ObservableMachine,
+        types::EvmTypeValue,
+    };
+    use serde_json;
 
     fn result_to_string(ret: ExecutorResult) -> String {
         let mut result = "".to_string();

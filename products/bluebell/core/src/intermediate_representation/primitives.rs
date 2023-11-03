@@ -1,10 +1,8 @@
-use crate::intermediate_representation::symbol_table::SymbolTable;
-use crate::parser::lexer::SourcePosition;
+use std::collections::{BTreeSet, HashMap, VecDeque};
 
-use std::collections::HashMap;
-
-use std::collections::BTreeSet;
-use std::collections::VecDeque;
+use crate::{
+    intermediate_representation::symbol_table::SymbolTable, parser::lexer::SourcePosition,
+};
 
 /// Enum representing the different kinds of identifiers in the intermediate representation.
 #[derive(Debug, Clone, PartialEq)]

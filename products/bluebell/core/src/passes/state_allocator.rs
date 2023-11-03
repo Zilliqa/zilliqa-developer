@@ -1,18 +1,18 @@
-use crate::intermediate_representation::symbol_table::StateLayoutEntry;
 use primitive_types::U256;
 
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::pass_executor::PassExecutor;
-use crate::intermediate_representation::primitives::CaseClause;
-use crate::intermediate_representation::primitives::ContractField;
-use crate::intermediate_representation::primitives::Instruction;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
-    VariableDeclaration, Variant,
+use crate::{
+    constants::{TraversalResult, TreeTraversalMode},
+    intermediate_representation::{
+        pass::IrPass,
+        pass_executor::PassExecutor,
+        primitives::{
+            CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+            FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+            IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+        },
+        symbol_table::{StateLayoutEntry, SymbolTable},
+    },
 };
-use crate::intermediate_representation::symbol_table::SymbolTable;
 
 pub struct StateCollector {
     namespace_stack: Vec<String>,

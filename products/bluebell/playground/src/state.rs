@@ -1,25 +1,28 @@
 // use strum_macros::{Display, EnumIter};
 
-use bluebell::support::evm::EvmCompiler;
-use bluebell::support::modules::ScillaDebugBuiltins;
-use bluebell::support::modules::ScillaDefaultBuiltins;
-use bluebell::support::modules::ScillaDefaultTypes;
-use evm::Capture::Exit;
-use evm::ExitReason;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::function_signature::EvmFunctionSignature;
-use evm_assembly::observable_machine::ObservableMachine;
-use evm_assembly::types::EvmTypeValue;
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
+
+use bluebell::support::{
+    evm::EvmCompiler,
+    modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
+};
+use evm::{Capture::Exit, ExitReason};
+use evm_assembly::{
+    compiler_context::EvmCompilerContext, executable::EvmExecutable,
+    function_signature::EvmFunctionSignature, observable_machine::ObservableMachine,
+    types::EvmTypeValue,
+};
 use gloo_console as console;
 use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
-use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
-use std::rc::Rc;
-use yewdux::prelude::Dispatch;
-use yewdux::prelude::Reducer;
-use yewdux::store::Store;
+use yewdux::{
+    prelude::{Dispatch, Reducer},
+    store::Store,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExecutionStatus {

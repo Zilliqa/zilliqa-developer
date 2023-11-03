@@ -1,13 +1,13 @@
-use crate::ast::converting::AstConverting;
-use crate::ast::nodes::*;
-use crate::ast::visitor::AstVisitor;
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::primitives::*;
-use crate::intermediate_representation::symbol_table::SymbolTable;
-use crate::parser::lexer::SourcePosition;
+use std::mem;
+
 use log::info;
 
-use std::mem;
+use crate::{
+    ast::{converting::AstConverting, nodes::*, visitor::AstVisitor},
+    constants::{TraversalResult, TreeTraversalMode},
+    intermediate_representation::{primitives::*, symbol_table::SymbolTable},
+    parser::lexer::SourcePosition,
+};
 
 /// Byte Code Generation Process
 ///

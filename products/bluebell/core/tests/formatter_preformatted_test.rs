@@ -1,17 +1,17 @@
 #[cfg(test)]
 mod tests {
     extern crate diffy;
-    use bluebell::formatter::BluebellFormatter;
-    use bluebell::parser::lexer;
-    use bluebell::parser::lexer::Lexer;
-    use bluebell::parser::lexer::SourcePosition;
-    use bluebell::parser::parser;
-    use bluebell::parser::ParserError;
+    use std::{fs, fs::File, io::Read};
 
+    use bluebell::{
+        formatter::BluebellFormatter,
+        parser::{
+            lexer,
+            lexer::{Lexer, SourcePosition},
+            parser, ParserError,
+        },
+    };
     use diffy::{create_patch, PatchFormatter};
-    use std::fs;
-    use std::fs::File;
-    use std::io::Read;
 
     fn strip_comments(input: &str) -> String {
         let re = regex::Regex::new(r"[ ]*\(\*([^*]|\*+[^*)])*\*+\)\n*").unwrap();
