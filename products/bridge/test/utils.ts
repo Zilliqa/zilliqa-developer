@@ -4,6 +4,9 @@ import { createProvider } from "hardhat/internal/core/providers/construction";
 import { HardhatEthersProvider } from "@nomicfoundation/hardhat-ethers/internal/hardhat-ethers-provider";
 import hre from "hardhat";
 import { ethers } from "hardhat";
+import { Signer } from "ethers";
+import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
+import { CollectorRelayer, Relayer } from "../typechain-types";
 
 var default_name;
 var default_config;
@@ -37,7 +40,7 @@ export async function switchNetwork(id = 0) {
   }
 }
 
-export async function obtainCalls(validators, relayer) {
+export async function obtainCalls(validators: Signer[], relayer: Relayer) {
   // validators see the Relayed event
   const index = Math.floor(Math.random() * validators.length);
   const blockNum = await ethers.provider.getBlockNumber();
@@ -60,14 +63,14 @@ export async function obtainCalls(validators, relayer) {
 }
 
 export async function confirmCall(
-  validators,
-  relayer,
-  caller,
-  callee,
-  call,
-  readonly,
-  callback,
-  nonce
+  validators: Signer[],
+  relayer: CollectorRelayer,
+  caller: Signer,
+  callee: Signer,
+  call: any,
+  readonly: boolean,
+  callback: any,
+  nonce: any
 ) {
   // validators sign the hash of the Relayed event data and submit their signature
   const message = ethers.AbiCoder.defaultAbiCoder().encode(

@@ -10,11 +10,7 @@ import {
   deliverResult,
 } from "./utils";
 import { ethers } from "hardhat";
-import {
-  ERC20Bridge__factory,
-  ERC20__factory,
-  MyToken__factory,
-} from "../typechain-types";
+import { ERC20Bridge__factory } from "../typechain-types";
 
 describe("ERC20Bridge", function () {
   async function setup() {
@@ -24,7 +20,7 @@ describe("ERC20Bridge", function () {
     const deployer1 = signers1[0];
     const tester1 = signers1[signers1.length - 1];
 
-    const relayer1 = await ethers.deployContract("Relayer");
+    const relayer1 = await ethers.deployContract("CollectorRelayer");
     const Bridge1 = await ethers.getContractFactory("ERC20Bridge");
     const bridge1 = await Bridge1.deploy();
     await bridge1.waitForDeployment();
