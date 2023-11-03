@@ -29,6 +29,7 @@ jobs:
             eth-spout,
             neo-savant,
             governance-api,
+            governance-snapshot,
           ]
         include:
           - application: bluebell-playground
@@ -64,6 +65,11 @@ jobs:
           - application: governance-api
             image_name: governance-api
             path: products/governance-api
+            tag_length: 8
+            tag_latest: false
+          - application: governance-snapshot
+            image_name: governance-snapshot
+            path: products/governance-snapshot
             tag_length: 8
             tag_latest: false
     env:
