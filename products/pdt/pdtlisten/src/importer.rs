@@ -3,7 +3,11 @@ use pdtdb::{
     values::{BQMicroblock, BQTransaction},
     zqproj::{Inserter, ZilliqaDBProject},
 };
-use std::{self, ops::Range};
+use std::{
+    self,
+    cmp::{max, min},
+    ops::Range,
+};
 
 pub(crate) struct Buffers {
     pub(crate) txn_inserter: Inserter<BQTransaction>,
@@ -49,15 +53,16 @@ impl BatchedImporter {
         match self.buffers.as_mut() {
             None => bail!("buffers have not been reset!"),
             Some(buffers) => {
-                if let Some(range) = self.range.as_ref() {
-                    if block.block < range.start {
-                        self.range = Some(block.block..range.end)
-                    } else if block.block > range.end {
-                        self.range = Some(range.start..block.block + 1) // range end not inclusive
-                    }
-                } else {
-                    self.range = Some(block.block..(block.block + 1))
-                }
+                let block_range = block.block..block.block + 1;
+
+                self.range
+                    .as_mut()
+                    .map_or(Some(block_range.clone()), |range| {
+                        let range_start = min(range.start, block_range.start);
+                        let range_end = max(range.end, block_range.end);
+                        Some(range_start..range_end)
+                    });
+
                 buffers.mb_inserter.insert_row(block)?;
                 for txn in txns {
                     buffers.txn_inserter.insert_row(txn)?;
@@ -68,9 +73,9 @@ impl BatchedImporter {
     }
 
     pub(crate) fn n_blocks(&self) -> usize {
-        match self.buffers.as_ref() {
-            None => 0,
-            Some(buffers) => buffers.mb_inserter.req.len(),
-        }
+        self.buffers
+            .as_ref()
+            .map(|buffers| buffers.mb_inserter.req.len())
+            .unwrap_or_default()
     }
 }

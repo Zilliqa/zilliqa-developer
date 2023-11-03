@@ -1,8 +1,9 @@
 mod importer;
 mod listener;
 mod types;
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, bail, Context, Error, Result};
 use ethers::{prelude::*, providers::StreamExt, utils::hex};
+use itertools::Itertools;
 use jsonrpsee::{core::client::ClientT, http_client::HttpClient, rpc_params};
 use pdtbq::{bq::ZilliqaBQProject, bq_utils::BigQueryDatasetLocation};
 use pdtdb::{
@@ -38,31 +39,29 @@ fn convert_block_and_txns(
     let my_block = block.clone();
     let bq_block = BQMicroblock::from_eth(&my_block)?;
     let version = bq_block.header_version;
-    let zil_transactions: HashMap<&str, ZILTransactionBody> = zil_txn_bodies
-        .into_iter()
-        .map(|x| (x.id.as_str(), x.clone()))
-        .collect();
+    let zil_transactions: HashMap<&str, &ZILTransactionBody> =
+        zil_txn_bodies.iter().map(|x| (x.id.as_str(), x)).collect();
 
-    let mut txn_errs = vec![];
-    let bq_transactions: Vec<BQTransaction> = my_block
+    let (bq_transactions, txn_errs): (Vec<BQTransaction>, Vec<Error>) = my_block
         .transactions
         .into_iter()
         .map(|txn| {
-            if let Some(zil_txn_body) =
-                zil_transactions.get(hex::encode(&txn.hash.as_bytes()).as_str())
-            {
-                BQTransaction::from_eth_with_zil_txn_bodies(&txn, zil_txn_body, version)
-            } else {
-                Err(anyhow!("some transaction zil body not found"))
-            }
+            zil_transactions
+                .get(hex::encode(txn.hash.as_bytes()).as_str())
+                .map_or(
+                    Err(anyhow!("zil transaction body not found")),
+                    |&txn_body| {
+                        BQTransaction::from_eth_with_zil_txn_bodies(&txn, txn_body, version)
+                    },
+                )
         })
-        .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
-        .collect();
+        .partition_result();
+
     if !txn_errs.is_empty() {
-        return Err(anyhow!(
+        bail!(
             "some transactions could not be converted, skipping this block: {:#?}",
             txn_errs
-        ));
+        );
     }
     Ok((bq_block, bq_transactions))
 }
@@ -73,25 +72,12 @@ async fn insert_block_and_txns<P: ZilliqaDBProject>(
     block_num: i64,
     proj: &P,
 ) -> Result<()> {
-    match proj
-        .insert_microblocks(block_req, &(block_num..(block_num + 1)))
+    proj.insert_microblocks(block_req, &(block_num..(block_num + 1)))
         .await
-    {
-        Err(e) => {
-            bail!("could not insert block due to error: {:}", e)
-        }
-        Ok(_) => (),
-    }
-    match proj
-        .insert_transactions(txn_req, &(block_num..(block_num + 1)))
+        .map_err(|e| anyhow!("could not insert block to err: {:}", e))?;
+    proj.insert_transactions(txn_req, &(block_num..(block_num + 1)))
         .await
-    {
-        Err(e) => {
-            bail!("could not insert transactions due to error: {:}", e)
-        }
-        Ok(_) => (),
-    }
-    Ok(())
+        .map_err(|e| anyhow!("could not insert transactions due to error: {:}", e))
 }
 
 async fn postgres_insert_block_and_txns(
@@ -102,19 +88,22 @@ async fn postgres_insert_block_and_txns(
     let psql_block: PSQLMicroblock = BQMicroblock::from_eth(&my_block)?.into();
     let version = psql_block.header_version;
     let block_num = psql_block.block;
-    let mut txn_errs = vec![];
-    let psql_txns: Vec<PSQLTransaction> = my_block
+
+    let (txns, txn_errs): (Vec<BQTransaction>, Vec<Error>) = my_block
         .transactions
         .into_iter()
         .map(|txn| BQTransaction::from_eth(&txn, version))
-        .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
+        .partition_result();
+    let psql_txns = txns
+        .into_iter()
         .map(|txn| Into::<PSQLTransaction>::into(txn))
-        .collect();
+        .collect_vec();
+
     if !txn_errs.is_empty() {
-        return Err(anyhow!(
+        bail!(
             "some transactions could not be converted, skipping this block: {:#?}",
             txn_errs
-        ));
+        );
     }
     // let err_psql_block = psql_block.clone();
     let psql_block_req = Inserter {

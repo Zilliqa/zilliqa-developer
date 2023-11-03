@@ -1,8 +1,7 @@
 use std::ops::Mul;
 
-use crate::utils::{self};
+use crate::utils::{self, decode_u8, encode_u8};
 use anyhow::{anyhow, Result};
-use base64::Engine;
 use ethers::types::{Block, Transaction, Withdrawal, U256};
 // use hex;
 use crate::zqproj::PSQLInsertable;
@@ -542,16 +541,6 @@ impl PSQLMicroblock {
     pub fn to_json(&self) -> Result<String> {
         Ok(serde_json::to_string(self)?)
     }
-}
-
-fn encode_u8(y: &[u8]) -> String {
-    base64::engine::general_purpose::STANDARD.encode(y)
-}
-
-fn decode_u8(x: String) -> Vec<u8> {
-    base64::engine::general_purpose::STANDARD
-        .decode(x)
-        .expect("base64-encoding should be decodeable")
 }
 
 #[test]
