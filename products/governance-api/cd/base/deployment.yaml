@@ -25,7 +25,7 @@ spec:
           env:
             - name: NODE_ENV
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: governance-api
                   key: NODE_ENV
             - name: PINATA_API_KEY
@@ -50,11 +50,11 @@ spec:
                   key: POSTGRES_HOST
             - name: POSTGRES_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: governance-api
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: governance-api
                   key: POSTGRES_USER
