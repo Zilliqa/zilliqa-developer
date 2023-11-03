@@ -1,23 +1,23 @@
-use crate::intermediate_representation::symbol_table::StateLayoutEntry;
 use primitive_types::U256;
 
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::pass_executor::PassExecutor;
-use crate::intermediate_representation::primitives::CaseClause;
-use crate::intermediate_representation::primitives::ContractField;
-use crate::intermediate_representation::primitives::Instruction;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
-    VariableDeclaration, Variant,
+use crate::{
+    constants::{TraversalResult, TreeTraversalMode},
+    intermediate_representation::{
+        pass::IrPass,
+        pass_executor::PassExecutor,
+        primitives::{
+            CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+            FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+            IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+        },
+        symbol_table::{StateLayoutEntry, SymbolTable},
+    },
 };
-use crate::intermediate_representation::symbol_table::SymbolTable;
 
 pub struct StateCollector {
     namespace_stack: Vec<String>,
     current_namespace: Option<String>,
-    current_type: Option<String>,
+    // current_type: Option<String>,
     address_offset: u64,
 }
 
@@ -26,7 +26,7 @@ impl StateCollector {
         StateCollector {
             namespace_stack: Vec::new(),
             current_namespace: None,
-            current_type: None,
+            // current_type: None,
             address_offset: 4919, // TODO:
         }
     }
@@ -153,7 +153,7 @@ impl IrPass for StateCollector {
     fn visit_symbol_name(
         &mut self,
         _mode: TreeTraversalMode,
-        symbol: &mut IrIdentifier,
+        _symbol: &mut IrIdentifier,
         _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
@@ -161,9 +161,9 @@ impl IrPass for StateCollector {
 
     fn visit_primitives(
         &mut self,
-        mode: TreeTraversalMode,
+        _mode: TreeTraversalMode,
         _primitives: &mut IntermediateRepresentation,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         Ok(TraversalResult::Continue)
     }

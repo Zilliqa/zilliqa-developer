@@ -1,7 +1,12 @@
-use crate::ast::converting::AstConverting;
-use crate::ast::nodes::*;
-use crate::constants::{TraversalResult, TreeTraversalMode};
+use crate::{
+    ast::{converting::AstConverting, nodes::*},
+    constants::{TraversalResult, TreeTraversalMode},
+};
 
+/// The `AstVisitor` trait is used for implementing the visiting behaviour for each AST node of the Scilla AST.
+/// Each node in the AST implements this trait to define how it should be visited during the tree traversal.
+/// The `visit` method is called with an `emitter` that implements the `AstConverting` trait, which is responsible for converting the AST to some other form.
+/// The `visit` method returns a `Result` with a `TraversalResult` that informs the visitor algorithm how to proceed, or a `String` in case of an error.
 pub trait AstVisitor {
     fn visit(&self, emitter: &mut dyn AstConverting) -> Result<TraversalResult, String>;
 }

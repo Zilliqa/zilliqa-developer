@@ -1,21 +1,19 @@
-use crate::ast::nodes::NodeProgram;
-use crate::support::modules::BluebellModule;
+use evm_assembly::{
+    compiler_context::EvmCompilerContext, executable::EvmExecutable, executor::EvmExecutor,
+};
 
-use crate::evm_bytecode_generator::EvmBytecodeGenerator;
-
-use crate::intermediate_representation::emitter::IrEmitter;
-use crate::intermediate_representation::pass_manager::PassManager;
-
-use crate::parser::lexer;
-use crate::parser::lexer::Lexer;
-use crate::parser::parser;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::executor::EvmExecutor;
+use crate::{
+    ast::nodes::NodeProgram,
+    evm_bytecode_generator::EvmBytecodeGenerator,
+    intermediate_representation::{
+        emitter::IrEmitter, pass_manager::PassManager, symbol_table::SymbolTableConstructor,
+    },
+    parser::{lexer, lexer::Lexer, parser},
+    support::modules::BluebellModule,
+};
 
 pub struct EvmCompiler {
     pub context: EvmCompilerContext,
-    ir_emitter: IrEmitter,
     pass_manager: PassManager,
     abi_support: bool,
 }
@@ -24,7 +22,6 @@ impl EvmCompiler {
     pub fn new() -> Self {
         EvmCompiler {
             context: EvmCompilerContext::new(),
-            ir_emitter: IrEmitter::new(),
             pass_manager: PassManager::default_pipeline(),
             abi_support: true,
         }
@@ -33,7 +30,6 @@ impl EvmCompiler {
     pub fn new_no_abi_support() -> Self {
         EvmCompiler {
             context: EvmCompilerContext::new(),
-            ir_emitter: IrEmitter::new(),
             pass_manager: PassManager::default_pipeline(),
             abi_support: false,
         }
@@ -64,7 +60,9 @@ impl EvmCompiler {
 
     // TODO: Remove &mut self - needs to be removed from a number of places first
     pub fn compile_ast(&mut self, ast: &NodeProgram) -> Result<EvmExecutable, String> {
-        let mut ir = self.ir_emitter.emit(ast)?;
+        let symbol_table = self.context.new_symbol_table();
+        let mut ir_emitter = IrEmitter::new(symbol_table);
+        let mut ir = ir_emitter.emit(ast)?;
         self.pass_manager.run(&mut ir)?;
 
         let mut generator = EvmBytecodeGenerator::new(&mut self.context, ir, self.abi_support);

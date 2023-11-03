@@ -1,8 +1,6 @@
+use std::{convert::From, iter::Peekable, str::CharIndices, string::String};
+
 use regex::Regex;
-use std::convert::From;
-use std::iter::Peekable;
-use std::str::CharIndices;
-use std::string::String;
 
 pub type Spanned<Tok, Loc, Error> = Result<(Loc, Tok, Loc), Error>;
 
