@@ -27,7 +27,7 @@ pub enum NodeByteStr {
     /// Represents a constant byte string
     /// Example: `let x = "constant";`
     Constant(WithMetaData<String>), // TODO: Apparently not used anywhere
-    /// Represents a type byte string
+    /// Represents a byte string type
     /// Example: `let x: ByStr = "type";`
     Type(WithMetaData<String>),
 }
