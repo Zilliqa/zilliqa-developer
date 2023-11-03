@@ -159,7 +159,6 @@ fn bluebell_evm_run(
         serde_json::from_str(&args).expect("Failed to deserialize arguments")
     };
 
-    print!("Arguments: {:?}", args);
     executable.execute(&entry_point, arguments);
 }
 

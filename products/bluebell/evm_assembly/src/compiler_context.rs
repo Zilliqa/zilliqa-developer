@@ -3,7 +3,6 @@ use crate::evm_bytecode_builder::EvmByteCodeBuilder;
 use crate::function_signature::{AssemblyBuilderFn, EvmFunctionSignature};
 use crate::types::EvmType;
 use evm::executor::stack::PrecompileFn;
-use log::info;
 use primitive_types::H160;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -55,7 +54,6 @@ impl<'a> EvmPrecompileBuilder<'a> {
             let padded_string = format!("{:0>40}", format!("{:x}", value)); // Pad with leading zeros to 40 characters
             H160::from_str(&padded_string).unwrap()
         };
-        info!("Attaching {} to address {:?}", name, address);
 
         self.signature.external_address = Some(index);
         self.context

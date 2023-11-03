@@ -13,8 +13,6 @@ use crate::intermediate_representation::primitives::{
 use crate::intermediate_representation::symbol_table::SymbolTable;
 use crate::intermediate_representation::symbol_table::TypeInfo;
 use crate::parser::lexer::SourcePosition;
-
-use log::info;
 use std::mem;
 
 pub struct AnnotateBaseTypes {
@@ -320,18 +318,7 @@ impl IrPass for AnnotateBaseTypes {
                         symbol_table.resolve_qualified_name(&symbol.unresolved, &self.namespace)
                     {
                         symbol.resolved = Some(resolved_name);
-                    } else {
-                        info!("Not resolved!!");
                     }
-
-                    /*
-                    // In the event of a definition we make a qualified name
-                    if let Some(ns) = &self.namespace {
-                        symbol.resolved = Some(
-                            format!("{}{}{}", ns, NAMESPACE_SEPARATOR, symbol.unresolved).to_string(),
-                        );
-                    }
-                    */
                 }
             }
             IrIndentifierKind::VirtualRegister

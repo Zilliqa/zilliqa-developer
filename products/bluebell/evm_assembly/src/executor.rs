@@ -91,7 +91,7 @@ impl<'a> EvmExecutor<'a> {
         );
 
         let (state_apply, _logs) = executor.into_state().deconstruct();
-        info!("Exit reason: {:#?}", exit_reason);
+        info!("\n\n\nExit reason: {:#?}", exit_reason);
         info!("Result: {:#?}", result);
 
         let mut ret = ExecutorResult {

@@ -11,7 +11,6 @@ use crate::intermediate_representation::primitives::{
     VariableDeclaration, Variant,
 };
 use crate::intermediate_representation::symbol_table::SymbolTable;
-use log::info;
 
 pub struct CollectTypeDefinitionsPass {
     namespace_stack: Vec<String>,
