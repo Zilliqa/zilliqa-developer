@@ -10,7 +10,7 @@ To run a Scilla file, use the `Run` command followed by the `--entry_point` flag
 cargo run --bin cli -- examples/hello-world.scilla --runtime-enable debug run --backend evm  --entry-point "HelloWorld::setHello" --args "[\"Zilliqa ❤️ Rocks\"]"
 ```
 
-This command will run the `main` function of the `hello-world.scilla` file with the argument `[\"Zilliqa ❤️ Rocks\"]` using the EVM backend. This should procude an output similar to
+This command will run the `main` function of the `hello-world.scilla` file with the argument `[\"Zilliqa ❤️ Rocks\"]` using the EVM backend. This should produce an output similar to
 
 ```bash
 Zilliqa ❤️ Rocks
