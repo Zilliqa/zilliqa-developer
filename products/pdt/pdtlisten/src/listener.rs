@@ -45,7 +45,21 @@ async fn get_block_by_number(x: U64, provider: &Provider<Http>) -> Result<Block<
     // is not happy about.
     raw_block["nonce"] = serde_json::to_value("0x0000000000000000")?;
 
-    Ok(serde_json::from_value(raw_block)?)
+    let mut block: Block<Transaction> = serde_json::from_value(raw_block)?;
+    while block.number.is_none() {
+        println!("{:?} is pending, looping", x);
+
+        // loop until the block is no longer pending
+        // the sleep duration is set arbitrarily.
+        tokio::time::sleep(Duration::from_millis(1000)).await;
+        raw_block = provider
+            .request("eth_getBlockByNumber", [serialize(x), serialize(true)])
+            .await?;
+        raw_block["nonce"] = serde_json::to_value("0x0000000000000000")?;
+
+        block = serde_json::from_value(raw_block)?;
+    }
+    Ok(block)
 }
 
 /// Fetches the most recent block number and compares against `last_seen_block_number` and retrieves all blocks in between

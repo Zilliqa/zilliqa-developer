@@ -53,7 +53,7 @@ impl Meta {
         client: &Client,
         loc: &bq_utils::BigQueryTableLocation,
     ) -> Result<()> {
-        if let None = bq_utils::find_table(client, loc).await? {
+        if let None = loc.find_table(client).await {
             Self::create_table(client, loc).await?;
         }
         Ok(())
@@ -80,8 +80,9 @@ impl Meta {
             Err(_) => {
                 // Wait a bit and then fetch the table.
                 sleep(Duration::from_millis(5_000)).await;
-                Ok(bq_utils::find_table(client, loc)
-                    .await?
+                Ok(loc
+                    .find_table(client)
+                    .await
                     .ok_or(anyhow!("Couldn't create table {}", loc.table_id))?)
             }
         }
