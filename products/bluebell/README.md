@@ -33,4 +33,4 @@ To set up Rust to run the playground, first follow these steps:
 4. Navigate to your project `playground/`.
 5. Run `trunk serve` to start the development server.
 
-A more detailed guide can be found in the playgrounds [README.md](playground/README.md) file.
+A more detailed guide can be found in the playground's [README.md](playground/README.md) file.
