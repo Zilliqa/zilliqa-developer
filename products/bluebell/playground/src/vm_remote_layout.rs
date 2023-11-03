@@ -1,5 +1,4 @@
 use yew::prelude::*;
-// use yewdux::prelude::*;
 
 pub struct VmRemoteControlLayout {
     props: VmRemoteControlLayoutProps,
