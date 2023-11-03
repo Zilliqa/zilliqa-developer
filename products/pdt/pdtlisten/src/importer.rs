@@ -55,8 +55,9 @@ impl BatchedImporter {
             Some(buffers) => {
                 let block_range = block.block..block.block + 1;
 
-                self.range
-                    .as_mut()
+                self.range = self
+                    .range
+                    .as_ref()
                     .map_or(Some(block_range.clone()), |range| {
                         let range_start = min(range.start, block_range.start);
                         let range_end = max(range.end, block_range.end);
