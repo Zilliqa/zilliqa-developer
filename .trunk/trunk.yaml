@@ -54,6 +54,7 @@ lint:
         - "templates/**"
         - "**/templates/**"
         - products/governance-api/**
+        - products/governance-snapshot/**
 
 runtimes:
   enabled:
