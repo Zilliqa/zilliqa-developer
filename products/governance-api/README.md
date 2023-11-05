@@ -81,7 +81,7 @@ z login
 1. Create a branch:
 
    ```sh
-   git checkout -b users/<username>/add_devex_to_staging_cluster
+   git checkout -b users/<username>/add_governance-api_to_staging_cluster
    ```
 
 2. In the file `infra/live/gcp/non-production/prj-d-staging/z_ase1.yaml` add the following:
@@ -113,8 +113,8 @@ z login
 
    ```sh
    git add .
-   git commit -m "Add Devex to staging cluster"
-   git push origin users/<username>/add_devex_to_staging_cluster
+   git commit -m "Add governance-api to staging cluster"
+   git push origin users/<username>/add_governance-api_to_staging_cluster
    ```
 
 4. Open a Pull Request to the main branch
@@ -169,7 +169,7 @@ z login
 1. Create a branch:
 
    ```sh
-   git checkout -b users/<username>/add_devex_to_production_cluster
+   git checkout -b users/<username>/add_governance-api_to_production_cluster
    ```
 
 2. In the file `infra/live/gcp/production/prj-p-prod-apps/z_ase1.yaml` add the following:
@@ -201,8 +201,8 @@ z login
 
    ```sh
    git add .
-   git commit -m "Add Devex to production cluster"
-   git push origin users/<username>/add_devex_to_production_cluster
+   git commit -m "Add governance-api to production cluster"
+   git push origin users/<username>/add_governance-api_to_production_cluster
    ```
 
 4. Open a Pull Request to the main branch
