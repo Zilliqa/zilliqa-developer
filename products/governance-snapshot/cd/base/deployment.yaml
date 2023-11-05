@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: governance-snapshot
+  namespace: governance-snapshot
+  labels:
+    "app.kubernetes.io/name": "governance-snapshot"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "governance-snapshot"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "governance-snapshot"
+    spec:
+      containers:
+        - image: governance-snapshot
+          name: governance-snapshot
+          ports:
+            - containerPort: 80
