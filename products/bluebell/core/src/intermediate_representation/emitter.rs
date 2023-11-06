@@ -186,6 +186,25 @@ impl<'a> IrEmitter<'a> {
         Ok(ret)
     }
 
+    fn pop_function_block_or_empty_block(&mut self) -> Result<Box<FunctionBlock>, String> {
+        let ret = if let Some(candidate) = self.stack.last() {
+            match candidate {
+                StackObject::FunctionBlock(n) => {
+                    if let StackObject::FunctionBlock(n) = self.stack.pop().unwrap() {
+                        n
+                    } else {
+                        panic!("This will never happen");
+                    }
+                }
+                _ => FunctionBlock::new("empty_block".to_string()),
+            }
+        } else {
+            return Err("Expected function block, but found nothing.".to_string());
+        };
+
+        Ok(ret)
+    }
+
     fn pop_ir_identifier(&mut self) -> Result<IrIdentifier, String> {
         let ret = if let Some(candidate) = self.stack.pop() {
             match candidate {
@@ -259,6 +278,25 @@ impl<'a> IrEmitter<'a> {
                         candidate
                     ));
                 }
+            }
+        } else {
+            return Err("Expected function body, but found nothing.".to_string());
+        };
+
+        Ok(ret)
+    }
+
+    fn pop_function_body_or_empty(&mut self) -> Result<Box<FunctionBody>, String> {
+        let ret = if let Some(candidate) = self.stack.last() {
+            match candidate {
+                StackObject::FunctionBody(n) => {
+                    if let StackObject::FunctionBody(n) = self.stack.pop().unwrap() {
+                        n
+                    } else {
+                        panic!("This will never happen");
+                    }
+                }
+                _ => FunctionBody::new(),
             }
         } else {
             return Err("Expected function body, but found nothing.".to_string());
@@ -1383,10 +1421,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
         if let Some(block) = &node.statement_block {
             let _ = block.visit(self)?;
         }
-
-        let last_block = self.pop_function_block()?;
+        // BOOK
+        let last_block = self.pop_function_block_or_empty_block()?;
         // Restoring the old body as current
-        let mut body = self.pop_function_body()?;
+        let mut body = self.pop_function_body_or_empty()?;
         mem::swap(&mut body, &mut self.current_body);
 
         // Pushing the current body onto the stack
@@ -1645,7 +1683,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
             let ir_arg = self.pop_variable_declaration()?;
             arguments.push(ir_arg);
         }
-
+        println!("Stacl:{:#?}", self.stack);
+        println!("{:#?}", node);
         // Function body
         let _ = node.body.visit(self)?;
 
@@ -1665,6 +1704,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 last_block.terminated = true;
             }
         }
+        println!("Stacl:{:#?}", self.stack);
 
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
