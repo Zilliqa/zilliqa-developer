@@ -5,7 +5,7 @@ use log::info;
 use crate::{
     ast::{converting::AstConverting, nodes::*, visitor::AstVisitor},
     constants::{TraversalResult, TreeTraversalMode},
-    intermediate_representation::{primitives::*, symbol_table::SymbolTable},
+    intermediate_representation::{ast_queue::AstQueue, primitives::*, symbol_table::SymbolTable},
     parser::lexer::SourcePosition,
 };
 
@@ -67,7 +67,7 @@ enum StackObject {
 
 /// The `IrEmitter` struct is used for bookkeeping during the conversion of a Scilla AST to an intermediate representation.
 /// It implements the `AstConverting` trait, which is a generic trait for AST conversions.
-pub struct IrEmitter {
+pub struct IrEmitter<'a> {
     /// Stack of objects used during the conversion process.
     stack: Vec<StackObject>,
 
@@ -88,10 +88,13 @@ pub struct IrEmitter {
 
     /// Source positions of the AST nodes.
     source_positions: Vec<(SourcePosition, SourcePosition)>,
+
+    /// Queue with imported libraries
+    ast_queue: &'a mut dyn AstQueue,
 }
 
-impl IrEmitter {
-    pub fn new(symbol_table: SymbolTable) -> Self {
+impl<'a> IrEmitter<'a> {
+    pub fn new(symbol_table: SymbolTable, ast_queue: &'a mut dyn AstQueue) -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         let ns = IrIdentifier {
@@ -119,6 +122,7 @@ impl IrEmitter {
                 SourcePosition::invalid_position(),
             )]
             .to_vec(), // TODO: this should not be necessary
+            ast_queue,
         }
     }
 
@@ -286,7 +290,7 @@ impl IrEmitter {
     }
 }
 
-impl AstConverting for IrEmitter {
+impl<'a> AstConverting for IrEmitter<'a> {
     fn push_source_position(&mut self, start: &SourcePosition, end: &SourcePosition) {
         self.source_positions.push((start.clone(), end.clone()));
     }
@@ -335,16 +339,27 @@ impl AstConverting for IrEmitter {
     fn emit_imported_name(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodeImportedName,
+        node: &NodeImportedName,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        match node {
+            NodeImportedName::RegularImport(value) => {
+                value.node.visit(self)?;
+                let identifier = self.pop_ir_identifier()?;
+                self.ast_queue.enqueue(&identifier.unresolved)?;
+            }
+            NodeImportedName::AliasedImport(_alias, _name) => {
+                unimplemented!()
+            }
+        }
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_import_declarations(
         &mut self,
         _mode: TreeTraversalMode,
         _node: &NodeImportDeclarations,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        // Nothing to do here - we will deal with the specific kind of import, futher down the tree
+        Ok(TraversalResult::Continue)
     }
     fn emit_meta_identifier(
         &mut self,

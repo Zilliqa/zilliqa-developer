@@ -66,8 +66,21 @@ mod tests {
             contract TestContract()
             "#
         );
-        assert!(false);
     }
+
+    /*
+    TODO: Not handled yet
+    #[test]
+    fn test_alias_import_handling() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+            import ListUtils as HelloWorld
+            library TestLib
+            contract TestContract()
+            "#
+        );
+    }
+    */
 
     /*
     #[test]
