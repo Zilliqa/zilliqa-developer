@@ -109,24 +109,26 @@ impl EvmCompiler {
     }
 
     pub fn compile(&mut self, script: String) -> Result<EvmExecutable, String> {
-        let mut errors: Vec<lexer::ParseError> = [].to_vec();
-        let lexer = Lexer::new(&script);
-        let parser = parser::ProgramParser::new();
-        let ast = match parser.parse(&mut errors, lexer) {
-            Ok(ast) => ast,
-            Err(error) => {
-                let message = format!("Syntax error {:?}", error);
-                return Err(message.to_string());
-            }
-        };
+        self.source_importer.load_script(script)?;
+        let symbol_table = self.context.new_symbol_table();
 
-        self.compile_ast(&ast)
+        // TODO: Change to while loop. This requires that IRs can be merged
+        if let Some(ast) = self.source_importer.pop_front() {
+            let ast_queue = &mut self.source_importer;
+            let mut ir_emitter = IrEmitter::new(symbol_table, ast_queue);
+            let mut ir = ir_emitter.emit(&ast)?;
+            self.pass_manager.run(&mut ir)?;
+            let mut generator = EvmBytecodeGenerator::new(&mut self.context, ir, self.abi_support);
+            generator.build_executable()
+        } else {
+            Err("No AST found.".to_string())
+        }
     }
 
     // TODO: Remove &mut self - needs to be removed from a number of places first
     pub fn compile_ast(&mut self, ast: &NodeProgram) -> Result<EvmExecutable, String> {
         let symbol_table = self.context.new_symbol_table();
-        let mut ast_queue = &mut self.source_importer;
+        let ast_queue = &mut self.source_importer;
 
         let mut ir_emitter = IrEmitter::new(symbol_table, ast_queue);
         let mut ir = ir_emitter.emit(ast)?;
