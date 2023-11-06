@@ -1,10 +1,7 @@
-FROM node:16 as build-stage
+FROM node:14 as build-stage
 
 WORKDIR app/
-COPY ./package.json ./
-RUN yarn install
-COPY . ./
-RUN yarn build
+COPY /app ./
 
 FROM nginx:stable-alpine as production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html

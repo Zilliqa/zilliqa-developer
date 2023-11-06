@@ -25,6 +25,17 @@ npm run build
 npm run lint
 ```
 
+## Pre-built app directory notes
+
+We are including the app directory as part of the code base because the legacy build process needs to be reviewed and corrected with newer dependencies versions. Once this is completed the Dockerfile could include the yarn install and build commands.
+
+```
+COPY ./package.json ./
+RUN yarn install
+COPY . ./
+RUN yarn build
+```
+
 ## Snapshot Spaces Commit
 https://github.com/Zilliqa/snapshot-spaces/commit/238e87aad231351a51727b06208ab407f0de1dcc
 
