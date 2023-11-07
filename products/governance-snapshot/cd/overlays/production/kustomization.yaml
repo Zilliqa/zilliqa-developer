@@ -24,5 +24,14 @@ patches:
           kubernetes.io/ingress.global-static-ip-name: governance-zilliqa-com
           networking.gke.io/managed-certificates: governance-snapshot
           networking.gke.io/v1beta1.FrontendConfig: governance-snapshot
+  - target:
+      kind: ConfigMap
+      name: governance-snapshot-config
+    patch: |-
+      - op: replace
+        path: "/data/config.js"
+        value: |
+          window['VUE_APP_HUB_URL'] = 'https://governance-api.zilliqa.com';
+          window['VUE_APP_IPFS_NODE'] = 'gateway.pinata.cloud';
 
 namespace: governance-snapshot-prd

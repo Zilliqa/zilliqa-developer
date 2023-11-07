@@ -5,3 +5,4 @@ metadata:
 spec:
   domains:
     - stg-governance.zilliqa.com
+    - stg-vote.zilliqa.com
