@@ -14,7 +14,7 @@ description: Learn how to use Chainlink oracles on Zilliqa.
 
 ## How to use Chainlink Community Deployment price feeds with smart contracts on Zilliqa
 
-In this tutorial we will show you how to get the current ZIL/ USDT price from one of the price feed oracles operating as part of the Chainlink Community Deployment on the Zilliqa network.
+In this tutorial we will show you how to get the current ZIL/ USDT price from one of the price feed oracles operating as part of the [Chainlink Community Deployment](https://docs.chain.link/data-feeds/selecting-data-feeds/#chainlink-community-deployments) on the Zilliqa network.
 
 > **Note**: This tutorial is aimed towards developers as you will need to have some basic knowledge of smart contracts and programming to complete the steps below.
 
@@ -45,7 +45,7 @@ Remix is great as it is a zero-setup tool for working with smart contracts, allo
 
 This is the contract you will deploy. This is just a minimal example to demonstrate how to consume these data feeds on Zilliqa. You can extend this to be a decentralised borrowing and lending protocol, a DEX, game, NFT minting contract - anything you can think of!
 
-If you look at the last function, it only returns the current answer, or price. You can see that it also is capable of returning other pieces of information such as timestamp data. Chainlink encourages dAapp developers to verify the timestamp together with the price information to protect against stale data. While the oracles should be publishing fresh data every other minute, there can be unexpected downtime.
+If you look at the last function, it only returns the current answer, or price. You can see that it also is capable of returning other pieces of information such as timestamp data. Chainlink documentation encourages dAapp developers to verify the timestamp together with the price information to protect against stale data. While the oracles should be publishing fresh data every other minute, there can be unexpected downtime.
 
 This is a public view function, meaning that getting the price data has zero cost. You can add pricing data to your dApp with no extra charge to your team or your users.
 
@@ -161,3 +161,4 @@ There you have it! While this a simple demonstration, it should illuminate the w
 - [Remix](https://remix.ethereum.org/)
 - [Zilliqa public RPCs](https://chainlist.org/?search=zilliqa&testnets=true)
 - [DefiLlama](https://defillama.com/)
+- [Chainlink Community Deployments](https://docs.chain.link/data-feeds/selecting-data-feeds/#chainlink-community-deployments)
