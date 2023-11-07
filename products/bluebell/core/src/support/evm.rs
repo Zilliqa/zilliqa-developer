@@ -1,7 +1,8 @@
+use std::collections::HashMap;
+
 use evm_assembly::{
     compiler_context::EvmCompilerContext, executable::EvmExecutable, executor::EvmExecutor,
 };
-use std::collections::HashMap;
 
 use crate::{
     ast::nodes::NodeProgram,

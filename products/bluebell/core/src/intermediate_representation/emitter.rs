@@ -340,10 +340,18 @@ impl<'a> AstConverting for IrEmitter<'a> {
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodeByteStr,
+        node: &NodeByteStr,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        let symbol = IrIdentifier::new(
+            node.to_string(),
+            IrIndentifierKind::Unknown, // TODO: Should be revised to TypeName
+            self.current_location(),
+        );
+
+        self.stack.push(StackObject::IrIdentifier(symbol));
+        Ok(TraversalResult::SkipChildren)
     }
+
     fn emit_type_name_identifier(
         &mut self,
         mode: TreeTraversalMode,
@@ -351,7 +359,9 @@ impl<'a> AstConverting for IrEmitter<'a> {
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
-                NodeTypeNameIdentifier::ByteStringType(_) => (),
+                NodeTypeNameIdentifier::ByteStringType(_) => {
+                    // Ignored as it is handled by emit_byte_str
+                }
                 NodeTypeNameIdentifier::EventType => {
                     /*
                     self.stack.push(StackObject::Identifier(Identifier::Event(
@@ -363,7 +373,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(name) => {
                     let symbol = IrIdentifier::new(
                         name.to_string(),
-                        IrIndentifierKind::Unknown,
+                        IrIndentifierKind::Unknown, // TODO: Should be revised to TypeName
                         self.current_location(),
                     );
 
@@ -374,6 +384,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
         }
         Ok(TraversalResult::Continue)
     }
+
     fn emit_imported_name(
         &mut self,
         _mode: TreeTraversalMode,
@@ -1704,7 +1715,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 last_block.terminated = true;
             }
         }
-        println!("Stacl:{:#?}", self.stack);
+        println!("Stack: {:#?}", self.stack);
 
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);

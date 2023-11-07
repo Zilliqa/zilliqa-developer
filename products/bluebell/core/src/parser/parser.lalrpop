@@ -111,7 +111,11 @@ pub ByteString : NodeByteStr = {
 // @return An identifier type name as a custom type name, a byte string type name, or an event type name.
 pub TypeNameIdentifier: WithMetaData<NodeTypeNameIdentifier> = {
 	<start:@L> <node:ByteString> <end:@R> => WithMetaData::<NodeTypeNameIdentifier> { 
-        node: NodeTypeNameIdentifier::EventType,  
+        node: NodeTypeNameIdentifier::ByteStringType(WithMetaData::<NodeByteStr>  {
+            node,
+            start: start.clone(),
+            end: end.clone()
+        }),
         start,
         end
     },

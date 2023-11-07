@@ -99,10 +99,9 @@ mod tests {
     }
     */
 
-    /*
     #[test]
     // Testing the failure when handling NodeTypeNameIdentifier::EventType in the emit_type_name_identifier() function.
-    fn test_event_type_not_implemented() {
+    fn test_byte_str_not_implemented() {
         test_compilation_and_evm_code_generation!(
             r#"scilla_version 0
 
@@ -111,13 +110,12 @@ mod tests {
             contract DummyRefinery()
 
             transition Register(claimer : ByStr20)
+                x = claimer
             end
 
-            transition Refine(to: ByStr20, amount: Uint128)
-            end
-    "#);
+    "#
+        );
     }
-    */
 
     /*
     #[test]
