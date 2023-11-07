@@ -1570,7 +1570,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
                     // TODO: self.current_function
                 }
                 */
-
+                println!("{:#?}", expression);
                 expression.visit(self)?;
                 unimplemented!();
             }

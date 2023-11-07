@@ -117,6 +117,25 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_emit_library_single_definition_unimplemented() {
+        // This test is attempting to trigger the unimplemented!() call in emit_library_single_definition
+        // It does this by defining a library with a single let definition.
+        // The let definition will cause the emit_library_single_definition method to be called during contract compilation.
+        // Since the current implementation of this function cannot handle let definitions, it should trigger the unimplemented error.
+
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+
+            library TestLibrary
+
+            let zero = Uint32 0
+
+            contract TestContract()
+            "#
+        );
+    }
+
     /*
     #[test]
     // This test case is used to generate an unimplemented error for the contract_type_arguments of
@@ -158,25 +177,7 @@ mod tests {
         );
     }
     */
-    /*
-    #[test]
-    fn test_emit_library_single_definition_unimplemented() {
-        test_compilation_and_evm_code_generation!(
-            r#"scilla_version 0
 
-            library TestLibrary
-
-            let zero = Uint32 0
-
-            contract TestContract()
-            "#);
-
-        // This test is attempting to trigger the unimplemented!() call in emit_library_single_definition
-        // It does this by defining a library with a single let definition.
-        // The let definition will cause the emit_library_single_definition method to be called during contract compilation.
-        // Since the current implementation of this function cannot handle let definitions, it should trigger the unimplemented error.
-    }
-    */
     /*
     #[test]
     // This test is meant to reproduce the error caused by the unimplemented match case in the
