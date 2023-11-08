@@ -4,22 +4,10 @@ import { createProvider } from "hardhat/internal/core/providers/construction";
 import { HardhatEthersProvider } from "@nomicfoundation/hardhat-ethers/internal/hardhat-ethers-provider";
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import { Signer } from "ethers";
-import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
+import { AddressLike, BytesLike, Signer } from "ethers";
 import { CollectorRelayer, Relayer } from "../typechain-types";
 
-var default_name;
-var default_config;
-var default_provider;
-var default_ethers_provider;
-
 export async function switchNetwork(id = 0) {
-  if (!default_name) {
-    default_name = hre.network.name;
-    default_config = hre.network.config;
-    default_provider = hre.network.provider;
-    default_ethers_provider = hre.ethers.provider;
-  }
   if (id > 0) {
     hre.network.name = "net" + id;
     hre.network.config = hre.config.networks[hre.network.name];
@@ -33,59 +21,84 @@ export async function switchNetwork(id = 0) {
       hre.network.name
     );
   } else {
-    hre.network.name = default_name;
-    hre.network.config = default_config;
-    hre.network.provider = default_provider;
-    hre.ethers.provider = default_ethers_provider;
+    hre.network.name = "hardhat";
+    hre.network.config = hre.config.networks["hardhat"];
+    hre.network.provider = await createProvider(
+      hre.config,
+      hre.network.name,
+      hre.artifacts
+    );
+    hre.ethers.provider = new HardhatEthersProvider(
+      hre.network.provider,
+      hre.network.name
+    );
   }
 }
 
 export async function obtainCalls(validators: Signer[], relayer: Relayer) {
   // validators see the Relayed event
-  const index = Math.floor(Math.random() * validators.length);
+  const randIndex = Math.floor(Math.random() * validators.length);
   const blockNum = await ethers.provider.getBlockNumber();
-  const logs = await validators[index].provider.getLogs({
-    fromBlock: blockNum - 100,
-    toBlock: blockNum,
-    address: await relayer.getAddress(),
-    topics: [ethers.id("Relayed(address,address,bytes,bool,bytes4,uint256)")],
-  });
-  const calls = [];
-  for (let i = 0; i < logs.length; i++) {
-    const [caller, callee, call, readonly, callback, nonce] =
-      ethers.AbiCoder.defaultAbiCoder().decode(
-        ["address", "address", "bytes", "bool", "bytes4", "uint256"],
-        logs[i].data
-      );
-    calls.push({ caller, callee, call, readonly, callback, nonce });
-  }
-  return calls;
+  const filter = relayer.filters.Relayed;
+  // Select random validator to query (in tests they use the same provider, but not in reality)
+  const logs = await relayer
+    .connect(validators[randIndex])
+    .queryFilter(filter, blockNum - 100, blockNum);
+  return logs.map(
+    ({ args: [caller, callee, call, readonly, callback, nonce] }) => ({
+      caller,
+      callee,
+      call,
+      readonly,
+      callback,
+      nonce,
+    })
+  );
+}
+
+function getRandomSample<T>(items: T[], n: number): T[] {
+  return items
+    .map((a) => [a, Math.random()] as [T, number])
+    .sort((a, b) => (a[1] < b[1] ? -1 : 1))
+    .slice(0, n)
+    .map((a) => a[0]);
+}
+
+function getSampleOfValidatorsIndices(
+  validatorsCount: number,
+  supermajority: number
+): number[] {
+  return getRandomSample(
+    [...Array(validatorsCount).keys()],
+    supermajority
+  ).sort((a, b) => ethers.toNumber(a) - ethers.toNumber(b));
 }
 
 export async function confirmCall(
   validators: Signer[],
   relayer: CollectorRelayer,
-  caller: Signer,
-  callee: Signer,
-  call: any,
+  caller: AddressLike,
+  callee: AddressLike,
+  call: BytesLike,
   readonly: boolean,
-  callback: any,
-  nonce: any
+  callback: BytesLike,
+  nonce: bigint
 ) {
   // validators sign the hash of the Relayed event data and submit their signature
+  // Prepare the hashed message
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
     ["address", "address", "bytes", "bool", "bytes4", "uint256"],
     [caller, callee, call, readonly, callback, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
-  const signatures = [];
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
-  const signerIndices = [...Array(validators.length).keys()]
-    .map((a) => [a, Math.random()])
-    .sort((a, b) => (a[1] < b[1] ? -1 : 1))
-    .slice(0, supermajority)
-    .map((a) => a[0])
-    .sort((a, b) => ethers.toNumber(a) - ethers.toNumber(b));
+  const signerIndices = getSampleOfValidatorsIndices(
+    validators.length,
+    supermajority
+  );
+
+  // Collect and emit the signatures
+  const signatures: string[] = [];
   for (const index of signerIndices) {
     signatures.push(
       await validators[index].signMessage(ethers.getBytes(message))
@@ -93,7 +106,7 @@ export async function confirmCall(
     const tx = await relayer
       .connect(validators[index])
       .echo(hash, index, signatures.slice(-1)[0]);
-    const rcpt = await tx.wait();
+    await tx.wait();
     await expect(tx)
       .to.emit(relayer, "Echoed")
       .withArgs(hash, index, signatures.slice(-1)[0]);
@@ -102,26 +115,28 @@ export async function confirmCall(
   // validators retrieve the signatures submitted by other validators from the Echoed events
   for (const index of signerIndices) {
     const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators[index].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: await relayer.getAddress(),
-      topics: [ethers.id("Echoed(bytes32,uint16,bytes)"), hash],
-    });
+    const filter = relayer.filters.Echoed(hash);
+    const logs = await relayer
+      .connect(validators[index])
+      .queryFilter(filter, blockNum - 100, blockNum);
 
-    for (let i = 0; i < logs.length; i++) {
-      const res = ethers.AbiCoder.defaultAbiCoder().decode(
-        ["uint16", "bytes"],
-        logs[i].data
-      );
-      expect(res[0]).to.equal(signerIndices[i]);
-      expect(res[1]).to.equal(signatures[i]);
-    }
+    logs.forEach((log, i) => {
+      const [, index, signature] = log.args;
+
+      expect(Number(index)).to.be.oneOf(signerIndices);
+      expect(signature).to.equal(signatures[i]);
+    });
   }
   return { signerIndices, signatures };
 }
 
-export async function queryCall(validators, relayer, caller, callee, call) {
+export async function queryCall(
+  validators: Signer[],
+  relayer: Relayer,
+  caller: AddressLike,
+  callee: AddressLike,
+  call: BytesLike
+) {
   // the supermajority of the validators retrieves the result using a view call
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
   const sample = [...Array(validators.length).keys()]
@@ -130,29 +145,29 @@ export async function queryCall(validators, relayer, caller, callee, call) {
     .slice(0, supermajority)
     .map((a) => a[0])
     .sort((a, b) => ethers.toNumber(a) - ethers.toNumber(b));
-  for (let index of sample) {
-    const returned = await relayer
-      .connect(validators[index])
-      .query(caller, callee, call);
-    expect(success).to.satisfy((v) => !v || v == returned[0]);
-    var success = returned[0];
-    expect(result).to.satisfy((v) => !v || v == returned[1]);
-    var result = returned[1];
-  }
-  return { success, result };
+
+  // Make sure all validators get the same result
+  const results = await Promise.all(
+    sample.map(async (index) =>
+      relayer.connect(validators[index]).query(caller, callee, call)
+    )
+  );
+  const [success, response] = results[0];
+  expect(results.every(([s, r]) => s === success && r === response)).is.true;
+  return { success, response };
 }
 
 export async function dispatchCall(
-  validators,
-  relayer,
-  caller,
-  callee,
-  call,
-  success,
-  callback,
-  nonce,
-  signerIndices,
-  signatures
+  validators: Signer[],
+  relayer: Relayer,
+  caller: AddressLike,
+  callee: AddressLike,
+  call: BytesLike,
+  success: boolean,
+  callback: BytesLike,
+  nonce: bigint,
+  signerIndices: number[],
+  signatures: string[]
 ) {
   // the next leader dispatches the relayed call
   const leaderIndex =
@@ -160,8 +175,8 @@ export async function dispatchCall(
   const tx = await relayer
     .connect(validators[leaderIndex])
     .dispatch(caller, callee, call, callback, nonce, signerIndices, signatures);
-  const rcpt = await tx.wait();
-  await expect(tx).to.emit(relayer, "Dispatched").withArgs(
+  await tx.wait();
+  expect(tx).to.emit(relayer, "Dispatched").withArgs(
     caller,
     callback,
     success, // expected boolean outcome or anyValue if outcome is not known in advance
@@ -170,39 +185,39 @@ export async function dispatchCall(
   );
 
   // other vaidators see the Dispatched event and retrieve the result of the relayed call
-  var result;
-  for (const index of signerIndices) {
-    const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators[index].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: await relayer.getAddress(),
-      topics: [
-        ethers.id("Dispatched(address,bytes4,bool,bytes,uint256)"),
-        ethers.zeroPadValue(caller, 32),
-        ethers.toBeHex(nonce, 32),
-      ],
-    });
-    const res = ethers.AbiCoder.defaultAbiCoder().decode(
-      ["bytes4", "bool", "bytes"],
-      logs[0].data
-    );
-    expect(res[0]).to.equal(callback);
-    if (success != anyValue) expect(res[1]).to.equal(success);
-    else success = res[1];
-    result = res[2];
+  const results = await Promise.all(
+    signerIndices.map(async (index) => {
+      const blockNum = await ethers.provider.getBlockNumber();
+      const filter = relayer.filters.Dispatched(
+        caller,
+        undefined,
+        undefined,
+        undefined,
+        nonce
+      );
+      const logs = await relayer
+        .connect(validators[index])
+        .queryFilter(filter, blockNum - 100, blockNum);
+
+      return logs[0].args;
+    })
+  );
+  // check that the result is the same for all validators
+  for (const result of results) {
+    expect(result).is.deep.equal(results[0]);
   }
-  return { success, result };
+
+  return { success: results[0].success, result: results[0].response };
 }
 
 export async function confirmResult(
-  validators,
-  relayer,
-  caller,
-  callback,
-  success,
-  result,
-  nonce
+  validators: Signer[],
+  relayer: CollectorRelayer,
+  caller: AddressLike,
+  callback: BytesLike,
+  success: boolean,
+  result: BytesLike,
+  nonce: bigint
 ) {
   // validators sign the hash of the Dispatched event data and submit their signature
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -210,59 +225,54 @@ export async function confirmResult(
     [caller, callback, success, result, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
-  const signatures = [];
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
-  const signerIndices = [...Array(validators.length).keys()]
-    .map((a) => [a, Math.random()])
-    .sort((a, b) => (a[1] < b[1] ? -1 : 1))
-    .slice(0, supermajority)
-    .map((a) => a[0])
-    .sort((a, b) => ethers.toNumber(a) - ethers.toNumber(b));
+  const signerIndices = getSampleOfValidatorsIndices(
+    validators.length,
+    supermajority
+  );
+
+  const signatures: string[] = [];
   for (const index of signerIndices) {
-    signatures.push(
-      await validators[index].signMessage(ethers.getBytes(message))
+    const signature = await validators[index].signMessage(
+      ethers.getBytes(message)
     );
+    signatures.push(signature);
+
     const tx = await relayer
       .connect(validators[index])
-      .echo(hash, index, signatures.slice(-1)[0]);
-    const rcpt = await tx.wait();
-    await expect(tx)
-      .to.emit(relayer, "Echoed")
-      .withArgs(hash, index, signatures.slice(-1)[0]);
+      .echo(hash, index, signature);
+    await tx.wait();
+    expect(tx).to.emit(relayer, "Echoed").withArgs(hash, index, signature);
   }
 
   // validators retrieve the signatures submitted by other validators from the Echoed events
   for (const index of signerIndices) {
     const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators[index].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: await relayer.getAddress(),
-      topics: [ethers.id("Echoed(bytes32,uint16,bytes)"), hash],
-    });
-    for (let i = 0; i < logs.length; i++) {
-      const res = ethers.AbiCoder.defaultAbiCoder().decode(
-        ["uint16", "bytes"],
-        logs[i].data
-      );
-      expect(res[0]).to.equal(signerIndices[i]);
-      expect(res[1]).to.equal(signatures[i]);
-    }
+
+    const filter = relayer.filters.Echoed(hash);
+    const logs = await relayer
+      .connect(validators[index])
+      .queryFilter(filter, blockNum - 100, blockNum);
+
+    expect(logs.map((log) => Number(log.args.index))).to.have.members(
+      signerIndices
+    );
+    expect(logs.map((log) => log.args.signature)).to.have.members(signatures);
   }
 
   return { signerIndices, signatures };
 }
 
 export async function deliverResult(
-  validators,
-  relayer,
-  caller,
-  callback,
-  success,
-  result,
-  nonce,
-  signerIndices,
-  signatures
+  validators: Signer[],
+  relayer: Relayer,
+  caller: AddressLike,
+  callback: BytesLike,
+  success: boolean,
+  result: BytesLike,
+  nonce: bigint,
+  signerIndices: number[],
+  signatures: string[]
 ) {
   // the next leader delivers the result to the caller contract and resumes its execution
   const leaderIndex =
@@ -278,7 +288,7 @@ export async function deliverResult(
       signerIndices,
       signatures
     );
-  const rcpt = await tx.wait();
+  await tx.wait();
   await expect(tx)
     .to.emit(relayer, "Resumed")
     .withArgs(
@@ -295,24 +305,22 @@ export async function deliverResult(
       nonce
     );
 
-  // other validators see the Resumed event and do not attmpt to deliver the result again
+  // other validators see the Resumed event and do not attempt to deliver the result again
   for (const index of signerIndices) {
     const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators[index].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: await relayer.getAddress(),
-      topics: [
-        ethers.id("Resumed(address,bytes,bool,bytes,uint256)"),
-        ethers.zeroPadValue(caller, 32),
-        ethers.toBeHex(nonce, 32),
-      ],
-    });
-    const res = ethers.AbiCoder.defaultAbiCoder().decode(
-      ["bytes", "bool", "bytes"],
-      logs[0].data
+
+    const filter = relayer.filters.Resumed(
+      caller,
+      undefined,
+      undefined,
+      undefined,
+      nonce
     );
-    expect(res[1]).to.equal(true);
-    expect(res[2]).to.equal("0x");
+    const logs = await relayer
+      .connect(validators[index])
+      .queryFilter(filter, blockNum - 100, blockNum);
+
+    expect(logs[0].args.success).to.equal(true);
+    expect(logs[0].args[3]).to.equal("0x");
   }
 }

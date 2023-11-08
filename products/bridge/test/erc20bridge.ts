@@ -25,7 +25,7 @@ describe("ERC20Bridge", function () {
     const bridge1 = await Bridge1.deploy();
     await bridge1.waitForDeployment();
     let tx = await bridge1.setRelayer(await relayer1.getAddress());
-    let rcpt = await tx.wait();
+    await tx.wait();
     expect(tx).not.to.be.reverted;
     const Token1 = await ethers.getContractFactory("MyToken");
     const token1 = await Token1.connect(deployer1).deploy(
@@ -34,7 +34,7 @@ describe("ERC20Bridge", function () {
     await token1.waitForDeployment();
 
     tx = await token1.connect(deployer1).transfer(tester1.address, 100);
-    rcpt = await tx.wait();
+    await tx.wait();
     expect(tx).not.to.be.reverted;
 
     switchNetwork(2);
@@ -50,7 +50,7 @@ describe("ERC20Bridge", function () {
     const bridge2 = await Bridge2.deploy();
     await bridge2.waitForDeployment();
     tx = await bridge2.setRelayer(await relayer2.getAddress());
-    rcpt = await tx.wait();
+    await tx.wait();
     expect(tx).not.to.be.reverted;
     const Token2 = await ethers.getContractFactory("MyToken");
     const token2 = await Token2.connect(deployer2).deploy(
@@ -59,7 +59,7 @@ describe("ERC20Bridge", function () {
     await token2.waitForDeployment();
 
     tx = await token2.connect(deployer2).transfer(tester2.address, 100);
-    rcpt = await tx.wait();
+    await tx.wait();
     expect(tx).not.to.be.reverted;
 
     const size = (await relayer2.getValidators()).length + 1;
@@ -101,7 +101,7 @@ describe("ERC20Bridge", function () {
     let tx = await token1
       .connect(tester1)
       .approve(await bridge1.getAddress(), value);
-    let rcpt = await tx.wait();
+    await tx.wait();
     await expect(tx)
       .to.emit(token1, "Approval")
       .withArgs(tester1.address, await bridge1.getAddress(), value);
@@ -109,7 +109,7 @@ describe("ERC20Bridge", function () {
     tx = await bridge1
       .connect(tester1)
       .bridge(await token2.getAddress(), tester1.address, value);
-    rcpt = await tx.wait();
+    await tx.wait();
     await expect(tx)
       .to.emit(relayer1, "Relayed")
       .withArgs(
@@ -193,7 +193,7 @@ describe("ERC20Bridge", function () {
     );
 
     const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators1[signerIndices[0]].provider.getLogs({
+    await validators1[signerIndices[0]].provider.getLogs({
       fromBlock: blockNum - 100,
       toBlock: blockNum,
       address: caller,
@@ -234,7 +234,7 @@ describe("ERC20Bridge", function () {
     let tx = await token1
       .connect(tester1)
       .transfer(bridge1.getAddress(), value);
-    let rcpt = await tx.wait();
+    await tx.wait();
     expect(tx).not.to.be.reverted;
     expect(await token1.balanceOf(await bridge1.getAddress())).to.equal(value);
 
@@ -246,7 +246,7 @@ describe("ERC20Bridge", function () {
     tx = await token2
       .connect(tester2)
       .approve(await bridge2.getAddress(), value);
-    rcpt = await tx.wait();
+    await tx.wait();
     await expect(tx)
       .to.emit(token2, "Approval")
       .withArgs(tester2.address, await bridge2.getAddress(), value);
@@ -254,7 +254,7 @@ describe("ERC20Bridge", function () {
     tx = await bridge2
       .connect(tester2)
       .exit(await token1.getAddress(), tester2.address, value);
-    rcpt = await tx.wait();
+    await tx.wait();
     await expect(tx)
       .to.emit(relayer2, "Relayed")
       .withArgs(
@@ -343,7 +343,7 @@ describe("ERC20Bridge", function () {
     );
 
     const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators1[signerIndices[0]].provider.getLogs({
+    await validators1[signerIndices[0]].provider.getLogs({
       fromBlock: blockNum - 100,
       toBlock: blockNum,
       address: caller,
