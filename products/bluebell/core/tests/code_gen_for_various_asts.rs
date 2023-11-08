@@ -85,8 +85,6 @@ mod tests {
         );
     }
 
-    /*
-    TODO: Not handled yet
     #[test]
     fn test_alias_import_handling() {
         test_compilation_and_evm_code_generation!(
@@ -97,7 +95,6 @@ mod tests {
             "#
         );
     }
-    */
 
     #[test]
     // Testing the failure when handling NodeTypeNameIdentifier::EventType in the emit_type_name_identifier() function.
@@ -214,7 +211,6 @@ mod tests {
     fn test_unimplemented_message_error() {
         // This test checks an exception which is thrown
         // when a Message literal is encountered in AST
-        // TODO: Not working
         test_compilation_and_evm_code_generation!(
             r#"scilla_version 0
     
