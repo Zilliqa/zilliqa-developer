@@ -136,7 +136,167 @@ mod tests {
         );
     }
 
-    /*
+    #[test]
+    // This test case is designed to reproduce a "not implemented" error about 'EnclosedTypeArguments' in Emitter.
+    fn test_enclosed_type_argument_error() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+
+            library TestLibrary
+
+            type ExampleType =
+            | ExampleType of ByStr20 Uint128 
+
+            let zero = Uint128 0
+            contract TestLibrary()
+
+            transition TestTransition(item: ExampleType)
+              match item with
+              | ExampleType account amount =>
+                msg = {_tag : "TestTag"; _recipient : account; _amount : zero; 
+                      account : account; amount: amount} 
+              end
+            end
+            "#
+        );
+    }
+
+    #[test]
+    // This test is trying to compile a scilla contract with an address argument type.
+    // The Scilla code we are testing with has a piece instance `None {ByStr20}` which
+    // is processed as an `AddressTypeArgument` in the Rust intermediary representation of Scilla.
+    // Currently, in Rust our Scilla interpreter/compiler doesn't support `AddressTypeArgument`s
+    // hence it should panic with a `not implemented` error.
+    fn test_address_argument_type() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+            library Test
+            contract Test()
+            field owner : Option ByStr20 = None {ByStr20}
+        "#
+        );
+        // Here we are expecting the test to panic hence we don't have any assertions
+    }
+
+    #[test]
+    fn test_map_key_type_not_implemented() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+
+            contract TestContract(
+                init_owner: ByStr20
+            )
+            field administrators : Map ByStr20 String = Emp ByStr20 String
+    "#
+        );
+        // This test is validating the panic caused by unimplemented handling
+        // of Map types declared in the field of a contract
+    }
+
+    #[test]
+    fn test_generic_constructor_call() {
+        test_compilation_and_evm_code_generation!(
+            r#"
+            scilla_version 0
+    
+            library TestLibrary
+            let zero_msg = Nil {Message}
+            
+            contract Test()
+    "#
+        );
+
+        // Tests that the compiler can handle a constructor call that
+        // uses generic type arguments.
+    }
+
+    #[test]
+    fn test_unimplemented_message_error() {
+        // This test checks an exception which is thrown
+        // when a Message literal is encountered in AST
+        // TODO: Not working
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+    
+            library Example
+        
+            contract Example()
+            field message : Uint64 = Uint64 0
+    
+            transition setMessage (msg: Uint64)
+              zero = Uint64 0;
+              test = Uint64 42;
+              is_owner = builtin eq msg test;
+              test2 = False;
+              is_false = builtin eq test2 is_owner;
+              match is_false with
+              | True =>
+                msg = {_recipient : zero; _tag: "Error1"; _amount: zero};
+                message := zero
+              | _ =>
+                msg = {_recipient : zero; _tag: "Error2"; _amount: zero};
+                message := msg 
+              end
+            end
+        "#
+        );
+    }
+
+    #[test]
+    // This test case is testing the handling of aliased imports (a feature not yet implemented),
+    // which cause a panic in our Scilla compiler written in Rust.
+    fn test_aliased_import() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+            import BoolUtils as BoolU
+            library Test
+            
+            contract Test()
+            field test_field : Uint64 = Uint64 0
+    
+            transition testTransition (msg: Uint64)
+              zero = Uint64 0;
+              test = Uint64 42;
+              is_owner = BoolU.eq msg test;
+              test2 = False;
+              is_false = BoolU.eq test2 is_owner;
+              match is_false with
+              | True =>
+                test_field := zero
+              | _ =>
+                test_field := msg 
+              end
+            end
+            "#
+        );
+
+        // Expected output: a defined behaviour about how to handle aliased imports.
+        // Current output: thread 'main' panicked at core/src/intermediate_representation/emitter.rs:400:17:
+        // not implemented
+        // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+    }
+
+    #[test]
+    // This test is to check how Rust handles an unimplemented feature:
+    // Generic types with arguments (GenericTypeWithArgs) using Scilla's "Option" and "Uint128" types
+    fn test_generic_type_with_args() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+               
+             library Test
+            
+             let get_var_value =
+                fun( var : Option Uint128) =>
+                match var with
+                | Some x => x
+                | None => Uint128 0
+                end
+
+            contract Test()
+            "#
+        );
+    }
+
     #[test]
     // This test case is used to generate an unimplemented error for the contract_type_arguments of
     // the ConstructorCall enum in the NodeFullExpression. A contract of this nature forces the program
@@ -149,11 +309,10 @@ mod tests {
 
             contract ProductContract ()
             field products: Map String (ProductType) = Emp String (ProductType)
-            "#);
+            "#
+        );
     }
-    */
 
-    /*
     #[test]
     fn test_type_arg_error() {
         // This test is meant to reproduce the `TemplateFunction` error
@@ -176,9 +335,7 @@ mod tests {
             "#
         );
     }
-    */
 
-    /*
     #[test]
     // This test is meant to reproduce the error caused by the unimplemented match case in the
     // emit_full_expression function.
@@ -217,7 +374,7 @@ mod tests {
             transition BlockAddress (wallet: ByStr20)
                 IsContractOwner
             end
-    "#);
+    "#
+        );
     }
-    */
 }

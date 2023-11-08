@@ -44,6 +44,33 @@ impl SourceImporter {
             "#
             .to_string(),
         );
+
+        preloaded_scripts.insert(
+            "BoolUtils".to_string(),
+            r#"scilla_version 0
+            library BoolUtils
+            contract BoolUtils()
+            "#
+            .to_string(),
+        );
+
+        preloaded_scripts.insert(
+            "IntUtils".to_string(),
+            r#"scilla_version 0
+            library IntUtils
+            contract IntUtils()
+            "#
+            .to_string(),
+        );
+
+        preloaded_scripts.insert(
+            "IntUtils".to_string(),
+            r#"scilla_version 0
+            library IntUtils
+            contract IntUtils()
+            "#
+            .to_string(),
+        );
         SourceImporter {
             queue: Vec::new(),
             preloaded_scripts,

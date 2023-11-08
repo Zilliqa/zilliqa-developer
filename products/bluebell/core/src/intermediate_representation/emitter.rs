@@ -1570,7 +1570,6 @@ impl<'a> AstConverting for IrEmitter<'a> {
                     // TODO: self.current_function
                 }
                 */
-                println!("{:#?}", expression);
                 expression.visit(self)?;
                 unimplemented!();
             }
@@ -1694,8 +1693,6 @@ impl<'a> AstConverting for IrEmitter<'a> {
             let ir_arg = self.pop_variable_declaration()?;
             arguments.push(ir_arg);
         }
-        println!("Stacl:{:#?}", self.stack);
-        println!("{:#?}", node);
         // Function body
         let _ = node.body.visit(self)?;
 
@@ -1715,7 +1712,6 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 last_block.terminated = true;
             }
         }
-        println!("Stack: {:#?}", self.stack);
 
         let mut function_name = self.pop_ir_identifier()?;
         assert!(function_name.kind == IrIndentifierKind::ComponentName);
