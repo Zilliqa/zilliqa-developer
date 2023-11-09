@@ -80,7 +80,6 @@ describe("ERC20Bridge", function () {
   it("should bridge some value in a remote call triggered on the Zilliqa network", async function () {
     const {
       bridge1,
-      bridge2,
       token1,
       token2,
       relayer1,
@@ -102,7 +101,7 @@ describe("ERC20Bridge", function () {
       .connect(tester1)
       .approve(await bridge1.getAddress(), value);
     await tx.wait();
-    await expect(tx)
+    expect(tx)
       .to.emit(token1, "Approval")
       .withArgs(tester1.address, await bridge1.getAddress(), value);
 
@@ -110,7 +109,7 @@ describe("ERC20Bridge", function () {
       .connect(tester1)
       .bridge(await token2.getAddress(), tester1.address, value);
     await tx.wait();
-    await expect(tx)
+    expect(tx)
       .to.emit(relayer1, "Relayed")
       .withArgs(
         await bridge1.getAddress(),
@@ -192,13 +191,9 @@ describe("ERC20Bridge", function () {
       signatures
     );
 
-    const blockNum = await ethers.provider.getBlockNumber();
-    await validators1[signerIndices[0]].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: caller,
-      topics: [ethers.id("Succeeded()")],
-    });
+    const filters = bridge1.filters.Succeeded;
+    const logs = await bridge1.queryFilter(filters);
+    expect(logs).is.not.empty;
 
     expect(await token2.balanceOf(tester2.address)).to.equal(balance2 + value);
     console.log(
@@ -229,14 +224,15 @@ describe("ERC20Bridge", function () {
     switchNetwork(1);
 
     // simulate bridging of the amount (see previous test) by simply sending it to bridge1
-    expect(await token1.balanceOf(await bridge1.getAddress())).to.equal(0);
+    // Ensures the bridge has enough funds to back
+    expect(await token1.balanceOf(await bridge2.getAddress())).to.equal(0);
 
     let tx = await token1
       .connect(tester1)
-      .transfer(bridge1.getAddress(), value);
+      .transfer(bridge2.getAddress(), value);
     await tx.wait();
     expect(tx).not.to.be.reverted;
-    expect(await token1.balanceOf(await bridge1.getAddress())).to.equal(value);
+    expect(await token1.balanceOf(await bridge2.getAddress())).to.equal(value);
 
     switchNetwork(2);
 
@@ -247,7 +243,7 @@ describe("ERC20Bridge", function () {
       .connect(tester2)
       .approve(await bridge2.getAddress(), value);
     await tx.wait();
-    await expect(tx)
+    expect(tx)
       .to.emit(token2, "Approval")
       .withArgs(tester2.address, await bridge2.getAddress(), value);
 
@@ -255,7 +251,7 @@ describe("ERC20Bridge", function () {
       .connect(tester2)
       .exit(await token1.getAddress(), tester2.address, value);
     await tx.wait();
-    await expect(tx)
+    expect(tx)
       .to.emit(relayer2, "Relayed")
       .withArgs(
         await bridge2.getAddress(),
@@ -331,8 +327,8 @@ describe("ERC20Bridge", function () {
     );
 
     await deliverResult(
-      validators1,
-      relayer1,
+      validators2,
+      relayer2,
       caller,
       callback,
       success,
@@ -342,15 +338,15 @@ describe("ERC20Bridge", function () {
       signatures
     );
 
-    const blockNum = await ethers.provider.getBlockNumber();
-    await validators1[signerIndices[0]].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: caller,
-      topics: [ethers.id("Succeeded()")],
-    });
+    const filter = bridge1.filters.Succeeded;
+    const logs = await bridge1.queryFilter(filter);
+    expect(logs).is.not.empty;
 
     expect(await token1.balanceOf(tester1.address)).to.equal(balance1 + value);
+    expect(await token2.balanceOf(bridge2.getAddress())).to.equal(0);
+    expect(await token2.balanceOf(tester2.getAddress())).to.equal(
+      balance2 - value
+    );
     console.log(
       tester1.address,
       "balance changed from",
