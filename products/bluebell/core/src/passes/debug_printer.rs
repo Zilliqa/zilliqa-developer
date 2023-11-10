@@ -210,6 +210,7 @@ impl IrPass for DebugPrinter {
                 name,
                 owner: _,
                 arguments,
+                template_type_arguments: _,
             } => {
                 // TODO: Support for owner
 

@@ -266,6 +266,7 @@ impl IrPass for AnnotateBaseTypes {
                         operation: Operation::CallStaticFunction {
                             name: symbol.clone(),
                             owner: None, // TODO:
+                            template_type_arguments: Vec::new(),
                             arguments: Vec::new(),
                         },
                         source_location: (
@@ -534,6 +535,7 @@ impl IrPass for AnnotateBaseTypes {
                 name,
                 owner: _,
                 arguments,
+                template_type_arguments: _                
             } => {
                 name.visit(self, symbol_table)?;
                 for arg in arguments.iter_mut() {

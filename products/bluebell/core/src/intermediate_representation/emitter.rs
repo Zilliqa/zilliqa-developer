@@ -1,4 +1,4 @@
-use std::mem;
+use std::{fmt::Arguments, mem};
 
 use log::info;
 
@@ -514,8 +514,23 @@ impl<'a> AstConverting for IrEmitter<'a> {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
                 let _ = lead.visit(self)?;
+                // Checking if it is a template type
                 if args.len() > 0 {
-                    // TODO: Deal with arguments
+                    let mut template_type = self.pop_ir_identifier()?;
+                    assert!(template_type.kind == IrIndentifierKind::Unknown);
+                    template_type.kind = IrIndentifierKind::TypeName;
+
+                    let mut arguments = Vec::new();
+                    for arg in args {
+                        let _ = arg.visit(self)?;
+                        let mut typename = self.pop_ir_identifier()?;
+                        assert!(typename.kind == IrIndentifierKind::Unknown);
+                        typename.kind = IrIndentifierKind::TypeName;
+                        arguments.push(typename);
+                    }
+                    println!("{:#?}", template_type);
+                    println!("{:#?}", arguments);
+
                     unimplemented!()
                 }
             }
@@ -817,19 +832,26 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 assert!(name.kind == IrIndentifierKind::Unknown);
                 name.kind = IrIndentifierKind::FunctionName;
 
-                let arguments: Vec<IrIdentifier> = [].to_vec();
+                let mut template_type_arguments: Vec<IrIdentifier> = [].to_vec();
 
-                if let Some(_test) = contract_type_arguments {
-                    unimplemented!()
+                if let Some(args) = contract_type_arguments {
+                    for arg in &args.node.type_arguments {
+                        arg.visit(self)?;
+                        let arg = self.pop_ir_identifier()?;
+                        template_type_arguments.push(arg);
+                    }
                 }
                 if argument_list.len() > 0 {
                     unimplemented!()
                 }
 
+                let mut arguments: Vec<IrIdentifier> = [].to_vec();
+
                 let operation = Operation::CallStaticFunction {
                     name,
                     owner: None, // We cannot deduce the type from the AST
                     arguments,
+                    template_type_arguments,
                 };
 
                 let instr = Box::new(Instruction {

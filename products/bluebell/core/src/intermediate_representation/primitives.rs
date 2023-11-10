@@ -15,6 +15,7 @@ pub enum IrIndentifierKind {
     ExternalFunctionName,
 
     TypeName,
+    // TemplateTypeName(Vec<IrIdentifier>),
     ComponentName,
     Event,
     Namespace,
@@ -222,11 +223,13 @@ pub enum Operation {
     CallStaticFunction {
         name: IrIdentifier,
         owner: Option<IrIdentifier>,
+        template_type_arguments: Vec<IrIdentifier>,
         arguments: Vec<IrIdentifier>,
     },
     CallMemberFunction {
         name: IrIdentifier,
         owner: Option<IrIdentifier>,
+        // template_type_arguments: Vec<IrIdentifier>,
         arguments: Vec<IrIdentifier>,
     },
     ResolveSymbol {
