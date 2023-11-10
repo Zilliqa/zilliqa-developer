@@ -18,34 +18,40 @@ describe("Bridge", function () {
     switchNetwork(1);
 
     const signers1 = await ethers.getSigners();
-    const Relayer1 = await ethers.getContractFactory("CollectorRelayer");
-    const relayer1 = await Relayer1.deploy();
+    const relayer1 = await ethers
+      .deployContract("CollectorRelayer")
+      .then((x) => x.waitForDeployment());
     await relayer1.waitForDeployment();
-    const Twin1 = await ethers.getContractFactory("Twin");
-    const twin1 = await Twin1.deploy();
-    await twin1.waitForDeployment();
-    let tx = await twin1.setRelayer(await relayer1.getAddress());
-    await tx.wait();
-    expect(tx).not.to.be.reverted;
-    const Target1 = await ethers.getContractFactory("Target");
-    const target1 = await Target1.connect(signers1[1]).deploy();
-    await target1.waitForDeployment();
+
+    const twin1 = await ethers
+      .deployContract("Twin")
+      .then(async (c) => c.waitForDeployment());
+    await twin1.setRelayer(await relayer1.getAddress()).then(async (tx) => {
+      await tx.wait();
+      expect(tx).not.to.be.reverted;
+    });
+
+    const target1 = await ethers
+      .deployContract("Target", signers1[1])
+      .then(async (c) => c.waitForDeployment());
 
     switchNetwork(2);
 
     const signers2 = await ethers.getSigners();
-    const Relayer2 = await ethers.getContractFactory("Relayer");
-    const relayer2 = await Relayer2.deploy();
+    const relayer2 = await ethers.deployContract("Relayer");
     await relayer2.waitForDeployment();
-    const Twin2 = await ethers.getContractFactory("Twin");
-    const twin2 = await Twin2.deploy();
-    await twin2.waitForDeployment();
-    tx = await twin2.setRelayer(await relayer2.getAddress());
-    await tx.wait();
-    expect(tx).not.to.be.reverted;
-    const Target2 = await ethers.getContractFactory("Target");
-    const target2 = await Target2.connect(signers2[1]).deploy();
-    await target2.waitForDeployment();
+
+    const twin2 = await ethers
+      .deployContract("Twin")
+      .then(async (c) => c.waitForDeployment());
+    await twin2.setRelayer(await relayer2.getAddress()).then(async (tx) => {
+      await tx.wait();
+      expect(tx).not.to.be.reverted;
+    });
+
+    const target2 = await ethers
+      .deployContract("Target", signers2[1])
+      .then(async (c) => c.waitForDeployment());
 
     const size = (await relayer2.getValidators()).length + 1;
     return {
@@ -303,37 +309,36 @@ describe("Bridge", function () {
       signatures
     );
 
-    const blockNum = await ethers.provider.getBlockNumber();
-    const logs = await validators1[signerIndices[0]].provider.getLogs({
-      fromBlock: blockNum - 100,
-      toBlock: blockNum,
-      address: caller,
-      topics: [ethers.id("Succeeded(uint256)")],
-    });
-    var res = ethers.AbiCoder.defaultAbiCoder().decode(
-      ["uint256"],
-      logs[0].data
-    );
-    console.log("Incremented", num, "to", ethers.toNumber(res[0]));
+    const filter = twin1.filters.Succeeded();
+    const logs = await twin1.queryFilter(filter);
+    expect(logs).is.not.empty;
+
+    const resNum = ethers.toNumber(logs[0].args[0]);
+    expect(resNum).to.equal(num + 1);
+
+    console.log("Incremented", num, "to", resNum);
   });
 
   it("should increment a number in a remote call triggered on the other network", async function () {
     const { twin2, target1, relayer1, relayer2, validators1, validators2 } =
       await setup(); // instead of loadFixture(setup);
-    const num = 125;
+    const inputNum = 125;
+    const expectedNum = inputNum + 1;
 
     switchNetwork(2);
 
     const tx = await twin2
       .connect(validators2[0])
-      .start(await target1.getAddress(), num, false);
+      .start(await target1.getAddress(), inputNum, false);
     await tx.wait();
     await expect(tx)
       .to.emit(relayer2, "Relayed")
       .withArgs(
         await twin2.getAddress(),
         await target1.getAddress(),
-        Target__factory.createInterface().encodeFunctionData("test", [num]),
+        Target__factory.createInterface().encodeFunctionData("test", [
+          inputNum,
+        ]),
         false,
         ERC20Bridge__factory.createInterface().getFunction("finish").selector,
         anyValue
@@ -373,7 +378,7 @@ describe("Bridge", function () {
     expect(success).to.be.true;
 
     expect(result).to.equal(
-      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [num + 1])
+      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [expectedNum])
     );
 
     var { signerIndices, signatures } = await confirmResult(
@@ -400,13 +405,12 @@ describe("Bridge", function () {
       signatures
     );
 
-    const blockNum = await ethers.provider.getBlockNumber();
     const filter = twin2.filters.Succeeded;
-    const logs = await twin2.queryFilter(filter, blockNum - 100, blockNum);
-    const res = logs[0].args[0];
-    expect(res).to.equal(num + 1);
+    const logs = await twin2.queryFilter(filter);
+    const resNum = logs[0].args[0];
+    expect(resNum).to.equal(expectedNum);
 
-    console.log("Incremented", num, "to", ethers.toNumber(res));
+    console.log("Incremented", inputNum, "to", ethers.toNumber(resNum));
   });
 
   // TODO: add test for remote calls without return value
