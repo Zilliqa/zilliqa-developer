@@ -220,8 +220,9 @@ impl IrPass for AnnotateBaseTypes {
         symbol: &mut IrIdentifier,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        match symbol.kind {
-            IrIndentifierKind::Unknown => {
+        match &symbol.kind {
+            IrIndentifierKind::TypeLikeName(_dependants) => {
+                // TODO: Deal with dependants
                 if let Some(typeinfo) = self.type_of(symbol, symbol_table) {
                     symbol.type_reference = Some(typeinfo.typename.clone());
 

@@ -344,7 +344,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
     ) -> Result<TraversalResult, String> {
         let symbol = IrIdentifier::new(
             node.to_string(),
-            IrIndentifierKind::Unknown, // TODO: Should be revised to TypeName
+            IrIndentifierKind::TypeLikeName(Vec::new()),
             self.current_location(),
         );
 
@@ -373,7 +373,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(name) => {
                     let symbol = IrIdentifier::new(
                         name.to_string(),
-                        IrIndentifierKind::Unknown, // TODO: Should be revised to TypeName
+                        IrIndentifierKind::TypeLikeName(Vec::new()),
                         self.current_location(),
                     );
 
@@ -517,14 +517,20 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 // Checking if it is a template type
                 if args.len() > 0 {
                     let mut template_type = self.pop_ir_identifier()?;
-                    assert!(template_type.kind == IrIndentifierKind::Unknown);
+                    assert!(match template_type.kind {
+                        IrIndentifierKind::TypeLikeName(_) => true,
+                        _ => false,
+                    });
                     template_type.kind = IrIndentifierKind::TypeName;
 
                     let mut arguments = Vec::new();
                     for arg in args {
                         let _ = arg.visit(self)?;
                         let mut typename = self.pop_ir_identifier()?;
-                        assert!(typename.kind == IrIndentifierKind::Unknown);
+                        assert!(match typename.kind {
+                            IrIndentifierKind::TypeLikeName(_) => true,
+                            _ => false,
+                        });
                         typename.kind = IrIndentifierKind::TypeName;
                         arguments.push(typename);
                     }
@@ -718,7 +724,12 @@ impl<'a> AstConverting for IrEmitter<'a> {
             // Creating compare instruction
             // TODO: Pop instruction or symbol
             let expected_value = self.pop_ir_identifier()?;
-            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+            assert!(match expected_value.kind {
+
+            IrIndentifierKind::TypeLikeName(_) => true,
+            _ => false,
+
+            });
 
             let source_location = expected_value.source_location.clone();
 
@@ -829,7 +840,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
 
                 // Expecting function name symbol
                 let mut name = self.pop_ir_identifier()?;
-                assert!(name.kind == IrIndentifierKind::Unknown);
+                assert!(match name.kind {
+                    IrIndentifierKind::TypeLikeName(_) => true,
+                    _ => false,
+                });
                 name.kind = IrIndentifierKind::FunctionName;
 
                 let mut template_type_arguments: Vec<IrIdentifier> = [].to_vec();
@@ -918,7 +932,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeValueLiteral::LiteralInt(typename, value) => {
                 let _ = typename.visit(self)?;
                 let mut typename = self.pop_ir_identifier()?;
-                assert!(typename.kind == IrIndentifierKind::Unknown);
+                assert!(match typename.kind {
+                    IrIndentifierKind::TypeLikeName(_) => true,
+                    _ => false,
+                });
                 typename.kind = IrIndentifierKind::TypeName;
                 let operation = Operation::Literal {
                     data: value.to_string(),
@@ -1270,7 +1287,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
 
                             clause.node.pattern_expression.visit(self)?;
                             let expected_value = self.pop_ir_identifier()?;
-                            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+                            assert!(match expected_value.kind {
+                                IrIndentifierKind::TypeLikeName(_) => true,
+                                _ => false,
+                            });
                             let source_location = expected_value.source_location.clone();
 
                             let jump_condition = Box::new(Instruction {
@@ -1497,7 +1517,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
         let _ = node.annotation.visit(self)?;
 
         let mut typename = self.pop_ir_identifier()?;
-        assert!(typename.kind == IrIndentifierKind::Unknown);
+        assert!(match typename.kind {
+            IrIndentifierKind::TypeLikeName(_) => true,
+            _ => false,
+        });
         typename.kind = IrIndentifierKind::TypeName;
 
         let s =
@@ -1559,7 +1582,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
     ) -> Result<TraversalResult, String> {
         let _ = node.name.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
-        assert!(ns.kind == IrIndentifierKind::Unknown);
+        assert!(match ns.kind {
+            IrIndentifierKind::TypeLikeName(_) => true,
+            _ => false,
+        });
         ns.kind = IrIndentifierKind::Namespace;
 
         self.push_namespace(ns);
@@ -1598,7 +1624,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                 let _ = name.visit(self)?;
                 let mut name = self.pop_ir_identifier()?;
-                assert!(name.kind == IrIndentifierKind::Unknown);
+                assert!(match name.kind {
+                    IrIndentifierKind::TypeLikeName(_) => true,
+                    _ => false,
+                });
                 name.kind = IrIndentifierKind::TypeName;
                 // The name itself is being defined here
                 name.is_definition = true;
@@ -1634,7 +1663,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
         // TODO: Decide whether the namespace should be distinct
         let _ = node.contract_name.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
-        assert!(ns.kind == IrIndentifierKind::Unknown);
+        assert!(match ns.kind {
+            IrIndentifierKind::TypeLikeName(_) => true,
+            _ => false,
+        });
         ns.kind = IrIndentifierKind::Namespace;
 
         self.push_namespace(ns);
@@ -1765,7 +1797,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
                 let _ = identifier.visit(self)?;
                 let mut enum_name = self.pop_ir_identifier()?;
-                assert!(enum_name.kind == IrIndentifierKind::Unknown);
+                assert!(match enum_name.kind {
+                    IrIndentifierKind::TypeLikeName(_) => true,
+                    _ => false,
+                });
                 enum_name.kind = IrIndentifierKind::StaticFunctionName;
                 self.stack
                     .push(StackObject::EnumValue(EnumValue::new(enum_name, None)));
@@ -1773,7 +1808,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
                 let _ = identifier.visit(self)?;
                 let mut member_name = self.pop_ir_identifier()?;
-                assert!(member_name.kind == IrIndentifierKind::Unknown);
+                assert!(match member_name.kind {
+                    IrIndentifierKind::TypeLikeName(_) => true,
+                    _ => false,
+                });
                 member_name.kind = IrIndentifierKind::StaticFunctionName;
 
                 let mut tuple = Tuple::new();
@@ -1781,7 +1819,10 @@ impl<'a> AstConverting for IrEmitter<'a> {
                     let _ = child.visit(self)?;
 
                     let mut item = self.pop_ir_identifier()?;
-                    assert!(item.kind == IrIndentifierKind::Unknown);
+                    assert!(match item.kind {
+                        IrIndentifierKind::TypeLikeName(_) => true,
+                        _ => false,
+                    });
                     item.kind = IrIndentifierKind::TypeName;
 
                     tuple.add_field(item)

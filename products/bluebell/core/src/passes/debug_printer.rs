@@ -36,6 +36,7 @@ impl IrPass for DebugPrinter {
             IrIndentifierKind::TransitionName => self.script.push_str("@"),
             IrIndentifierKind::ProcedureName => self.script.push_str("@"),
             IrIndentifierKind::ExternalFunctionName => self.script.push_str("@"),
+            IrIndentifierKind::TypeLikeName(_) => self.script.push_str("%"),
             IrIndentifierKind::TypeName => self.script.push_str("%"),
             IrIndentifierKind::ComponentName => self.script.push_str("@"),
             IrIndentifierKind::Event => self.script.push_str("@"),

@@ -14,6 +14,8 @@ pub enum IrIndentifierKind {
     TemplateFunctionName,
     ExternalFunctionName,
 
+    TypeLikeName(Vec<IrIdentifier>), // Intermediate identifier where it is not sure that it actually is a type
+
     TypeName,
     // TemplateTypeName(Vec<IrIdentifier>),
     ComponentName,
