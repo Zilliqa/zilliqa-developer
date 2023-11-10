@@ -536,7 +536,7 @@ impl IrPass for AnnotateBaseTypes {
                 name,
                 owner: _,
                 arguments,
-                template_type_arguments: _                
+                template_type_arguments: _
             } => {
                 name.visit(self, symbol_table)?;
                 for arg in arguments.iter_mut() {

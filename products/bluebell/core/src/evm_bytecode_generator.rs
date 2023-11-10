@@ -479,7 +479,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     ref name,
                                     owner: _,
                                     ref arguments,
-                                    template_type_arguments: _                                    
+                                    template_type_arguments: _
                                 } => {
                                     if arguments.len() > 0 {
                                         // TODO: Pack data
