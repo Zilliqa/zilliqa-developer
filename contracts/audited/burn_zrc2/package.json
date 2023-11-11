@@ -26,7 +26,7 @@
     "@types/cli-color": "^2.0.2",
     "@types/mocha": "^9.1.1",
     "@types/yargs": "^17.0.17",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "eslint": "^8.23.1",
