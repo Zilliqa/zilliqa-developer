@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-import "./Bridge.sol";
+import "./Bridged.sol";
 
 contract Twin is Bridged {
     function start(address target, uint num, bool readonly) public {

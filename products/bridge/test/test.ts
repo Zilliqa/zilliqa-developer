@@ -1,6 +1,5 @@
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
-
 import { ethers } from "hardhat";
 import {
   switchNetwork,
@@ -10,65 +9,70 @@ import {
   confirmResult,
   deliverResult,
   queryCall,
+  setupBridge,
 } from "./utils";
-import { ERC20Bridge__factory, Target__factory } from "../typechain-types";
+import { Twin__factory } from "../typechain-types";
 
 describe("Bridge", function () {
   async function setup() {
+    const { collector, relayer1, relayer2, validators1, validators2 } =
+      await setupBridge();
+
     switchNetwork(1);
 
-    const signers1 = await ethers.getSigners();
-    const relayer1 = await ethers
-      .deployContract("CollectorRelayer")
-      .then((x) => x.waitForDeployment());
-    await relayer1.waitForDeployment();
+    const salt = ethers.randomBytes(32);
+    const twinInitHashCode = ethers.keccak256(Twin__factory.bytecode);
+    const twinAddress = ethers.getCreate2Address(
+      await relayer1.getAddress(),
+      salt,
+      twinInitHashCode
+    );
 
-    const twin1 = await ethers
-      .deployContract("Twin")
-      .then(async (c) => c.waitForDeployment());
-    await twin1.setRelayer(await relayer1.getAddress()).then(async (tx) => {
-      await tx.wait();
-      expect(tx).not.to.be.reverted;
-    });
+    expect(await relayer1.deployTwin(salt, Twin__factory.bytecode))
+      .to.emit(relayer1, "Deployed")
+      .withArgs(twinAddress);
+
+    const twin1 = await ethers.getContractAt("Twin", twinAddress);
 
     const target1 = await ethers
-      .deployContract("Target", signers1[1])
+      .deployContract("Target")
       .then(async (c) => c.waitForDeployment());
 
     switchNetwork(2);
 
-    const signers2 = await ethers.getSigners();
-    const relayer2 = await ethers.deployContract("Relayer");
-    await relayer2.waitForDeployment();
+    expect(await relayer2.deployTwin(salt, Twin__factory.bytecode))
+      .to.emit(relayer2, "Deployed")
+      .withArgs(twinAddress);
 
-    const twin2 = await ethers
-      .deployContract("Twin")
-      .then(async (c) => c.waitForDeployment());
-    await twin2.setRelayer(await relayer2.getAddress()).then(async (tx) => {
-      await tx.wait();
-      expect(tx).not.to.be.reverted;
-    });
+    const twin2 = await ethers.getContractAt("Twin", twinAddress);
 
     const target2 = await ethers
-      .deployContract("Target", signers2[1])
+      .deployContract("Target")
       .then(async (c) => c.waitForDeployment());
 
-    const size = (await relayer2.getValidators()).length + 1;
     return {
+      collector,
       twin1,
       twin2,
       target1,
       target2,
       relayer1,
       relayer2,
-      validators1: signers1.slice(1, size),
-      validators2: signers2.slice(1, size),
+      validators1,
+      validators2,
     };
   }
 
   it("should increment a number in a remote call triggered on the Zilliqa network", async function () {
-    const { twin1, target2, relayer1, relayer2, validators1, validators2 } =
-      await setup(); // instead of loadFixture(setup);
+    const {
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      collector,
+    } = await setup(); // instead of loadFixture(setup);
     const num = 123;
 
     switchNetwork(1);
@@ -84,7 +88,7 @@ describe("Bridge", function () {
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
         false,
-        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
+        twin1.interface.getFunction("finish").selector,
         anyValue
       );
 
@@ -93,9 +97,9 @@ describe("Bridge", function () {
     )[0];
     expect(readonly).to.be.false;
 
-    var { signerIndices, signatures } = await confirmCall(
+    var signatures = await confirmCall(
       validators1,
-      relayer1,
+      collector,
       caller,
       callee,
       call,
@@ -116,7 +120,6 @@ describe("Bridge", function () {
       success,
       callback,
       nonce,
-      signerIndices,
       signatures
     );
     expect(success).to.be.true;
@@ -127,9 +130,9 @@ describe("Bridge", function () {
 
     switchNetwork(1);
 
-    var { signerIndices, signatures } = await confirmResult(
+    var signatures = await confirmResult(
       validators1,
-      relayer1,
+      collector,
       caller,
       callback,
       success,
@@ -145,20 +148,24 @@ describe("Bridge", function () {
       success,
       result,
       nonce,
-      signerIndices,
       signatures
     );
 
-    const blockNum = await ethers.provider.getBlockNumber();
-
     const filter = twin1.filters.Succeeded();
-    const logs = await twin1.queryFilter(filter, blockNum - 100, blockNum);
+    const logs = await twin1.queryFilter(filter);
     console.log("Incremented", num, "to", ethers.toNumber(logs[0].args[0]));
   });
 
   it("should fail to increase the number in a remote call because it is too large", async function () {
-    const { twin1, target2, relayer1, relayer2, validators1, validators2 } =
-      await setup(); // instead of loadFixture(setup);
+    const {
+      collector,
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+    } = await setup(); // instead of loadFixture(setup);
     const num = 1789;
 
     switchNetwork(1);
@@ -172,9 +179,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin1.getAddress(),
         await target2.getAddress(),
-        Target__factory.createInterface().encodeFunctionData("test", [num]),
+        target2.interface.encodeFunctionData("test", [num]),
         false,
-        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
+        twin1.interface.getFunction("finish").selector,
         anyValue
       );
 
@@ -183,9 +190,9 @@ describe("Bridge", function () {
     )[0];
     expect(readonly).to.be.false;
 
-    var { signerIndices, signatures } = await confirmCall(
+    var signatures = await confirmCall(
       validators1,
-      relayer1,
+      collector,
       caller,
       callee,
       call,
@@ -206,16 +213,15 @@ describe("Bridge", function () {
       success,
       callback,
       nonce,
-      signerIndices,
       signatures
     );
     expect(success).to.be.false;
 
     switchNetwork(1);
 
-    var { signerIndices, signatures } = await confirmResult(
+    var signatures = await confirmResult(
       validators1,
-      relayer1,
+      collector,
       caller,
       callback,
       success,
@@ -231,7 +237,6 @@ describe("Bridge", function () {
       success,
       result,
       nonce,
-      signerIndices,
       signatures
     );
 
@@ -244,8 +249,15 @@ describe("Bridge", function () {
   });
 
   it("should increment a number in a remote view call triggered on the Zilliqa network", async function () {
-    const { twin1, target2, relayer1, relayer2, validators1, validators2 } =
-      await setup(); // instead of loadFixture(setup);
+    const {
+      collector,
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+    } = await setup(); // instead of loadFixture(setup);
     const num = 124;
 
     switchNetwork(1);
@@ -259,9 +271,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin1.getAddress(),
         await target2.getAddress(),
-        Target__factory.createInterface().encodeFunctionData("test", [num]),
+        target2.interface.encodeFunctionData("test", [num]),
         true,
-        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
+        twin1.interface.getFunction("finish").selector,
         anyValue
       );
 
@@ -287,9 +299,9 @@ describe("Bridge", function () {
 
     switchNetwork(1);
 
-    var { signerIndices, signatures } = await confirmResult(
+    var signatures = await confirmResult(
       validators1,
-      relayer1,
+      collector,
       caller,
       callback,
       success,
@@ -305,7 +317,6 @@ describe("Bridge", function () {
       success,
       response,
       nonce,
-      signerIndices,
       signatures
     );
 
@@ -320,8 +331,15 @@ describe("Bridge", function () {
   });
 
   it("should increment a number in a remote call triggered on the other network", async function () {
-    const { twin2, target1, relayer1, relayer2, validators1, validators2 } =
-      await setup(); // instead of loadFixture(setup);
+    const {
+      collector,
+      twin2,
+      target1,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+    } = await setup(); // instead of loadFixture(setup);
     const inputNum = 125;
     const expectedNum = inputNum + 1;
 
@@ -336,11 +354,9 @@ describe("Bridge", function () {
       .withArgs(
         await twin2.getAddress(),
         await target1.getAddress(),
-        Target__factory.createInterface().encodeFunctionData("test", [
-          inputNum,
-        ]),
+        target1.interface.encodeFunctionData("test", [inputNum]),
         false,
-        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
+        twin2.interface.getFunction("finish").selector,
         anyValue
       );
 
@@ -351,9 +367,9 @@ describe("Bridge", function () {
 
     switchNetwork(1);
 
-    var { signerIndices, signatures } = await confirmCall(
+    var signatures = await confirmCall(
       validators1,
-      relayer1,
+      collector,
       caller,
       callee,
       call,
@@ -372,7 +388,6 @@ describe("Bridge", function () {
       success,
       callback,
       nonce,
-      signerIndices,
       signatures
     );
     expect(success).to.be.true;
@@ -381,9 +396,9 @@ describe("Bridge", function () {
       ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [expectedNum])
     );
 
-    var { signerIndices, signatures } = await confirmResult(
+    var signatures = await confirmResult(
       validators1,
-      relayer1,
+      collector,
       caller,
       callback,
       success,
@@ -401,7 +416,6 @@ describe("Bridge", function () {
       success,
       result,
       nonce,
-      signerIndices,
       signatures
     );
 

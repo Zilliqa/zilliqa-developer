@@ -8,34 +8,46 @@ import {
   dispatchCall,
   confirmResult,
   deliverResult,
+  setupBridge,
 } from "./utils";
 import { ethers } from "hardhat";
 import { ERC20Bridge__factory } from "../typechain-types";
 
 describe("ERC20Bridge", function () {
   async function setup() {
+    const {
+      collector,
+      validators1,
+      validators2,
+      relayer1,
+      relayer2,
+      tester1,
+      tester2,
+      twinDeployer1,
+      twinDeployer2,
+    } = await setupBridge();
+
+    const salt = ethers.randomBytes(32);
+    const bridgeInitHashCode = ethers.keccak256(ERC20Bridge__factory.bytecode);
+    const bridgeAddress = ethers.getCreate2Address(
+      await relayer1.getAddress(),
+      salt,
+      bridgeInitHashCode
+    );
+
     switchNetwork(1);
 
-    const signers1 = await ethers.getSigners();
-    const deployer1 = signers1[0];
-    const tester1 = signers1[signers1.length - 1];
+    expect(await relayer1.deployTwin(salt, ERC20Bridge__factory.bytecode))
+      .to.emit(relayer1, "Deployed")
+      .withArgs(bridgeAddress);
 
-    const relayer1 = await ethers
-      .deployContract("CollectorRelayer")
-      .then(async (c) => c.waitForDeployment());
-
-    const bridge1 = await ethers.deployContract("ERC20Bridge");
-    await bridge1.waitForDeployment();
-    await bridge1.setRelayer(await relayer1.getAddress()).then(async (tx) => {
-      await tx.wait();
-      expect(tx).not.to.be.reverted;
-    });
+    const bridge1 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
 
     const token1 = await ethers
-      .deployContract("MyToken", [bridge1.getAddress()], deployer1)
+      .deployContract("MyToken", [bridgeAddress], twinDeployer1)
       .then(async (c) => c.waitForDeployment());
     await token1
-      .connect(deployer1)
+      .connect(twinDeployer1)
       .transfer(tester1.address, 100)
       .then(async (tx) => {
         await tx.wait();
@@ -44,36 +56,26 @@ describe("ERC20Bridge", function () {
 
     switchNetwork(2);
 
-    const signers2 = await ethers.getSigners();
-    const deployer2 = signers2[0];
-    const tester2 = signers2[signers2.length - 1];
+    expect(await relayer2.deployTwin(salt, ERC20Bridge__factory.bytecode))
+      .to.emit(relayer2, "Deployed")
+      .withArgs(bridgeAddress);
+    const bridge2 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
 
-    const relayer2 = await ethers
-      .deployContract("Relayer")
-      .then(async (c) => c.waitForDeployment());
-
-    const bridge2 = await ethers
-      .deployContract("ERC20Bridge")
-      .then(async (c) => c.waitForDeployment());
-    await bridge2.setRelayer(await relayer2.getAddress()).then(async (tx) => {
-      await tx.wait();
-      expect(tx).not.to.be.reverted;
-    });
-
+    // Mimic CREATE2 deployments with signers that have matching nonce (twinDeployer1 & twinDeployer2)
     const token2 = await ethers
-      .deployContract("MyToken", [bridge2.getAddress()], deployer2)
+      .deployContract("MyToken", [await bridge2.getAddress()], twinDeployer2)
       .then(async (c) => c.waitForDeployment());
 
     await token2
-      .connect(deployer2)
+      .connect(twinDeployer2)
       .transfer(tester2.address, 100)
       .then(async (tx) => {
         await tx.wait();
         expect(tx).not.to.be.reverted;
       });
 
-    const size = (await relayer2.getValidators()).length + 1;
     return {
+      collector,
       bridge1,
       bridge2,
       token1,
@@ -82,8 +84,8 @@ describe("ERC20Bridge", function () {
       relayer2,
       tester1,
       tester2,
-      validators1: signers1.slice(1, size),
-      validators2: signers2.slice(1, size),
+      validators1,
+      validators2,
     };
   }
 
@@ -98,6 +100,7 @@ describe("ERC20Bridge", function () {
       tester2,
       validators1,
       validators2,
+      collector,
     } = await setup();
 
     const value = 12;
@@ -126,7 +129,7 @@ describe("ERC20Bridge", function () {
         await token2.getAddress(),
         token2.interface.encodeFunctionData("mint", [tester1.address, value]),
         false,
-        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
+        bridge1.interface.getFunction("finish").selector,
         anyValue
       )
       .to.emit(bridge1, "Started")
@@ -147,9 +150,9 @@ describe("ERC20Bridge", function () {
     )[0];
     expect(readonly).to.be.false;
 
-    var { signerIndices, signatures } = await confirmCall(
+    var signatures = await confirmCall(
       validators1,
-      relayer1,
+      collector,
       caller,
       callee,
       call,
@@ -172,16 +175,15 @@ describe("ERC20Bridge", function () {
       success,
       callback,
       nonce,
-      signerIndices,
       signatures
     );
     expect(success).to.be.true;
 
     switchNetwork(1);
 
-    var { signerIndices, signatures } = await confirmResult(
+    var signatures = await confirmResult(
       validators1,
-      relayer1,
+      collector,
       caller,
       callback,
       success,
@@ -197,7 +199,6 @@ describe("ERC20Bridge", function () {
       success,
       result,
       nonce,
-      signerIndices,
       signatures
     );
 
@@ -217,7 +218,7 @@ describe("ERC20Bridge", function () {
 
   it("should bridge back some value in a remote call triggered on the other network", async function () {
     const {
-      bridge1,
+      collector,
       bridge2,
       token1,
       token2,
@@ -271,7 +272,7 @@ describe("ERC20Bridge", function () {
           value,
         ]),
         false,
-        ERC20Bridge__factory.createInterface().getFunction("finish").selector,
+        bridge2.interface.getFunction("finish").selector,
         anyValue
       )
       .to.emit(bridge2, "Started")
@@ -294,9 +295,9 @@ describe("ERC20Bridge", function () {
 
     switchNetwork(1);
 
-    var { signerIndices, signatures } = await confirmCall(
+    var signatures = await confirmCall(
       validators1,
-      relayer1,
+      collector,
       caller,
       callee,
       call,
@@ -317,7 +318,6 @@ describe("ERC20Bridge", function () {
       success,
       callback,
       nonce,
-      signerIndices,
       signatures
     );
     expect(success).to.be.true;
@@ -326,9 +326,9 @@ describe("ERC20Bridge", function () {
       ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true])
     );
 
-    var { signerIndices, signatures } = await confirmResult(
+    var signatures = await confirmResult(
       validators1,
-      relayer1,
+      collector,
       caller,
       callback,
       success,
@@ -344,7 +344,6 @@ describe("ERC20Bridge", function () {
       success,
       result,
       nonce,
-      signerIndices,
       signatures
     );
 
