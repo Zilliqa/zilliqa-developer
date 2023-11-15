@@ -9,9 +9,6 @@ on:
   push:
     branches:
       - main
-  # On released
-  release:
-    types: [created]
 
 jobs:
   build-docker:
@@ -19,8 +16,8 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
-    name: "Build and push images"
+    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
+    name: "Deploy image"
     strategy:
       fail-fast: false
       matrix:
@@ -78,7 +75,7 @@ jobs:
           username: "oauth2accesstoken"
           password: "${{ steps.google-auth.outputs.access_token }}"
 
-      - name: Get tag version staging - staging
+      - name: Get tag version - staging
         id: set-tag
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:

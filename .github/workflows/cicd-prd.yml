@@ -28,6 +28,7 @@ jobs:
             devex-apollo,
             eth-spout,
             neo-savant,
+            zilliqa-isolated-server,
           ]
         include:
           - application: bluebell-playground
@@ -60,6 +61,11 @@ jobs:
             path: products/neo-savant
             tag_length: 8
             tag_latest: false
+          - application: zilliqa-isolated-server
+            image_name: zilliqa-isolated-server
+            path: products/zilliqa-isolated-server
+            tag_length: 8
+            tag_latest: true
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
