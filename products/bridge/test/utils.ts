@@ -169,7 +169,9 @@ export async function obtainCalls(validators: Signer[], relayer: Relayer) {
   const randIndex = Math.floor(Math.random() * validators.length);
   const filter = relayer.filters.Relayed;
   // Select random validator to query (in tests they use the same provider, but not in reality)
-  const logs = await relayer.connect(validators[randIndex]).queryFilter(filter);
+  const logs = await relayer
+    .connect(validators[randIndex])
+    .queryFilter(filter, "earliest", "finalized");
   return logs.map(
     ({ args: [caller, callee, call, readonly, callback, nonce] }) => ({
       caller,
@@ -327,7 +329,9 @@ export async function dispatchCall(
         undefined,
         nonce
       );
-      const logs = await relayer.connect(validator).queryFilter(filter);
+      const logs = await relayer
+        .connect(validator)
+        .queryFilter(filter, "earliest", "finalized");
 
       return logs[0].args;
     })
@@ -427,7 +431,9 @@ export async function deliverResult(
       undefined,
       nonce
     );
-    const logs = await relayer.connect(validator).queryFilter(filter);
+    const logs = await relayer
+      .connect(validator)
+      .queryFilter(filter, "earliest", "finalized");
 
     expect(logs[0].args.success).to.equal(true);
     expect(logs[0].args[3]).to.equal("0x");

@@ -151,7 +151,7 @@ describe("Bridge", function () {
       signatures
     );
 
-    const filter = twin1.filters.Succeeded();
+    const filter = twin1.filters.Succeeded;
     const logs = await twin1.queryFilter(filter);
     console.log("Incremented", num, "to", ethers.toNumber(logs[0].args[0]));
   });
@@ -240,9 +240,8 @@ describe("Bridge", function () {
       signatures
     );
 
-    const blockNum = await ethers.provider.getBlockNumber();
     const filter = twin1.filters.Failed;
-    const logs = await twin1.queryFilter(filter, blockNum - 100, blockNum);
+    const logs = await twin1.queryFilter(filter);
     expect(logs[0].args[0]).to.equal("Too large");
 
     console.log("Remote call failed with", logs[0].args[0]);
@@ -320,7 +319,7 @@ describe("Bridge", function () {
       signatures
     );
 
-    const filter = twin1.filters.Succeeded();
+    const filter = twin1.filters.Succeeded;
     const logs = await twin1.queryFilter(filter);
     expect(logs).is.not.empty;
 
