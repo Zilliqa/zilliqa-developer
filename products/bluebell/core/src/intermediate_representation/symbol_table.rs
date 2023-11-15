@@ -31,6 +31,32 @@ impl TypeInfo {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum TypeLayout {
+    Tuple {
+        type_id: String,
+        members: Vec<String>,
+    },
+    Union {
+        type_id: String,
+        members: Vec<String>,
+    },
+    Enum {
+        type_id: String,
+        names: Vec<String>,
+    },
+    TaggedUnion {
+        type_id: String,
+        names: Vec<String>,
+        members: Vec<String>,
+    },
+    Struct {
+        type_id: String,
+        names: Vec<String>,
+        members: Vec<String>,
+    },
+}
+
 /// Struct representing the state layout entry.
 #[derive(Debug, Clone)]
 pub struct StateLayoutEntry {
@@ -46,6 +72,8 @@ pub struct SymbolTable {
     pub type_of_table: HashMap<String, Box<TypeInfo>>,
     pub name_generator: NameGenerator,
     pub state_layout: HashMap<String, StateLayoutEntry>,
+
+    pub user_types: HashMap<String, TypeLayout>,
 }
 
 /// Trait for constructing a new symbol table.
@@ -227,6 +255,11 @@ impl SymbolTable {
         typename: &str,
     ) -> Result<String, String> {
         self.declare_type_of(name, typename)
+    }
+
+    /// Declares a type.
+    pub fn declare_opaque_type(&mut self, symbol: &str) -> Result<String, String> {
+        self.declare_type_of(symbol, symbol)
     }
 
     /// Declares a type.

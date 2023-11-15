@@ -119,6 +119,8 @@ impl IrPass for AnnotateBaseTypes {
         var_dec: &mut VariableDeclaration,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
+        println!("Declaration: {:#?}", var_dec);
+
         if let Some(typename) = &var_dec.typename.resolved {
             let _ = var_dec.name.visit(self, symbol_table)?;
             var_dec.name.type_reference = Some(typename.clone());
@@ -138,7 +140,7 @@ impl IrPass for AnnotateBaseTypes {
             }
         } else {
             Err(format!(
-                "Could not resolve type for {}, type {} is not declared",
+                "Could not resolve type for '{}', type {} is not declared",
                 var_dec.name.unresolved, var_dec.typename.unresolved
             ))
         }
@@ -220,8 +222,14 @@ impl IrPass for AnnotateBaseTypes {
         symbol: &mut IrIdentifier,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
+        println!("Visiting {:#?}", symbol);
         match &symbol.kind {
-            IrIndentifierKind::TypeLikeName(_dependants) => {
+            IrIndentifierKind::TypeLikeName(dependants) => {
+                // TODO: We do not yet have support for template types
+                if dependants.len() > 0 {
+                    unimplemented!();
+                }
+
                 // TODO: Deal with dependants
                 if let Some(typeinfo) = self.type_of(symbol, symbol_table) {
                     symbol.type_reference = Some(typeinfo.typename.clone());
@@ -334,6 +342,7 @@ impl IrPass for AnnotateBaseTypes {
             }
             _ => (),
         }
+
         symbol.type_reference = self.typename_of(symbol, symbol_table);
         Ok(TraversalResult::Continue)
     }

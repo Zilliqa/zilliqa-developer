@@ -4,8 +4,7 @@ mod tests {
         evm::EvmCompiler,
         modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
     };
-    use evm_assembly::{executor::ExecutorResult, types::EvmTypeValue};
-    use serde_json;
+    use evm_assembly::executor::ExecutorResult;
 
     fn result_to_string(ret: ExecutorResult) -> String {
         let mut result = "".to_string();
@@ -40,7 +39,7 @@ mod tests {
         compiler.attach(&default_types);
         compiler.attach(&default_builtins);
         compiler.attach(&debug);
-        let executable = compiler.executable_from_script(script.to_string())?;
+        let _executable = compiler.executable_from_script(script.to_string())?;
 
         Ok(())
     }
@@ -85,17 +84,6 @@ mod tests {
         );
     }
 
-    // TODO: #[test]
-    fn test_alias_import_handling() {
-        test_compilation_and_evm_code_generation!(
-            r#"scilla_version 0
-            import ListUtils as HelloWorld
-            library TestLib
-            contract TestContract()
-            "#
-        );
-    }
-
     #[test]
     // Testing the failure when handling NodeTypeNameIdentifier::EventType in the emit_type_name_identifier() function.
     fn test_byte_str_not_implemented() {
@@ -114,26 +102,54 @@ mod tests {
         );
     }
 
-    // TODO: #[test]
-    fn test_emit_library_single_definition_unimplemented() {
-        // This test is attempting to trigger the unimplemented!() call in emit_library_single_definition
-        // It does this by defining a library with a single let definition.
-        // The let definition will cause the emit_library_single_definition method to be called during contract compilation.
-        // Since the current implementation of this function cannot handle let definitions, it should trigger the unimplemented error.
-
+    #[test]
+    // This test case is designed to reproduce a "not implemented" error about 'EnclosedTypeArguments' in Emitter.
+    fn test_global_definition() {
         test_compilation_and_evm_code_generation!(
             r#"scilla_version 0
 
             library TestLibrary
 
-            let zero = Uint32 0
+            let zero = Uint128 0
+            contract TestLibrary()
 
+            transition TestTransition()
+                accept
+            end
+            "#
+        );
+    }
+
+    // TODO: Emitter works, but code generator not working #[test]
+    fn test_generic_constructor_call() {
+        test_compilation_and_evm_code_generation!(
+            r#"
+            scilla_version 0
+    
+            library TestLibrary
+            let zero_msg = Nil {Message}
+            
+            contract Test()
+    "#
+        );
+
+        // Tests that the compiler can handle a constructor call that
+        // uses generic type arguments.
+        assert!(false)
+    }
+
+    #[test]
+    fn test_alias_import_handling() {
+        test_compilation_and_evm_code_generation!(
+            r#"scilla_version 0
+            import ListUtils as HelloWorld
+            library TestLib
             contract TestContract()
             "#
         );
     }
 
-    // TODO: #[test]
+    #[test]
     // This test case is designed to reproduce a "not implemented" error about 'EnclosedTypeArguments' in Emitter.
     fn test_enclosed_type_argument_error() {
         test_compilation_and_evm_code_generation!(
@@ -158,7 +174,7 @@ mod tests {
         );
     }
 
-    // TODO: #[test]
+    // TODO: Fix template instantiation #[test]
     // This test is trying to compile a scilla contract with an address argument type.
     // The Scilla code we are testing with has a piece instance `None {ByStr20}` which
     // is processed as an `AddressTypeArgument` in the Rust intermediary representation of Scilla.
@@ -190,25 +206,8 @@ mod tests {
         // of Map types declared in the field of a contract
     }
 
-    // TODO: #[test]
-    fn test_generic_constructor_call() {
-        test_compilation_and_evm_code_generation!(
-            r#"
-            scilla_version 0
-    
-            library TestLibrary
-            let zero_msg = Nil {Message}
-            
-            contract Test()
-    "#
-        );
-
-        // Tests that the compiler can handle a constructor call that
-        // uses generic type arguments.
-        assert!(false)
-    }
-
-    // TODO: #[test]
+    // TODO: Fix this - it requires a full type deduction
+    // #[test]
     fn test_unimplemented_message_error() {
         // This test checks an exception which is thrown
         // when a Message literal is encountered in AST

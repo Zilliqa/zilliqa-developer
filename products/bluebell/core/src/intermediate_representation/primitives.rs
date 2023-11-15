@@ -17,6 +17,7 @@ pub enum IrIndentifierKind {
     TypeLikeName(Vec<IrIdentifier>), // Intermediate identifier where it is not sure that it actually is a type
 
     TypeName,
+    TemplateTypeName(Vec<IrIdentifier>),
     // TemplateTypeName(Vec<IrIdentifier>),
     ComponentName,
     Event,
@@ -375,12 +376,21 @@ pub struct ContractField {
     pub initializer: Box<Instruction>,
 }
 
+#[derive(Debug)]
+pub struct GlobalVariableDefition {
+    pub name: IrIdentifier,
+    pub typename: Option<IrIdentifier>,
+    pub value: Box<Instruction>,
+}
+
 /// Struct representing the intermediate representation of a program.
 #[derive(Debug)]
 pub struct IntermediateRepresentation {
     // Program IR
     pub version: String,
     pub type_definitions: Vec<ConcreteType>,
+    pub global_init_block: Box<FunctionBlock>,
+    pub global_variables: Vec<GlobalVariableDefition>,
     pub function_definitions: Vec<ConcreteFunction>,
     pub fields_definitions: Vec<ContractField>,
     pub lambda_functions: Vec<LambdaFunctionSingleArgument>,
@@ -395,6 +405,8 @@ impl IntermediateRepresentation {
         IntermediateRepresentation {
             version: "".to_string(),
             type_definitions: Vec::new(),
+            global_init_block: FunctionBlock::new("globals".to_string()),
+            global_variables: Vec::new(),
             function_definitions: Vec::new(),
             fields_definitions: Vec::new(),
             lambda_functions: Vec::new(),

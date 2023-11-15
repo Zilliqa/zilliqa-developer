@@ -27,6 +27,12 @@ impl AstQueue for SourceImporter {
         self.load_script(script)
     }
 
+    fn enqueue_with_alias(&mut self, filename: &str, alias_name: &str) -> Result<(), String> {
+        let script = self.load_script_from_filename(filename)?;
+        println!("TODO: Alias not implemented");
+        self.load_script(script)
+    }
+
     fn pop_front(&mut self) -> Option<NodeProgram> {
         self.queue.pop()
     }

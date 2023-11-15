@@ -25,13 +25,12 @@ pub trait BluebellModule {
 
 impl SymbolTableConstructor for EvmCompilerContext {
     fn new_symbol_table(&self) -> SymbolTable {
-        let type_of_table = HashMap::new();
-
         let mut ret = SymbolTable {
             aliases: HashMap::new(),
-            type_of_table,
+            type_of_table: HashMap::new(),
             name_generator: NameGenerator::new(),
             state_layout: HashMap::new(),
+            user_types: HashMap::new(),
         };
 
         // TODO: Get types from self

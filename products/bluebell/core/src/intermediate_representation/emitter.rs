@@ -1,4 +1,4 @@
-use std::{fmt::Arguments, mem};
+use std::mem;
 
 use log::info;
 
@@ -189,7 +189,7 @@ impl<'a> IrEmitter<'a> {
     fn pop_function_block_or_empty_block(&mut self) -> Result<Box<FunctionBlock>, String> {
         let ret = if let Some(candidate) = self.stack.last() {
             match candidate {
-                StackObject::FunctionBlock(n) => {
+                StackObject::FunctionBlock(_n) => {
                     if let StackObject::FunctionBlock(n) = self.stack.pop().unwrap() {
                         n
                     } else {
@@ -289,7 +289,7 @@ impl<'a> IrEmitter<'a> {
     fn pop_function_body_or_empty(&mut self) -> Result<Box<FunctionBody>, String> {
         let ret = if let Some(candidate) = self.stack.last() {
             match candidate {
-                StackObject::FunctionBody(n) => {
+                StackObject::FunctionBody(_n) => {
                     if let StackObject::FunctionBody(n) = self.stack.pop().unwrap() {
                         n
                     } else {
@@ -396,8 +396,13 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 let identifier = self.pop_ir_identifier()?;
                 self.ast_queue.enqueue(&identifier.unresolved)?;
             }
-            NodeImportedName::AliasedImport(_alias, _name) => {
-                unimplemented!()
+            NodeImportedName::AliasedImport(value, alias) => {
+                value.node.visit(self)?;
+                let identifier = self.pop_ir_identifier()?;
+                alias.node.visit(self)?;
+                let alias = self.pop_ir_identifier()?;
+                self.ast_queue
+                    .enqueue_with_alias(&identifier.unresolved, &alias.unresolved)?;
             }
         }
         Ok(TraversalResult::SkipChildren)
@@ -517,27 +522,25 @@ impl<'a> AstConverting for IrEmitter<'a> {
                 // Checking if it is a template type
                 if args.len() > 0 {
                     let mut template_type = self.pop_ir_identifier()?;
-                    assert!(match template_type.kind {
-                        IrIndentifierKind::TypeLikeName(_) => true,
+                    assert!(match &template_type.kind {
+                        IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                         _ => false,
                     });
-                    template_type.kind = IrIndentifierKind::TypeName;
 
                     let mut arguments = Vec::new();
                     for arg in args {
                         let _ = arg.visit(self)?;
                         let mut typename = self.pop_ir_identifier()?;
-                        assert!(match typename.kind {
-                            IrIndentifierKind::TypeLikeName(_) => true,
+                        assert!(match &typename.kind {
+                            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                             _ => false,
                         });
                         typename.kind = IrIndentifierKind::TypeName;
                         arguments.push(typename);
                     }
-                    println!("{:#?}", template_type);
-                    println!("{:#?}", arguments);
 
-                    unimplemented!()
+                    template_type.kind = IrIndentifierKind::TypeLikeName(arguments);
+                    self.stack.push(StackObject::IrIdentifier(template_type));
                 }
             }
             NodeScillaType::MapType(key, value) => {
@@ -675,7 +678,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
 
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeFullExpression::Message(_entries) => {
+            NodeFullExpression::Message(entries) => {
+                println!("{:#?}", entries);
                 unimplemented!();
             }
             NodeFullExpression::Match {
@@ -724,9 +728,9 @@ impl<'a> AstConverting for IrEmitter<'a> {
             // Creating compare instruction
             // TODO: Pop instruction or symbol
             let expected_value = self.pop_ir_identifier()?;
-            assert!(match expected_value.kind {
+            assert!(match &expected_value.kind {
 
-            IrIndentifierKind::TypeLikeName(_) => true,
+            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
             _ => false,
 
             });
@@ -840,8 +844,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
 
                 // Expecting function name symbol
                 let mut name = self.pop_ir_identifier()?;
-                assert!(match name.kind {
-                    IrIndentifierKind::TypeLikeName(_) => true,
+                assert!(match &name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                     _ => false,
                 });
                 name.kind = IrIndentifierKind::FunctionName;
@@ -859,7 +863,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
                     unimplemented!()
                 }
 
-                let mut arguments: Vec<IrIdentifier> = [].to_vec();
+                let arguments: Vec<IrIdentifier> = [].to_vec();
 
                 let operation = Operation::CallStaticFunction {
                     name,
@@ -932,8 +936,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeValueLiteral::LiteralInt(typename, value) => {
                 let _ = typename.visit(self)?;
                 let mut typename = self.pop_ir_identifier()?;
-                assert!(match typename.kind {
-                    IrIndentifierKind::TypeLikeName(_) => true,
+                assert!(match &typename.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                     _ => false,
                 });
                 typename.kind = IrIndentifierKind::TypeName;
@@ -1005,6 +1009,9 @@ impl<'a> AstConverting for IrEmitter<'a> {
             }
             NodePattern::Constructor(name, args) => {
                 if args.len() > 0 {
+                    println!("Name: {:?}", name);
+                    println!("Args: {:?}", args);
+
                     unimplemented!();
                 }
 
@@ -1287,8 +1294,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
 
                             clause.node.pattern_expression.visit(self)?;
                             let expected_value = self.pop_ir_identifier()?;
-                            assert!(match expected_value.kind {
-                                IrIndentifierKind::TypeLikeName(_) => true,
+                            assert!(match &expected_value.kind {
+                                IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                                 _ => false,
                             });
                             let source_location = expected_value.source_location.clone();
@@ -1474,7 +1481,7 @@ impl<'a> AstConverting for IrEmitter<'a> {
         if let Some(block) = &node.statement_block {
             let _ = block.visit(self)?;
         }
-        // BOOK
+
         let last_block = self.pop_function_block_or_empty_block()?;
         // Restoring the old body as current
         let mut body = self.pop_function_body_or_empty()?;
@@ -1513,18 +1520,23 @@ impl<'a> AstConverting for IrEmitter<'a> {
         _mode: TreeTraversalMode,
         node: &NodeTypedIdentifier,
     ) -> Result<TraversalResult, String> {
-        let name = node.identifier_name.clone();
+        let name = node.identifier_name.node.clone();
         let _ = node.annotation.visit(self)?;
 
         let mut typename = self.pop_ir_identifier()?;
-        assert!(match typename.kind {
-            IrIndentifierKind::TypeLikeName(_) => true,
-            _ => false,
-        });
-        typename.kind = IrIndentifierKind::TypeName;
 
-        let s =
-            StackObject::VariableDeclaration(VariableDeclaration::new(name.node, false, typename));
+        typename.kind = match &typename.kind {
+            IrIndentifierKind::TypeLikeName(args) => {
+                if args.len() > 0 {
+                    IrIndentifierKind::TemplateTypeName(args.clone())
+                } else {
+                    IrIndentifierKind::TypeName
+                }
+            }
+            _ => panic!("Expected TypeLikeName"),
+        };
+
+        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, false, typename));
         self.stack.push(s);
 
         Ok(TraversalResult::SkipChildren)
@@ -1582,8 +1594,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
     ) -> Result<TraversalResult, String> {
         let _ = node.name.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
-        assert!(match ns.kind {
-            IrIndentifierKind::TypeLikeName(_) => true,
+        assert!(match &ns.kind {
+            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
             _ => false,
         });
         ns.kind = IrIndentifierKind::Namespace;
@@ -1604,28 +1616,50 @@ impl<'a> AstConverting for IrEmitter<'a> {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeLibrarySingleDefinition::LetDefinition {
-                variable_name: _,
-                type_annotation: _,
+                variable_name,
+                type_annotation,
                 expression,
             } => {
-                /*
-                let declaration_start = match self.current_function {
-                    Some(_) => true,
-                    None => false
+                // TODO: Assumes that we do not visit this parts of the code recursively (which should happen in Scilla)
+                // However, this should be be fixed.
+                std::mem::swap(&mut self.current_block, &mut self.ir.global_init_block);
+
+                let name = IrIdentifier {
+                    unresolved: variable_name.node.clone(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::VirtualRegister,
+                    is_definition: false,
+                    source_location: self.current_location(),
                 };
 
-                if declaration_start {
-                    // TODO: self.current_function
-                }
-                */
+                let typename = match type_annotation {
+                    Some(t) => {
+                        t.visit(self)?;
+                        Some(self.pop_ir_identifier()?)
+                    }
+                    None => None,
+                };
+
                 expression.visit(self)?;
-                unimplemented!();
+                let value = self.pop_instruction()?;
+
+                let global_var = GlobalVariableDefition {
+                    name,
+                    typename,
+                    value,
+                };
+
+                // TODO: See comment at the first swap
+                std::mem::swap(&mut self.current_block, &mut self.ir.global_init_block);
+
+                self.ir.global_variables.push(global_var);
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                 let _ = name.visit(self)?;
                 let mut name = self.pop_ir_identifier()?;
-                assert!(match name.kind {
-                    IrIndentifierKind::TypeLikeName(_) => true,
+                assert!(match &name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                     _ => false,
                 });
                 name.kind = IrIndentifierKind::TypeName;
@@ -1663,8 +1697,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
         // TODO: Decide whether the namespace should be distinct
         let _ = node.contract_name.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
-        assert!(match ns.kind {
-            IrIndentifierKind::TypeLikeName(_) => true,
+        assert!(match &ns.kind {
+            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
             _ => false,
         });
         ns.kind = IrIndentifierKind::Namespace;
@@ -1797,8 +1831,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
                 let _ = identifier.visit(self)?;
                 let mut enum_name = self.pop_ir_identifier()?;
-                assert!(match enum_name.kind {
-                    IrIndentifierKind::TypeLikeName(_) => true,
+                assert!(match &enum_name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                     _ => false,
                 });
                 enum_name.kind = IrIndentifierKind::StaticFunctionName;
@@ -1808,8 +1842,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
                 let _ = identifier.visit(self)?;
                 let mut member_name = self.pop_ir_identifier()?;
-                assert!(match member_name.kind {
-                    IrIndentifierKind::TypeLikeName(_) => true,
+                assert!(match &member_name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                     _ => false,
                 });
                 member_name.kind = IrIndentifierKind::StaticFunctionName;
@@ -1819,8 +1853,8 @@ impl<'a> AstConverting for IrEmitter<'a> {
                     let _ = child.visit(self)?;
 
                     let mut item = self.pop_ir_identifier()?;
-                    assert!(match item.kind {
-                        IrIndentifierKind::TypeLikeName(_) => true,
+                    assert!(match &item.kind {
+                        IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
                         _ => false,
                     });
                     item.kind = IrIndentifierKind::TypeName;
