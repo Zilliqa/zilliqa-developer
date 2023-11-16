@@ -24,6 +24,8 @@ This guide will explain how to accomplish the following:
 2. Deploy a smart contract to the testnet.
 3. Have our new smart contract get the current price of ZIL from the oracle contract
 
+> **Note**: Chainlink Community Deployment price feeds are not official integrations. Developers should understand risks associated with community deployments. [Learn More](https://docs.chain.link/data-feeds/selecting-data-feeds/#chainlink-community-deployments)
+
 ## Connecting to Zilliqa Testnet
 
 First we need to add the Zilliqa testnet to our metamask:
