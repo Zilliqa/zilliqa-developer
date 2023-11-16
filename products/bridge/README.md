@@ -202,7 +202,7 @@ The bridge will have the following deliverables:
   - Hardhat - E2E testing + deployment
   - Foundry - Unit testing + fuzzing + invariant testing + gas reporting
 - **Validator Node Lib**
-  - Written in Rust,
+  - Written in Rust
   - Should encapsulate most functionality required for a validator to run the bridge protocol
 - **Off-chain Validator Nodes**
   - Written in Rust
@@ -219,7 +219,7 @@ The bridge will have the following deliverables:
 
 ### MVP
 
-The MVP bridge will run on a gossip network with validators managed by Zilliqa.
+The MVP bridge will run on a gossip network with validators managed by Zilliqa
 
 - [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
   - [ ] Integrate foundry to support effective unit testing on contracts
@@ -231,7 +231,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa.
   - [ ] Multichain support - appending chain-ids to event calls
   - [ ] Fuzz + variant testing
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
-  - Initially developed as a binary together. Will be refactored out later to be used for ZQ2
+  - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
   - [ ] Determine type of connection to use to connect to non-zilliqa chains
     - Light node/client? [helios](https://github.com/a16z/helios)
   - [ ] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
