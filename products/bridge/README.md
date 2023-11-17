@@ -193,3 +193,48 @@ The middle layer are cross-chain applications that use the cross-chain conctract
 - the twin contract checks the expiration and whether the approved token and amount are as required, transfers the amount to user 1 and returns true as response
 - the swap contract on Zilliqa receives the response of its twin and transfers the locked amount to user 2
 - if the swap contract does not receive a response from its twin before the expiration, user 1 can claim the approved amount and the swap contract sends it back to user 1
+
+## Roadmap
+
+The bridge will have the following deliverables:
+
+- **Smart Contracts** – these will be written with the combination of:
+  - Hardhat - E2E testing + deployment
+  - Foundry - Unit testing + fuzzing + invariant testing + gas reporting
+- **Validator Node Lib**
+  - Written in Rust
+  - Should encapsulate most functionality required for a validator to run the bridge protocol
+- **Off-chain Validator Nodes**
+  - Written in Rust
+  - Will use `Validator Node Lib` as a dependency for most shared code
+  - This will run the validator set
+  - Signature aggregation through a gossip network
+  - Validators run by Zilliqa
+- **Frontend DApp**
+  - Written in React
+  - Simple DApp enabling bridge activities
+- **Integrate bridge into ZQ2 consensus**
+  - Integrate `Validator Node Lib`
+  - Migrate validators to ZQ2 once released and stable
+
+### MVP
+
+The MVP bridge will run on a gossip network with validators managed by Zilliqa
+
+- [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
+  - [ ] Integrate foundry to support effective unit testing on contracts
+  - [ ] Finish remaining TODO tests
+  - [ ] Write deployment scripts
+    - [ ] Support CREATE2
+    - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
+  - [ ] Integrate mechanism for gas reversal
+  - [ ] Multichain support - appending chain-ids to event calls
+  - [ ] Fuzz + variant testing
+- [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
+  - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
+  - [ ] Determine type of connection to use to connect to non-zilliqa chains
+    - Light node/client? [helios](https://github.com/a16z/helios)
+  - [ ] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
+  - [ ] Read & Write to chains
+- [ ] **Frontend DApp**
+  - [ ] Boilerplate setup (Vite React with Rainbow Kit)

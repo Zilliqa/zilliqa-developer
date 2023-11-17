@@ -7,6 +7,69 @@ import { ethers } from "hardhat";
 import { AddressLike, BytesLike, Signer } from "ethers";
 import { Relayer, Collector } from "../typechain-types";
 
+export async function dispatchMessage(
+  validators1: Signer[],
+  relayer1: Relayer,
+  validators2: Signer[],
+  relayer2: Relayer,
+  collector: Collector,
+  isSuccess: boolean
+) {
+  const { caller, callee, call, readonly, callback, nonce } = (
+    await obtainCalls(validators1, relayer1)
+  )[0];
+  expect(readonly).to.be.false;
+
+  const callSignatures = await confirmCall(
+    validators1,
+    collector,
+    caller,
+    callee,
+    call,
+    readonly,
+    callback,
+    nonce
+  );
+
+  switchNetwork(2);
+
+  const { success, result } = await dispatchCall(
+    validators2,
+    relayer2,
+    caller,
+    callee,
+    call,
+    isSuccess,
+    callback,
+    nonce,
+    callSignatures
+  );
+  expect(success).to.be.true;
+
+  switchNetwork(1);
+
+  const resultSignatures = await confirmResult(
+    validators1,
+    collector,
+    caller,
+    callback,
+    success,
+    result,
+    nonce
+  );
+
+  await deliverResult(
+    validators1,
+    relayer1,
+    caller,
+    callback,
+    success,
+    result,
+    nonce,
+    resultSignatures
+  );
+}
+
 export async function setupBridge() {
   const validatorSize = 15;
 
@@ -106,7 +169,9 @@ export async function obtainCalls(validators: Signer[], relayer: Relayer) {
   const randIndex = Math.floor(Math.random() * validators.length);
   const filter = relayer.filters.Relayed;
   // Select random validator to query (in tests they use the same provider, but not in reality)
-  const logs = await relayer.connect(validators[randIndex]).queryFilter(filter);
+  const logs = await relayer
+    .connect(validators[randIndex])
+    .queryFilter(filter, "earliest", "finalized");
   return logs.map(
     ({ args: [caller, callee, call, readonly, callback, nonce] }) => ({
       caller,
@@ -264,7 +329,9 @@ export async function dispatchCall(
         undefined,
         nonce
       );
-      const logs = await relayer.connect(validator).queryFilter(filter);
+      const logs = await relayer
+        .connect(validator)
+        .queryFilter(filter, "earliest", "finalized");
 
       return logs[0].args;
     })
@@ -364,7 +431,9 @@ export async function deliverResult(
       undefined,
       nonce
     );
-    const logs = await relayer.connect(validator).queryFilter(filter);
+    const logs = await relayer
+      .connect(validator)
+      .queryFilter(filter, "earliest", "finalized");
 
     expect(logs[0].args.success).to.equal(true);
     expect(logs[0].args[3]).to.equal("0x");
