@@ -44,6 +44,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+        working-directory: products/bridge/smart-contracts
 
       - name: Run tests
         run: pnpm test
+        working-directory: products/bridge/smart-contracts
