@@ -5,7 +5,7 @@
     "node": "hardhat node",
     "node:two": "HARDHAT_CHAIN_ID=31338 hardhat node --port 8546",
     "test:only": "hardhat test",
-    "test": "concurrently npm:node npm:node:two npm:test:only -k --hide node,node:two -p \" \""
+    "test": "concurrently npm:test:only npm:node npm:node:two -k -s first --hide node,node:two -p \" \""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
