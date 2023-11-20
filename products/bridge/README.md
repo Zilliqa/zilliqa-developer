@@ -232,6 +232,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [x] Multichain support - appending chain-ids to event calls
   - [ ] Fuzz + variant testing
   - [ ] Synchronizing validators cross-chain
+  - [x] CI automated testing
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
   - [ ] Determine type of connection to use to connect to non-zilliqa chains
