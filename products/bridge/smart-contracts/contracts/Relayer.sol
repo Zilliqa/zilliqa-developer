@@ -14,25 +14,6 @@ using MessageHashUtils for bytes;
 
 contract Relayer {
     ValidatorManager private validatorManager;
-
-    event TwinDeployment(address indexed twin);
-
-    function deployTwin(
-        bytes32 salt,
-        bytes calldata bytecode,
-        bytes calldata initCall
-    ) public returns (address) {
-        address bridgedContract = Create2.deploy(0, salt, bytecode);
-        (bool success, ) = bridgedContract.call(initCall);
-        require(success, "initialization failed");
-        emit TwinDeployment(bridgedContract);
-        return bridgedContract;
-    }
-
-    constructor(ValidatorManager _validatorManager) {
-        validatorManager = _validatorManager;
-    }
-
     // targetChainId => caller => nonce
     mapping(uint => mapping(address => uint)) nonces;
     // sourceChainId => caller => dispatched
@@ -40,6 +21,7 @@ contract Relayer {
     // sourceChainId => caller => resumed
     mapping(uint => mapping(address => mapping(uint => bool))) resumed;
 
+    event TwinDeployment(address indexed twin);
     event Relayed(
         uint indexed targetChainId,
         address caller,
@@ -49,6 +31,67 @@ contract Relayer {
         bytes4 callback,
         uint nonce
     );
+    event Dispatched(
+        uint indexed sourceChainId,
+        address indexed caller,
+        bytes4 callback,
+        bool success,
+        bytes response,
+        uint indexed nonce
+    );
+    event Resumed(
+        uint indexed targetChainId,
+        address indexed caller,
+        bytes call,
+        bool success,
+        bytes response,
+        uint indexed nonce
+    );
+
+    error FailedDeploymentInitialization();
+    error InvalidSignatures();
+    error NoSupermajority();
+    error NonContractCaller();
+    error AlreadyResumed();
+    error AlreadyDispatched();
+
+    modifier onlyContractCaller(address caller) {
+        if (caller.code.length == 0) {
+            revert NonContractCaller();
+        }
+        _;
+    }
+
+    constructor(ValidatorManager _validatorManager) {
+        validatorManager = _validatorManager;
+    }
+
+    function validateRequest(
+        bytes memory encodedMessage,
+        bytes[] memory signatures
+    ) public view {
+        bytes32 hash = encodedMessage.toEthSignedMessageHash();
+        if (!validatorManager.validateUniqueSignatures(hash, signatures)) {
+            revert InvalidSignatures();
+        }
+        if (!validatorManager.hasSupermajority(signatures.length)) {
+            revert NoSupermajority();
+        }
+    }
+
+    function deployTwin(
+        bytes32 salt,
+        bytes calldata bytecode,
+        bytes calldata initCall
+    ) public returns (address) {
+        address bridgedContract = Create2.deploy(0, salt, bytecode);
+        (bool success, ) = bridgedContract.call(initCall);
+        if (!success) {
+            revert FailedDeploymentInitialization();
+        }
+        emit TwinDeployment(bridgedContract);
+        return bridgedContract;
+    }
 
     function relay(
         uint targetChainId,
@@ -70,30 +113,6 @@ contract Relayer {
         return nonces[targetChainId][msg.sender];
     }
 
-    event Dispatched(
-        uint indexed sourceChainId,
-        address indexed caller,
-        bytes4 callback,
-        bool success,
-        bytes response,
-        uint indexed nonce
-    );
-
-    function validateRequest(
-        bytes memory encodedMessage,
-        bytes[] memory signatures
-    ) private view {
-        bytes32 hash = encodedMessage.toEthSignedMessageHash();
-        require(
-            validatorManager.validateUniqueSignatures(hash, signatures),
-            "Invalid signatures"
-        );
-        require(
-            validatorManager.hasSupermajority(signatures.length),
-            "No supermajority"
-        );
-    }
-
     function dispatch(
         uint sourceChainId,
         address caller,
@@ -102,11 +121,10 @@ contract Relayer {
         bytes4 callback,
         uint nonce,
         bytes[] memory signatures
-    ) public {
-        require(
-            !dispatched[sourceChainId][caller][nonce],
-            "Already dispatched"
-        );
+    ) public onlyContractCaller(caller) {
+        if (dispatched[sourceChainId][caller][nonce]) {
+            revert AlreadyDispatched();
+        }
 
         bytes memory message = abi.encode(
             sourceChainId,
@@ -119,7 +137,6 @@ contract Relayer {
         );
         validateRequest(message, signatures);
 
-        require(caller.code.length > 0, "code length");
         (bool success, bytes memory response) = Bridged(caller).dispatched(
             sourceChainId,
             target,
@@ -140,19 +157,14 @@ contract Relayer {
         address caller,
         address target,
         bytes memory call
-    ) public view returns (bool success, bytes memory response) {
-        require(caller.code.length > 0, "code length");
+    )
+        public
+        view
+        onlyContractCaller(caller)
+        returns (bool success, bytes memory response)
+    {
         (success, response) = Bridged(caller).queried(target, call);
     }
-
-    event Resumed(
-        uint indexed targetChainId,
-        address indexed caller,
-        bytes call,
-        bool success,
-        bytes response,
-        uint indexed nonce
-    );
 
     // Ensure signatures are submitted in the order of their addresses
     function resume(
@@ -164,7 +176,9 @@ contract Relayer {
         uint nonce,
         bytes[] memory signatures
     ) public payable {
-        require(!resumed[targetChainId][caller][nonce], "Already resumed");
+        if (resumed[targetChainId][caller][nonce]) {
+            revert AlreadyResumed();
+        }
         bytes memory message = abi.encode(
             targetChainId,
             caller,

@@ -4,18 +4,24 @@ pragma solidity ^0.8.20;
 import "./ValidatorManager.sol";
 
 contract Collector {
-    ValidatorManager private validatorManager;
+    ValidatorManager private _validatorManager;
+
     event Echoed(bytes32 indexed hash, bytes signature);
 
-    constructor(ValidatorManager _validatorManager) {
-        validatorManager = _validatorManager;
+    error InvalidSignature();
+
+    constructor(ValidatorManager validatorManager_) {
+        _validatorManager = validatorManager_;
     }
 
     function echo(bytes32 hash, bytes memory signature) public {
-        require(
-            validatorManager.validateSignature(hash, signature),
-            "Wrong validator"
-        );
+        if (!_validatorManager.validateSignature(hash, signature)) {
+            revert InvalidSignature();
+        }
         emit Echoed(hash, signature);
+    }
+
+    function validatorManager() public view returns (ValidatorManager) {
+        return _validatorManager;
     }
 }

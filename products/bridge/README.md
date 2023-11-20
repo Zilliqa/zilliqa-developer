@@ -224,14 +224,14 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
 - [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
   - [ ] Integrate foundry to support effective unit testing on contracts
   - [ ] Finish remaining TODO tests
-  - [ ] Update error handling on contracts
-    - [ ] define errors
+  - [x] Update error handling on contracts
   - [ ] Write deployment scripts
     - [ ] Support CREATE2
     - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
   - [ ] Integrate mechanism for gas reversal
   - [x] Multichain support - appending chain-ids to event calls
   - [ ] Fuzz + variant testing
+  - [ ] Synchronizing validators cross-chain
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
   - [ ] Determine type of connection to use to connect to non-zilliqa chains

@@ -10,18 +10,22 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 contract BridgedERC20 is ERC20, ERC20Burnable {
     address _bridge;
 
+    error NotBridge(address);
+
+    modifier onlyBridge() {
+        if (msg.sender != _bridge) {
+            revert NotBridge(msg.sender);
+        }
+        _;
+    }
+
     constructor(
         string memory name,
         string memory symbol,
-        address bridge
+        address bridge_
     ) ERC20(name, symbol) {
-        _bridge = bridge;
+        _bridge = bridge_;
         _mint(msg.sender, 1000);
-    }
-
-    modifier onlyBridge() {
-        require(msg.sender == _bridge, "Not the bridge");
-        _;
     }
 
     function mint(address to, uint256 amount) public onlyBridge {
@@ -31,6 +35,10 @@ contract BridgedERC20 is ERC20, ERC20Burnable {
     function burn(address from, uint256 amount) public onlyBridge {
         burnFrom(from, amount);
     }
+
+    function bridge() public view returns (address) {
+        return _bridge;
+    }
 }
 
 contract MyToken is BridgedERC20 {
@@ -39,6 +47,8 @@ contract MyToken is BridgedERC20 {
 
 contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     event Started(address, address, uint);
+    event Succeeded();
+    event Failed(string);
 
     function initialize(Relayer relayer, uint twinChainId) public initializer {
         __Bridged_init(relayer);
@@ -54,7 +64,7 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         public
         payable
         override
-        onlyTwin(sourceChainId)
+        onlyTwinChain(sourceChainId)
         returns (bool success, bytes memory response)
     {
         (success, response) = _dispatched(target, call);
@@ -91,9 +101,6 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         );
         emit Started(token, owner, value);
     }
-
-    event Succeeded();
-    event Failed(string);
 
     function finish(
         uint targetChainId,

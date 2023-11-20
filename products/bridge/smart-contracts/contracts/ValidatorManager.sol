@@ -10,6 +10,8 @@ contract ValidatorManager {
     using MessageHashUtils for bytes;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    error NonUniqueOrUnorderedSignatures();
+
     EnumerableSet.AddressSet private _validators;
 
     constructor(address[] memory validators) {
@@ -49,10 +51,9 @@ contract ValidatorManager {
 
         for (uint i = 0; i < signatures.length; i++) {
             address signer = ethSignedMessageHash.recover(signatures[i]);
-            require(
-                signer > lastSigner,
-                "Signatures must be unique and in increasing order"
-            );
+            if (signer <= lastSigner) {
+                revert NonUniqueOrUnorderedSignatures();
+            }
             if (!isValidator(signer)) {
                 return false;
             }
