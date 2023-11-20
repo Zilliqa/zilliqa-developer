@@ -25,6 +25,8 @@ describe("ERC20Bridge", function () {
       tester2,
       twinDeployer1,
       twinDeployer2,
+      chainId1,
+      chainId2,
     } = await setupBridge();
 
     const salt = ethers.randomBytes(32);
@@ -37,7 +39,14 @@ describe("ERC20Bridge", function () {
 
     switchNetwork(1);
 
-    expect(await relayer1.deployTwin(salt, ERC20Bridge__factory.bytecode))
+    const initCall1 = ERC20Bridge__factory.createInterface().encodeFunctionData(
+      "initialize",
+      [await relayer1.getAddress(), chainId2]
+    );
+
+    expect(
+      await relayer1.deployTwin(salt, ERC20Bridge__factory.bytecode, initCall1)
+    )
       .to.emit(relayer1, "Deployed")
       .withArgs(bridgeAddress);
 
@@ -56,7 +65,14 @@ describe("ERC20Bridge", function () {
 
     switchNetwork(2);
 
-    expect(await relayer2.deployTwin(salt, ERC20Bridge__factory.bytecode))
+    const initCall2 = ERC20Bridge__factory.createInterface().encodeFunctionData(
+      "initialize",
+      [await relayer2.getAddress(), chainId1]
+    );
+
+    expect(
+      await relayer2.deployTwin(salt, ERC20Bridge__factory.bytecode, initCall2)
+    )
       .to.emit(relayer2, "Deployed")
       .withArgs(bridgeAddress);
     const bridge2 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
@@ -86,6 +102,8 @@ describe("ERC20Bridge", function () {
       tester2,
       validators1,
       validators2,
+      chainId1,
+      chainId2,
     };
   }
 
@@ -101,10 +119,13 @@ describe("ERC20Bridge", function () {
       validators1,
       validators2,
       collector,
+      chainId1,
+      chainId2,
     } = await setup();
 
     const value = 12;
-
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
     switchNetwork(1);
 
     expect(await token1.balanceOf(await bridge1.getAddress())).to.equal(0);
@@ -145,7 +166,7 @@ describe("ERC20Bridge", function () {
       balance1 - value
     );
 
-    var { caller, callee, call, readonly, callback, nonce } = (
+    const { caller, callee, call, readonly, callback, nonce } = (
       await obtainCalls(validators1, relayer1)
     )[0];
     expect(readonly).to.be.false;
@@ -153,6 +174,7 @@ describe("ERC20Bridge", function () {
     var signatures = await confirmCall(
       validators1,
       collector,
+      sourceChainId,
       caller,
       callee,
       call,
@@ -168,6 +190,7 @@ describe("ERC20Bridge", function () {
     success = anyValue;
     var { success, result } = await dispatchCall(
       validators2,
+      sourceChainId,
       relayer2,
       caller,
       callee,
@@ -184,6 +207,7 @@ describe("ERC20Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      targetChainId,
       caller,
       callback,
       success,
@@ -194,6 +218,7 @@ describe("ERC20Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      targetChainId,
       caller,
       callback,
       success,
@@ -228,9 +253,13 @@ describe("ERC20Bridge", function () {
       tester2,
       validators1,
       validators2,
+      chainId1,
+      chainId2,
     } = await setup();
 
     const value = 23;
+    const sourceChainId = chainId2;
+    const targetChainId = chainId1;
 
     switchNetwork(1);
 
@@ -298,6 +327,7 @@ describe("ERC20Bridge", function () {
     var signatures = await confirmCall(
       validators1,
       collector,
+      sourceChainId,
       caller,
       callee,
       call,
@@ -311,6 +341,7 @@ describe("ERC20Bridge", function () {
     success = anyValue;
     var { success, result } = await dispatchCall(
       validators1,
+      sourceChainId,
       relayer1,
       caller,
       callee,
@@ -329,6 +360,7 @@ describe("ERC20Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      targetChainId,
       caller,
       callback,
       success,
@@ -339,6 +371,7 @@ describe("ERC20Bridge", function () {
     await deliverResult(
       validators2,
       relayer2,
+      targetChainId,
       caller,
       callback,
       success,

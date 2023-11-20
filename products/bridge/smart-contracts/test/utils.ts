@@ -8,6 +8,8 @@ import { AddressLike, BytesLike, Signer } from "ethers";
 import { Relayer, Collector } from "../typechain-types";
 
 export async function dispatchMessage(
+  chainId1: bigint,
+  chainId2: bigint,
   validators1: Signer[],
   relayer1: Relayer,
   validators2: Signer[],
@@ -15,6 +17,9 @@ export async function dispatchMessage(
   collector: Collector,
   isSuccess: boolean
 ) {
+  const sourceChainId = chainId1;
+  const targetChainId = chainId2;
+
   const { caller, callee, call, readonly, callback, nonce } = (
     await obtainCalls(validators1, relayer1)
   )[0];
@@ -23,6 +28,7 @@ export async function dispatchMessage(
   const callSignatures = await confirmCall(
     validators1,
     collector,
+    sourceChainId,
     caller,
     callee,
     call,
@@ -35,6 +41,7 @@ export async function dispatchMessage(
 
   const { success, result } = await dispatchCall(
     validators2,
+    sourceChainId,
     relayer2,
     caller,
     callee,
@@ -51,6 +58,7 @@ export async function dispatchMessage(
   const resultSignatures = await confirmResult(
     validators1,
     collector,
+    targetChainId,
     caller,
     callback,
     success,
@@ -61,6 +69,7 @@ export async function dispatchMessage(
   await deliverResult(
     validators1,
     relayer1,
+    targetChainId,
     caller,
     callback,
     success,
@@ -103,6 +112,9 @@ export async function setupBridge() {
     .deployContract("Collector", [await validatorManager1.getAddress()])
     .then(async (c) => c.waitForDeployment());
 
+  const network1 = await ethers.provider.getNetwork();
+  const chainId1 = network1.chainId;
+
   switchNetwork(2);
 
   const signers2 = await ethers.getSigners();
@@ -121,6 +133,9 @@ export async function setupBridge() {
     .deployContract("Relayer", [validatorManager2], twinDeployer2)
     .then((x) => x.waitForDeployment());
 
+  const network2 = await ethers.provider.getNetwork();
+  const chainId2 = network2.chainId;
+
   switchNetwork(1);
 
   return {
@@ -133,6 +148,8 @@ export async function setupBridge() {
     tester2,
     twinDeployer1,
     twinDeployer2,
+    chainId1,
+    chainId2,
   };
 }
 
@@ -173,7 +190,10 @@ export async function obtainCalls(validators: Signer[], relayer: Relayer) {
     .connect(validators[randIndex])
     .queryFilter(filter, "earliest", "finalized");
   return logs.map(
-    ({ args: [caller, callee, call, readonly, callback, nonce] }) => ({
+    ({
+      args: [targetChainId, caller, callee, call, readonly, callback, nonce],
+    }) => ({
+      targetChainId,
       caller,
       callee,
       call,
@@ -210,6 +230,7 @@ function orderSignaturesBySignerAddress(hash: string, signatures: string[]) {
 export async function confirmCall(
   validators: Signer[],
   collector: Collector,
+  sourceChainId: bigint,
   caller: AddressLike,
   callee: AddressLike,
   call: BytesLike,
@@ -220,8 +241,8 @@ export async function confirmCall(
   // validators sign the hash of the Relayed event data and submit their signature
   // Prepare the hashed message
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["address", "address", "bytes", "bool", "bytes4", "uint256"],
-    [caller, callee, call, readonly, callback, nonce]
+    ["uint256", "address", "address", "bytes", "bool", "bytes4", "uint256"],
+    [sourceChainId, caller, callee, call, readonly, callback, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
@@ -288,6 +309,7 @@ export async function queryCall(
 
 export async function dispatchCall(
   validators: Signer[],
+  sourceChainId: bigint,
   relayer: Relayer,
   caller: AddressLike,
   callee: AddressLike,
@@ -301,17 +323,26 @@ export async function dispatchCall(
   const leaderValidator =
     validators[Math.floor(Math.random() * validators.length)];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["address", "address", "bytes", "bool", "bytes4", "uint256"],
-    [caller, callee, call, false, callback, nonce]
+    ["uint256", "address", "address", "bytes", "bool", "bytes4", "uint256"],
+    [sourceChainId, caller, callee, call, false, callback, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
 
   const tx = await relayer
     .connect(leaderValidator)
-    .dispatch(caller, callee, call, callback, nonce, orderedSignatures);
+    .dispatch(
+      sourceChainId,
+      caller,
+      callee,
+      call,
+      callback,
+      nonce,
+      orderedSignatures
+    );
   await tx.wait();
   expect(tx).to.emit(relayer, "Dispatched").withArgs(
+    sourceChainId,
     caller,
     callback,
     success, // expected boolean outcome or anyValue if outcome is not known in advance
@@ -323,6 +354,7 @@ export async function dispatchCall(
   const results = await Promise.all(
     validators.map(async (validator) => {
       const filter = relayer.filters.Dispatched(
+        undefined,
         caller,
         undefined,
         undefined,
@@ -341,12 +373,16 @@ export async function dispatchCall(
     expect(result).is.deep.equal(results[0]);
   }
 
-  return { success: results[0].success, result: results[0].response };
+  return {
+    success: results[0].success,
+    result: results[0].response,
+  };
 }
 
 export async function confirmResult(
   validators: Signer[],
   collector: Collector,
+  targetChainId: bigint,
   caller: AddressLike,
   callback: BytesLike,
   success: boolean,
@@ -355,8 +391,8 @@ export async function confirmResult(
 ) {
   // validators sign the hash of the Dispatched event data and submit their signature
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["address", "bytes4", "bool", "bytes", "uint256"],
-    [caller, callback, success, result, nonce]
+    ["uint256", "address", "bytes4", "bool", "bytes", "uint256"],
+    [targetChainId, caller, callback, success, result, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
@@ -386,6 +422,7 @@ export async function confirmResult(
 export async function deliverResult(
   validators: Signer[],
   relayer: Relayer,
+  targetChainId: bigint,
   caller: AddressLike,
   callback: BytesLike,
   success: boolean,
@@ -397,24 +434,33 @@ export async function deliverResult(
   const leaderValidator =
     validators[Math.floor(Math.random() * validators.length)];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["address", "bytes4", "bool", "bytes", "uint256"],
-    [caller, callback, success, result, nonce]
+    ["uint256", "address", "bytes4", "bool", "bytes", "uint256"],
+    [targetChainId, caller, callback, success, result, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
   const tx = await relayer
     .connect(leaderValidator)
-    .resume(caller, callback, success, result, nonce, orderedSignatures);
+    .resume(
+      targetChainId,
+      caller,
+      callback,
+      success,
+      result,
+      nonce,
+      orderedSignatures
+    );
   await tx.wait();
   await expect(tx)
     .to.emit(relayer, "Resumed")
     .withArgs(
+      targetChainId,
       caller,
       ethers.concat([
         callback,
         ethers.AbiCoder.defaultAbiCoder().encode(
-          ["bool", "bytes", "uint256"],
-          [success, result, nonce]
+          ["uint", "bool", "bytes", "uint256"],
+          [targetChainId, success, result, nonce]
         ),
       ]),
       true,
@@ -425,6 +471,7 @@ export async function deliverResult(
   // other validators see the Resumed event and do not attempt to deliver the result again
   for (const validator of validators) {
     const filter = relayer.filters.Resumed(
+      targetChainId,
       caller,
       undefined,
       undefined,
@@ -436,6 +483,6 @@ export async function deliverResult(
       .queryFilter(filter, "earliest", "finalized");
 
     expect(logs[0].args.success).to.equal(true);
-    expect(logs[0].args[3]).to.equal("0x");
+    expect(logs[0].args.response).to.equal("0x");
   }
 }

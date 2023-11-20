@@ -19,10 +19,12 @@ contract Relayer {
 
     function deployTwin(
         bytes32 salt,
-        bytes calldata bytecode
+        bytes calldata bytecode,
+        bytes calldata initCall
     ) public returns (address) {
         address bridgedContract = Create2.deploy(0, salt, bytecode);
-        Bridged(bridgedContract).initialize(this);
+        (bool success, ) = bridgedContract.call(initCall);
+        require(success, "initialization failed");
         emit TwinDeployment(bridgedContract);
         return bridgedContract;
     }
@@ -31,11 +33,15 @@ contract Relayer {
         validatorManager = _validatorManager;
     }
 
-    mapping(address => uint) nonces;
-    mapping(address => mapping(uint => bool)) dispatched;
-    mapping(address => mapping(uint => bool)) resumed;
+    // targetChainId => caller => nonce
+    mapping(uint => mapping(address => uint)) nonces;
+    // sourceChainId => caller => dispatched
+    mapping(uint => mapping(address => mapping(uint => bool))) dispatched;
+    // sourceChainId => caller => resumed
+    mapping(uint => mapping(address => mapping(uint => bool))) resumed;
 
     event Relayed(
+        uint indexed targetChainId,
         address caller,
         address target,
         bytes call,
@@ -45,24 +51,27 @@ contract Relayer {
     );
 
     function relay(
+        uint targetChainId,
         address target,
         bytes memory call,
         bool readonly,
         bytes4 callback
     ) public returns (uint) {
         emit Relayed(
+            targetChainId,
             msg.sender,
             target,
             call,
             readonly,
             callback,
-            nonces[msg.sender]
+            nonces[targetChainId][msg.sender]
         );
-        nonces[msg.sender]++;
-        return nonces[msg.sender];
+        nonces[targetChainId][msg.sender]++;
+        return nonces[targetChainId][msg.sender];
     }
 
     event Dispatched(
+        uint indexed sourceChainId,
         address indexed caller,
         bytes4 callback,
         bool success,
@@ -86,6 +95,7 @@ contract Relayer {
     }
 
     function dispatch(
+        uint sourceChainId,
         address caller,
         address target,
         bytes memory call,
@@ -93,9 +103,13 @@ contract Relayer {
         uint nonce,
         bytes[] memory signatures
     ) public {
-        require(!dispatched[caller][nonce], "Already dispatched");
+        require(
+            !dispatched[sourceChainId][caller][nonce],
+            "Already dispatched"
+        );
 
         bytes memory message = abi.encode(
+            sourceChainId,
             caller,
             target,
             call,
@@ -107,11 +121,19 @@ contract Relayer {
 
         require(caller.code.length > 0, "code length");
         (bool success, bytes memory response) = Bridged(caller).dispatched(
+            sourceChainId,
             target,
             call
         );
-        emit Dispatched(caller, callback, success, response, nonce);
-        dispatched[caller][nonce] = true;
+        emit Dispatched(
+            sourceChainId,
+            caller,
+            callback,
+            success,
+            response,
+            nonce
+        );
+        dispatched[sourceChainId][caller][nonce] = true;
     }
 
     function query(
@@ -124,6 +146,7 @@ contract Relayer {
     }
 
     event Resumed(
+        uint indexed targetChainId,
         address indexed caller,
         bytes call,
         bool success,
@@ -133,6 +156,7 @@ contract Relayer {
 
     // Ensure signatures are submitted in the order of their addresses
     function resume(
+        uint targetChainId,
         address caller,
         bytes4 callback,
         bool success,
@@ -140,8 +164,9 @@ contract Relayer {
         uint nonce,
         bytes[] memory signatures
     ) public payable {
-        require(!resumed[caller][nonce], "Already resumed");
+        require(!resumed[targetChainId][caller][nonce], "Already resumed");
         bytes memory message = abi.encode(
+            targetChainId,
             caller,
             callback,
             success,
@@ -152,6 +177,7 @@ contract Relayer {
 
         bytes memory call = abi.encodeWithSelector(
             callback,
+            targetChainId,
             success,
             response,
             nonce
@@ -161,7 +187,7 @@ contract Relayer {
             gas: 100000
         }(call);
 
-        emit Resumed(caller, call, success2, response2, nonce);
-        resumed[caller][nonce] = true;
+        emit Resumed(targetChainId, caller, call, success2, response2, nonce);
+        resumed[targetChainId][caller][nonce] = true;
     }
 }

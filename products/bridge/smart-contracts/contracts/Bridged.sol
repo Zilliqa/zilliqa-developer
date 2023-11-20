@@ -9,7 +9,7 @@ import "./Relayer.sol";
 abstract contract Bridged is Initializable {
     Relayer private _relayer;
 
-    function initialize(Relayer relayer) public initializer {
+    function __Bridged_init(Relayer relayer) public onlyInitializing {
         _relayer = relayer;
     }
 
@@ -19,9 +19,23 @@ abstract contract Bridged is Initializable {
     }
 
     function dispatched(
+        uint targetChainId,
         address target,
         bytes memory call
-    ) public payable onlyRelayer returns (bool success, bytes memory response) {
+    )
+        public
+        payable
+        virtual
+        onlyRelayer
+        returns (bool success, bytes memory response)
+    {
+        (success, response) = _dispatched(target, call);
+    }
+
+    function _dispatched(
+        address target,
+        bytes memory call
+    ) internal onlyRelayer returns (bool success, bytes memory response) {
         console.log("dispatched()");
         (success, response) = target.call{value: msg.value, gas: 100000}(call);
     }
@@ -29,17 +43,38 @@ abstract contract Bridged is Initializable {
     function queried(
         address target,
         bytes memory call
-    ) public view onlyRelayer returns (bool success, bytes memory response) {
-        console.log("queried()");
+    ) public view virtual returns (bool success, bytes memory response) {
         (success, response) = target.staticcall{gas: 100000}(call);
     }
 
     function relay(
+        uint targetChainId,
         address target,
         bytes memory call,
         bool readonly,
         bytes4 callback
     ) internal returns (uint nonce) {
-        nonce = _relayer.relay(target, call, readonly, callback);
+        nonce = _relayer.relay(targetChainId, target, call, readonly, callback);
+    }
+}
+
+abstract contract BridgedTwin is Initializable, Bridged {
+    uint private _twinChainId;
+
+    function __BridgedTwin_init(uint twinChainId_) public onlyInitializing {
+        require(
+            twinChainId_ > 0 && twinChainId_ != block.chainid,
+            "Invalid chain ID"
+        );
+        _twinChainId = twinChainId_;
+    }
+
+    function twinChainId() public view returns (uint) {
+        return _twinChainId;
+    }
+
+    modifier onlyTwin(uint twinChainId_) {
+        require(_twinChainId == twinChainId_, "Must be called by twin");
+        _;
     }
 }

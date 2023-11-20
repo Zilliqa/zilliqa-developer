@@ -5,16 +5,17 @@ import "./Bridged.sol";
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 contract BridgedERC20 is ERC20, ERC20Burnable {
     address _bridge;
 
     constructor(
-        string memory name_,
-        string memory symbol_,
-        address bridge_
-    ) ERC20(name_, symbol_) {
-        _bridge = bridge_;
+        string memory name,
+        string memory symbol,
+        address bridge
+    ) ERC20(name, symbol) {
+        _bridge = bridge;
         _mint(msg.sender, 1000);
     }
 
@@ -36,8 +37,28 @@ contract MyToken is BridgedERC20 {
     constructor(address bridge_) BridgedERC20("MyToken", "MTK", bridge_) {}
 }
 
-contract ERC20Bridge is Bridged {
+contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     event Started(address, address, uint);
+
+    function initialize(Relayer relayer, uint twinChainId) public initializer {
+        __Bridged_init(relayer);
+        __BridgedTwin_init(twinChainId);
+    }
+
+    // This might be unecessary as bridge and exit will already restrict these calls
+    function dispatched(
+        uint sourceChainId,
+        address target,
+        bytes memory call
+    )
+        public
+        payable
+        override
+        onlyTwin(sourceChainId)
+        returns (bool success, bytes memory response)
+    {
+        (success, response) = _dispatched(target, call);
+    }
 
     function bridge(
         address token,
@@ -46,6 +67,7 @@ contract ERC20Bridge is Bridged {
     ) public returns (uint nonce) {
         MyToken(token).transferFrom(owner, address(this), value);
         nonce = relay(
+            twinChainId(),
             token,
             abi.encodeWithSignature("mint(address,uint256)", owner, value),
             false,
@@ -61,6 +83,7 @@ contract ERC20Bridge is Bridged {
     ) public returns (uint nonce) {
         MyToken(token).burn(owner, value);
         nonce = relay(
+            twinChainId(),
             token,
             abi.encodeWithSignature("transfer(address,uint256)", owner, value),
             false,
@@ -73,6 +96,7 @@ contract ERC20Bridge is Bridged {
     event Failed(string);
 
     function finish(
+        uint targetChainId,
         bool success,
         bytes calldata res,
         uint nonce

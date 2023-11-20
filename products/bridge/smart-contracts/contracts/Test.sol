@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./Bridged.sol";
 
-contract Twin is Bridged {
+contract Twin is Initializable, Bridged, BridgedTwin {
+    function initialize(Relayer relayer, uint twinChainId) public initializer {
+        __Bridged_init(relayer);
+        __BridgedTwin_init(twinChainId);
+    }
+
     function start(address target, uint num, bool readonly) public {
         uint nonce = relay(
+            twinChainId(),
             target,
             abi.encodeWithSignature("test(uint256)", num),
             readonly,
@@ -18,6 +25,7 @@ contract Twin is Bridged {
     event Failed(string);
 
     function finish(
+        uint targetChainId,
         bool success,
         bytes calldata res,
         uint nonce
@@ -36,7 +44,6 @@ contract Twin is Bridged {
 
 contract Target {
     function test(uint num) public pure returns (uint) {
-        console.log("test()");
         require(num < 1000, "Too large");
         return num + 1;
     }

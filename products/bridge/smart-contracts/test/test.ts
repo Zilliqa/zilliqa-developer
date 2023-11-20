@@ -15,8 +15,15 @@ import { Twin__factory } from "../typechain-types";
 
 describe("Bridge", function () {
   async function setup() {
-    const { collector, relayer1, relayer2, validators1, validators2 } =
-      await setupBridge();
+    const {
+      collector,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      chainId1,
+      chainId2,
+    } = await setupBridge();
 
     switchNetwork(1);
 
@@ -28,7 +35,12 @@ describe("Bridge", function () {
       twinInitHashCode
     );
 
-    expect(await relayer1.deployTwin(salt, Twin__factory.bytecode))
+    const initCall1 = Twin__factory.createInterface().encodeFunctionData(
+      "initialize",
+      [await relayer1.getAddress(), chainId2]
+    );
+
+    expect(await relayer1.deployTwin(salt, Twin__factory.bytecode, initCall1))
       .to.emit(relayer1, "Deployed")
       .withArgs(twinAddress);
 
@@ -40,7 +52,12 @@ describe("Bridge", function () {
 
     switchNetwork(2);
 
-    expect(await relayer2.deployTwin(salt, Twin__factory.bytecode))
+    const initCall2 = Twin__factory.createInterface().encodeFunctionData(
+      "initialize",
+      [await relayer2.getAddress(), chainId1]
+    );
+
+    expect(await relayer2.deployTwin(salt, Twin__factory.bytecode, initCall2))
       .to.emit(relayer2, "Deployed")
       .withArgs(twinAddress);
 
@@ -60,6 +77,8 @@ describe("Bridge", function () {
       relayer2,
       validators1,
       validators2,
+      chainId1,
+      chainId2,
     };
   }
 
@@ -72,8 +91,12 @@ describe("Bridge", function () {
       validators1,
       validators2,
       collector,
+      chainId1,
+      chainId2,
     } = await setup(); // instead of loadFixture(setup);
     const num = 123;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
 
     switchNetwork(1);
 
@@ -84,6 +107,7 @@ describe("Bridge", function () {
     await expect(tx)
       .to.emit(relayer1, "Relayed")
       .withArgs(
+        targetChainId,
         await twin1.getAddress(),
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
@@ -100,6 +124,7 @@ describe("Bridge", function () {
     var signatures = await confirmCall(
       validators1,
       collector,
+      sourceChainId,
       caller,
       callee,
       call,
@@ -113,6 +138,7 @@ describe("Bridge", function () {
     success = true; // we expect the call to succeed
     var { success, result } = await dispatchCall(
       validators2,
+      sourceChainId,
       relayer2,
       caller,
       callee,
@@ -133,6 +159,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      targetChainId,
       caller,
       callback,
       success,
@@ -143,6 +170,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      targetChainId,
       caller,
       callback,
       success,
@@ -165,8 +193,12 @@ describe("Bridge", function () {
       relayer2,
       validators1,
       validators2,
+      chainId1,
+      chainId2,
     } = await setup(); // instead of loadFixture(setup);
     const num = 1789;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
 
     switchNetwork(1);
 
@@ -177,6 +209,7 @@ describe("Bridge", function () {
     await expect(tx)
       .to.emit(relayer1, "Relayed")
       .withArgs(
+        targetChainId,
         await twin1.getAddress(),
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
@@ -193,6 +226,7 @@ describe("Bridge", function () {
     var signatures = await confirmCall(
       validators1,
       collector,
+      sourceChainId,
       caller,
       callee,
       call,
@@ -206,6 +240,7 @@ describe("Bridge", function () {
     success = false; // we expect the call to fail
     var { success, result } = await dispatchCall(
       validators2,
+      sourceChainId,
       relayer2,
       caller,
       callee,
@@ -222,6 +257,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      targetChainId,
       caller,
       callback,
       success,
@@ -232,6 +268,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      targetChainId,
       caller,
       callback,
       success,
@@ -256,8 +293,10 @@ describe("Bridge", function () {
       relayer2,
       validators1,
       validators2,
+      chainId2,
     } = await setup(); // instead of loadFixture(setup);
     const num = 124;
+    const targetChainId = chainId2;
 
     switchNetwork(1);
 
@@ -268,6 +307,7 @@ describe("Bridge", function () {
     await expect(tx)
       .to.emit(relayer1, "Relayed")
       .withArgs(
+        targetChainId,
         await twin1.getAddress(),
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
@@ -301,6 +341,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      targetChainId,
       caller,
       callback,
       success,
@@ -311,6 +352,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      targetChainId,
       caller,
       callback,
       success,
@@ -338,9 +380,13 @@ describe("Bridge", function () {
       relayer2,
       validators1,
       validators2,
+      chainId1,
+      chainId2,
     } = await setup(); // instead of loadFixture(setup);
     const inputNum = 125;
     const expectedNum = inputNum + 1;
+    const sourceChainId = chainId2;
+    const targetChainId = chainId1;
 
     switchNetwork(2);
 
@@ -351,6 +397,7 @@ describe("Bridge", function () {
     await expect(tx)
       .to.emit(relayer2, "Relayed")
       .withArgs(
+        targetChainId,
         await twin2.getAddress(),
         await target1.getAddress(),
         target1.interface.encodeFunctionData("test", [inputNum]),
@@ -369,6 +416,7 @@ describe("Bridge", function () {
     var signatures = await confirmCall(
       validators1,
       collector,
+      sourceChainId,
       caller,
       callee,
       call,
@@ -380,6 +428,7 @@ describe("Bridge", function () {
     success = true; // we expect the call to succeed
     var { success, result } = await dispatchCall(
       validators1,
+      sourceChainId,
       relayer1,
       caller,
       callee,
@@ -398,6 +447,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      targetChainId,
       caller,
       callback,
       success,
@@ -410,6 +460,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators2,
       relayer2,
+      targetChainId,
       caller,
       callback,
       success,
