@@ -24,9 +24,9 @@ spec:
             - containerPort: 80
           resources:
             limits:
-              memory: 1000Mi
+              memory: 2000Mi
             requests:
-              memory: 500Mi
+              memory: 1000Mi
           env:
             - name: BLOCKS_PER_REQUEST
               valueFrom:
