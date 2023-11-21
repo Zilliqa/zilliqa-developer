@@ -27,6 +27,6 @@ spec:
             name: zillion-config
             subPath: config.js
       volumes:
-      - name: zillion
-        configMap:
-          name: zillion
+        - name: zillion-config
+          configMap:
+            name: zillion-config
