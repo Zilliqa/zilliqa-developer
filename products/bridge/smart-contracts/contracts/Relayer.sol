@@ -69,7 +69,7 @@ contract Relayer {
     function validateRequest(
         bytes memory encodedMessage,
         bytes[] memory signatures
-    ) public view {
+    ) private view {
         bytes32 hash = encodedMessage.toEthSignedMessageHash();
         if (!validatorManager.validateUniqueSignatures(hash, signatures)) {
             revert InvalidSignatures();
@@ -83,7 +83,7 @@ contract Relayer {
         bytes32 salt,
         bytes calldata bytecode,
         bytes calldata initCall
-    ) public returns (address) {
+    ) external returns (address) {
         address bridgedContract = Create2.deploy(0, salt, bytecode);
         (bool success, ) = bridgedContract.call(initCall);
         if (!success) {
@@ -96,10 +96,10 @@ contract Relayer {
     function relay(
         uint targetChainId,
         address target,
-        bytes memory call,
+        bytes calldata call,
         bool readonly,
         bytes4 callback
-    ) public returns (uint) {
+    ) external returns (uint) {
         emit Relayed(
             targetChainId,
             msg.sender,
@@ -109,19 +109,18 @@ contract Relayer {
             callback,
             nonces[targetChainId][msg.sender]
         );
-        nonces[targetChainId][msg.sender]++;
-        return nonces[targetChainId][msg.sender];
+        return ++nonces[targetChainId][msg.sender];
     }
 
     function dispatch(
         uint sourceChainId,
         address caller,
         address target,
-        bytes memory call,
+        bytes calldata call,
         bytes4 callback,
         uint nonce,
-        bytes[] memory signatures
-    ) public onlyContractCaller(caller) {
+        bytes[] calldata signatures
+    ) external onlyContractCaller(caller) {
         if (dispatched[sourceChainId][caller][nonce]) {
             revert AlreadyDispatched();
         }
@@ -157,9 +156,9 @@ contract Relayer {
     function query(
         address caller,
         address target,
-        bytes memory call
+        bytes calldata call
     )
-        public
+        external
         view
         onlyContractCaller(caller)
         returns (bool success, bytes memory response)
@@ -173,10 +172,10 @@ contract Relayer {
         address caller,
         bytes4 callback,
         bool success,
-        bytes memory response,
+        bytes calldata response,
         uint nonce,
-        bytes[] memory signatures
-    ) public payable {
+        bytes[] calldata signatures
+    ) external payable {
         if (resumed[targetChainId][caller][nonce]) {
             revert AlreadyResumed();
         }

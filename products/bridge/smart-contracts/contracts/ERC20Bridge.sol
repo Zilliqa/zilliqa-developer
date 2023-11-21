@@ -28,11 +28,11 @@ contract BridgedERC20 is ERC20, ERC20Burnable {
         _mint(msg.sender, 1000);
     }
 
-    function mint(address to, uint256 amount) public onlyBridge {
+    function mint(address to, uint256 amount) external onlyBridge {
         _mint(to, amount);
     }
 
-    function burn(address from, uint256 amount) public onlyBridge {
+    function burn(address from, uint256 amount) external onlyBridge {
         burnFrom(from, amount);
     }
 
@@ -59,9 +59,9 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     function dispatched(
         uint sourceChainId,
         address target,
-        bytes memory call
+        bytes calldata call
     )
-        public
+        external
         payable
         override
         onlyTwinChain(sourceChainId)
@@ -74,7 +74,7 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         address token,
         address owner,
         uint value
-    ) public returns (uint nonce) {
+    ) external returns (uint nonce) {
         MyToken(token).transferFrom(owner, address(this), value);
         nonce = relay(
             twinChainId(),
@@ -90,7 +90,7 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         address token,
         address owner,
         uint value
-    ) public returns (uint nonce) {
+    ) external returns (uint nonce) {
         MyToken(token).burn(owner, value);
         nonce = relay(
             twinChainId(),
@@ -107,7 +107,7 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         bool success,
         bytes calldata res,
         uint nonce
-    ) public onlyRelayer {
+    ) external onlyRelayer {
         if (success) {
             emit Succeeded();
         } else {

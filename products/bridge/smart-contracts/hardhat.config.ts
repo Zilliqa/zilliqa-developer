@@ -5,9 +5,15 @@ const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.20",
     settings: {
+      viaIR: true,
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 10_000,
+        details: {
+          yulDetails: {
+            optimizerSteps: "u",
+          },
+        },
       },
     },
   },

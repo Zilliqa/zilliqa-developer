@@ -14,7 +14,7 @@ contract Collector {
         _validatorManager = validatorManager_;
     }
 
-    function echo(bytes32 hash, bytes memory signature) public {
+    function echo(bytes32 hash, bytes calldata signature) public {
         if (!_validatorManager.validateSignature(hash, signature)) {
             revert InvalidSignature();
         }

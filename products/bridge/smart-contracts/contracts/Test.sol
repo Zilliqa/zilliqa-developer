@@ -10,7 +10,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         __BridgedTwin_init(twinChainId);
     }
 
-    function start(address target, uint num, bool readonly) public {
+    function start(address target, uint num, bool readonly) external {
         uint nonce = relay(
             twinChainId(),
             target,
@@ -29,7 +29,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         bool success,
         bytes calldata res,
         uint nonce
-    ) public onlyRelayer {
+    ) external onlyRelayer {
         console.log("finish()", nonce);
         if (success) {
             uint num = abi.decode(res, (uint));
@@ -43,7 +43,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
 }
 
 contract Target {
-    function test(uint num) public pure returns (uint) {
+    function test(uint num) external pure returns (uint) {
         require(num < 1000, "Too large");
         return num + 1;
     }

@@ -38,7 +38,7 @@ abstract contract Bridged is Initializable {
 
     function _dispatched(
         address target,
-        bytes memory call
+        bytes calldata call
     ) internal onlyRelayer returns (bool success, bytes memory response) {
         (success, response) = target.call{value: msg.value, gas: 100000}(call);
     }
@@ -46,9 +46,9 @@ abstract contract Bridged is Initializable {
     function dispatched(
         uint targetChainId,
         address target,
-        bytes memory call
+        bytes calldata call
     )
-        public
+        external
         payable
         virtual
         onlyRelayer
@@ -59,8 +59,8 @@ abstract contract Bridged is Initializable {
 
     function queried(
         address target,
-        bytes memory call
-    ) public view virtual returns (bool success, bytes memory response) {
+        bytes calldata call
+    ) external view virtual returns (bool success, bytes memory response) {
         (success, response) = target.staticcall{gas: 100000}(call);
     }
 }

@@ -29,6 +29,7 @@ export async function dispatchMessage(
     validators1,
     collector,
     sourceChainId,
+    targetChainId,
     caller,
     callee,
     call,
@@ -42,6 +43,7 @@ export async function dispatchMessage(
   const { success, result } = await dispatchCall(
     validators2,
     sourceChainId,
+    targetChainId,
     relayer2,
     caller,
     callee,
@@ -58,6 +60,7 @@ export async function dispatchMessage(
   const resultSignatures = await confirmResult(
     validators1,
     collector,
+    sourceChainId,
     targetChainId,
     caller,
     callback,
@@ -69,6 +72,7 @@ export async function dispatchMessage(
   await deliverResult(
     validators1,
     relayer1,
+    sourceChainId,
     targetChainId,
     caller,
     callback,
