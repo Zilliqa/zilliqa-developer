@@ -307,9 +307,129 @@ describe("Bridge", function () {
     console.log("Incremented", inputNum, "to", ethers.toNumber(resNum));
   });
 
-  // TODO: add test for remote calls without return value
+  it("should make remote call without return value", async function () {
+    const {
+      collector,
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      chainId1,
+      chainId2,
+    } = await setup(); // instead of loadFixture(setup);
+    const num = 124;
+    const expectedNum = num + 1;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
+    const readonly = false;
 
-  // TODO: add test for remote calls with multiple return values
+    switchNetwork(1);
+
+    const tx = await twin1
+      .connect(validators1[0])
+      .startNoReturn(await target2.getAddress(), num, readonly);
+    await tx.wait();
+    await expect(tx)
+      .to.emit(relayer1, "Relayed")
+      .withArgs(
+        targetChainId,
+        await twin1.getAddress(),
+        await target2.getAddress(),
+        target2.interface.encodeFunctionData("testNoReturn", [num]),
+        readonly,
+        twin1.interface.getFunction("finishNoReturn").selector,
+        anyValue
+      );
+
+    await dispatchMessage(
+      1,
+      2,
+      sourceChainId,
+      targetChainId,
+      validators1,
+      relayer1,
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly,
+      ""
+    );
+
+    const filter = twin1.filters.SucceededNoReturn;
+    const logs = await twin1.queryFilter(filter);
+    expect(logs).is.not.empty;
+
+    const targetLogs = await target2.queryFilter(target2.filters.TestNoReturn);
+    expect(targetLogs[0].args[0]).to.equal(expectedNum);
+  });
+
+  it("should make remote call with multiple return values", async function () {
+    const {
+      collector,
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      chainId1,
+      chainId2,
+    } = await setup(); // instead of loadFixture(setup);
+    const num = 124;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
+    const readonly = false;
+
+    switchNetwork(1);
+
+    const tx = await twin1
+      .connect(validators1[0])
+      .startMultipleReturn(await target2.getAddress(), num, readonly);
+    await tx.wait();
+    await expect(tx)
+      .to.emit(relayer1, "Relayed")
+      .withArgs(
+        targetChainId,
+        await twin1.getAddress(),
+        await target2.getAddress(),
+        target2.interface.encodeFunctionData("testMultipleReturn", [num]),
+        readonly,
+        twin1.interface.getFunction("finishMultipleReturn").selector,
+        anyValue
+      );
+
+    await dispatchMessage(
+      1,
+      2,
+      sourceChainId,
+      targetChainId,
+      validators1,
+      relayer1,
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly,
+      ethers.AbiCoder.defaultAbiCoder().encode(
+        ["uint256", "uint256", "uint256"],
+        [num + 1, num + 2, num + 3]
+      )
+    );
+
+    const filter = twin1.filters.SucceededMultipleReturn;
+    const logs = await twin1.queryFilter(filter);
+    expect(logs).is.not.empty;
+    expect(logs[0].args).to.deep.equal([
+      BigInt(num + 1),
+      BigInt(num + 2),
+      BigInt(num + 3),
+    ]);
+  });
 
   // TODO: add test for simultaneous remote calls requested by the same contract
 
