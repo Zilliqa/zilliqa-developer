@@ -22,3 +22,11 @@ spec:
           name: zillion
           ports:
             - containerPort: 80
+         volumeMounts:
+          - mountPath: /usr/share/nginx/html/config.js
+            name: zillion-config
+            subPath: config.js
+      volumes:
+      - name: zillion
+        configMap:
+          name: zillion
