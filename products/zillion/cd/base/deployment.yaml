@@ -18,15 +18,15 @@ spec:
         "app.kubernetes.io/name": "zillion"
     spec:
       containers:
-      - image: zillion
-        name: zillion
-        ports:
-          - containerPort: 80
-       volumeMounts:
-        - mountPath: /usr/share/nginx/html/config.js
-          name: zillion-config
-          subPath: config.js
+        - image: zillion
+          name: zillion
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html/config.js
+              name: zillion-config
+              subPath: config.js
       volumes:
-      - name: zillion-config
-        configMap:
-          name: zillion-config
+        - name: zillion-config
+          configMap:
+            name: zillion-config
