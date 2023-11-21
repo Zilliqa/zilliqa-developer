@@ -5,3 +5,5 @@ metadata:
 spec:
   domains:
     - zillion.zilstg.dev
+    - stg-stake.zilliqa.com
+    - testnet-stake.zilliqa.com
