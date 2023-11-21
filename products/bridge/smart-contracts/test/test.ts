@@ -1,16 +1,7 @@
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import {
-  switchNetwork,
-  obtainCalls,
-  confirmCall,
-  dispatchCall,
-  confirmResult,
-  deliverResult,
-  queryCall,
-  setupBridge,
-} from "./utils";
+import { switchNetwork, setupBridge, dispatchMessage } from "./utils";
 import { Twin__factory } from "../typechain-types";
 
 describe("Bridge", function () {
@@ -97,12 +88,13 @@ describe("Bridge", function () {
     const num = 123;
     const sourceChainId = chainId1;
     const targetChainId = chainId2;
+    const readonly = false;
 
     switchNetwork(1);
 
     const tx = await twin1
       .connect(validators1[0])
-      .start(await target2.getAddress(), num, false);
+      .start(await target2.getAddress(), num, readonly);
     await tx.wait();
     await expect(tx)
       .to.emit(relayer1, "Relayed")
@@ -111,76 +103,24 @@ describe("Bridge", function () {
         await twin1.getAddress(),
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
-        false,
+        readonly,
         twin1.interface.getFunction("finish").selector,
         anyValue
       );
 
-    var { caller, callee, call, readonly, callback, nonce } = (
-      await obtainCalls(validators1, relayer1)
-    )[0];
-    expect(readonly).to.be.false;
-
-    var signatures = await confirmCall(
-      validators1,
-      collector,
+    await dispatchMessage(
+      1,
+      2,
       sourceChainId,
       targetChainId,
-      caller,
-      callee,
-      call,
-      readonly,
-      callback,
-      nonce
-    );
-
-    switchNetwork(2);
-
-    success = true; // we expect the call to succeed
-    var { success, result } = await dispatchCall(
-      validators2,
-      sourceChainId,
-      targetChainId,
-      relayer2,
-      caller,
-      callee,
-      call,
-      success,
-      callback,
-      nonce,
-      signatures
-    );
-    expect(success).to.be.true;
-
-    expect(result).to.equal(
-      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [num + 1])
-    );
-
-    switchNetwork(1);
-
-    var signatures = await confirmResult(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce
-    );
-
-    await deliverResult(
       validators1,
       relayer1,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce,
-      signatures
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly
     );
 
     const filter = twin1.filters.Succeeded;
@@ -203,12 +143,13 @@ describe("Bridge", function () {
     const num = 1789;
     const sourceChainId = chainId1;
     const targetChainId = chainId2;
+    const readonly = false;
 
     switchNetwork(1);
 
     const tx = await twin1
       .connect(validators1[0])
-      .start(await target2.getAddress(), num, false);
+      .start(await target2.getAddress(), num, readonly);
     await tx.wait();
     await expect(tx)
       .to.emit(relayer1, "Relayed")
@@ -217,72 +158,24 @@ describe("Bridge", function () {
         await twin1.getAddress(),
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
-        false,
+        readonly,
         twin1.interface.getFunction("finish").selector,
         anyValue
       );
 
-    var { caller, callee, call, readonly, callback, nonce } = (
-      await obtainCalls(validators1, relayer1)
-    )[0];
-    expect(readonly).to.be.false;
-
-    var signatures = await confirmCall(
-      validators1,
-      collector,
+    await dispatchMessage(
+      1,
+      2,
       sourceChainId,
       targetChainId,
-      caller,
-      callee,
-      call,
-      readonly,
-      callback,
-      nonce
-    );
-
-    switchNetwork(2);
-
-    success = false; // we expect the call to fail
-    var { success, result } = await dispatchCall(
-      validators2,
-      sourceChainId,
-      targetChainId,
-      relayer2,
-      caller,
-      callee,
-      call,
-      success,
-      callback,
-      nonce,
-      signatures
-    );
-    expect(success).to.be.false;
-
-    switchNetwork(1);
-
-    var signatures = await confirmResult(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce
-    );
-
-    await deliverResult(
       validators1,
       relayer1,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce,
-      signatures
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      false,
+      readonly
     );
 
     const filter = twin1.filters.Failed;
@@ -305,14 +198,16 @@ describe("Bridge", function () {
       chainId2,
     } = await setup(); // instead of loadFixture(setup);
     const num = 124;
+    const expectedNum = num + 1;
     const sourceChainId = chainId1;
     const targetChainId = chainId2;
+    const readonly = true;
 
     switchNetwork(1);
 
     const tx = await twin1
       .connect(validators1[0])
-      .start(await target2.getAddress(), num, true);
+      .start(await target2.getAddress(), num, readonly);
     await tx.wait();
     await expect(tx)
       .to.emit(relayer1, "Relayed")
@@ -321,56 +216,25 @@ describe("Bridge", function () {
         await twin1.getAddress(),
         await target2.getAddress(),
         target2.interface.encodeFunctionData("test", [num]),
-        true,
+        readonly,
         twin1.interface.getFunction("finish").selector,
         anyValue
       );
 
-    var { caller, callee, call, readonly, callback, nonce } = (
-      await obtainCalls(validators1, relayer1)
-    )[0];
-    expect(readonly).to.be.true;
-
-    switchNetwork(2);
-
-    var { success, response } = await queryCall(
-      validators2,
-      relayer2,
-      caller,
-      callee,
-      call
-    );
-    expect(success).to.be.true;
-
-    expect(response).to.equal(
-      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [num + 1])
-    );
-
-    switchNetwork(1);
-
-    var signatures = await confirmResult(
-      validators1,
-      collector,
+    await dispatchMessage(
+      1,
+      2,
       sourceChainId,
       targetChainId,
-      caller,
-      callback,
-      success,
-      response,
-      nonce
-    );
-
-    await deliverResult(
       validators1,
       relayer1,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      response,
-      nonce,
-      signatures
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly,
+      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [expectedNum])
     );
 
     const filter = twin1.filters.Succeeded;
@@ -378,7 +242,7 @@ describe("Bridge", function () {
     expect(logs).is.not.empty;
 
     const resNum = ethers.toNumber(logs[0].args[0]);
-    expect(resNum).to.equal(num + 1);
+    expect(resNum).to.equal(expectedNum);
 
     console.log("Incremented", num, "to", resNum);
   });
@@ -399,12 +263,13 @@ describe("Bridge", function () {
     const expectedNum = inputNum + 1;
     const sourceChainId = chainId2;
     const targetChainId = chainId1;
+    const readonly = false;
 
     switchNetwork(2);
 
     const tx = await twin2
       .connect(validators2[0])
-      .start(await target1.getAddress(), inputNum, false);
+      .start(await target1.getAddress(), inputNum, readonly);
     await tx.wait();
     await expect(tx)
       .to.emit(relayer2, "Relayed")
@@ -413,76 +278,25 @@ describe("Bridge", function () {
         await twin2.getAddress(),
         await target1.getAddress(),
         target1.interface.encodeFunctionData("test", [inputNum]),
-        false,
+        readonly,
         twin2.interface.getFunction("finish").selector,
         anyValue
       );
 
-    var { caller, callee, call, readonly, callback, nonce } = (
-      await obtainCalls(validators2, relayer2)
-    )[0];
-    expect(readonly).to.be.false;
-
-    switchNetwork(1);
-
-    var signatures = await confirmCall(
-      validators1,
-      collector,
+    await dispatchMessage(
+      2,
+      1,
       sourceChainId,
       targetChainId,
-      caller,
-      callee,
-      call,
-      readonly,
-      callback,
-      nonce
-    );
-
-    success = true; // we expect the call to succeed
-    var { success, result } = await dispatchCall(
-      validators1,
-      sourceChainId,
-      targetChainId,
-      relayer1,
-      caller,
-      callee,
-      call,
-      success,
-      callback,
-      nonce,
-      signatures
-    );
-    expect(success).to.be.true;
-
-    expect(result).to.equal(
-      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [expectedNum])
-    );
-
-    var signatures = await confirmResult(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce
-    );
-
-    switchNetwork(2);
-
-    await deliverResult(
       validators2,
       relayer2,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce,
-      signatures
+      validators1,
+      relayer1,
+      validators1,
+      collector,
+      true,
+      readonly,
+      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [expectedNum])
     );
 
     const filter = twin2.filters.Succeeded;

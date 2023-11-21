@@ -3,12 +3,8 @@ import { expect } from "chai";
 
 import {
   switchNetwork,
-  obtainCalls,
-  confirmCall,
-  dispatchCall,
-  confirmResult,
-  deliverResult,
   setupBridge,
+  dispatchMessage as sendCrossChainMessage,
 } from "./utils";
 import { ethers } from "hardhat";
 import { ERC20Bridge__factory } from "../typechain-types";
@@ -166,69 +162,21 @@ describe("ERC20Bridge", function () {
       balance1 - value
     );
 
-    const { caller, callee, call, readonly, callback, nonce } = (
-      await obtainCalls(validators1, relayer1)
-    )[0];
-    expect(readonly).to.be.false;
-
-    var signatures = await confirmCall(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callee,
-      call,
-      readonly,
-      callback,
-      nonce
-    );
-
-    switchNetwork(2);
-
     const balance2 = ethers.toNumber(await token2.balanceOf(tester2.address));
 
-    success = anyValue;
-    var { success, result } = await dispatchCall(
-      validators2,
+    await sendCrossChainMessage(
+      1,
+      2,
       sourceChainId,
       targetChainId,
-      relayer2,
-      caller,
-      callee,
-      call,
-      success,
-      callback,
-      nonce,
-      signatures
-    );
-    expect(success).to.be.true;
-
-    switchNetwork(1);
-
-    var signatures = await confirmResult(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce
-    );
-
-    await deliverResult(
       validators1,
       relayer1,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce,
-      signatures
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      false
     );
 
     const filters = bridge1.filters.Succeeded;
@@ -321,71 +269,21 @@ describe("ERC20Bridge", function () {
       balance2 - value
     );
 
-    var { caller, callee, call, readonly, callback, nonce } = (
-      await obtainCalls(validators2, relayer2)
-    )[0];
-    expect(readonly).to.be.false;
-
-    switchNetwork(1);
-
-    var signatures = await confirmCall(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callee,
-      call,
-      readonly,
-      callback,
-      nonce
-    );
-
     const balance1 = ethers.toNumber(await token1.balanceOf(tester1.address));
 
-    success = anyValue;
-    var { success, result } = await dispatchCall(
-      validators1,
+    await sendCrossChainMessage(
+      2,
+      1,
       sourceChainId,
       targetChainId,
-      relayer1,
-      caller,
-      callee,
-      call,
-      success,
-      callback,
-      nonce,
-      signatures
-    );
-    expect(success).to.be.true;
-
-    expect(result).to.equal(
-      ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true])
-    );
-
-    var signatures = await confirmResult(
-      validators1,
-      collector,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce
-    );
-
-    await deliverResult(
       validators2,
       relayer2,
-      sourceChainId,
-      targetChainId,
-      caller,
-      callback,
-      success,
-      result,
-      nonce,
-      signatures
+      validators1,
+      relayer1,
+      validators1,
+      collector,
+      true,
+      false
     );
 
     const filter = bridge2.filters.Succeeded;

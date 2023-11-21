@@ -8,25 +8,30 @@ import { AddressLike, BytesLike, Signer } from "ethers";
 import { Relayer, Collector } from "../typechain-types";
 
 export async function dispatchMessage(
-  chainId1: bigint,
-  chainId2: bigint,
-  validators1: Signer[],
-  relayer1: Relayer,
-  validators2: Signer[],
-  relayer2: Relayer,
+  sourceNetwork: number,
+  targetNetwork: number,
+  sourceChainId: bigint,
+  targetChainId: bigint,
+  validatorsSource: Signer[],
+  relayerSource: Relayer,
+  validatorsTarget: Signer[],
+  relayerTarget: Relayer,
+  collectorValidators: Signer[],
   collector: Collector,
-  isSuccess: boolean
+  isSuccess: boolean,
+  isQuery: boolean,
+  expectedResponse?: BytesLike
 ) {
-  const sourceChainId = chainId1;
-  const targetChainId = chainId2;
+  switchNetwork(sourceNetwork);
 
   const { caller, callee, call, readonly, callback, nonce } = (
-    await obtainCalls(validators1, relayer1)
+    await obtainCalls(validatorsSource, relayerSource)
   )[0];
-  expect(readonly).to.be.false;
+
+  expect(readonly).to.equal(isQuery);
 
   const callSignatures = await confirmCall(
-    validators1,
+    collectorValidators,
     collector,
     sourceChainId,
     targetChainId,
@@ -38,27 +43,47 @@ export async function dispatchMessage(
     nonce
   );
 
-  switchNetwork(2);
+  switchNetwork(targetNetwork);
 
-  const { success, result } = await dispatchCall(
-    validators2,
-    sourceChainId,
-    targetChainId,
-    relayer2,
-    caller,
-    callee,
-    call,
-    isSuccess,
-    callback,
-    nonce,
-    callSignatures
-  );
-  expect(success).to.be.true;
+  let success, result;
+  if (isQuery) {
+    const query = await queryCall(
+      validatorsTarget,
+      relayerTarget,
+      caller,
+      callee,
+      call
+    );
+    success = query.success;
+    result = query.response;
+  } else {
+    const dispatch = await dispatchCall(
+      validatorsTarget,
+      sourceChainId,
+      targetChainId,
+      relayerTarget,
+      caller,
+      callee,
+      call,
+      readonly,
+      isSuccess,
+      callback,
+      nonce,
+      callSignatures
+    );
+    success = dispatch.success;
+    result = dispatch.result;
+  }
 
-  switchNetwork(1);
+  expect(success).to.equal(isSuccess);
+  if (expectedResponse) {
+    expect(result).to.equal(expectedResponse);
+  }
+
+  switchNetwork(sourceNetwork);
 
   const resultSignatures = await confirmResult(
-    validators1,
+    collectorValidators,
     collector,
     sourceChainId,
     targetChainId,
@@ -70,8 +95,8 @@ export async function dispatchMessage(
   );
 
   await deliverResult(
-    validators1,
-    relayer1,
+    validatorsSource,
+    relayerSource,
     sourceChainId,
     targetChainId,
     caller,
@@ -338,6 +363,7 @@ export async function dispatchCall(
   caller: AddressLike,
   callee: AddressLike,
   call: BytesLike,
+  readonly: boolean,
   success: boolean,
   callback: BytesLike,
   nonce: bigint,
@@ -357,7 +383,16 @@ export async function dispatchCall(
       "bytes4",
       "uint256",
     ],
-    [sourceChainId, targetChainId, caller, callee, call, false, callback, nonce]
+    [
+      sourceChainId,
+      targetChainId,
+      caller,
+      callee,
+      call,
+      readonly,
+      callback,
+      nonce,
+    ]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
