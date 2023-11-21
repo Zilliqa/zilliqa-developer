@@ -125,6 +125,7 @@ describe("Bridge", function () {
       validators1,
       collector,
       sourceChainId,
+      targetChainId,
       caller,
       callee,
       call,
@@ -139,6 +140,7 @@ describe("Bridge", function () {
     var { success, result } = await dispatchCall(
       validators2,
       sourceChainId,
+      targetChainId,
       relayer2,
       caller,
       callee,
@@ -159,6 +161,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -170,6 +173,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -227,6 +231,7 @@ describe("Bridge", function () {
       validators1,
       collector,
       sourceChainId,
+      targetChainId,
       caller,
       callee,
       call,
@@ -241,6 +246,7 @@ describe("Bridge", function () {
     var { success, result } = await dispatchCall(
       validators2,
       sourceChainId,
+      targetChainId,
       relayer2,
       caller,
       callee,
@@ -257,6 +263,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -268,6 +275,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -293,9 +301,11 @@ describe("Bridge", function () {
       relayer2,
       validators1,
       validators2,
+      chainId1,
       chainId2,
     } = await setup(); // instead of loadFixture(setup);
     const num = 124;
+    const sourceChainId = chainId1;
     const targetChainId = chainId2;
 
     switchNetwork(1);
@@ -341,6 +351,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -352,6 +363,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -417,6 +429,7 @@ describe("Bridge", function () {
       validators1,
       collector,
       sourceChainId,
+      targetChainId,
       caller,
       callee,
       call,
@@ -429,6 +442,7 @@ describe("Bridge", function () {
     var { success, result } = await dispatchCall(
       validators1,
       sourceChainId,
+      targetChainId,
       relayer1,
       caller,
       callee,
@@ -447,6 +461,7 @@ describe("Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -460,6 +475,7 @@ describe("Bridge", function () {
     await deliverResult(
       validators2,
       relayer2,
+      sourceChainId,
       targetChainId,
       caller,
       callback,

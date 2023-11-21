@@ -175,6 +175,7 @@ describe("ERC20Bridge", function () {
       validators1,
       collector,
       sourceChainId,
+      targetChainId,
       caller,
       callee,
       call,
@@ -191,6 +192,7 @@ describe("ERC20Bridge", function () {
     var { success, result } = await dispatchCall(
       validators2,
       sourceChainId,
+      targetChainId,
       relayer2,
       caller,
       callee,
@@ -207,6 +209,7 @@ describe("ERC20Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -218,6 +221,7 @@ describe("ERC20Bridge", function () {
     await deliverResult(
       validators1,
       relayer1,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -328,6 +332,7 @@ describe("ERC20Bridge", function () {
       validators1,
       collector,
       sourceChainId,
+      targetChainId,
       caller,
       callee,
       call,
@@ -342,6 +347,7 @@ describe("ERC20Bridge", function () {
     var { success, result } = await dispatchCall(
       validators1,
       sourceChainId,
+      targetChainId,
       relayer1,
       caller,
       callee,
@@ -360,6 +366,7 @@ describe("ERC20Bridge", function () {
     var signatures = await confirmResult(
       validators1,
       collector,
+      sourceChainId,
       targetChainId,
       caller,
       callback,
@@ -371,6 +378,7 @@ describe("ERC20Bridge", function () {
     await deliverResult(
       validators2,
       relayer2,
+      sourceChainId,
       targetChainId,
       caller,
       callback,

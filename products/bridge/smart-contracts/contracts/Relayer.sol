@@ -18,7 +18,7 @@ contract Relayer {
     mapping(uint => mapping(address => uint)) nonces;
     // sourceChainId => caller => dispatched
     mapping(uint => mapping(address => mapping(uint => bool))) dispatched;
-    // sourceChainId => caller => resumed
+    // targetChainId => caller => resumed
     mapping(uint => mapping(address => mapping(uint => bool))) resumed;
 
     event TwinDeployment(address indexed twin);
@@ -128,6 +128,7 @@ contract Relayer {
 
         bytes memory message = abi.encode(
             sourceChainId,
+            block.chainid,
             caller,
             target,
             call,
@@ -180,6 +181,7 @@ contract Relayer {
             revert AlreadyResumed();
         }
         bytes memory message = abi.encode(
+            block.chainid,
             targetChainId,
             caller,
             callback,

@@ -231,6 +231,7 @@ export async function confirmCall(
   validators: Signer[],
   collector: Collector,
   sourceChainId: bigint,
+  targetChainId: bigint,
   caller: AddressLike,
   callee: AddressLike,
   call: BytesLike,
@@ -241,8 +242,26 @@ export async function confirmCall(
   // validators sign the hash of the Relayed event data and submit their signature
   // Prepare the hashed message
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["uint256", "address", "address", "bytes", "bool", "bytes4", "uint256"],
-    [sourceChainId, caller, callee, call, readonly, callback, nonce]
+    [
+      "uint256",
+      "uint256",
+      "address",
+      "address",
+      "bytes",
+      "bool",
+      "bytes4",
+      "uint256",
+    ],
+    [
+      sourceChainId,
+      targetChainId,
+      caller,
+      callee,
+      call,
+      readonly,
+      callback,
+      nonce,
+    ]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
@@ -310,6 +329,7 @@ export async function queryCall(
 export async function dispatchCall(
   validators: Signer[],
   sourceChainId: bigint,
+  targetChainId: bigint,
   relayer: Relayer,
   caller: AddressLike,
   callee: AddressLike,
@@ -323,8 +343,17 @@ export async function dispatchCall(
   const leaderValidator =
     validators[Math.floor(Math.random() * validators.length)];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["uint256", "address", "address", "bytes", "bool", "bytes4", "uint256"],
-    [sourceChainId, caller, callee, call, false, callback, nonce]
+    [
+      "uint256",
+      "uint256",
+      "address",
+      "address",
+      "bytes",
+      "bool",
+      "bytes4",
+      "uint256",
+    ],
+    [sourceChainId, targetChainId, caller, callee, call, false, callback, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
@@ -382,6 +411,7 @@ export async function dispatchCall(
 export async function confirmResult(
   validators: Signer[],
   collector: Collector,
+  sourceChainId: bigint,
   targetChainId: bigint,
   caller: AddressLike,
   callback: BytesLike,
@@ -391,8 +421,8 @@ export async function confirmResult(
 ) {
   // validators sign the hash of the Dispatched event data and submit their signature
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["uint256", "address", "bytes4", "bool", "bytes", "uint256"],
-    [targetChainId, caller, callback, success, result, nonce]
+    ["uint256", "uint256", "address", "bytes4", "bool", "bytes", "uint256"],
+    [sourceChainId, targetChainId, caller, callback, success, result, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const supermajority = Math.floor((validators.length * 2) / 3) + 1;
@@ -422,6 +452,7 @@ export async function confirmResult(
 export async function deliverResult(
   validators: Signer[],
   relayer: Relayer,
+  sourceChainId: bigint,
   targetChainId: bigint,
   caller: AddressLike,
   callback: BytesLike,
@@ -434,8 +465,8 @@ export async function deliverResult(
   const leaderValidator =
     validators[Math.floor(Math.random() * validators.length)];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["uint256", "address", "bytes4", "bool", "bytes", "uint256"],
-    [targetChainId, caller, callback, success, result, nonce]
+    ["uint256", "uint256", "address", "bytes4", "bool", "bytes", "uint256"],
+    [sourceChainId, targetChainId, caller, callback, success, result, nonce]
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
