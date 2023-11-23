@@ -42,7 +42,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **EVM Chain ID**                       | 33101                                                                               |
 | **REWARD CONTROL CONTRACT ADDRESS**    | 0xB041e706DDeA33F57518b59BaE5b9E2085b39e77                                          |
 | **PERSISTENCE BUCKET (S3 compatible)** | s3://zq1-testnet-persistence (use: AWS_ENDPOINT_URL=https://storage.googleapis.com) |
-| **PERSISTENCE HTTPS ENDPOINT**         | https://persistence.zq1.dev                                                         |
+| **PERSISTENCE HTTPS ENDPOINT**         | https://persistence.testnet.zq1.dev                                                 |
 
 ## Developer Devnet
 
