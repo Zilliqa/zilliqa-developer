@@ -44,7 +44,7 @@ abstract contract Bridged is Initializable {
     }
 
     function dispatched(
-        uint targetChainId,
+        uint sourceChainId,
         address target,
         bytes calldata call
     )
