@@ -223,7 +223,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
 
 - [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
   - [ ] Integrate foundry to support effective unit testing on contracts
-  - [ ] Finish remaining TODO tests
+  - [x] Finish remaining TODO tests
   - [x] Update error handling on contracts
   - [ ] Write deployment scripts
     - [ ] Support CREATE2

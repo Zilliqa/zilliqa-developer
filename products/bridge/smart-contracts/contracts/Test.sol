@@ -18,7 +18,6 @@ contract Twin is Initializable, Bridged, BridgedTwin {
             readonly,
             this.finish.selector
         );
-        console.log("start()", nonce);
     }
 
     event Succeeded(uint);
@@ -29,7 +28,6 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         bytes calldata res,
         uint nonce
     ) external onlyRelayer {
-        console.log("finish()", nonce);
         if (success) {
             uint num = abi.decode(res, (uint));
             emit Succeeded(num);
@@ -40,15 +38,39 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         }
     }
 
+    function startSum(address target, uint num, bool readonly) external {
+        relay(
+            twinChainId(),
+            target,
+            abi.encodeWithSignature("testSum(uint256)", num),
+            readonly,
+            this.finishSum.selector
+        );
+    }
+
+    function finishSum(
+        bool success,
+        bytes calldata res,
+        uint nonce
+    ) external onlyRelayer {
+        if (success) {
+            uint num = abi.decode(res, (uint));
+            emit Succeeded(num);
+        } else {
+            bytes4(res[:4]);
+            bytes memory err = bytes(res[4:]);
+            emit Failed(abi.decode(err, (string)));
+        }
+    }
+
     function startNoReturn(address target, uint num, bool readonly) external {
-        uint nonce = relay(
+        relay(
             twinChainId(),
             target,
             abi.encodeWithSignature("testNoReturn(uint256)", num),
             readonly,
             this.finishNoReturn.selector
         );
-        console.log("start()", nonce);
     }
 
     event SucceededNoReturn();
@@ -61,7 +83,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         if (success) {
             emit SucceededNoReturn();
         } else {
-            bytes4 sig = bytes4(res[:4]);
+            bytes4(res[:4]);
             bytes memory err = bytes(res[4:]);
             emit Failed(abi.decode(err, (string)));
         }
@@ -72,7 +94,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         uint num,
         bool readonly
     ) external {
-        uint nonce = relay(
+        relay(
             twinChainId(),
             target,
             abi.encodeWithSignature("testMultipleReturn(uint256)", num),
@@ -95,7 +117,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
             );
             emit SucceededMultipleReturn(num, num2, num3);
         } else {
-            bytes4 sig = bytes4(res[:4]);
+            bytes4(res[:4]);
             bytes memory err = bytes(res[4:]);
             emit Failed(abi.decode(err, (string)));
         }
@@ -103,20 +125,33 @@ contract Twin is Initializable, Bridged, BridgedTwin {
 }
 
 contract Target {
-    event TestNoReturn(uint num);
+    uint private _num = 1;
 
-    function test(uint num) external pure returns (uint) {
-        require(num < 1000, "Too large");
-        return num + 1;
+    event TestNoReturn(uint num);
+    event TestSum(uint num);
+
+    function test(uint num_) external pure returns (uint) {
+        require(num_ < 1000, "Too large");
+        return num_ + 1;
     }
 
-    function testNoReturn(uint num) external {
-        emit TestNoReturn(num + 1);
+    function testSum(uint num_) external returns (uint) {
+        _num += num_;
+        emit TestSum(_num);
+        return _num;
+    }
+
+    function num() external view returns (uint) {
+        return _num;
+    }
+
+    function testNoReturn(uint num_) external {
+        emit TestNoReturn(num_ + 1);
     }
 
     function testMultipleReturn(
-        uint num
+        uint num_
     ) external pure returns (uint, uint, uint) {
-        return (num + 1, num + 2, num + 3);
+        return (num_ + 1, num_ + 2, num_ + 3);
     }
 }

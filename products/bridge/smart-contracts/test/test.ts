@@ -37,8 +37,10 @@ describe("Bridge", function () {
       [await relayer1.getAddress(), chainId2]
     );
 
-    expect(await relayer1.deployTwin(salt, Twin__factory.bytecode, initCall1))
-      .to.emit(relayer1, "Deployed")
+    await expect(
+      await relayer1.deployTwin(salt, Twin__factory.bytecode, initCall1)
+    )
+      .to.emit(relayer1, "TwinDeployment")
       .withArgs(twinAddress);
 
     const twin1 = await ethers.getContractAt("Twin", twinAddress);
@@ -54,8 +56,10 @@ describe("Bridge", function () {
       [await relayer2.getAddress(), chainId1]
     );
 
-    expect(await relayer2.deployTwin(salt, Twin__factory.bytecode, initCall2))
-      .to.emit(relayer2, "Deployed")
+    await expect(
+      await relayer2.deployTwin(salt, Twin__factory.bytecode, initCall2)
+    )
+      .to.emit(relayer2, "TwinDeployment")
       .withArgs(twinAddress);
 
     const twin2 = await ethers.getContractAt("Twin", twinAddress);
@@ -437,7 +441,111 @@ describe("Bridge", function () {
     ]);
   });
 
-  // TODO: add test for simultaneous remote calls requested by the same contract
+  it("should handle multiple remote calls requested by the same contract", async function () {
+    const {
+      collector,
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      chainId1,
+      chainId2,
+    } = await setup(); // instead of loadFixture(setup);
+    const num = 124;
+    const num2 = 130;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
+    const readonly = false;
+
+    switchNetwork(1);
+
+    const tx = await twin1
+      .connect(validators1[0])
+      .startSum(await target2.getAddress(), num, readonly);
+    await tx.wait();
+    await expect(tx)
+      .to.emit(relayer1, "Relayed")
+      .withArgs(
+        targetChainId,
+        await twin1.getAddress(),
+        await target2.getAddress(),
+        target2.interface.encodeFunctionData("testSum", [num]),
+        readonly,
+        twin1.interface.getFunction("finishSum").selector,
+        anyValue
+      );
+
+    const { dispatchTxn } = await dispatchMessage(
+      1,
+      2,
+      sourceChainId,
+      targetChainId,
+      validators1,
+      relayer1,
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly,
+      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [num + 1])
+    );
+
+    const filter = twin1.filters.Succeeded;
+    const logs = await twin1.queryFilter(filter);
+    expect(logs).is.not.empty;
+    expect(logs[0].args).to.deep.equal([BigInt(num + 1)]);
+
+    expect(await target2.num()).to.equal(num + 1);
+    await expect(dispatchTxn)
+      .to.emit(target2, "TestSum")
+      .withArgs(num + 1);
+
+    switchNetwork(1);
+
+    const tx2 = await twin1
+      .connect(validators1[0])
+      .startSum(await target2.getAddress(), num2, readonly);
+    await tx2.wait();
+    await expect(tx2)
+      .to.emit(relayer1, "Relayed")
+      .withArgs(
+        targetChainId,
+        await twin1.getAddress(),
+        await target2.getAddress(),
+        target2.interface.encodeFunctionData("testSum", [num2]),
+        readonly,
+        twin1.interface.getFunction("finishSum").selector,
+        anyValue
+      );
+
+    const { dispatchTxn: dispatchTxn2 } = await dispatchMessage(
+      1,
+      2,
+      sourceChainId,
+      targetChainId,
+      validators1,
+      relayer1,
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly,
+      ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [num2 + num + 1])
+    );
+
+    const logs2 = await twin1.queryFilter(twin1.filters.Succeeded);
+    expect(logs2).is.not.empty;
+    expect(logs2[1].args).to.deep.equal([BigInt(num2 + num + 1)]);
+
+    expect(await target2.num()).to.equal(num2 + num + 1);
+    await expect(dispatchTxn2)
+      .to.emit(target2, "TestSum")
+      .withArgs(num2 + num + 1);
+  });
 
   it("should fail to replay the same remote call, only first one going through", async function () {
     const {

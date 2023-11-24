@@ -40,10 +40,10 @@ describe("ERC20Bridge", function () {
       [await relayer1.getAddress(), chainId2]
     );
 
-    expect(
-      await relayer1.deployTwin(salt, ERC20Bridge__factory.bytecode, initCall1)
+    await expect(
+      relayer1.deployTwin(salt, ERC20Bridge__factory.bytecode, initCall1)
     )
-      .to.emit(relayer1, "Deployed")
+      .to.emit(relayer1, "TwinDeployment")
       .withArgs(bridgeAddress);
 
     const bridge1 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
@@ -66,10 +66,10 @@ describe("ERC20Bridge", function () {
       [await relayer2.getAddress(), chainId1]
     );
 
-    expect(
-      await relayer2.deployTwin(salt, ERC20Bridge__factory.bytecode, initCall2)
+    await expect(
+      relayer2.deployTwin(salt, ERC20Bridge__factory.bytecode, initCall2)
     )
-      .to.emit(relayer2, "Deployed")
+      .to.emit(relayer2, "TwinDeployment")
       .withArgs(bridgeAddress);
     const bridge2 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
 
@@ -131,7 +131,7 @@ describe("ERC20Bridge", function () {
       .connect(tester1)
       .approve(await bridge1.getAddress(), value);
     await tx.wait();
-    expect(tx)
+    await expect(tx)
       .to.emit(token1, "Approval")
       .withArgs(tester1.address, await bridge1.getAddress(), value);
 
@@ -139,9 +139,10 @@ describe("ERC20Bridge", function () {
       .connect(tester1)
       .bridge(await token2.getAddress(), tester1.address, value);
     await tx.wait();
-    expect(tx)
+    await expect(tx)
       .to.emit(relayer1, "Relayed")
       .withArgs(
+        targetChainId,
         await bridge1.getAddress(),
         await token2.getAddress(),
         token2.interface.encodeFunctionData("mint", [tester1.address, value]),
@@ -235,7 +236,7 @@ describe("ERC20Bridge", function () {
       .connect(tester2)
       .approve(await bridge2.getAddress(), value);
     await tx.wait();
-    expect(tx)
+    await expect(tx)
       .to.emit(token2, "Approval")
       .withArgs(tester2.address, await bridge2.getAddress(), value);
 
@@ -243,9 +244,10 @@ describe("ERC20Bridge", function () {
       .connect(tester2)
       .exit(await token1.getAddress(), tester2.address, value);
     await tx.wait();
-    expect(tx)
+    await expect(tx)
       .to.emit(relayer2, "Relayed")
       .withArgs(
+        targetChainId,
         await bridge2.getAddress(),
         await token1.getAddress(),
         token1.interface.encodeFunctionData("transfer", [

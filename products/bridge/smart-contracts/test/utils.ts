@@ -31,7 +31,7 @@ export async function dispatchMessage(
 
   const { caller, callee, call, readonly, callback, nonce } = (
     await obtainCalls(validatorsSource, relayerSource)
-  )[0];
+  ).slice(-1)[0];
 
   expect(readonly).to.equal(isQuery);
 
@@ -50,7 +50,7 @@ export async function dispatchMessage(
 
   switchNetwork(targetNetwork);
 
-  let success, result;
+  let success, result, dispatchTxn;
   if (isQuery) {
     const query = await queryCall(
       validatorsTarget,
@@ -75,8 +75,8 @@ export async function dispatchMessage(
       nonce,
       callSignatures
     );
-    const tx = await txResponse.wait();
-    if (!tx) {
+    dispatchTxn = await txResponse.wait();
+    if (!dispatchTxn) {
       expect.fail("tx is null");
     }
     const dispatch = await verifyDispatchCall(
@@ -87,7 +87,7 @@ export async function dispatchMessage(
       isSuccess,
       callback,
       nonce,
-      tx
+      dispatchTxn
     );
     success = dispatch.success;
     result = dispatch.result;
@@ -124,8 +124,8 @@ export async function dispatchMessage(
     nonce,
     resultSignatures
   );
-  const tx = await txResponse.wait();
-  if (!tx) {
+  const deliveryTxn = await txResponse.wait();
+  if (!deliveryTxn) {
     expect.fail("tx is null");
   }
   await verifyDeliveryResult(
@@ -137,13 +137,15 @@ export async function dispatchMessage(
     success,
     result,
     nonce,
-    tx
+    deliveryTxn
   );
   return {
     nonce,
     callSignatures,
     resultSignatures,
     result,
+    deliveryTxn,
+    dispatchTxn,
   };
 }
 
@@ -404,7 +406,7 @@ async function verifyDispatchCall(
   nonce: bigint,
   tx: ContractTransactionReceipt
 ) {
-  expect(tx).to.emit(relayer, "Dispatched").withArgs(
+  await expect(tx).to.emit(relayer, "Dispatched").withArgs(
     sourceChainId,
     caller,
     callback,
@@ -428,7 +430,7 @@ async function verifyDispatchCall(
         .connect(validator)
         .queryFilter(filter, "earliest", "finalized");
 
-      return logs[0].args;
+      return logs.slice(-1)[0].args;
     })
   );
   // check that the result is the same for all validators
@@ -523,7 +525,7 @@ export async function confirmResult(
 
     const tx = await collector.connect(validator).echo(hash, signature);
     await tx.wait();
-    expect(tx).to.emit(collector, "Echoed").withArgs(hash, signature);
+    await expect(tx).to.emit(collector, "Echoed").withArgs(hash, signature);
   }
 
   // validators retrieve the signatures submitted by other validators from the Echoed events
