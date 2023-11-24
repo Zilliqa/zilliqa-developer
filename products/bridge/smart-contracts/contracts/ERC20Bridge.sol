@@ -103,7 +103,6 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     }
 
     function finish(
-        uint targetChainId,
         bool success,
         bytes calldata res,
         uint nonce

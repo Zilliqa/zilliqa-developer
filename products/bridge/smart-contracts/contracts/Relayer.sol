@@ -15,11 +15,11 @@ using MessageHashUtils for bytes;
 contract Relayer {
     ValidatorManager private validatorManager;
     // targetChainId => caller => nonce
-    mapping(uint => mapping(address => uint)) nonces;
+    mapping(address => uint) nonces;
     // sourceChainId => caller => dispatched
     mapping(uint => mapping(address => mapping(uint => bool))) dispatched;
     // targetChainId => caller => resumed
-    mapping(uint => mapping(address => mapping(uint => bool))) resumed;
+    mapping(address => mapping(uint => bool)) resumed;
 
     event TwinDeployment(address indexed twin);
     event Relayed(
@@ -107,9 +107,9 @@ contract Relayer {
             call,
             readonly,
             callback,
-            nonces[targetChainId][msg.sender]
+            nonces[msg.sender]
         );
-        return ++nonces[targetChainId][msg.sender];
+        return ++nonces[msg.sender];
     }
 
     function dispatch(
@@ -176,7 +176,7 @@ contract Relayer {
         uint nonce,
         bytes[] calldata signatures
     ) external payable {
-        if (resumed[targetChainId][caller][nonce]) {
+        if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
         bytes memory message = abi.encode(
@@ -192,7 +192,6 @@ contract Relayer {
 
         bytes memory call = abi.encodeWithSelector(
             callback,
-            targetChainId,
             success,
             response,
             nonce
@@ -203,6 +202,6 @@ contract Relayer {
         }(call);
 
         emit Resumed(targetChainId, caller, call, success2, response2, nonce);
-        resumed[targetChainId][caller][nonce] = true;
+        resumed[caller][nonce] = true;
     }
 }

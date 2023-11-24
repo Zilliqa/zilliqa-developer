@@ -1,7 +1,13 @@
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { switchNetwork, setupBridge, dispatchMessage } from "./utils";
+import {
+  switchNetwork,
+  setupBridge,
+  dispatchMessage,
+  dispatchCall,
+  deliverResult,
+} from "./utils";
 import { Twin__factory } from "../typechain-types";
 
 describe("Bridge", function () {
@@ -433,7 +439,150 @@ describe("Bridge", function () {
 
   // TODO: add test for simultaneous remote calls requested by the same contract
 
-  // TODO: add test for replayed dispatch of the same remote call
+  it("should fail to replay the same remote call, only first one going through", async function () {
+    const {
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      collector,
+      chainId1,
+      chainId2,
+    } = await setup(); // instead of loadFixture(setup);
+    const num = 123;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
+    const readonly = false;
 
-  // TODO: add test for replayed delivery of the same results
+    switchNetwork(1);
+
+    const tx = await twin1
+      .connect(validators1[0])
+      .start(await target2.getAddress(), num, readonly);
+    await tx.wait();
+    await expect(tx)
+      .to.emit(relayer1, "Relayed")
+      .withArgs(
+        targetChainId,
+        await twin1.getAddress(),
+        await target2.getAddress(),
+        target2.interface.encodeFunctionData("test", [num]),
+        readonly,
+        twin1.interface.getFunction("finish").selector,
+        anyValue
+      );
+
+    const { nonce, callSignatures } = await dispatchMessage(
+      1,
+      2,
+      sourceChainId,
+      targetChainId,
+      validators1,
+      relayer1,
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly
+    );
+
+    const filter = twin1.filters.Succeeded;
+    const logs = await twin1.queryFilter(filter);
+    console.log("Incremented", num, "to", ethers.toNumber(logs[0].args[0]));
+
+    // Second attempt to dispatch would fail
+    const repeatedDispatch = dispatchCall(
+      validators2,
+      sourceChainId,
+      targetChainId,
+      relayer2,
+      await twin1.getAddress(),
+      await target2.getAddress(),
+      target2.interface.encodeFunctionData("test", [num]),
+      readonly,
+      twin1.interface.getFunction("finish").selector,
+      nonce,
+      callSignatures
+    );
+    expect(repeatedDispatch).to.be.revertedWithCustomError(
+      relayer2,
+      "AlreadyDispatched"
+    );
+  });
+
+  it("should fail to replay the same delivery call, only first one going through", async function () {
+    const {
+      twin1,
+      target2,
+      relayer1,
+      relayer2,
+      validators1,
+      validators2,
+      collector,
+      chainId1,
+      chainId2,
+    } = await setup(); // instead of loadFixture(setup);
+    const num = 123;
+    const sourceChainId = chainId1;
+    const targetChainId = chainId2;
+    const readonly = false;
+
+    switchNetwork(1);
+
+    const tx = await twin1
+      .connect(validators1[0])
+      .start(await target2.getAddress(), num, readonly);
+    await tx.wait();
+    await expect(tx)
+      .to.emit(relayer1, "Relayed")
+      .withArgs(
+        targetChainId,
+        await twin1.getAddress(),
+        await target2.getAddress(),
+        target2.interface.encodeFunctionData("test", [num]),
+        readonly,
+        twin1.interface.getFunction("finish").selector,
+        anyValue
+      );
+
+    const { nonce, resultSignatures, result } = await dispatchMessage(
+      1,
+      2,
+      sourceChainId,
+      targetChainId,
+      validators1,
+      relayer1,
+      validators2,
+      relayer2,
+      validators1,
+      collector,
+      true,
+      readonly
+    );
+
+    const filter = twin1.filters.Succeeded;
+    const logs = await twin1.queryFilter(filter);
+    console.log("Incremented", num, "to", ethers.toNumber(logs[0].args[0]));
+
+    // Second attempt to deliver result would fail
+    const repeatedResult = deliverResult(
+      validators1,
+      relayer1,
+      sourceChainId,
+      targetChainId,
+      await twin1.getAddress(),
+      target2.interface.encodeFunctionData("test", [num]),
+      true,
+      result,
+      nonce,
+      resultSignatures
+    );
+    expect(repeatedResult).to.be.revertedWithCustomError(
+      relayer1,
+      "AlreadyResumed"
+    );
+  });
 });

@@ -25,7 +25,6 @@ contract Twin is Initializable, Bridged, BridgedTwin {
     event Failed(string);
 
     function finish(
-        uint targetChainId,
         bool success,
         bytes calldata res,
         uint nonce
@@ -55,7 +54,6 @@ contract Twin is Initializable, Bridged, BridgedTwin {
     event SucceededNoReturn();
 
     function finishNoReturn(
-        uint targetChainId,
         bool success,
         bytes calldata res,
         uint nonce
@@ -86,7 +84,6 @@ contract Twin is Initializable, Bridged, BridgedTwin {
     event SucceededMultipleReturn(uint, uint, uint);
 
     function finishMultipleReturn(
-        uint targetChainId,
         bool success,
         bytes calldata res,
         uint nonce

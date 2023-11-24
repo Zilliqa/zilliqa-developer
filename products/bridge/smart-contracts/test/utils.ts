@@ -4,7 +4,12 @@ import { createProvider } from "hardhat/internal/core/providers/construction";
 import { HardhatEthersProvider } from "@nomicfoundation/hardhat-ethers/internal/hardhat-ethers-provider";
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import { AddressLike, BytesLike, Signer } from "ethers";
+import {
+  AddressLike,
+  BytesLike,
+  ContractTransactionReceipt,
+  Signer,
+} from "ethers";
 import { Relayer, Collector } from "../typechain-types";
 
 export async function dispatchMessage(
@@ -57,7 +62,7 @@ export async function dispatchMessage(
     success = query.success;
     result = query.response;
   } else {
-    const dispatch = await dispatchCall(
+    const txResponse = await dispatchCall(
       validatorsTarget,
       sourceChainId,
       targetChainId,
@@ -66,10 +71,23 @@ export async function dispatchMessage(
       callee,
       call,
       readonly,
-      isSuccess,
       callback,
       nonce,
       callSignatures
+    );
+    const tx = await txResponse.wait();
+    if (!tx) {
+      expect.fail("tx is null");
+    }
+    const dispatch = await verifyDispatchCall(
+      validatorsTarget,
+      sourceChainId,
+      relayerTarget,
+      caller,
+      isSuccess,
+      callback,
+      nonce,
+      tx
     );
     success = dispatch.success;
     result = dispatch.result;
@@ -94,7 +112,7 @@ export async function dispatchMessage(
     nonce
   );
 
-  await deliverResult(
+  const txResponse = await deliverResult(
     validatorsSource,
     relayerSource,
     sourceChainId,
@@ -106,6 +124,27 @@ export async function dispatchMessage(
     nonce,
     resultSignatures
   );
+  const tx = await txResponse.wait();
+  if (!tx) {
+    expect.fail("tx is null");
+  }
+  await verifyDeliveryResult(
+    validatorsSource,
+    relayerSource,
+    targetChainId,
+    caller,
+    callback,
+    success,
+    result,
+    nonce,
+    tx
+  );
+  return {
+    nonce,
+    callSignatures,
+    resultSignatures,
+    result,
+  };
 }
 
 export async function setupBridge() {
@@ -355,6 +394,54 @@ export async function queryCall(
   return { success, response };
 }
 
+async function verifyDispatchCall(
+  validators: Signer[],
+  sourceChainId: bigint,
+  relayer: Relayer,
+  caller: AddressLike,
+  success: boolean,
+  callback: BytesLike,
+  nonce: bigint,
+  tx: ContractTransactionReceipt
+) {
+  expect(tx).to.emit(relayer, "Dispatched").withArgs(
+    sourceChainId,
+    caller,
+    callback,
+    success, // expected boolean outcome or anyValue if outcome is not known in advance
+    anyValue,
+    nonce
+  );
+
+  // other validators see the Dispatched event and retrieve the result of the relayed call
+  const results = await Promise.all(
+    validators.map(async (validator) => {
+      const filter = relayer.filters.Dispatched(
+        undefined,
+        caller,
+        undefined,
+        undefined,
+        undefined,
+        nonce
+      );
+      const logs = await relayer
+        .connect(validator)
+        .queryFilter(filter, "earliest", "finalized");
+
+      return logs[0].args;
+    })
+  );
+  // check that the result is the same for all validators
+  for (const result of results) {
+    expect(result).is.deep.equal(results[0]);
+  }
+
+  return {
+    success: results[0].success,
+    result: results[0].response,
+  };
+}
+
 export async function dispatchCall(
   validators: Signer[],
   sourceChainId: bigint,
@@ -364,7 +451,6 @@ export async function dispatchCall(
   callee: AddressLike,
   call: BytesLike,
   readonly: boolean,
-  success: boolean,
   callback: BytesLike,
   nonce: bigint,
   signatures: string[]
@@ -397,7 +483,7 @@ export async function dispatchCall(
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
 
-  const tx = await relayer
+  return relayer
     .connect(leaderValidator)
     .dispatch(
       sourceChainId,
@@ -408,43 +494,6 @@ export async function dispatchCall(
       nonce,
       orderedSignatures
     );
-  await tx.wait();
-  expect(tx).to.emit(relayer, "Dispatched").withArgs(
-    sourceChainId,
-    caller,
-    callback,
-    success, // expected boolean outcome or anyValue if outcome is not known in advance
-    anyValue,
-    nonce
-  );
-
-  // other vaidators see the Dispatched event and retrieve the result of the relayed call
-  const results = await Promise.all(
-    validators.map(async (validator) => {
-      const filter = relayer.filters.Dispatched(
-        undefined,
-        caller,
-        undefined,
-        undefined,
-        undefined,
-        nonce
-      );
-      const logs = await relayer
-        .connect(validator)
-        .queryFilter(filter, "earliest", "finalized");
-
-      return logs[0].args;
-    })
-  );
-  // check that the result is the same for all validators
-  for (const result of results) {
-    expect(result).is.deep.equal(results[0]);
-  }
-
-  return {
-    success: results[0].success,
-    result: results[0].response,
-  };
 }
 
 export async function confirmResult(
@@ -509,7 +558,7 @@ export async function deliverResult(
   );
   const hash = ethers.hashMessage(ethers.getBytes(message));
   const orderedSignatures = orderSignaturesBySignerAddress(hash, signatures);
-  const tx = await relayer
+  return relayer
     .connect(leaderValidator)
     .resume(
       targetChainId,
@@ -520,7 +569,19 @@ export async function deliverResult(
       nonce,
       orderedSignatures
     );
-  await tx.wait();
+}
+
+async function verifyDeliveryResult(
+  validators: Signer[],
+  relayer: Relayer,
+  targetChainId: bigint,
+  caller: AddressLike,
+  callback: BytesLike,
+  success: boolean,
+  result: BytesLike,
+  nonce: bigint,
+  tx: ContractTransactionReceipt
+) {
   await expect(tx)
     .to.emit(relayer, "Resumed")
     .withArgs(
@@ -529,8 +590,8 @@ export async function deliverResult(
       ethers.concat([
         callback,
         ethers.AbiCoder.defaultAbiCoder().encode(
-          ["uint", "bool", "bytes", "uint256"],
-          [targetChainId, success, result, nonce]
+          ["bool", "bytes", "uint256"],
+          [success, result, nonce]
         ),
       ]),
       true,
