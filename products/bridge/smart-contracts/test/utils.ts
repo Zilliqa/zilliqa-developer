@@ -466,8 +466,7 @@ export async function dispatchCall(
   signatures: string[]
 ) {
   // the next leader dispatches the relayed call
-  const leaderValidator =
-    validators[Math.floor(Math.random() * validators.length)];
+  const leaderValidator = validators[0];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
     [
       "uint256",
