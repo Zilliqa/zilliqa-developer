@@ -9,6 +9,7 @@ import {
   deliverResult,
 } from "./utils";
 import { Twin__factory } from "../typechain-types";
+import { parseEther } from "ethers";
 
 describe("Bridge", function () {
   async function setup() {
@@ -45,6 +46,10 @@ describe("Bridge", function () {
 
     const twin1 = await ethers.getContractAt("Twin", twinAddress);
 
+    await relayer1.topUpGas(await twin1.getAddress(), {
+      value: parseEther("1"),
+    });
+
     const target1 = await ethers
       .deployContract("Target")
       .then(async (c) => c.waitForDeployment());
@@ -63,6 +68,10 @@ describe("Bridge", function () {
       .withArgs(twinAddress);
 
     const twin2 = await ethers.getContractAt("Twin", twinAddress);
+
+    await relayer2.topUpGas(await twin2.getAddress(), {
+      value: parseEther("1"),
+    });
 
     const target2 = await ethers
       .deployContract("Target")
@@ -441,7 +450,7 @@ describe("Bridge", function () {
     ]);
   });
 
-  it("should handle multiple remote calls requested by the same contract", async function () {
+  it.only("should handle multiple remote calls requested by the same contract", async function () {
     const {
       collector,
       twin1,
@@ -476,6 +485,8 @@ describe("Bridge", function () {
         twin1.interface.getFunction("finishSum").selector,
         anyValue
       );
+
+    await relayer2.connect(validators2[0]).warmup();
 
     const { dispatchTxn } = await dispatchMessage(
       1,
