@@ -15,11 +15,14 @@ using MessageHashUtils for bytes;
 contract Relayer {
     ValidatorManager private validatorManager;
     // targetChainId => caller => nonce
-    mapping(address => uint) nonces;
+    mapping(address => uint) private _nonces;
     // sourceChainId => caller => dispatched
-    mapping(uint => mapping(address => mapping(uint => bool))) dispatched;
+    mapping(uint => mapping(address => mapping(uint => bool)))
+        private _dispatched;
     // targetChainId => caller => resumed
-    mapping(address => mapping(uint => bool)) resumed;
+    mapping(address => mapping(uint => bool)) private _resumed;
+    mapping(address => uint) private _gas;
+    mapping(address => uint) private _refund;
 
     event TwinDeployment(address indexed twin);
     event Relayed(
@@ -107,9 +110,46 @@ contract Relayer {
             call,
             readonly,
             callback,
-            nonces[msg.sender]
+            _nonces[msg.sender]
         );
-        return ++nonces[msg.sender];
+        return ++_nonces[msg.sender];
+    }
+
+    // TODO: remove later, used for testing
+    function warmup() external {
+        ++_refund[msg.sender];
+    }
+
+    function topUpGas(address target) external payable {
+        _gas[target] += msg.value;
+    }
+
+    function refundGas() external {
+        uint amount = _refund[msg.sender];
+        _refund[msg.sender] = 0;
+        payable(msg.sender).transfer(amount);
+    }
+
+    function refund(address x) external view {
+        _refund[x];
+    }
+
+    function gas(address x) external view {
+        _gas[x];
+    }
+
+    modifier trackGas(address caller) {
+        uint gasStart = gasleft();
+        require(
+            _gas[caller] >= block.gaslimit * tx.gasprice,
+            "Insufficient gas to cover limit"
+        );
+        _;
+        // 27603 = 21000 + 3 + 6600
+        gasStart += 27603 + 16 * (msg.data.length - 4);
+        uint spent = (gasStart - gasleft()) * tx.gasprice;
+        _gas[caller] -= spent;
+        _refund[msg.sender] += spent;
     }
 
     function dispatch(
@@ -120,8 +160,8 @@ contract Relayer {
         bytes4 callback,
         uint nonce,
         bytes[] calldata signatures
-    ) external onlyContractCaller(caller) {
-        if (dispatched[sourceChainId][caller][nonce]) {
+    ) external trackGas(caller) onlyContractCaller(caller) {
+        if (_dispatched[sourceChainId][caller][nonce]) {
             revert AlreadyDispatched();
         }
 
@@ -150,7 +190,7 @@ contract Relayer {
             response,
             nonce
         );
-        dispatched[sourceChainId][caller][nonce] = true;
+        _dispatched[sourceChainId][caller][nonce] = true;
     }
 
     function query(
@@ -176,7 +216,7 @@ contract Relayer {
         uint nonce,
         bytes[] calldata signatures
     ) external payable {
-        if (resumed[caller][nonce]) {
+        if (_resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
         bytes memory message = abi.encode(
@@ -202,6 +242,6 @@ contract Relayer {
         }(call);
 
         emit Resumed(targetChainId, caller, call, success2, response2, nonce);
-        resumed[caller][nonce] = true;
+        _resumed[caller][nonce] = true;
     }
 }

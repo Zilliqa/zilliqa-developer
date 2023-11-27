@@ -225,6 +225,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Integrate foundry to support effective unit testing on contracts
   - [x] Finish remaining TODO tests
   - [x] Update error handling on contracts
+  - [ ] Optional resume callback
   - [ ] Write deployment scripts
     - [ ] Support CREATE2
     - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
