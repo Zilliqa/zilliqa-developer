@@ -9,37 +9,83 @@ import "./Relayer.sol";
 abstract contract Bridged is Initializable {
     Relayer private _relayer;
 
-    function initialize(Relayer relayer) public initializer {
-        _relayer = relayer;
-    }
+    error NotRelayer(address relayer);
 
     modifier onlyRelayer() {
-        require(msg.sender == address(_relayer), "Must be called by relayer");
+        if (msg.sender != address(_relayer)) {
+            revert NotRelayer(msg.sender);
+        }
         _;
     }
 
-    function dispatched(
-        address target,
-        bytes memory call
-    ) public payable onlyRelayer returns (bool success, bytes memory response) {
-        console.log("dispatched()");
-        (success, response) = target.call{value: msg.value, gas: 100000}(call);
+    function __Bridged_init(Relayer relayer_) public onlyInitializing {
+        _relayer = relayer_;
     }
 
-    function queried(
-        address target,
-        bytes memory call
-    ) public view onlyRelayer returns (bool success, bytes memory response) {
-        console.log("queried()");
-        (success, response) = target.staticcall{gas: 100000}(call);
+    function relayer() public view returns (Relayer) {
+        return _relayer;
     }
 
     function relay(
+        uint targetChainId,
         address target,
         bytes memory call,
         bool readonly,
         bytes4 callback
     ) internal returns (uint nonce) {
-        nonce = _relayer.relay(target, call, readonly, callback);
+        nonce = _relayer.relay(targetChainId, target, call, readonly, callback);
+    }
+
+    function _dispatched(
+        address target,
+        bytes calldata call
+    ) internal onlyRelayer returns (bool success, bytes memory response) {
+        (success, response) = target.call{value: msg.value, gas: 100000}(call);
+    }
+
+    function dispatched(
+        uint sourceChainId,
+        address target,
+        bytes calldata call
+    )
+        external
+        payable
+        virtual
+        onlyRelayer
+        returns (bool success, bytes memory response)
+    {
+        (success, response) = _dispatched(target, call);
+    }
+
+    function queried(
+        address target,
+        bytes calldata call
+    ) external view virtual returns (bool success, bytes memory response) {
+        (success, response) = target.staticcall{gas: 100000}(call);
+    }
+}
+
+abstract contract BridgedTwin is Initializable, Bridged {
+    uint private _twinChainId;
+
+    error InvalidChainId(uint chainId);
+    error NotTwinChain(uint chainId);
+
+    modifier onlyTwinChain(uint twinChainId_) {
+        if (_twinChainId != twinChainId_) {
+            revert NotTwinChain(twinChainId_);
+        }
+        _;
+    }
+
+    function __BridgedTwin_init(uint twinChainId_) public onlyInitializing {
+        if (twinChainId_ == 0 || twinChainId_ == block.chainid) {
+            revert InvalidChainId(twinChainId_);
+        }
+        _twinChainId = twinChainId_;
+    }
+
+    function twinChainId() public view returns (uint) {
+        return _twinChainId;
     }
 }
