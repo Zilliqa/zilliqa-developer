@@ -39,11 +39,18 @@ impl Context {
     }
     pub async fn new(bucket_name: &str, network_name: &str, target_path: &str) -> Result<Self> {
         let region_provider = RegionProviderChain::first_try(Region::new("us-west-2")); // FIXME
-        let config = aws_config::from_env()
+        let config_loader = aws_config::from_env()
             .no_credentials()
-            .region(region_provider)
-            .load()
-            .await;
+            .region(region_provider);
+        // Temporary whilst migrations are being carried out
+        let config_loader = if network_name.starts_with("testnet-") {
+            config_loader.endpoint_url("https://storage.googleapis.com")
+        } else {
+            config_loader
+        };
+
+        let config = config_loader.load().await;
+
         let client = aws_sdk_s3::Client::new(&config);
         Ok(Context {
             client,

@@ -21,7 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [developer-portal, devex, devex-apollo, neo-savant]
+        application:
+          [developer-portal, devex, devex-apollo, neo-savant, zillion]
         include:
           - application: developer-portal
             image_name: developer-portal
@@ -46,6 +47,11 @@ jobs:
           - application: pdt
             image_name: pdt
             path: products/pdt
+            tag_length: 8
+            tag_latest: false
+          - application: zillion
+            image_name: zillion
+            path: products/zillion
             tag_length: 8
             tag_latest: false
     env:
