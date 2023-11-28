@@ -130,8 +130,8 @@ contract Relayer {
         payable(msg.sender).transfer(amount);
     }
 
-    function refund(address x) external view {
-        _refund[x];
+    function refund(address x) external view returns (uint) {
+        return _refund[x];
     }
 
     function gas(address x) external view {

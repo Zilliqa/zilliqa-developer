@@ -80,7 +80,7 @@ export async function dispatchMessage(
     const x = await relayerTarget.refund(
       await validatorsTarget[0].getAddress()
     );
-    console.log(x / dispatchTxn?.gasPrice);
+    console.log(x / (dispatchTxn?.gasPrice ?? 1n));
     console.log("gas price: ", dispatchTxn?.gasPrice);
 
     if (!dispatchTxn) {

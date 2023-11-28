@@ -516,6 +516,9 @@ describe("Bridge", function () {
 
     switchNetwork(1);
 
+    await relayer2.connect(validators2[0]).refundGas();
+    await relayer2.connect(validators2[0]).warmup();
+
     const tx2 = await twin1
       .connect(validators1[0])
       .startSum(await target2.getAddress(), num2, readonly);
