@@ -12,7 +12,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
 
     function start(address target, uint num, bool readonly) external {
         uint nonce = relay(
-            twinChainId(),
+            twinChainId,
             target,
             abi.encodeWithSignature("test(uint256)", num),
             readonly,
@@ -40,7 +40,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
 
     function startSum(address target, uint num, bool readonly) external {
         relay(
-            twinChainId(),
+            twinChainId,
             target,
             abi.encodeWithSignature("testSum(uint256)", num),
             readonly,
@@ -65,7 +65,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
 
     function startNoReturn(address target, uint num, bool readonly) external {
         relay(
-            twinChainId(),
+            twinChainId,
             target,
             abi.encodeWithSignature("testNoReturn(uint256)", num),
             readonly,
@@ -95,7 +95,7 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         bool readonly
     ) external {
         relay(
-            twinChainId(),
+            twinChainId,
             target,
             abi.encodeWithSignature("testMultipleReturn(uint256)", num),
             readonly,

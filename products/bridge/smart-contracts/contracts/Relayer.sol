@@ -131,6 +131,9 @@ contract Relayer {
         );
         _;
         // 44703 = 21000 + 3 + 6600 + 17100
+        // 17100 = init storage cost (worst case)
+        // 6600 = operations related to gas tracking
+        // 21000 = fixed cost of transaction
         gasStart += 44703 + 16 * (msg.data.length - 4);
         uint spent = (gasStart - gasleft()) * tx.gasprice;
         gasDeposit[caller] -= spent;

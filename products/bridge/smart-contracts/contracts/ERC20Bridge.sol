@@ -77,7 +77,7 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     ) external returns (uint nonce) {
         MyToken(token).transferFrom(owner, address(this), value);
         nonce = relay(
-            twinChainId(),
+            twinChainId,
             token,
             abi.encodeWithSignature("mint(address,uint256)", owner, value),
             false,
@@ -93,7 +93,7 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     ) external returns (uint nonce) {
         MyToken(token).burn(owner, value);
         nonce = relay(
-            twinChainId(),
+            twinChainId,
             token,
             abi.encodeWithSignature("transfer(address,uint256)", owner, value),
             false,
