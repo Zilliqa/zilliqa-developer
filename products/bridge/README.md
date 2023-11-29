@@ -229,7 +229,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Write deployment scripts
     - [ ] Support CREATE2
     - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
-  - [ ] Integrate mechanism for gas reversal
+  - [x] Integrate mechanism for gas reversal
   - [x] Multichain support - appending chain-ids to event calls
   - [ ] Fuzz + invariant testing
   - [ ] Synchronizing validators cross-chain

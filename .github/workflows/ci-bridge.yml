@@ -1,7 +1,7 @@
 name: "CI for Product Bridge"
 
 on:
-  pull_request:
+  push:
     paths:
       - products/bridge/**
       - ".github/workflows/**"
@@ -9,10 +9,12 @@ on:
 jobs:
   testing:
     runs-on: ubuntu-latest
-    name: "Linting"
+    name: "Bridge Tests"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -24,6 +26,11 @@ jobs:
         with:
           version: 8
           run_install: false
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
 
       - name: Get pnpm store directory
         shell: bash
@@ -42,6 +49,10 @@ jobs:
         run: pnpm install
         working-directory: products/bridge/smart-contracts
 
-      - name: Run tests
+      - name: Run Hardhat tests
         run: pnpm test
+        working-directory: products/bridge/smart-contracts
+
+      - name: Run Foundry tests
+        run: pnpm test:foundry
         working-directory: products/bridge/smart-contracts
