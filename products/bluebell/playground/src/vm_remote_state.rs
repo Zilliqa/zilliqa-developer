@@ -1,8 +1,8 @@
+use std::rc::Rc;
+
 use evm_assembly::function_signature::EvmFunctionSignature;
 use serde::{Deserialize, Serialize};
-use std::rc::Rc;
-use yewdux::prelude::Reducer;
-use yewdux::store::Store;
+use yewdux::{prelude::Reducer, store::Store};
 
 #[derive(Store, Serialize, Deserialize, Clone)]
 #[store(storage = "local")]
@@ -26,7 +26,7 @@ impl Default for VmRemoteState {
 }
 
 impl PartialEq for VmRemoteState {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, _other: &Self) -> bool {
         false
     }
 }

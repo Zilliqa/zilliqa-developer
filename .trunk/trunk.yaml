@@ -37,6 +37,9 @@ lint:
       paths:
         - needing-organisation/**/*
         - products/devex/public/*.js
+        - products/governance-api/**
+        - products/governance-snapshot/**
+        - products/zillion/**
         - .devcontainer/*
         - .devcontainer/**
         - .trunk/*out/**
@@ -53,8 +56,6 @@ lint:
         - "**/templates/*"
         - "templates/**"
         - "**/templates/**"
-        - products/governance-api/**
-        - products/governance-snapshot/**
 
 runtimes:
   enabled:

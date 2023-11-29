@@ -1,27 +1,25 @@
-use crate::constants::TreeTraversalMode;
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::primitives::Operation;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
-};
-use crate::intermediate_representation::symbol_table::StateLayoutEntry;
-use crate::passes::debug_printer::DebugPrinter;
-use evm_assembly::block::EvmBlock;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::instruction::EvmSourcePosition;
-use evm_assembly::types::EvmType;
-use log::warn;
-use primitive_types::U256;
-use std::collections::BTreeSet;
-use std::str::FromStr;
+use std::{collections::BTreeSet, mem, str::FromStr};
 
-use evm_assembly::types::EvmTypeValue;
-use evm_assembly::EvmAssemblyGenerator;
-use evm_assembly::EvmByteCodeBuilder;
-use log::info;
+use evm_assembly::{
+    block::EvmBlock,
+    compiler_context::EvmCompilerContext,
+    executable::EvmExecutable,
+    instruction::EvmSourcePosition,
+    types::{EvmType, EvmTypeValue},
+    EvmByteCodeBuilder,
+};
+use primitive_types::U256;
 use sha3::{Digest, Keccak256};
-use std::mem;
+
+use crate::{
+    constants::TreeTraversalMode,
+    intermediate_representation::{
+        pass::IrPass,
+        primitives::{IntermediateRepresentation, Operation},
+        symbol_table::StateLayoutEntry,
+    },
+    passes::debug_printer::DebugPrinter,
+};
 
 /// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
 /// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.
@@ -78,7 +76,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         }
 
         Ok(())
-        //        unimplemented!()
     }
 
     /// This function writes function definitions from the IR to the EVM module.
@@ -463,7 +460,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     evm_block.push_u256(address);
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.external_sload();
-                                    evm_block.register_stack_name(value_name);
+                                    let _ = evm_block.register_stack_name(value_name);
                                 }
                                 Operation::Return(ref _value) => {
                                     // Assumes that the next element on the stack is return pointer
@@ -494,13 +491,18 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
-                                    // TODO: Assumes that a static call just produces the Keccak of the name
-                                    // The "correct" to do would be to make this spec dependant
-                                    let hash = Keccak256::digest(name);
-                                    let mut selector = Vec::new();
-                                    selector.extend_from_slice(&hash[..4]);
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.push(selector);
+                                    let ctx = &mut code_builder.context;
+                                    if let Some(constructor) = &ctx.default_constructors.get(name) {
+                                        constructor(&mut evm_block);
+                                    } else {
+                                        // Falling back to plain enum type naming with no data associated
+                                        // for custom types.
+                                        let hash = Keccak256::digest(name);
+                                        let mut selector = Vec::new();
+                                        selector.extend_from_slice(&hash[..4]);
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                        evm_block.push(selector);
+                                    }
                                 }
                                 Operation::IsEqual {
                                     ref left,
@@ -525,30 +527,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.eq();
-                                }
-                                Operation::Switch {
-                                    // TODO: Deprecated?
-                                    ref cases,
-                                    ref on_default,
-                                } => {
-                                    for case in cases {
-                                        let label = match &case.label.resolved {
-                                            Some(l) => l,
-                                            None => panic!("Could not resolve case label"),
-                                        };
-                                        // TODO: This assumes order in cases
-                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.jump_if_to(&code_builder.add_scope_to_label(label));
-                                    }
-
-                                    let label = match &on_default.resolved {
-                                        Some(l) => l,
-                                        None => panic!("Could not resolve default label"),
-                                    };
-
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_to(&code_builder.add_scope_to_label(label));
-                                    // unimplemented!() // Add handling for other operations here
                                 }
                                 Operation::Jump(label) => {
                                     let label = match &label.resolved {
@@ -676,7 +654,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Ignore terminating ref as this will just be pop at the end of the block.
                                 }
                                 _ => {
-                                    unimplemented!() // Add handling for other operations here
+                                    panic!("Unhandled operation {:#?}",instr);
                                 }
                             }
 
@@ -732,37 +710,5 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
         self.builder.finalize_blocks();
         Ok(self.builder.build())
-    }
-}
-
-/// This impl block provides the lowering operations for our `EvmBytecodeGenerator`.
-/// Here we translate high-level intermediate representation (IR) constructs into
-/// lower-level constructs that are suitable for generating EVM bytecode.
-impl<'ctx> IrLowering for EvmBytecodeGenerator<'ctx> {
-    /// This function takes a `ConcreteType` and lowers it into a form suitable for generating
-    /// EVM bytecode. How exactly this is done will depend on the concrete type in question.
-    fn lower_concrete_type(&mut self, _con_type: &ConcreteType) {
-        // TODO: Implement
-        unimplemented!()
-    }
-
-    /// This function takes a `ConcreteFunction` and lowers it into a form suitable
-    /// for generating EVM bytecode. This typically involves translating the function's
-    /// high-level operations into equivalent sequences of low-level EVM operations.
-    fn lower_concrete_function(&mut self, _con_function: &ConcreteFunction) {
-        // TODO: Move write_function_definitions_to_module into this structure
-        unimplemented!()
-    }
-
-    /// This is the main interface for lowering. It takes an intermediate representation (IR)
-    /// and lowers all its types and function definitions.
-    fn lower(&mut self, primitives: &IntermediateRepresentation) {
-        for con_type in &primitives.type_definitions {
-            self.lower_concrete_type(con_type);
-        }
-
-        for con_function in &primitives.function_definitions {
-            self.lower_concrete_function(con_function);
-        }
     }
 }

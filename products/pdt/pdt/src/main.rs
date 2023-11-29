@@ -144,7 +144,7 @@ struct ListenOptions {
     buffer_size: usize,
 }
 
-const TESTNET_BUCKET: &str = "301978b4-0c0a-4b6b-ad7b-3a2f63c5182c";
+const TESTNET_BUCKET: &str = "zq1-testnet-persistence";
 const MAINNET_BUCKET: &str = "c5b68604-8540-4887-ad29-2ab9e680f997";
 
 const DEV_API_URL: &str = "https://dev-api.zilliqa.com/";

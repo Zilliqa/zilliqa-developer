@@ -13,7 +13,7 @@ mod tests {
 --| contract HelloWorldExample()
 --> transition TriggerHelloWorld()
 -->   msg = "Hello world.";
---|   print msg (* TODO: Fix position propagation to such this line is captured *)
+-->   print msg
 --| end
         "#,
             "",

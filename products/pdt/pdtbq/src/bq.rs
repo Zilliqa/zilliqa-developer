@@ -45,12 +45,13 @@ impl ZilliqaBQProject {
     pub async fn ensure_schema(bq: &bq_utils::BigQueryDatasetLocation) -> Result<()> {
         let client = client_from_default_credentials().await?.client;
         let txn_location = bq_utils::BigQueryTableLocation::new(&bq, TRANSACTION_TABLE_ID);
-        if let None = bq_utils::find_table(&client, &txn_location).await? {
+        if txn_location.find_table(&client).await.is_none() {
             Self::create_transaction_table(&client, &txn_location).await?;
         }
+
         TrackedTable::ensure_schema(&client, &txn_location).await?;
         let microblock_location = bq.with_table_id(MICROBLOCK_TABLE_ID);
-        if let None = bq_utils::find_table(&client, &microblock_location).await? {
+        if microblock_location.find_table(&client).await.is_none() {
             Self::create_microblock_table(&client, &microblock_location).await?;
         }
         TrackedTable::ensure_schema(&client, &microblock_location).await?;
@@ -65,6 +66,7 @@ impl ZilliqaBQProject {
         // Application default creds don't work here because the auth library looks for a service
         // account key in the file you give it and, of course, it's not there ..
         let my_client = client_from_default_credentials().await?.client;
+
         let zq_ds = if let Ok(ds) = my_client
             .dataset()
             .get(&bq.project_id, &bq.dataset_id)
@@ -77,17 +79,17 @@ impl ZilliqaBQProject {
                 .create(Dataset::new(&bq.project_id, &bq.dataset_id))
                 .await?
         };
+
         let txn_location = bq.with_table_id(TRANSACTION_TABLE_ID);
-        let transaction_table = bq_utils::find_table(&my_client, &txn_location)
-            .await?
-            .ok_or(anyhow!(
-                "No transaction table - have you created the schema?"
-            ))?;
+        let transaction_table = txn_location.find_table(&my_client).await.ok_or(anyhow!(
+            "No transaction table - have you created the schema?"
+        ))?;
         let txns = TrackedTable::new(&txn_location, coords, transaction_table, nr_blks)?;
 
         let microblock_location = bq.with_table_id(MICROBLOCK_TABLE_ID);
-        let microblock_table = bq_utils::find_table(&my_client, &microblock_location)
-            .await?
+        let microblock_table = microblock_location
+            .find_table(&my_client)
+            .await
             .ok_or(anyhow!(
                 "No microblock table - have you created the schema?"
             ))?;

@@ -22,6 +22,13 @@ patches:
           kubernetes.io/ingress.class: gce
           kubernetes.io/ingress.global-static-ip-name: devex-apollo-zilstg-dev
           networking.gke.io/managed-certificates: devex-apollo
+  - target:
+      kind: Deployment
+      name: devex-apollo
+    patch: |-
+      - op: replace
+        path: "/spec/template/spec/containers/0/resources/limits/memory"
+        value: 1000Mi
 
 patchesStrategicMerge:
   - configmap.yaml

@@ -3,8 +3,8 @@ use ethers::{
     types::{Block, Transaction, U64},
 };
 
-use anyhow::Result;
-use async_stream::try_stream;
+use anyhow::{Ok, Result};
+use async_stream::stream;
 use pdtdb::values::ZILTransactionBody;
 use serde_json::{to_value, Value};
 use tokio::time::{interval, Duration};
@@ -117,12 +117,20 @@ pub fn listen_blocks(
     provider: &Provider<Http>,
     from_block: Option<i64>,
 ) -> impl Stream<Item = Result<Vec<(Block<Transaction>, Vec<ZILTransactionBody>)>>> + '_ {
-    try_stream! {
+    stream! {
         let mut interval = interval(Duration::from_secs(15));
         let mut last_seen_block_number: Option<U64> = from_block.map(U64::from);
         loop {
             interval.tick().await;
-            yield get_block(provider, &mut last_seen_block_number).await?
+            yield get_block(provider, &mut last_seen_block_number).await.or_else(|err| {
+                // Handle known error
+                if err.to_string().contains("Tx Block does not exist") {
+                    println!("RPC does not have block yet, trying again later...");
+                    Ok(Vec::default())
+                } else {
+                    Err(err) // propagate the error
+                }
+            })
         }
     }
 }

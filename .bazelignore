@@ -9,6 +9,7 @@ node_modules
 **/node_modules
 products/developer-portal/node_modules
 products/developer-portal-ng/node_modules
+products/bridge/node_modules
 
 zilliqa/js/account/node_modules
 zilliqa/js/blockchain/node_modules

@@ -1,6 +1,6 @@
-use crate::block::EvmBlock;
-use crate::function::EvmFunction;
 use std::collections::VecDeque;
+
+use crate::{block::EvmBlock, function::EvmFunction};
 
 #[derive(Debug, Clone)]
 pub struct EvmBytecodeIr {

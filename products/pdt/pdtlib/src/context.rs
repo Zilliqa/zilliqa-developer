@@ -39,11 +39,18 @@ impl Context {
     }
     pub async fn new(bucket_name: &str, network_name: &str, target_path: &str) -> Result<Self> {
         let region_provider = RegionProviderChain::first_try(Region::new("us-west-2")); // FIXME
-        let config = aws_config::from_env()
+        let config_loader = aws_config::from_env()
             .no_credentials()
-            .region(region_provider)
-            .load()
-            .await;
+            .region(region_provider);
+        // Temporary whilst migrations are being carried out
+        let config_loader = if network_name.starts_with("testnet-") {
+            config_loader.endpoint_url("https://storage.googleapis.com")
+        } else {
+            config_loader
+        };
+
+        let config = config_loader.load().await;
+
         let client = aws_sdk_s3::Client::new(&config);
         Ok(Context {
             client,
@@ -69,11 +76,9 @@ impl Context {
     }
 
     pub async fn list_object(&self, key: &str) -> Result<Entry> {
-        if let Some(val) = self.maybe_list_object(key).await? {
-            Ok(val)
-        } else {
-            Err(anyhow!("No object for key {}", key))
-        }
+        self.maybe_list_object(key)
+            .await?
+            .ok_or(anyhow!("No object for key {}", key))
     }
 
     pub async fn list_objects(&self, prefix: &str) -> Result<Vec<Entry>> {
@@ -82,15 +87,15 @@ impl Context {
         // Because AWS, you can't seem to get more than 1000 keys in a list, so
         // tediously continue it until it's finished.
         let mut token: Option<String> = None;
-        loop {
-            let mut caller = self
-                .client
-                .list_objects_v2()
-                .bucket(self.bucket_name.clone())
-                .prefix(prefix.to_string())
-                .max_keys(ENTRIES_PER_REQUEST);
+        let caller = self
+            .client
+            .list_objects_v2()
+            .bucket(self.bucket_name.clone())
+            .prefix(prefix.to_string())
+            .max_keys(ENTRIES_PER_REQUEST);
 
-            caller = caller.set_continuation_token(token);
+        loop {
+            let caller = caller.clone().set_continuation_token(token);
             let res = caller.send().await?;
             println!(
                 " {} objects with trunc {} next {:?}",
@@ -98,16 +103,18 @@ impl Context {
             );
 
             if let Some(objects) = res.contents {
-                for object in objects {
-                    if let Some(key) = object.key() {
-                        result.push(Entry {
-                            key: key.to_string(),
-                            e_tag: object.e_tag().map(|x| x.to_string()),
-                            size: object.size(),
-                        })
-                    }
-                }
+                let valid_entries = objects.iter().filter_map(|object| {
+                    // Getting objects with valid keys
+                    object.key().map(|key| Entry {
+                        key: key.to_string(),
+                        e_tag: object.e_tag().map(|x| x.to_string()),
+                        size: object.size(),
+                    })
+                });
+
+                result.extend(valid_entries);
             }
+
             if res.is_truncated {
                 // Need to go around again.
                 token = res.next_continuation_token.clone();
@@ -142,8 +149,8 @@ impl Context {
 
     pub async fn get_key_as_string(&self, object_key: &str) -> Result<String> {
         let the_object = self.get_object(object_key).await?;
-        let the_bytes = the_object.body.collect().await?;
-        Ok(std::str::from_utf8(&the_bytes.into_bytes())?.to_string())
+        let the_bytes = the_object.body.collect().await?.into_bytes();
+        Ok(std::str::from_utf8(&the_bytes)?.to_string())
     }
 
     pub async fn get_byte_range(

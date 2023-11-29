@@ -27,9 +27,11 @@ jobs:
             devex,
             devex-apollo,
             eth-spout,
-            neo-savant,
             governance-api,
             governance-snapshot,
+            neo-savant,
+            zilliqa-isolated-server,
+            zillion,
           ]
         include:
           - application: bluebell-playground
@@ -57,11 +59,6 @@ jobs:
             path: products/eth-spout
             tag_length: 9
             tag_latest: true
-          - application: neo-savant
-            image_name: neo-savant
-            path: products/neo-savant
-            tag_length: 8
-            tag_latest: false
           - application: governance-api
             image_name: governance-api
             path: products/governance-api
@@ -72,6 +69,21 @@ jobs:
             path: products/governance-snapshot
             tag_length: 8
             tag_latest: false
+          - application: neo-savant
+            image_name: neo-savant
+            path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
+          - application: zillion
+            image_name: zillion
+            path: products/zillion
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-isolated-server
+            image_name: zilliqa-isolated-server
+            path: products/zilliqa-isolated-server
+            tag_length: 8
+            tag_latest: true
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public

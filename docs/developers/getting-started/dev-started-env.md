@@ -17,42 +17,46 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 
 ## Zilliqa Mainnet
 
-|                        | URL(s)                                               |
-| :--------------------- | :--------------------------------------------------- |
-| **API URL**            | [https://api.zilliqa.com/](https://api.zilliqa.com/) |
-| **EVM API**            | https://api.zilliqa.com/ or http://evm-api-filters.zilliqa.com/ (if using eth_subscribe)                 |
-| **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa)             |
-| **Devex explorer**     | [**Link**](https://devex.zilliqa.com/)                 |
-| **EVM Block Explorer** | [Ethereal EVM explorer](https://evmx.zilliqa.com/overview) 
-| **WebSocket endpoint** | `wss://api-ws.zilliqa.com`                           |
-| **Chain ID**           | 1                                                    |
-| **EVM Chain ID**       | N/A                                                  |
+|                        | URL(s)                                                                                   |
+| :--------------------- | :--------------------------------------------------------------------------------------- |
+| **API URL**            | [https://api.zilliqa.com/](https://api.zilliqa.com/)                                     |
+| **EVM API**            | https://api.zilliqa.com/ or http://evm-api-filters.zilliqa.com/ (if using eth_subscribe) |
+| **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa)                                                 |
+| **Devex explorer**     | [**Link**](https://devex.zilliqa.com/)                                                   |
+| **EVM Block Explorer** | [Ethereal EVM explorer](https://evmx.zilliqa.com/overview)                               |
+| **WebSocket endpoint** | `wss://api-ws.zilliqa.com`                                                               |
+| **Chain ID**           | 1                                                                                        |
+| **EVM Chain ID**       | N/A                                                                                      |
 
 ## Developer Testnet
 
-|                        | URL(s)                                                               |
-| :--------------------- | :------------------------------------------------------------------- |
-| **API URL**            | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)         |
-| **EVM URL**            | [https://evm-api-dev.zilliqa.com/](https://evm-api-dev.zilliqa.com/) |
-| **Faucet**             | [**Link**](https://dev-wallet.zilliqa.com/home?network=testnet)      |
-| **Block Explorer**     | [**Link**](https://viewblock.io/zilliqa?network=testnet)             |
-| **EVM Block Explorer** | [**Link**](https://otterscan.testnet.zilliqa.com)                    |
-| **WebSocket endpoint** | `wss://dev-ws.zilliqa.com`                                           |
-| **Chain ID**           | 333                                                                  |
-| **EVM Chain ID**       | 33101                                                                |
+|                                        | URL(s)                                                                              |
+| :------------------------------------- | :---------------------------------------------------------------------------------- |
+| **API URL**                            | [https://dev-api.zilliqa.com/](https://dev-api.zilliqa.com/)                        |
+| **EVM URL**                            | [https://evm-api-dev.zilliqa.com/](https://evm-api-dev.zilliqa.com/)                |
+| **Faucet**                             | [**Link**](https://dev-wallet.zilliqa.com/home?network=testnet)                     |
+| **Block Explorer**                     | [**Link**](https://viewblock.io/zilliqa?network=testnet)                            |
+| **EVM Block Explorer**                 | [**Link**](https://otterscan.testnet.zilliqa.com)                                   |
+| **WebSocket endpoint**                 | wss://dev-ws.zilliqa.com                                                            |
+| **Chain ID**                           | 333                                                                                 |
+| **EVM Chain ID**                       | 33101                                                                               |
+| **REWARD CONTROL CONTRACT ADDRESS**    | 0xB041e706DDeA33F57518b59BaE5b9E2085b39e77                                          |
+| **PERSISTENCE BUCKET (S3 compatible)** | s3://zq1-testnet-persistence (use: AWS_ENDPOINT_URL=https://storage.googleapis.com) |
+| **PERSISTENCE HTTPS ENDPOINT**         | https://persistence.testnet.zq1.dev                                                 |
 
 ## Developer Devnet
 
-|                        | URL(s)                                                               |
-| :--------------------- | :------------------------------------------------------------------- |
-| **API URL**            | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/)   |
-| **EVM URL**            | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/)   |
-| **Faucet**             | [**Link**](https://faucet.devnet.zilliqa.com)                        |
-| **Block Explorer**     | N/A                                                                  |
-| **EVM Block Explorer** | [**Link**](https://otterscan.devnet.zilliqa.com)                     |
-| **WebSocket endpoint** | `wss://wss.devnet.zilliqa.com`                                       |
-| **Chain ID**           | 617                                                                  |
-| **EVM Chain ID**       | 33385                                                                |
+|                                     | URL(s)                                                             |
+| :---------------------------------- | :----------------------------------------------------------------- |
+| **API URL**                         | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
+| **EVM URL**                         | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
+| **Faucet**                          | [**Link**](https://faucet.devnet.zilliqa.com)                      |
+| **Block Explorer**                  | [**Link**](https://devex.devnet.zilliqa.com)                       |
+| **EVM Block Explorer**              | [**Link**](https://otterscan.devnet.zilliqa.com)                   |
+| **WebSocket endpoint**              | `wss://wss.devnet.zilliqa.com`                                     |
+| **Chain ID**                        | 617                                                                |
+| **EVM Chain ID**                    | 33385                                                              |
+| **REWARD CONTROL CONTRACT ADDRESS** | 0xE2d79664c088Aec94209F0E657642f8569FC12D8                         |
 
 ## Isolated Server
 

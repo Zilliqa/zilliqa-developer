@@ -1,7 +1,6 @@
-use crate::utils;
+use crate::utils::{self, decode_u8, encode_u8};
 use crate::zqproj::PSQLInsertable;
 use anyhow::{anyhow, Result};
-use base64::Engine;
 use ethers::types::Transaction;
 use hex;
 use pdtlib::proto::ProtoTransactionWithReceipt;
@@ -154,13 +153,6 @@ impl BQTransaction {
                 <u64>::try_into(*z).ok()
             })
         });
-        // println!(
-        //     "C {:?} D {:?}",
-        //     core.amount.clone().and_then(|x| Some(hex::encode(&x.data))),
-        //     core.gasprice
-        //         .clone()
-        //         .and_then(|x| Some(hex::encode(&x.data)))
-        // );
         let amount = core
             .amount
             .clone()
@@ -259,7 +251,7 @@ impl BQTransaction {
             raw_receipt: None,
             receipt: None,
             sender_public_key: None,
-            from_addr_zil: None, //TODO: we should be able to get this.
+            from_addr_zil: None,
             from_addr_eth,
             signature: None,
             to_addr,
@@ -289,8 +281,12 @@ impl BQTransaction {
             utils::API::Zilliqa,
         );
         let raw_receipt = encode_u8(zil_txn_body.receipt.as_bytes());
+        let code = zil_txn_body
+            .code
+            .as_ref()
+            .map(|code| encode_u8(code.as_bytes()));
         Ok(BQTransaction {
-            code: zil_txn_body.code.clone(),
+            code,
             receipt: Some(zil_txn_body.receipt.clone()),
             raw_receipt: Some(raw_receipt),
             sender_public_key: Some(zil_txn_body.sender_pub_key.clone()),
@@ -460,18 +456,6 @@ impl PSQLTransaction {
     pub fn to_json(&self) -> Result<String> {
         Ok(serde_json::to_string(self)?)
     }
-}
-
-fn encode_u8(y: &[u8]) -> String {
-    base64::engine::general_purpose::STANDARD
-        .encode(y)
-        .to_string()
-}
-
-fn decode_u8(x: String) -> Vec<u8> {
-    base64::engine::general_purpose::STANDARD
-        .decode(x)
-        .expect("base64-encoding should be decodeable")
 }
 
 #[serde_as]

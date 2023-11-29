@@ -1,20 +1,22 @@
-use crate::compiler_context::EvmCompilerContext;
-use crate::io_interface::CustomMemoryAccount;
-use crate::io_interface::EvmIoInterface;
-use crate::types::EvmTypeValue;
-use evm::backend::Apply;
-use evm::executor::stack::MemoryStackState;
-use evm::executor::stack::StackExecutor;
-use evm::executor::stack::StackSubstateMetadata;
-use evm::Config;
-use log::info;
-use primitive_types::H160;
-use primitive_types::U256;
-use std::collections::BTreeMap;
-use std::collections::HashMap;
-use std::str::FromStr;
+use std::{
+    collections::{BTreeMap, HashMap},
+    str::FromStr,
+};
 
-use crate::executable::EvmExecutable;
+use evm::{
+    backend::Apply,
+    executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata},
+    Config,
+};
+use log::info;
+use primitive_types::{H160, U256};
+
+use crate::{
+    compiler_context::EvmCompilerContext,
+    executable::EvmExecutable,
+    io_interface::{CustomMemoryAccount, EvmIoInterface},
+    types::EvmTypeValue,
+};
 
 pub struct EvmExecutor<'a> {
     pub context: &'a EvmCompilerContext,
@@ -91,7 +93,7 @@ impl<'a> EvmExecutor<'a> {
         );
 
         let (state_apply, _logs) = executor.into_state().deconstruct();
-        info!("Exit reason: {:#?}", exit_reason);
+        info!("\n\n\nExit reason: {:#?}", exit_reason);
         info!("Result: {:#?}", result);
 
         let mut ret = ExecutorResult {

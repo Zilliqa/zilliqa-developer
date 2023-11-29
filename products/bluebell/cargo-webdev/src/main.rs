@@ -1,10 +1,15 @@
+use std::{
+    path::Path,
+    sync::{Arc, Mutex},
+};
+
 use notify::{recommended_watcher, RecursiveMode, Watcher};
-use std::path::Path;
-use std::sync::{Arc, Mutex};
-use tokio::io::{self, AsyncReadExt, AsyncWriteExt};
-use tokio::process::{Child, Command};
-use tokio::sync::broadcast;
-use tokio::time::{sleep, Duration};
+use tokio::{
+    io::{self, AsyncReadExt, AsyncWriteExt},
+    process::{Child, Command},
+    sync::broadcast,
+    time::{sleep, Duration},
+};
 
 async fn stream_output(mut child: Child) -> Result<Child, Box<dyn std::error::Error>> {
     let mut stdout = child

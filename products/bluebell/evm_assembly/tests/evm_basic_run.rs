@@ -1,13 +1,12 @@
-use std::str::FromStr;
+use std::{collections::BTreeMap, str::FromStr};
 
-use evm::backend::Backend;
-use evm::executor::stack::PrecompileFn;
-use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
-use evm::{Context, ExitError, ExitSucceed};
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::types::EvmTypeValue;
+use evm::{
+    backend::Backend,
+    executor::stack::{PrecompileFailure, PrecompileFn, PrecompileOutput, PrecompileOutputType},
+    Context, ExitError, ExitSucceed,
+};
+use evm_assembly::{compiler_context::EvmCompilerContext, types::EvmTypeValue};
 use primitive_types::H160;
-use std::collections::BTreeMap;
 
 // See
 // https://odra.dev/blog/evm-at-risc0/
@@ -58,14 +57,11 @@ pub fn get_precompiles() -> BTreeMap<H160, PrecompileFn> {
 
 #[cfg(test)]
 mod tests {
-    use evm_assembly::executor::EvmExecutor;
-    use evm_assembly::types::EvmType;
     use std::str::FromStr;
 
-    use crate::test_precompile;
-    use crate::{EvmCompilerContext, EvmTypeValue};
+    use evm_assembly::{executor::EvmExecutor, types::EvmType, EvmByteCodeBuilder};
 
-    use evm_assembly::EvmByteCodeBuilder;
+    use crate::{test_precompile, EvmCompilerContext, EvmTypeValue};
 
     #[test]
     fn blah() {
