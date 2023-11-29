@@ -10,18 +10,7 @@ import "./Bridged.sol";
 using ECDSA for bytes32;
 using MessageHashUtils for bytes;
 
-contract Relayer {
-    ValidatorManager public validatorManager;
-    // targetChainId => caller => nonce
-    mapping(address => uint) public nonces;
-    // sourceChainId => caller => dispatched
-    mapping(uint => mapping(address => mapping(uint => bool)))
-        public dispatched;
-    // targetChainId => caller => resumed
-    mapping(address => mapping(uint => bool)) public resumed;
-    mapping(address => uint) public feeDeposit;
-    mapping(address => uint) public feeRefund;
-
+interface IRelayerEvents {
     event TwinDeployment(address indexed twin);
     event Relayed(
         uint indexed targetChainId,
@@ -48,13 +37,30 @@ contract Relayer {
         bytes response,
         uint indexed nonce
     );
+}
 
+interface IRelayerErrors {
     error FailedDeploymentInitialization();
     error InvalidSignatures();
     error NoSupermajority();
     error NonContractCaller();
     error AlreadyResumed();
     error AlreadyDispatched();
+}
+
+interface IRelayer is IRelayerEvents, IRelayerErrors {}
+
+contract Relayer is IRelayer {
+    ValidatorManager public validatorManager;
+    // targetChainId => caller => nonce
+    mapping(address => uint) public nonces;
+    // sourceChainId => caller => dispatched
+    mapping(uint => mapping(address => mapping(uint => bool)))
+        public dispatched;
+    // targetChainId => caller => resumed
+    mapping(address => mapping(uint => bool)) public resumed;
+    mapping(address => uint) public feeDeposit;
+    mapping(address => uint) public feeRefund;
 
     modifier onlyContractCaller(address caller) {
         if (caller.code.length == 0) {
@@ -70,7 +76,7 @@ contract Relayer {
     function validateRequest(
         bytes memory encodedMessage,
         bytes[] memory signatures
-    ) private view {
+    ) internal view {
         bytes32 hash = encodedMessage.toEthSignedMessageHash();
         if (!validatorManager.validateUniqueSignatures(hash, signatures)) {
             revert InvalidSignatures();
@@ -204,7 +210,7 @@ contract Relayer {
         bytes calldata response,
         uint nonce,
         bytes[] calldata signatures
-    ) external payable meterFee(caller) {
+    ) external payable meterFee(caller) onlyContractCaller(caller) {
         if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }

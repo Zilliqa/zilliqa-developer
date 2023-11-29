@@ -222,7 +222,7 @@ The bridge will have the following deliverables:
 The MVP bridge will run on a gossip network with validators managed by Zilliqa
 
 - [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
-  - [ ] Integrate foundry to support effective unit testing on contracts
+  - [x] Integrate foundry to support effective unit testing on contracts
   - [x] Finish remaining TODO tests
   - [x] Update error handling on contracts
   - [ ] Optional resume callback
@@ -234,6 +234,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Fuzz + invariant testing
   - [ ] Synchronizing validators cross-chain
   - [x] CI automated testing
+  - [ ] Split bridged incoming and outgoing interfaces
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
   - [ ] Determine type of connection to use to connect to non-zilliqa chains
