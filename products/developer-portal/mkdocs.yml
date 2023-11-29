@@ -288,6 +288,7 @@ nav:
           - Faucet: developers/developer-toolings/dev-tools-faucet.md
       - Other Developer Information:
           - Dev Wrapped Zil: developers/other-developer-information/dev-wrapped-tokens.md
+          - v9.3.0 Miners rehearsal join: developers/other-developer-information/dev-miners-rehearsal-v93-join.md
       - Transaction Lifecycle:
           - Signing: developers/transaction-lifecycle/dev-txn-signing.md
           - Broadcasting: developers/transaction-lifecycle/dev-txn-broadcasting.md
