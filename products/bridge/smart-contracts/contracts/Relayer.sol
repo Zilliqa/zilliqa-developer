@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import "hardhat/console.sol";
-
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
@@ -13,16 +11,16 @@ using ECDSA for bytes32;
 using MessageHashUtils for bytes;
 
 contract Relayer {
-    ValidatorManager private validatorManager;
+    ValidatorManager public validatorManager;
     // targetChainId => caller => nonce
-    mapping(address => uint) private _nonces;
+    mapping(address => uint) public nonces;
     // sourceChainId => caller => dispatched
     mapping(uint => mapping(address => mapping(uint => bool)))
-        private _dispatched;
+        public dispatched;
     // targetChainId => caller => resumed
-    mapping(address => mapping(uint => bool)) private _resumed;
-    mapping(address => uint) private _gas;
-    mapping(address => uint) private _refund;
+    mapping(address => mapping(uint => bool)) public resumed;
+    mapping(address => uint) public gasDeposit;
+    mapping(address => uint) public gasRefund;
 
     event TwinDeployment(address indexed twin);
     event Relayed(
@@ -110,46 +108,33 @@ contract Relayer {
             call,
             readonly,
             callback,
-            _nonces[msg.sender]
+            nonces[msg.sender]
         );
-        return ++_nonces[msg.sender];
+        return ++nonces[msg.sender];
     }
 
-    // TODO: remove later, used for testing
-    function warmup() external {
-        ++_refund[msg.sender];
-    }
-
-    function topUpGas(address target) external payable {
-        _gas[target] += msg.value;
+    function depositGas() external payable {
+        gasDeposit[msg.sender] += msg.value;
     }
 
     function refundGas() external {
-        uint amount = _refund[msg.sender];
-        _refund[msg.sender] = 0;
+        uint amount = gasRefund[msg.sender];
+        gasRefund[msg.sender] = 0;
         payable(msg.sender).transfer(amount);
-    }
-
-    function refund(address x) external view returns (uint) {
-        return _refund[x];
-    }
-
-    function gas(address x) external view {
-        _gas[x];
     }
 
     modifier trackGas(address caller) {
         uint gasStart = gasleft();
         require(
-            _gas[caller] >= block.gaslimit * tx.gasprice,
+            gasDeposit[caller] >= block.gaslimit * tx.gasprice,
             "Insufficient gas to cover limit"
         );
         _;
-        // 27603 = 21000 + 3 + 6600
-        gasStart += 27603 + 16 * (msg.data.length - 4);
+        // 44703 = 21000 + 3 + 6600 + 17100
+        gasStart += 44703 + 16 * (msg.data.length - 4);
         uint spent = (gasStart - gasleft()) * tx.gasprice;
-        _gas[caller] -= spent;
-        _refund[msg.sender] += spent;
+        gasDeposit[caller] -= spent;
+        gasRefund[msg.sender] += spent;
     }
 
     function dispatch(
@@ -161,9 +146,11 @@ contract Relayer {
         uint nonce,
         bytes[] calldata signatures
     ) external trackGas(caller) onlyContractCaller(caller) {
-        if (_dispatched[sourceChainId][caller][nonce]) {
+        // TODO: Only validator
+        if (dispatched[sourceChainId][caller][nonce]) {
             revert AlreadyDispatched();
         }
+        dispatched[sourceChainId][caller][nonce] = true;
 
         bytes memory message = abi.encode(
             sourceChainId,
@@ -190,7 +177,6 @@ contract Relayer {
             response,
             nonce
         );
-        _dispatched[sourceChainId][caller][nonce] = true;
     }
 
     function query(
@@ -215,8 +201,8 @@ contract Relayer {
         bytes calldata response,
         uint nonce,
         bytes[] calldata signatures
-    ) external payable {
-        if (_resumed[caller][nonce]) {
+    ) external payable trackGas(caller) {
+        if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
         bytes memory message = abi.encode(
@@ -242,6 +228,6 @@ contract Relayer {
         }(call);
 
         emit Resumed(targetChainId, caller, call, success2, response2, nonce);
-        _resumed[caller][nonce] = true;
+        resumed[caller][nonce] = true;
     }
 }

@@ -46,7 +46,7 @@ describe("Bridge", function () {
 
     const twin1 = await ethers.getContractAt("Twin", twinAddress);
 
-    await relayer1.topUpGas(await twin1.getAddress(), {
+    await twin1.depositGas({
       value: parseEther("1"),
     });
 
@@ -69,7 +69,7 @@ describe("Bridge", function () {
 
     const twin2 = await ethers.getContractAt("Twin", twinAddress);
 
-    await relayer2.topUpGas(await twin2.getAddress(), {
+    await twin2.depositGas({
       value: parseEther("1"),
     });
 
@@ -450,7 +450,7 @@ describe("Bridge", function () {
     ]);
   });
 
-  it.only("should handle multiple remote calls requested by the same contract", async function () {
+  it("should handle multiple remote calls requested by the same contract", async function () {
     const {
       collector,
       twin1,
@@ -486,8 +486,6 @@ describe("Bridge", function () {
         anyValue
       );
 
-    await relayer2.connect(validators2[0]).warmup();
-
     const { dispatchTxn } = await dispatchMessage(
       1,
       2,
@@ -517,7 +515,6 @@ describe("Bridge", function () {
     switchNetwork(1);
 
     await relayer2.connect(validators2[0]).refundGas();
-    await relayer2.connect(validators2[0]).warmup();
 
     const tx2 = await twin1
       .connect(validators1[0])

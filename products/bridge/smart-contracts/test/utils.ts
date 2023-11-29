@@ -76,12 +76,13 @@ export async function dispatchMessage(
       callSignatures
     );
     dispatchTxn = await txResponse.wait();
-    console.log("gas used: ", dispatchTxn?.gasUsed);
-    const x = await relayerTarget.refund(
-      await validatorsTarget[0].getAddress()
-    );
-    console.log(x / (dispatchTxn?.gasPrice ?? 1n));
-    console.log("gas price: ", dispatchTxn?.gasPrice);
+    // Calculate gas usage of dispatch
+    // console.log("gas used: ", dispatchTxn?.gasUsed);
+    // const x = await relayerTarget.gasRefund(
+    //   await validatorsTarget[0].getAddress()
+    // );
+    // console.log(x / (dispatchTxn?.gasPrice ?? 1n));
+    // console.log("gas price: ", dispatchTxn?.gasPrice);
 
     if (!dispatchTxn) {
       expect.fail("tx is null");
@@ -465,7 +466,8 @@ export async function dispatchCall(
   signatures: string[]
 ) {
   // the next leader dispatches the relayed call
-  const leaderValidator = validators[0];
+  const leaderValidator =
+    validators[Math.floor(Math.random() * validators.length)];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
     [
       "uint256",
