@@ -27,6 +27,8 @@ jobs:
             devex,
             devex-apollo,
             eth-spout,
+            governance-api,
+            governance-snapshot,
             neo-savant,
             zilliqa-isolated-server,
             zillion,
@@ -57,6 +59,16 @@ jobs:
             path: products/eth-spout
             tag_length: 9
             tag_latest: true
+          - application: governance-api
+            image_name: governance-api
+            path: products/governance-api
+            tag_length: 8
+            tag_latest: false
+          - application: governance-snapshot
+            image_name: governance-snapshot
+            path: products/governance-snapshot
+            tag_length: 8
+            tag_latest: false
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant

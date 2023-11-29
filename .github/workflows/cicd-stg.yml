@@ -22,7 +22,15 @@ jobs:
       fail-fast: false
       matrix:
         application:
-          [developer-portal, devex, devex-apollo, neo-savant, zillion]
+          [
+            developer-portal,
+            devex,
+            devex-apollo,
+            governance-api,
+            governance-snapshot,
+            neo-savant,
+            zillion,
+          ]
         include:
           - application: developer-portal
             image_name: developer-portal
@@ -42,6 +50,16 @@ jobs:
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
+          - application: governance-api
+            image_name: governance-api
+            path: products/governance-api
+            tag_length: 8
+            tag_latest: false
+          - application: governance-snapshot
+            image_name: governance-snapshot
+            path: products/governance-snapshot
             tag_length: 8
             tag_latest: false
           - application: pdt

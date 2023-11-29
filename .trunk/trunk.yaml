@@ -37,7 +37,9 @@ lint:
       paths:
         - needing-organisation/**/*
         - products/devex/public/*.js
-        - products/zillion/**  
+        - products/governance-api/**
+        - products/governance-snapshot/**
+        - products/zillion/**
         - .devcontainer/*
         - .devcontainer/**
         - .trunk/*out/**
