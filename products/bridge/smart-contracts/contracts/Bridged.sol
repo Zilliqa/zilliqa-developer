@@ -60,8 +60,8 @@ abstract contract Bridged is Initializable {
         (success, response) = target.staticcall{gas: 100000}(call);
     }
 
-    function depositGas() external payable virtual {
-        relayer.depositGas{value: msg.value}();
+    function depositFee() external payable virtual {
+        relayer.depositFee{value: msg.value}();
     }
 }
 

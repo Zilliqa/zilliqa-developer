@@ -46,7 +46,7 @@ describe("Bridge", function () {
 
     const twin1 = await ethers.getContractAt("Twin", twinAddress);
 
-    await twin1.depositGas({
+    await twin1.depositFee({
       value: parseEther("1"),
     });
 
@@ -69,7 +69,7 @@ describe("Bridge", function () {
 
     const twin2 = await ethers.getContractAt("Twin", twinAddress);
 
-    await twin2.depositGas({
+    await twin2.depositFee({
       value: parseEther("1"),
     });
 
@@ -514,7 +514,7 @@ describe("Bridge", function () {
 
     switchNetwork(1);
 
-    await relayer2.connect(validators2[0]).refundGas();
+    await relayer2.connect(validators2[0]).refundFee();
 
     const tx2 = await twin1
       .connect(validators1[0])

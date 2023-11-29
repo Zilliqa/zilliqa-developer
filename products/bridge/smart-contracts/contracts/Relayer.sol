@@ -19,8 +19,8 @@ contract Relayer {
         public dispatched;
     // targetChainId => caller => resumed
     mapping(address => mapping(uint => bool)) public resumed;
-    mapping(address => uint) public gasDeposit;
-    mapping(address => uint) public gasRefund;
+    mapping(address => uint) public feeDeposit;
+    mapping(address => uint) public feeRefund;
 
     event TwinDeployment(address indexed twin);
     event Relayed(
@@ -113,20 +113,20 @@ contract Relayer {
         return ++nonces[msg.sender];
     }
 
-    function depositGas() external payable {
-        gasDeposit[msg.sender] += msg.value;
+    function depositFee() external payable {
+        feeDeposit[msg.sender] += msg.value;
     }
 
-    function refundGas() external {
-        uint amount = gasRefund[msg.sender];
-        gasRefund[msg.sender] = 0;
+    function refundFee() external {
+        uint amount = feeRefund[msg.sender];
+        feeRefund[msg.sender] = 0;
         payable(msg.sender).transfer(amount);
     }
 
-    modifier trackGas(address caller) {
+    modifier meterFee(address caller) {
         uint gasStart = gasleft();
         require(
-            gasDeposit[caller] >= block.gaslimit * tx.gasprice,
+            feeDeposit[caller] >= block.gaslimit * tx.gasprice,
             "Insufficient gas to cover limit"
         );
         _;
@@ -136,8 +136,8 @@ contract Relayer {
         // 21000 = fixed cost of transaction
         gasStart += 44703 + 16 * (msg.data.length - 4);
         uint spent = (gasStart - gasleft()) * tx.gasprice;
-        gasDeposit[caller] -= spent;
-        gasRefund[msg.sender] += spent;
+        feeDeposit[caller] -= spent;
+        feeRefund[msg.sender] += spent;
     }
 
     function dispatch(
@@ -148,7 +148,7 @@ contract Relayer {
         bytes4 callback,
         uint nonce,
         bytes[] calldata signatures
-    ) external trackGas(caller) onlyContractCaller(caller) {
+    ) external meterFee(caller) onlyContractCaller(caller) {
         // TODO: Only validator
         if (dispatched[sourceChainId][caller][nonce]) {
             revert AlreadyDispatched();
@@ -204,7 +204,7 @@ contract Relayer {
         bytes calldata response,
         uint nonce,
         bytes[] calldata signatures
-    ) external payable trackGas(caller) {
+    ) external payable meterFee(caller) {
         if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
