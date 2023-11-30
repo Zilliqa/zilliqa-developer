@@ -1,57 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import "contracts/ValidatorManager.sol";
-import "contracts/Relayer.sol";
-import "./Tester.sol";
-
-using ECDSA for bytes32;
-using MessageHashUtils for bytes;
-
-contract BridgeTarget {
-    uint public c = 0;
-
-    function work(uint num_) external pure returns (uint) {
-        require(num_ < 1000, "Too large");
-        return num_ + 1;
-    }
-
-    function infiniteLoop() public {
-        while (true) {
-            c = c + 1;
-        }
-    }
-}
-
-contract SimpleBridge is Bridged {
-    function initialize(Relayer relayer) public initializer {
-        __Bridged_init(relayer);
-    }
-}
-
-abstract contract RelayerTestFixture is Tester, IRelayer {
-    ValidatorManager validatorManager;
-    Relayer relayer;
-    uint constant validatorCount = 10;
-    Vm.Wallet[] validators = new Vm.Wallet[](validatorCount);
-    SimpleBridge immutable bridge = new SimpleBridge();
-
-    constructor() {
-        // Setup validator manager
-        address[] memory validatorAddresses = new address[](validatorCount);
-        for (uint i = 0; i < validatorCount; ++i) {
-            validators[i] = vm.createWallet(i + 1);
-            validatorAddresses[i] = validators[i].addr;
-        }
-        validatorManager = new ValidatorManager(validatorAddresses);
-        // Setup relayer
-        relayer = new Relayer(validatorManager);
-        // Initialise bridge
-        bridge.initialize(relayer);
-    }
-}
+import {RelayerTestFixture, Vm, ValidatorManager, BridgeTarget, MessageHashUtils, IRelayerEvents} from "./Helpers.sol";
 
 contract Dispatch is RelayerTestFixture {
+    using MessageHashUtils for bytes;
+
     BridgeTarget immutable bridgeTarget = new BridgeTarget();
 
     function setUp() public {
@@ -337,56 +291,4 @@ contract Dispatch is RelayerTestFixture {
 
         assertEq(bridgeTarget.c(), uint(0));
     }
-}
-
-contract Resume is Tester {}
-
-contract SignatureValidation is Tester {
-    function test_happyPath() external TODO {}
-
-    function testRevert_noSignatures() external TODO {}
-
-    function testRevert_emptyMessage() external TODO {}
-
-    function testRevert_noMajority() external TODO {}
-
-    function testRevert_invalidSignature() external TODO {}
-
-    function testRevert_unorderedSignatures() external TODO {}
-
-    function testRevert_repeatedSigners() external TODO {}
-}
-
-contract Fees is Tester {
-    function test_feesRefundedToValidator() external TODO {}
-
-    function testRevert_insufficientFees() external TODO {}
-
-    function test_enoughRefundWhenSingleValidator() external TODO {}
-
-    function test_enoughRefundWhenManyValidators() external TODO {}
-
-    function test_enoughRefundWhenNoArgumentCall() external TODO {}
-
-    function test_enoughRefundWhenManyArgumentCall() external TODO {}
-
-    function testFuzz_varyValidators() external TODO {}
-
-    function testFuzz_varyGasPrice() external TODO {}
-
-    function test_validatorFeeRefund() external TODO {}
-
-    function test_validatorFeeRefundWhenMultipleCalls() external TODO {}
-
-    function test_validatorFeeRefundWhenNoFees() external TODO {}
-
-    function test_depositFee() external TODO {}
-}
-
-contract TwinDeployment is Tester {
-    function test_happyPath() external TODO {}
-}
-
-contract Relay is Tester {
-    function test_happyPath() external TODO {}
 }
