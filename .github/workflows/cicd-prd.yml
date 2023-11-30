@@ -30,8 +30,8 @@ jobs:
             governance-api,
             governance-snapshot,
             neo-savant,
-            zilliqa-isolated-server,
             zillion,
+            zilliqa-isolated-server,
           ]
         include:
           - application: bluebell-playground
