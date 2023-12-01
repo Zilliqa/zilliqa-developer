@@ -50,14 +50,14 @@ contract BridgeTarget is IReentrancy {
 
     function reentrancy() external {
         if (alreadyEntered) {
-            revert Reentrancy.ReentrancyVulnerability();
+            revert IReentrancy.ReentrancyVulnerability();
         }
         alreadyEntered = true;
         (bool success, ) = reentrancyTarget.call(reentrancyCalldata);
         if (success) {
-            revert Reentrancy.ReentrancyVulnerability();
+            revert IReentrancy.ReentrancyVulnerability();
         }
-        revert Reentrancy.ReentrancySafe();
+        revert IReentrancy.ReentrancySafe();
     }
 }
 
