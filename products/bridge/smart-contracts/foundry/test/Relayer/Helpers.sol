@@ -7,7 +7,12 @@ import "foundry/test/Tester.sol";
 
 using ECDSA for bytes32;
 
-contract BridgeTarget {
+interface IReentrancy {
+    error ReentrancyVulnerability();
+    error ReentrancySafe();
+}
+
+contract BridgeTarget is IReentrancy {
     uint public c = 0;
 
     function work(uint num_) external pure returns (uint) {
@@ -32,6 +37,27 @@ contract BridgeTarget {
         res;
         nonce;
         revert();
+    }
+
+    bool public alreadyEntered = false;
+    bytes public reentrancyCalldata;
+    address public reentrancyTarget;
+
+    function setReentrancyConfig(address target, bytes calldata data) external {
+        reentrancyTarget = target;
+        reentrancyCalldata = data;
+    }
+
+    function reentrancy() external {
+        if (alreadyEntered) {
+            revert Reentrancy.ReentrancyVulnerability();
+        }
+        alreadyEntered = true;
+        (bool success, ) = reentrancyTarget.call(reentrancyCalldata);
+        if (success) {
+            revert Reentrancy.ReentrancyVulnerability();
+        }
+        revert Reentrancy.ReentrancySafe();
     }
 }
 

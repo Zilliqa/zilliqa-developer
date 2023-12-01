@@ -235,7 +235,7 @@ contract Relayer is IRelayer {
             nonce
         );
         // TODO: Specifiy gas
-        (bool success2, bytes memory response2) = caller.call{gas: 100000}(
+        (bool success2, bytes memory response2) = caller.call{gas: 1_000_000}(
             call
         );
 

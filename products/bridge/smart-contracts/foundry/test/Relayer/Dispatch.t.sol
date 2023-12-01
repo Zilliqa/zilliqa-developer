@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {RelayerTestFixture, Vm, ValidatorManager, BridgeTarget, MessageHashUtils} from "./Helpers.sol";
+import {RelayerTestFixture, Vm, ValidatorManager, BridgeTarget, MessageHashUtils, IReentrancy} from "./Helpers.sol";
 import {IRelayerEvents, IRelayerErrors} from "contracts/Relayer.sol";
 
 contract Dispatch is RelayerTestFixture, IRelayerEvents {
@@ -293,5 +293,54 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
         assertEq(bridgeTarget.c(), uint(0));
     }
 
-    function test_reentrancy() external TODO {}
+    function test_reentrancy() external {
+        bytes memory call = abi.encodeWithSelector(
+            bridgeTarget.reentrancy.selector
+        );
+        (
+            uint sourceChainId,
+            address caller,
+            address target,
+            bytes4 callback,
+            uint nonce,
+            bytes[] memory signatures
+        ) = getDispatchArgs(call);
+
+        bridgeTarget.setReentrancyConfig(
+            address(relayer),
+            abi.encodeWithSelector(
+                relayer.dispatch.selector,
+                sourceChainId,
+                caller,
+                target,
+                call,
+                callback,
+                nonce,
+                signatures
+            )
+        );
+
+        // Dispatch
+        bytes memory expectedError = abi.encodeWithSelector(
+            IReentrancy.ReentrancySafe.selector
+        );
+        vm.expectEmit(address(relayer));
+        emit IRelayerEvents.Dispatched(
+            sourceChainId,
+            caller,
+            callback,
+            false,
+            expectedError,
+            nonce
+        );
+        relayer.dispatch(
+            sourceChainId,
+            caller,
+            target,
+            call,
+            callback,
+            nonce,
+            signatures
+        );
+    }
 }
