@@ -210,10 +210,13 @@ contract Relayer is IRelayer {
         bytes calldata response,
         uint nonce,
         bytes[] calldata signatures
-    ) external payable meterFee(caller) onlyContractCaller(caller) {
+    ) external meterFee(caller) onlyContractCaller(caller) {
+        // TODO: nonce must be smaller equal to nonces[caller]
         if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
+        resumed[caller][nonce] = true;
+
         bytes memory message = abi.encode(
             block.chainid,
             targetChainId,
@@ -231,12 +234,11 @@ contract Relayer is IRelayer {
             response,
             nonce
         );
-        (bool success2, bytes memory response2) = caller.call{
-            value: msg.value,
-            gas: 100000
-        }(call);
+        // TODO: Specifiy gas
+        (bool success2, bytes memory response2) = caller.call{gas: 100000}(
+            call
+        );
 
         emit Resumed(targetChainId, caller, call, success2, response2, nonce);
-        resumed[caller][nonce] = true;
     }
 }

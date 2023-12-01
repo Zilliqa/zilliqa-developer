@@ -20,6 +20,19 @@ contract BridgeTarget {
             c = c + 1;
         }
     }
+
+    function finish(bool success, bytes calldata res, uint nonce) external {}
+
+    function finishRevert(
+        bool success,
+        bytes calldata res,
+        uint nonce
+    ) external pure {
+        success;
+        res;
+        nonce;
+        revert();
+    }
 }
 
 contract SimpleBridge is Bridged {
@@ -45,7 +58,7 @@ contract RelayerHarness is Relayer {
     }
 }
 
-abstract contract RelayerTestFixture is Tester, IRelayer {
+abstract contract RelayerTestFixture is Tester {
     using MessageHashUtils for bytes;
 
     ValidatorManager validatorManager;

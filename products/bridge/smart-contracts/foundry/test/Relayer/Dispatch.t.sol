@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {RelayerTestFixture, Vm, ValidatorManager, BridgeTarget, MessageHashUtils, IRelayerEvents} from "./Helpers.sol";
+import {RelayerTestFixture, Vm, ValidatorManager, BridgeTarget, MessageHashUtils} from "./Helpers.sol";
+import {IRelayerEvents, IRelayerErrors} from "contracts/Relayer.sol";
 
-contract Dispatch is RelayerTestFixture {
+contract Dispatch is RelayerTestFixture, IRelayerEvents {
     using MessageHashUtils for bytes;
 
     BridgeTarget immutable bridgeTarget = new BridgeTarget();
@@ -141,7 +142,7 @@ contract Dispatch is RelayerTestFixture {
         ) = getDispatchArgs();
         uint dispatchedNonce = signedNonce + 1;
 
-        vm.expectRevert(InvalidSignatures.selector);
+        vm.expectRevert(IRelayerErrors.InvalidSignatures.selector);
         // Dispatch
         relayer.dispatch(
             sourceChainId,
@@ -177,7 +178,7 @@ contract Dispatch is RelayerTestFixture {
             signatures
         );
         // Replay
-        vm.expectRevert(AlreadyDispatched.selector);
+        vm.expectRevert(IRelayerErrors.AlreadyDispatched.selector);
         relayer.dispatch(
             sourceChainId,
             caller,
@@ -189,7 +190,7 @@ contract Dispatch is RelayerTestFixture {
         );
     }
 
-    function test_unsuccessfulCalls() external {
+    function test_failedCall() external {
         uint num = 1000;
         bytes memory failedCall = abi.encodeWithSelector(
             bridgeTarget.work.selector,
@@ -243,7 +244,7 @@ contract Dispatch is RelayerTestFixture {
         ) = getDispatchArgs();
 
         // Dispatch
-        vm.expectRevert(NonContractCaller.selector);
+        vm.expectRevert(IRelayerErrors.NonContractCaller.selector);
         relayer.dispatch(
             sourceChainId,
             vm.addr(1001),
@@ -255,7 +256,7 @@ contract Dispatch is RelayerTestFixture {
         );
     }
 
-    function testRevert_overspentgas() external {
+    function test_outOfGasCall() external {
         bytes memory call = abi.encodeWithSelector(
             bridgeTarget.infiniteLoop.selector
         );
@@ -291,4 +292,6 @@ contract Dispatch is RelayerTestFixture {
 
         assertEq(bridgeTarget.c(), uint(0));
     }
+
+    function test_reentrancy() external TODO {}
 }

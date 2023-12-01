@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IValidatorManager {
+interface IValidatorManagerErrors {
     error NonUniqueOrUnorderedSignatures();
 }
 
-contract ValidatorManager is Ownable, IValidatorManager {
+contract ValidatorManager is Ownable, IValidatorManagerErrors {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes;
     using EnumerableSet for EnumerableSet.AddressSet;

@@ -62,7 +62,6 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         bytes calldata call
     )
         external
-        payable
         override
         onlyTwinChain(sourceChainId)
         returns (bool success, bytes memory response)

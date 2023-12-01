@@ -36,7 +36,7 @@ abstract contract Bridged is Initializable {
         address target,
         bytes calldata call
     ) internal onlyRelayer returns (bool success, bytes memory response) {
-        (success, response) = target.call{value: msg.value, gas: 100000}(call);
+        (success, response) = target.call{gas: 100000}(call);
     }
 
     function dispatched(
@@ -45,7 +45,6 @@ abstract contract Bridged is Initializable {
         bytes calldata call
     )
         external
-        payable
         virtual
         onlyRelayer
         returns (bool success, bytes memory response)

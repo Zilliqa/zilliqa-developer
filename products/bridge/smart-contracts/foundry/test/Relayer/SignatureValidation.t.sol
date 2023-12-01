@@ -2,7 +2,8 @@
 pragma solidity 0.8.20;
 
 import {RelayerTestFixture, Vm, ValidatorManager, MessageHashUtils} from "./Helpers.sol";
-import {IValidatorManager} from "contracts/ValidatorManager.sol";
+import {IValidatorManagerErrors} from "contracts/ValidatorManager.sol";
+import {IRelayerErrors} from "contracts/Relayer.sol";
 
 contract SignatureValidation is RelayerTestFixture {
     using MessageHashUtils for bytes;
@@ -60,14 +61,14 @@ contract SignatureValidation is RelayerTestFixture {
             message.toEthSignedMessageHash()
         );
         // If it works does not do anything
-        vm.expectRevert(NoSupermajority.selector);
+        vm.expectRevert(IRelayerErrors.NoSupermajority.selector);
         relayer.exposed_validateRequest(message, signatures);
     }
 
     function testRevert_noSignatures() external {
         bytes memory message = "Hello world";
         bytes[] memory signatures = new bytes[](0);
-        vm.expectRevert(NoSupermajority.selector);
+        vm.expectRevert(IRelayerErrors.NoSupermajority.selector);
         relayer.exposed_validateRequest(message, signatures);
     }
 
@@ -88,7 +89,7 @@ contract SignatureValidation is RelayerTestFixture {
         );
         // Manipulate one of the bytes in the first signature
         signatures[0][0] = 0;
-        vm.expectRevert(InvalidSignatures.selector);
+        vm.expectRevert(IRelayerErrors.InvalidSignatures.selector);
         relayer.exposed_validateRequest(message, signatures);
     }
 
@@ -100,7 +101,7 @@ contract SignatureValidation is RelayerTestFixture {
             message.toEthSignedMessageHash()
         );
         vm.expectRevert(
-            IValidatorManager.NonUniqueOrUnorderedSignatures.selector
+            IValidatorManagerErrors.NonUniqueOrUnorderedSignatures.selector
         );
         relayer.exposed_validateRequest(message, signatures);
     }
@@ -115,7 +116,7 @@ contract SignatureValidation is RelayerTestFixture {
         // Repeat first and second validator
         signatures[0] = signatures[1];
         vm.expectRevert(
-            IValidatorManager.NonUniqueOrUnorderedSignatures.selector
+            IValidatorManagerErrors.NonUniqueOrUnorderedSignatures.selector
         );
         relayer.exposed_validateRequest(message, signatures);
     }
