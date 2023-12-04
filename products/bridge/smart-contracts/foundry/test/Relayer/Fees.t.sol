@@ -4,7 +4,9 @@ pragma solidity 0.8.20;
 import {RelayerTestFixture} from "./Helpers.sol";
 
 contract Fees is RelayerTestFixture {
-    function test_feesRefundedToValidator() external TODO {}
+    function test_feesRefundedToValidator() external TODO {
+        // feeDeposit + feeRefund = initial deposit
+    }
 
     function testRevert_insufficientFees() external TODO {}
 

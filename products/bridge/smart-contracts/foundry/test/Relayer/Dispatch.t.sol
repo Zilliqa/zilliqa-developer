@@ -126,7 +126,7 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
             nonce,
             signatures
         );
-        // Check nonce increased
+        assertEq(relayer.dispatched(sourceChainId, caller, nonce), true);
     }
 
     function testRevert_badSignature() external {

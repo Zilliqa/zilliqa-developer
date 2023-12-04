@@ -46,18 +46,23 @@ interface IRelayerErrors {
     error NonContractCaller();
     error AlreadyResumed();
     error AlreadyDispatched();
+    /**
+     * Occurs when a resume is attempted with a nonce that is greater than the
+     * current nonce for the caller. Trying to resume a call not yet initialised
+     */
+    error IllegalResumeNonce();
 }
 
 interface IRelayer is IRelayerEvents, IRelayerErrors {}
 
 contract Relayer is IRelayer {
     ValidatorManager public validatorManager;
-    // targetChainId => caller => nonce
+    // caller => nonce
     mapping(address => uint) public nonces;
     // sourceChainId => caller => dispatched
     mapping(uint => mapping(address => mapping(uint => bool)))
         public dispatched;
-    // targetChainId => caller => resumed
+    // caller => resumed
     mapping(address => mapping(uint => bool)) public resumed;
     mapping(address => uint) public feeDeposit;
     mapping(address => uint) public feeRefund;
@@ -211,7 +216,9 @@ contract Relayer is IRelayer {
         uint nonce,
         bytes[] calldata signatures
     ) external meterFee(caller) onlyContractCaller(caller) {
-        // TODO: nonce must be smaller equal to nonces[caller]
+        if (nonce > nonces[caller]) {
+            revert IllegalResumeNonce();
+        }
         if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
