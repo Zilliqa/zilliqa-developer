@@ -4,8 +4,48 @@ pragma solidity 0.8.20;
 import {RelayerTestFixture, Vm, ValidatorManager, BridgeTarget, MessageHashUtils, IReentrancy} from "./Helpers.sol";
 import {IRelayerEvents, IRelayerErrors} from "contracts/Relayer.sol";
 
+struct DispatchArgs {
+    uint sourceChainId;
+    address caller;
+    address target;
+    bytes call;
+    bytes4 callback;
+    uint nonce;
+}
+
+library DispatchArgsBuilder {
+    function instance(
+        address caller,
+        address target
+    ) external pure returns (DispatchArgs memory args) {
+        args.sourceChainId = 1;
+        args.caller = caller;
+        args.call = abi.encodeWithSelector(BridgeTarget.work.selector, uint(1));
+        args.target = target;
+        args.callback = bytes4(0);
+        args.nonce = 1;
+    }
+
+    function withCall(
+        DispatchArgs memory args,
+        bytes calldata call
+    ) external pure returns (DispatchArgs memory) {
+        args.call = call;
+        return args;
+    }
+
+    function withCaller(
+        DispatchArgs memory args,
+        address caller
+    ) external pure returns (DispatchArgs memory) {
+        args.caller = caller;
+        return args;
+    }
+}
+
 contract Dispatch is RelayerTestFixture, IRelayerEvents {
     using MessageHashUtils for bytes;
+    using DispatchArgsBuilder for DispatchArgs;
 
     BridgeTarget immutable bridgeTarget = new BridgeTarget();
 
@@ -14,82 +54,19 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
         bridge.depositFee{value: 1 ether}();
     }
 
-    function getDispatchArgs()
-        public
-        returns (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes memory call,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        )
-    {
-        sourceChainId = 1;
-        caller = address(bridge);
-        call = abi.encodeWithSelector(bridgeTarget.work.selector, uint(1));
-        target = address(bridgeTarget);
-        callback = bytes4(0);
-        nonce = 1;
-        // Generate signatures
-        signatures = signDispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce
-        );
-    }
-
-    function getDispatchArgs(
-        bytes memory call
-    )
-        public
-        returns (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        )
-    {
-        sourceChainId = 1;
-        caller = address(bridge);
-        target = address(bridgeTarget);
-        callback = bytes4(0);
-        nonce = 1;
-        // Generate signatures
-        signatures = signDispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce
-        );
-    }
-
     function signDispatch(
-        uint sourceChainId,
-        address caller,
-        address target,
-        bytes memory call,
-        bytes4 callback,
-        uint nonce
+        DispatchArgs memory args
     ) public returns (bytes[] memory signatures) {
         bytes32 hashedMessage = abi
             .encode(
-                sourceChainId,
+                args.sourceChainId,
                 block.chainid,
-                caller,
-                target,
-                call,
+                args.caller,
+                args.target,
+                args.call,
                 false,
-                callback,
-                nonce
+                args.callback,
+                args.nonce
             )
             .toEthSignedMessageHash();
 
@@ -97,95 +74,86 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
     }
 
     function test_happyPath() external {
-        (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes memory call,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs();
+        DispatchArgs memory args = DispatchArgsBuilder.instance(
+            address(bridge),
+            address(bridgeTarget)
+        );
+        bytes[] memory signatures = signDispatch(args);
 
-        vm.expectCall(address(bridgeTarget), call);
+        vm.expectCall(address(bridgeTarget), args.call);
         vm.expectEmit(address(relayer));
         emit IRelayerEvents.Dispatched(
-            sourceChainId,
-            caller,
-            callback,
+            args.sourceChainId,
+            args.caller,
+            args.callback,
             true,
             abi.encode(uint(2)),
-            nonce
+            args.nonce
         );
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
-        assertEq(relayer.dispatched(sourceChainId, caller, nonce), true);
+        assertEq(
+            relayer.dispatched(args.sourceChainId, args.caller, args.nonce),
+            true
+        );
     }
 
     function testRevert_badSignature() external {
         // Prepare call
-        (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes memory call,
-            bytes4 callback,
-            uint signedNonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs();
-        uint dispatchedNonce = signedNonce + 1;
+        DispatchArgs memory args = DispatchArgsBuilder.instance(
+            address(bridge),
+            address(bridgeTarget)
+        );
+        bytes[] memory signatures = signDispatch(args);
+        uint badNonce = args.nonce + 1;
 
         vm.expectRevert(IRelayerErrors.InvalidSignatures.selector);
         // Dispatch
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            dispatchedNonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            badNonce,
             signatures
         );
     }
 
     function testRevert_replay() external {
         // Prepare call
-        (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes memory call,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs();
+        DispatchArgs memory args = DispatchArgsBuilder.instance(
+            address(bridge),
+            address(bridgeTarget)
+        );
+        bytes[] memory signatures = signDispatch(args);
 
         // Dispatch
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
         // Replay
         vm.expectRevert(IRelayerErrors.AlreadyDispatched.selector);
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
     }
@@ -196,14 +164,10 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
             bridgeTarget.work.selector,
             num
         );
-        (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs(failedCall);
+        DispatchArgs memory args = DispatchArgsBuilder
+            .instance(address(bridge), address(bridgeTarget))
+            .withCall(failedCall);
+        bytes[] memory signatures = signDispatch(args);
 
         // Dispatch
         vm.expectCall(address(bridgeTarget), failedCall);
@@ -214,44 +178,39 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
         );
         vm.expectEmit(address(relayer));
         emit IRelayerEvents.Dispatched(
-            sourceChainId,
-            caller,
-            callback,
+            args.sourceChainId,
+            args.caller,
+            args.callback,
             false,
             expectedError,
-            nonce
+            args.nonce
         );
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            failedCall,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
     }
 
     function testRevert_nonContractCaller() external {
-        (
-            uint sourceChainId,
-            ,
-            address target,
-            bytes memory call,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs();
+        DispatchArgs memory args = DispatchArgsBuilder
+            .instance(address(bridge), address(bridgeTarget))
+            .withCaller(vm.addr(1001));
+        bytes[] memory signatures = signDispatch(args);
 
         // Dispatch
         vm.expectRevert(IRelayerErrors.NonContractCaller.selector);
         relayer.dispatch(
-            sourceChainId,
-            vm.addr(1001),
-            target,
-            call,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
     }
@@ -260,33 +219,29 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
         bytes memory call = abi.encodeWithSelector(
             bridgeTarget.infiniteLoop.selector
         );
-        (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs(call);
+        DispatchArgs memory args = DispatchArgsBuilder
+            .instance(address(bridge), address(bridgeTarget))
+            .withCall(call);
+        bytes[] memory signatures = signDispatch(args);
 
         // Dispatch
-        vm.expectCall(address(bridgeTarget), call);
+        vm.expectCall(address(bridgeTarget), args.call);
         vm.expectEmit(address(relayer));
         emit IRelayerEvents.Dispatched(
-            sourceChainId,
-            caller,
-            callback,
+            args.sourceChainId,
+            args.caller,
+            args.callback,
             false,
             hex"", // denotes out of gas
-            nonce
+            args.nonce
         );
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
 
@@ -297,25 +252,21 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
         bytes memory call = abi.encodeWithSelector(
             bridgeTarget.reentrancy.selector
         );
-        (
-            uint sourceChainId,
-            address caller,
-            address target,
-            bytes4 callback,
-            uint nonce,
-            bytes[] memory signatures
-        ) = getDispatchArgs(call);
+        DispatchArgs memory args = DispatchArgsBuilder
+            .instance(address(bridge), address(bridgeTarget))
+            .withCall(call);
+        bytes[] memory signatures = signDispatch(args);
 
         bridgeTarget.setReentrancyConfig(
             address(relayer),
             abi.encodeWithSelector(
                 relayer.dispatch.selector,
-                sourceChainId,
-                caller,
-                target,
-                call,
-                callback,
-                nonce,
+                args.sourceChainId,
+                args.caller,
+                args.target,
+                args.call,
+                args.callback,
+                args.nonce,
                 signatures
             )
         );
@@ -326,20 +277,20 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
         );
         vm.expectEmit(address(relayer));
         emit IRelayerEvents.Dispatched(
-            sourceChainId,
-            caller,
-            callback,
+            args.sourceChainId,
+            args.caller,
+            args.callback,
             false,
             expectedError,
-            nonce
+            args.nonce
         );
         relayer.dispatch(
-            sourceChainId,
-            caller,
-            target,
-            call,
-            callback,
-            nonce,
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
             signatures
         );
     }
