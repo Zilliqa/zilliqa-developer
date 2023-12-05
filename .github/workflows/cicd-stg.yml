@@ -16,68 +16,73 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
+    # if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
     name: "Deploy image"
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [
-            developer-portal,
-            devex,
-            devex-apollo,
-            governance-api,
-            governance-snapshot,
-            neo-savant,
-            zillion,
-            zilliqa-isolated-server,
+        application: [
+            # developer-portal,
+            # devex,
+            # devex-apollo,
+            # governance-api,
+            # governance-snapshot,
+            # neo-savant,
+            scilla-server,
+            # zillion,
+            # zilliqa-isolated-server,
           ]
         include:
-          - application: developer-portal
-            image_name: developer-portal
-            path: products/developer-portal
+          # - application: developer-portal
+          #   image_name: developer-portal
+          #   path: products/developer-portal
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: devex
+          #   image_name: devex
+          #   path: products/devex
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: devex-apollo
+          #   image_name: devex-apollo
+          #   path: products/devex-apollo
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: neo-savant
+          #   image_name: neo-savant
+          #   path: products/neo-savant
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: governance-api
+          #   image_name: governance-api
+          #   path: products/governance-api
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: governance-snapshot
+          #   image_name: governance-snapshot
+          #   path: products/governance-snapshot
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: pdt
+          #   image_name: pdt
+          #   path: products/pdt
+          #   tag_length: 8
+          #   tag_latest: false
+          - application: scilla-server
+            image_name: scilla-server
+            path: products/scilla-server
             tag_length: 8
             tag_latest: false
-          - application: devex
-            image_name: devex
-            path: products/devex
-            tag_length: 8
-            tag_latest: false
-          - application: devex-apollo
-            image_name: devex-apollo
-            path: products/devex-apollo
-            tag_length: 8
-            tag_latest: false
-          - application: neo-savant
-            image_name: neo-savant
-            path: products/neo-savant
-            tag_length: 8
-            tag_latest: false
-          - application: governance-api
-            image_name: governance-api
-            path: products/governance-api
-            tag_length: 8
-            tag_latest: false
-          - application: governance-snapshot
-            image_name: governance-snapshot
-            path: products/governance-snapshot
-            tag_length: 8
-            tag_latest: false
-          - application: pdt
-            image_name: pdt
-            path: products/pdt
-            tag_length: 8
-            tag_latest: false
-          - application: zillion
-            image_name: zillion
-            path: products/zillion
-            tag_length: 8
-            tag_latest: false
-          - application: zilliqa-isolated-server
-            image_name: zilliqa-isolated-server
-            path: products/zilliqa-isolated-server
-            tag_length: 8
-            tag_latest: true
+          # - application: zillion
+          #   image_name: zillion
+          #   path: products/zillion
+          #   tag_length: 8
+          #   tag_latest: false
+          # - application: zilliqa-isolated-server
+          #   image_name: zilliqa-isolated-server
+          #   path: products/zilliqa-isolated-server
+          #   tag_length: 8
+          #   tag_latest: true
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
