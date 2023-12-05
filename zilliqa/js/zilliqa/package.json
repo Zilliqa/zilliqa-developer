@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/zilliqa",
-  "version": "3.4.4",
+  "version": "3.5.0",
   "description": "Main entry point to the Zilliqa JS client.",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
