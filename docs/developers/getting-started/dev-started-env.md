@@ -40,23 +40,28 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **WebSocket endpoint**                 | wss://dev-ws.zilliqa.com                                                            |
 | **Chain ID**                           | 333                                                                                 |
 | **EVM Chain ID**                       | 33101                                                                               |
+| **VERSION**                            | v9.3.0rc16                                                                          |
 | **REWARD CONTROL CONTRACT ADDRESS**    | 0xB041e706DDeA33F57518b59BaE5b9E2085b39e77                                          |
 | **PERSISTENCE BUCKET (S3 compatible)** | s3://zq1-testnet-persistence (use: AWS_ENDPOINT_URL=https://storage.googleapis.com) |
 | **PERSISTENCE HTTPS ENDPOINT**         | https://persistence.testnet.zq1.dev                                                 |
+| **PERSISTENCE FOLDER NAME**            | testnet-v930rc16                                                                    |
 
 ## Developer Devnet
 
-|                                     | URL(s)                                                             |
-| :---------------------------------- | :----------------------------------------------------------------- |
-| **API URL**                         | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
-| **EVM URL**                         | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/) |
-| **Faucet**                          | [**Link**](https://faucet.devnet.zilliqa.com)                      |
-| **Block Explorer**                  | [**Link**](https://devex.devnet.zilliqa.com)                       |
-| **EVM Block Explorer**              | [**Link**](https://otterscan.devnet.zilliqa.com)                   |
-| **WebSocket endpoint**              | `wss://wss.devnet.zilliqa.com`                                     |
-| **Chain ID**                        | 617                                                                |
-| **EVM Chain ID**                    | 33385                                                              |
-| **REWARD CONTROL CONTRACT ADDRESS** | 0xE2d79664c088Aec94209F0E657642f8569FC12D8                         |
+|                                        | URL(s)                                                                             |
+| :------------------------------------- | :--------------------------------------------------------------------------------- |
+| **API URL**                            | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/)                 |
+| **EVM URL**                            | [https://api.devnet.zilliqa.com/](https://api.devnet.zilliqa.com/)                 |
+| **Faucet**                             | [**Link**](https://faucet.devnet.zilliqa.com)                                      |
+| **Block Explorer**                     | [**Link**](https://devex.devnet.zilliqa.com)                                       |
+| **EVM Block Explorer**                 | [**Link**](https://otterscan.devnet.zilliqa.com)                                   |
+| **WebSocket endpoint**                 | `wss://wss.devnet.zilliqa.com`                                                     |
+| **Chain ID**                           | 617                                                                                |
+| **VERSION**                            | v9.3.0rc16                                                                         |
+| **EVM Chain ID**                       | 33385                                                                              |
+| **REWARD CONTROL CONTRACT ADDRESS**    | 0xE2d79664c088Aec94209F0E657642f8569FC12D8                                         |
+| **PERSISTENCE BUCKET (S3 compatible)** | s3://zq1-devnet-persistence (use: AWS_ENDPOINT_URL=https://storage.googleapis.com) |
+| **PERSISTENCE FOLDER NAME**            | devnet-pub-v930                                                                    |
 
 ## Isolated Server
 
