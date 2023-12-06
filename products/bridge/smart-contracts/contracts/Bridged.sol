@@ -84,3 +84,25 @@ abstract contract BridgedTwin is Initializable, Bridged {
         twinChainId = _twinChainId;
     }
 }
+
+interface ITwinFactory {
+    error FailedDeploymentInitialization();
+    event TwinDeployment(address indexed twin);
+}
+
+contract TwinFactory is ITwinFactory {
+    // TODO: extract to a library or separate factory contract
+    function deployTwin(
+        bytes32 salt,
+        bytes calldata bytecode,
+        bytes calldata initCall
+    ) external returns (address) {
+        address bridgedContract = Create2.deploy(0, salt, bytecode);
+        (bool success, ) = bridgedContract.call(initCall);
+        if (!success) {
+            revert FailedDeploymentInitialization();
+        }
+        emit TwinDeployment(bridgedContract);
+        return bridgedContract;
+    }
+}
