@@ -29,6 +29,7 @@ jobs:
             governance-api,
             governance-snapshot,
             neo-savant,
+            scilla-server,
             zillion,
             zilliqa-isolated-server,
           ]
@@ -66,6 +67,11 @@ jobs:
           - application: pdt
             image_name: pdt
             path: products/pdt
+            tag_length: 8
+            tag_latest: false
+          - application: scilla-server
+            image_name: scilla-server
+            path: products/scilla-server
             tag_length: 8
             tag_latest: false
           - application: zillion
