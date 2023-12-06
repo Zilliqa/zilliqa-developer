@@ -1,8 +1,8 @@
 FROM golang:1.17.1 as build-stage
 WORKDIR /app
 COPY . /app
-RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o build/faucet-service ./cmd
+RUN go mod download && \
+    CGO_ENABLED=0 GOOS=linux go build -o build/faucet-service ./cmd
 
 
 

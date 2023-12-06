@@ -93,7 +93,7 @@ Also, note that each item has one of the following status:
 - 👁 Unconfirmed (being tracked)
 - 📦 Pending
 
-#### 1. `Confirm()` Deletes the confirmed items which are no longer needed.
+#### 1. `Confirm()` Deletes the confirmed items which are no longer needed
 
 | Status | ID        | CreatedAt              | Address     | TxID      |
 | ------ | --------- | ---------------------- | ----------- | --------- |
@@ -118,7 +118,7 @@ After `Confirm()` the table will be the following:
 
 Note that the items with ✅ status have been deleted.
 
-#### 2. `Expire()` Reduces stored data volumes by expiring the old items.
+#### 2. `Expire()` Reduces stored data volumes by expiring the old items
 
 | Status | ID        | CreatedAt              | Address     | TxID      |
 | :----: | --------- | ---------------------- | ----------- | --------- |
@@ -145,7 +145,7 @@ After `Expire()` the table will be the following:
 
 Note that the items with ⌛️ status have been deleted.
 
-#### 3. `Retry()` Removes the old tx id.
+#### 3. `Retry()` Removes the old tx id
 
 | Status | ID        | CreatedAt              | Address     | TxID      |
 | :----: | --------- | ---------------------- | ----------- | --------- |
@@ -167,7 +167,7 @@ After `Retry()` the table will be the following:
 
 Note that the items doesn't have the tx ID.
 
-#### 4. `Send()` Creates transactions.
+#### 4. `Send()` Creates transactions
 
 | Status | ID        | CreatedAt              | Address     | TxID |
 | :----: | --------- | ---------------------- | ----------- | ---- |
