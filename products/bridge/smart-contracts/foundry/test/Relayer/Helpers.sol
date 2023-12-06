@@ -7,6 +7,30 @@ import "foundry/test/Tester.sol";
 
 using ECDSA for bytes32;
 
+contract TransferReentrancyTester {
+    address target;
+    bytes data;
+    bool public alreadyEntered = false;
+
+    function testVulnerability(
+        address _target,
+        bytes calldata _data
+    ) external returns (bool) {
+        target = _target;
+        data = _data;
+
+        (bool success, ) = target.call(data);
+        return success;
+    }
+
+    receive() external payable {
+        if (address(target).balance > 0) {
+            (bool success, ) = target.call(data);
+            success;
+        }
+    }
+}
+
 interface IReentrancy {
     error ReentrancyVulnerability();
     error ReentrancySafe();
@@ -62,13 +86,15 @@ contract BridgeTarget is IReentrancy {
 }
 
 contract SimpleBridge is Bridged {
-    function initialize(Relayer relayer) public initializer {
-        __Bridged_init(relayer);
+    function initialize(Relayer _relayer) public initializer {
+        __Bridged_init(_relayer);
     }
 }
 
-contract RelayerHarness is Relayer {
-    constructor(ValidatorManager validatorManager) Relayer(validatorManager) {}
+contract RelayerHarness is Relayer, Test {
+    constructor(
+        ValidatorManager _validatorManager
+    ) Relayer(_validatorManager) {}
 
     function exposed_validateRequest(
         bytes memory encodedMessage,
@@ -81,6 +107,25 @@ contract RelayerHarness is Relayer {
         ValidatorManager validatorManager_
     ) external {
         validatorManager = validatorManager_;
+    }
+
+    function verifyFeeInvariant(
+        uint initialFeeDeposit,
+        uint gasSpent,
+        address sponsor,
+        address sender
+    ) external {
+        // feeDeposit + feeRefund = initial deposit
+        assertEq(
+            feeDeposit[sponsor],
+            initialFeeDeposit - feeRefund[sender],
+            "Invariant violated: feeDeposit + feeRefund = initial deposit"
+        );
+        assertGe(
+            feeRefund[sender],
+            gasSpent,
+            "Invariant violated: Sender should be refunded more than the gas spent"
+        );
     }
 }
 

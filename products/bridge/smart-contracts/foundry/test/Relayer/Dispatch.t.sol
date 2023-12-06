@@ -46,12 +46,13 @@ library DispatchArgsBuilder {
 contract Dispatch is RelayerTestFixture, IRelayerEvents {
     using MessageHashUtils for bytes;
     using DispatchArgsBuilder for DispatchArgs;
+    uint constant INITIAL_FEE_DEPOSIT = 1 ether;
 
     BridgeTarget immutable bridgeTarget = new BridgeTarget();
 
     function setUp() public {
         // Deposit gas from the bridge to the relayer
-        bridge.depositFee{value: 1 ether}();
+        bridge.depositFee{value: INITIAL_FEE_DEPOSIT}();
     }
 
     function signDispatch(
@@ -292,6 +293,112 @@ contract Dispatch is RelayerTestFixture, IRelayerEvents {
             args.callback,
             args.nonce,
             signatures
+        );
+    }
+
+    function test_enoughFeeRefundWhenSingleValidator() external {
+        // Setup single validator
+        (
+            Vm.Wallet[] memory _validators,
+            ValidatorManager _validatorManager
+        ) = generateValidatorManager(1);
+        relayer.workaround_updateValidatorManager(_validatorManager);
+        validators = _validators;
+        address sender = vm.addr(2001);
+
+        // Fix gas price
+        vm.txGasPrice(10 gwei);
+
+        // Prepare call
+        DispatchArgs memory args = DispatchArgsBuilder.instance(
+            address(bridge),
+            address(bridgeTarget)
+        );
+        bytes[] memory signatures = signDispatch(args);
+
+        // Dispatch
+        vm.prank(sender);
+        vm.expectCall(address(bridgeTarget), args.call);
+        vm.expectEmit(address(relayer));
+        emit IRelayerEvents.Dispatched(
+            args.sourceChainId,
+            args.caller,
+            args.callback,
+            true,
+            abi.encode(uint(2)),
+            args.nonce
+        );
+        uint gasStart = gasleft();
+        relayer.dispatch{gas: 1_000_000}(
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
+            signatures
+        );
+        uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
+
+        // Verify fee invariant
+        relayer.verifyFeeInvariant(
+            INITIAL_FEE_DEPOSIT,
+            feeSpent,
+            address(bridge),
+            sender
+        );
+    }
+
+    function test_enoughFeeRefundWhenManyValidators() external {
+        // Setup single validator
+        (
+            Vm.Wallet[] memory _validators,
+            ValidatorManager _validatorManager
+        ) = generateValidatorManager(1000);
+        relayer.workaround_updateValidatorManager(_validatorManager);
+        validators = _validators;
+        address sender = vm.addr(2001);
+
+        // Fix gas price
+        vm.txGasPrice(10 gwei);
+
+        // Prepare call
+        DispatchArgs memory args = DispatchArgsBuilder.instance(
+            address(bridge),
+            address(bridgeTarget)
+        );
+        bytes[] memory signatures = signDispatch(args);
+
+        // Dispatch
+        vm.prank(sender);
+        vm.expectCall(address(bridgeTarget), args.call);
+        vm.expectEmit(address(relayer));
+        emit IRelayerEvents.Dispatched(
+            args.sourceChainId,
+            args.caller,
+            args.callback,
+            true,
+            abi.encode(uint(2)),
+            args.nonce
+        );
+        uint gasStart = gasleft();
+        relayer.dispatch{gas: 10_000_000}(
+            args.sourceChainId,
+            args.caller,
+            args.target,
+            args.call,
+            args.callback,
+            args.nonce,
+            signatures
+        );
+        uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
+
+        // Verify fee invariant
+        relayer.verifyFeeInvariant(
+            INITIAL_FEE_DEPOSIT,
+            feeSpent,
+            address(bridge),
+            sender
         );
     }
 }
