@@ -6,6 +6,7 @@ interface IRelayerEvents {
         uint indexed targetChainId,
         address target,
         bytes call,
+        uint gasLimit,
         uint nonce
     );
 }
@@ -16,7 +17,8 @@ interface IRelayer is IRelayerEvents {
     function relay(
         uint targetChainId,
         address target,
-        bytes calldata call
+        bytes calldata call,
+        uint gasLimit
     ) external returns (uint);
 }
 
@@ -27,9 +29,10 @@ contract Relayer is IRelayer {
     function relay(
         uint targetChainId,
         address target,
-        bytes calldata call
+        bytes calldata call,
+        uint gasLimit
     ) external returns (uint) {
-        emit Relayed(targetChainId, target, call, nonces[msg.sender]);
+        emit Relayed(targetChainId, target, call, gasLimit, nonces[msg.sender]);
         return nonces[msg.sender]++;
     }
 }

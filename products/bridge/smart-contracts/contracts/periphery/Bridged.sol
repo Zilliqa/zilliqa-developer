@@ -4,10 +4,11 @@ pragma solidity ^0.8.20;
 import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "./Relayer.sol";
+import "@openzeppelin/contracts/utils/Create2.sol";
+import "contracts/core/ChainGateway.sol";
 
 abstract contract Bridged is Initializable {
-    Relayer public relayer;
+    ChainGateway public relayer;
 
     error NotRelayer(address relayer);
 
@@ -18,7 +19,7 @@ abstract contract Bridged is Initializable {
         _;
     }
 
-    function __Bridged_init(Relayer relayer_) public onlyInitializing {
+    function __Bridged_init(ChainGateway relayer_) public onlyInitializing {
         relayer = relayer_;
     }
 
@@ -26,10 +27,9 @@ abstract contract Bridged is Initializable {
         uint targetChainId,
         address target,
         bytes memory call,
-        bool readonly,
-        bytes4 callback
+        uint gasLimit
     ) internal returns (uint nonce) {
-        nonce = relayer.relay(targetChainId, target, call, readonly, callback);
+        nonce = relayer.relay(targetChainId, target, call, gasLimit);
     }
 
     function _dispatched(
@@ -50,13 +50,6 @@ abstract contract Bridged is Initializable {
         returns (bool success, bytes memory response)
     {
         (success, response) = _dispatched(target, call);
-    }
-
-    function queried(
-        address target,
-        bytes calldata call
-    ) external view virtual returns (bool success, bytes memory response) {
-        (success, response) = target.staticcall{gas: 100000}(call);
     }
 
     function depositFee() external payable virtual {

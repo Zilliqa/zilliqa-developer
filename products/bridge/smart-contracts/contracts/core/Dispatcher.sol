@@ -3,13 +3,8 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "@openzeppelin/contracts/utils/Create2.sol";
-import "./ValidatorManager.sol";
-import "./Bridged.sol";
-import "contracts/FeeTracker.sol";
-
-using ECDSA for bytes32;
-using MessageHashUtils for bytes;
+import "contracts/core/ValidatorManager.sol";
+import "contracts/core/FeeTracker.sol";
 
 interface IDispatcherEvents {
     event Dispatched(
@@ -36,6 +31,7 @@ interface IDispatcher is IDispatcherEvents, IDispatcherErrors {
         uint sourceChainId,
         address target,
         bytes calldata call,
+        uint gasLimit,
         uint nonce,
         bytes[] calldata signatures
     ) external;
@@ -43,6 +39,8 @@ interface IDispatcher is IDispatcherEvents, IDispatcherErrors {
 
 // Cross-chain only
 contract Dispatcher is IDispatcher, FeeTracker {
+    using MessageHashUtils for bytes;
+
     ValidatorManager public validatorManager;
     // sourceChainId => nonce => isDispatched
     mapping(uint => mapping(uint => bool)) public dispatched;
@@ -90,6 +88,7 @@ contract Dispatcher is IDispatcher, FeeTracker {
         uint sourceChainId,
         address target,
         bytes calldata call,
+        uint gasLimit,
         uint nonce,
         bytes[] calldata signatures
     )
@@ -104,11 +103,14 @@ contract Dispatcher is IDispatcher, FeeTracker {
             block.chainid,
             target,
             call,
+            gasLimit,
             nonce
         );
         validateRequest(message, signatures);
 
-        (bool success, bytes memory response) = (target).call(call);
+        (bool success, bytes memory response) = (target).call{gas: gasLimit}(
+            call
+        );
 
         emit Dispatched(sourceChainId, target, success, response, nonce);
     }

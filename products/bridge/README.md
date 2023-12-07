@@ -225,25 +225,33 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [x] Integrate foundry to support effective unit testing on contracts
   - [x] Finish remaining TODO tests
   - [x] Update error handling on contracts
-  - [ ] Optional resume callback
   - [ ] Write deployment scripts
     - [ ] Support CREATE2
     - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
   - [x] Integrate mechanism for gas reversal
   - [x] Multichain support - appending chain-ids to event calls
-  - [ ] Fuzz + invariant testing
+  - [-] Fuzz + invariant testing
   - [ ] Synchronizing validators cross-chain
+    - [ ] Update validator set
   - [x] CI automated testing
   - [ ] Split bridged incoming and outgoing interfaces
-  - [ ] Gas limit parameters for dispatch and resume
-  - [ ] Remove resume from core part of the protocol
-  - [ ] Update interface to support cross-shard
-  - [ ] Add cross-chain support for contracts
+  - [x] Gas limit parameters for dispatch
+  - [x] Move resume from core to periphery
+  - [x] Update interface to support cross-shard
+  - [x] Add cross-shard support for contracts
+  - [x] Global nonces
+  - [ ] Validator rewards for txns
+  - [x] Remove Collector
+  - [ ] Update foundry and hardhat tests to new refactor
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
   - [ ] Determine type of connection to use to connect to non-zilliqa chains
     - Light node/client? [helios](https://github.com/a16z/helios)
   - [ ] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
   - [ ] Read & Write to chains
+  - [ ] Validator slashing
+  - [ ] Zilliqa maintained full nodes of non-zq chain. UCCB validators use light nodes on it
+  - [ ] Integrate into ZQ2 consensus network to share signatures
+  - [ ] Periodic gas refund for validators
 - [ ] **Frontend DApp**
   - [ ] Boilerplate setup (Vite React with Rainbow Kit)

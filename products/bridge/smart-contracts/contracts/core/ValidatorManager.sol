@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IValidatorManagerErrors {
@@ -12,7 +11,6 @@ interface IValidatorManagerErrors {
 
 contract ValidatorManager is Ownable, IValidatorManagerErrors {
     using ECDSA for bytes32;
-    using MessageHashUtils for bytes;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     EnumerableSet.AddressSet private _validators;
@@ -25,11 +23,13 @@ contract ValidatorManager is Ownable, IValidatorManagerErrors {
     }
 
     // TODO: add restriction
+    // Ownership should then be trasnferred to the relayer
     function addValidator(address user) public onlyOwner returns (bool) {
         return _validators.add(user);
     }
 
     // TODO: add restriction
+    // Ownership should then be trasnferred to the relayer
     function removeValidator(address user) external onlyOwner returns (bool) {
         return _validators.remove(user);
     }
