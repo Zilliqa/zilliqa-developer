@@ -26,6 +26,7 @@ jobs:
             developer-portal,
             devex,
             devex-apollo,
+            faucet-service,
             governance-api,
             governance-snapshot,
             neo-savant,
@@ -47,6 +48,11 @@ jobs:
           - application: devex-apollo
             image_name: devex-apollo
             path: products/devex-apollo
+            tag_length: 8
+            tag_latest: false
+          - application: faucet-service
+            image_name: faucet-service
+            path: products/faucet-service
             tag_length: 8
             tag_latest: false
           - application: neo-savant

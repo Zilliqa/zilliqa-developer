@@ -20,12 +20,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [
+        application: [
             bluebell-playground,
             developer-portal,
             devex,
             devex-apollo,
+            faucet-service
             eth-spout,
             governance-api,
             governance-snapshot,
@@ -40,6 +40,11 @@ jobs:
             path: products/bluebell
             tag_length: 8
             tag_latest: false
+          - application: developer-portal
+            image_name: developer-portal
+            path: products/developer-portal
+            tag_length: 8
+            tag_latest: false
           - application: devex
             image_name: devex
             path: products/devex
@@ -50,9 +55,9 @@ jobs:
             path: products/devex-apollo
             tag_length: 8
             tag_latest: false
-          - application: developer-portal
-            image_name: developer-portal
-            path: products/developer-portal
+          - application: faucet-service
+            image_name: faucet-service
+            path: products/faucet-service
             tag_length: 8
             tag_latest: false
           - application: eth-spout
