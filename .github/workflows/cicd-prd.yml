@@ -20,12 +20,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [
+        application:
+          [
             bluebell-playground,
             developer-portal,
             devex,
             devex-apollo,
-            faucet-service
+            faucet-service,
             eth-spout,
             governance-api,
             governance-snapshot,
