@@ -19,8 +19,8 @@ abstract contract Bridged is Initializable {
         _;
     }
 
-    function __Bridged_init(ChainGateway relayer_) public onlyInitializing {
-        relayer = relayer_;
+    function __Bridged_init(ChainGateway _relayer) public onlyInitializing {
+        relayer = _relayer;
     }
 
     function relay(
@@ -84,7 +84,6 @@ interface ITwinFactory {
 }
 
 contract TwinFactory is ITwinFactory {
-    // TODO: extract to a library or separate factory contract
     function deployTwin(
         bytes32 salt,
         bytes calldata bytecode,
