@@ -12,13 +12,14 @@ require (
 )
 
 require (
-	github.com/btcsuite/btcd v0.0.0-20190315201642-aa6e0f35703c // indirect
+	github.com/btcsuite/btcd v0.23.2 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
-	github.com/golang/protobuf v1.3.3 // indirect
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
@@ -26,10 +27,15 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
+	github.com/onsi/gomega v1.10.1 // indirect
 	github.com/tyler-smith/go-bip39 v1.0.2 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/ybbus/jsonrpc v2.1.2+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc // indirect
+	golang.org/x/sys v0.0.0-20200814200057-3d37ad5750ed // indirect
+	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/protobuf v1.23.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
