@@ -7,5 +7,5 @@ metadata:
 spec:
   timeoutSec: 30
   healthCheck:
-    requestPath: /
+    requestPath: /livez
     port: 8080
