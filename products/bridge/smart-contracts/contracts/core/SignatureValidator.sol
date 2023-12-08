@@ -21,15 +21,6 @@ library SignatureValidator {
         return count * 3 > self.length() * 2;
     }
 
-    function validateSignature(
-        EnumerableSet.AddressSet storage validators,
-        bytes32 ethSignedMessageHash,
-        bytes calldata signature
-    ) internal view returns (bool) {
-        address signer = ethSignedMessageHash.recover(signature);
-        return validators.contains(signer);
-    }
-
     /**
      * @dev Checks signatures are unique, ordered and valid against message hash
      * and forms a supermajority

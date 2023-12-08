@@ -9,8 +9,6 @@ import "contracts/periphery/Bridged.sol";
 
 import "foundry/test/Tester.sol";
 
-using ECDSA for bytes32;
-
 contract TransferReentrancyTester {
     address target;
     bytes data;
@@ -96,26 +94,7 @@ contract SimpleBridge is Bridged {
 }
 
 contract RelayerHarness is Relayer, Test {
-    constructor(ValidatorManager _validatorManager) Relayer() {}
 
-    // function verifyFeeInvariant(
-    //     uint initialFeeDeposit,
-    //     uint gasSpent,
-    //     address sponsor,
-    //     address sender
-    // ) external {
-    //     // feeDeposit + feeRefund = initial deposit
-    //     assertEq(
-    //         feeDeposit[sponsor],
-    //         initialFeeDeposit - feeRefund[sender],
-    //         "Invariant violated: feeDeposit + feeRefund = initial deposit"
-    //     );
-    //     assertGe(
-    //         feeRefund[sender],
-    //         gasSpent,
-    //         "Invariant violated: Sender should be refunded more than the gas spent"
-    //     );
-    // }
 }
 
 // abstract contract RelayerTestFixture is Tester {
