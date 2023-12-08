@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "contracts/core/ValidatorManager.sol";
 import "contracts/core/FeeTracker.sol";
+import {DispatchReplayChecker} from "contracts/core/DispatchReplayChecker.sol";
 
 interface IDispatcherEvents {
     event Dispatched(
@@ -17,16 +18,11 @@ interface IDispatcherEvents {
 }
 
 interface IDispatcherErrors {
-    error InvalidSignatures();
-    error NoSupermajority();
     error NonContractCaller();
-    error AlreadyDispatched();
     error NotValidator();
 }
 
 interface IDispatcher is IDispatcherEvents, IDispatcherErrors {
-    function dispatched(uint sourceChainId, uint nonce) external returns (bool);
-
     function dispatch(
         uint sourceChainId,
         address target,
@@ -38,12 +34,10 @@ interface IDispatcher is IDispatcherEvents, IDispatcherErrors {
 }
 
 // Cross-chain only
-contract Dispatcher is IDispatcher, FeeTracker {
+contract Dispatcher is IDispatcher, FeeTracker, DispatchReplayChecker {
     using MessageHashUtils for bytes;
 
     ValidatorManager public validatorManager;
-    // sourceChainId => nonce => isDispatched
-    mapping(uint => mapping(uint => bool)) public dispatched;
 
     modifier onlyContract(address c) {
         if (c.code.length == 0) {
@@ -59,30 +53,14 @@ contract Dispatcher is IDispatcher, FeeTracker {
         _;
     }
 
-    modifier replayDispatchGuard(uint sourceChainId, uint nonce) {
-        if (dispatched[sourceChainId][nonce]) {
-            revert AlreadyDispatched();
-        }
-        dispatched[sourceChainId][nonce] = true;
-        _;
-    }
-
     constructor(ValidatorManager _validatorManager) {
         validatorManager = _validatorManager;
     }
 
     function validateRequest(
         bytes memory encodedMessage,
-        bytes[] memory signatures
-    ) internal view {
-        bytes32 hash = encodedMessage.toEthSignedMessageHash();
-        if (!validatorManager.validateUniqueSignatures(hash, signatures)) {
-            revert InvalidSignatures();
-        }
-        if (!validatorManager.hasSupermajority(signatures.length)) {
-            revert NoSupermajority();
-        }
-    }
+        bytes[] calldata signatures
+    ) internal view {}
 
     function dispatch(
         uint sourceChainId,
@@ -98,15 +76,17 @@ contract Dispatcher is IDispatcher, FeeTracker {
         onlyContract(target)
         replayDispatchGuard(sourceChainId, nonce)
     {
-        bytes memory message = abi.encode(
-            sourceChainId,
-            block.chainid,
-            target,
-            call,
-            gasLimit,
-            nonce
+        validateRequest(
+            abi.encode(
+                sourceChainId,
+                block.chainid,
+                target,
+                call,
+                gasLimit,
+                nonce
+            ),
+            signatures
         );
-        validateRequest(message, signatures);
 
         (bool success, bytes memory response) = (target).call{gas: gasLimit}(
             call

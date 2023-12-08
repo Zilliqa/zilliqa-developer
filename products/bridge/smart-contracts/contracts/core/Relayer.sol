@@ -12,7 +12,7 @@ interface IRelayerEvents {
 }
 
 interface IRelayer is IRelayerEvents {
-    function nonces(address target) external returns (uint);
+    function nonce() external returns (uint);
 
     function relay(
         uint targetChainId,
@@ -23,8 +23,7 @@ interface IRelayer is IRelayerEvents {
 }
 
 contract Relayer is IRelayer {
-    // target => nonce
-    mapping(address => uint) public nonces;
+    uint public nonce;
 
     function relay(
         uint targetChainId,
@@ -32,7 +31,7 @@ contract Relayer is IRelayer {
         bytes calldata call,
         uint gasLimit
     ) external returns (uint) {
-        emit Relayed(targetChainId, target, call, gasLimit, nonces[msg.sender]);
-        return nonces[msg.sender]++;
+        emit Relayed(targetChainId, target, call, gasLimit, nonce);
+        return nonce++;
     }
 }

@@ -237,6 +237,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Validator rewards for txns
   - [ ] Update periphery contracts
     - [ ] Split bridged incoming and outgoing interfaces
+    - [ ] Support response instead of fire&forget
   - [ ] Update foundry tests
   - [ ] Update hardhat tests
   - [ ] Synchronizing validators cross-chain

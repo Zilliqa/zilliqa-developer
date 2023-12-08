@@ -5,13 +5,12 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IValidatorManagerErrors {
-    error NonUniqueOrUnorderedSignatures();
-}
+import "contracts/core/SignatureValidator.sol";
 
-contract ValidatorManager is Ownable, IValidatorManagerErrors {
+contract ValidatorManager is Ownable {
     using ECDSA for bytes32;
     using EnumerableSet for EnumerableSet.AddressSet;
+    using SignatureValidator for EnumerableSet.AddressSet;
 
     EnumerableSet.AddressSet private _validators;
 
@@ -39,42 +38,21 @@ contract ValidatorManager is Ownable, IValidatorManagerErrors {
         return _validators.values();
     }
 
-    function isValidator(address user) public view returns (bool) {
+    function isValidator(address user) external view returns (bool) {
         return _validators.contains(user);
     }
 
-    function validatorsCount() public view returns (uint) {
+    function validatorsSize() external view returns (uint) {
         return _validators.length();
     }
 
-    function validateUniqueSignatures(
+    function validateMessageWithSupermajority(
         bytes32 ethSignedMessageHash,
         bytes[] calldata signatures
-    ) external view returns (bool) {
-        address lastSigner = address(0);
-
-        for (uint i = 0; i < signatures.length; ++i) {
-            address signer = ethSignedMessageHash.recover(signatures[i]);
-            if (signer <= lastSigner) {
-                revert NonUniqueOrUnorderedSignatures();
-            }
-            if (!isValidator(signer)) {
-                return false;
-            }
-            lastSigner = signer;
-        }
-        return true;
-    }
-
-    function hasSupermajority(uint count) external view returns (bool) {
-        return count * 3 > validatorsCount() * 2;
-    }
-
-    function validateSignature(
-        bytes32 ethSignedMessageHash,
-        bytes memory signature
-    ) external view returns (bool) {
-        address signer = ethSignedMessageHash.recover(signature);
-        return isValidator(signer);
+    ) external view {
+        _validators.validateSignaturesWithSupermajority(
+            ethSignedMessageHash,
+            signatures
+        );
     }
 }
