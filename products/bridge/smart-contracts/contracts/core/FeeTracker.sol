@@ -1,30 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-
 interface IFeeTrackerErrors {
     error InsufficientMinFeeDeposit();
 }
 
-interface IFeeTracker is IFeeTrackerErrors {
-    function feeDeposit(address sponsor) external returns (uint);
-
-    function feeRefund(address caller) external returns (uint);
-
-    function depositFee() external payable;
-
-    function withdrawFee(uint amount) external;
-
-    function refundFee() external;
-}
-
-abstract contract FeeTracker is IFeeTracker {
+abstract contract FeeTracker is IFeeTrackerErrors {
     mapping(address => uint) public feeDeposit;
     mapping(address => uint) public feeRefund;
 
-    modifier meterFee(address sponsor) {
+    modifier meterFee(address patron) {
         uint feeStart = gasleft() * tx.gasprice;
         // 44703 = 21000 + 3 + 6600 + 17100
         // 17100 = init storage cost (worst case)
@@ -32,16 +17,16 @@ abstract contract FeeTracker is IFeeTracker {
         // 21000 = fixed cost of transaction
         uint feeOffset = (44703 + 16 * (msg.data.length - 4)) * tx.gasprice;
         // Should reject if insuficient to pay for the offset
-        if (feeDeposit[sponsor] < feeOffset) {
+        if (feeDeposit[patron] < feeOffset) {
             revert InsufficientMinFeeDeposit();
         }
         feeStart += feeOffset;
         // It will still take fees even if insufficient fee deposit is provided
-        if (feeDeposit[sponsor] >= feeStart) {
+        if (feeDeposit[patron] >= feeStart) {
             _;
         }
         uint spent = feeStart - gasleft() * tx.gasprice;
-        feeDeposit[sponsor] -= spent;
+        feeDeposit[patron] -= spent;
         feeRefund[msg.sender] += spent;
     }
 

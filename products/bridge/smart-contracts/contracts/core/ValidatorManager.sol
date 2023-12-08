@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "contracts/core/SignatureValidator.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {SignatureValidator} from "contracts/core/SignatureValidator.sol";
 
 contract ValidatorManager is Ownable {
-    using ECDSA for bytes32;
     using EnumerableSet for EnumerableSet.AddressSet;
     using SignatureValidator for EnumerableSet.AddressSet;
 

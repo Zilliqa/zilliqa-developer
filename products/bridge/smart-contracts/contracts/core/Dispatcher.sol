@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "contracts/core/ValidatorManager.sol";
-import "contracts/core/FeeTracker.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
+import {FeeTracker} from "contracts/core/FeeTracker.sol";
 import {DispatchReplayChecker} from "contracts/core/DispatchReplayChecker.sol";
 
 interface IDispatcherEvents {
@@ -53,8 +52,8 @@ contract Dispatcher is IDispatcher, FeeTracker, DispatchReplayChecker {
         _;
     }
 
-    constructor(ValidatorManager _validatorManager) {
-        validatorManager = _validatorManager;
+    constructor(address _validatorManager) {
+        validatorManager = ValidatorManager(_validatorManager);
     }
 
     function validateRequest(
