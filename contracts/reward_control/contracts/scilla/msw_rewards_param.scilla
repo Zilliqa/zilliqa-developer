@@ -19,6 +19,7 @@ type MultiSigTransition =
   | ClaimAdmin
   | ChangeBaseReward of (Uint32)
   | ChangeLookupReward of (Uint32)
+  | ChangeNodeReward of (Uint32)
   | ChangeCoinbaseReward of (Uint128)
   | ChangeRewardEachMulInMillis of (Uint32)
   | ChangeBaseRewardMulInMillis of (Uint32)
@@ -38,6 +39,10 @@ let custom_transaction_msg = fun (r: ByStr20) => fun (t: MultiSigTransition) => 
   | ChangeLookupReward lookup_reward_val => {
       lookup_reward_val: lookup_reward_val;
       _tag: "ChangeLookupReward"; _amount: Uint128 0; _recipient: r
+    }
+  | ChangeNodeReward node_reward_val => {
+      node_reward_val: node_reward_val;
+      _tag: "ChangeNodeReward"; _amount: Uint128 0; _recipient: r
     }
   | ChangeCoinbaseReward coinbase_reward_val => {
       coinbase_reward_val: coinbase_reward_val;
@@ -365,6 +370,12 @@ end
 (* Submit a new ChangeLookupReward request *)
 transition SubmitCustomChangeLookupRewardTransaction (calleeContract : ByStr20, lookup_reward_val: Uint32)
   transaction = ChangeLookupReward lookup_reward_val;
+  SubmitCustomTransaction calleeContract transaction
+end
+
+(* Submit a new ChangeNodeReward request *)
+transition SubmitCustomChangeNodeRewardTransaction (calleeContract : ByStr20, node_reward_val: Uint32)
+  transaction = ChangeNodeReward node_reward_val;
   SubmitCustomTransaction calleeContract transaction
 end
 
