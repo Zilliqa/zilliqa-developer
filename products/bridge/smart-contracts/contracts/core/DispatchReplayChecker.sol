@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-interface IDispatchReplayErrors {
+interface IDispatchReplayCheckerErrors {
     error AlreadyDispatched();
 }
 
-abstract contract DispatchReplayChecker is IDispatchReplayErrors {
+abstract contract DispatchReplayChecker is IDispatchReplayCheckerErrors {
     // sourceChainId => nonce => isDispatched
     mapping(uint => mapping(uint => bool)) public dispatched;
 

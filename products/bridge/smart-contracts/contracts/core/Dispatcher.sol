@@ -21,16 +21,7 @@ interface IDispatcherErrors {
     error NotValidator();
 }
 
-interface IDispatcher is IDispatcherEvents, IDispatcherErrors {
-    function dispatch(
-        uint sourceChainId,
-        address target,
-        bytes calldata call,
-        uint gasLimit,
-        uint nonce,
-        bytes[] calldata signatures
-    ) external;
-}
+interface IDispatcher is IDispatcherEvents, IDispatcherErrors {}
 
 // Cross-chain only
 contract Dispatcher is IDispatcher, FeeTracker, DispatchReplayChecker {
@@ -56,11 +47,6 @@ contract Dispatcher is IDispatcher, FeeTracker, DispatchReplayChecker {
         validatorManager = ValidatorManager(_validatorManager);
     }
 
-    function validateRequest(
-        bytes memory encodedMessage,
-        bytes[] calldata signatures
-    ) internal view {}
-
     function dispatch(
         uint sourceChainId,
         address target,
@@ -75,15 +61,17 @@ contract Dispatcher is IDispatcher, FeeTracker, DispatchReplayChecker {
         onlyContract(target)
         replayDispatchGuard(sourceChainId, nonce)
     {
-        validateRequest(
-            abi.encode(
-                sourceChainId,
-                block.chainid,
-                target,
-                call,
-                gasLimit,
-                nonce
-            ),
+        validatorManager.validateMessageWithSupermajority(
+            abi
+                .encode(
+                    sourceChainId,
+                    block.chainid,
+                    target,
+                    call,
+                    gasLimit,
+                    nonce
+                )
+                .toEthSignedMessageHash(),
             signatures
         );
 
