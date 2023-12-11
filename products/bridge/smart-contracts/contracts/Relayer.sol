@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import "hardhat/console.sol";
-
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
@@ -12,15 +10,7 @@ import "./Bridged.sol";
 using ECDSA for bytes32;
 using MessageHashUtils for bytes;
 
-contract Relayer {
-    ValidatorManager private validatorManager;
-    // targetChainId => caller => nonce
-    mapping(address => uint) nonces;
-    // sourceChainId => caller => dispatched
-    mapping(uint => mapping(address => mapping(uint => bool))) dispatched;
-    // targetChainId => caller => resumed
-    mapping(address => mapping(uint => bool)) resumed;
-
+interface IRelayerEvents {
     event TwinDeployment(address indexed twin);
     event Relayed(
         uint indexed targetChainId,
@@ -47,13 +37,36 @@ contract Relayer {
         bytes response,
         uint indexed nonce
     );
+}
 
+interface IRelayerErrors {
     error FailedDeploymentInitialization();
     error InvalidSignatures();
     error NoSupermajority();
     error NonContractCaller();
     error AlreadyResumed();
     error AlreadyDispatched();
+    /**
+     * Occurs when a resume is attempted with a nonce that is greater than the
+     * current nonce for the caller. Trying to resume a call not yet initialised
+     */
+    error IllegalResumeNonce();
+    error InsufficientMinFeeDeposit();
+}
+
+interface IRelayer is IRelayerEvents, IRelayerErrors {}
+
+contract Relayer is IRelayer {
+    ValidatorManager public validatorManager;
+    // caller => nonce
+    mapping(address => uint) public nonces;
+    // sourceChainId => caller => dispatched
+    mapping(uint => mapping(address => mapping(uint => bool)))
+        public dispatched;
+    // caller => resumed
+    mapping(address => mapping(uint => bool)) public resumed;
+    mapping(address => uint) public feeDeposit;
+    mapping(address => uint) public feeRefund;
 
     modifier onlyContractCaller(address caller) {
         if (caller.code.length == 0) {
@@ -69,7 +82,7 @@ contract Relayer {
     function validateRequest(
         bytes memory encodedMessage,
         bytes[] memory signatures
-    ) private view {
+    ) internal view {
         bytes32 hash = encodedMessage.toEthSignedMessageHash();
         if (!validatorManager.validateUniqueSignatures(hash, signatures)) {
             revert InvalidSignatures();
@@ -112,6 +125,43 @@ contract Relayer {
         return ++nonces[msg.sender];
     }
 
+    function depositFee() external payable {
+        feeDeposit[msg.sender] += msg.value;
+    }
+
+    function withdrawFee(uint amount) external {
+        feeDeposit[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+    }
+
+    function refundFee() external {
+        uint amount = feeRefund[msg.sender];
+        // TODO: keep it 1 for saving gas
+        feeRefund[msg.sender] = 0;
+        payable(msg.sender).transfer(amount);
+    }
+
+    modifier meterFee(address caller) {
+        uint feeStart = gasleft() * tx.gasprice;
+        // 44703 = 21000 + 3 + 6600 + 17100
+        // 17100 = init storage cost (worst case)
+        // 6600 = operations related to gas tracking
+        // 21000 = fixed cost of transaction
+        uint feeOffset = (44703 + 16 * (msg.data.length - 4)) * tx.gasprice;
+        // Should reject if insuficient to pay for the offset
+        if (feeDeposit[caller] < feeOffset) {
+            revert InsufficientMinFeeDeposit();
+        }
+        feeStart += feeOffset;
+        // It will still take fees even if insufficient fee deposit is provided
+        if (feeDeposit[caller] >= feeStart) {
+            _;
+        }
+        uint spent = feeStart - gasleft() * tx.gasprice;
+        feeDeposit[caller] -= spent;
+        feeRefund[msg.sender] += spent;
+    }
+
     function dispatch(
         uint sourceChainId,
         address caller,
@@ -120,10 +170,12 @@ contract Relayer {
         bytes4 callback,
         uint nonce,
         bytes[] calldata signatures
-    ) external onlyContractCaller(caller) {
+    ) external meterFee(caller) onlyContractCaller(caller) {
+        // TODO: Only validator
         if (dispatched[sourceChainId][caller][nonce]) {
             revert AlreadyDispatched();
         }
+        dispatched[sourceChainId][caller][nonce] = true;
 
         bytes memory message = abi.encode(
             sourceChainId,
@@ -150,7 +202,6 @@ contract Relayer {
             response,
             nonce
         );
-        dispatched[sourceChainId][caller][nonce] = true;
     }
 
     function query(
@@ -175,10 +226,15 @@ contract Relayer {
         bytes calldata response,
         uint nonce,
         bytes[] calldata signatures
-    ) external payable {
+    ) external meterFee(caller) onlyContractCaller(caller) {
+        if (nonce > nonces[caller]) {
+            revert IllegalResumeNonce();
+        }
         if (resumed[caller][nonce]) {
             revert AlreadyResumed();
         }
+        resumed[caller][nonce] = true;
+
         bytes memory message = abi.encode(
             block.chainid,
             targetChainId,
@@ -196,12 +252,11 @@ contract Relayer {
             response,
             nonce
         );
-        (bool success2, bytes memory response2) = caller.call{
-            value: msg.value,
-            gas: 100000
-        }(call);
+        // TODO: Specifiy gas
+        (bool success2, bytes memory response2) = caller.call{gas: 1_000_000}(
+            call
+        );
 
         emit Resumed(targetChainId, caller, call, success2, response2, nonce);
-        resumed[caller][nonce] = true;
     }
 }

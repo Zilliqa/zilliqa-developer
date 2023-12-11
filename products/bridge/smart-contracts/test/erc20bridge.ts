@@ -47,6 +47,9 @@ describe("ERC20Bridge", function () {
       .withArgs(bridgeAddress);
 
     const bridge1 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
+    await bridge1.depositFee({
+      value: ethers.parseEther("1"),
+    });
 
     const token1 = await ethers
       .deployContract("MyToken", [bridgeAddress], twinDeployer1)
@@ -72,6 +75,9 @@ describe("ERC20Bridge", function () {
       .to.emit(relayer2, "TwinDeployment")
       .withArgs(bridgeAddress);
     const bridge2 = await ethers.getContractAt("ERC20Bridge", bridgeAddress);
+    await bridge2.depositFee({
+      value: ethers.parseEther("1"),
+    });
 
     // Mimic CREATE2 deployments with signers that have matching nonce (twinDeployer1 & twinDeployer2)
     const token2 = await ethers

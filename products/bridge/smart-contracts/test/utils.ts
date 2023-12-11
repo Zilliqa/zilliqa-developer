@@ -76,6 +76,14 @@ export async function dispatchMessage(
       callSignatures
     );
     dispatchTxn = await txResponse.wait();
+    // Calculate gas usage of dispatch
+    // console.log("gas used: ", dispatchTxn?.gasUsed);
+    // const x = await relayerTarget.gasRefund(
+    //   await validatorsTarget[0].getAddress()
+    // );
+    // console.log(x / (dispatchTxn?.gasPrice ?? 1n));
+    // console.log("gas price: ", dispatchTxn?.gasPrice);
+
     if (!dispatchTxn) {
       expect.fail("tx is null");
     }

@@ -7,23 +7,19 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./Relayer.sol";
 
 abstract contract Bridged is Initializable {
-    Relayer private _relayer;
+    Relayer public relayer;
 
     error NotRelayer(address relayer);
 
     modifier onlyRelayer() {
-        if (msg.sender != address(_relayer)) {
+        if (msg.sender != address(relayer)) {
             revert NotRelayer(msg.sender);
         }
         _;
     }
 
     function __Bridged_init(Relayer relayer_) public onlyInitializing {
-        _relayer = relayer_;
-    }
-
-    function relayer() public view returns (Relayer) {
-        return _relayer;
+        relayer = relayer_;
     }
 
     function relay(
@@ -33,14 +29,14 @@ abstract contract Bridged is Initializable {
         bool readonly,
         bytes4 callback
     ) internal returns (uint nonce) {
-        nonce = _relayer.relay(targetChainId, target, call, readonly, callback);
+        nonce = relayer.relay(targetChainId, target, call, readonly, callback);
     }
 
     function _dispatched(
         address target,
         bytes calldata call
     ) internal onlyRelayer returns (bool success, bytes memory response) {
-        (success, response) = target.call{value: msg.value, gas: 100000}(call);
+        (success, response) = target.call{gas: 1_000_000}(call);
     }
 
     function dispatched(
@@ -49,7 +45,6 @@ abstract contract Bridged is Initializable {
         bytes calldata call
     )
         external
-        payable
         virtual
         onlyRelayer
         returns (bool success, bytes memory response)
@@ -63,29 +58,29 @@ abstract contract Bridged is Initializable {
     ) external view virtual returns (bool success, bytes memory response) {
         (success, response) = target.staticcall{gas: 100000}(call);
     }
+
+    function depositFee() external payable virtual {
+        relayer.depositFee{value: msg.value}();
+    }
 }
 
 abstract contract BridgedTwin is Initializable, Bridged {
-    uint private _twinChainId;
+    uint public twinChainId;
 
     error InvalidChainId(uint chainId);
     error NotTwinChain(uint chainId);
 
-    modifier onlyTwinChain(uint twinChainId_) {
-        if (_twinChainId != twinChainId_) {
-            revert NotTwinChain(twinChainId_);
+    modifier onlyTwinChain(uint _twinChainId) {
+        if (twinChainId != _twinChainId) {
+            revert NotTwinChain(_twinChainId);
         }
         _;
     }
 
-    function __BridgedTwin_init(uint twinChainId_) public onlyInitializing {
-        if (twinChainId_ == 0 || twinChainId_ == block.chainid) {
-            revert InvalidChainId(twinChainId_);
+    function __BridgedTwin_init(uint _twinChainId) public onlyInitializing {
+        if (_twinChainId == 0 || _twinChainId == block.chainid) {
+            revert InvalidChainId(_twinChainId);
         }
-        _twinChainId = twinChainId_;
-    }
-
-    function twinChainId() public view returns (uint) {
-        return _twinChainId;
+        twinChainId = _twinChainId;
     }
 }
