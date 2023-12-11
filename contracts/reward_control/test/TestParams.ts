@@ -107,7 +107,7 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     ).to.be.eq(35);
   });
 
-  it("Admin can change node reward to 35", async function () {
+  it("Admin can change node reward to 25", async function () {
     let result1 = await scillaRewardsParamsContract.ChangeNodeReward(25);
     expect(
       await scillaRewardsParamsContract.node_reward_in_percent()
