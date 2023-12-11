@@ -5,7 +5,7 @@ import {Test, Vm} from "forge-std/Test.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Target, ValidatorManagerFixture, IReentrancy} from "foundry/test/Helpers.sol";
 
-import {Dispatcher, IDispatcherEvents, IDispatcherErrors} from "contracts/core/Dispatcher.sol";
+import {ChainDispatcher, IChainDispatcherEvents, IChainDispatcherErrors} from "contracts/core/ChainDispatcher.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ISignatureValidatorErrors} from "contracts/core/SignatureValidator.sol";
 import {IDispatchReplayCheckerErrors} from "contracts/core/DispatchReplayChecker.sol";
@@ -38,8 +38,8 @@ library DispatchArgsBuilder {
     }
 }
 
-contract DispatcherHarness is Dispatcher, Test {
-    constructor(address _validatorManager) Dispatcher(_validatorManager) {}
+contract DispatcherHarness is ChainDispatcher, Test {
+    constructor(address _validatorManager) ChainDispatcher(_validatorManager) {}
 
     function workaround_updateValidatorManager(
         ValidatorManager _validatorManager
@@ -101,7 +101,7 @@ contract DispatcherFixture is ValidatorManagerFixture {
     }
 }
 
-contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
+contract DispatcherTests is IChainDispatcherEvents, DispatcherFixture {
     using DispatchArgsBuilder for DispatchArgs;
 
     function setUp() external {
@@ -116,7 +116,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
 
         vm.expectCall(address(target), args.call);
         vm.expectEmit(address(dispatcher));
-        emit IDispatcherEvents.Dispatched(
+        emit Dispatched(
             args.sourceChainId,
             args.target,
             true,
@@ -205,7 +205,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
             "Too large"
         );
         vm.expectEmit(address(dispatcher));
-        emit IDispatcherEvents.Dispatched(
+        emit Dispatched(
             args.sourceChainId,
             args.target,
             false,
@@ -227,7 +227,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
         bytes[] memory signatures = signDispatch(args);
 
         // Dispatch
-        vm.expectRevert(IDispatcherErrors.NonContractCaller.selector);
+        vm.expectRevert(IChainDispatcherErrors.NonContractCaller.selector);
         dispatcher.dispatch(
             args.sourceChainId,
             args.target,
@@ -250,7 +250,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
         // Dispatch
         vm.expectCall(address(target), args.call);
         vm.expectEmit(address(dispatcher));
-        emit IDispatcherEvents.Dispatched(
+        emit Dispatched(
             args.sourceChainId,
             args.target,
             false,
@@ -278,7 +278,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
 
         // Dispatch
         vm.stopPrank();
-        vm.expectRevert(IDispatcherErrors.NotValidator.selector);
+        vm.expectRevert(IChainDispatcherErrors.NotValidator.selector);
         dispatcher.dispatch(
             args.sourceChainId,
             args.target,
@@ -314,7 +314,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
             IReentrancy.ReentrancySafe.selector
         );
         vm.expectEmit(address(dispatcher));
-        emit IDispatcherEvents.Dispatched(
+        emit Dispatched(
             args.sourceChainId,
             args.target,
             false,
@@ -353,7 +353,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
         // Dispatch
         vm.expectCall(address(target), args.call);
         vm.expectEmit(address(dispatcher));
-        emit IDispatcherEvents.Dispatched(
+        emit Dispatched(
             args.sourceChainId,
             args.target,
             true,
@@ -402,7 +402,7 @@ contract DispatcherTests is IDispatcherEvents, DispatcherFixture {
         // Dispatch
         vm.expectCall(address(target), args.call);
         vm.expectEmit(address(dispatcher));
-        emit IDispatcherEvents.Dispatched(
+        emit Dispatched(
             args.sourceChainId,
             args.target,
             true,

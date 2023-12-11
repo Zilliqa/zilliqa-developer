@@ -6,7 +6,7 @@ import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {FeeTracker} from "contracts/core/FeeTracker.sol";
 import {DispatchReplayChecker} from "contracts/core/DispatchReplayChecker.sol";
 
-interface IDispatcherEvents {
+interface IChainDispatcherEvents {
     event Dispatched(
         uint indexed sourceChainId,
         address indexed target,
@@ -16,15 +16,19 @@ interface IDispatcherEvents {
     );
 }
 
-interface IDispatcherErrors {
+interface IChainDispatcherErrors {
     error NonContractCaller();
     error NotValidator();
 }
 
-interface IDispatcher is IDispatcherEvents, IDispatcherErrors {}
+interface IChainDispatcher is IChainDispatcherEvents, IChainDispatcherErrors {}
 
 // Cross-chain only
-contract Dispatcher is IDispatcher, FeeTracker, DispatchReplayChecker {
+contract ChainDispatcher is
+    IChainDispatcher,
+    FeeTracker,
+    DispatchReplayChecker
+{
     using MessageHashUtils for bytes;
 
     ValidatorManager public validatorManager;
