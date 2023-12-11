@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import "contracts/core/ValidatorManager.sol";
-import "foundry/test/Tester.sol";
+import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
+import {Tester, Vm} from "foundry/test/Tester.sol";
 
 contract TransferReentrancyTester {
     address target;
