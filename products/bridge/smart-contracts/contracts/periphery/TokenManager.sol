@@ -66,7 +66,7 @@ abstract contract TokenManager {
 
         _handleTransfer(token, msg.sender, amount);
 
-        gateway.relay(
+        gateway.relayWithMetadata(
             remoteToken.chainId,
             remoteToken.tokenManager,
             this.accept.selector,

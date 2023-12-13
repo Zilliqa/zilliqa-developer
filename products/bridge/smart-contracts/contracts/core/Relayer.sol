@@ -21,7 +21,7 @@ struct CallMetadata {
 contract Relayer is IRelayer {
     uint public nonce;
 
-    function relay(
+    function relayWithMetadata(
         uint targetChainId,
         address target,
         bytes4 callSelector,
@@ -39,6 +39,18 @@ contract Relayer is IRelayer {
             gasLimit,
             nonce
         );
+
+        return nonce++;
+    }
+
+    function relay(
+        uint targetChainId,
+        address target,
+        bytes calldata call,
+        uint gasLimit
+    ) external returns (uint) {
+        emit Relayed(targetChainId, target, call, gasLimit, nonce);
+
         return nonce++;
     }
 }

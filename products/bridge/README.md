@@ -246,6 +246,7 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Write deployment scripts
     - [ ] Support CREATE2
     - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
+  - [ ] Track last event block number for light client event censorship resistance
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
   - [ ] Determine type of connection to use to connect to non-zilliqa chains
