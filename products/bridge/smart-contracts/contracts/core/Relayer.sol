@@ -4,22 +4,18 @@ pragma solidity ^0.8.20;
 interface IRelayerEvents {
     event Relayed(
         uint indexed targetChainId,
-        address target,
+        address indexed target,
         bytes call,
         uint gasLimit,
         uint nonce
     );
 }
 
-interface IRelayer is IRelayerEvents {
-    function nonce() external returns (uint);
+interface IRelayer is IRelayerEvents {}
 
-    function relay(
-        uint targetChainId,
-        address target,
-        bytes calldata call,
-        uint gasLimit
-    ) external returns (uint);
+struct CallMetadata {
+    uint sourceChainId;
+    address sender;
 }
 
 contract Relayer is IRelayer {
@@ -28,10 +24,21 @@ contract Relayer is IRelayer {
     function relay(
         uint targetChainId,
         address target,
-        bytes calldata call,
+        bytes4 callSelector,
+        bytes calldata callData,
         uint gasLimit
     ) external returns (uint) {
-        emit Relayed(targetChainId, target, call, gasLimit, nonce);
+        emit Relayed(
+            targetChainId,
+            target,
+            abi.encodeWithSelector(
+                callSelector,
+                abi.encode(CallMetadata(block.chainid, msg.sender)),
+                callData
+            ),
+            gasLimit,
+            nonce
+        );
         return nonce++;
     }
 }

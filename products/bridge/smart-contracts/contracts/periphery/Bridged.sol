@@ -21,14 +21,14 @@ abstract contract Bridged is Initializable {
         relayer = _relayer;
     }
 
-    function relay(
-        uint targetChainId,
-        address target,
-        bytes memory call,
-        uint gasLimit
-    ) internal returns (uint nonce) {
-        nonce = relayer.relay(targetChainId, target, call, gasLimit);
-    }
+    // function relay(
+    //     uint targetChainId,
+    //     address target,
+    //     bytes memory call,
+    //     uint gasLimit
+    // ) internal returns (uint nonce) {
+    //     nonce = relayer.relay(targetChainId, target, call, gasLimit);
+    // }
 
     function _dispatched(
         address target,
