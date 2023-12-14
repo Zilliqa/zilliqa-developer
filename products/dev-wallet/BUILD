@@ -1,5 +1,4 @@
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
@@ -118,34 +117,6 @@ pkg_tar(
     mode = "0755",
     package_dir = "/etc/nginx/conf.d/",
     deps = [],
-)
-
-container_image(
-    name = "image",
-    base = "@nginx//image",
-    ports = ["80"],
-    tars = [
-        ":html-folder",
-        ":nginx-conf",
-    ],
-)
-
-container_push(
-    name = "push_image_stg",
-    format = "Docker",
-    image = ":image",
-    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public",
-    repository = "dev-wallet",
-    tag = "$${IMAGE_TAG#*:}",
-)
-
-container_push(
-    name = "push_image_prd",
-    format = "Docker",
-    image = ":image",
-    registry = "asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public",
-    repository = "dev-wallet",
-    tag = "$${IMAGE_TAG#*:}",
 )
 
 # TODO: Many snapshot based tests with heuristic class names.
