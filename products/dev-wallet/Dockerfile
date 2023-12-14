@@ -2,9 +2,9 @@ FROM node:16 as build-stage
 
 WORKDIR /app
 COPY . ./
-RUN yarn install
-RUN yarn ci
-RUN yarn build
+RUN yarn install && \
+    yarn ci && \
+    yarn build
 
 FROM nginx:stable-alpine as production-stage
 COPY --from=build-stage /app/build /usr/share/nginx/html
