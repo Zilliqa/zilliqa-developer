@@ -14,10 +14,6 @@ patches:
       - op: replace
         path: "/spec/rules/0/host"
         value: dev-wallet.zilliqa.com
-      - op: remove
-        path: "/spec/rules/2"
-      - op: remove
-        path: "/spec/rules/1"
       - op: replace
         path: /metadata/annotations
         value:
