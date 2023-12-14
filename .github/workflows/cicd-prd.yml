@@ -26,6 +26,7 @@ jobs:
             developer-portal,
             devex,
             devex-apollo,
+            dev-wallet,
             faucet-service,
             eth-spout,
             governance-api,
@@ -54,6 +55,11 @@ jobs:
           - application: devex-apollo
             image_name: devex-apollo
             path: products/devex-apollo
+            tag_length: 8
+            tag_latest: false
+          - application: dev-wallet
+            image_name: dev-wallet
+            path: products/dev-wallet
             tag_length: 8
             tag_latest: false
           - application: faucet-service
