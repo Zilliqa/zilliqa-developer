@@ -112,23 +112,40 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "nignx-conf",
+    name = "nginx-conf",
     srcs = ["nginx/default.conf"],
     mode = "0755",
     package_dir = "/etc/nginx/conf.d/",
     deps = [],
 )
 
-# TODO: To be made a later point
-# container_image(
-#     name = "image",
-#     base = "@nginx//image",
-#     ports = ["80"],
-#     tars = [
-#         ":html-folder",
-#         ":nignx-conf",
-#     ],
-# )
+container_image(
+    name = "image",
+    base = "@nginx//image",
+    ports = ["80"],
+    tars = [
+        ":html-folder",
+        ":nginx-conf",
+    ],
+)
+
+container_push(
+    name = "push_image_stg",
+    format = "Docker",
+    image = ":image",
+    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public",
+    repository = "dev-wallet",
+    tag = "$${IMAGE_TAG#*:}",
+)
+
+container_push(
+    name = "push_image_prd",
+    format = "Docker",
+    image = ":image",
+    registry = "asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public",
+    repository = "dev-wallet",
+    tag = "$${IMAGE_TAG#*:}",
+)
 
 # TODO: Many snapshot based tests with heuristic class names.
 # cra_bin.react_app_rewired_test(
