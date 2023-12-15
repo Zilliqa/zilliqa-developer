@@ -9,7 +9,7 @@ data:
   DATASET_ID_MAINNET: "ds_zq1_mainnet"
   NETWORK_TYPE_TESTNET: "testnet"
   NETWORK_TYPE_MAINNET: "mainnet"
-  NETWORK_TESTNET: "testnet-v930rc9"
+  NETWORK_TESTNET: "testnet-v930rc19"
   NETWORK_MAINNET: "mainnet-v920"
   DOWNLOAD_DIR: "/data/download"
   UNPACK_DIR: "/data/download"
