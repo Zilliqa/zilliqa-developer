@@ -26,7 +26,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **EVM Block Explorer** | [Ethereal EVM explorer](https://evmx.zilliqa.com/overview)                               |
 | **WebSocket endpoint** | `wss://api-ws.zilliqa.com`                                                               |
 | **Chain ID**           | 1                                                                                        |
-| **EVM Chain ID**       | N/A                                                                                      |
+| **EVM Chain ID**       | 32769                                                                                    |
 
 ## Developer Testnet
 
@@ -40,11 +40,11 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **WebSocket endpoint**                 | wss://dev-ws.zilliqa.com                                                            |
 | **Chain ID**                           | 333                                                                                 |
 | **EVM Chain ID**                       | 33101                                                                               |
-| **VERSION**                            | v9.3.0rc16                                                                          |
-| **REWARD CONTROL CONTRACT ADDRESS**    | 0xB041e706DDeA33F57518b59BaE5b9E2085b39e77                                          |
+| **VERSION**                            | v9.3.0rc19                                                                          |
+| **REWARD CONTROL CONTRACT ADDRESS**    | 0x489F0Ec426DF9343A5F6D7B170B0Bca08e6a81CE                                          |
 | **PERSISTENCE BUCKET (S3 compatible)** | s3://zq1-testnet-persistence (use: AWS_ENDPOINT_URL=https://storage.googleapis.com) |
 | **PERSISTENCE HTTPS ENDPOINT**         | https://persistence.testnet.zq1.dev                                                 |
-| **PERSISTENCE FOLDER NAME**            | testnet-v930rc16                                                                    |
+| **PERSISTENCE FOLDER NAME**            | testnet-v930rc19                                                                    |
 
 ## Developer Devnet
 
@@ -57,7 +57,7 @@ description: Zilliqa Development Environments - Testnet, Mainnet & Isolated Serv
 | **EVM Block Explorer**                 | [**Link**](https://otterscan.devnet.zilliqa.com)                                   |
 | **WebSocket endpoint**                 | `wss://wss.devnet.zilliqa.com`                                                     |
 | **Chain ID**                           | 617                                                                                |
-| **VERSION**                            | v9.3.0rc16                                                                         |
+| **VERSION**                            | v9.3.0rc19                                                                         |
 | **EVM Chain ID**                       | 33385                                                                              |
 | **REWARD CONTROL CONTRACT ADDRESS**    | 0xE2d79664c088Aec94209F0E657642f8569FC12D8                                         |
 | **PERSISTENCE BUCKET (S3 compatible)** | s3://zq1-devnet-persistence (use: AWS_ENDPOINT_URL=https://storage.googleapis.com) |
