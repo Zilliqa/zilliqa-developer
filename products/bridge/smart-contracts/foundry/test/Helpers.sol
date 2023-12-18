@@ -1,18 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import "contracts/ValidatorManager.sol";
-import "contracts/Relayer.sol";
-import "foundry/test/Tester.sol";
-
-using ECDSA for bytes32;
+import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
+import {Tester, Vm} from "foundry/test/Tester.sol";
 
 contract TransferReentrancyTester {
     address target;
     bytes data;
     bool public alreadyEntered = false;
 
-    function testVulnerability(
+    function reentrancyAttack(
         address _target,
         bytes calldata _data
     ) external returns (bool) {
@@ -36,8 +33,12 @@ interface IReentrancy {
     error ReentrancySafe();
 }
 
-contract BridgeTarget is IReentrancy {
+contract Target is IReentrancy {
     uint public c = 0;
+
+    function depositFee(uint amount) external payable {
+        amount;
+    }
 
     function work(uint num_) external pure returns (uint) {
         require(num_ < 1000, "Too large");
@@ -85,64 +86,18 @@ contract BridgeTarget is IReentrancy {
     }
 }
 
-contract SimpleBridge is Bridged {
-    function initialize(Relayer _relayer) public initializer {
-        __Bridged_init(_relayer);
-    }
-}
-
-contract RelayerHarness is Relayer, Test {
-    constructor(
-        ValidatorManager _validatorManager
-    ) Relayer(_validatorManager) {}
-
-    function exposed_validateRequest(
-        bytes memory encodedMessage,
-        bytes[] memory signatures
-    ) public view {
-        return validateRequest(encodedMessage, signatures);
-    }
-
-    function workaround_updateValidatorManager(
-        ValidatorManager validatorManager_
-    ) external {
-        validatorManager = validatorManager_;
-    }
-
-    function verifyFeeInvariant(
-        uint initialFeeDeposit,
-        uint gasSpent,
-        address sponsor,
-        address sender
-    ) external {
-        // feeDeposit + feeRefund = initial deposit
-        assertEq(
-            feeDeposit[sponsor],
-            initialFeeDeposit - feeRefund[sender],
-            "Invariant violated: feeDeposit + feeRefund = initial deposit"
-        );
-        assertGe(
-            feeRefund[sender],
-            gasSpent,
-            "Invariant violated: Sender should be refunded more than the gas spent"
-        );
-    }
-}
-
-abstract contract RelayerTestFixture is Tester {
-    using MessageHashUtils for bytes;
+abstract contract ValidatorManagerFixture is Tester {
+    uint constant VALIDATOR_COUNT = 10;
 
     ValidatorManager validatorManager;
-    RelayerHarness relayer;
-    uint constant validatorCount = 10;
-    Vm.Wallet[] validators = new Vm.Wallet[](validatorCount);
-    SimpleBridge immutable bridge = new SimpleBridge();
+    Vm.Wallet[] public validators = new Vm.Wallet[](VALIDATOR_COUNT);
 
     function generateValidatorManager(
         uint size
     ) internal returns (Vm.Wallet[] memory, ValidatorManager) {
         Vm.Wallet[] memory _validators = new Vm.Wallet[](size);
         address[] memory validatorAddresses = new address[](size);
+
         for (uint i = 0; i < size; ++i) {
             _validators[i] = vm.createWallet(i + 1);
             validatorAddresses[i] = _validators[i].addr;
@@ -159,13 +114,8 @@ abstract contract RelayerTestFixture is Tester {
         (
             Vm.Wallet[] memory _validators,
             ValidatorManager _validatorManager
-        ) = generateValidatorManager(validatorCount);
+        ) = generateValidatorManager(VALIDATOR_COUNT);
         validators = _validators;
         validatorManager = _validatorManager;
-
-        // Setup relayer
-        relayer = new RelayerHarness(validatorManager);
-        // Initialise bridge
-        bridge.initialize(relayer);
     }
 }

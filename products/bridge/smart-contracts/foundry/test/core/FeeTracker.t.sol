@@ -1,31 +1,28 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import "forge-std/Test.sol";
-import {RelayerTestFixture, RelayerHarness, ValidatorManager, Test, TransferReentrancyTester} from "./Helpers.sol";
-import {IRelayerErrors} from "contracts/Relayer.sol";
+import {TransferReentrancyTester} from "foundry/test/Helpers.sol";
+import {FeeTracker, IFeeTrackerErrors} from "contracts/core/FeeTracker.sol";
+import {stdStorage, StdStorage} from "forge-std/Test.sol";
+import {Tester} from "foundry/test/Tester.sol";
 
-contract RelayerFeeTester is RelayerHarness {
+contract FeeTrackerTester is FeeTracker {
     bool public writeSuccessful;
     address public sponsor;
-
-    constructor(
-        ValidatorManager validatorManger
-    ) RelayerHarness(validatorManager) {}
-
-    function test(address _sponsor) external meterFee(_sponsor) {
-        writeSuccessful = true;
-    }
 
     function setSponsor(address _sponsor) external {
         sponsor = _sponsor;
     }
 
-    function test() external meterFee(sponsor) {
+    function write(address _sponsor) external meterFee(_sponsor) {
         writeSuccessful = true;
     }
 
-    function test(
+    function write() external meterFee(sponsor) {
+        writeSuccessful = true;
+    }
+
+    function write(
         address _sponsor,
         bytes[] calldata data
     ) external meterFee(_sponsor) {
@@ -33,7 +30,7 @@ contract RelayerFeeTester is RelayerHarness {
         writeSuccessful = true;
     }
 
-    function test(
+    function write(
         address _sponsor,
         uint[] calldata data
     ) external meterFee(_sponsor) {
@@ -42,15 +39,15 @@ contract RelayerFeeTester is RelayerHarness {
     }
 }
 
-contract Fees is RelayerTestFixture {
+contract FeeTrackerTests is Tester {
     using stdStorage for StdStorage;
 
-    RelayerFeeTester relayerTester;
+    FeeTrackerTester feeTrackerTester;
     address sponsor1 = vm.addr(1000);
     address sender1 = vm.addr(2000);
 
-    function setUp() public {
-        relayerTester = new RelayerFeeTester(validatorManager);
+    function setUp() external {
+        feeTrackerTester = new FeeTrackerTester();
     }
 
     function verifyFeeInvariant(
@@ -59,12 +56,12 @@ contract Fees is RelayerTestFixture {
     ) internal {
         // feeDeposit + feeRefund = initial deposit
         assertEq(
-            relayerTester.feeDeposit(sponsor1),
-            initialFeeDeposit - relayerTester.feeRefund(sender1),
+            feeTrackerTester.feeDeposit(sponsor1),
+            initialFeeDeposit - feeTrackerTester.feeRefund(sender1),
             "Invariant violated: feeDeposit + feeRefund = initial deposit"
         );
         assertGe(
-            relayerTester.feeRefund(sender1),
+            feeTrackerTester.feeRefund(sender1),
             gasSpent,
             "Invariant violated: Sender should be refunded more than the gas spent"
         );
@@ -72,23 +69,18 @@ contract Fees is RelayerTestFixture {
 
     function test_meterFee_happyPath() external {
         vm.txGasPrice(10 gwei);
-        uint initialFeeDeposit = 100000 ether;
+        uint initialFeeDeposit = 100_000 ether;
 
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
         uint gasStart = gasleft();
-        relayerTester.test{gas: 100_000}(sponsor1);
+        feeTrackerTester.write{gas: 100_000}(sponsor1);
         uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent);
+        assertTrue(feeTrackerTester.writeSuccessful());
     }
 
     function testRevert_meterFee_insufficientMinFeeDeposit() external {
@@ -96,15 +88,15 @@ contract Fees is RelayerTestFixture {
         uint initialFeeDeposit = 1 gwei;
 
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
-        vm.expectRevert(IRelayerErrors.InsufficientMinFeeDeposit.selector);
-        relayerTester.test{gas: 1_000_000}(sponsor1);
+        vm.expectRevert(IFeeTrackerErrors.InsufficientMinFeeDeposit.selector);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1);
 
-        assertFalse(relayerTester.writeSuccessful());
+        assertFalse(feeTrackerTester.writeSuccessful());
         assertEq(
-            relayerTester.feeDeposit(sponsor1),
+            feeTrackerTester.feeDeposit(sponsor1),
             initialFeeDeposit,
             "Sender should not make transaction when insufficient fee deposit is provided"
         );
@@ -115,42 +107,32 @@ contract Fees is RelayerTestFixture {
         uint initialFeeDeposit = 9_000_000 gwei;
 
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
         uint gasStart = gasleft();
-        relayerTester.test{gas: 1_000_000}(sponsor1);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1);
         uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
 
-        assertFalse(relayerTester.writeSuccessful());
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent,
-            sponsor1,
-            sender1
-        );
+        assertFalse(feeTrackerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent);
     }
 
     function test_meterFee_enoughRefundWhenNoArgumentCall() external {
         vm.txGasPrice(10 gwei);
-        relayerTester.setSponsor(sponsor1);
+        feeTrackerTester.setSponsor(sponsor1);
 
         uint initialFeeDeposit = 1 ether;
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
         uint gasStart = gasleft();
-        relayerTester.test{gas: 1_000_000}();
+        feeTrackerTester.write{gas: 1_000_000}();
         uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent);
+        assertTrue(feeTrackerTester.writeSuccessful());
     }
 
     function test_meterFee_enoughRefundWhenManyZeroArgumentCall() external {
@@ -159,20 +141,15 @@ contract Fees is RelayerTestFixture {
 
         uint initialFeeDeposit = 1 ether;
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
         uint gasStart = gasleft();
-        relayerTester.test{gas: 1_000_000}(sponsor1, data);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1, data);
         uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent);
+        assertTrue(feeTrackerTester.writeSuccessful());
     }
 
     function test_meterFee_enoughRefundWhenManyNonzeroArgumentCall() external {
@@ -184,20 +161,15 @@ contract Fees is RelayerTestFixture {
 
         uint initialFeeDeposit = 1 ether;
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
         uint gasStart = gasleft();
-        relayerTester.test{gas: 1_000_000}(sponsor1, data);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1, data);
         uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent);
+        assertTrue(feeTrackerTester.writeSuccessful());
     }
 
     function test_meterFee_consecutiveCalls() external {
@@ -209,36 +181,26 @@ contract Fees is RelayerTestFixture {
 
         uint initialFeeDeposit = 1 ether;
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         // First Call
         vm.prank(sender1);
         uint gasStart1 = gasleft();
-        relayerTester.test{gas: 1_000_000}(sponsor1, data);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1, data);
         uint feeSpent1 = (gasStart1 - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent1,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent1);
+        assertTrue(feeTrackerTester.writeSuccessful());
 
         // Second Call
 
         vm.prank(sender1);
         uint gasStart2 = gasleft();
-        relayerTester.test{gas: 1_000_000}(sponsor1, data);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1, data);
         uint feeSpent2 = (gasStart2 - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent1 + feeSpent2,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent1 + feeSpent2);
+        assertTrue(feeTrackerTester.writeSuccessful());
     }
 
     function testFuzz_meterFee_varyGasPrice(uint gasPrice) external {
@@ -246,111 +208,110 @@ contract Fees is RelayerTestFixture {
 
         uint initialFeeDeposit = 1_000 ether;
         hoax(sponsor1);
-        relayerTester.depositFee{value: initialFeeDeposit}();
+        feeTrackerTester.depositFee{value: initialFeeDeposit}();
 
         vm.prank(sender1);
         uint gasStart = gasleft();
-        relayerTester.test{gas: 1_000_000}(sponsor1);
+        feeTrackerTester.write{gas: 1_000_000}(sponsor1);
         uint feeSpent = (gasStart - gasleft()) * tx.gasprice;
 
-        relayerTester.verifyFeeInvariant(
-            initialFeeDeposit,
-            feeSpent,
-            sponsor1,
-            sender1
-        );
-        assertTrue(relayerTester.writeSuccessful());
+        verifyFeeInvariant(initialFeeDeposit, feeSpent);
+        assertTrue(feeTrackerTester.writeSuccessful());
     }
 
     function test_refundFee_happyPath() external {
-        uint amount = 1000 gwei;
-        vm.deal(address(relayerTester), amount);
+        uint amount = 1_000 gwei;
+        vm.deal(address(sponsor1), amount);
+        vm.deal(address(feeTrackerTester), amount);
 
         stdstore
-            .target(address(relayerTester))
-            .sig(relayerTester.feeRefund.selector)
+            .target(address(feeTrackerTester))
+            .sig(feeTrackerTester.feeRefund.selector)
             .with_key(sender1)
             .checked_write(amount);
 
         vm.prank(sender1);
-        relayerTester.refundFee();
-        assertEq(relayerTester.feeRefund(sender1), 0);
+        feeTrackerTester.refundFee();
+        assertEq(feeTrackerTester.feeRefund(sender1), 0);
         assertEq(sender1.balance, amount);
-        assertEq(address(relayerTester).balance, 0);
+        assertEq(address(feeTrackerTester).balance, 0);
     }
 
     function test_refundFee_reentrancy() external {
         TransferReentrancyTester reentrancyTester = new TransferReentrancyTester();
         uint amount = 1 ether;
-        vm.deal(address(relayerTester), amount * 2);
+        vm.deal(address(feeTrackerTester), amount * 2);
 
         bytes memory data = abi.encodeWithSelector(
-            relayerTester.refundFee.selector
+            feeTrackerTester.refundFee.selector
         );
 
         stdstore
-            .target(address(relayerTester))
-            .sig(relayerTester.feeRefund.selector)
+            .target(address(feeTrackerTester))
+            .sig(feeTrackerTester.feeRefund.selector)
             .with_key(address(reentrancyTester))
             .checked_write(amount);
 
         // Expect revert on attempt to reenter: out of gas
-        bool success = reentrancyTester.testVulnerability(
-            address(relayerTester),
+        bool success = reentrancyTester.reentrancyAttack(
+            address(feeTrackerTester),
             data
         );
         assertFalse(success, "Reentrancy should have failed");
         // No state should be changed
-        assertEq(address(relayerTester).balance, amount * 2);
+        assertEq(address(feeTrackerTester).balance, amount * 2);
         assertEq(address(reentrancyTester).balance, 0);
-        assertEq(relayerTester.feeRefund(address(reentrancyTester)), amount);
+        assertEq(feeTrackerTester.feeRefund(address(reentrancyTester)), amount);
     }
 
     function test_depositFee_happyPath() external {
-        uint amount = 1000 gwei;
+        uint amount = 1_000 gwei;
 
         hoax(sender1, amount);
-        relayerTester.depositFee{value: amount}();
+        feeTrackerTester.depositFee{value: amount}();
 
-        assertEq(relayerTester.feeDeposit(sender1), amount);
-        assertEq(address(relayerTester).balance, amount);
+        assertEq(feeTrackerTester.feeDeposit(sender1), amount);
+        assertEq(address(feeTrackerTester).balance, amount);
         assertEq(sender1.balance, 0);
     }
 
     function test_withdrawFee_happyPath() external {
-        uint amount = 1000 gwei;
+        uint amount = 1_000 gwei;
         startHoax(sender1, amount);
 
-        relayerTester.depositFee{value: amount}();
+        feeTrackerTester.depositFee{value: amount}();
         assertEq(sender1.balance, 0);
 
-        relayerTester.withdrawFee(amount);
-        assertEq(relayerTester.feeDeposit(sender1), 0);
+        feeTrackerTester.withdrawFee(amount);
+        assertEq(feeTrackerTester.feeDeposit(sender1), 0);
         assertEq(sender1.balance, amount);
-        assertEq(address(relayerTester).balance, 0);
+        assertEq(address(feeTrackerTester).balance, 0);
     }
 
     function test_withdrawFee_reentrancy() external {
         TransferReentrancyTester reentrancyTester = new TransferReentrancyTester();
         uint amount = 1 ether;
-        vm.deal(address(relayerTester), amount);
+        vm.deal(address(feeTrackerTester), amount);
 
         bytes memory data = abi.encodeWithSelector(
-            relayerTester.withdrawFee.selector
+            feeTrackerTester.withdrawFee.selector
         );
 
         hoax(address(reentrancyTester), amount);
-        relayerTester.depositFee{value: amount}();
+        feeTrackerTester.depositFee{value: amount}();
 
         // Expect revert on attempt to reenter: out of gas
-        bool success = reentrancyTester.testVulnerability(
-            address(relayerTester),
+        bool success = reentrancyTester.reentrancyAttack(
+            address(feeTrackerTester),
             data
         );
         assertFalse(success, "Reentrancy should have failed");
         // No state should be changed
-        assertEq(address(relayerTester).balance, amount * 2);
+        assertEq(address(feeTrackerTester).balance, amount * 2);
         assertEq(address(reentrancyTester).balance, 0);
-        assertEq(relayerTester.feeDeposit(address(reentrancyTester)), amount);
+        assertEq(
+            feeTrackerTester.feeDeposit(address(reentrancyTester)),
+            amount
+        );
     }
 }

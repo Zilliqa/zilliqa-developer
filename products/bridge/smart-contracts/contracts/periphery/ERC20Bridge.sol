@@ -4,27 +4,28 @@ pragma solidity ^0.8.20;
 import "./Bridged.sol";
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 contract BridgedERC20 is ERC20, ERC20Burnable {
-    address _bridge;
+    address public bridge;
 
     error NotBridge(address);
 
     modifier onlyBridge() {
-        if (msg.sender != _bridge) {
+        if (msg.sender != bridge) {
             revert NotBridge(msg.sender);
         }
         _;
     }
 
     constructor(
-        string memory name,
-        string memory symbol,
-        address bridge_
-    ) ERC20(name, symbol) {
-        _bridge = bridge_;
+        string memory _name,
+        string memory _symbol,
+        address _bridge
+    ) ERC20(_name, _symbol) {
+        bridge = _bridge;
         _mint(msg.sender, 1000);
     }
 
@@ -34,10 +35,6 @@ contract BridgedERC20 is ERC20, ERC20Burnable {
 
     function burn(address from, uint256 amount) external onlyBridge {
         burnFrom(from, amount);
-    }
-
-    function bridge() public view returns (address) {
-        return _bridge;
     }
 }
 
@@ -50,9 +47,12 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
     event Succeeded();
     event Failed(string);
 
-    function initialize(Relayer relayer, uint twinChainId) public initializer {
-        __Bridged_init(relayer);
-        __BridgedTwin_init(twinChainId);
+    function initialize(
+        ChainGateway _relayer,
+        uint _twinChainId
+    ) public initializer {
+        __Bridged_init(_relayer);
+        __BridgedTwin_init(_twinChainId);
     }
 
     // This might be unecessary as bridge and exit will already restrict these calls
@@ -74,13 +74,12 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         address owner,
         uint value
     ) external returns (uint nonce) {
-        MyToken(token).transferFrom(owner, address(this), value);
+        BridgedERC20(token).transferFrom(owner, address(this), value);
         nonce = relay(
             twinChainId,
             token,
-            abi.encodeWithSignature("mint(address,uint256)", owner, value),
-            false,
-            this.finish.selector
+            abi.encodeWithSelector(BridgedERC20.mint.selector, owner, value),
+            1_000_000
         );
         emit Started(token, owner, value);
     }
@@ -90,13 +89,12 @@ contract ERC20Bridge is Initializable, Bridged, BridgedTwin {
         address owner,
         uint value
     ) external returns (uint nonce) {
-        MyToken(token).burn(owner, value);
+        BridgedERC20(token).burn(owner, value);
         nonce = relay(
             twinChainId,
             token,
-            abi.encodeWithSignature("transfer(address,uint256)", owner, value),
-            false,
-            this.finish.selector
+            abi.encodeWithSelector(IERC20.transfer.selector, owner, value),
+            1_000_000
         );
         emit Started(token, owner, value);
     }

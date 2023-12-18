@@ -2,21 +2,24 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "./Bridged.sol";
+import "contracts/periphery/Bridged.sol";
+import "contracts/core/ChainGateway.sol";
 
 contract Twin is Initializable, Bridged, BridgedTwin {
-    function initialize(Relayer relayer, uint twinChainId) public initializer {
-        __Bridged_init(relayer);
-        __BridgedTwin_init(twinChainId);
+    function initialize(
+        ChainGateway _relayer,
+        uint _twinChainId
+    ) public initializer {
+        __Bridged_init(_relayer);
+        __BridgedTwin_init(_twinChainId);
     }
 
-    function start(address target, uint num, bool readonly) external {
+    function start(address target, uint num) external {
         uint nonce = relay(
             twinChainId,
             target,
             abi.encodeWithSignature("test(uint256)", num),
-            readonly,
-            this.finish.selector
+            1_000_000
         );
     }
 
@@ -38,13 +41,12 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         }
     }
 
-    function startSum(address target, uint num, bool readonly) external {
+    function startSum(address target, uint num) external {
         relay(
             twinChainId,
             target,
             abi.encodeWithSignature("testSum(uint256)", num),
-            readonly,
-            this.finishSum.selector
+            1_000_000
         );
     }
 
@@ -63,13 +65,12 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         }
     }
 
-    function startNoReturn(address target, uint num, bool readonly) external {
+    function startNoReturn(address target, uint num) external {
         relay(
             twinChainId,
             target,
             abi.encodeWithSignature("testNoReturn(uint256)", num),
-            readonly,
-            this.finishNoReturn.selector
+            1_000_000
         );
     }
 
@@ -89,17 +90,12 @@ contract Twin is Initializable, Bridged, BridgedTwin {
         }
     }
 
-    function startMultipleReturn(
-        address target,
-        uint num,
-        bool readonly
-    ) external {
+    function startMultipleReturn(address target, uint num) external {
         relay(
             twinChainId,
             target,
             abi.encodeWithSignature("testMultipleReturn(uint256)", num),
-            readonly,
-            this.finishMultipleReturn.selector
+            1_000_000
         );
     }
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import "forge-std/Test.sol";
+import {Test, Vm} from "forge-std/Test.sol";
 
 abstract contract Tester is Test {
     modifier TODO() {
