@@ -14,17 +14,26 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import classnames from 'classnames';
-import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Row, Col } from 'reactstrap';
+import { useState } from "react";
+import classnames from "classnames";
+import {
+  TabContent,
+  TabPane,
+  Nav,
+  NavItem,
+  NavLink,
+  Card,
+  Row,
+  Col,
+} from "reactstrap";
 
-import './style.css';
+import "./style.css";
 
-import AccessKeystore from '../access-keystore';
-import AccessPrivateKey from '../access-private-key';
+import AccessKeystore from "../access-keystore";
+import AccessPrivateKey from "../access-private-key";
 
-const KEYSTORE_TAB = '0';
-const PRIVATE_KEY_TAB = '1';
+const KEYSTORE_TAB = "0";
+const PRIVATE_KEY_TAB = "1";
 
 const AccessTabs = ({ accessWallet }) => {
   const [activeTab, setActiveTab] = useState(KEYSTORE_TAB);
@@ -42,7 +51,7 @@ const AccessTabs = ({ accessWallet }) => {
             <Col xs={10} sm={10} md={8} lg={7} className="mr-auto ml-auto">
               <div className="text-center">
                 <h2 className="pt-5 pb-4">
-                  <b>{'Access Existing Wallet'}</b>
+                  <b>{"Access Existing Wallet"}</b>
                 </h2>
               </div>
               <div>
@@ -54,7 +63,7 @@ const AccessTabs = ({ accessWallet }) => {
                       })}`}
                       onClick={() => toggle(KEYSTORE_TAB)}
                     >
-                      {'keystore File'}
+                      {"keystore File"}
                     </NavLink>
                   </NavItem>
                   <NavItem>
@@ -66,7 +75,7 @@ const AccessTabs = ({ accessWallet }) => {
                         toggle(PRIVATE_KEY_TAB);
                       }}
                     >
-                      {'Private Key'}
+                      {"Private Key"}
                     </NavLink>
                   </NavItem>
                 </Nav>

@@ -14,8 +14,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import './style.css';
+import React from "react";
+import "./style.css";
 
 interface IProps {
   loading: boolean;
@@ -23,7 +23,7 @@ interface IProps {
 
 const SpinnerWithCheckMark: React.FunctionComponent<IProps> = ({ loading }) => {
   return (
-    <div className={`circle-loader ${loading ? '' : 'load-complete'}`}>
+    <div className={`circle-loader ${loading ? "" : "load-complete"}`}>
       <div className="checkmark draw" />
     </div>
   );

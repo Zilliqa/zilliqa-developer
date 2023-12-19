@@ -14,9 +14,9 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import styled from 'styled-components';
-import { colors } from '../../colors';
+import * as React from "react";
+import styled from "styled-components";
+import { colors } from "../../colors";
 
 const StyledButton = styled.button`
   outline: none;
@@ -34,31 +34,34 @@ const StyledButton = styled.button`
   user-select: none;
   background-color: transparent;
   border: 1px solid transparent;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 
   &::-webkit-file-upload-button {
     font: inherit;
     -webkit-appearance: button;
   }
 
-  & [type='button'],
-  [type='reset'],
-  [type='submit'] {
+  & [type="button"],
+  [type="reset"],
+  [type="submit"] {
     -webkit-appearance: button;
   }
 
   &:not(:disabled),
-  [type='button']:not(:disabled),
-  [type='reset']:not(:disabled),
-  [type='submit']:not(:disabled) {
+  [type="button"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  [type="submit"]:not(:disabled) {
     cursor: pointer;
   }
 
   &::-moz-focus-inner,
-  [type='button']::-moz-focus-inner,
-  [type='reset']::-moz-focus-inner,
-  [type='submit']::-moz-focus-inner {
+  [type="button"]::-moz-focus-inner,
+  [type="reset"]::-moz-focus-inner,
+  [type="submit"]::-moz-focus-inner {
     padding: 0;
     border-style: none;
   }
@@ -68,21 +71,21 @@ const StyledButton = styled.button`
   }
 
   ${({ size }) =>
-    size === 'large'
+    size === "large"
       ? `&{
         padding: 0.5rem 1rem;
         font-size: 1.25rem;
         line-height: 1.5;
         border-radius: 0.3rem;
       }`
-      : size === 'small'
-      ? `&{
+      : size === "small"
+        ? `&{
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
         line-height: 1.5;
         border-radius: 0.2rem;
       }`
-      : `&{
+        : `&{
         padding: 0.375rem 0.75rem;
         font-size: 1rem;
         line-height: 1.5;
@@ -90,7 +93,7 @@ const StyledButton = styled.button`
       }`}
 
   ${({ level }) =>
-    level === 'primary'
+    level === "primary"
       ? `&{
               background-color: ${colors.teal600};
               color: ${colors.white};
@@ -103,8 +106,8 @@ const StyledButton = styled.button`
               color: ${colors.gray500};
               background-color: ${colors.teal600};
             }`
-      : level === 'secondary'
-      ? `&{
+      : level === "secondary"
+        ? `&{
               background-color: transparent;
               color: ${colors.gray500};
               border-color: ${colors.gray500};
@@ -115,8 +118,8 @@ const StyledButton = styled.button`
               color: ${colors.gray600};
               border-color: ${colors.gray600};
             }`
-      : level === 'tertiary'
-      ? `&{
+        : level === "tertiary"
+          ? `&{
               background-color: transparent;
               color: ${colors.gray500};
               border-color: transparent;
@@ -125,7 +128,7 @@ const StyledButton = styled.button`
             }&:disabled{
               color: ${colors.gray600};
             }`
-      : ``}
+          : ``}
 `;
 
 interface IProps {
@@ -143,15 +146,15 @@ interface IProps {
   readonly testId?: string;
 }
 
-type ButtonType = 'button' | 'submit' | 'reset';
-type SizeType = 'large' | 'medium' | 'small';
-type ButtonLevelType = 'primary' | 'secondary' | 'tertiary';
+type ButtonType = "button" | "submit" | "reset";
+type SizeType = "large" | "medium" | "small";
+type ButtonLevelType = "primary" | "secondary" | "tertiary";
 
 const Button: React.FunctionComponent<IProps> = ({
-  text = '',
-  size = 'medium',
-  className = '',
-  type = 'submit',
+  text = "",
+  size = "medium",
+  className = "",
+  type = "submit",
   disabled,
   onClick,
   before,
@@ -164,7 +167,7 @@ const Button: React.FunctionComponent<IProps> = ({
   <StyledButton
     level={level}
     size={size}
-    className={className || ''}
+    className={className || ""}
     onClick={onClick}
     aria-label={text}
     disabled={disabled}

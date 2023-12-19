@@ -14,19 +14,24 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { Suspense, lazy } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
 
-import Home from './containers/home';
-import Spinner from './components/spinner';
+import Home from "./containers/home";
+import Spinner from "./components/spinner";
 
-import { ZilProvider, ZilContext } from './contexts/zil-context';
+import { ZilProvider, ZilContext } from "./contexts/zil-context";
 
 export const paths = {
-  faucet: '/faucet',
-  send: '/send',
-  generate: '/generate',
-  home: '/home',
+  faucet: "/faucet",
+  send: "/send",
+  generate: "/generate",
+  home: "/home",
 };
 
 const Fallback = () => (
@@ -43,11 +48,11 @@ export const RouterNode = () => (
           return (
             <p
               style={{
-                color: '#555',
+                color: "#555",
                 padding: 10,
               }}
             >
-              {'Fetching config'}
+              {"Fetching config"}
             </p>
           );
         }
@@ -58,15 +63,15 @@ export const RouterNode = () => (
           },
           {
             path: paths.send,
-            component: lazy(() => import('./containers/send')),
+            component: lazy(() => import("./containers/send")),
           },
           {
             path: paths.generate,
-            component: lazy(() => import('./containers/generate')),
+            component: lazy(() => import("./containers/generate")),
           },
           {
             path: paths.faucet,
-            component: lazy(() => import('./containers/faucet')),
+            component: lazy(() => import("./containers/faucet")),
           },
         ];
 
@@ -95,5 +100,10 @@ export const RouterNode = () => (
 );
 
 const PublicRoute = ({ component: Component, zilContext, ...rest }) => {
-  return <Route {...rest} render={(props) => <Component {...props} zilContext={zilContext} />} />;
+  return (
+    <Route
+      {...rest}
+      render={(props) => <Component {...props} zilContext={zilContext} />}
+    />
+  );
 };

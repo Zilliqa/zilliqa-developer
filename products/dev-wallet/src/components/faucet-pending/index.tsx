@@ -17,9 +17,9 @@
 const FaucetPending = () => (
   <div data-testid="faucet-pending" className="text-center py-4">
     <p className="text-secondary text-fade-in">
-      {'Running Faucet'}
+      {"Running Faucet"}
       <br />
-      <small>{'Please kindly wait. It might take a while.'}</small>
+      <small>{"Please kindly wait. It might take a while."}</small>
     </p>
   </div>
 );

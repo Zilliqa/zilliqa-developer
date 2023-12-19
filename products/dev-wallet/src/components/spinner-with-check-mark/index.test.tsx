@@ -14,16 +14,16 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import Spinner from '.';
+import React from "react";
+import { render } from "@testing-library/react";
+import Spinner from ".";
 
-test('matches the snapshot when loading', () => {
+test("matches the snapshot when loading", () => {
   const { container } = render(<Spinner loading={true} />);
   expect(container.firstChild).toMatchSnapshot();
 });
 
-test('matches the snapshot when loaded', () => {
+test("matches the snapshot when loaded", () => {
   const { container } = render(<Spinner loading={false} />);
   expect(container.firstChild).toMatchSnapshot();
 });

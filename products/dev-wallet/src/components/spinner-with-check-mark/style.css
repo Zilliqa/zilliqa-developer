@@ -55,7 +55,7 @@
   transform-origin: left top;
   border-right: 3px solid var(--success);
   border-top: 3px solid var(--success);
-  content: '';
+  content: "";
   left: 1.75em;
   top: 3.5em;
   position: absolute;

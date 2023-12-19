@@ -14,11 +14,11 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Layout from '../../components/layout';
-import Row from 'reactstrap/lib/Row';
-import Col from 'reactstrap/lib/Col';
-import Disclaimer from '../../components/disclaimer';
-import styled from 'styled-components';
+import Layout from "../../components/layout";
+import Row from "reactstrap/lib/Row";
+import Col from "reactstrap/lib/Col";
+import Disclaimer from "../../components/disclaimer";
+import styled from "styled-components";
 
 const Container = styled.div`
   width: 100%;
@@ -37,18 +37,21 @@ const Home = ({ zilContext }) => {
       <Container>
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            textAlign: 'center',
+            display: "flex",
+            flexDirection: "column",
+            textAlign: "center",
           }}
         >
-          <h1 style={{ fontSize: '5rem', padding: '1.5rem 0' }} className="neon">
-            {' '}
+          <h1
+            style={{ fontSize: "5rem", padding: "1.5rem 0" }}
+            className="neon"
+          >
+            {" "}
             Dev Wallet
           </h1>
           <br />
 
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: "center" }}>
             <small>
               Node URL: <code>{curNetwork.nodeUrl}</code>
             </small>
@@ -56,7 +59,7 @@ const Home = ({ zilContext }) => {
             <small>
               Chain ID: <code>{curNetwork.chainId}</code>
             </small>
-            {' | '}
+            {" | "}
             <small>
               Msg Ver: <code>{curNetwork.msgVersion}</code>
             </small>
@@ -65,7 +68,13 @@ const Home = ({ zilContext }) => {
       </Container>
       <div className="container">
         <Row className="pt-4">
-          <Col xs={6} sm={6} md={6} lg={6} className="ml-auto mr-auto text-center">
+          <Col
+            xs={6}
+            sm={6}
+            md={6}
+            lg={6}
+            className="ml-auto mr-auto text-center"
+          >
             <Disclaimer />
           </Col>
         </Row>

@@ -14,13 +14,18 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FaGithub, FaDiscord, FaTelegramPlane, FaTwitter } from 'react-icons/fa';
-import './style.css';
+import {
+  FaGithub,
+  FaDiscord,
+  FaTelegramPlane,
+  FaTwitter,
+} from "react-icons/fa";
+import "./style.css";
 
 const Footer = ({ year }) => {
   const getCopyright = (y) => `Copyright © ${y} Zilliqa Research Pte. Ltd.`;
   return (
-    <footer data-testid="footer" className={'footer'}>
+    <footer data-testid="footer" className={"footer"}>
       <div className="text-center py-2">
         <ul className="nav justify-content-center">
           <li className="nav-item">
@@ -29,7 +34,7 @@ const Footer = ({ year }) => {
               href="https://github.com/Zilliqa/dev-wallet"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={'Dev Wallet GitHub'}
+              aria-label={"Dev Wallet GitHub"}
             >
               <FaGithub />
             </a>
@@ -40,7 +45,7 @@ const Footer = ({ year }) => {
               href="https://discord.com/invite/XMRE9tt"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={'Zilliqa Discord'}
+              aria-label={"Zilliqa Discord"}
             >
               <FaDiscord />
             </a>
@@ -51,7 +56,7 @@ const Footer = ({ year }) => {
               href="https://t.me/ZilliqaDevs"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={'Zilliqa Telegram'}
+              aria-label={"Zilliqa Telegram"}
             >
               <FaTelegramPlane />
             </a>
@@ -62,7 +67,7 @@ const Footer = ({ year }) => {
               href="https://twitter.com/zilliqa"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={'Zilliqa Twitter'}
+              aria-label={"Zilliqa Twitter"}
             >
               <FaTwitter />
             </a>

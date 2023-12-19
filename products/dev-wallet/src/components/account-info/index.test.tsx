@@ -14,23 +14,25 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { render, waitFor } from '@testing-library/react';
-import AccountInfo from '.';
-import { NETWORK } from '../../contexts/zil-context';
+import { render, waitFor } from "@testing-library/react";
+import AccountInfo from ".";
+import { NETWORK } from "../../contexts/zil-context";
 
-const publicKey = '0245DC2911EDC02F2774E0A40FBEB0112EA60BF513F9EC50889D59FC94C97EC18F';
-const privateKey = '0245DC2911EDC02F2774E0A40FBEB0112EA60BF513F9EC50889D59FC94C97EC18F';
-const address = '0x3C9Ff642E17aF5Cc0C109593C9864d4529B247A0';
+const publicKey =
+  "0245DC2911EDC02F2774E0A40FBEB0112EA60BF513F9EC50889D59FC94C97EC18F";
+const privateKey =
+  "0245DC2911EDC02F2774E0A40FBEB0112EA60BF513F9EC50889D59FC94C97EC18F";
+const address = "0x3C9Ff642E17aF5Cc0C109593C9864d4529B247A0";
 const curNetwork = {
   name: NETWORK.TestNet,
   chainId: 333,
   msgVersion: 1,
-  nodeUrl: 'https://dev-api.zilliqa.com',
-  faucetUrl: 'https://some-api.zilliqa.com/api/v1/faucet',
-  explorerUrl: 'devex.zilliqa.com',
+  nodeUrl: "https://dev-api.zilliqa.com",
+  faucetUrl: "https://some-api.zilliqa.com/api/v1/faucet",
+  explorerUrl: "devex.zilliqa.com",
 };
-test('matches the snapshot when loaded', async () => {
-  const getBalance = jest.fn().mockResolvedValue('100000');
+test("matches the snapshot when loaded", async () => {
+  const getBalance = jest.fn().mockResolvedValue("100000");
   const { container, getByTestId } = render(
     <AccountInfo
       privateKey={privateKey}
@@ -38,14 +40,14 @@ test('matches the snapshot when loaded', async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />
+    />,
   );
 
   expect(container.firstChild).toMatchSnapshot();
 });
 
-test('matches the snapshot when loaded', async () => {
-  const getBalance = jest.fn().mockResolvedValue('100000');
+test("matches the snapshot when loaded", async () => {
+  const getBalance = jest.fn().mockResolvedValue("100000");
   const { container, getByTestId } = render(
     <AccountInfo
       privateKey={privateKey}
@@ -53,15 +55,15 @@ test('matches the snapshot when loaded', async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />
+    />,
   );
 
-  await waitFor(() => getByTestId('container-data'));
+  await waitFor(() => getByTestId("container-data"));
   expect(container.firstChild).toMatchSnapshot();
 });
 
-test('matches the snapshot when failed', async () => {
-  const getBalance = jest.fn().mockRejectedValue('Intended Error');
+test("matches the snapshot when failed", async () => {
+  const getBalance = jest.fn().mockRejectedValue("Intended Error");
   const { container, getByTestId } = render(
     <AccountInfo
       privateKey={privateKey}
@@ -69,13 +71,13 @@ test('matches the snapshot when failed', async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />
+    />,
   );
-  await waitFor(() => getByTestId('container-error'), { timeout: 1000 });
+  await waitFor(() => getByTestId("container-error"), { timeout: 1000 });
   expect(container.firstChild).toMatchSnapshot();
 });
 
-test('matches the snapshot when no data', async () => {
+test("matches the snapshot when no data", async () => {
   const getBalance = jest.fn().mockResolvedValue(undefined);
   const { container, getByTestId } = render(
     <AccountInfo
@@ -84,8 +86,8 @@ test('matches the snapshot when no data', async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />
+    />,
   );
-  await waitFor(() => getByTestId('container-no-data'));
+  await waitFor(() => getByTestId("container-no-data"));
   expect(container.firstChild).toMatchSnapshot();
 });
