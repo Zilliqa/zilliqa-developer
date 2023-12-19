@@ -33,14 +33,14 @@ const curNetwork = {
 };
 test("matches the snapshot when loaded", async () => {
   const getBalance = jest.fn().mockResolvedValue("100000");
-  const { container, getByTestId } = render(
+  const { container } = render(
     <AccountInfo
       privateKey={privateKey}
       publicKey={publicKey}
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />,
+    />
   );
 
   expect(container.firstChild).toMatchSnapshot();
@@ -55,7 +55,7 @@ test("matches the snapshot when loaded", async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />,
+    />
   );
 
   await waitFor(() => getByTestId("container-data"));
@@ -71,7 +71,7 @@ test("matches the snapshot when failed", async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />,
+    />
   );
   await waitFor(() => getByTestId("container-error"), { timeout: 1000 });
   expect(container.firstChild).toMatchSnapshot();
@@ -86,7 +86,7 @@ test("matches the snapshot when no data", async () => {
       address={address}
       getBalance={getBalance}
       curNetwork={curNetwork}
-    />,
+    />
   );
   await waitFor(() => getByTestId("container-no-data"));
   expect(container.firstChild).toMatchSnapshot();

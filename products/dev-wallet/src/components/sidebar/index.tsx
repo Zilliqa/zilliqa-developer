@@ -14,16 +14,17 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withRouter } from "react-router";
+// TODO: useLocation is broken
+// import { useLocation } from "react-router";
 import { NavItem } from "reactstrap";
 import { Link } from "react-router-dom";
 import { paths } from "../../routes";
 import "./style.css";
 import { FaHome, FaPlusSquare, FaTint, FaPaperPlane } from "react-icons/fa";
 
-const Sidebar = (props) => {
-  const { pathname } = props.location;
-
+const Sidebar = () => {
+  // const { pathname } = useLocation();
+  const pathname = "";
   const renderLink = (path, name, icon) => (
     <Link
       to={path + window.location.search}
@@ -44,7 +45,7 @@ const Sidebar = (props) => {
               {renderLink(
                 paths.generate,
                 "Create New Wallet",
-                <FaPlusSquare />,
+                <FaPlusSquare />
               )}
             </NavItem>
             <NavItem>
@@ -60,4 +61,4 @@ const Sidebar = (props) => {
   );
 };
 
-export default withRouter(Sidebar);
+export default Sidebar;

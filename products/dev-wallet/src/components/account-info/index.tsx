@@ -95,7 +95,7 @@ const AccountInfo = ({
               <div data-testid="container-data">
                 <small>{`${units.fromQa(
                   new BN(data as string),
-                  units.Units.Zil,
+                  units.Units.Zil
                 )} ZIL`}</small>
               </div>
             ) : (

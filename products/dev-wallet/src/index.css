@@ -39,24 +39,17 @@
 
 @keyframes GlowEffect {
   0% {
-    text-shadow:
-      0 0 4px var(--white),
-      0 0 16px var(--success),
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
       0 0 64px var(--success);
   }
 
   50% {
-    text-shadow:
-      0 0 4px var(--white),
-      0 0 16px var(--success),
-      0 0 64px var(--success),
-      0 0 72px royalblue;
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
+      0 0 64px var(--success), 0 0 72px royalblue;
   }
 
   100% {
-    text-shadow:
-      0 0 4px var(--white),
-      0 0 16px var(--success),
+    text-shadow: 0 0 4px var(--white), 0 0 16px var(--success),
       0 0 64px var(--success);
   }
 }
@@ -148,9 +141,7 @@ form input.form-control {
   border-radius: 0;
   border-bottom: 1px solid var(--gray500);
   padding: 0;
-  transition:
-    border-width 0.1s linear,
-    border-color 0.3s linear;
+  transition: border-width 0.1s linear, border-color 0.3s linear;
   position: relative;
   outline: 0;
   background-color: transparent;

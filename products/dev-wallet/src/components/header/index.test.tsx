@@ -39,7 +39,7 @@ test("matches the snapshot", () => {
         }}
         switchNetwork={switchNetwork}
       />
-    </MemoryRouter>,
+    </MemoryRouter>
   );
   expect(container).toMatchSnapshot();
 });
@@ -63,7 +63,7 @@ test("matches the snapshot", () => {
         }}
         switchNetwork={switchNetwork}
       />
-    </MemoryRouter>,
+    </MemoryRouter>
   );
   expect(container).toMatchSnapshot();
 });

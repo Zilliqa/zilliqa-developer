@@ -125,7 +125,7 @@ export const useAsyncFn: UseAsyncFn = ({ fn, deferred = false, ...args }) => {
         isMountedRef.current && dispatch({ type: curType, payload: error });
       }
     },
-    [asyncFn],
+    [asyncFn]
   );
 
   const abort = (): void => {
@@ -138,7 +138,7 @@ export const useAsyncFn: UseAsyncFn = ({ fn, deferred = false, ...args }) => {
     () => () => {
       isMountedRef.current = false;
     },
-    [],
+    []
   );
   useEffect(() => {
     if (!deferred) {

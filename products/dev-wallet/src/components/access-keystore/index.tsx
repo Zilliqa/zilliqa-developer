@@ -61,25 +61,27 @@ const initialState: IState = {
 const AccessKeystore: React.FunctionComponent<IProps> = (props) => {
   const [worker, setWorker] = useState(initialState.worker);
   const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(
-    initialState.isDisclaimerChecked,
+    initialState.isDisclaimerChecked
   );
   const [decryptStatus, setDecryptStatus] = useState(
-    initialState.decryptStatus,
+    initialState.decryptStatus
   );
 
   const [passphrase, setPassphrase] = useState(initialState.passphrase);
   const [passphraseValid, setPassphraseValid] = useState(
-    initialState.passphraseValid,
+    initialState.passphraseValid
   );
   const [passphraseInvalid, setPassphraseInvalid] = useState(
-    initialState.passphraseInvalid,
+    initialState.passphraseInvalid
   );
   const [filename, setFilename] = useState(initialState.filename);
   const [keystoreV3, setKeystoreV3] = useState(initialState.keystoreV3);
 
   useEffect(() => {
     if (worker === undefined) {
-      const myWorker = new Worker("./decrypt.worker", { type: "module" });
+      // String cannot be inlined. See https://github.com/angular/angular-cli/issues/14776#issuecomment-516998921
+      const name: string = "./decrypt.worker";
+      const myWorker = new Worker(name, { type: "module" });
 
       myWorker.onmessage = (event) => {
         const { data } = event;
@@ -122,7 +124,7 @@ const AccessKeystore: React.FunctionComponent<IProps> = (props) => {
     const validationResult: any = getInputValidationState(
       key,
       value,
-      /^.{8,}$/,
+      /^.{8,}$/
     );
     setPassphraseValid(validationResult.passphraseValid);
     setPassphraseInvalid(validationResult.passphraseInvalid);

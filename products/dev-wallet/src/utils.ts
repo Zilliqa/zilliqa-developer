@@ -28,7 +28,7 @@ export const setValIfWholeNum =
 export const getInputValidationState = (
   key: string,
   value: string,
-  testVal: RegExp | boolean,
+  testVal: RegExp | boolean
 ) => {
   const isInvalid: boolean =
     typeof testVal === "boolean" ? testVal : testVal.test(value);
@@ -66,7 +66,7 @@ export const downloadObjectAsJson = (exportObj, exportName) => {
 export const formatSendAmountInZil = (
   amountInZil: string,
   balanceInZil: string,
-  minGasPriceInZil: string,
+  minGasPriceInZil: string
 ): string => {
   const amountInQaBN: BN = units.toQa(amountInZil, units.Units.Zil);
   const balanceInQaBN: BN = units.toQa(balanceInZil, units.Units.Zil);

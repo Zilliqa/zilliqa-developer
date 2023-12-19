@@ -44,11 +44,11 @@ const StyledSpinner = styled.div`
         height: ${LARGE}px;
       }`
       : size === "small"
-        ? `&{
+      ? `&{
         width: ${SMALL}px;
         height: ${SMALL}px;
       }`
-        : `&{
+      : `&{
         width: ${MEDIUM}px;
         height: ${MEDIUM}px;
       }`}

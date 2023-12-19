@@ -23,7 +23,7 @@ const encrypt = async (event) => {
     const keystoreJSON = await encryptPrivateKey(
       "pbkdf2",
       privateKey,
-      passphrase,
+      passphrase
     );
     // @ts-ignore
     // eslint-disable-next-line

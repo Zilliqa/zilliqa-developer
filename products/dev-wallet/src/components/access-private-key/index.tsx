@@ -48,15 +48,15 @@ const initialState: IState = {
 
 const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
   const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(
-    initialState.isDisclaimerChecked,
+    initialState.isDisclaimerChecked
   );
   const [isAccessing, setIsAccessing] = useState(initialState.isAccessing);
   const [privateKey, setPrivateKey] = useState(initialState.privateKey);
   const [privateKeyValid, setPrivateKeyValid] = useState(
-    initialState.privateKeyValid,
+    initialState.privateKeyValid
   );
   const [privateKeyInvalid, setPrivateKeyInvalid] = useState(
-    initialState.privateKeyInvalid,
+    initialState.privateKeyInvalid
   );
 
   const handleCheck = () => {
@@ -70,7 +70,7 @@ const AccessPrivateKey: React.FunctionComponent<IProps> = (props) => {
     const validationResult: any = getInputValidationState(
       key,
       value,
-      /^[a-fA-F0-9]{64}$/g,
+      /^[a-fA-F0-9]{64}$/g
     );
     setPrivateKeyValid(validationResult.privateKeyValid);
     setPrivateKeyInvalid(validationResult.privateKeyInvalid);

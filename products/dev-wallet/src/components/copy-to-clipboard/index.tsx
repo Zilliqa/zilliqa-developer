@@ -73,10 +73,10 @@ const Copy = (props) => (
       props.copyToClipboard
         ? props.copyToClipboard
         : window.navigator &&
-            window.navigator.clipboard &&
-            window.navigator.clipboard.writeText
-          ? (text) => window.navigator.clipboard.writeText(text)
-          : undefined
+          window.navigator.clipboard &&
+          window.navigator.clipboard.writeText
+        ? (text) => window.navigator.clipboard.writeText(text)
+        : undefined
     }
   />
 );

@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+
 import {
   getAddressFromPrivateKey,
   getPubKeyFromPrivateKey,
@@ -44,9 +45,23 @@ const initialState = {
   publicKey: undefined as string | undefined,
   privateKey: undefined as string | undefined,
 };
+type IState = {
+  config: any;
+
+  curNetwork: any;
+  zilliqa?: Zilliqa;
+  version?: number;
+  provider?: HTTPProvider;
+
+  isAuth?: boolean;
+  address?: string;
+  publicKey?: string;
+  privateKey?: string;
+};
+
 export const ZilContext = React.createContext(initialState);
 
-export class ZilProvider extends React.Component {
+export class ZilProvider extends React.Component<{ children: any }, IState> {
   public readonly state = initialState;
   async componentDidMount() {
     const res = await fetch("config.json");
@@ -62,7 +77,7 @@ export class ZilProvider extends React.Component {
     const params = Object.fromEntries(urlSearchParams.entries());
     const networkParam = params["network"];
     const isValidNetwork = [NETWORK.IsolatedServer, NETWORK.TestNet].includes(
-      networkParam as NETWORK,
+      networkParam as NETWORK
     );
     if (isValidNetwork) {
       curNetworkKey = networkParam;
@@ -74,7 +89,7 @@ export class ZilProvider extends React.Component {
       window.history.replaceState(
         null,
         "",
-        `${window.location.pathname}?${urlSearchParams.toString()}`,
+        `${window.location.pathname}?${urlSearchParams.toString()}`
       );
     }
     const { config } = this.state;
@@ -142,7 +157,7 @@ export class ZilProvider extends React.Component {
     const provider = this.state.provider as HTTPProvider;
     const tx = new Transaction(
       await this.getParams(toAddress, amount),
-      provider,
+      provider
     );
     const signedTx = await zilliqa.wallet.sign(tx);
     const { txParams } = signedTx;
@@ -202,7 +217,7 @@ export class ZilProvider extends React.Component {
     });
     if (!res.ok) {
       throw new Error(
-        "Failed to run faucet, you may have reached maximum request limit.",
+        "Failed to run faucet, you may have reached maximum request limit."
       );
     }
     const data = await res.json();
@@ -220,7 +235,7 @@ export class ZilProvider extends React.Component {
     window.history.replaceState(
       null,
       "",
-      `${window.location.pathname}?${urlSearchParams.toString()}`,
+      `${window.location.pathname}?${urlSearchParams.toString()}`
     );
     this.initState(key);
   };

@@ -34,7 +34,7 @@ const snapshot = (level) => (size) => (disabled) => {
         disabled={disabled}
         data-testid={`${level}-${size}`}
         onClick={onClick}
-      />,
+      />
     );
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -42,8 +42,8 @@ const snapshot = (level) => (size) => (disabled) => {
 
 levelArray.forEach((level) =>
   sizeArray.forEach((size) =>
-    disabledArray.forEach((disabled) => snapshot(level)(size)(disabled)),
-  ),
+    disabledArray.forEach((disabled) => snapshot(level)(size)(disabled))
+  )
 );
 
 test("matches the snapshot", () => {
@@ -55,7 +55,7 @@ test("matches the snapshot", () => {
       level={"primary"}
       data-testid={"button-before"}
       onClick={onClick}
-    />,
+    />
   );
   expect(container.firstChild).toMatchSnapshot();
 });
@@ -69,7 +69,7 @@ test("matches the snapshot", () => {
       level={"primary"}
       data-testid={"button-before"}
       onClick={onClick}
-    />,
+    />
   );
   expect(container.firstChild).toMatchSnapshot();
 });

@@ -52,7 +52,7 @@ const SendForm = ({ send, getBalance, getMinGasPrice, curNetwork }) => {
 
   const minGasPriceInZil: string = units.fromQa(
     new BN(minGasPriceInQa),
-    units.Units.Zil,
+    units.Units.Zil
   );
 
   const balanceProps = useAsyncFn({ fn: getBalance });
@@ -61,7 +61,7 @@ const SendForm = ({ send, getBalance, getMinGasPrice, curNetwork }) => {
 
   const balanceInZil: string = units.fromQa(
     new BN(balanceInQa),
-    units.Units.Zil,
+    units.Units.Zil
   );
 
   const mutationProps = useAsyncFn({
@@ -85,7 +85,7 @@ const SendForm = ({ send, getBalance, getMinGasPrice, curNetwork }) => {
     const validationResult: any = getInputValidationState(
       key,
       value,
-      isBech32(value),
+      isBech32(value)
     );
     setToAddress(value);
     setToAddressValid(validationResult.toAddressValid);
@@ -99,14 +99,14 @@ const SendForm = ({ send, getBalance, getMinGasPrice, curNetwork }) => {
       const amountFormattedInZil = formatSendAmountInZil(
         amountInZil,
         balanceInZil,
-        minGasPriceInZil,
+        minGasPriceInZil
       );
       setAmount(amountFormattedInZil);
     }
   };
 
   const isBalanceInsufficient = new BN(balanceInQa).lte(
-    new BN(minGasPriceInQa),
+    new BN(minGasPriceInQa)
   );
   const isSendButtonDisabled =
     toAddressInvalid ||
@@ -251,7 +251,7 @@ const TransactionProcess = ({ confirm, mutationProps, curNetwork }) => {
   const { isFulfilled, isPending, error, data } = mutationProps;
   const getTxExplorerURL = (txId) => {
     return `${curNetwork.explorerUrl}/tx/${txId}?network=${encodeURIComponent(
-      curNetwork.nodeUrl,
+      curNetwork.nodeUrl
     )}`;
   };
   return (

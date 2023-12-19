@@ -48,7 +48,7 @@ const FaucetContainer = ({ zilContext }) => {
   const [toAddress, setToAddress] = useState(initialAddress);
   const [toAddressValid, setToAddressValid] = useState(isInitialAddressValid);
   const [toAddressInvalid, setToAddressInvalid] = useState(
-    initialAddress !== undefined && !isInitialAddressValid,
+    initialAddress !== undefined && !isInitialAddressValid
   );
 
   const changeToAddress = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -61,7 +61,7 @@ const FaucetContainer = ({ zilContext }) => {
     const validationResult: any = getInputValidationState(
       key,
       value,
-      validate(value),
+      validate(value)
     );
     setToAddress(value);
     setToAddressValid(validationResult.toAddressValid);

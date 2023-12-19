@@ -34,11 +34,8 @@ const StyledButton = styled.button`
   user-select: none;
   background-color: transparent;
   border: 1px solid transparent;
-  transition:
-    color 0.15s ease-in-out,
-    background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
   &::-webkit-file-upload-button {
     font: inherit;
@@ -79,13 +76,13 @@ const StyledButton = styled.button`
         border-radius: 0.3rem;
       }`
       : size === "small"
-        ? `&{
+      ? `&{
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
         line-height: 1.5;
         border-radius: 0.2rem;
       }`
-        : `&{
+      : `&{
         padding: 0.375rem 0.75rem;
         font-size: 1rem;
         line-height: 1.5;
@@ -107,7 +104,7 @@ const StyledButton = styled.button`
               background-color: ${colors.teal600};
             }`
       : level === "secondary"
-        ? `&{
+      ? `&{
               background-color: transparent;
               color: ${colors.gray500};
               border-color: ${colors.gray500};
@@ -118,8 +115,8 @@ const StyledButton = styled.button`
               color: ${colors.gray600};
               border-color: ${colors.gray600};
             }`
-        : level === "tertiary"
-          ? `&{
+      : level === "tertiary"
+      ? `&{
               background-color: transparent;
               color: ${colors.gray500};
               border-color: transparent;
@@ -128,7 +125,7 @@ const StyledButton = styled.button`
             }&:disabled{
               color: ${colors.gray600};
             }`
-          : ``}
+      : ``}
 `;
 
 interface IProps {
@@ -161,7 +158,6 @@ const Button: React.FunctionComponent<IProps> = ({
   after,
   style,
   level,
-  testId,
   ...rest
 }) => (
   <StyledButton

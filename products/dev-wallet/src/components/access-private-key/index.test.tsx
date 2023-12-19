@@ -21,7 +21,7 @@ import AccessPrivateKey from ".";
 test("matches the snapshot when loading", () => {
   const accessWallet = jest.fn();
   const { container } = render(
-    <AccessPrivateKey accessWallet={accessWallet} />,
+    <AccessPrivateKey accessWallet={accessWallet} />
   );
   expect(container.firstChild).toMatchSnapshot();
 });

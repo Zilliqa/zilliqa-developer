@@ -24,7 +24,7 @@ afterEach(cleanup);
 test("matches the snapshot", () => {
   const copy = jest.fn();
   const { container } = render(
-    <CopyToClipboard data="lorem" copyToClipboard={copy} />,
+    <CopyToClipboard data="lorem" copyToClipboard={copy} />
   );
   expect(container.firstChild).toMatchSnapshot();
 });
