@@ -192,7 +192,8 @@ const KeystoreStep = ({
 
   useEffect(() => {
     if (worker === undefined) {
-      const myWorker = new Worker("./encrypt.worker", { type: "module" });
+      const name: string = "./decrypt.worker";
+      const myWorker = new Worker(name, { type: "module" });
 
       myWorker.onmessage = (event) => {
         const { data } = event;

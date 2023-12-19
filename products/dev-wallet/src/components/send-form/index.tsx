@@ -35,7 +35,7 @@ import {
 import SpinnerWithCheckMark from "../spinner-with-check-mark";
 import Disclaimer from "../disclaimer";
 
-import { isBech32 } from "@zilliqa-js/util/dist/validation";
+import { isBech32 } from "@zilliqa-js/util/validation";
 import { useAsyncFn } from "../../use-async-fn";
 
 const SendForm = ({ send, getBalance, getMinGasPrice, curNetwork }) => {
