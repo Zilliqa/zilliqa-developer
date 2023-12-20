@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 interface IRelayerEvents {
     event Relayed(
         uint indexed targetChainId,
-        address indexed target,
+        address target,
         bytes call,
         uint gasLimit,
         uint nonce
@@ -21,6 +21,8 @@ struct CallMetadata {
 contract Relayer is IRelayer {
     uint public nonce;
 
+    // Use this function to relay a call with metadata. This is useful for calling surrogate contracts.
+    // Ensure the surrogate implements this interface
     function relayWithMetadata(
         uint targetChainId,
         address target,

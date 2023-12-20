@@ -249,13 +249,15 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Track last event block number for light client event censorship resistance
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
-  - [ ] Determine type of connection to use to connect to non-zilliqa chains
-    - Light node/client? [helios](https://github.com/a16z/helios)
   - [ ] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
   - [ ] Read & Write to chains
   - [ ] Validator slashing
-  - [ ] Zilliqa maintained full nodes of non-zq chain. UCCB validators use light nodes on it
   - [ ] Integrate into ZQ2 consensus network to share signatures
   - [ ] Periodic gas refund for validators
+  - [ ] Light client implementation
+    - [ ] Determine type of connection to use to connect to non-zilliqa chains
+    - [ ] Zilliqa maintained full nodes of non-zq chain. UCCB validators use light nodes on it
+    - [ ] Check logsBloom for potential events in the block
+    - [ ] Retrieve block receipts, check for logs and verify receipt root
 - [ ] **Frontend DApp**
   - [ ] Boilerplate setup (Vite React with Rainbow Kit)

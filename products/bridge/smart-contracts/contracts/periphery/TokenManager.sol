@@ -17,7 +17,6 @@ struct RemoteToken {
 
 abstract contract TokenManager {
     Relayer gateway;
-    // ChainId => token => remoteToken
     mapping(address => RemoteToken) public remoteTokens;
 
     error InvalidSourceChainId();
