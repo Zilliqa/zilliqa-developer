@@ -16,7 +16,7 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    # if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
+    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
     name: "Deploy image"
     strategy:
       fail-fast: false
@@ -64,7 +64,7 @@ jobs:
           #   tag_latest: false
           - application: multisig
             image_name: multisig
-            path: products/neo-savant
+            path: products/multisig
             tag_length: 8
             tag_latest: false
           # - application: neo-savant

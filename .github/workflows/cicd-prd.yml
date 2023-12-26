@@ -85,7 +85,7 @@ jobs:
             tag_latest: false
           - application: multisig
             image_name: multisig
-            path: products/neo-savant
+            path: products/multisig
             tag_length: 8
             tag_latest: false
           - application: neo-savant
