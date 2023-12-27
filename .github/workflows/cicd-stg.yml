@@ -30,6 +30,7 @@ jobs:
             faucet-service,
             governance-api,
             governance-snapshot,
+            multisig,
             neo-savant,
             scilla-server,
             zillion,
@@ -59,6 +60,11 @@ jobs:
           - application: faucet-service
             image_name: faucet-service
             path: products/faucet-service
+            tag_length: 8
+            tag_latest: false
+          - application: multisig
+            image_name: multisig
+            path: products/multisig
             tag_length: 8
             tag_latest: false
           - application: neo-savant

@@ -39,6 +39,7 @@ lint:
         - products/devex/public/*.js
         - products/governance-api/**
         - products/governance-snapshot/**
+        - products/multisig/**
         - products/scilla-server/**
         - products/zillion/**
         - .devcontainer/*

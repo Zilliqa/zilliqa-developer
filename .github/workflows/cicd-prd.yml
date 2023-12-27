@@ -31,6 +31,7 @@ jobs:
             eth-spout,
             governance-api,
             governance-snapshot,
+            multisig,
             neo-savant,
             scilla-server,
             zillion,
@@ -80,6 +81,11 @@ jobs:
           - application: governance-snapshot
             image_name: governance-snapshot
             path: products/governance-snapshot
+            tag_length: 8
+            tag_latest: false
+          - application: multisig
+            image_name: multisig
+            path: products/multisig
             tag_length: 8
             tag_latest: false
           - application: neo-savant
