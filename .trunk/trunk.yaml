@@ -37,6 +37,7 @@ lint:
       paths:
         - needing-organisation/**/*
         - products/devex/public/*.js
+        - products/dev-wallet/**
         - products/governance-api/**
         - products/governance-snapshot/**
         - products/multisig/**

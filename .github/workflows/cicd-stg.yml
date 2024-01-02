@@ -21,8 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [
+        application: [
             # developer-portal,
             # devex,
             # devex-apollo,
