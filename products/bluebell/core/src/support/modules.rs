@@ -30,7 +30,6 @@ impl SymbolTableConstructor for EvmCompilerContext {
             type_of_table: HashMap::new(),
             name_generator: NameGenerator::new(),
             state_layout: HashMap::new(),
-            user_types: HashMap::new(),
         };
 
         // TODO: Get types from self
@@ -95,6 +94,15 @@ impl BluebellModule for ScillaDefaultTypes {
             block.push([1].to_vec());
         });
 
+        context.declare_generic_type(
+            "Option",
+            ["T".to_string()].into(),
+            [
+                ("defined".to_string(), "Bool".to_string()),
+                ("value".to_string(), "T".to_string()),
+            ]
+            .into(),
+        );
         // TODO: Functions to be moved out to another
     }
 }
