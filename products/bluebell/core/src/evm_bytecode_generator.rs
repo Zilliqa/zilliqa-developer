@@ -9,10 +9,10 @@ use evm_assembly::{
     EvmByteCodeBuilder,
 };
 use primitive_types::U256;
+use scilla_parser::ast::TreeTraversalMode;
 use sha3::{Digest, Keccak256};
 
 use crate::{
-    constants::TreeTraversalMode,
     intermediate_representation::{
         pass::IrPass,
         primitives::{IntermediateRepresentation, Operation},
