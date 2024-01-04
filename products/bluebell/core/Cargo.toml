@@ -1,7 +1,6 @@
 [package]
 name = "bluebell"
 version = "0.1.0"
-build = "build.rs"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -16,6 +15,8 @@ lalrpop-util = {version = "0.19", features = ["lexer"]}
 # # LLVM stuff
 # inkwell = {version = "0.2.0", features= ["llvm16-0"]}
 
+scilla-parser = { git = "https://github.com/Zilliqa/rs-scilla-parser.git", branch="main" }
+
 # EVM stuff
 evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
 evm_assembly = { path = "../evm_assembly" }
@@ -28,7 +29,7 @@ sha3 = "0.10.8"
 log = "0.4.2"
 
 # Test
-regex = "1"
+regex = "1.10.2"
 diffy = "0.3.0"
 
 serde = { version = "1.0", features = ["derive"] }
