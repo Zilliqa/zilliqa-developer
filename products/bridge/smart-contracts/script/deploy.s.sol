@@ -16,16 +16,21 @@ import "forge-std/console.sol";
 contract Deployment is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address[] memory validators = new address[](1);
+        uint256 validator2 = vm.envUint("PRIVATE_KEY2");
+        // uint256 validator3 = vm.envUint("PRIVATE_KEY3");
+        address[] memory validators = new address[](2);
         // address target = 0xAEace9DC4125f5E7c6bC1D77D515fa64f69f7dEC;
 
         validators[0] = vm.addr(deployerPrivateKey);
+        validators[1] = vm.addr(validator2);
+        // validators[2] = vm.addr(validator3);
 
         vm.startBroadcast(deployerPrivateKey);
 
         ValidatorManager validatorManager = new ValidatorManager{salt: "salt"}(
-            validators
+            validators[0]
         );
+        validatorManager.initialize(validators);
 
         ChainGateway gateway = new ChainGateway{salt: "salt"}(
             address(validatorManager)

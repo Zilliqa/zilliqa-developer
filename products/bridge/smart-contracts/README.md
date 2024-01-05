@@ -6,12 +6,12 @@ Once the bridge infrastructure has been setup as according to [here](../bridge-v
 
 ```sh
 # Deploy on chainid 1
-forge script script/deploy.s.sol:Deploy --fork-url http://localhost:8545 --broadcast
+forge script script/deploy.s.sol:Deployment --fork-url http://localhost:8545 --broadcast
 ```
 
 ```sh
 # Deploy on chainid 2
-forge script script/deploy.s.sol:Deploy --fork-url http://localhost:8546 --broadcast
+forge script script/deploy.s.sol:Deployment --fork-url http://localhost:8546 --broadcast
 ```
 
 2.Run `relay` to relay messages across:

@@ -102,9 +102,8 @@ abstract contract ValidatorManagerFixture is Tester {
             _validators[i] = vm.createWallet(i + 1);
             validatorAddresses[i] = _validators[i].addr;
         }
-        ValidatorManager _validatorManager = new ValidatorManager(
-            validatorAddresses
-        );
+        ValidatorManager _validatorManager = new ValidatorManager(msg.sender);
+        _validatorManager.initialize(validatorAddresses);
 
         return (_validators, _validatorManager);
     }

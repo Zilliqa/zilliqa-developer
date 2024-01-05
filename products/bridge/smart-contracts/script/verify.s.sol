@@ -8,7 +8,7 @@ import "forge-std/console.sol";
 contract Verify is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address target = 0x287b0F2491653E5Cb93981AcF7fb30576480015D;
+        address target = 0x9cB4b20da1fA0caA96221aD7a80139DdbBEC266e;
         vm.startBroadcast(deployerPrivateKey);
 
         uint x = Target(target).count();

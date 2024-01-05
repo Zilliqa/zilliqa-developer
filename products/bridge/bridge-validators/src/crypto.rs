@@ -1,7 +1,13 @@
 // ! taken from ZQ2
 
+use std::str::FromStr;
+
 use anyhow::{anyhow, Result};
-use ethers::{core::k256, utils::hex};
+use ethers::{
+    core::k256,
+    signers::{LocalWallet, WalletError},
+    utils::hex,
+};
 
 /// The secret key type used as the basis of all cryptography in the node.
 /// Any of the `NodePublicKey` or `TransactionPublicKey`s, or a libp2p identity, can be derived
@@ -42,6 +48,10 @@ impl SecretKey {
 
     pub fn to_hex(&self) -> String {
         hex::encode(self.bytes)
+    }
+
+    pub fn as_wallet(&self) -> Result<LocalWallet, WalletError> {
+        LocalWallet::from_str(self.to_hex().as_str())
     }
 
     pub fn to_libp2p_keypair(&self) -> libp2p::identity::Keypair {

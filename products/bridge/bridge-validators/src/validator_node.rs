@@ -1,78 +1,542 @@
-use std::{collections::HashMap, str::FromStr, sync::Arc};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+};
 
 use anyhow::Result;
 use ethers::{
-    middleware::SignerMiddleware,
-    providers::{Http, Middleware, Provider},
-    signers::LocalWallet,
-    types::{Address, U256},
+    abi::{self, Token},
+    middleware::{MiddlewareBuilder, SignerMiddleware},
+    providers::{Http, Middleware, Provider, StreamExt},
+    signers::{LocalWallet, Signer},
+    types::{Address, BlockNumber, Bytes, Signature, H256, U256},
+    utils::hash_message,
 };
-use futures::future::join_all;
+use serde::{Deserialize, Serialize};
+use tokio::{
+    select,
+    sync::mpsc::{self, UnboundedSender},
+};
+use tokio_stream::wrappers::UnboundedReceiverStream;
+use tracing::{info, warn};
 
-use crate::{ChainGateway, ValidatorManager};
+use crate::{
+    crypto::SecretKey,
+    message::{
+        Dispatch, Dispatched, ExternalMessage, InboundBridgeMessage, OutboundBridgeMessage, Relay,
+    },
+    ChainGateway, ChainGatewayErrors, DispatchedFilter, RelayedFilter, ValidatorManager,
+};
+
+const CHAIN_GATEWAY: &str = "0x4a50E1Be218279ca980EAb216d95E0A48B5aE872";
+const VALIDATOR_MANAGER: &str = "0x4212b368876a54F99c741C8B5b64be2e52a6956b";
 
 pub type Client = SignerMiddleware<Provider<Http>, LocalWallet>;
 
-#[derive(Debug, Clone)]
-pub struct ValidatorNode {
-    pub chain_clients: HashMap<U256, Client>,
-    pub wallet: LocalWallet,
-    // /// The following two message streams are used for networked messages.
-    // /// The sender is provided to the p2p coordinator, to forward messages to the node.
-    // pub inbound_message_sender: UnboundedSender<(PeerId, ExternalMessage)>,
-    // /// The corresponding receiver is handled here, forwarding messages to the node struct.
-    // pub inbound_message_receiver: UnboundedReceiverStream<(PeerId, ExternalMessage)>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RelayEvent {
+    pub source_chain_id: U256,
+    pub target_chain_id: U256,
+    target: Address,
+    call: Bytes,
+    gas_limit: U256,
+    pub nonce: U256,
 }
 
-impl ValidatorNode {
-    pub async fn new(rpc_urls: &[&str], private_key: &str) -> Result<ValidatorNode> {
-        let wallet: LocalWallet = private_key.try_into()?;
+impl RelayEvent {
+    fn hash(&self) -> H256 {
+        hash_message(abi::encode(&[
+            Token::Uint(self.source_chain_id),
+            Token::Uint(self.target_chain_id),
+            Token::Address(self.target),
+            Token::Bytes(self.call.to_vec()),
+            Token::Uint(self.gas_limit),
+            Token::Uint(self.nonce),
+        ]))
+    }
+}
 
-        let chain_clients: HashMap<U256, Client> =
-            join_all(rpc_urls.into_iter().map(|&rpc_url| async move {
-                let provider = Provider::<Http>::try_from(rpc_url)?;
-                let client: Client =
-                    SignerMiddleware::new(provider, LocalWallet::from_str(private_key)?);
-                let chain_id = client.get_chainid().await?;
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct EventSignatures {
+    event: Option<RelayEvent>,
+    dispatched: bool,
+    signatures: SignedSignatures,
+}
 
-                Ok((chain_id, client))
-            }))
-            .await
-            .into_iter()
-            .collect::<Result<HashMap<U256, Client>>>()
-            .unwrap();
+impl EventSignatures {
+    fn new(event: RelayEvent, address: Address, signature: Signature) -> Self {
+        EventSignatures {
+            event: Some(event),
+            dispatched: false,
+            signatures: SignedSignatures(HashMap::from([(address, signature)])),
+        }
+    }
+}
 
-        Ok(ValidatorNode {
-            chain_clients,
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct SignedSignatures(HashMap<Address, Signature>);
+
+impl SignedSignatures {
+    fn add_signature(&mut self, address: Address, signature: Signature) -> Option<Signature> {
+        self.0.insert(address, signature)
+    }
+
+    fn into_ordered_signatures(self) -> Vec<Bytes> {
+        let mut list = self.0.into_iter().collect::<Vec<(Address, Signature)>>();
+        list.sort_by_cached_key(|(address, _)| address.clone());
+        list.into_iter()
+            .map(|(_, signature)| Bytes::from(signature.to_vec()))
+            .collect()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BridgeNodeConfig {
+    pub rpc_urls: Vec<String>,
+    pub private_key: SecretKey,
+    pub is_leader: bool,
+}
+
+#[derive(Debug)]
+pub struct BridgeChainNode {
+    event_signatures: HashMap<U256, EventSignatures>,
+    outbound_message_sender: UnboundedSender<OutboundBridgeMessage>,
+    inbound_message_receiver: UnboundedReceiverStream<InboundBridgeMessage>,
+    inbound_message_sender: UnboundedSender<InboundBridgeMessage>,
+    client: Client,
+    chain_id: U256,
+    wallet: LocalWallet,
+    validators: HashSet<Address>,
+    is_leader: bool,
+}
+
+impl BridgeChainNode {
+    async fn new(
+        rpc_url: &str,
+        wallet: LocalWallet,
+        outbound_message_sender: UnboundedSender<OutboundBridgeMessage>,
+        is_leader: bool,
+    ) -> Result<Self> {
+        let provider = Provider::<Http>::try_from(rpc_url)?;
+        let chain_id = provider.get_chainid().await?;
+
+        let client: Client = provider.with_signer(wallet.clone().with_chain_id(chain_id.as_u64()));
+
+        let (inbound_message_sender, inbound_message_receiver) = mpsc::unbounded_channel();
+        let inbound_message_receiver = UnboundedReceiverStream::new(inbound_message_receiver);
+
+        let mut bridge_node = BridgeChainNode {
+            event_signatures: HashMap::new(),
+            client,
+            chain_id,
             wallet,
+            validators: HashSet::new(),
+            outbound_message_sender,
+            inbound_message_receiver,
+            inbound_message_sender,
+            is_leader,
+        };
+
+        bridge_node.update_validators().await?;
+
+        Ok(bridge_node)
+    }
+
+    fn get_inbound_message_sender(&self) -> UnboundedSender<InboundBridgeMessage> {
+        self.inbound_message_sender.clone()
+    }
+
+    async fn listen_events(&mut self) -> Result<()> {
+        {
+            println!("Start Listening: {:?}", self.chain_id);
+            let chain_gateway_address = CHAIN_GATEWAY.parse::<Address>()?;
+
+            let chain_gateway: ChainGateway<Client> =
+                self.client.get_contract(&chain_gateway_address);
+
+            let relayed_events = chain_gateway
+                .event::<RelayedFilter>()
+                .from_block(BlockNumber::Earliest);
+            // .to_block(BlockNumber::Finalized);
+            let dispatched_events = chain_gateway
+                .event::<DispatchedFilter>()
+                .from_block(BlockNumber::Earliest);
+            // .to_block(BlockNumber::Finalized);
+
+            let mut relayed_stream = relayed_events.stream().await?;
+            let mut dispatched_stream = dispatched_events.stream().await?;
+
+            loop {
+                select! {
+                    Some(Ok(event)) = relayed_stream.next() => {
+                        self.handle_relay_event(event)?;
+                    },
+                    Some(Ok(event)) = dispatched_stream.next() => {
+                        self.handle_dispatch_event(event)?;
+                    }
+                    Some(message) = self.inbound_message_receiver.next() => {
+                        self.handle_bridge_message(message).await?;
+                    }
+                }
+            }
+        }
+    }
+
+    /// Handles incoming bridge related messages, either Relay from other validators or Dispatch from another chain
+    /// running on a separate thread locally
+    async fn handle_bridge_message(&mut self, message: InboundBridgeMessage) -> Result<()> {
+        match message {
+            InboundBridgeMessage::Dispatched(dispatch) => {
+                info!(
+                    "Register event as dispatched Chain {}, Nonce: {}",
+                    dispatch.chain_id, dispatch.nonce
+                );
+                if let Some(event_signature) = self.event_signatures.get_mut(&dispatch.nonce) {
+                    event_signature.dispatched = true;
+                } else {
+                    // Create new one instance if does not yet exist
+                    self.event_signatures.insert(
+                        dispatch.nonce,
+                        EventSignatures {
+                            dispatched: true,
+                            ..EventSignatures::default()
+                        },
+                    );
+                };
+            }
+            InboundBridgeMessage::Relay(relay) => {
+                self.handle_relay(&relay).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn handle_relay_event(&self, event: RelayedFilter) -> Result<()> {
+        info!(
+            "Chain: {} event found to be broadcasted: {}",
+            self.chain_id, event
+        );
+
+        if let Some(EventSignatures {
+            dispatched: true, ..
+        }) = self.event_signatures.get(&event.nonce)
+        {
+            info!("Already dispatched, no need to broadcast");
+            return Ok(());
+        }
+
+        let relay_event = RelayEvent {
+            source_chain_id: self.chain_id,
+            target_chain_id: event.target_chain_id,
+            target: event.target,
+            call: event.call,
+            gas_limit: event.gas_limit,
+            nonce: event.nonce,
+        };
+
+        self.broadcast_message(Relay {
+            signature: self.wallet.sign_event(&relay_event)?,
+            event: relay_event,
+        })?;
+
+        Ok(())
+    }
+
+    fn handle_dispatch_event(&mut self, event: DispatchedFilter) -> Result<()> {
+        info!(
+            "Found dispatched event chain: {}, nonce: {}",
+            event.source_chain_id, event.nonce
+        );
+        self.outbound_message_sender
+            .send(OutboundBridgeMessage::Dispatched(Dispatched {
+                chain_id: event.source_chain_id,
+                nonce: event.nonce,
+            }))?;
+
+        Ok(())
+    }
+
+    fn broadcast_message(&self, relay: Relay) -> Result<()> {
+        info!("Broadcasting: {:?}", relay);
+        // Send out echo message
+        self.outbound_message_sender
+            .send(OutboundBridgeMessage::Relay(relay))?;
+
+        Ok(())
+    }
+
+    async fn update_validators(&mut self) -> Result<()> {
+        let validator_manager_address = VALIDATOR_MANAGER.parse::<Address>()?;
+
+        let validator_manager: ValidatorManager<Client> =
+            self.client.get_contract(&validator_manager_address);
+
+        let validators: Vec<Address> = validator_manager.get_validators().call().await?;
+
+        self.validators = validators.into_iter().collect();
+
+        Ok(())
+    }
+
+    fn has_supermajority(&self, signature_count: usize) -> bool {
+        signature_count * 3 > self.validators.len() * 2
+    }
+
+    /// Handle message, verify and add to storage.
+    /// If has supermajority then submit the transaction.
+    /// TODO: Also check if it is current leader to dispatch
+    async fn handle_relay(&mut self, echo: &Relay) -> Result<()> {
+        let Relay { signature, event } = echo;
+        let nonce = event.nonce;
+        let event_hash = event.hash();
+
+        let signature = Signature::try_from(signature.to_vec().as_slice())?;
+
+        // update validator set in case it has changed
+        self.update_validators().await?;
+
+        if let Ok(address) = signature.recover(event_hash) {
+            if self.validators.contains(&address) {
+                // TODO: handle case where validators sign different data to the same event
+                let event_signatures = if let Some(event_signatures) =
+                    self.event_signatures.get_mut(&nonce)
+                {
+                    // Only insert if it is the same event as the one stored
+                    if let Some(relay_event) = &mut event_signatures.event {
+                        if relay_event.hash() == event_hash {
+                            event_signatures
+                                .signatures
+                                .add_signature(address, signature);
+                        } else {
+                            warn!("Message bodies don't match, so reject {:?}", relay_event);
+                            return Ok(());
+                        }
+                    } else {
+                        warn!("Found event_signature without event {:?}", event_signatures);
+                        return Ok(());
+                    }
+
+                    event_signatures.clone()
+                } else {
+                    let event_signatures = EventSignatures::new(event.clone(), address, signature);
+                    self.event_signatures
+                        .insert(nonce, event_signatures.clone());
+
+                    event_signatures
+                };
+                info!(
+                    "Handling received: {:?}, collected: {:?}",
+                    &echo,
+                    event_signatures.signatures.0.len()
+                );
+
+                if self.is_leader && self.has_supermajority(event_signatures.signatures.0.len()) {
+                    // Send message to BridgeNode to be handled and sent out
+                    // TODO: Verify if any signatures became invalid due to validator changes
+                    info!("Sending out dispatch request for {:?}", &echo);
+                    self.outbound_message_sender
+                        .send(OutboundBridgeMessage::Dispatch(Dispatch {
+                            event: event.clone(),
+                            signatures: event_signatures.signatures,
+                        }))?;
+                }
+            } else {
+                info!("Address not part of the validator set");
+                return Ok(());
+            }
+        } else {
+            info!("Invalid message signature");
+            return Ok(());
+        }
+
+        Ok(())
+    }
+}
+
+type Nonce = U256;
+
+#[derive(Debug)]
+pub struct BridgeNode {
+    /// The following two message streams are used for networked messages.
+    /// The sender is provided to the p2p coordinator, to forward messages to the node.
+    bridge_outbound_message_sender: UnboundedSender<ExternalMessage>,
+    bridge_inbound_message_receiver: UnboundedReceiverStream<ExternalMessage>,
+    bridge_inbound_message_sender: UnboundedSender<ExternalMessage>,
+    bridge_message_receiver: UnboundedReceiverStream<OutboundBridgeMessage>,
+    chain_node_senders: HashMap<Nonce, UnboundedSender<InboundBridgeMessage>>,
+    chain_clients: HashMap<Nonce, Client>,
+}
+
+impl BridgeNode {
+    pub async fn new(
+        config: BridgeNodeConfig,
+        bridge_outbound_message_sender: UnboundedSender<ExternalMessage>,
+    ) -> Result<Self> {
+        let mut chain_node_senders = HashMap::new();
+        let mut chain_clients = HashMap::new();
+        let wallet = config.private_key.as_wallet()?;
+
+        let (bridge_message_sender, bridge_message_receiver) = mpsc::unbounded_channel();
+        let bridge_message_receiver = UnboundedReceiverStream::new(bridge_message_receiver);
+
+        for rpc_url in config.rpc_urls {
+            let mut validator_chain_node = BridgeChainNode::new(
+                rpc_url.as_str(),
+                wallet.clone(),
+                bridge_message_sender.clone(),
+                config.is_leader,
+            )
+            .await?;
+            chain_node_senders.insert(
+                validator_chain_node.chain_id,
+                validator_chain_node.get_inbound_message_sender(),
+            );
+
+            chain_clients.insert(
+                validator_chain_node.chain_id,
+                validator_chain_node.client.clone(),
+            );
+
+            tokio::spawn(async move {
+                validator_chain_node.listen_events().await.unwrap();
+            });
+        }
+
+        let (bridge_inbound_message_sender, bridge_inbound_message_receiver) =
+            mpsc::unbounded_channel();
+        let bridge_inbound_message_receiver =
+            UnboundedReceiverStream::new(bridge_inbound_message_receiver);
+
+        Ok(BridgeNode {
+            bridge_outbound_message_sender,
+            bridge_inbound_message_receiver,
+            bridge_inbound_message_sender,
+            bridge_message_receiver,
+            chain_node_senders,
+            chain_clients,
         })
+    }
+
+    pub fn get_bridge_inbound_message_sender(&self) -> UnboundedSender<ExternalMessage> {
+        self.bridge_inbound_message_sender.clone()
+    }
+
+    // TODO: solidify into all events together
+    pub async fn listen_events(&mut self) -> Result<()> {
+        loop {
+            select! {
+               Some(message) = self.bridge_inbound_message_receiver.next() => {
+                    // forward messages to bridge_chain_node
+                    match message {
+                        ExternalMessage::BridgeEcho(echo) => {
+                            // Send echo to respective source_chain_id to be verified, only if chain is supported
+                            if let Some(sender) = self.chain_node_senders.get(&echo.event.source_chain_id) {
+                                sender.send(InboundBridgeMessage::Relay(echo))?;
+                            }
+                        }
+                    }
+                }
+                Some(message) = self.bridge_message_receiver.next() => {
+                    match message {
+                        OutboundBridgeMessage::Dispatch(dispatch) => {
+                            // Send relay event to target chain
+                            self.dispatch_message(dispatch).await?;
+                        },
+                        OutboundBridgeMessage::Dispatched(dispatched) => {
+                            // Forward message to another chain_node
+                            if let Some(sender) = self.chain_node_senders.get(&dispatched.chain_id) {
+                                sender.send(InboundBridgeMessage::Dispatched(dispatched))?;
+                            }
+                        },
+                        OutboundBridgeMessage::Relay(relay) => {
+                            // Forward message to broadcast
+                            self.bridge_outbound_message_sender.send(ExternalMessage::BridgeEcho(relay))?;
+                        },
+                    }
+                }
+            }
+        }
+    }
+
+    async fn dispatch_message(&self, dispatch: Dispatch) -> Result<()> {
+        let chain_gateway_address = CHAIN_GATEWAY.parse::<Address>()?;
+
+        let Dispatch {
+            event, signatures, ..
+        } = dispatch;
+
+        if let Some(client) = self.chain_clients.get(&event.target_chain_id) {
+            let chain_gateway: ChainGateway<Client> = client.get_contract(&chain_gateway_address);
+
+            let function_call = chain_gateway.dispatch(
+                event.source_chain_id,
+                event.target,
+                event.call,
+                event.gas_limit,
+                event.nonce,
+                signatures.into_ordered_signatures(),
+            );
+            info!(
+                "Preparing to send dispatch {}.{}",
+                event.target_chain_id, event.nonce
+            );
+
+            match function_call.call().await {
+                Ok(_) => {
+                    function_call.send().await?.await?;
+                    println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
+                }
+                Err(contract_err) => {
+                    match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
+                        Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
+                            println!(
+                                "Already Dispatched {}.{}",
+                                event.target_chain_id, event.nonce
+                            );
+                        }
+                        Some(x) => {
+                            println!("ChainGatewayError: {:?}", x);
+                        }
+                        None => {
+                            dbg!("Some unknown error", contract_err);
+                        }
+                    }
+                }
+            };
+        } else {
+            warn!("Invalid chain id")
+        }
+
+        Ok(())
+    }
+}
+
+pub trait EventSigner {
+    fn sign_event(&self, event: &RelayEvent) -> Result<Signature>;
+}
+
+impl EventSigner for LocalWallet {
+    fn sign_event(&self, event: &RelayEvent) -> Result<Signature> {
+        let data = event.hash();
+        let signature = self.sign_hash(data)?;
+
+        Ok(signature)
     }
 }
 
 pub trait ContractInitializer<T> {
-    fn get_contract(&self, chain_id: U256, contract_address: Address) -> Option<T>;
+    fn get_contract(&self, contract_address: &Address) -> T;
 }
 
-impl ContractInitializer<ValidatorManager<Client>> for ValidatorNode {
-    fn get_contract(
-        &self,
-        chain_id: U256,
-        contract_address: Address,
-    ) -> Option<ValidatorManager<Client>> {
-        self.chain_clients
-            .get(&chain_id)
-            .map(|client| ValidatorManager::new(contract_address, Arc::new(client.clone())))
+impl ContractInitializer<ValidatorManager<Client>> for Client {
+    fn get_contract(&self, contract_address: &Address) -> ValidatorManager<Client> {
+        ValidatorManager::new(*contract_address, Arc::new(self.clone()))
     }
 }
 
-impl ContractInitializer<ChainGateway<Client>> for ValidatorNode {
-    fn get_contract(
-        &self,
-        chain_id: U256,
-        contract_address: Address,
-    ) -> Option<ChainGateway<Client>> {
-        self.chain_clients
-            .get(&chain_id)
-            .map(|client| ChainGateway::new(contract_address, Arc::new(client.clone())))
+impl ContractInitializer<ChainGateway<Client>> for Client {
+    fn get_contract(&self, contract_address: &Address) -> ChainGateway<Client> {
+        ChainGateway::new(*contract_address, Arc::new(self.clone()))
     }
 }
