@@ -32,7 +32,7 @@ yours is not listed here, please
 
 [zilliqa-js](https://github.com/Zilliqa/zilliqa-js),
 [gozilliqa (formerly laksago)](https://github.com/Zilliqa/gozilliqa-sdk) and
-[laksaj](https://github.com/FireStack-Lab/LaksaJ) are active SDKs maintained by
+[laksaj](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/laksaj) are active SDKs maintained by
 the Zilliqa core team but the zilliqa community members also actively maintain
 multiple SDKs.
 
@@ -41,7 +41,6 @@ multiple SDKs.
 ### JavaScript/TypeScript
 
 - [zilliqa-js/viewblock](https://github.com/Ashlar/zilliqa-js-viewblock)
-- [laksaj](https://github.com/FireStack-Lab/Laksa)
 - [moonlet-core](https://github.com/cryptolandtech/moonlet-core)
 - [mszbednarski/boost-zil](https://github.com/MszBednarski/boost-zil)
 
@@ -56,6 +55,10 @@ multiple SDKs.
 ### Swift
 
 - [zesame](https://github.com/OpenZesame/Zesame)
+
+### Java
+
+- [laksaj](https://github.com/FireStack-Lab/Laksaj)
 
 ### Ruby
 
