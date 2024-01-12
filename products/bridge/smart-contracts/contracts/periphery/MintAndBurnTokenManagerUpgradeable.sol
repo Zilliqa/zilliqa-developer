@@ -1,24 +1,32 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import {Relayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {TokenManagerUpgradeable, ITokenManager} from "contracts/periphery/TokenManagerUpgradeable.sol";
+import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 
-import {TokenManager, RemoteToken} from "contracts/periphery/TokenManager.sol";
-import {IBridgedToken, BridgedToken} from "contracts/periphery/BridgedToken.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
-contract MintAndBurnTokenManager is TokenManager {
-    event Minted(address token, address recipient, uint amount);
-    event Burned(address token, address recipient, uint amount);
+interface IMintAndBurnTokenManager is ITokenManager {
+    event Minted(address indexed token, address indexed recipient, uint amount);
+    event Burned(address indexed token, address indexed recipient, uint amount);
     event BridgedTokenDeployed(
-        address indexed token,
+        address token,
         address remoteToken,
         address remoteTokenManager,
         uint remoteChainId
     );
+}
 
-    // TODO: deployed counterfactually
-    constructor(address _gateway) TokenManager(_gateway) {}
+contract MintAndBurnTokenManagerUpgradeable is
+    IMintAndBurnTokenManager,
+    TokenManagerUpgradeable
+{
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address _gateway) external initializer {
+        __TokenManager_init(_gateway);
+    }
 
     function deployToken(
         string calldata name,
@@ -53,7 +61,7 @@ contract MintAndBurnTokenManager is TokenManager {
         address recipient,
         uint amount
     ) internal override {
-        IBridgedToken(token).burnFrom(recipient, amount);
+        BridgedToken(token).burnFrom(recipient, amount);
         emit Burned(token, recipient, amount);
     }
 
@@ -63,7 +71,7 @@ contract MintAndBurnTokenManager is TokenManager {
         address recipient,
         uint amount
     ) internal override {
-        IBridgedToken(token).mint(recipient, amount);
+        BridgedToken(token).mint(recipient, amount);
         emit Minted(token, recipient, amount);
     }
 }

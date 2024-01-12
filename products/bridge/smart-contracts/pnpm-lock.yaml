@@ -11,9 +11,9 @@ importers:
       '@openzeppelin/contracts':
         specifier: ^5.0.0
         version: 5.0.0
-      bridge:
-        specifier: ^2.0.71
-        version: 2.0.71
+      '@openzeppelin/contracts-upgradeable':
+        specifier: ^5.0.1
+        version: 5.0.1(@openzeppelin/contracts@5.0.0)
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
@@ -916,6 +916,14 @@ packages:
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.1
     dev: true
 
+  /@openzeppelin/contracts-upgradeable@5.0.1(@openzeppelin/contracts@5.0.0):
+    resolution: {integrity: sha512-MvaLoPnVcoZr/qqZP+4cl9piuR4gg0iIGgxVSZ/AL1iId3M6IdEHzz9Naw5Lirl4KKBI6ciTVnX07yL4dOMIJg==}
+    peerDependencies:
+      '@openzeppelin/contracts': 5.0.1
+    dependencies:
+      '@openzeppelin/contracts': 5.0.0
+    dev: false
+
   /@openzeppelin/contracts@5.0.0:
     resolution: {integrity: sha512-bv2sdS6LKqVVMLI5+zqnNrNU/CA+6z6CmwFXm/MzmOPBRSO5reEJN7z0Gbzvs0/bv/MZZXNklubpwy3v2+azsw==}
     dev: false
@@ -1444,10 +1452,6 @@ packages:
     dependencies:
       fill-range: 7.0.1
     dev: true
-
-  /bridge@2.0.71:
-    resolution: {integrity: sha512-iXCsrRbow6d0QbugqZI9U5ODeSFaDoI/jGtBe+DUTB7UrL8YIJI9qIdpZMSHMpFFoeKbxiiuP1AM8cvxHfgU6w==}
-    dev: false
 
   /brorand@1.1.0:
     resolution: {integrity: sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==}

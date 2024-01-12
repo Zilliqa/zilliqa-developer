@@ -2,9 +2,9 @@
 pragma solidity 0.8.20;
 
 import {Tester, Vm} from "foundry/test/Tester.sol";
-import {LockAndReleaseTokenManager} from "contracts/periphery/LockAndReleaseTokenManager.sol";
-import {AcceptArgs, TokenManager} from "contracts/periphery/TokenManager.sol";
-import {MintAndBurnTokenManager} from "contracts/periphery/MintAndBurnTokenManager.sol";
+import {LockAndReleaseTokenManagerUpgradeable} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
+import {AcceptArgs, TokenManagerUpgradeable} from "contracts/periphery/TokenManagerUpgradeable.sol";
+import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 import {CallMetadata, Relayer} from "contracts/core/Relayer.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
@@ -23,12 +23,12 @@ contract TokenBridgeTests is Tester {
     address remoteUser = vm.addr(3);
     uint originalTokenSupply = 1000 ether;
 
-    LockAndReleaseTokenManager sourceTokenManager;
+    LockAndReleaseTokenManagerUpgradeable sourceTokenManager;
     TestToken originalToken;
     ChainGateway sourceChainGateway;
     ValidatorManager sourceValidatorManager;
 
-    MintAndBurnTokenManager remoteTokenManager;
+    MintAndBurnTokenManagerUpgradeable remoteTokenManager;
     BridgedToken bridgedToken;
     ChainGateway remoteChainGateway;
     ValidatorManager remoteValidatorManager;
@@ -46,13 +46,13 @@ contract TokenBridgeTests is Tester {
         remoteValidatorManager.initialize(validators);
         remoteChainGateway = new ChainGateway(address(remoteValidatorManager));
 
-        // Deploy LockAndReleaseTokenManager
-        sourceTokenManager = new LockAndReleaseTokenManager(
+        // Deploy LockAndReleaseTokenManagerUpgradeable
+        sourceTokenManager = new LockAndReleaseTokenManagerUpgradeable(
             address(sourceChainGateway)
         );
 
-        // Deploy MintAndBurnTokenManager
-        remoteTokenManager = new MintAndBurnTokenManager(
+        // Deploy MintAndBurnTokenManagerUpgradeable
+        remoteTokenManager = new MintAndBurnTokenManagerUpgradeable(
             address(remoteChainGateway)
         );
 
@@ -97,7 +97,7 @@ contract TokenBridgeTests is Tester {
         // Make the bridge txn
         vm.startPrank(validator);
         bytes memory data = abi.encodeWithSelector(
-            TokenManager.accept.selector,
+            TokenManagerUpgradeable.accept.selector,
             CallMetadata(sourceChainId, address(sourceTokenManager)), // From
             AcceptArgs(address(bridgedToken), remoteUser, amount) // To
         );
@@ -144,7 +144,7 @@ contract TokenBridgeTests is Tester {
         // Make the bridge txn
         vm.startPrank(validator);
         data = abi.encodeWithSelector(
-            TokenManager.accept.selector,
+            TokenManagerUpgradeable.accept.selector,
             CallMetadata(remoteChainId, address(remoteTokenManager)), // From
             AcceptArgs(address(originalToken), sourceUser, amount) // To
         );
