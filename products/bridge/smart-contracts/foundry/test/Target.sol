@@ -20,8 +20,4 @@ contract Target {
         emit Incremented(++count);
         return count;
     }
-
-    function deposit() external payable {
-        gateway.depositFee{value: msg.value}();
-    }
 }

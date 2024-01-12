@@ -4,23 +4,13 @@ pragma solidity ^0.8.20;
 import {Relayer, CallMetadata} from "contracts/core/Relayer.sol";
 import {TokenManager} from "contracts/periphery/TokenManager.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract LockAndReleaseTokenManager is TokenManager, Ownable {
+contract LockAndReleaseTokenManager is TokenManager {
     event Locked(address token, address recipient, uint amount);
     event Released(address token, address recipient, uint amount);
 
     // TODO: deploy counterfactually
-    constructor(address _gateway) TokenManager(_gateway) Ownable(msg.sender) {}
-
-    function addToken(
-        address token,
-        address remoteToken,
-        address tokenManager,
-        uint chainId
-    ) external onlyGateway {
-        _registerToken(token, remoteToken, tokenManager, chainId);
-    }
+    constructor(address _gateway) TokenManager(_gateway) {}
 
     // Outgoing
     function _handleTransfer(
@@ -32,6 +22,7 @@ contract LockAndReleaseTokenManager is TokenManager, Ownable {
         emit Locked(token, recipient, amount);
     }
 
+    // Incoming
     function _handleAccept(
         address token,
         address recipient,

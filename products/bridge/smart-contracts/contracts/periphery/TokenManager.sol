@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Relayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 struct AcceptArgs {
     address token;
@@ -15,13 +16,20 @@ struct RemoteToken {
     uint chainId;
 }
 
-abstract contract TokenManager {
+abstract contract TokenManager is Ownable {
     Relayer gateway;
-    mapping(address => RemoteToken) public remoteTokens;
+    // localTokenAddress => remoteChainId => RemoteToken
+    mapping(address => mapping(uint => RemoteToken)) public remoteTokens;
 
     error InvalidSourceChainId();
     error InvalidTokenManager();
     error NotGateway();
+    event TokenRegistered(
+        address indexed token,
+        address remoteToken,
+        address remoteTokenManager,
+        uint remoteChainId
+    );
 
     modifier onlyGateway() {
         if (msg.sender != address(gateway)) {
@@ -30,17 +38,36 @@ abstract contract TokenManager {
         _;
     }
 
-    constructor(address _gateway) {
-        gateway = Relayer(_gateway);
+    constructor(address _gateway) Ownable(msg.sender) {
+        _setGateway(_gateway);
     }
 
     function _registerToken(
+        address localToken,
+        address remoteToken,
+        address remoteTokenManager,
+        uint remoteChainId
+    ) internal {
+        remoteTokens[localToken][remoteChainId] = RemoteToken(
+            remoteToken,
+            remoteTokenManager,
+            remoteChainId
+        );
+    }
+
+    function registerToken(
         address token,
         address remoteToken,
-        address tokenManager,
-        uint chainId
-    ) internal {
-        remoteTokens[token] = RemoteToken(remoteToken, tokenManager, chainId);
+        address remoteTokenManager,
+        uint remoteChainId
+    ) external virtual onlyOwner {
+        _registerToken(token, remoteToken, remoteTokenManager, remoteChainId);
+        emit TokenRegistered(
+            token,
+            remoteToken,
+            remoteTokenManager,
+            remoteChainId
+        );
     }
 
     function _handleTransfer(
@@ -58,10 +85,11 @@ abstract contract TokenManager {
     // Outgoing
     function transfer(
         address token,
+        uint remoteChainId,
         address remoteRecipient,
         uint amount
-    ) public virtual {
-        RemoteToken memory remoteToken = remoteTokens[token];
+    ) external virtual {
+        RemoteToken memory remoteToken = remoteTokens[token][remoteChainId];
 
         _handleTransfer(token, msg.sender, amount);
 
@@ -74,21 +102,32 @@ abstract contract TokenManager {
         );
     }
 
-    function transfer(address token, uint amount) external {
-        transfer(token, msg.sender, amount);
-    }
-
     // Incoming
     function accept(
         CallMetadata calldata metadata,
         AcceptArgs calldata args
     ) external virtual onlyGateway {
-        if (metadata.sourceChainId != remoteTokens[args.token].chainId) {
+        if (
+            metadata.sourceChainId !=
+            remoteTokens[args.token][metadata.sourceChainId].chainId
+        ) {
             revert InvalidSourceChainId();
         }
-        if (metadata.sender == remoteTokens[args.token].tokenManager) {
+        if (
+            metadata.sender !=
+            remoteTokens[args.token][metadata.sourceChainId].tokenManager
+        ) {
             revert InvalidTokenManager();
         }
+
         _handleAccept(args.token, args.recipient, args.amount);
+    }
+
+    function _setGateway(address _gateway) internal {
+        gateway = Relayer(_gateway);
+    }
+
+    function setGateway(address _gateway) external onlyOwner {
+        _setGateway(_gateway);
     }
 }

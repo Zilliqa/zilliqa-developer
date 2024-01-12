@@ -38,8 +38,6 @@ contract Deployment is Script {
 
         Target target = new Target{salt: "salt"}(address(gateway));
 
-        target.deposit{value: 1 ether}();
-
         vm.stopBroadcast();
     }
 }

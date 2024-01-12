@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {Tester, Vm} from "foundry/test/Tester.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract TransferReentrancyTester {
     address target;
@@ -118,5 +119,11 @@ abstract contract ValidatorManagerFixture is Tester {
         ) = generateValidatorManager(VALIDATOR_COUNT);
         validators = _validators;
         validatorManager = _validatorManager;
+    }
+}
+
+contract TestToken is ERC20 {
+    constructor(uint256 initialSupply) ERC20("Test", "T") {
+        _mint(msg.sender, initialSupply);
     }
 }
