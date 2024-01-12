@@ -1,3 +1,6 @@
 [submodule "products/bridge/smart-contracts/lib/forge-std"]
 	path = products/bridge/smart-contracts/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "products/bridge/smart-contracts/lib/openzeppelin-foundry-upgrades"]
+	path = products/bridge/smart-contracts/lib/openzeppelin-foundry-upgrades
+	url = https://github.com/OpenZeppelin/openzeppelin-foundry-upgrades
