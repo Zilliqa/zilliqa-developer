@@ -9,9 +9,10 @@ use ethers::{
     middleware::{MiddlewareBuilder, SignerMiddleware},
     providers::{Http, Middleware, Provider, StreamExt},
     signers::{LocalWallet, Signer},
-    types::{Address, BlockNumber, Bytes, Signature, H256, U256},
+    types::{Address, Block, BlockNumber, Bytes, Signature, H256, U256},
     utils::hash_message,
 };
+use ethers_contract::{EthEvent, Event};
 use serde::{Deserialize, Serialize};
 use tokio::{
     select,
@@ -25,11 +26,9 @@ use crate::{
     message::{
         Dispatch, Dispatched, ExternalMessage, InboundBridgeMessage, OutboundBridgeMessage, Relay,
     },
-    ChainGateway, ChainGatewayErrors, DispatchedFilter, RelayedFilter, ValidatorManager,
+    ChainConfig, ChainGateway, ChainGatewayErrors, DispatchedFilter, RelayedFilter,
+    ValidatorManager,
 };
-
-const CHAIN_GATEWAY: &str = "0x4a50E1Be218279ca980EAb216d95E0A48B5aE872";
-const VALIDATOR_MANAGER: &str = "0x4212b368876a54F99c741C8B5b64be2e52a6956b";
 
 pub type Client = SignerMiddleware<Provider<Http>, LocalWallet>;
 
@@ -91,8 +90,37 @@ impl SignedSignatures {
 }
 
 #[derive(Debug, Clone)]
+pub struct ChainClient {
+    client: Arc<Client>,
+    validator_manager_address: Address,
+    chain_gateway_address: Address,
+    chain_id: U256,
+    wallet: LocalWallet,
+    block_query_limit: Option<u64>,
+}
+
+impl ChainClient {
+    async fn new(config: &ChainConfig, wallet: LocalWallet) -> Result<Self> {
+        let provider = Provider::<Http>::try_from(config.rpc_url.as_str())?;
+        let chain_id = provider.get_chainid().await?;
+
+        let client: Arc<Client> =
+            Arc::new(provider.with_signer(wallet.clone().with_chain_id(chain_id.as_u64())));
+
+        Ok(ChainClient {
+            client,
+            validator_manager_address: config.validator_manager_address.parse()?,
+            chain_gateway_address: config.chain_gateway_address.parse()?,
+            chain_id,
+            wallet,
+            block_query_limit: config.block_query_limit,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct BridgeNodeConfig {
-    pub rpc_urls: Vec<String>,
+    pub chain_configs: Vec<ChainConfig>,
     pub private_key: SecretKey,
     pub is_leader: bool,
 }
@@ -103,33 +131,23 @@ pub struct BridgeChainNode {
     outbound_message_sender: UnboundedSender<OutboundBridgeMessage>,
     inbound_message_receiver: UnboundedReceiverStream<InboundBridgeMessage>,
     inbound_message_sender: UnboundedSender<InboundBridgeMessage>,
-    client: Client,
-    chain_id: U256,
-    wallet: LocalWallet,
+    chain_client: ChainClient,
     validators: HashSet<Address>,
     is_leader: bool,
 }
 
 impl BridgeChainNode {
     async fn new(
-        rpc_url: &str,
-        wallet: LocalWallet,
+        chain_client: ChainClient,
         outbound_message_sender: UnboundedSender<OutboundBridgeMessage>,
         is_leader: bool,
     ) -> Result<Self> {
-        let provider = Provider::<Http>::try_from(rpc_url)?;
-        let chain_id = provider.get_chainid().await?;
-
-        let client: Client = provider.with_signer(wallet.clone().with_chain_id(chain_id.as_u64()));
-
         let (inbound_message_sender, inbound_message_receiver) = mpsc::unbounded_channel();
         let inbound_message_receiver = UnboundedReceiverStream::new(inbound_message_receiver);
 
         let mut bridge_node = BridgeChainNode {
             event_signatures: HashMap::new(),
-            client,
-            chain_id,
-            wallet,
+            chain_client,
             validators: HashSet::new(),
             outbound_message_sender,
             inbound_message_receiver,
@@ -142,41 +160,77 @@ impl BridgeChainNode {
         Ok(bridge_node)
     }
 
+    // WIP
     fn get_inbound_message_sender(&self) -> UnboundedSender<InboundBridgeMessage> {
         self.inbound_message_sender.clone()
     }
 
-    async fn listen_events(&mut self) -> Result<()> {
+    async fn query_recent_finalised_events<D>(
+        &self,
+        event: Event<Arc<Client>, Client, D>,
+    ) -> Result<(Vec<D>, u64)>
+    where
+        D: EthEvent,
+    {
+        let latest_finalised_block = self
+            .chain_client
+            .client
+            .get_block(BlockNumber::Finalized)
+            .await?;
+        if let Some(Block {
+            number: Some(block_number),
+            ..
+        }) = latest_finalised_block
         {
-            println!("Start Listening: {:?}", self.chain_id);
-            let chain_gateway_address = CHAIN_GATEWAY.parse::<Address>()?;
+            println!("Latest Finalised Block {}", block_number);
+            let from = if let Some(block_query_limit) = self.chain_client.block_query_limit {
+                dbg!(block_query_limit);
+                BlockNumber::Number(block_number - block_query_limit)
+            } else {
+                BlockNumber::Earliest
+            };
 
-            let chain_gateway: ChainGateway<Client> =
-                self.client.get_contract(&chain_gateway_address);
+            dbg!(from);
+            dbg!(block_number);
 
-            let relayed_events = chain_gateway
-                .event::<RelayedFilter>()
-                .from_block(BlockNumber::Earliest);
-            // .to_block(BlockNumber::Finalized);
-            let dispatched_events = chain_gateway
-                .event::<DispatchedFilter>()
-                .from_block(BlockNumber::Earliest);
-            // .to_block(BlockNumber::Finalized);
+            let res = event
+                .from_block(from)
+                .to_block(block_number)
+                .query()
+                .await?;
+            return Ok((res, block_number.as_u64()));
+        }
 
-            let mut relayed_stream = relayed_events.stream().await?;
-            let mut dispatched_stream = dispatched_events.stream().await?;
+        return Ok((vec![], 0));
+    }
 
-            loop {
-                select! {
-                    Some(Ok(event)) = relayed_stream.next() => {
-                        self.handle_relay_event(event)?;
-                    },
-                    Some(Ok(event)) = dispatched_stream.next() => {
-                        self.handle_dispatch_event(event)?;
-                    }
-                    Some(message) = self.inbound_message_receiver.next() => {
-                        self.handle_bridge_message(message).await?;
-                    }
+    async fn listen_events(&mut self) -> Result<()> {
+        println!("Start Listening: {:?}", self.chain_client.chain_id);
+
+        let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
+
+        // TODO: test if polling finalised block events work
+        let relayed_events = chain_gateway
+            .event::<RelayedFilter>()
+            .to_block(BlockNumber::Finalized);
+
+        let dispatched_events = chain_gateway
+            .event::<DispatchedFilter>()
+            .to_block(BlockNumber::Finalized);
+
+        let mut relayed_stream = relayed_events.stream().await?;
+        let mut dispatched_stream = dispatched_events.stream().await?;
+
+        loop {
+            select! {
+                Some(Ok(event)) = relayed_stream.next() => {
+                    self.handle_relay_event(event)?;
+                },
+                Some(Ok(event)) = dispatched_stream.next() => {
+                    self.handle_dispatch_event(event)?;
+                }
+                Some(message) = self.inbound_message_receiver.next() => {
+                    self.handle_bridge_message(message).await?;
                 }
             }
         }
@@ -215,7 +269,7 @@ impl BridgeChainNode {
     fn handle_relay_event(&self, event: RelayedFilter) -> Result<()> {
         info!(
             "Chain: {} event found to be broadcasted: {}",
-            self.chain_id, event
+            self.chain_client.chain_id, event
         );
 
         if let Some(EventSignatures {
@@ -227,7 +281,7 @@ impl BridgeChainNode {
         }
 
         let relay_event = RelayEvent {
-            source_chain_id: self.chain_id,
+            source_chain_id: self.chain_client.chain_id,
             target_chain_id: event.target_chain_id,
             target: event.target,
             call: event.call,
@@ -236,7 +290,7 @@ impl BridgeChainNode {
         };
 
         self.broadcast_message(Relay {
-            signature: self.wallet.sign_event(&relay_event)?,
+            signature: self.chain_client.wallet.sign_event(&relay_event)?,
             event: relay_event,
         })?;
 
@@ -267,10 +321,7 @@ impl BridgeChainNode {
     }
 
     async fn update_validators(&mut self) -> Result<()> {
-        let validator_manager_address = VALIDATOR_MANAGER.parse::<Address>()?;
-
-        let validator_manager: ValidatorManager<Client> =
-            self.client.get_contract(&validator_manager_address);
+        let validator_manager: ValidatorManager<Client> = self.chain_client.get_contract();
 
         let validators: Vec<Address> = validator_manager.get_validators().call().await?;
 
@@ -354,7 +405,7 @@ impl BridgeChainNode {
     }
 }
 
-type Nonce = U256;
+type ChainID = U256;
 
 #[derive(Debug)]
 pub struct BridgeNode {
@@ -364,8 +415,8 @@ pub struct BridgeNode {
     bridge_inbound_message_receiver: UnboundedReceiverStream<ExternalMessage>,
     bridge_inbound_message_sender: UnboundedSender<ExternalMessage>,
     bridge_message_receiver: UnboundedReceiverStream<OutboundBridgeMessage>,
-    chain_node_senders: HashMap<Nonce, UnboundedSender<InboundBridgeMessage>>,
-    chain_clients: HashMap<Nonce, Client>,
+    chain_node_senders: HashMap<ChainID, UnboundedSender<InboundBridgeMessage>>,
+    chain_clients: HashMap<ChainID, ChainClient>,
 }
 
 impl BridgeNode {
@@ -380,23 +431,21 @@ impl BridgeNode {
         let (bridge_message_sender, bridge_message_receiver) = mpsc::unbounded_channel();
         let bridge_message_receiver = UnboundedReceiverStream::new(bridge_message_receiver);
 
-        for rpc_url in config.rpc_urls {
+        for chain_config in config.chain_configs {
+            let chain_client = ChainClient::new(&chain_config, wallet.clone()).await?;
+
             let mut validator_chain_node = BridgeChainNode::new(
-                rpc_url.as_str(),
-                wallet.clone(),
+                chain_client.clone(),
                 bridge_message_sender.clone(),
                 config.is_leader,
             )
             .await?;
             chain_node_senders.insert(
-                validator_chain_node.chain_id,
+                validator_chain_node.chain_client.chain_id,
                 validator_chain_node.get_inbound_message_sender(),
             );
 
-            chain_clients.insert(
-                validator_chain_node.chain_id,
-                validator_chain_node.client.clone(),
-            );
+            chain_clients.insert(validator_chain_node.chain_client.chain_id, chain_client);
 
             tokio::spawn(async move {
                 validator_chain_node.listen_events().await.unwrap();
@@ -460,14 +509,12 @@ impl BridgeNode {
     }
 
     async fn dispatch_message(&self, dispatch: Dispatch) -> Result<()> {
-        let chain_gateway_address = CHAIN_GATEWAY.parse::<Address>()?;
-
         let Dispatch {
             event, signatures, ..
         } = dispatch;
 
         if let Some(client) = self.chain_clients.get(&event.target_chain_id) {
-            let chain_gateway: ChainGateway<Client> = client.get_contract(&chain_gateway_address);
+            let chain_gateway: ChainGateway<Client> = client.get_contract();
 
             let function_call = chain_gateway.dispatch(
                 event.source_chain_id,
@@ -526,17 +573,17 @@ impl EventSigner for LocalWallet {
 }
 
 pub trait ContractInitializer<T> {
-    fn get_contract(&self, contract_address: &Address) -> T;
+    fn get_contract(&self) -> T;
 }
 
-impl ContractInitializer<ValidatorManager<Client>> for Client {
-    fn get_contract(&self, contract_address: &Address) -> ValidatorManager<Client> {
-        ValidatorManager::new(*contract_address, Arc::new(self.clone()))
+impl ContractInitializer<ValidatorManager<Client>> for ChainClient {
+    fn get_contract(&self) -> ValidatorManager<Client> {
+        ValidatorManager::new(self.validator_manager_address, self.client.clone())
     }
 }
 
-impl ContractInitializer<ChainGateway<Client>> for Client {
-    fn get_contract(&self, contract_address: &Address) -> ChainGateway<Client> {
-        ChainGateway::new(*contract_address, Arc::new(self.clone()))
+impl ContractInitializer<ChainGateway<Client>> for ChainClient {
+    fn get_contract(&self) -> ChainGateway<Client> {
+        ChainGateway::new(self.chain_gateway_address, self.client.clone())
     }
 }
