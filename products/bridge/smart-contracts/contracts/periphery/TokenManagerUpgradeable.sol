@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Relayer, CallMetadata} from "contracts/core/Relayer.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 struct AcceptArgs {
@@ -59,6 +60,7 @@ interface ITokenManager {
 abstract contract TokenManagerUpgradeable is
     ITokenManager,
     Initializable,
+    UUPSUpgradeable,
     OwnableUpgradeable
 {
     Relayer gateway;
@@ -172,4 +174,6 @@ abstract contract TokenManagerUpgradeable is
     function setGateway(address _gateway) external onlyOwner {
         _setGateway(_gateway);
     }
+
+    function _authorizeUpgrade(address) internal virtual override onlyOwner {}
 }

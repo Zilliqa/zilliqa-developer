@@ -22,9 +22,7 @@ contract Deployment is Script {
         }(validators[0]);
         validatorManager.initialize(validators);
 
-        ChainGateway gateway = new ChainGateway{salt: "zilliqa-bridge"}(
-            address(validatorManager)
-        );
+        new ChainGateway{salt: "zilliqa-bridge"}(address(validatorManager));
 
         vm.stopBroadcast();
     }

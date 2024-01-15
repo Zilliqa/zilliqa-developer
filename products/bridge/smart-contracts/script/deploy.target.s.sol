@@ -15,7 +15,7 @@ contract Deployment is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        Target target = new Target{salt: "salt"}(chainGateway);
+        new Target{salt: "salt"}(chainGateway);
 
         vm.stopBroadcast();
     }

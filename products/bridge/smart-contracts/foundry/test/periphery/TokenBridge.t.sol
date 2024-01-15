@@ -10,7 +10,9 @@ import {CallMetadata, Relayer} from "contracts/core/Relayer.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {TestToken} from "foundry/test/Helpers.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 
 contract TokenBridgeTests is Tester {
     using MessageHashUtils for bytes;
@@ -47,14 +49,32 @@ contract TokenBridgeTests is Tester {
         remoteChainGateway = new ChainGateway(address(remoteValidatorManager));
 
         // Deploy LockAndReleaseTokenManagerUpgradeable
-        sourceTokenManager = new LockAndReleaseTokenManagerUpgradeable(
-            address(sourceChainGateway)
+        address implementation = address(
+            new LockAndReleaseTokenManagerUpgradeable()
         );
+        address proxy = address(
+            new ERC1967Proxy(
+                implementation,
+                abi.encodeCall(
+                    LockAndReleaseTokenManagerUpgradeable.initialize,
+                    address(sourceChainGateway)
+                )
+            )
+        );
+        sourceTokenManager = LockAndReleaseTokenManagerUpgradeable(proxy);
 
         // Deploy MintAndBurnTokenManagerUpgradeable
-        remoteTokenManager = new MintAndBurnTokenManagerUpgradeable(
-            address(remoteChainGateway)
+        implementation = address(new MintAndBurnTokenManagerUpgradeable());
+        proxy = address(
+            new ERC1967Proxy(
+                implementation,
+                abi.encodeCall(
+                    MintAndBurnTokenManagerUpgradeable.initialize,
+                    address(remoteChainGateway)
+                )
+            )
         );
+        remoteTokenManager = MintAndBurnTokenManagerUpgradeable(proxy);
 
         // Deploy original ERC20
         originalToken = new TestToken(originalTokenSupply);

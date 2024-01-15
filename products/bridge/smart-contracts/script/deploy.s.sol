@@ -36,7 +36,7 @@ contract Deployment is Script {
             address(validatorManager)
         );
 
-        Target target = new Target{salt: "salt"}(address(gateway));
+        new Target{salt: "salt"}(address(gateway));
 
         vm.stopBroadcast();
     }
