@@ -5,7 +5,6 @@ import {Script} from "forge-std/Script.sol";
 import {Relayer} from "contracts/core/Relayer.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
-import {Target} from "foundry/test/Target.sol";
 import "forge-std/console.sol";
 
 contract Deployment is Script {
@@ -18,11 +17,14 @@ contract Deployment is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         ValidatorManager validatorManager = new ValidatorManager{
-            salt: "zilliqa-bridge"
+            salt: "zilliqa-bridge-uccb"
         }(validators[0]);
         validatorManager.initialize(validators);
+        // address validatorManager = 0x462777dC056b3835d486f5f1Dd806195A569487F;
 
-        new ChainGateway{salt: "zilliqa-bridge"}(address(validatorManager));
+        new ChainGateway{salt: "zilliqa-bridge-uccb"}(
+            address(validatorManager)
+        );
 
         vm.stopBroadcast();
     }

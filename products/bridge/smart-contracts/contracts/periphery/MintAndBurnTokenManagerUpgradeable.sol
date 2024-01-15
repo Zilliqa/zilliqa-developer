@@ -31,12 +31,50 @@ contract MintAndBurnTokenManagerUpgradeable is
     function deployToken(
         string calldata name,
         string calldata symbol,
+        uint8 decimals,
         address remoteToken,
         address tokenManager,
         uint remoteChainId
-    ) external onlyOwner returns (BridgedToken) {
+    ) external returns (BridgedToken) {
+        return
+            _deployToken(
+                name,
+                symbol,
+                decimals,
+                remoteToken,
+                tokenManager,
+                remoteChainId
+            );
+    }
+
+    function deployToken(
+        string calldata name,
+        string calldata symbol,
+        address remoteToken,
+        address tokenManager,
+        uint remoteChainId
+    ) external returns (BridgedToken) {
+        return
+            _deployToken(
+                name,
+                symbol,
+                18,
+                remoteToken,
+                tokenManager,
+                remoteChainId
+            );
+    }
+
+    function _deployToken(
+        string calldata name,
+        string calldata symbol,
+        uint8 decimals,
+        address remoteToken,
+        address tokenManager,
+        uint remoteChainId
+    ) internal onlyOwner returns (BridgedToken) {
         // TODO: deployed counterfactually
-        BridgedToken bridgedToken = new BridgedToken(name, symbol);
+        BridgedToken bridgedToken = new BridgedToken(name, symbol, decimals);
 
         _registerToken(
             address(bridgedToken),

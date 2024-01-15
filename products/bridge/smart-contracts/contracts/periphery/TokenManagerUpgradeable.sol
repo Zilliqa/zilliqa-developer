@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import {Relayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -30,6 +30,8 @@ interface ITokenManager {
         uint remoteChainId
     );
 
+    function getGateway() external view returns (address);
+
     function getRemoteTokens(
         address token,
         uint remoteChainId
@@ -51,7 +53,7 @@ interface ITokenManager {
 
     function accept(
         CallMetadata calldata metadata,
-        AcceptArgs calldata args
+        bytes calldata args
     ) external;
 
     function setGateway(address _gateway) external;
@@ -63,7 +65,7 @@ abstract contract TokenManagerUpgradeable is
     UUPSUpgradeable,
     OwnableUpgradeable
 {
-    Relayer gateway;
+    IRelayer gateway;
     // localTokenAddress => remoteChainId => RemoteToken
     mapping(address => mapping(uint => RemoteToken)) internal remoteTokens;
 
@@ -72,6 +74,10 @@ abstract contract TokenManagerUpgradeable is
             revert NotGateway();
         }
         _;
+    }
+
+    function getGateway() external view returns (address) {
+        return address(gateway);
     }
 
     function getRemoteTokens(
@@ -149,18 +155,17 @@ abstract contract TokenManagerUpgradeable is
     // Incoming
     function accept(
         CallMetadata calldata metadata,
-        AcceptArgs calldata args
+        bytes calldata _args
     ) external virtual onlyGateway {
-        if (
-            metadata.sourceChainId !=
-            remoteTokens[args.token][metadata.sourceChainId].chainId
-        ) {
+        AcceptArgs memory args = abi.decode(_args, (AcceptArgs));
+
+        RemoteToken memory remoteToken = remoteTokens[args.token][
+            metadata.sourceChainId
+        ];
+        if (metadata.sourceChainId != remoteToken.chainId) {
             revert InvalidSourceChainId();
         }
-        if (
-            metadata.sender !=
-            remoteTokens[args.token][metadata.sourceChainId].tokenManager
-        ) {
+        if (metadata.sender != remoteToken.tokenManager) {
             revert InvalidTokenManager();
         }
 
@@ -168,7 +173,7 @@ abstract contract TokenManagerUpgradeable is
     }
 
     function _setGateway(address _gateway) internal {
-        gateway = Relayer(_gateway);
+        gateway = IRelayer(_gateway);
     }
 
     function setGateway(address _gateway) external onlyOwner {

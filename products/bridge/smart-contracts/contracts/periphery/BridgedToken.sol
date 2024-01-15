@@ -15,12 +15,21 @@ interface IBridgedToken is IERC20 {
 }
 
 contract BridgedToken is IERC20, ERC20, ERC20Burnable, Ownable {
+    uint8 private immutable _decimals;
+
     constructor(
-        string memory _name,
-        string memory _symbol
-    ) ERC20(_name, _symbol) Ownable(msg.sender) {}
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
+    ) ERC20(name_, symbol_) Ownable(msg.sender) {
+        _decimals = decimals_;
+    }
 
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
+    }
+
+    function decimals() public view override returns (uint8) {
+        return _decimals;
     }
 }

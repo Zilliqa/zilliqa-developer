@@ -11,7 +11,22 @@ interface IRelayerEvents {
     );
 }
 
-interface IRelayer is IRelayerEvents {}
+interface IRelayer is IRelayerEvents {
+    function relayWithMetadata(
+        uint targetChainId,
+        address target,
+        bytes4 callSelector,
+        bytes calldata callData,
+        uint gasLimit
+    ) external returns (uint);
+
+    function relay(
+        uint targetChainId,
+        address target,
+        bytes calldata call,
+        uint gasLimit
+    ) external returns (uint);
+}
 
 struct CallMetadata {
     uint sourceChainId;
@@ -35,7 +50,7 @@ contract Relayer is IRelayer {
             target,
             abi.encodeWithSelector(
                 callSelector,
-                abi.encode(CallMetadata(block.chainid, msg.sender)),
+                CallMetadata(block.chainid, msg.sender),
                 callData
             ),
             gasLimit,

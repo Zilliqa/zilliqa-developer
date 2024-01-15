@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "dotenv/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
+import "@openzeppelin/hardhat-upgrades";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -33,6 +34,10 @@ const config: HardhatUserConfig = {
     },
     "zq-testnet": {
       url: "https://dev-api.zilliqa.com",
+      accounts: [process.env.PRIVATE_KEY_TEST ?? ""],
+    },
+    "bsc-testnet": {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       accounts: [process.env.PRIVATE_KEY_TEST ?? ""],
     },
     net1: {

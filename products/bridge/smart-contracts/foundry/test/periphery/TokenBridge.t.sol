@@ -6,7 +6,7 @@ import {LockAndReleaseTokenManagerUpgradeable} from "contracts/periphery/LockAnd
 import {AcceptArgs, TokenManagerUpgradeable} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
-import {CallMetadata, Relayer} from "contracts/core/Relayer.sol";
+import {CallMetadata, IRelayerEvents} from "contracts/core/Relayer.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
@@ -14,7 +14,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {TestToken} from "foundry/test/Helpers.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 
-contract TokenBridgeTests is Tester {
+contract TokenBridgeTests is Tester, IRelayerEvents {
     using MessageHashUtils for bytes;
 
     // Gateway shared between the two chains
@@ -105,8 +105,22 @@ contract TokenBridgeTests is Tester {
         uint remoteChainId = block.chainid;
         assertEq(originalToken.balanceOf(sourceUser), amount);
 
+        bytes memory data = abi.encodeWithSelector(
+            TokenManagerUpgradeable.accept.selector,
+            CallMetadata(sourceChainId, address(sourceTokenManager)), // From
+            abi.encode(AcceptArgs(address(bridgedToken), remoteUser, amount)) // To
+        );
+
         // Approve and transfer
         originalToken.approve(address(sourceTokenManager), amount);
+        vm.expectEmit(address(sourceChainGateway));
+        emit IRelayerEvents.Relayed(
+            remoteChainId,
+            address(remoteTokenManager),
+            data,
+            1_000_000,
+            0
+        );
         sourceTokenManager.transfer(
             address(originalToken),
             remoteChainId,
@@ -116,11 +130,6 @@ contract TokenBridgeTests is Tester {
 
         // Make the bridge txn
         vm.startPrank(validator);
-        bytes memory data = abi.encodeWithSelector(
-            TokenManagerUpgradeable.accept.selector,
-            CallMetadata(sourceChainId, address(sourceTokenManager)), // From
-            AcceptArgs(address(bridgedToken), remoteUser, amount) // To
-        );
         bytes[] memory signatures = new bytes[](1);
         signatures[0] = sign(
             validatorWallet,
@@ -130,7 +139,7 @@ contract TokenBridgeTests is Tester {
                     remoteChainId,
                     address(remoteTokenManager),
                     data,
-                    10_000_000,
+                    1_000_000,
                     0
                 )
                 .toEthSignedMessageHash()
@@ -139,7 +148,7 @@ contract TokenBridgeTests is Tester {
             sourceChainId,
             address(remoteTokenManager),
             data,
-            10_000_000,
+            1_000_000,
             0,
             signatures
         );
@@ -166,7 +175,7 @@ contract TokenBridgeTests is Tester {
         data = abi.encodeWithSelector(
             TokenManagerUpgradeable.accept.selector,
             CallMetadata(remoteChainId, address(remoteTokenManager)), // From
-            AcceptArgs(address(originalToken), sourceUser, amount) // To
+            abi.encode(AcceptArgs(address(originalToken), sourceUser, amount)) // To
         );
         signatures[0] = sign(
             validatorWallet,
