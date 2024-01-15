@@ -1,7 +1,8 @@
 import { getRelayEvents } from "../helpers";
+import { config } from "../config";
 
 async function main() {
-  const chainGatewayAddress = "0x18BCE81F9De993cdB2ebd680a44A8068B62D7f26";
+  const chainGatewayAddress = config.zq.chainGateway;
 
   const events = await getRelayEvents(chainGatewayAddress);
 

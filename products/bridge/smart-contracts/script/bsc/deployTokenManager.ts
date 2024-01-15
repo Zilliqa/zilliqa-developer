@@ -1,7 +1,8 @@
 import { ethers, upgrades } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const gatewayContract = "0x587cA00ac16EF2b96B7ff1D9E810B20b942b11c3";
+  const gatewayContract = config.bsc.chainGateway;
 
   const TokenManagerFactory = await ethers.getContractFactory(
     "MintAndBurnTokenManagerUpgradeable"

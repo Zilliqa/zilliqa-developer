@@ -1,8 +1,9 @@
 import { ethers } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const newGatewayAddress = "0x5cE584e24f6703f3197Ca83d442807cB82474f8D";
-  const tokenManagerAddress = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
+  const newGatewayAddress = config.bsc.chainGateway;
+  const tokenManagerAddress = config.bsc.tokenManager;
 
   const tokenManager = await ethers.getContractAt(
     "MintAndBurnTokenManagerUpgradeable",

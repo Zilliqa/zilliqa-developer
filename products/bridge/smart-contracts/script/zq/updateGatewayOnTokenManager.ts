@@ -1,8 +1,9 @@
 import { ethers } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const newGatewayAddress = "0x18BCE81F9De993cdB2ebd680a44A8068B62D7f26";
-  const tokenManagerAddress = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
+  const newGatewayAddress = config.zq.chainGateway;
+  const tokenManagerAddress = config.zq.tokenManager;
 
   const tokenManager = await ethers.getContractAt(
     "LockAndReleaseTokenManagerUpgradeable",

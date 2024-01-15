@@ -1,9 +1,10 @@
 import { ethers } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const tokenManagerAddress = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
-  const localToken = "0x63B6ebD476C84bFDd5DcaCB3f974794FC6C2e721";
-  const remoteChainID = 97;
+  const tokenManagerAddress = config.zq.tokenManager;
+  const localToken = config.zq.token;
+  const remoteChainID = config.zq.remoteChainId;
 
   const tokenManager = await ethers.getContractAt(
     "MintAndBurnTokenManagerUpgradeable",

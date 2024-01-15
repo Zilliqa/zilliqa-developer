@@ -1,12 +1,13 @@
 import { ethers } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const tokenManagerAddress = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
+  const tokenManagerAddress = config.zq.tokenManager;
 
-  const localToken = "0x63B6ebD476C84bFDd5DcaCB3f974794FC6C2e721";
-  const remoteToken = "0x6d78c86D66DfE5Be5F55FBAA8B1d3FD28edfF396";
-  const remoteTokenManager = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
-  const remoteChainId = 97;
+  const localToken = config.zq.token;
+  const remoteToken = config.zq.remoteToken;
+  const remoteTokenManager = config.zq.remoteTokenManager;
+  const remoteChainId = config.zq.remoteChainId;
 
   const tokenManager = await ethers.getContractAt(
     "LockAndReleaseTokenManagerUpgradeable",

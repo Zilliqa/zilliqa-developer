@@ -1,16 +1,16 @@
-import { parseUnits } from "ethers";
 import { ethers } from "hardhat";
 import { getRelayEvents } from "../helpers";
+import { config } from "../config";
 
 async function main() {
   let tx, receipt;
-  const tokenManagerAddress = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
-  const chainGatewayAddress = "0x18BCE81F9De993cdB2ebd680a44A8068B62D7f26";
+  const tokenManagerAddress = config.zq.tokenManager;
+  const chainGatewayAddress = config.zq.chainGateway;
 
-  const tokenAddress = "0x63B6ebD476C84bFDd5DcaCB3f974794FC6C2e721";
-  const remoteChainID = 97;
-  const remoteRecipient = "0xb494D016F2CF329224e2dB445aA748Cf96C18C29";
-  const amount = parseUnits("100", 12);
+  const tokenAddress = config.zq.token;
+  const remoteChainID = config.zq.remoteChainId;
+  const remoteRecipient = config.zq.remoteRecipient;
+  const amount = config.zq.amount;
 
   const tokenManager = await ethers.getContractAt(
     "LockAndReleaseTokenManagerUpgradeable",

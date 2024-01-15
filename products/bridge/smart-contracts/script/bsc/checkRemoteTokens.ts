@@ -1,9 +1,10 @@
 import { ethers } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const tokenManagerAddress = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
-  const localToken = "0x6d78c86D66DfE5Be5F55FBAA8B1d3FD28edfF396";
-  const remoteChainID = 33101;
+  const tokenManagerAddress = config.bsc.tokenManager;
+  const localToken = config.bsc.token;
+  const remoteChainID = config.bsc.remoteChainId;
 
   const tokenManager = await ethers.getContractAt(
     "MintAndBurnTokenManagerUpgradeable",

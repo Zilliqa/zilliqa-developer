@@ -1,7 +1,8 @@
 import { ethers, upgrades } from "hardhat";
+import { config } from "../config";
 
 async function main() {
-  const gatewayContract = "0xd10077bCE4A9D19068965dE519CED8a2fC1B096C";
+  const gatewayContract = config.zq.chainGateway;
 
   const LockAndReleaseTokenManagerFactory = await ethers.getContractFactory(
     "LockAndReleaseTokenManagerUpgradeable"
