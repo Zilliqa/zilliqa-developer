@@ -16,15 +16,10 @@ contract Deployment is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        ValidatorManager validatorManager = new ValidatorManager{
-            salt: "zilliqa-bridge-uccb"
-        }(validators[0]);
+        ValidatorManager validatorManager = new ValidatorManager(validators[0]);
         validatorManager.initialize(validators);
-        // address validatorManager = 0x462777dC056b3835d486f5f1Dd806195A569487F;
 
-        new ChainGateway{salt: "zilliqa-bridge-uccb"}(
-            address(validatorManager)
-        );
+        new ChainGateway(address(validatorManager));
 
         vm.stopBroadcast();
     }

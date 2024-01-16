@@ -36,6 +36,14 @@ const config: HardhatUserConfig = {
       url: "https://dev-api.zilliqa.com",
       accounts: [process.env.PRIVATE_KEY_TEST ?? ""],
     },
+    zq: {
+      url: "https://api.zilliqa.com",
+      accounts: [process.env.PRIVATE_KEY_TEST ?? ""],
+    },
+    bsc: {
+      url: "https://bsc-dataseed1.binance.org",
+      accounts: [process.env.PRIVATE_KEY_TEST ?? ""],
+    },
     "bsc-testnet": {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       accounts: [process.env.PRIVATE_KEY_TEST ?? ""],
