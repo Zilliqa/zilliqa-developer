@@ -32,6 +32,8 @@ interface ITokenManager {
 
     function getGateway() external view returns (address);
 
+    function setGateway(address _gateway) external;
+
     function getRemoteTokens(
         address token,
         uint remoteChainId
@@ -55,8 +57,6 @@ interface ITokenManager {
         CallMetadata calldata metadata,
         bytes calldata args
     ) external;
-
-    function setGateway(address _gateway) external;
 }
 
 abstract contract TokenManagerUpgradeable is
@@ -65,30 +65,60 @@ abstract contract TokenManagerUpgradeable is
     UUPSUpgradeable,
     OwnableUpgradeable
 {
-    IRelayer gateway;
-    // localTokenAddress => remoteChainId => RemoteToken
-    mapping(address => mapping(uint => RemoteToken)) internal remoteTokens;
-
-    modifier onlyGateway() {
-        if (msg.sender != address(gateway)) {
-            revert NotGateway();
-        }
-        _;
+    /// @custom:storage-location erc7201:zilliqa.storage.TokenManager
+    struct TokenManagerStorage {
+        address gateway;
+        // localTokenAddress => remoteChainId => RemoteToken
+        mapping(address => mapping(uint => RemoteToken)) remoteTokens;
     }
 
-    function getGateway() external view returns (address) {
-        return address(gateway);
+    // keccak256(abi.encode(uint256(keccak256("zilliqa.storage.TokenManager")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant TokenManagerStorageLocation =
+        0x4a6c2e6a7e6518c249bdcd1d934ea16ea5325bbae105af814eb678f5f49f3400;
+
+    function _getTokenManagerStorage()
+        private
+        pure
+        returns (TokenManagerStorage storage $)
+    {
+        assembly {
+            $.slot := TokenManagerStorageLocation
+        }
+    }
+
+    function getGateway() public view returns (address) {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        return $.gateway;
     }
 
     function getRemoteTokens(
         address token,
         uint remoteChainId
-    ) external view returns (RemoteToken memory) {
-        return remoteTokens[token][remoteChainId];
+    ) public view returns (RemoteToken memory) {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        return $.remoteTokens[token][remoteChainId];
+    }
+
+    modifier onlyGateway() {
+        if (msg.sender != address(getGateway())) {
+            revert NotGateway();
+        }
+        _;
     }
 
     function __TokenManager_init(address _gateway) internal onlyInitializing {
         __Ownable_init(msg.sender);
+        _setGateway(_gateway);
+    }
+
+    function _authorizeUpgrade(address) internal virtual override onlyOwner {}
+
+    function _setGateway(address _gateway) internal {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        $.gateway = _gateway;
+    }
+
+    function setGateway(address _gateway) external onlyOwner {
         _setGateway(_gateway);
     }
 
@@ -98,7 +128,14 @@ abstract contract TokenManagerUpgradeable is
         address remoteTokenManager,
         uint remoteChainId
     ) internal {
-        remoteTokens[localToken][remoteChainId] = RemoteToken(
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        $.remoteTokens[localToken][remoteChainId] = RemoteToken(
+            remoteToken,
+            remoteTokenManager,
+            remoteChainId
+        );
+        emit TokenRegistered(
+            localToken,
             remoteToken,
             remoteTokenManager,
             remoteChainId
@@ -112,38 +149,33 @@ abstract contract TokenManagerUpgradeable is
         uint remoteChainId
     ) external virtual onlyOwner {
         _registerToken(token, remoteToken, remoteTokenManager, remoteChainId);
-        emit TokenRegistered(
-            token,
-            remoteToken,
-            remoteTokenManager,
-            remoteChainId
-        );
     }
 
+    // TO OVERRIDE – Incoming
     function _handleTransfer(
         address token,
         address recipient,
         uint amount
     ) internal virtual;
 
+    // TO OVERRIDE – Outgoing
     function _handleAccept(
         address token,
         address recipient,
         uint amount
     ) internal virtual;
 
-    // Outgoing
     function transfer(
         address token,
         uint remoteChainId,
         address remoteRecipient,
         uint amount
     ) external virtual {
-        RemoteToken memory remoteToken = remoteTokens[token][remoteChainId];
+        RemoteToken memory remoteToken = getRemoteTokens(token, remoteChainId);
 
         _handleTransfer(token, msg.sender, amount);
 
-        gateway.relayWithMetadata(
+        IRelayer(getGateway()).relayWithMetadata(
             remoteToken.chainId,
             remoteToken.tokenManager,
             this.accept.selector,
@@ -159,9 +191,10 @@ abstract contract TokenManagerUpgradeable is
     ) external virtual onlyGateway {
         AcceptArgs memory args = abi.decode(_args, (AcceptArgs));
 
-        RemoteToken memory remoteToken = remoteTokens[args.token][
+        RemoteToken memory remoteToken = getRemoteTokens(
+            args.token,
             metadata.sourceChainId
-        ];
+        );
         if (metadata.sourceChainId != remoteToken.chainId) {
             revert InvalidSourceChainId();
         }
@@ -171,14 +204,4 @@ abstract contract TokenManagerUpgradeable is
 
         _handleAccept(args.token, args.recipient, args.amount);
     }
-
-    function _setGateway(address _gateway) internal {
-        gateway = IRelayer(_gateway);
-    }
-
-    function setGateway(address _gateway) external onlyOwner {
-        _setGateway(_gateway);
-    }
-
-    function _authorizeUpgrade(address) internal virtual override onlyOwner {}
 }
