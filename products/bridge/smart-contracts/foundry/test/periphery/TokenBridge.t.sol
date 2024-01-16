@@ -169,7 +169,7 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
             amount
         );
 
-        // //Mock Call
+        //Mock Call
         // Make the bridge txn
         vm.startPrank(validator);
         data = abi.encodeWithSelector(
@@ -199,7 +199,7 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
             signatures
         );
 
-        // // Check balances back to normal
+        // Check balances back to normal
         assertEq(bridgedToken.balanceOf(remoteUser), 0);
         assertEq(originalToken.balanceOf(sourceUser), amount);
     }

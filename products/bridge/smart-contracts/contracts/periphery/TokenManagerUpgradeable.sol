@@ -18,10 +18,8 @@ struct RemoteToken {
     uint chainId;
 }
 
-interface ITokenManager {
-    error InvalidSourceChainId();
-    error InvalidTokenManager();
-    error NotGateway();
+interface ITokenManagerEvents {
+    event TokenRemoved(address token, uint remoteChainId);
 
     event TokenRegistered(
         address indexed token,
@@ -29,6 +27,12 @@ interface ITokenManager {
         address remoteTokenManager,
         uint remoteChainId
     );
+}
+
+interface ITokenManager is ITokenManagerEvents {
+    error InvalidSourceChainId();
+    error InvalidTokenManager();
+    error NotGateway();
 
     function getGateway() external view returns (address);
 
@@ -122,6 +126,12 @@ abstract contract TokenManagerUpgradeable is
         _setGateway(_gateway);
     }
 
+    function _removeToken(address localToken, uint remoteChainId) internal {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        delete $.remoteTokens[localToken][remoteChainId];
+        emit TokenRemoved(localToken, remoteChainId);
+    }
+
     function _registerToken(
         address localToken,
         address remoteToken,
@@ -142,6 +152,7 @@ abstract contract TokenManagerUpgradeable is
         );
     }
 
+    // Token Overrides
     function registerToken(
         address token,
         address remoteToken,

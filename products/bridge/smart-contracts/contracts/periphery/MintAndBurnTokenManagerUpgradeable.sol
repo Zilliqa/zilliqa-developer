@@ -93,6 +93,15 @@ contract MintAndBurnTokenManagerUpgradeable is
         return bridgedToken;
     }
 
+    function transferTokenOwnership(
+        address localToken,
+        uint remoteChainId,
+        address newOwner
+    ) external onlyOwner {
+        BridgedToken(localToken).transferOwnership(newOwner);
+        _removeToken(localToken, remoteChainId);
+    }
+
     // Outgoing
     function _handleTransfer(
         address token,
