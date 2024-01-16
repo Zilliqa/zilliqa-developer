@@ -11,7 +11,6 @@ import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 contract MintAndBurnTokenManagerTests is Tester, ITokenManagerEvents {
     address deployer = vm.addr(1);
     address chainGateway = vm.addr(102);
-    uint originalTokenSupply = 1000 ether;
 
     address remoteTokenManager = vm.addr(100);
     address remoteToken = vm.addr(101);

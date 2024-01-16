@@ -14,6 +14,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {TestToken} from "foundry/test/Helpers.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 
+// Integration Tests combining the TokenManagers and ChainGateway
 contract TokenBridgeTests is Tester, IRelayerEvents {
     using MessageHashUtils for bytes;
 
