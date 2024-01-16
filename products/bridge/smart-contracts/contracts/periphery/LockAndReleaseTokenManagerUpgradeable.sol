@@ -5,7 +5,7 @@ import {TokenManagerUpgradeable, ITokenManager} from "contracts/periphery/TokenM
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ILockAndReleaseTokenManager is ITokenManager {
-    event Locked(address indexed token, address indexed recipient, uint amount);
+    event Locked(address indexed token, address indexed from, uint amount);
     event Released(
         address indexed token,
         address indexed recipient,
@@ -29,11 +29,11 @@ contract LockAndReleaseTokenManagerUpgradeable is
     // Outgoing
     function _handleTransfer(
         address token,
-        address recipient,
+        address from,
         uint amount
     ) internal override {
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
-        emit Locked(token, recipient, amount);
+        IERC20(token).transferFrom(from, address(this), amount);
+        emit Locked(token, from, amount);
     }
 
     // Incoming

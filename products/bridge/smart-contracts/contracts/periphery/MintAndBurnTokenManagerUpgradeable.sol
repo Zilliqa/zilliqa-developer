@@ -6,7 +6,7 @@ import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 
 interface IMintAndBurnTokenManager is ITokenManager {
     event Minted(address indexed token, address indexed recipient, uint amount);
-    event Burned(address indexed token, address indexed recipient, uint amount);
+    event Burned(address indexed token, address indexed from, uint amount);
     event BridgedTokenDeployed(
         address token,
         address remoteToken,
@@ -96,11 +96,11 @@ contract MintAndBurnTokenManagerUpgradeable is
     // Outgoing
     function _handleTransfer(
         address token,
-        address recipient,
+        address from,
         uint amount
     ) internal override {
-        BridgedToken(token).burnFrom(recipient, amount);
-        emit Burned(token, recipient, amount);
+        BridgedToken(token).burnFrom(from, amount);
+        emit Burned(token, from, amount);
     }
 
     // Incoming

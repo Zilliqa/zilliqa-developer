@@ -154,7 +154,7 @@ abstract contract TokenManagerUpgradeable is
     // TO OVERRIDE – Incoming
     function _handleTransfer(
         address token,
-        address recipient,
+        address from,
         uint amount
     ) internal virtual;
 

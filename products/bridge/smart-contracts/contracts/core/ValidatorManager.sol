@@ -29,12 +29,12 @@ contract ValidatorManager is Ownable {
         }
     }
 
-    // Ownership should then be trasnferred to the relayer
+    // Ownership should then be transferred to the relayer
     function addValidator(address user) public onlyOwner returns (bool) {
         return _validators.add(user);
     }
 
-    // Ownership should then be trasnferred to the relayer
+    // Ownership should then be transferred to the relayer
     function removeValidator(address user) external onlyOwner returns (bool) {
         return _validators.remove(user);
     }
