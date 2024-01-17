@@ -4,10 +4,10 @@ import { config } from "../config";
 async function main() {
   const tokenManagerAddress = config.bsc.tokenManager;
 
-  const tokenName = "WEB3WAR Token";
-  const tokenSymbol = "FPS";
-  const tokenDecimals = 12;
-  const remoteToken = "0x63B6ebD476C84bFDd5DcaCB3f974794FC6C2e721";
+  const tokenName = "Stream Token";
+  const tokenSymbol = "STREAM";
+  const tokenDecimals = 8;
+  const remoteToken = "0x95ebe761b40042F23b717e1e00ECF6b871f24173";
   const remoteTokenManager = config.bsc.remoteTokenManager;
   const remoteChainId = config.bsc.remoteChainId;
 
