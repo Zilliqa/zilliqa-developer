@@ -75,13 +75,13 @@ contract MintAndBurnTokenManagerUpgradeable is
     ) internal onlyOwner returns (BridgedToken) {
         // TODO: deployed counterfactually
         BridgedToken bridgedToken = new BridgedToken(name, symbol, decimals);
-
-        _registerToken(
-            address(bridgedToken),
+        RemoteToken memory remoteTokenStruct = RemoteToken(
             remoteToken,
             tokenManager,
             remoteChainId
         );
+
+        _registerToken(address(bridgedToken), remoteTokenStruct);
 
         emit BridgedTokenDeployed(
             address(bridgedToken),

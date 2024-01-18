@@ -3,11 +3,7 @@ pragma solidity ^0.8.20;
 
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Script} from "forge-std/Script.sol";
-import {Relayer, CallMetadata} from "contracts/core/Relayer.sol";
-import {ITokenManager, AcceptArgs} from "contracts/periphery/TokenManagerUpgradeable.sol";
-import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
-import "forge-std/console.sol";
 
 contract Dispatch is Script {
     using MessageHashUtils for bytes;

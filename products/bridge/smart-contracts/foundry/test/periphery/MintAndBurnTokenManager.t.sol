@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {Tester} from "foundry/test/Tester.sol";
 import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
-import {ITokenManagerEvents, RemoteToken} from "contracts/periphery/TokenManagerUpgradeable.sol";
+import {ITokenManagerStructs, ITokenManagerEvents} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
@@ -61,15 +61,12 @@ contract MintAndBurnTokenManagerTests is Tester, ITokenManagerEvents {
             newOwner
         );
 
-        RemoteToken memory newRemoteToken = tokenManager.getRemoteTokens(
-            address(bridgedToken),
-            remoteChainId
-        );
+        ITokenManagerStructs.RemoteToken memory newRemoteToken = tokenManager
+            .getRemoteTokens(address(bridgedToken), remoteChainId);
+        ITokenManagerStructs.RemoteToken memory expected;
         // Verify if owner has been updated
         assertEq(bridgedToken.owner(), newOwner);
         // Verify if remoteToken has been deleted
-        assertEq(newRemoteToken.token, address(0));
-        assertEq(newRemoteToken.tokenManager, address(0));
-        assertEq(newRemoteToken.chainId, 0);
+        assertEq(abi.encode(newRemoteToken), abi.encode(expected));
     }
 }

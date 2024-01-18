@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {Tester, Vm} from "foundry/test/Tester.sol";
 import {LockAndReleaseTokenManagerUpgradeable} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
-import {AcceptArgs, TokenManagerUpgradeable} from "contracts/periphery/TokenManagerUpgradeable.sol";
+import {ITokenManagerStructs, TokenManagerUpgradeable} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 import {CallMetadata, IRelayerEvents} from "contracts/core/Relayer.sol";
@@ -90,13 +90,15 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
             block.chainid
         );
 
+        ITokenManagerStructs.RemoteToken
+            memory remoteToken = ITokenManagerStructs.RemoteToken({
+                token: address(bridgedToken),
+                tokenManager: address(remoteTokenManager),
+                chainId: block.chainid
+            });
+
         // Register bridged token with original token
-        sourceTokenManager.registerToken(
-            address(originalToken),
-            address(bridgedToken),
-            address(remoteTokenManager),
-            block.chainid
-        );
+        sourceTokenManager.registerToken(address(originalToken), remoteToken);
     }
 
     function test_happyPath() external {
@@ -109,7 +111,13 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
         bytes memory data = abi.encodeWithSelector(
             TokenManagerUpgradeable.accept.selector,
             CallMetadata(sourceChainId, address(sourceTokenManager)), // From
-            abi.encode(AcceptArgs(address(bridgedToken), remoteUser, amount)) // To
+            abi.encode(
+                ITokenManagerStructs.AcceptArgs(
+                    address(bridgedToken),
+                    remoteUser,
+                    amount
+                )
+            ) // To
         );
 
         // Approve and transfer
@@ -176,7 +184,13 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
         data = abi.encodeWithSelector(
             TokenManagerUpgradeable.accept.selector,
             CallMetadata(remoteChainId, address(remoteTokenManager)), // From
-            abi.encode(AcceptArgs(address(originalToken), sourceUser, amount)) // To
+            abi.encode(
+                ITokenManagerStructs.AcceptArgs(
+                    address(originalToken),
+                    sourceUser,
+                    amount
+                )
+            ) // To
         );
         signatures[0] = sign(
             validatorWallet,

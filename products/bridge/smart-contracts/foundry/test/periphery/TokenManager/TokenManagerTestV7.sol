@@ -2,72 +2,34 @@
 pragma solidity ^0.8.20;
 
 import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {ITokenManager} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-interface ITokenManagerEvents {
-    event TokenRemoved(address token, uint remoteChainId);
+/**
+ * Add a non-erc7201 compliant contract to the end of the inheritance list
+ */
 
-    event TokenRegistered(
-        address indexed token,
-        address remoteToken,
-        address remoteTokenManager,
-        uint remoteChainId
-    );
-}
+contract NonERC7201CompliantContract is Initializable {
+    uint public number;
+    address public addressValue;
 
-interface ITokenManagerStructs {
-    struct AcceptArgs {
-        address token;
-        address recipient;
-        uint amount;
-    }
-
-    struct RemoteToken {
-        address token;
-        address tokenManager;
-        uint chainId;
+    function __NonERC7201CompliantContract_init(
+        uint _number,
+        address _addressValue
+    ) internal onlyInitializing {
+        number = _number;
+        addressValue = _addressValue;
     }
 }
 
-interface ITokenManager is ITokenManagerEvents, ITokenManagerStructs {
-    error InvalidSourceChainId();
-    error InvalidTokenManager();
-    error NotGateway();
-
-    function getGateway() external view returns (address);
-
-    function setGateway(address _gateway) external;
-
-    function getRemoteTokens(
-        address token,
-        uint remoteChainId
-    ) external view returns (RemoteToken memory);
-
-    function registerToken(
-        address token,
-        RemoteToken memory remoteToken
-    ) external;
-
-    function transfer(
-        address token,
-        uint remoteChainId,
-        address remoteRecipient,
-        uint amount
-    ) external;
-
-    function accept(
-        CallMetadata calldata metadata,
-        bytes calldata args
-    ) external;
-}
-
-abstract contract TokenManagerUpgradeable is
+abstract contract TokenManagerUpgradeableTestV7 is
     ITokenManager,
     Initializable,
     UUPSUpgradeable,
-    OwnableUpgradeable
+    OwnableUpgradeable,
+    NonERC7201CompliantContract
 {
     /// @custom:storage-location erc7201:zilliqa.storage.TokenManager
     struct TokenManagerStorage {
@@ -95,6 +57,15 @@ abstract contract TokenManagerUpgradeable is
         return $.gateway;
     }
 
+    function _setGateway(address _gateway) internal {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        $.gateway = _gateway;
+    }
+
+    function setGateway(address _gateway) external onlyOwner {
+        _setGateway(_gateway);
+    }
+
     function getRemoteTokens(
         address token,
         uint remoteChainId
@@ -110,21 +81,17 @@ abstract contract TokenManagerUpgradeable is
         _;
     }
 
-    function __TokenManager_init(address _gateway) internal onlyInitializing {
+    function __TokenManager_init(
+        address _gateway,
+        uint _number,
+        address _addressValue
+    ) internal onlyInitializing {
         __Ownable_init(msg.sender);
         _setGateway(_gateway);
+        __NonERC7201CompliantContract_init(_number, _addressValue);
     }
 
     function _authorizeUpgrade(address) internal virtual override onlyOwner {}
-
-    function _setGateway(address _gateway) internal {
-        TokenManagerStorage storage $ = _getTokenManagerStorage();
-        $.gateway = _gateway;
-    }
-
-    function setGateway(address _gateway) external onlyOwner {
-        _setGateway(_gateway);
-    }
 
     function _removeToken(address localToken, uint remoteChainId) internal {
         TokenManagerStorage storage $ = _getTokenManagerStorage();
@@ -173,38 +140,35 @@ abstract contract TokenManagerUpgradeable is
         uint remoteChainId,
         address remoteRecipient,
         uint amount
-    ) external virtual {
-        RemoteToken memory remoteToken = getRemoteTokens(token, remoteChainId);
+    ) external virtual {}
 
-        _handleTransfer(token, msg.sender, amount);
-
-        IRelayer(getGateway()).relayWithMetadata(
-            remoteToken.chainId,
-            remoteToken.tokenManager,
-            this.accept.selector,
-            abi.encode(AcceptArgs(remoteToken.token, remoteRecipient, amount)),
-            1_000_000
-        );
-    }
-
-    // Incoming
     function accept(
         CallMetadata calldata metadata,
         bytes calldata _args
-    ) external virtual onlyGateway {
-        AcceptArgs memory args = abi.decode(_args, (AcceptArgs));
+    ) external virtual onlyGateway {}
+}
 
-        RemoteToken memory remoteToken = getRemoteTokens(
-            args.token,
-            metadata.sourceChainId
-        );
-        if (metadata.sourceChainId != remoteToken.chainId) {
-            revert InvalidSourceChainId();
-        }
-        if (metadata.sender != remoteToken.tokenManager) {
-            revert InvalidTokenManager();
-        }
-
-        _handleAccept(args.token, args.recipient, args.amount);
+contract TokenManagerTestV7 is TokenManagerUpgradeableTestV7 {
+    constructor() {
+        _disableInitializers();
     }
+
+    function reinitialize(
+        uint _number,
+        address _value
+    ) public reinitializer(2) {
+        __TokenManager_init(getGateway(), _number, _value);
+    }
+
+    function _handleTransfer(
+        address token,
+        address from,
+        uint amount
+    ) internal override {}
+
+    function _handleAccept(
+        address token,
+        address recipient,
+        uint amount
+    ) internal override {}
 }

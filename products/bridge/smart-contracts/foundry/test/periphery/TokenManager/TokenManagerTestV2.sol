@@ -2,68 +2,15 @@
 pragma solidity ^0.8.20;
 
 import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {ITokenManager} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-interface ITokenManagerEvents {
-    event TokenRemoved(address token, uint remoteChainId);
-
-    event TokenRegistered(
-        address indexed token,
-        address remoteToken,
-        address remoteTokenManager,
-        uint remoteChainId
-    );
-}
-
-interface ITokenManagerStructs {
-    struct AcceptArgs {
-        address token;
-        address recipient;
-        uint amount;
-    }
-
-    struct RemoteToken {
-        address token;
-        address tokenManager;
-        uint chainId;
-    }
-}
-
-interface ITokenManager is ITokenManagerEvents, ITokenManagerStructs {
-    error InvalidSourceChainId();
-    error InvalidTokenManager();
-    error NotGateway();
-
-    function getGateway() external view returns (address);
-
-    function setGateway(address _gateway) external;
-
-    function getRemoteTokens(
-        address token,
-        uint remoteChainId
-    ) external view returns (RemoteToken memory);
-
-    function registerToken(
-        address token,
-        RemoteToken memory remoteToken
-    ) external;
-
-    function transfer(
-        address token,
-        uint remoteChainId,
-        address remoteRecipient,
-        uint amount
-    ) external;
-
-    function accept(
-        CallMetadata calldata metadata,
-        bytes calldata args
-    ) external;
-}
-
-abstract contract TokenManagerUpgradeable is
+/**
+ * Added new counter variable and relevant helper functions around it
+ */
+abstract contract TokenManagerUpgradeableTestV2 is
     ITokenManager,
     Initializable,
     UUPSUpgradeable,
@@ -74,6 +21,7 @@ abstract contract TokenManagerUpgradeable is
         address gateway;
         // localTokenAddress => remoteChainId => RemoteToken
         mapping(address => mapping(uint => RemoteToken)) remoteTokens;
+        uint counter;
     }
 
     // keccak256(abi.encode(uint256(keccak256("zilliqa.storage.TokenManager")) - 1)) & ~bytes32(uint256(0xff))
@@ -90,9 +38,32 @@ abstract contract TokenManagerUpgradeable is
         }
     }
 
+    function incrementCounter() external {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        $.counter++;
+    }
+
+    function setCounter(uint counter) public {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        $.counter = counter;
+    }
+
+    function getCounter() public view returns (uint) {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        return $.counter;
+    }
+
     function getGateway() public view returns (address) {
         TokenManagerStorage storage $ = _getTokenManagerStorage();
         return $.gateway;
+    }
+
+    function getRemoteTokenAddress(
+        address token,
+        uint remoteChainId
+    ) public view returns (address) {
+        TokenManagerStorage storage $ = _getTokenManagerStorage();
+        return $.remoteTokens[token][remoteChainId].token;
     }
 
     function getRemoteTokens(
@@ -173,38 +144,34 @@ abstract contract TokenManagerUpgradeable is
         uint remoteChainId,
         address remoteRecipient,
         uint amount
-    ) external virtual {
-        RemoteToken memory remoteToken = getRemoteTokens(token, remoteChainId);
-
-        _handleTransfer(token, msg.sender, amount);
-
-        IRelayer(getGateway()).relayWithMetadata(
-            remoteToken.chainId,
-            remoteToken.tokenManager,
-            this.accept.selector,
-            abi.encode(AcceptArgs(remoteToken.token, remoteRecipient, amount)),
-            1_000_000
-        );
-    }
+    ) external virtual {}
 
     // Incoming
     function accept(
         CallMetadata calldata metadata,
         bytes calldata _args
-    ) external virtual onlyGateway {
-        AcceptArgs memory args = abi.decode(_args, (AcceptArgs));
+    ) external virtual onlyGateway {}
+}
 
-        RemoteToken memory remoteToken = getRemoteTokens(
-            args.token,
-            metadata.sourceChainId
-        );
-        if (metadata.sourceChainId != remoteToken.chainId) {
-            revert InvalidSourceChainId();
-        }
-        if (metadata.sender != remoteToken.tokenManager) {
-            revert InvalidTokenManager();
-        }
-
-        _handleAccept(args.token, args.recipient, args.amount);
+contract TokenManagerTestV2 is TokenManagerUpgradeableTestV2 {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
+
+    function reinitialize(uint startCount) public reinitializer(2) {
+        setCounter(startCount);
+    }
+
+    function _handleTransfer(
+        address token,
+        address from,
+        uint amount
+    ) internal override {}
+
+    function _handleAccept(
+        address token,
+        address recipient,
+        uint amount
+    ) internal override {}
 }
