@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 library ScillaConnector {
-    uint256 private constant CALL_SCILLA_WITH_THE_SAME_SENDER = 1;
-    uint256 private constant NONEVM_CALL_PRECOMPILE_ADDRESS = 0x5a494c53;
-    uint256 private constant NONEVM_STATE_READ_PRECOMPILE_ADDRESS = 0x5a494c92;
+    uint private constant CALL_SCILLA_WITH_THE_SAME_SENDER = 1;
+    uint private constant SCILLA_CALL_PRECOMPILE_ADDRESS = 0x5a494c53;
+    uint private constant SCILLA_STATE_READ_PRECOMPILE_ADDRESS = 0x5a494c92;
 
     /**
      * @dev Calls a ZRC2 contract function with two arguments
@@ -31,7 +31,7 @@ library ScillaConnector {
         assembly {
             let alwaysSuccessForThisPrecompile := call(
                 21000,
-                NONEVM_CALL_PRECOMPILE_ADDRESS,
+                SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
                 add(encodedArgs, 0x20),
                 argsLength,
@@ -69,7 +69,7 @@ library ScillaConnector {
         assembly {
             let alwaysSuccessForThisPrecompile := call(
                 21000,
-                NONEVM_CALL_PRECOMPILE_ADDRESS,
+                SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
                 add(encodedArgs, 0x20),
                 argsLength,
@@ -96,7 +96,7 @@ library ScillaConnector {
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
                 21000,
-                NONEVM_STATE_READ_PRECOMPILE_ADDRESS,
+                SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
                 add(output, 0x20),
@@ -124,7 +124,7 @@ library ScillaConnector {
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
                 21000,
-                NONEVM_STATE_READ_PRECOMPILE_ADDRESS,
+                SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
                 add(output, 0x20),
@@ -153,7 +153,7 @@ library ScillaConnector {
         assembly {
             success := staticcall(
                 21000,
-                NONEVM_STATE_READ_PRECOMPILE_ADDRESS,
+                SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
                 add(output, 0x20),
@@ -188,7 +188,7 @@ library ScillaConnector {
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
                 21000,
-                NONEVM_STATE_READ_PRECOMPILE_ADDRESS,
+                SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
                 add(output, 0x20),
@@ -225,7 +225,7 @@ library ScillaConnector {
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
                 21000,
-                NONEVM_STATE_READ_PRECOMPILE_ADDRESS,
+                SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
                 add(output, 0x20),

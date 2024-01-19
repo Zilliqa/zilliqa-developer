@@ -5,7 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {ScillaConnector} from "./ScillaConnector.sol";
 
-contract ZRC2Proxy is IERC20 {
+contract ZRC2ProxyForZRC2 is IERC20 {
     using ScillaConnector for address;
     using SafeCast for uint256;
 
