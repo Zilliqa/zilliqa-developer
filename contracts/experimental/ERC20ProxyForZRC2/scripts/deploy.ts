@@ -1,10 +1,10 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const zrc2_address: `0x${string}` = "0x";
+  const zrc2Address: `0x${string}` = "0x";
 
   const contract = await ethers.deployContract("ZRC2ProxyForZRC2", [
-    zrc2_address,
+    zrc2Address,
   ]);
 
   await contract.waitForDeployment();
