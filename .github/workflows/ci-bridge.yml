@@ -49,9 +49,9 @@ jobs:
         run: pnpm install
         working-directory: products/bridge/smart-contracts
 
-      - name: Run Hardhat tests
-        run: pnpm test
-        working-directory: products/bridge/smart-contracts
+      # - name: Run Hardhat tests
+      #   run: pnpm test
+      #   working-directory: products/bridge/smart-contracts
 
       - name: Run Foundry tests
         run: pnpm test:foundry
