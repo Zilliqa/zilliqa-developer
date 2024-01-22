@@ -22,3 +22,4 @@ zilliqa/js/util/node_modules
 zilliqa/js/zilliqa/node_modules
 examples/zilliqa-js/latest-block/node_modules
 examples/zilliqa-js/react-zilliqa-js/node_modules
+contracts/experimental/ERC20ProxyForZRC2/node_modules
