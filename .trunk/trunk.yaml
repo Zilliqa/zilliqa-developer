@@ -27,12 +27,13 @@ lint:
   ignore:
     - linters: [gitleaks]
       paths:
-        - products/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
+        - products/laksaj # laksaj contains a lot of embedded testnet privkeys - ignore them.
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
+        - products/bridge/smart-contracts/script/config.ts
     - linters: [eslint]
       paths:
         - contracts/audited/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
-        - contracts/reward_control    # and again
+        - contracts/reward_control # and again
     - linters: [ALL]
       paths:
         - needing-organisation/**/*

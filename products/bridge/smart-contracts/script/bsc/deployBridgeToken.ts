@@ -7,7 +7,7 @@ async function main() {
   const tokenName = "Stream Token";
   const tokenSymbol = "STREAM";
   const tokenDecimals = 8;
-  const remoteToken = "0x95ebe761b40042F23b717e1e00ECF6b871f24173";
+  const remoteToken = config.bsc.remoteToken;
   const remoteTokenManager = config.bsc.remoteTokenManager;
   const remoteChainId = config.bsc.remoteChainId;
 
