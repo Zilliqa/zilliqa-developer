@@ -24,7 +24,7 @@ use tracing::{debug, error, info};
 use crate::{
     crypto::SecretKey,
     message::ExternalMessage,
-    validator_node::{BridgeNode, BridgeNodeConfig},
+    validator_node::{ValidatorNode, ValidatorNodeConfig},
 };
 
 #[derive(NetworkBehaviour)]
@@ -36,7 +36,6 @@ struct Behaviour {
 }
 
 pub struct P2pNode {
-    secret_key: SecretKey,
     peer_id: PeerId,
     swarm: Swarm<Behaviour>,
     /// Forward messages to the bridge validators. Only initialised once BridgeNode is created
@@ -91,7 +90,6 @@ impl P2pNode {
 
         Ok(Self {
             peer_id,
-            secret_key,
             swarm,
             bridge_outbound_message_sender,
             bridge_outbound_message_receiver,
@@ -111,14 +109,14 @@ impl P2pNode {
         Ok(())
     }
 
-    async fn create_and_start_validator_node(&mut self, config: BridgeNodeConfig) -> Result<()> {
+    async fn create_and_start_validator_node(&mut self, config: ValidatorNodeConfig) -> Result<()> {
         let topic = IdentTopic::new("bridge"); // TODO: change to more specific bridge chains
 
         self.swarm.behaviour_mut().gossipsub.subscribe(&topic)?;
 
         // Initialise bridge node
         let mut bridge_node =
-            BridgeNode::new(config, self.bridge_outbound_message_sender.clone()).await?;
+            ValidatorNode::new(config, self.bridge_outbound_message_sender.clone()).await?;
 
         self.bridge_inbound_message_sender = Some(bridge_node.get_bridge_inbound_message_sender());
 
@@ -127,7 +125,7 @@ impl P2pNode {
         Ok(())
     }
 
-    pub async fn start<'a>(&mut self, config: BridgeNodeConfig) -> Result<()> {
+    pub async fn start<'a>(&mut self, config: ValidatorNodeConfig) -> Result<()> {
         let addr: Multiaddr = "/ip4/0.0.0.0/tcp/0".parse().unwrap();
 
         self.create_and_start_validator_node(config).await?;

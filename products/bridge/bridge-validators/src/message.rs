@@ -1,11 +1,14 @@
 // ! taken from ZQ2
 
-use std::fmt::{self, Debug, Formatter};
+use std::{
+    collections::HashMap,
+    fmt::{self, Debug, Formatter},
+};
 
-use ethers::types::{Signature, U256};
+use ethers::types::{Address, Signature, U256};
 use serde::{Deserialize, Serialize};
 
-use crate::validator_node::{RelayEvent, SignedSignatures};
+use crate::event::RelayEvent;
 
 /// A message intended to be sent over the network as part of p2p communication.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -46,7 +49,7 @@ pub struct Dispatched {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Dispatch {
     pub event: RelayEvent,
-    pub signatures: SignedSignatures,
+    pub signatures: HashMap<Address, Signature>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

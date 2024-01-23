@@ -1,6 +1,10 @@
+mod bridge_node;
+mod client;
 mod crypto;
+mod event;
 mod message;
 mod p2p_node;
+mod signature;
 mod validator_node;
 
 use std::{fs, path::PathBuf};
@@ -10,17 +14,9 @@ use clap::Parser;
 use ethers::contract::abigen;
 use serde::Deserialize;
 use tracing_subscriber::EnvFilter;
-use validator_node::BridgeNodeConfig;
+use validator_node::ValidatorNodeConfig;
 
 use crate::{crypto::SecretKey, p2p_node::P2pNode};
-
-const _TARGET: &str = "0x9cB4b20da1fA0caA96221aD7a80139DdbBEC266e";
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Config {
-    pub chain_configs: Vec<ChainConfig>,
-}
 
 abigen!(ChainGateway, "abi/ChainGateway.json",);
 abigen!(ValidatorManager, "abi/ValidatorManager.json");
@@ -32,7 +28,13 @@ pub struct ChainConfig {
     pub rpc_url: String,
     pub validator_manager_address: String,
     pub chain_gateway_address: String,
-    pub block_query_limit: Option<u64>,
+    pub chain_gateway_block_deployed: u64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Config {
+    pub chain_configs: Vec<ChainConfig>,
 }
 
 #[derive(Parser, Debug)]
@@ -60,7 +62,7 @@ async fn main() -> Result<()> {
     };
     let config: Config = toml::from_str(&config)?;
 
-    let config = BridgeNodeConfig {
+    let config = ValidatorNodeConfig {
         chain_configs: config.chain_configs,
         private_key: args.secret_key,
         is_leader: args.leader,
