@@ -7,7 +7,7 @@ use anyhow::Result;
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Middleware, StreamExt},
-    types::{Address, Block, BlockNumber, Signature, U256},
+    types::{Address, BlockNumber, Signature, U256},
 };
 use tokio::{
     select,
@@ -63,37 +63,61 @@ impl BridgeNode {
         self.inbound_message_sender.clone()
     }
 
-    async fn query_recent_finalised_events<D>(
+    async fn get_historic_events<D>(
         &self,
         event: Event<Arc<Client>, Client, D>,
-    ) -> Result<(Vec<D>, u64)>
+        to_block: BlockNumber,
+    ) -> Result<Vec<D>>
     where
         D: EthEvent,
     {
-        let latest_finalised_block = self
+        let events = event
+            .address(self.chain_client.chain_gateway_address.into())
+            .from_block(self.chain_client.chain_gateway_block_deployed)
+            .to_block(to_block)
+            .query()
+            .await?;
+
+        return Ok(events);
+    }
+
+    pub async fn sync_historic_events(&mut self) -> Result<()> {
+        let finalized_block_number = self
             .chain_client
             .client
             .get_block(BlockNumber::Finalized)
+            .await?
+            .expect("Latest finalized block should be retrieved")
+            .number
+            .expect("Number should be here");
+
+        println!("Latest Finalised Block {}", finalized_block_number);
+
+        let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
+
+        let dispatch_events = self
+            .get_historic_events(
+                chain_gateway.event::<DispatchedFilter>(),
+                BlockNumber::Number(finalized_block_number.into()),
+            )
             .await?;
 
-        if let Some(Block {
-            number: Some(block_number),
-            ..
-        }) = latest_finalised_block
-        {
-            println!("Latest Finalised Block {}", block_number);
-
-            let events = event
-                .address(self.chain_client.chain_gateway_address.into())
-                .from_block(self.chain_client.chain_gateway_block_deployed)
-                .to_block(BlockNumber::Finalized)
-                .query()
-                .await?;
-
-            return Ok((events, block_number.as_u64()));
+        for dispatch in dispatch_events {
+            self.handle_dispatch_event(dispatch)?;
         }
 
-        Ok((vec![], 0))
+        let relay_events = self
+            .get_historic_events(
+                chain_gateway.event::<RelayedFilter>(),
+                BlockNumber::Number(finalized_block_number.into()),
+            )
+            .await?;
+
+        for relay in relay_events {
+            self.handle_relay_event(relay)?;
+        }
+
+        Ok(())
     }
 
     pub async fn listen_events(&mut self) -> Result<()> {
@@ -101,14 +125,8 @@ impl BridgeNode {
 
         let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
 
-        let x = self
-            .query_recent_finalised_events(chain_gateway.event::<RelayedFilter>())
-            .await?;
-        dbg!(x);
-
         // TODO: test if polling finalised block events work
         let relayed_events = chain_gateway.event::<RelayedFilter>();
-
         let dispatched_events = chain_gateway.event::<DispatchedFilter>();
 
         let mut relayed_stream = relayed_events.stream().await?;
@@ -245,7 +263,7 @@ impl BridgeNode {
         };
 
         if !self.validators.contains(&address) {
-            info!("Address not part of the validator set");
+            info!("Address not part of the validator set, {}", address);
             return Ok(());
         }
 
@@ -260,19 +278,21 @@ impl BridgeNode {
             }
             Some(event_signatures) => {
                 // Only insert if it is the same event as the one stored
-                if let Some(relay_event) = &mut event_signatures.event {
-                    if relay_event.hash() == event_hash {
-                        event_signatures
-                            .signatures
-                            .add_signature(address, signature);
-                    } else {
-                        warn!("Message bodies don't match, so reject {:?}", relay_event);
-                        return Ok(());
-                    }
+                let relay_event = if let Some(event) = &event_signatures.event {
+                    event
                 } else {
                     warn!("Found event_signature without event {:?}", event_signatures);
                     return Ok(());
+                };
+
+                if relay_event.hash() != event_hash {
+                    warn!("Message bodies don't match, so reject {:?}", relay_event);
+                    return Ok(());
                 }
+
+                event_signatures
+                    .signatures
+                    .add_signature(address, signature);
 
                 event_signatures.clone()
             }

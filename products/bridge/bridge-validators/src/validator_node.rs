@@ -68,6 +68,9 @@ impl ValidatorNode {
             chain_clients.insert(validator_chain_node.chain_client.chain_id, chain_client);
 
             tokio::spawn(async move {
+                // Fill all historic events first
+                validator_chain_node.sync_historic_events().await.unwrap();
+                // Then start listening to new ones
                 validator_chain_node.listen_events().await.unwrap();
             });
         }
@@ -91,8 +94,7 @@ impl ValidatorNode {
         self.bridge_inbound_message_sender.clone()
     }
 
-    // TODO: solidify into all events together
-    pub async fn listen_events(&mut self) -> Result<()> {
+    pub async fn listen_p2p(&mut self) -> Result<()> {
         loop {
             select! {
                Some(message) = self.bridge_inbound_message_receiver.next() => {

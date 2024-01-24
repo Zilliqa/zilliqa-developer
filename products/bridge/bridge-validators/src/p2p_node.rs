@@ -120,7 +120,7 @@ impl P2pNode {
 
         self.bridge_inbound_message_sender = Some(bridge_node.get_bridge_inbound_message_sender());
 
-        tokio::task::spawn(async move { bridge_node.listen_events().await });
+        tokio::task::spawn(async move { bridge_node.listen_p2p().await });
 
         Ok(())
     }
