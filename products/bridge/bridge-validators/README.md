@@ -24,7 +24,7 @@ cargo run 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
 
 2.Run `smart-contract` forge commands to test if bridge works
 
-### Bootstrap with docker-compose
+## Bootstrap with docker-compose
 
 Automated bootstrap of a 4 nodes Zilliqa 2.0 aka zq2 network.
 
