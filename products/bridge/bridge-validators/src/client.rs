@@ -34,8 +34,8 @@ impl ChainClient {
 
         Ok(ChainClient {
             client,
-            validator_manager_address: config.validator_manager_address.parse()?,
-            chain_gateway_address: config.chain_gateway_address.parse()?,
+            validator_manager_address: config.validator_manager_address,
+            chain_gateway_address: config.chain_gateway_address,
             chain_id,
             wallet,
             chain_gateway_block_deployed: config.chain_gateway_block_deployed,

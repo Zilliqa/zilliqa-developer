@@ -11,7 +11,8 @@ use std::{fs, path::PathBuf};
 
 use anyhow::Result;
 use clap::Parser;
-use ethers::contract::abigen;
+use ethers::{contract::abigen, types::Address};
+use libp2p::{Multiaddr, PeerId};
 use serde::Deserialize;
 use tracing_subscriber::EnvFilter;
 use validator_node::ValidatorNodeConfig;
@@ -20,14 +21,13 @@ use crate::{crypto::SecretKey, p2p_node::P2pNode};
 
 abigen!(ChainGateway, "abi/ChainGateway.json",);
 abigen!(ValidatorManager, "abi/ValidatorManager.json");
-abigen!(Target, "abi/Target.json");
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ChainConfig {
     pub rpc_url: String,
-    pub validator_manager_address: String,
-    pub chain_gateway_address: String,
+    pub validator_manager_address: Address,
+    pub chain_gateway_address: Address,
     pub chain_gateway_block_deployed: u64,
 }
 
@@ -35,14 +35,14 @@ pub struct ChainConfig {
 #[serde(deny_unknown_fields)]
 pub struct Config {
     pub chain_configs: Vec<ChainConfig>,
+    pub bootstrap_address: Option<(PeerId, Multiaddr)>,
+    pub is_leader: Option<bool>,
 }
 
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(value_parser = SecretKey::from_hex)]
     secret_key: SecretKey,
-    #[clap(short, long, default_value = "false")]
-    leader: bool,
     #[clap(long, short, default_value = "config.toml")]
     config_file: PathBuf,
 }
@@ -65,7 +65,8 @@ async fn main() -> Result<()> {
     let config = ValidatorNodeConfig {
         chain_configs: config.chain_configs,
         private_key: args.secret_key,
-        is_leader: args.leader,
+        is_leader: config.is_leader.unwrap_or_default(),
+        bootstrap_address: config.bootstrap_address,
     };
 
     let mut node = P2pNode::new(args.secret_key)?;

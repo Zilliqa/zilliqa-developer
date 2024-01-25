@@ -126,7 +126,15 @@ impl P2pNode {
     }
 
     pub async fn start<'a>(&mut self, config: ValidatorNodeConfig) -> Result<()> {
-        let addr: Multiaddr = "/ip4/0.0.0.0/tcp/0".parse().unwrap();
+        let addr: Multiaddr = "/ip4/0.0.0.0/tcp/3334".parse().unwrap();
+
+        if let Some((peer, address)) = &config.bootstrap_address {
+            self.swarm
+                .behaviour_mut()
+                .kademlia
+                .add_address(peer, address.clone());
+            self.swarm.behaviour_mut().kademlia.bootstrap()?;
+        }
 
         self.create_and_start_validator_node(config).await?;
 
@@ -142,9 +150,9 @@ impl P2pNode {
                     }
                     SwarmEvent::Behaviour(BehaviourEvent::Mdns(mdns::Event::Discovered(list))) => {
                         for (peer_id, addr) in list {
-                            info!(%peer_id, %addr, "discovered peer via mDNS");
-                            self.swarm.behaviour_mut().kademlia.add_address(&peer_id, addr);
-                            self.swarm.behaviour_mut().gossipsub.add_explicit_peer(&peer_id);
+                        info!(%peer_id, %addr, "discovered peer via mDNS");
+                        self.swarm.behaviour_mut().kademlia.add_address(&peer_id, addr);
+                        self.swarm.behaviour_mut().gossipsub.add_explicit_peer(&peer_id);
                         }
                     }
                     SwarmEvent::Behaviour(BehaviourEvent::Mdns(mdns::Event::Expired(list))) => {
@@ -153,6 +161,7 @@ impl P2pNode {
                         }
                     }
                     SwarmEvent::Behaviour(BehaviourEvent::Identify(identify::Event::Received { info: identify::Info { observed_addr, listen_addrs, .. }, peer_id })) => {
+                        info!("discovered peer via kad, {}, {:?}", &peer_id, &listen_addrs);
                         for addr in listen_addrs {
                             self.swarm.behaviour_mut().kademlia.add_address(&peer_id, addr);
                         }
@@ -160,7 +169,7 @@ impl P2pNode {
                         // TODO: We shouldn't trust this, instead we should confirm our own address manually or using
                         // `libp2p-autonat`.
                         self.swarm.add_external_address(observed_addr);
-                    }
+                                            }
                     SwarmEvent::Behaviour(BehaviourEvent::Gossipsub(gossipsub::Event::Message{
                         message: gossipsub::Message {
                             source,
