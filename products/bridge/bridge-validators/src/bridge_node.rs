@@ -7,7 +7,7 @@ use anyhow::Result;
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Middleware, StreamExt},
-    types::{Address, BlockNumber, Signature, U256},
+    types::{Address, BlockNumber, Log, Signature, U256},
 };
 use tokio::{
     select,
@@ -17,6 +17,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use tracing::{info, warn};
 
 use crate::{
+    block::BlockPolling,
     client::{ChainClient, Client, ContractInitializer},
     event::{RelayEvent, RelayEventSignatures},
     message::{Dispatch, Dispatched, InboundBridgeMessage, OutboundBridgeMessage, Relay},
@@ -72,35 +73,72 @@ impl BridgeNode {
         D: EthEvent,
     {
         let events = event
-            .address(self.chain_client.chain_gateway_address.into())
             .from_block(self.chain_client.chain_gateway_block_deployed)
-            .to_block(to_block)
-            .query()
+            .to_block(to_block);
+
+        self.chain_client
+            .get_historic_blocks(
+                self.chain_client.chain_gateway_block_deployed,
+                to_block.as_number().unwrap().as_u64(),
+            )
             .await?;
 
-        return Ok(events);
+        let logs: Vec<serde_json::Value> = self
+            .chain_client
+            .client
+            .provider()
+            .request("eth_getLogs", [&events.filter])
+            .await?;
+
+        let logs: Result<Vec<Log>> = logs
+            .into_iter()
+            .map(|log| {
+                // Parse log values
+                let mut log = log;
+                match log["removed"].as_str() {
+                    Some("true") => log["removed"] = serde_json::Value::Bool(true),
+                    Some("false") => log["removed"] = serde_json::Value::Bool(false),
+                    Some(&_) => warn!("invalid parsing"),
+                    None => (),
+                };
+                let log: Log = serde_json::from_value(log)?;
+                Ok(log)
+            })
+            .collect();
+
+        dbg!(logs);
+
+        return Ok(vec![]);
     }
 
     pub async fn sync_historic_events(&mut self) -> Result<()> {
-        let finalized_block_number = self
+        let to_block = if self.chain_client.block_instant_finality {
+            BlockNumber::Latest
+        } else {
+            BlockNumber::Finalized
+        };
+        info!("Getting Historic Events {}", to_block);
+
+        let to_block_number = self
             .chain_client
             .client
-            .get_block(BlockNumber::Finalized)
+            .get_block(to_block)
             .await?
             .expect("Latest finalized block should be retrieved")
             .number
             .expect("Number should be here");
 
-        println!("Latest Finalised Block {}", finalized_block_number);
+        dbg!(to_block_number);
 
         let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
 
         let dispatch_events = self
             .get_historic_events(
                 chain_gateway.event::<DispatchedFilter>(),
-                BlockNumber::Number(finalized_block_number.into()),
+                BlockNumber::Number(to_block_number.into()),
             )
             .await?;
+        dbg!(dispatch_events.len());
 
         for dispatch in dispatch_events {
             self.handle_dispatch_event(dispatch)?;
@@ -109,9 +147,11 @@ impl BridgeNode {
         let relay_events = self
             .get_historic_events(
                 chain_gateway.event::<RelayedFilter>(),
-                BlockNumber::Number(finalized_block_number.into()),
+                BlockNumber::Number(to_block_number.into()),
             )
             .await?;
+
+        dbg!(relay_events.len());
 
         for relay in relay_events {
             self.handle_relay_event(relay)?;
@@ -125,7 +165,7 @@ impl BridgeNode {
 
         let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
 
-        // TODO: test if polling finalised block events work
+        // TODO: polling finalized events
         let relayed_events = chain_gateway.event::<RelayedFilter>();
         let dispatched_events = chain_gateway.event::<DispatchedFilter>();
 
@@ -243,7 +283,6 @@ impl BridgeNode {
 
     /// Handle message, verify and add to storage.
     /// If has supermajority then submit the transaction.
-    /// TODO: Also check if it is current leader to dispatch
     async fn handle_relay(&mut self, echo: &Relay) -> Result<()> {
         let Relay { signature, event } = echo;
         let nonce = event.nonce;

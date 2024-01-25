@@ -21,6 +21,7 @@ pub struct ChainClient {
     pub chain_id: U256,
     pub wallet: LocalWallet,
     pub chain_gateway_block_deployed: u64,
+    pub block_instant_finality: bool,
 }
 
 impl ChainClient {
@@ -39,6 +40,7 @@ impl ChainClient {
             chain_id,
             wallet,
             chain_gateway_block_deployed: config.chain_gateway_block_deployed,
+            block_instant_finality: config.block_instant_finality.unwrap_or_default(),
         })
     }
 }
