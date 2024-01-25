@@ -86,7 +86,7 @@ contract RelayerTests is Tester, IRelayerEvents {
 
         bytes memory expectedCall = abi.encodeWithSelector(
             callSelector,
-            abi.encode(CallMetadata(block.chainid, address(this))),
+            CallMetadata(block.chainid, address(this)),
             callData
         );
 
