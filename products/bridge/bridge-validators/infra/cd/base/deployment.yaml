@@ -29,6 +29,7 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /etc/bridge/config.toml
+              subPath: config-leader.toml
       volumes:
         - name: config-volume
           configMap:
