@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bridge-validator
+  namespace: bridge-validator
+data:
+  PRIVATE_KEY: ""
+  CONFIG: "config.toml"

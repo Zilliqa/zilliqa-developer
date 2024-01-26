@@ -14,6 +14,7 @@ use clap::Parser;
 use ethers::{contract::abigen, types::Address};
 use libp2p::{Multiaddr, PeerId};
 use serde::Deserialize;
+use tracing::info;
 use tracing_subscriber::EnvFilter;
 use validator_node::ValidatorNodeConfig;
 
@@ -36,7 +37,6 @@ pub struct ChainConfig {
 pub struct Config {
     pub chain_configs: Vec<ChainConfig>,
     pub bootstrap_address: Option<(PeerId, Multiaddr)>,
-    pub is_leader: Option<bool>,
 }
 
 #[derive(Parser, Debug)]
@@ -45,6 +45,8 @@ struct Args {
     secret_key: SecretKey,
     #[clap(long, short, default_value = "config.toml")]
     config_file: PathBuf,
+    #[clap(long)]
+    is_leader: bool,
 }
 
 #[tokio::main]
@@ -62,10 +64,14 @@ async fn main() -> Result<()> {
     };
     let config: Config = toml::from_str(&config)?;
 
+    if args.is_leader {
+        info!("Running as leader");
+    }
+
     let config = ValidatorNodeConfig {
         chain_configs: config.chain_configs,
         private_key: args.secret_key,
-        is_leader: config.is_leader.unwrap_or_default(),
+        is_leader: args.is_leader,
         bootstrap_address: config.bootstrap_address,
     };
 

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bridge-validator-node0
+  namespace: bridge-validator
+  labels:
+    "app.kubernetes.io/name": "validator-node0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "validator-node0"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "validator-node0"
+    spec:
+      containers:
+        - image: zilliqa-bridge-validator
+          name: validator-node0
+          env:
+            - name: PRIVATE_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: bridge-validator
+                  key: PRIVATE_KEY
+            - name: CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: bridge-validator
+                  key: CONFIG
+          command: ["/bin/bash", "-c"]
+          args:
+            - ./bridge-validator $PRIVATE_KEY --config-file $CONFIG
+---
+
