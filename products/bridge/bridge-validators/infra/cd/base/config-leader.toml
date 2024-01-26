@@ -1,0 +1,30 @@
+# BSC Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 36696045
+rpc_url = "https://bsc-prebsc-dataseed.bnbchain.org"
+validator_manager_address = "0x6a7E0A8CB1b990b7C5E2b3b7f00141a947d9A73B"
+chain_gateway_address = "0x517bBe8f8ca40B71BB88979b132138894801200a"
+
+# BSC Mainnet
+# [[chain_configs]]
+# chain_gateway_block_deployed = 35300538
+# rpc_url = "https://bsc-mainnet.core.chainstack.com/f46f3fe682039b2ed570255458dcd7d9"
+# validator_manager_address = "0x95ebe761b40042F23b717e1e00ECF6b871f24173"
+# chain_gateway_address = "0x3fa391E5a4c1b55D04A1b164fDC67ECEb312B93d"
+
+# [[chain_configs]]
+# rpc_url = "http://localhost:8545"
+# validator_manager_address = "0x4a50E1Be218279ca980EAb216d95E0A48B5aE872"
+# chain_gateway_address = "0x4212b368876a54F99c741C8B5b64be2e52a6956b"
+
+# [[chain_configs]]
+# rpc_url = "http://localhost:8546"
+# validator_manager_address = "0x4a50E1Be218279ca980EAb216d95E0A48B5aE8https://bsc.blockpi.network/v1/rpc/public72"
+# chain_gateway_address = "0x4212b368876a54F99c741C8B5b64be2e52a6956b"
+
+# Zilliqa Testnet
+# [[chain_configs]]
+# gateway_block_deployed = 6542681
+# rpc_url = "http://evm-api-filters.testnet.zilliqa.com/"
+# validator_manager_address = "0xF74C8a0AF3B03d7135C7fFb816774f24d0053A3B"
+# chain_gateway_address = "0x3Be6E686397f04901Be15e3e02EDC0c7565e4b13"

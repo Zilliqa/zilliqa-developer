@@ -5,3 +5,5 @@ resources:
   - ../../base
 
 namespace: bridge-validator-staging
+patches:
+  - path: app-secrets.yaml

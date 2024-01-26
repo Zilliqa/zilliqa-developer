@@ -20,19 +20,16 @@ spec:
       containers:
         - image: zilliqa-bridge-validator
           name: validator-node0
-          env:
-            - name: PRIVATE_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: bridge-validator
-                  key: PRIVATE_KEY
-            - name: CONFIG
-              valueFrom:
-                configMapKeyRef:
-                  name: bridge-validator
-                  key: CONFIG
+          envFrom:
+            - secretRef:
+                name: zilliqa-bridge-validator-secret
           command: ["/bin/bash", "-c"]
           args:
-            - ./bridge-validator $PRIVATE_KEY --config-file $CONFIG
----
-
+            - ./bridge-validator $PRIVATE_KEY --config-file /etc/bridge/config.toml
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/bridge/config.toml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: zilliqa-bridge-validator-leader-config
