@@ -1,7 +1,7 @@
-# bootstrap_address = [
-#   "12D3KooWESbrSPohuw87dQDbJCB8qeeNgJsFD3ahkea3cu41m7bG",
-#   "/ip4/172.16.8.135/tcp/3333",
-# ]
+bootstrap_address = [
+  "12D3KooWESbrSPohuw87dQDbJCB8qeeNgJsFD3ahkea3cu41m7bG",
+  "/ip4/172.16.8.135/tcp/3333",
+]
 # BSC Testnet
 
 [[chain_configs]]

@@ -406,7 +406,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bridge-validators"
+name = "bridge-validator"
 version = "0.1.0"
 dependencies = [
  "anyhow",

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use ethers::{providers::StreamExt, types::U256};
+use libp2p::{Multiaddr, PeerId};
 use tokio::{
     select,
     sync::mpsc::{self, UnboundedSender},
@@ -25,6 +26,7 @@ pub struct ValidatorNodeConfig {
     pub chain_configs: Vec<ChainConfig>,
     pub private_key: SecretKey,
     pub is_leader: bool,
+    pub bootstrap_address: Option<(PeerId, Multiaddr)>,
 }
 
 #[derive(Debug)]
@@ -69,7 +71,7 @@ impl ValidatorNode {
 
             tokio::spawn(async move {
                 // Fill all historic events first
-                validator_chain_node.sync_historic_events().await.unwrap();
+                // validator_chain_node.sync_historic_events().await.unwrap();
                 // Then start listening to new ones
                 validator_chain_node.listen_events().await.unwrap();
             });
