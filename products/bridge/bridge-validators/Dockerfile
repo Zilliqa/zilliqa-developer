@@ -14,6 +14,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     cargo build && \
     mv /bridge/target/debug/bridge-validator /bridge/build/
 
-FROM gcr.io/distroless/cc-debian11@sha256:ef6b28ea043173c428d9a8b1e673896466d1846112e46267348d73073b18f578
+FROM debian:bullseye-slim
 
 COPY --from=builder /bridge/build/bridge-validator /bridge-validator
