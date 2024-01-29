@@ -267,8 +267,6 @@ nav:
           - Introduction: developers/getting-started/dev-started-introduction.md
           - Helloworld: developers/getting-started/dev-started-helloworld.md
           - Environment: developers/getting-started/dev-started-env.md
-      - Upgrade Notices:
-          - Upgrade to v. 8: developers/upgrade-notices/dev-upgrade-v8.md
       - User Key Management:
           - Introduction: developers/user-key-management/dev-keys-introduction.md
           - Zilpay: developers/user-key-management/dev-keys-zilpay.md
@@ -278,7 +276,8 @@ nav:
       - Developer Toolings:
           - Ceres: developers/developer-toolings/dev-tools-ceres.md
           - SDKs:
-              - Zilliqajs: developers/developer-toolings/sdks/dev-tools-zilliqajs.md
+              - Zilliqa-js: developers/developer-toolings/sdks/dev-tools-zilliqajs.md
+              - Zilliqa-rs: developers/developer-toolings/sdks/dev-tools-zilliqars.md
               - Gozilliqa: developers/developer-toolings/sdks/dev-tools-gozilliqa.md
               - Java: developers/developer-toolings/sdks/dev-tools-java.md
               - Sdks: developers/developer-toolings/sdks/dev-tools-sdks.md
@@ -286,6 +285,7 @@ nav:
           - Cli: developers/developer-toolings/dev-tools-cli.md
           - Explorer: developers/developer-toolings/dev-tools-explorer.md
           - Faucet: developers/developer-toolings/dev-tools-faucet.md
+          - Scilla Parser: developers/developer-toolings/dev-tools-scillaparser.md
       - Other Developer Information:
           - Dev Wrapped Zil: developers/other-developer-information/dev-wrapped-tokens.md
           - v9.3.0 Miners rehearsal join: developers/other-developer-information/dev-miners-rehearsal-v93-join.md
