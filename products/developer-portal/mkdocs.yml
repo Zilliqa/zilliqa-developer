@@ -229,6 +229,7 @@ nav:
           - Get Latest Tx Block: api/blockchain-related-methods/api-blockchain-get-latest-tx-block.md
           - Get Miner Info: api/blockchain-related-methods/api-blockchain-get-miner-info.md
           - Get Network Id: api/blockchain-related-methods/api-blockchain-get-network-id.md
+          - Get Node Type: api/blockchain-related-methods/api-blockchain-get-node-type.md
           - Num Ds Blocks: api/blockchain-related-methods/api-blockchain-get-num-ds-blocks.md
           - Get Num Tx: api/blockchain-related-methods/api-blockchain-get-num-tx.md
           - Get Num Tx Blocks: api/blockchain-related-methods/api-blockchain-get-num-tx-blocks.md
