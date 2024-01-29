@@ -230,6 +230,8 @@ nav:
           - Get Miner Info: api/blockchain-related-methods/api-blockchain-get-miner-info.md
           - Get Network Id: api/blockchain-related-methods/api-blockchain-get-network-id.md
           - Get Node Type: api/blockchain-related-methods/api-blockchain-get-node-type.md
+          - Get Num Peers: api/blockchain-related-methods/api-blockchain-get-num-peers.md
+          - Get Sharding Structure: api/blockchain-related-methods/api-blockchain-get-sharding-structure.md
           - Num Ds Blocks: api/blockchain-related-methods/api-blockchain-get-num-ds-blocks.md
           - Get Num Tx: api/blockchain-related-methods/api-blockchain-get-num-tx.md
           - Get Num Tx Blocks: api/blockchain-related-methods/api-blockchain-get-num-tx-blocks.md
