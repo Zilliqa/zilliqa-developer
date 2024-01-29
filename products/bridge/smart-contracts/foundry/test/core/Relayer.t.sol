@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import {Tester} from "foundry/test/Tester.sol";
 import {Relayer, IRelayerEvents, CallMetadata} from "contracts/core/Relayer.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Registry} from "contracts/core/Registry.sol";
 
 struct Args {
@@ -138,5 +139,49 @@ contract RelayerTests is Tester, IRelayerEvents {
             )
         );
         relayer.relay(targetChainId, target, call, gasLimit);
+    }
+
+    function test_removeRegisteredSender() external {
+        uint targetChainId = 1;
+        address target = address(0x1);
+        bytes memory call = abi.encodeWithSelector(ITest.foo.selector);
+        uint gasLimit = 100_000;
+
+        vm.prank(owner);
+        relayer.unregister(registered);
+        assertEq(relayer.registered(registered), false);
+
+        vm.prank(registered);
+        vm.expectRevert(
+            abi.encodeWithSelector(Registry.NotRegistered.selector, registered)
+        );
+        relayer.relay(targetChainId, target, call, gasLimit);
+    }
+
+    function test_RevertUnauthorizedRegister() external {
+        address notOwner = vm.createWallet("notOwner").addr;
+        address newRegistrant = vm.createWallet("newRegistrant").addr;
+
+        vm.prank(notOwner);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                notOwner
+            )
+        );
+        relayer.register(newRegistrant);
+    }
+
+    function test_RevertUnauthorizedUnregister() external {
+        address notOwner = vm.createWallet("notOwner").addr;
+
+        vm.prank(notOwner);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                notOwner
+            )
+        );
+        relayer.unregister(registered);
     }
 }
