@@ -36,8 +36,27 @@ contract BridgedToken is ERC20, ERC20Burnable, Ownable {
         _decimals = decimals_;
     }
 
+    function decimals() public view override returns (uint8) {
+        return _decimals;
+    }
+
+    function circulatingSupply() external view returns (uint256 amount) {
+        return totalSupply() - balanceOf(lockProxyAddress);
+    }
+
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
+    }
+
+    function burn(uint256 value) public override onlyOwner {
+        super.burn(value);
+    }
+
+    function burnFrom(
+        address account,
+        uint256 value
+    ) public override onlyOwner {
+        super.burnFrom(account, value);
     }
 
     function setLockProxyAddress(address lockProxyAddress_) external onlyOwner {
@@ -59,13 +78,5 @@ contract BridgedToken is ERC20, ERC20Burnable, Ownable {
     ) public override returns (bool) {
         mintIfLockProxy(from, to, value);
         return super.transferFrom(from, to, value);
-    }
-
-    function decimals() public view override returns (uint8) {
-        return _decimals;
-    }
-
-    function circulatingSupply() external view returns (uint256 amount) {
-        return totalSupply() - balanceOf(lockProxyAddress);
     }
 }

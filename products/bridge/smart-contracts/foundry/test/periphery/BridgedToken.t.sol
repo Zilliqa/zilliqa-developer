@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {Tester} from "foundry/test/Tester.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface ERC20Events {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -28,7 +29,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
         bridgedToken = new BridgedToken("Gold", "GLD", 18);
     }
 
-    function mint(address target) internal {
+    function preMint(address target) internal {
         vm.prank(bridge);
         bridgedToken.mint(target, mintedAmount);
     }
@@ -71,7 +72,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
 
     function test_transfer_asZilBridge_transferWithLockedTokens() external {
         address target = vm.createWallet("target").addr;
-        mint(zilBridge);
+        preMint(zilBridge);
         migrateToZilBridge(bridge);
         assertEq(bridgedToken.circulatingSupply(), 0);
         assertEq(bridgedToken.totalSupply(), mintedAmount);
@@ -117,7 +118,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
 
     function test_transferFrom_asZilBridge_transferWithLockedTokens() external {
         address target = vm.createWallet("target").addr;
-        mint(zilBridge);
+        preMint(zilBridge);
         migrateToZilBridge(bridge);
         assertEq(bridgedToken.circulatingSupply(), 0);
         assertEq(bridgedToken.totalSupply(), mintedAmount);
@@ -156,7 +157,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
         bridgedToken.transfer(target, amount);
     }
 
-    function test_transferFrom_revertUserWithoutTokens() external TODO {
+    function test_transferFrom_revertUserWithoutTokens() external {
         address target = vm.createWallet("target").addr;
         uint amount = 20 ether;
         migrateToZilBridge(bridge);
@@ -164,6 +165,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
         vm.prank(user);
         bridgedToken.approve(target, amount);
 
+        vm.prank(target);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IERC20Errors.ERC20InsufficientBalance.selector,
@@ -175,21 +177,174 @@ contract BridgedTokenTests is Tester, ERC20Events {
         bridgedToken.transferFrom(user, target, amount);
     }
 
-    function test_transfer_UserWithTokens() external TODO {
-        mint(user);
+    function test_transfer_UserWithTokens() external {
+        address target = vm.createWallet("target").addr;
+        preMint(user);
         migrateToZilBridge(bridge);
+        assertEq(bridgedToken.balanceOf(target), 0);
+        assertEq(bridgedToken.balanceOf(user), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+
+        // Transfer event
+        vm.expectEmit(address(bridgedToken));
+        emit ERC20Events.Transfer(user, target, mintedAmount);
+        vm.prank(user);
+        bridgedToken.transfer(target, mintedAmount);
+
+        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(bridgedToken.balanceOf(target), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
     }
 
-    function test_transferFrom_UserWithTokens() external TODO {
-        mint(user);
+    function test_transferFrom_UserWithTokens() external {
+        address target = vm.createWallet("target").addr;
+        preMint(user);
         migrateToZilBridge(bridge);
+        assertEq(bridgedToken.balanceOf(target), 0);
+        assertEq(bridgedToken.balanceOf(user), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+
+        // Approve
+        vm.prank(user);
+        bridgedToken.approve(target, mintedAmount);
+
+        // Transfer event
+        vm.expectEmit(address(bridgedToken));
+        emit ERC20Events.Transfer(user, target, mintedAmount);
+        vm.prank(target);
+        bridgedToken.transferFrom(user, target, mintedAmount);
+
+        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(bridgedToken.balanceOf(target), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
     }
 
-    function test_mint_revertsAfterMigration() external TODO {
+    function test_mint_revertsAfterMigration() external {
         migrateToZilBridge(bridge);
+
+        vm.prank(bridge);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                bridge
+            )
+        );
+        bridgedToken.mint(user, 10 ether);
     }
 
-    function test_burn_revertsAfterMigration() external TODO {
+    function test_burn_revertsAfterMigration() external {
         migrateToZilBridge(bridge);
+
+        vm.prank(bridge);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                bridge
+            )
+        );
+        bridgedToken.burn(10 ether);
+    }
+
+    function test_burnFrom_revertsAfterMigration() external {
+        migrateToZilBridge(bridge);
+
+        vm.prank(bridge);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                bridge
+            )
+        );
+        bridgedToken.burn(10 ether);
+    }
+
+    function test_mint_beforeMigration() external {
+        uint amount = 20 ether;
+        assertEq(bridgedToken.balanceOf(bridge), 0);
+        assertEq(bridgedToken.circulatingSupply(), 0);
+        assertEq(bridgedToken.totalSupply(), 0);
+
+        vm.prank(bridge);
+        bridgedToken.mint(user, amount);
+
+        assertEq(bridgedToken.balanceOf(bridge), 0);
+        assertEq(bridgedToken.balanceOf(user), amount);
+        assertEq(bridgedToken.circulatingSupply(), amount);
+        assertEq(bridgedToken.totalSupply(), amount);
+    }
+
+    function test_burn_beforeMigration() external {
+        preMint(bridge);
+        assertEq(bridgedToken.balanceOf(bridge), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+
+        vm.prank(bridge);
+        bridgedToken.burn(mintedAmount);
+
+        assertEq(bridgedToken.balanceOf(bridge), 0);
+        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(bridgedToken.circulatingSupply(), 0);
+        assertEq(bridgedToken.totalSupply(), 0);
+    }
+
+    function test_burnFrom_beforeMigration() external {
+        preMint(user);
+        assertEq(bridgedToken.balanceOf(bridge), 0);
+        assertEq(bridgedToken.balanceOf(user), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+
+        vm.prank(user);
+        bridgedToken.approve(bridge, mintedAmount);
+
+        vm.prank(bridge);
+        bridgedToken.burnFrom(user, mintedAmount);
+
+        assertEq(bridgedToken.balanceOf(bridge), 0);
+        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(bridgedToken.circulatingSupply(), 0);
+        assertEq(bridgedToken.totalSupply(), 0);
+    }
+
+    function test_transfer_RevertsIfNoFundsBeforeMigration() external {
+        address target = vm.createWallet("target").addr;
+        uint amount = 10 ether;
+        assertEq(bridgedToken.balanceOf(user), 0);
+
+        vm.prank(user);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientBalance.selector,
+                user,
+                0,
+                amount
+            )
+        );
+        bridgedToken.transfer(target, amount);
+    }
+
+    function test_transferFrom_RevertsIfNoFundsBeforeMigration() external {
+        address target = vm.createWallet("target").addr;
+        uint amount = 10 ether;
+        assertEq(bridgedToken.balanceOf(user), 0);
+
+        vm.prank(user);
+        bridgedToken.approve(target, amount);
+
+        vm.prank(target);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientBalance.selector,
+                user,
+                0,
+                amount
+            )
+        );
+        bridgedToken.transferFrom(user, target, amount);
     }
 }
