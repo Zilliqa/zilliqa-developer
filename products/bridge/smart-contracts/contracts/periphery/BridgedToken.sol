@@ -20,7 +20,11 @@ contract BridgedToken is IERC20, ERC20, ERC20Burnable, Ownable {
 
     error LockProxyTransferToSelf();
 
-    function mintIfLockProxy(address from, address to, uint amount) internal {
+    function mintIfLockProxy(
+        address from,
+        address to,
+        uint256 amount
+    ) internal {
         if (from == lockProxyAddress) {
             if (to == lockProxyAddress) {
                 revert LockProxyTransferToSelf();
