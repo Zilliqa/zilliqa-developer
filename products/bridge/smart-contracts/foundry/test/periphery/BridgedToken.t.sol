@@ -34,16 +34,34 @@ contract BridgedTokenTests is Tester, ERC20Events {
         bridgedToken.mint(target, mintedAmount);
     }
 
-    function migrateToZilBridge(address owner) internal {
-        vm.startPrank(owner);
+    function migrateToZilBridge() internal {
+        vm.startPrank(bridge);
         bridgedToken.setLockProxyAddress(zilBridge);
+        vm.stopPrank();
+
+        vm.startPrank(zilBridge);
+        uint originalAmount = bridgedToken.totalSupply();
+        bridgedToken.transfer(bridge, originalAmount);
+        assertEq(bridgedToken.balanceOf(bridge), originalAmount);
+        assertEq(bridgedToken.totalSupply(), originalAmount * 2);
+        vm.stopPrank();
+
+        vm.startPrank(bridge);
+        bridgedToken.burn(bridgedToken.balanceOf(bridge));
+
         bridgedToken.renounceOwnership();
         vm.stopPrank();
     }
 
     function test_migrateOwnershipToZilBridge() external {
-        migrateToZilBridge(bridge);
+        preMint(user);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
 
+        migrateToZilBridge();
+
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+        assertEq(bridgedToken.circulatingSupply(), mintedAmount);
         assertEq(bridgedToken.lockProxyAddress(), zilBridge);
         assertEq(bridgedToken.owner(), address(0));
     }
@@ -51,7 +69,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     function test_transfer_asZilBridge_mintWhenNoLockedTokens() external {
         address target = vm.createWallet("target").addr;
         uint bridgeAmount = 100 ether;
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
         assertEq(bridgedToken.balanceOf(zilBridge), 0);
         assertEq(bridgedToken.balanceOf(target), 0);
 
@@ -72,8 +90,11 @@ contract BridgedTokenTests is Tester, ERC20Events {
 
     function test_transfer_asZilBridge_transferWithLockedTokens() external {
         address target = vm.createWallet("target").addr;
-        preMint(zilBridge);
-        migrateToZilBridge(bridge);
+        preMint(user);
+        migrateToZilBridge();
+
+        vm.prank(user);
+        bridgedToken.transfer(zilBridge, mintedAmount);
         assertEq(bridgedToken.circulatingSupply(), 0);
         assertEq(bridgedToken.totalSupply(), mintedAmount);
         assertEq(bridgedToken.balanceOf(zilBridge), mintedAmount);
@@ -91,10 +112,39 @@ contract BridgedTokenTests is Tester, ERC20Events {
         assertEq(bridgedToken.totalSupply(), mintedAmount);
     }
 
+    function test_transfer_asZilBridge_transferWithPartiallyLockedTokens()
+        external
+    {
+        address target = vm.createWallet("target").addr;
+        preMint(user);
+        migrateToZilBridge();
+
+        vm.prank(user);
+        bridgedToken.transfer(zilBridge, mintedAmount);
+
+        assertEq(bridgedToken.circulatingSupply(), 0);
+        assertEq(bridgedToken.totalSupply(), mintedAmount);
+        assertEq(bridgedToken.balanceOf(zilBridge), mintedAmount);
+        assertEq(bridgedToken.balanceOf(target), 0);
+
+        uint transferAmount = mintedAmount * 3;
+
+        // Transfer event
+        vm.expectEmit(address(bridgedToken));
+        emit ERC20Events.Transfer(zilBridge, target, transferAmount);
+        vm.prank(zilBridge);
+        bridgedToken.transfer(target, transferAmount);
+
+        assertEq(bridgedToken.balanceOf(zilBridge), 0);
+        assertEq(bridgedToken.balanceOf(target), transferAmount);
+        assertEq(bridgedToken.circulatingSupply(), transferAmount);
+        assertEq(bridgedToken.totalSupply(), transferAmount);
+    }
+
     function test_transferFrom_asZilBridge_mintWhenNoLockedTokens() external {
         address target = vm.createWallet("target").addr;
         uint bridgeAmount = 100 ether;
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
         assertEq(bridgedToken.balanceOf(zilBridge), 0);
         assertEq(bridgedToken.balanceOf(target), 0);
 
@@ -118,8 +168,12 @@ contract BridgedTokenTests is Tester, ERC20Events {
 
     function test_transferFrom_asZilBridge_transferWithLockedTokens() external {
         address target = vm.createWallet("target").addr;
-        preMint(zilBridge);
-        migrateToZilBridge(bridge);
+        preMint(user);
+
+        migrateToZilBridge();
+
+        vm.prank(user);
+        bridgedToken.transfer(zilBridge, mintedAmount);
         assertEq(bridgedToken.circulatingSupply(), 0);
         assertEq(bridgedToken.totalSupply(), mintedAmount);
         assertEq(bridgedToken.balanceOf(zilBridge), mintedAmount);
@@ -143,7 +197,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     function test_transfer_revertUserWithoutTokens() external {
         address target = vm.createWallet("target").addr;
         uint amount = 20 ether;
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
 
         vm.prank(user);
         vm.expectRevert(
@@ -160,7 +214,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     function test_transferFrom_revertUserWithoutTokens() external {
         address target = vm.createWallet("target").addr;
         uint amount = 20 ether;
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
 
         vm.prank(user);
         bridgedToken.approve(target, amount);
@@ -180,7 +234,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     function test_transfer_UserWithTokens() external {
         address target = vm.createWallet("target").addr;
         preMint(user);
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
         assertEq(bridgedToken.balanceOf(target), 0);
         assertEq(bridgedToken.balanceOf(user), mintedAmount);
         assertEq(bridgedToken.circulatingSupply(), mintedAmount);
@@ -201,7 +255,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     function test_transferFrom_UserWithTokens() external {
         address target = vm.createWallet("target").addr;
         preMint(user);
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
         assertEq(bridgedToken.balanceOf(target), 0);
         assertEq(bridgedToken.balanceOf(user), mintedAmount);
         assertEq(bridgedToken.circulatingSupply(), mintedAmount);
@@ -224,7 +278,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     }
 
     function test_mint_revertsAfterMigration() external {
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
 
         vm.prank(bridge);
         vm.expectRevert(
@@ -237,7 +291,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     }
 
     function test_burn_revertsAfterMigration() external {
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
 
         vm.prank(bridge);
         vm.expectRevert(
@@ -250,7 +304,7 @@ contract BridgedTokenTests is Tester, ERC20Events {
     }
 
     function test_burnFrom_revertsAfterMigration() external {
-        migrateToZilBridge(bridge);
+        migrateToZilBridge();
 
         vm.prank(bridge);
         vm.expectRevert(
