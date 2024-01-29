@@ -41,12 +41,14 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
         sourceValidatorManager = new ValidatorManager(validator);
         vm.prank(validator);
         sourceValidatorManager.initialize(validators);
+        vm.prank(validator);
         sourceChainGateway = new ChainGateway(address(sourceValidatorManager));
 
         // Deploy Target Infra
         remoteValidatorManager = new ValidatorManager(validator);
         vm.prank(validator);
         remoteValidatorManager.initialize(validators);
+        vm.prank(validator);
         remoteChainGateway = new ChainGateway(address(remoteValidatorManager));
 
         // Deploy LockAndReleaseTokenManagerUpgradeable
@@ -76,6 +78,12 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
             )
         );
         remoteTokenManager = MintAndBurnTokenManagerUpgradeable(proxy);
+
+        // Register contracts to chaingateway
+        vm.prank(validator);
+        sourceChainGateway.register(address(sourceTokenManager));
+        vm.prank(validator);
+        remoteChainGateway.register(address(remoteTokenManager));
 
         // Deploy original ERC20
         originalToken = new TestToken(originalTokenSupply);

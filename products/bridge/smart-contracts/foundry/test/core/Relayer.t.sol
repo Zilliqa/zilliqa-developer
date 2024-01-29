@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import {Tester} from "foundry/test/Tester.sol";
 import {Relayer, IRelayerEvents, CallMetadata} from "contracts/core/Relayer.sol";
+import {Registry} from "contracts/core/Registry.sol";
 
 struct Args {
     uint num;
@@ -18,7 +19,15 @@ interface ITest {
 }
 
 contract RelayerTests is Tester, IRelayerEvents {
-    Relayer relayer = new Relayer();
+    Relayer relayer;
+    address owner = vm.addr(100);
+    address registered = vm.addr(101);
+
+    function setUp() external {
+        relayer = new Relayer(owner);
+        vm.prank(owner);
+        relayer.register(registered);
+    }
 
     function test_relay_happyPath() external {
         uint nonce = 0;
@@ -28,6 +37,7 @@ contract RelayerTests is Tester, IRelayerEvents {
         uint gasLimit = 100_000;
 
         vm.expectEmit(address(relayer));
+        vm.prank(registered);
         emit IRelayerEvents.Relayed(
             targetChainId,
             target,
@@ -49,6 +59,7 @@ contract RelayerTests is Tester, IRelayerEvents {
         uint gasLimit = 100_000;
 
         vm.expectEmit(address(relayer));
+        vm.prank(registered);
         emit IRelayerEvents.Relayed(
             targetChainId,
             target,
@@ -71,6 +82,7 @@ contract RelayerTests is Tester, IRelayerEvents {
             gasLimit,
             nonce
         );
+        vm.prank(registered);
         result = relayer.relay(targetChainId, target, call, gasLimit);
         assertEq(result, nonce);
         assertEq(relayer.nonce(), nonce + 1);
@@ -86,7 +98,7 @@ contract RelayerTests is Tester, IRelayerEvents {
 
         bytes memory expectedCall = abi.encodeWithSelector(
             callSelector,
-            CallMetadata(block.chainid, address(this)),
+            CallMetadata(block.chainid, registered),
             callData
         );
 
@@ -98,6 +110,7 @@ contract RelayerTests is Tester, IRelayerEvents {
             gasLimit,
             nonce
         );
+        vm.prank(registered);
         uint result = relayer.relayWithMetadata(
             targetChainId,
             target,
@@ -108,5 +121,22 @@ contract RelayerTests is Tester, IRelayerEvents {
 
         assertEq(result, nonce);
         assertEq(relayer.nonce(), nonce + 1);
+    }
+
+    function test_RevertNonRegisteredSender() external {
+        uint targetChainId = 1;
+        address target = address(0x1);
+        bytes memory call = abi.encodeWithSelector(ITest.foo.selector);
+        uint gasLimit = 100_000;
+        address notRegisteredSender = vm.addr(10);
+
+        vm.prank(notRegisteredSender);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Registry.NotRegistered.selector,
+                notRegisteredSender
+            )
+        );
+        relayer.relay(targetChainId, target, call, gasLimit);
     }
 }

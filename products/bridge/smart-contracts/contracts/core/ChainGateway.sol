@@ -7,5 +7,5 @@ import {Relayer} from "contracts/core/Relayer.sol";
 contract ChainGateway is Relayer, ChainDispatcherWithoutFees {
     constructor(
         address _validatorManager
-    ) ChainDispatcherWithoutFees(_validatorManager) {}
+    ) ChainDispatcherWithoutFees(_validatorManager) Relayer(msg.sender) {}
 }
