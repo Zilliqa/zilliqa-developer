@@ -120,7 +120,7 @@ impl P2pNode {
 
         self.bridge_inbound_message_sender = Some(bridge_node.get_bridge_inbound_message_sender());
 
-        tokio::task::spawn(async move { bridge_node.listen_p2p().await });
+        tokio::task::spawn(async move { bridge_node.listen_p2p().await.unwrap() });
 
         Ok(())
     }
@@ -195,6 +195,7 @@ impl P2pNode {
 
                     let topic = IdentTopic::new("bridge");
 
+                    if self.swarm.behaviour().gossipsub.all_peers().count() > 0 {
                     debug!(%from, message_type, "broadcasting");
                     match self.swarm.behaviour_mut().gossipsub.publish(topic.hash(), data)  {
                         Ok(_) => {},
@@ -202,6 +203,11 @@ impl P2pNode {
                             error!(%e, "failed to publish message");
                         }
                     }
+                    } else{
+                        info!("Not broadcasting");
+                    };
+
+
                     // Also broadcast the message to ourselves.
                     self.forward_external_message_to_bridge_node(from, message)?;
                 },

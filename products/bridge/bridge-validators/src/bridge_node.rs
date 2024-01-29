@@ -7,7 +7,7 @@ use anyhow::Result;
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Middleware, StreamExt},
-    types::{Address, BlockNumber, Log, Signature, U256},
+    types::{Address, BlockNumber, Signature, U256},
 };
 use tokio::{
     select,
@@ -17,7 +17,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use tracing::{info, warn};
 
 use crate::{
-    block::BlockPolling,
+    block::{BlockPolling, EventListener},
     client::{ChainClient, Client, ContractInitializer},
     event::{RelayEvent, RelayEventSignatures},
     message::{Dispatch, Dispatched, InboundBridgeMessage, OutboundBridgeMessage, Relay},
@@ -72,43 +72,13 @@ impl BridgeNode {
     where
         D: EthEvent,
     {
-        let events = event
-            .from_block(self.chain_client.chain_gateway_block_deployed)
-            .to_block(to_block);
-
         self.chain_client
-            .get_historic_blocks(
-                self.chain_client.chain_gateway_block_deployed,
-                to_block.as_number().unwrap().as_u64(),
+            .get_events(
+                event.filter,
+                self.chain_client.chain_gateway_block_deployed.into(),
+                to_block,
             )
-            .await?;
-
-        let logs: Vec<serde_json::Value> = self
-            .chain_client
-            .client
-            .provider()
-            .request("eth_getLogs", [&events.filter])
-            .await?;
-
-        let logs: Result<Vec<Log>> = logs
-            .into_iter()
-            .map(|log| {
-                // Parse log values
-                let mut log = log;
-                match log["removed"].as_str() {
-                    Some("true") => log["removed"] = serde_json::Value::Bool(true),
-                    Some("false") => log["removed"] = serde_json::Value::Bool(false),
-                    Some(&_) => warn!("invalid parsing"),
-                    None => (),
-                };
-                let log: Log = serde_json::from_value(log)?;
-                Ok(log)
-            })
-            .collect();
-
-        dbg!(logs);
-
-        return Ok(vec![]);
+            .await
     }
 
     pub async fn sync_historic_events(&mut self) -> Result<()> {
@@ -157,7 +127,7 @@ impl BridgeNode {
             self.handle_relay_event(relay)?;
         }
 
-        Ok(())
+        unimplemented!();
     }
 
     pub async fn listen_events(&mut self) -> Result<()> {
@@ -166,19 +136,28 @@ impl BridgeNode {
         let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
 
         // TODO: polling finalized events
-        let relayed_events = chain_gateway.event::<RelayedFilter>();
-        let dispatched_events = chain_gateway.event::<DispatchedFilter>();
+        let relayed_filter = chain_gateway.event::<RelayedFilter>().filter;
+        let dispatched_filter = chain_gateway.event::<DispatchedFilter>().filter;
 
-        let mut relayed_stream = relayed_events.stream().await?;
-        let mut dispatched_stream = dispatched_events.stream().await?;
+        let relayed_listener: EventListener<RelayedFilter> =
+            EventListener::new(self.chain_client.clone(), relayed_filter);
+        let dispatched_listener: EventListener<DispatchedFilter> =
+            EventListener::new(self.chain_client.clone(), dispatched_filter);
+
+        let mut relayed_stream = relayed_listener.listen();
+        let mut dispatched_stream = dispatched_listener.listen();
 
         loop {
             select! {
-                Some(Ok(event)) = relayed_stream.next() => {
-                    self.handle_relay_event(event)?;
+                Some(Ok(events)) = relayed_stream.next() => {
+                    for event in events {
+                        self.handle_relay_event(event)?;
+                    }
                 },
-                Some(Ok(event)) = dispatched_stream.next() => {
-                    self.handle_dispatch_event(event)?;
+                Some(Ok(events)) = dispatched_stream.next() => {
+                    for event in events {
+                        self.handle_dispatch_event(event)?;
+                    }
                 }
                 Some(message) = self.inbound_message_receiver.next() => {
                     self.handle_bridge_message(message).await?;

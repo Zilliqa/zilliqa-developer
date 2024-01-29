@@ -1,24 +1,33 @@
-use std::{collections::btree_map::Range, future::IntoFuture};
+use std::{marker::PhantomData, time::Duration};
 
+use async_stream::try_stream;
 use async_trait::async_trait;
 
 use anyhow::Result;
 use ethers::{
-    abi::{ethereum_types::BloomInput, Address},
     providers::Middleware,
-    types::{BlockNumber, Bloom, H256},
+    types::{BlockNumber, Filter, Log, U64},
 };
-use ethers_contract::EthEvent;
-use futures::{StreamExt, TryStreamExt};
+use ethers_contract::{parse_log, EthEvent};
+use futures::{Stream, StreamExt, TryStreamExt};
+use tokio::time::interval;
 use tracing::warn;
 
-use crate::{client::ChainClient, DispatchedFilter, RelayedFilter};
+use crate::client::ChainClient;
 
 #[async_trait]
 pub trait BlockPolling {
     async fn stream_finalized_blocks(&mut self) -> Result<()>;
-    async fn check_filter(&self) -> Result<()>;
     async fn get_historic_blocks(&self, from: u64, to: u64) -> Result<()>;
+
+    async fn get_events<D>(
+        &self,
+        event: Filter,
+        from_block: BlockNumber,
+        to_block: BlockNumber,
+    ) -> Result<Vec<D>>
+    where
+        D: EthEvent;
 }
 
 #[async_trait]
@@ -40,39 +49,116 @@ impl BlockPolling for ChainClient {
         })
         .try_collect::<Vec<_>>();
 
-        let res = concurrent_requests.await;
-        dbg!(res);
+        let _res = concurrent_requests.await;
 
         Ok(())
     }
 
-    async fn check_filter(&self) -> Result<()> {
-        // Try an example
-        let block = if let Some(block) = self.client.get_block(6542681).await? {
-            block
-        } else {
-            warn!("Latest block not found");
-            return Ok(());
-        };
+    async fn get_events<D>(
+        &self,
+        event: Filter,
+        from_block: BlockNumber,
+        to_block: BlockNumber,
+    ) -> Result<Vec<D>>
+    where
+        D: EthEvent,
+    {
+        let event = event.from_block(from_block).to_block(to_block);
 
-        dbg!(block.logs_bloom);
-        if let Some(logs_bloom) = block.logs_bloom {
-            let address: Address = "0x517bBe8f8ca40B71BB88979b132138894801200a".parse()?;
-            let addr = check_bloom_address(logs_bloom, address);
-            let event = check_bloom_event(logs_bloom, RelayedFilter::signature());
-            let event_dispatch = check_bloom_event(logs_bloom, DispatchedFilter::signature());
+        let logs: Vec<serde_json::Value> = self
+            .client
+            .provider()
+            .request("eth_getLogs", [event])
+            .await?;
 
-            println!("Filter contains info {} {} {}", addr, event, event_dispatch);
+        let logs = logs
+            .into_iter()
+            .map(|log| {
+                // Parse log values
+                let mut log = log;
+                match log["removed"].as_str() {
+                    Some("true") => log["removed"] = serde_json::Value::Bool(true),
+                    Some("false") => log["removed"] = serde_json::Value::Bool(false),
+                    Some(&_) => warn!("invalid parsing"),
+                    None => (),
+                };
+                let log: Log = serde_json::from_value(log)?;
+                Ok(log)
+            })
+            .collect::<Result<Vec<Log>>>()?;
+
+        let events: Vec<D> = logs
+            .into_iter()
+            .map(|log| Ok(parse_log::<D>(log)?))
+            .collect::<Result<Vec<D>>>()?;
+
+        return Ok(events);
+    }
+}
+
+pub struct EventListener<D: EthEvent> {
+    chain_client: ChainClient,
+    current_block: U64,
+    event: Filter,
+    phantom: PhantomData<D>,
+}
+
+impl<D: EthEvent> EventListener<D> {
+    pub fn new(chain_client: ChainClient, event: Filter) -> Self {
+        EventListener {
+            current_block: 0.into(),
+            chain_client,
+            event,
+            phantom: PhantomData,
+        }
+    }
+
+    async fn poll_next_events(&mut self) -> Result<Vec<D>>
+    where
+        D: EthEvent,
+    {
+        let new_block: U64 = self.chain_client.client.get_block_number().await?;
+
+        // Stop if same block
+        if new_block == self.current_block {
+            return Ok(vec![]);
         }
 
-        Ok(())
+        // `eth_getLogs`'s block_number is inclusive, so `current_block` is already retrieved
+        let events = self
+            .chain_client
+            .get_events(
+                self.event.clone(),
+                (self.current_block + 1).into(),
+                new_block.into(),
+            )
+            .await?;
+
+        println!(
+            "Getting from {} to {}, events gathered {:?}",
+            (self.current_block + 1),
+            new_block,
+            events.len(),
+        );
+
+        self.current_block = new_block;
+
+        Ok(events)
     }
-}
 
-fn check_bloom_address(bloom_filter: Bloom, address: Address) -> bool {
-    bloom_filter.contains_input(BloomInput::Raw(address.as_bytes()))
-}
+    pub fn listen(mut self) -> impl Stream<Item = Result<Vec<D>>> {
+        let stream = try_stream! {
+            // TODO: update block interval on config
+            let mut interval = interval(Duration::from_secs(3));
+            self.current_block = self.chain_client.client.get_block_number().await?;
 
-fn check_bloom_event(bloom_filter: Bloom, signature: H256) -> bool {
-    bloom_filter.contains_input(BloomInput::Raw(signature.as_bytes()))
+            loop {
+                interval.tick().await;
+
+                let new_events =  self.poll_next_events().await?;
+                yield new_events
+            }
+        };
+        Box::pin(stream)
+    }
 }

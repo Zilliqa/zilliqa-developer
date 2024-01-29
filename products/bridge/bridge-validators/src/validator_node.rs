@@ -1,7 +1,12 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Result;
-use ethers::{providers::StreamExt, types::U256};
+use ethers::{
+    middleware::SignerMiddleware,
+    providers::{Http, Middleware, Provider, StreamExt},
+    signers::LocalWallet,
+    types::{Address, U256},
+};
 use libp2p::{Multiaddr, PeerId};
 use tokio::{
     select,
@@ -160,6 +165,12 @@ impl ValidatorNode {
             event.target_chain_id, event.nonce
         );
 
+        let function_call = if [32769, 33101, 33385, 32990].contains(&client.chain_id.as_u32()) {
+            function_call.legacy()
+        } else {
+            function_call
+        };
+
         // Simulate call, if fails decode error and exit early
         if let Err(contract_err) = function_call.call().await {
             match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
@@ -180,7 +191,7 @@ impl ValidatorNode {
         }
 
         // Make the actual call
-        function_call.send().await?.await?;
+        let txn = function_call.send().await?;
         println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
 
         Ok(())
