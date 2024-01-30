@@ -6,4 +6,24 @@ module.exports = {
     extend: {},
   },
   plugins: [require("daisyui")],
+  daisyui: {
+    themes: [
+      {
+        mytheme: {
+          primary: "#4DBBBA",
+          "primary-content": "#ffffff",
+          secondary: "#1e1e1e",
+          accent: "#1e1e1e",
+          neutral: "#1e1e1e",
+          "neutral-content": "#ffffff",
+          content: "#ffffff",
+          "base-100": "#010101",
+          info: "#ffffff",
+          success: "#00ffff",
+          warning: "#ffffff",
+          error: "#ffffff",
+        },
+      },
+    ],
+  },
 };

@@ -1,10 +1,10 @@
 import { getDefaultWallets } from "@rainbow-me/rainbowkit";
-import { polygon, optimism, arbitrum, base, zora } from "viem/chains";
-import { configureChains, mainnet, createConfig } from "wagmi";
+import { bsc, zilliqa } from "viem/chains";
+import { configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
 export const { chains, publicClient } = configureChains(
-  [mainnet, polygon, optimism, arbitrum, base, zora],
+  [bsc, zilliqa],
   [publicProvider()]
 );
 
