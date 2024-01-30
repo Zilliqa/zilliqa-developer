@@ -106,7 +106,6 @@ Returns the details of a specified Transaction block. In verbose mode, additiona
       "GasLimit": "650000",
       "GasUsed": "25517",
       "MbInfoHash": "b2a862649507a9d86b21246b1538aa237c75f65cf7ef9a512e03ba39d0e62933",
-      "MinerPubKey": "0x02134CC19B594B1571916AABBA4475026D1B2021C19045CB2065E0D3B12706768E",
       "NumMicroBlocks": 4,
       "NumPages": 5,
       "NumTxns": 10022,
@@ -162,7 +161,6 @@ Returns the details of a specified Transaction block. In verbose mode, additiona
       "DifficultyDS": 156,
       "EpochNum": "899900",
       "GasPrice": "2000000000",
-      "LeaderPubKey": "0x026100807AA1CD6A09B8EFEC2E9D1469D7CF8A5E66714D6CADE3798585514CBD82",
       "MembersEjected": [
         "0x02572A2FCD59F8115297B399F76D7ACCFDA7E82AC53702063C3A61FB4D85E0D0C1",
         "0x029933F07FF634654C2ECB17A90EAD00CF9EE9F75395E206660CCEFB21874ECEA1",
