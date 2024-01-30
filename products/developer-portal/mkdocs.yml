@@ -250,6 +250,7 @@ nav:
           - Get Num Txns Txepoch: api/transaction-related-methods/api-transaction-get-num-txns-txepoch.md
           - Get Recent Txs: api/transaction-related-methods/api-transaction-get-recent-txs.md
           - Get Tx: api/transaction-related-methods/api-transaction-get-tx.md
+          - Get Soft Confirmed Tx: api/transaction-related-methods/api-transaction-get-soft-confirmed-tx.md
           - Get Transaction Status: api/transaction-related-methods/api-transaction-get-transaction-status.md
           - Get Txs For Txblock: api/transaction-related-methods/api-transaction-get-txs-for-txblock.md
           - Get Txs For Txblock Ex: api/transaction-related-methods/api-transaction-get-txs-for-txblock-ex.md
