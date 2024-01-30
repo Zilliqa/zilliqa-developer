@@ -3,7 +3,7 @@ use std::{marker::PhantomData, time::Duration};
 use async_stream::try_stream;
 use async_trait::async_trait;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use ethers::{
     providers::Middleware,
     types::{BlockNumber, Filter, Log, U64},
@@ -113,16 +113,29 @@ impl<D: EthEvent> EventListener<D> {
         }
     }
 
+    async fn get_block_number(&self) -> Result<U64> {
+        if self.chain_client.block_instant_finality {
+            self.chain_client.client.get_block_number().await
+        } else {
+            self.chain_client
+                .client
+                .get_block(BlockNumber::Finalized)
+                .await
+                .map(|block| block.unwrap().number.unwrap())
+        }
+        .map_err(|_| anyhow!("Unable to get block number"))
+    }
+
     async fn poll_next_events(&mut self) -> Result<Vec<D>>
     where
         D: EthEvent,
     {
-        let new_block: U64 = self.chain_client.client.get_block_number().await?;
-
-        // Stop if same block
-        if new_block == self.current_block {
-            return Ok(vec![]);
-        }
+        let new_block: U64 = match self.get_block_number().await {
+            Err(_) => return Ok(vec![]),
+            // Return early if smaller block
+            Ok(block) if block <= self.current_block => return Ok(vec![]),
+            Ok(block) => block,
+        };
 
         // `eth_getLogs`'s block_number is inclusive, so `current_block` is already retrieved
         let events = self
