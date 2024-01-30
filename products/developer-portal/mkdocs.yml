@@ -222,6 +222,7 @@ nav:
           - Ds Block Listing: api/blockchain-related-methods/api-blockchain-ds-block-listing.md
           - Get Blockchain Info: api/blockchain-related-methods/api-blockchain-get-blockchain-info.md
           - Get Current Ds Epoch: api/blockchain-related-methods/api-blockchain-get-current-ds-epoch.md
+          - Get Current Ds Comm: api/blockchain-related-methods/api-blockchain-get-current-ds-comm.md
           - Get Current Mini Epoch: api/blockchain-related-methods/api-blockchain-get-current-mini-epoch.md
           - Get Ds Block: api/blockchain-related-methods/api-blockchain-get-ds-block.md
           - Get Ds Block Rate: api/blockchain-related-methods/api-blockchain-get-ds-block-rate.md
