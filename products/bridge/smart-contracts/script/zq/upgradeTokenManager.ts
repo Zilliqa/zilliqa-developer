@@ -5,7 +5,7 @@ async function main() {
   const tokenManagerAddress = config.zq.tokenManager;
 
   const TokenManagerFactory = await ethers.getContractFactory(
-    "LockAndReleaseTokenManagerUpgradeable"
+    "LockAndReleaseTokenManagerUpgradeableV2"
   );
   const tokenManager = await upgrades.upgradeProxy(
     tokenManagerAddress,

@@ -33,7 +33,8 @@ contract Deployment is Script {
         validatorManager.initialize(validators);
 
         ChainGateway gateway = new ChainGateway{salt: "salt"}(
-            address(validatorManager)
+            address(validatorManager),
+            validators[0]
         );
 
         new Target{salt: "salt"}(address(gateway));

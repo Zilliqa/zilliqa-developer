@@ -42,14 +42,20 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
         vm.prank(validator);
         sourceValidatorManager.initialize(validators);
         vm.prank(validator);
-        sourceChainGateway = new ChainGateway(address(sourceValidatorManager));
+        sourceChainGateway = new ChainGateway(
+            address(sourceValidatorManager),
+            validator
+        );
 
         // Deploy Target Infra
         remoteValidatorManager = new ValidatorManager(validator);
         vm.prank(validator);
         remoteValidatorManager.initialize(validators);
         vm.prank(validator);
-        remoteChainGateway = new ChainGateway(address(remoteValidatorManager));
+        remoteChainGateway = new ChainGateway(
+            address(remoteValidatorManager),
+            validator
+        );
 
         // Deploy LockAndReleaseTokenManagerUpgradeable
         address implementation = address(

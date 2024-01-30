@@ -5,7 +5,7 @@ async function main() {
   const tokenManagerAddress = config.bsc.tokenManager;
 
   const TokenManagerFactory = await ethers.getContractFactory(
-    "MintAndBurnTokenManagerUpgradeable"
+    "MintAndBurnTokenManagerUpgradeableV2"
   );
   const tokenManager = await upgrades.upgradeProxy(
     tokenManagerAddress,

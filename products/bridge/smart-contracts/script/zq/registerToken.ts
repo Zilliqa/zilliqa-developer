@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import { config } from "../config";
+import { ITokenManagerStructs } from "../../typechain-types/contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol/ILockAndReleaseTokenManager";
 
 async function main() {
   const tokenManagerAddress = config.zq.tokenManager;
@@ -14,12 +15,14 @@ async function main() {
     tokenManagerAddress
   );
 
-  const tx = await tokenManager.registerToken(
-    localToken,
-    remoteToken,
-    remoteTokenManager,
-    remoteChainId
-  );
+  const remoteTokenStruct: ITokenManagerStructs.RemoteTokenStruct = {
+    token: remoteToken,
+    tokenManager: remoteTokenManager,
+    chainId: remoteChainId,
+  };
+
+  console.log("start register");
+  const tx = await tokenManager.registerToken(localToken, remoteTokenStruct);
   const receipt = await tx.wait();
   console.log(receipt);
 }

@@ -20,7 +20,7 @@ contract Deployment is Script {
         ValidatorManager validatorManager = new ValidatorManager(validators[0]);
         validatorManager.initialize(validators);
 
-        new ChainGateway(address(validatorManager));
+        new ChainGateway(address(validatorManager), validators[0]);
 
         vm.stopBroadcast();
     }
