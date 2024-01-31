@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
@@ -6,7 +7,8 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
   ],
-  ignorePatterns: ["dist", ".eslintrc.cjs"],
+  //  eslint-disable-next-line
+  ignorePatterns: ["dist"],
   parser: "@typescript-eslint/parser",
   plugins: ["react-refresh"],
   rules: {
