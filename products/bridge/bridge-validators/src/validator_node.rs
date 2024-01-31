@@ -1,7 +1,10 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use anyhow::{anyhow, Result};
-use ethers::{providers::StreamExt, types::U256};
+use ethers::{
+    providers::{MiddlewareError, StreamExt},
+    types::U256,
+};
 use futures::future::Join;
 use libp2p::{Multiaddr, PeerId};
 use tokio::{
@@ -185,28 +188,44 @@ impl ValidatorNode {
             function_call
         };
 
-        // Simulate call, if fails decode error and exit early
-        if let Err(contract_err) = function_call.call().await {
-            match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
-                Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
-                    info!(
-                        "Already Dispatched {}.{}",
-                        event.target_chain_id, event.nonce
-                    );
-                }
-                Some(err) => {
-                    warn!("ChainGatewayError: {:?}", err);
-                }
-                None => {
-                    warn!("Some unknown error, {:?}", contract_err);
+        for i in 1..6 {
+            info!("Dispatch Attempt {:?}", i);
+            // Simulate call, if fails decode error and exit early
+            if let Err(contract_err) = function_call.call().await {
+                match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
+                    Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
+                        info!(
+                            "Already Dispatched {}.{}",
+                            event.target_chain_id, event.nonce
+                        );
+                        return Ok(());
+                    }
+                    Some(err) => {
+                        warn!("ChainGatewayError: {:?}", err);
+                        return Ok(());
+                    }
+                    None => {
+                        warn!("Some unknown error, {:?}", contract_err);
+                        tokio::time::sleep(Duration::from_secs(1)).await;
+                        continue;
+                    }
                 }
             }
-            return Ok(());
-        }
 
-        // Make the actual call
-        let txn = function_call.send().await?.log_msg("Pending txn hash");
-        println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
+            // Make the actual call
+            match function_call.send().await {
+                Ok(tx) => {
+                    tx.log_msg("Pending txn hash");
+                    println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
+                    return Ok(());
+                }
+                Err(err) => {
+                    warn!("Failed to send: {:?}", err);
+                }
+            }
+
+            tokio::time::sleep(Duration::from_secs(1)).await;
+        }
 
         Ok(())
     }
