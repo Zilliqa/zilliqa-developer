@@ -111,6 +111,8 @@ extra:
       link: https://twitter.com/zilliqa
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/channel/UCvinnFbf0u71cajoxKcfZIQ
+    - icon: octicons/server-16
+      link: https://status.zilliqa.com
 
 plugins:
   - search
