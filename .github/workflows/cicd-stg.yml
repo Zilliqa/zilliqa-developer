@@ -109,7 +109,7 @@ jobs:
             tag_latest: false
           - application: zilliqa-bridge-web
             image_name: zilliqa-bridge-web
-            path: products/bridge/bridge/web
+            path: products/bridge/bridge-web
             tag_length: 8
             tag_latest: false
     env:
