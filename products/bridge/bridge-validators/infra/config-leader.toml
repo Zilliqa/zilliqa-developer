@@ -25,7 +25,7 @@ chain_gateway_address = "0xCD6D04BB823cBBEd853B43DFe421Be47fc49AbC5"
 # Zilliqa Testnet
 [[chain_configs]]
 chain_gateway_block_deployed = 6542681
-rpc_url = "https://dev-api.zilliqa.com"
+rpc_url = "http://xbridge-testnet-l2api.testnet-ase1.zq1.dev/"
 validator_manager_address = "0x16bF46CAa709C01053da0d454111E284Ea8291AD"
 chain_gateway_address = "0x9e7FF4479511B8C497860633f3E136Fa21C99f5A"
 block_instant_finality = true
