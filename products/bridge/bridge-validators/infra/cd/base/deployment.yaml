@@ -20,6 +20,11 @@ spec:
       containers:
         - image: zilliqa-bridge-validator
           name: validator-node0
+          env:
+            - name: RUSTLOG
+              value: "info"
+            - name: RUST_BACKTRACE
+              value: "1"
           envFrom:
             - secretRef:
                 name: zilliqa-bridge-validator-secret
