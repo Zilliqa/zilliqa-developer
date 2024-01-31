@@ -6,6 +6,7 @@ namespace: xbridge-fe-stg
 resources:
   - ../../base
   - certificates.yaml
+  - backend-config.yaml
   - frontend-config.yaml
 
 patches:
