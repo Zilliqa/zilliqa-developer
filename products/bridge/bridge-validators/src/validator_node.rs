@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use ethers::{providers::StreamExt, types::U256};
+use futures::future::Join;
 use libp2p::{Multiaddr, PeerId};
 use tokio::{
     select,
     sync::mpsc::{self, UnboundedSender},
+    task::JoinSet,
 };
 use tokio_stream::wrappers::UnboundedReceiverStream;
-use tracing::{info, warn};
+use tracing::{error, info, warn};
 
 use crate::{
     bridge_node::BridgeNode,
@@ -39,6 +41,7 @@ pub struct ValidatorNode {
     bridge_message_receiver: UnboundedReceiverStream<OutboundBridgeMessage>,
     chain_node_senders: HashMap<ChainID, UnboundedSender<InboundBridgeMessage>>,
     chain_clients: HashMap<ChainID, ChainClient>,
+    pub bridge_node_threads: JoinSet<Result<()>>,
 }
 
 impl ValidatorNode {
@@ -52,6 +55,8 @@ impl ValidatorNode {
 
         let (bridge_message_sender, bridge_message_receiver) = mpsc::unbounded_channel();
         let bridge_message_receiver = UnboundedReceiverStream::new(bridge_message_receiver);
+
+        let mut bridge_node_threads: JoinSet<Result<()>> = JoinSet::new();
 
         for chain_config in config.chain_configs {
             let chain_client = ChainClient::new(&chain_config, wallet.clone()).await?;
@@ -69,11 +74,11 @@ impl ValidatorNode {
 
             chain_clients.insert(validator_chain_node.chain_client.chain_id, chain_client);
 
-            tokio::spawn(async move {
+            bridge_node_threads.spawn(async move {
                 // Fill all historic events first
-                // validator_chain_node.sync_historic_events().await.unwrap();
+                // validator_chain_node.sync_historic_events().await
                 // Then start listening to new ones
-                validator_chain_node.listen_events().await.unwrap();
+                validator_chain_node.listen_events().await
             });
         }
 
@@ -89,6 +94,7 @@ impl ValidatorNode {
             bridge_message_receiver,
             chain_node_senders,
             chain_clients,
+            bridge_node_threads,
         })
     }
 
@@ -126,6 +132,19 @@ impl ValidatorNode {
                             // Forward message to broadcast
                             self.bridge_outbound_message_sender.send(ExternalMessage::BridgeEcho(relay))?;
                         },
+                    }
+                }
+                Some(res) = self.bridge_node_threads.join_next() => {
+                    match res {
+                        Ok(Ok(())) => unreachable!(),
+                        Ok(Err(e)) => {
+                            error!(%e);
+                            return Err(e.into())
+                        }
+                        Err(e) =>{
+                            error!(%e);
+                            return Err(e.into())
+                        }
                     }
                 }
             }

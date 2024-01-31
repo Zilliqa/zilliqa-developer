@@ -17,6 +17,7 @@ use libp2p::{
 use tokio::{
     select,
     sync::{mpsc, mpsc::UnboundedSender},
+    task::JoinHandle,
 };
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use tracing::{debug, error, info};
@@ -39,16 +40,17 @@ pub struct P2pNode {
     peer_id: PeerId,
     // swarm: Swarm<Behaviour>,
     /// Forward messages to the bridge validators. Only initialised once BridgeNode is created
-    bridge_inbound_message_sender: Option<UnboundedSender<ExternalMessage>>,
+    bridge_inbound_message_sender: UnboundedSender<ExternalMessage>,
     /// Bridge nodes get a copy of these senders to propagate messages across the network.
     bridge_outbound_message_sender: UnboundedSender<ExternalMessage>,
     /// The p2p node keeps a handle to these receivers, to obtain messages from bridge nodes and propagate
     /// them as necessary.
     bridge_outbound_message_receiver: UnboundedReceiverStream<ExternalMessage>,
+    validator_node_thread: JoinHandle<Result<()>>,
 }
 
 impl P2pNode {
-    pub fn new(secret_key: SecretKey) -> Result<Self> {
+    pub async fn new(secret_key: SecretKey, config: ValidatorNodeConfig) -> Result<Self> {
         let (bridge_outbound_message_sender, bridge_outbound_message_receiver) =
             mpsc::unbounded_channel();
         let bridge_outbound_message_receiver =
@@ -88,12 +90,28 @@ impl P2pNode {
         //     swarm::Config::with_tokio_executor(),
         // );
 
+        // let topic = IdentTopic::new("bridge"); // TODO: change to more specific bridge chains
+
+        // self.swarm.behaviour_mut().gossipsub.subscribe(&topic)?;
+
+        // Initialise bridge node
+        let mut validator_node =
+            ValidatorNode::new(config, bridge_outbound_message_sender.clone()).await?;
+
+        let bridge_inbound_message_sender = validator_node.get_bridge_inbound_message_sender();
+
+        let validator_node_thread = tokio::task::spawn(async move {
+            validator_node.listen_p2p().await
+            // Err(anyhow!("failing again"))
+        });
+
         Ok(Self {
             peer_id,
             // swarm,
             bridge_outbound_message_sender,
             bridge_outbound_message_receiver,
-            bridge_inbound_message_sender: None,
+            bridge_inbound_message_sender,
+            validator_node_thread,
         })
     }
 
@@ -102,30 +120,11 @@ impl P2pNode {
         _source: PeerId,
         message: ExternalMessage,
     ) -> Result<()> {
-        self.bridge_inbound_message_sender
-            .as_ref()
-            .expect("Bridge should be initialized")
-            .send(message)?;
+        self.bridge_inbound_message_sender.send(message)?;
         Ok(())
     }
 
-    async fn create_and_start_validator_node(&mut self, config: ValidatorNodeConfig) -> Result<()> {
-        // let topic = IdentTopic::new("bridge"); // TODO: change to more specific bridge chains
-
-        // self.swarm.behaviour_mut().gossipsub.subscribe(&topic)?;
-
-        // Initialise bridge node
-        let mut bridge_node =
-            ValidatorNode::new(config, self.bridge_outbound_message_sender.clone()).await?;
-
-        self.bridge_inbound_message_sender = Some(bridge_node.get_bridge_inbound_message_sender());
-
-        tokio::task::spawn(async move { bridge_node.listen_p2p().await.unwrap() });
-
-        Ok(())
-    }
-
-    pub async fn start(&mut self, config: ValidatorNodeConfig) -> Result<()> {
+    pub async fn start(&mut self) -> Result<()> {
         // let addr: Multiaddr = "/ip4/0.0.0.0/tcp/3334".parse().unwrap();
 
         // if let Some((peer, address)) = &config.bootstrap_address {
@@ -135,8 +134,6 @@ impl P2pNode {
         //         .add_address(peer, address.clone());
         //     self.swarm.behaviour_mut().kademlia.bootstrap()?;
         // }
-
-        self.create_and_start_validator_node(config).await?;
 
         // self.swarm.listen_on(addr)?;
 
@@ -211,6 +208,21 @@ impl P2pNode {
                     // Also broadcast the message to ourselves.
                     self.forward_external_message_to_bridge_node(from, message)?;
                 },
+                res = &mut self.validator_node_thread => {
+                    dbg!(&res);
+                    match res {
+                        Ok(Ok(())) => unreachable!(),
+                        Ok(Err(e)) => {
+                            error!(%e);
+                            return Err(e.into())
+                        }
+                        Err(e) =>{
+                            error!(%e);
+                            return Err(e.into())
+                        }
+                    }
+                }
+
             }
         }
     }

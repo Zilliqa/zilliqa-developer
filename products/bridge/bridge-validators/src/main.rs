@@ -78,9 +78,9 @@ async fn main() -> Result<()> {
         bootstrap_address: config.bootstrap_address,
     };
 
-    let mut node = P2pNode::new(args.secret_key)?;
+    let mut node = P2pNode::new(args.secret_key, config).await?;
 
-    node.start(config).await?;
+    node.start().await?;
 
     Ok(())
 }
