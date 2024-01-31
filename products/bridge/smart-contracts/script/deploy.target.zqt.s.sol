@@ -2,24 +2,20 @@
 pragma solidity ^0.8.20;
 
 import {Script} from "forge-std/Script.sol";
+import {Relayer} from "contracts/core/Relayer.sol";
+import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
 import {Target} from "foundry/test/Target.sol";
+import "forge-std/console.sol";
 
-contract Relay is Script {
+contract Deployment is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TESTNET");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
         address chainGateway = 0x9e7FF4479511B8C497860633f3E136Fa21C99f5A;
-        address target = 0x47eF3cc8B9D54db3A6d8D0175eb117D694575509;
-        uint targetChainId = 97;
 
         vm.startBroadcast(deployerPrivateKey);
 
-        ChainGateway(chainGateway).relay(
-            targetChainId,
-            target,
-            abi.encodeWithSelector(Target.increment.selector),
-            1_000_000
-        );
+        new Target(chainGateway);
 
         vm.stopBroadcast();
     }

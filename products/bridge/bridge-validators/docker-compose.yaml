@@ -4,11 +4,10 @@ services:
     environment:
       RUST_BACKTRACE: 1
       RUST_LOG: info
-    image: bridge-validator-node
+    container_name: validatornode0
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: validatornode0
     volumes:
       - "./infra/config-leader.toml:/config.toml"
     command:
@@ -20,7 +19,9 @@ services:
       RUST_BACKTRACE: 1
       RUST_LOG: info
     container_name: validatornode1
-    image: bridge-validator-node
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - "./infra/config.toml:/config.toml"
     command:
@@ -32,7 +33,9 @@ services:
       RUST_BACKTRACE: 1
       RUST_LOG: info
     container_name: validatornode2
-    image: bridge-validator-node
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - "./infra/config.toml:/config.toml"
     command:
@@ -44,7 +47,9 @@ services:
       RUST_BACKTRACE: 1
       RUST_LOG: info
     container_name: validatornode3
-    image: bridge-validator-node
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - "./infra/config.toml:/config.toml"
     command:

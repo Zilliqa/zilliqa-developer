@@ -17,6 +17,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use tracing::{info, warn};
 
 use crate::{
+    block::{BlockPolling, EventListener},
     client::{ChainClient, Client, ContractInitializer},
     event::{RelayEvent, RelayEventSignatures},
     message::{Dispatch, Dispatched, InboundBridgeMessage, OutboundBridgeMessage, Relay},
@@ -71,36 +72,43 @@ impl BridgeNode {
     where
         D: EthEvent,
     {
-        let events = event
-            .address(self.chain_client.chain_gateway_address.into())
-            .from_block(self.chain_client.chain_gateway_block_deployed)
-            .to_block(to_block)
-            .query()
-            .await?;
-
-        return Ok(events);
+        self.chain_client
+            .get_events(
+                event.filter,
+                self.chain_client.chain_gateway_block_deployed.into(),
+                to_block,
+            )
+            .await
     }
 
     pub async fn sync_historic_events(&mut self) -> Result<()> {
-        let finalized_block_number = self
+        let to_block = if self.chain_client.block_instant_finality {
+            BlockNumber::Latest
+        } else {
+            BlockNumber::Finalized
+        };
+        info!("Getting Historic Events {}", to_block);
+
+        let to_block_number = self
             .chain_client
             .client
-            .get_block(BlockNumber::Finalized)
+            .get_block(to_block)
             .await?
             .expect("Latest finalized block should be retrieved")
             .number
             .expect("Number should be here");
 
-        println!("Latest Finalised Block {}", finalized_block_number);
+        dbg!(to_block_number);
 
         let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
 
         let dispatch_events = self
             .get_historic_events(
                 chain_gateway.event::<DispatchedFilter>(),
-                BlockNumber::Number(finalized_block_number.into()),
+                BlockNumber::Number(to_block_number.into()),
             )
             .await?;
+        dbg!(dispatch_events.len());
 
         for dispatch in dispatch_events {
             self.handle_dispatch_event(dispatch)?;
@@ -109,15 +117,17 @@ impl BridgeNode {
         let relay_events = self
             .get_historic_events(
                 chain_gateway.event::<RelayedFilter>(),
-                BlockNumber::Number(finalized_block_number.into()),
+                BlockNumber::Number(to_block_number.into()),
             )
             .await?;
+
+        dbg!(relay_events.len());
 
         for relay in relay_events {
             self.handle_relay_event(relay)?;
         }
 
-        Ok(())
+        unimplemented!();
     }
 
     pub async fn listen_events(&mut self) -> Result<()> {
@@ -125,20 +135,29 @@ impl BridgeNode {
 
         let chain_gateway: ChainGateway<Client> = self.chain_client.get_contract();
 
-        // TODO: test if polling finalised block events work
-        let relayed_events = chain_gateway.event::<RelayedFilter>();
-        let dispatched_events = chain_gateway.event::<DispatchedFilter>();
+        // TODO: polling finalized events
+        let relayed_filter = chain_gateway.event::<RelayedFilter>().filter;
+        let dispatched_filter = chain_gateway.event::<DispatchedFilter>().filter;
 
-        let mut relayed_stream = relayed_events.stream().await?;
-        let mut dispatched_stream = dispatched_events.stream().await?;
+        let relayed_listener: EventListener<RelayedFilter> =
+            EventListener::new(self.chain_client.clone(), relayed_filter);
+        let dispatched_listener: EventListener<DispatchedFilter> =
+            EventListener::new(self.chain_client.clone(), dispatched_filter);
+
+        let mut relayed_stream = relayed_listener.listen();
+        let mut dispatched_stream = dispatched_listener.listen();
 
         loop {
             select! {
-                Some(Ok(event)) = relayed_stream.next() => {
-                    self.handle_relay_event(event)?;
+                Some(Ok(events)) = relayed_stream.next() => {
+                    for event in events {
+                        self.handle_relay_event(event)?;
+                    }
                 },
-                Some(Ok(event)) = dispatched_stream.next() => {
-                    self.handle_dispatch_event(event)?;
+                Some(Ok(events)) = dispatched_stream.next() => {
+                    for event in events {
+                        self.handle_dispatch_event(event)?;
+                    }
                 }
                 Some(message) = self.inbound_message_receiver.next() => {
                     self.handle_bridge_message(message).await?;
@@ -243,7 +262,6 @@ impl BridgeNode {
 
     /// Handle message, verify and add to storage.
     /// If has supermajority then submit the transaction.
-    /// TODO: Also check if it is current leader to dispatch
     async fn handle_relay(&mut self, echo: &Relay) -> Result<()> {
         let Relay { signature, event } = echo;
         let nonce = event.nonce;

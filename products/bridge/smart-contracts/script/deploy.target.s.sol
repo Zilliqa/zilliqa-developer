@@ -11,7 +11,7 @@ import "forge-std/console.sol";
 contract Deployment is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
-        address chainGateway = 0x517bBe8f8ca40B71BB88979b132138894801200a;
+        address chainGateway = 0xCD6D04BB823cBBEd853B43DFe421Be47fc49AbC5;
 
         vm.startBroadcast(deployerPrivateKey);
 

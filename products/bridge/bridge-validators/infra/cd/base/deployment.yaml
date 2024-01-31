@@ -25,7 +25,7 @@ spec:
                 name: zilliqa-bridge-validator-secret
           command: ["/bin/bash", "-c"]
           args:
-            - ./bridge-validator $PRIVATE_KEY --config-file /etc/bridge/config.toml
+            - ./bridge-validator $PRIVATE_KEY --config-file /etc/bridge/config.toml --is-leader
           volumeMounts:
             - name: config-volume
               mountPath: /etc/bridge/config.toml

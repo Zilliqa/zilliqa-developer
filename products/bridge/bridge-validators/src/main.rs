@@ -1,3 +1,4 @@
+mod block;
 mod bridge_node;
 mod client;
 mod crypto;
@@ -30,6 +31,8 @@ pub struct ChainConfig {
     pub validator_manager_address: Address,
     pub chain_gateway_address: Address,
     pub chain_gateway_block_deployed: u64,
+    pub block_instant_finality: Option<bool>,
+    pub legacy_gas_estimation: Option<bool>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

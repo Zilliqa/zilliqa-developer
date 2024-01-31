@@ -160,6 +160,12 @@ impl ValidatorNode {
             event.target_chain_id, event.nonce
         );
 
+        let function_call = if client.legacy_gas_estimation {
+            function_call.legacy()
+        } else {
+            function_call
+        };
+
         // Simulate call, if fails decode error and exit early
         if let Err(contract_err) = function_call.call().await {
             match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
@@ -180,7 +186,7 @@ impl ValidatorNode {
         }
 
         // Make the actual call
-        function_call.send().await?.await?;
+        let txn = function_call.send().await?.log_msg("Pending txn hash");
         println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
 
         Ok(())
