@@ -7,7 +7,7 @@ import {Target} from "foundry/test/Target.sol";
 
 contract Relay is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TESTNET");
         address chainGateway = 0xCD6D04BB823cBBEd853B43DFe421Be47fc49AbC5;
         address target = 0x6da9913794Fabe2482CB40cC9d7368f8332A998f;
         uint targetChainId = 33101;

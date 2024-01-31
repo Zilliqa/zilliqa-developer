@@ -11,7 +11,7 @@ use ethers::{
 use ethers_contract::{parse_log, EthEvent};
 use futures::{Stream, StreamExt, TryStreamExt};
 use tokio::time::interval;
-use tracing::warn;
+use tracing::{debug, info, warn};
 
 use crate::client::ChainClient;
 
@@ -147,12 +147,20 @@ impl<D: EthEvent> EventListener<D> {
             )
             .await?;
 
-        println!(
+        debug!(
             "Getting from {} to {}, events gathered {:?}",
             (self.current_block + 1),
             new_block,
             events.len(),
         );
+        if events.len() > 0 {
+            info!(
+                "Getting from {} to {}, events gathered {:?}",
+                (self.current_block + 1),
+                new_block,
+                events.len(),
+            )
+        }
 
         self.current_block = new_block;
 

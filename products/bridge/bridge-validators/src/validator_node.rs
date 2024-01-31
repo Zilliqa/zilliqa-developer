@@ -186,7 +186,7 @@ impl ValidatorNode {
         }
 
         // Make the actual call
-        let txn = function_call.send().await?;
+        let txn = function_call.send().await?.log_msg("Pending txn hash");
         println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
 
         Ok(())
