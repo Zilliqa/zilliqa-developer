@@ -22,6 +22,7 @@ pub struct ChainClient {
     pub wallet: LocalWallet,
     pub chain_gateway_block_deployed: u64,
     pub block_instant_finality: bool,
+    pub legacy_gas_estimation: bool,
 }
 
 impl ChainClient {
@@ -41,6 +42,7 @@ impl ChainClient {
             wallet,
             chain_gateway_block_deployed: config.chain_gateway_block_deployed,
             block_instant_finality: config.block_instant_finality.unwrap_or_default(),
+            legacy_gas_estimation: config.legacy_gas_estimation.unwrap_or_default(),
         })
     }
 }

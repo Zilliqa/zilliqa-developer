@@ -34,6 +34,7 @@ rpc_url = "https://dev-api.zilliqa.com"
 validator_manager_address = "0x16bF46CAa709C01053da0d454111E284Ea8291AD"
 chain_gateway_address = "0x9e7FF4479511B8C497860633f3E136Fa21C99f5A"
 block_instant_finality = true
+legacy_gas_estimation = true
 
 # Zilliqa Mainnet
 # [[chain_configs]]

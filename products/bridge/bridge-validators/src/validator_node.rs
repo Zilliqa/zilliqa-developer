@@ -1,12 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use anyhow::Result;
-use ethers::{
-    middleware::SignerMiddleware,
-    providers::{Http, Middleware, Provider, StreamExt},
-    signers::LocalWallet,
-    types::{Address, U256},
-};
+use ethers::{providers::StreamExt, types::U256};
 use libp2p::{Multiaddr, PeerId};
 use tokio::{
     select,
@@ -165,7 +160,7 @@ impl ValidatorNode {
             event.target_chain_id, event.nonce
         );
 
-        let function_call = if [32769, 33101, 33385, 32990].contains(&client.chain_id.as_u32()) {
+        let function_call = if client.legacy_gas_estimation {
             function_call.legacy()
         } else {
             function_call
