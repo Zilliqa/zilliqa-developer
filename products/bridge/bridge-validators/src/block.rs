@@ -114,7 +114,7 @@ impl<D: EthEvent> EventListener<D> {
     }
 
     async fn get_block_number(&self) -> Result<U64> {
-        if self.chain_client.block_instant_finality {
+        let block = if self.chain_client.block_instant_finality {
             self.chain_client.client.get_block_number().await
         } else {
             self.chain_client
@@ -122,8 +122,9 @@ impl<D: EthEvent> EventListener<D> {
                 .get_block(BlockNumber::Finalized)
                 .await
                 .map(|block| block.unwrap().number.unwrap())
-        }
-        .map_err(|_| anyhow!("Unable to get block number"))
+        }?;
+
+        Ok(block)
     }
 
     async fn poll_next_events(&mut self) -> Result<Vec<D>>
@@ -131,24 +132,35 @@ impl<D: EthEvent> EventListener<D> {
         D: EthEvent,
     {
         let new_block: U64 = match self.get_block_number().await {
-            Err(_) => return Ok(vec![]),
+            Err(e) => {
+                warn!(?e);
+                let vec = Ok(vec![]);
+                return vec;
+            }
             // Return early if smaller block
             Ok(block) if block <= self.current_block => return Ok(vec![]),
             Ok(block) => block,
         };
 
         // `eth_getLogs`'s block_number is inclusive, so `current_block` is already retrieved
-        let events = self
+        let events = match self
             .chain_client
             .get_events(
                 self.event.clone(),
                 (self.current_block + 1).into(),
                 new_block.into(),
             )
-            .await?;
-
+            .await
+        {
+            Err(err) => {
+                warn!(?err);
+                vec![]
+            }
+            Ok(events) => events,
+        };
         debug!(
-            "Getting from {} to {}, events gathered {:?}",
+            "{} Getting from {} to {}, events gathered {:?}",
+            self.chain_client.chain_id,
             (self.current_block + 1),
             new_block,
             events.len(),

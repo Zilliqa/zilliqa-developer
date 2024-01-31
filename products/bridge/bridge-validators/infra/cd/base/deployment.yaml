@@ -22,7 +22,7 @@ spec:
           name: validator-node0
           env:
             - name: RUST_LOG
-              value: "info"
+              value: "bridge_validator=debug"
             - name: RUST_BACKTRACE
               value: "1"
           envFrom:
