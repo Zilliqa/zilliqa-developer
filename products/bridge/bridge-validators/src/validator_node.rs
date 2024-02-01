@@ -202,6 +202,7 @@ impl ValidatorNode {
                 function_call.clone().gas(gas_estimate * 130 / 100) // Apply multiplier
             } else {
                 let function_call = function_call.clone();
+                // `eth_call` does not seem to work on ZQ so it had to be skipped
                 if let Err(contract_err) = function_call.call().await {
                     match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
                         Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
