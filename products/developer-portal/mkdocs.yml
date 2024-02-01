@@ -285,6 +285,7 @@ nav:
           - SDKs:
               - Zilliqa-js: developers/developer-toolings/sdks/dev-tools-zilliqajs.md
               - Zilliqa-rs: developers/developer-toolings/sdks/dev-tools-zilliqars.md
+              - Pyzil: developers/developer-toolings/sdks/dev-tools-pyzil.md
               - Gozilliqa: developers/developer-toolings/sdks/dev-tools-gozilliqa.md
               - Java: developers/developer-toolings/sdks/dev-tools-java.md
               - Sdks: developers/developer-toolings/sdks/dev-tools-sdks.md
