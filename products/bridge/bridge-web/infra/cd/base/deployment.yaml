@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xbridge-frontend
+  namespace: xbridge-fe
+  labels:
+    app.kubernetes.io/name: xbridge-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: xbridge-frontend
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: xbridge-frontend
+    spec:
+      containers:
+        - image: zilliqa-bridge-web
+          name: zilliqa-bridge-web
+          ports:
+            - containerPort: 4173

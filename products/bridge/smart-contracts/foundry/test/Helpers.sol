@@ -3,6 +3,32 @@ pragma solidity 0.8.20;
 
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {Tester, Vm} from "foundry/test/Tester.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+
+library UUPSUpgrader {
+    function deploy(
+        string memory location,
+        bytes memory initializerData
+    ) internal returns (address proxy) {
+        Options memory opts;
+        opts.unsafeSkipAllChecks = true;
+
+        proxy = Upgrades.deployUUPSProxy(location, initializerData, opts);
+    }
+
+    function upgrade(
+        address proxy,
+        string memory location,
+        bytes memory initializerData,
+        address deployer
+    ) internal {
+        Options memory opts;
+        opts.unsafeSkipAllChecks = true;
+
+        Upgrades.upgradeProxy(proxy, location, initializerData, opts, deployer);
+    }
+}
 
 contract TransferReentrancyTester {
     address target;
@@ -103,8 +129,9 @@ abstract contract ValidatorManagerFixture is Tester {
             validatorAddresses[i] = _validators[i].addr;
         }
         ValidatorManager _validatorManager = new ValidatorManager(
-            validatorAddresses
+            address(this)
         );
+        _validatorManager.initialize(validatorAddresses);
 
         return (_validators, _validatorManager);
     }
@@ -117,5 +144,11 @@ abstract contract ValidatorManagerFixture is Tester {
         ) = generateValidatorManager(VALIDATOR_COUNT);
         validators = _validators;
         validatorManager = _validatorManager;
+    }
+}
+
+contract TestToken is ERC20 {
+    constructor(uint256 initialSupply) ERC20("Test", "T") {
+        _mint(msg.sender, initialSupply);
     }
 }

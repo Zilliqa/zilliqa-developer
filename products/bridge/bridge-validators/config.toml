@@ -1,0 +1,45 @@
+# bootstrap_address = [
+#   "12D3KooWESbrSPohuw87dQDbJCB8qeeNgJsFD3ahkea3cu41m7bG",
+#   "/ip4/172.16.8.135/tcp/3333",
+# ]
+
+# BSC Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 36696045
+rpc_url = "https://bsc-prebsc-dataseed.bnbchain.org"
+validator_manager_address = "0x3bBa7E3B4b2058d3F3D017FBCC552939d62Eebb5"
+chain_gateway_address = "0xCD6D04BB823cBBEd853B43DFe421Be47fc49AbC5"
+
+# BSC Mainnet
+# [[chain_configs]]
+# chain_gateway_block_deployed = 0
+# rpc_url = "https://bsc-dataseed1.binance.org"
+# validator_manager_address = "0x63B6ebD476C84bFDd5DcaCB3f974794FC6C2e721"
+# chain_gateway_address = "0x15A3D695EafF8d302eaF0a2e6b7b54F6A440C570"
+
+# [[chain_configs]]
+# rpc_url = "http://localhost:8545"
+# validator_manager_address = "0x4a50E1Be218279ca980EAb216d95E0A48B5aE872"
+# chain_gateway_address = "0x4212b368876a54F99c741C8B5b64be2e52a6956b"
+
+# [[chain_configs]]
+# rpc_url = "http://localhost:8546"
+# validator_manager_address = "0x4a50E1Be218279ca980EAb216d95E0A48B5aE8https://bsc.blockpi.network/v1/rpc/public72"
+# chain_gateway_address = "0x4212b368876a54F99c741C8B5b64be2e52a6956b"
+
+# Zilliqa Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 6542681
+rpc_url = "https://dev-api.zilliqa.com"
+validator_manager_address = "0x16bF46CAa709C01053da0d454111E284Ea8291AD"
+chain_gateway_address = "0x9e7FF4479511B8C497860633f3E136Fa21C99f5A"
+block_instant_finality = true
+legacy_gas_estimation = true
+
+# Zilliqa Mainnet
+# [[chain_configs]]
+# chain_gateway_block_deployed = 0
+# rpc_url = "https://api.zilliqa.com"
+# validator_manager_address = "0x8B64A6e53fC3A642E72E9Ac6709AeBc12aAc20f4"
+# chain_gateway_address = "0x1690B1e78b98332EC5601A510640f451daf1323F"
+# block_instant_finality = true

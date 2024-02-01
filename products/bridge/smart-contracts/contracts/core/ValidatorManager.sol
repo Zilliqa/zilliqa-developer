@@ -8,24 +8,33 @@ import {SignatureValidator} from "contracts/core/SignatureValidator.sol";
 contract ValidatorManager is Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SignatureValidator for EnumerableSet.AddressSet;
+    bool initialized = false;
 
     EnumerableSet.AddressSet private _validators;
 
-    constructor(address[] memory validators) Ownable(msg.sender) {
+    constructor(address _owner) Ownable(_owner) {}
+
+    modifier initializer() {
+        require(!initialized, "ValidatorManager: already initialized");
+        initialized = true;
+        _;
+    }
+
+    function initialize(
+        address[] calldata validators
+    ) external onlyOwner initializer {
         uint validatorsLength = validators.length;
         for (uint i = 0; i < validatorsLength; ++i) {
             addValidator(validators[i]);
         }
     }
 
-    // TODO: add restriction
-    // Ownership should then be trasnferred to the relayer
+    // Ownership should then be transferred to the relayer
     function addValidator(address user) public onlyOwner returns (bool) {
         return _validators.add(user);
     }
 
-    // TODO: add restriction
-    // Ownership should then be trasnferred to the relayer
+    // Ownership should then be transferred to the relayer
     function removeValidator(address user) external onlyOwner returns (bool) {
         return _validators.remove(user);
     }

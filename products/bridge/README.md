@@ -234,9 +234,9 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [x] Add cross-shard support for contracts
   - [x] Global nonces
   - [x] Remove Collector
-  - [ ] Validator rewards for txns
+  - [ ] Validator rewards
   - [ ] Update periphery contracts
-    - [ ] Split bridged incoming and outgoing interfaces
+    - [x] Split bridged incoming and outgoing interfaces
     - [ ] Support response instead of fire&forget
   - [x] Update foundry tests
   - [ ] Update hardhat tests
@@ -249,8 +249,8 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [ ] Track last event block number for light client event censorship resistance
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
-  - [ ] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
-  - [ ] Read & Write to chains
+  - [x] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
+  - [x] Read & Write to chains
   - [ ] Validator slashing
   - [ ] Integrate into ZQ2 consensus network to share signatures
   - [ ] Periodic gas refund for validators

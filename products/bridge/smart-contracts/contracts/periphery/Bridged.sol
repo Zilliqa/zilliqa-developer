@@ -50,9 +50,9 @@ abstract contract Bridged is Initializable {
         (success, response) = _dispatched(target, call);
     }
 
-    function depositFee() external payable virtual {
-        relayer.depositFee{value: msg.value}();
-    }
+    // function depositFee() external payable virtual {
+    //     relayer.depositFee{value: msg.value}();
+    // }
 }
 
 abstract contract BridgedTwin is Initializable, Bridged {
