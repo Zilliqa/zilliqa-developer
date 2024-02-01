@@ -1,11 +1,7 @@
 use std::{collections::HashMap, time::Duration};
 
-use anyhow::{anyhow, Result};
-use ethers::{
-    providers::{MiddlewareError, StreamExt},
-    types::U256,
-};
-use futures::future::Join;
+use anyhow::Result;
+use ethers::{providers::StreamExt, types::U256};
 use libp2p::{Multiaddr, PeerId};
 use tokio::{
     select,
@@ -191,29 +187,46 @@ impl ValidatorNode {
         for i in 1..6 {
             info!("Dispatch Attempt {:?}", i);
             // Simulate call, if fails decode error and exit early
-            if let Err(contract_err) = function_call.call().await {
-                match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
-                    Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
-                        info!(
-                            "Already Dispatched {}.{}",
-                            event.target_chain_id, event.nonce
-                        );
+
+            // Get gas estimate
+            // TODO: refactor configs specifically for zilliqa
+            let _function_call = if client.legacy_gas_estimation {
+                let gas_estimate = match function_call.estimate_gas().await {
+                    Ok(estimate) => estimate,
+                    Err(err) => {
+                        warn!("Failed to estimate gas, {:?}", err);
                         return Ok(());
                     }
-                    Some(err) => {
-                        warn!("ChainGatewayError: {:?}", err);
-                        return Ok(());
-                    }
-                    None => {
-                        warn!("Some unknown error, {:?}", contract_err);
-                        tokio::time::sleep(Duration::from_secs(1)).await;
-                        continue;
+                };
+                info!("Gas estimate {:?}", gas_estimate);
+                function_call.clone().gas(gas_estimate * 130 / 100) // Apply multiplier
+            } else {
+                let function_call = function_call.clone();
+                if let Err(contract_err) = function_call.call().await {
+                    match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
+                        Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
+                            info!(
+                                "Already Dispatched {}.{}",
+                                event.target_chain_id, event.nonce
+                            );
+                            return Ok(());
+                        }
+                        Some(err) => {
+                            warn!("ChainGatewayError: {:?}", err);
+                            return Ok(());
+                        }
+                        None => {
+                            warn!("Some unknown error, {:?}", contract_err);
+                            tokio::time::sleep(Duration::from_secs(1)).await;
+                            continue;
+                        }
                     }
                 }
-            }
+                function_call
+            };
 
             // Make the actual call
-            match function_call.send().await {
+            match _function_call.send().await {
                 Ok(tx) => {
                     tx.log_msg("Pending txn hash");
                     println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
