@@ -81,7 +81,7 @@ print("{}: {}".format(account, balance))
 
 # load account from private key
 # private key is required to send ZILs
-account = Account(private_key="05C3CF3387F31202CD0798B7AA882327A1BD365331F90954A58C18F61BD08FFC")
+account = Account(private_key="...")
 balance2 = account.get_balance()
 print("Account balance: {}".format(balance2))
 
