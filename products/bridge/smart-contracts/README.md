@@ -59,3 +59,21 @@ Deterministic deployer not available, simple CREATE was used
 - `MintAndBurnTokenManager`: `0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23`
 
 `ChainGateway` and `ValidatorManager` were deployed using deterministic deployer [0x4e59b44847b379578588920ca78fbf26c0b4956c](https://github.com/Arachnid/deterministic-deployment-proxy). The salt used was `zilliqa`
+
+### Zilliqa Testnet
+
+- `ChainId`: 33101
+- `ChainGateway`: `0x10917A34FE60eE8364a401a6b1d3adaf80D84eb6`
+- `ValidatorManager`: `0x28E0D96C5B0Fd26654bd5b29ccDf77BE60D8bc1F`
+- `LockAndReleaseTokenManager`: `0x1509988c41f02014aA59d455c6a0D67b5b50f129`
+- `TestTokenZRC2Proxy`: `0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3`
+
+Deterministic deployer not available, simple CREATE was used
+
+### BSC Testnet
+
+- `ChainId`: 97
+- `ChainGateway`: `0x72B9B59e48779A8b64554A3e2bC8b5297A04c68a`
+- `ValidatorManager`: `0x43Eca260173De3cF0A2a68a5b3477C420f816F47`
+- `MintAndBurnTokenManager`: `0xA6D73210AF20a59832F264fbD991D2abf28401d0`
+- `BridgedTestToken`: `0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B`
