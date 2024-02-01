@@ -38,6 +38,8 @@ yours is not listed here, please
 the Zilliqa core team but the zilliqa community members also actively maintain
 multiple SDKs.
 
+The core team also maintains a fork of [ethers.js](https://github.com/Zilliqa/ethers.js) to keep it working with zilliqa EVM.
+
 ## SDKs Maintained By the Community
 
 ### JavaScript/TypeScript
