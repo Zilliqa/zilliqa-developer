@@ -1,18 +1,20 @@
-import { getDefaultWallets } from "@rainbow-me/rainbowkit";
-import { bsc, zilliqa } from "viem/chains";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
+import { bscTestnet, zilliqaTestnet } from "viem/chains";
 import { configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
 export const { chains, publicClient } = configureChains(
-  [bsc, zilliqa],
+  [bscTestnet, zilliqaTestnet],
   [publicProvider()]
 );
 
-const { connectors } = getDefaultWallets({
-  appName: "Bridge Frontend",
-  projectId: "Project ID",
-  chains,
-});
+const connectors = connectorsForWallets([
+  {
+    groupName: "Recommended",
+    wallets: [metaMaskWallet({ chains, projectId: "" })],
+  },
+]);
 
 export const wagmiConfig = createConfig({
   autoConnect: true,

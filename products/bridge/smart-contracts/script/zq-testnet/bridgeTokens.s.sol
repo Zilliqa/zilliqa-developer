@@ -25,14 +25,14 @@ contract Transfer is Script {
                 tokenManagerAddress
             );
 
-        vm.startBroadcast(deployerPrivateKey);
-
         console.log(
             "Owner Balance: %d, TokenManagerBalance %d, %s",
             token.balanceOf(owner),
             token.balanceOf(tokenManagerAddress),
             token.name()
         );
+
+        vm.startBroadcast(deployerPrivateKey);
 
         token.approve(tokenManagerAddress, amount);
         tokenManager.transfer(
@@ -42,12 +42,12 @@ contract Transfer is Script {
             amount
         );
 
+        vm.stopBroadcast();
+
         console.log(
             "New Owner Balance: %d, TokenManagerBalance %d",
             token.balanceOf(owner),
             token.balanceOf(tokenManagerAddress)
         );
-
-        vm.stopBroadcast();
     }
 }
