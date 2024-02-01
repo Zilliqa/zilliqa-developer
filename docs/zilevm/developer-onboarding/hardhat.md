@@ -10,7 +10,7 @@ description: Hardhat allows developers to easily compile, test, and deploy their
 
 ## Hardhat
 
-[Hardhat](https://hardhat.org/) is a development environment for the Solidity programming language. One of the primary use cases for Hardhat is to make it easier for developers to compile and deploy their Solidity smart contracts. Another common use case for Hardhat is to make it easier to write and run automated tests for Solidity smart contracts. This can help to ensure that the contracts are working as intended and can help to catch any bugs or issues before they are deployed to the main network. Check the [documentation](https://hardhat.org/hardhat-runner/docs/getting-started#quick-start) for more information.
+[Hardhat](https://hardhat.org/) is a development environment for the Solidity programming language. One of the primary use cases for Hardhat is to make it easier for developers to compile and deploy their Solidity smart contracts. Another common use case for Hardhat is to make it easier to write and run automated tests for Solidity smart contracts. This can help to ensure that the contracts are working as intended and can help to catch any bugs or issues before they are deployed to the main network. Check the [documentation](https://hardhat.org/hardhat-runner/docs/getting-started#quick-start) for more information. If you plan to use ethers.js with Hardhat, it's recommended to use [our fork](https://github.com/Zilliqa/ethers.js) to avoid errors.
 
 ### Hardhat with Truffle
 
