@@ -92,13 +92,13 @@ function App() {
   });
 
   const hasEnoughAllowance =
-    decimals && amount
-      ? allowance ?? 0n >= parseUnits(amount.toString(), decimals)
+    !!decimals && !!amount
+      ? (allowance ?? 0n) >= parseUnits(amount.toString(), decimals)
       : true;
   const hasEnoughBalance =
     decimals && balance
       ? parseUnits(amount.toString(), decimals) <= balance
-      : true;
+      : false;
   const validBech32Address = recipient && validation.isBech32(recipient);
   const validEthAddress = recipient && validation.isAddress(recipient);
   const hasValidAddress = recipient
