@@ -401,7 +401,14 @@ function App() {
                     }
                   }}
                 >
-                  Approve
+                  {isLoadingApprove ? (
+                    <>
+                      <span className="loading loading-spinner"></span>
+                      loading
+                    </>
+                  ) : (
+                    "Approve"
+                  )}
                 </button>
               ) : (
                 <button
