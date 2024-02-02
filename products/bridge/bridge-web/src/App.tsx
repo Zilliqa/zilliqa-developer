@@ -94,14 +94,14 @@ function App() {
   const hasEnoughAllowance =
     decimals && allowance
       ? allowance > parseUnits(amount.toString(), decimals)
-      : false;
+      : true;
   const hasEnoughBalance =
     decimals && balance
       ? parseUnits(amount.toString(), decimals) < balance
       : true;
   const hasValidAddress = recipient
     ? validation.isBech32(recipient) || validation.isAddress(recipient)
-    : false;
+    : true;
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
