@@ -384,7 +384,7 @@ function App() {
                   className="btn w-5/6 mx-10 btn-primary text-primary-content"
                   disabled={!canBridge}
                   onClick={async () => {
-                    let tx;
+                    let tx: { hash: string };
                     if (fromChainConfig.isZilliqa && bridgeFromZilliqa) {
                       tx = await bridgeFromZilliqa();
                       console.log(tx.hash);
