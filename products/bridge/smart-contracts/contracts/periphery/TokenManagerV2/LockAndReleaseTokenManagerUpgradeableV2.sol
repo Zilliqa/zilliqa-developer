@@ -2,7 +2,16 @@
 pragma solidity ^0.8.20;
 
 import {TokenManagerUpgradeableV2, ITokenManager} from "contracts/periphery/TokenManagerV2/TokenManagerUpgradeableV2.sol";
-import {ILockAndReleaseTokenManager, IERC20} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
+import {IERC20} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
+
+interface ILockAndReleaseTokenManager {
+    event Locked(address indexed token, address indexed from, uint amount);
+    event Released(
+        address indexed token,
+        address indexed recipient,
+        uint amount
+    );
+}
 
 contract LockAndReleaseTokenManagerUpgradeableV2 is
     ILockAndReleaseTokenManager,

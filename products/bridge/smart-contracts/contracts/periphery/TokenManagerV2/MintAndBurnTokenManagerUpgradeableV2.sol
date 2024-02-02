@@ -3,7 +3,17 @@ pragma solidity ^0.8.20;
 
 import {TokenManagerUpgradeableV2, ITokenManager} from "contracts/periphery/TokenManagerV2/TokenManagerUpgradeableV2.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
-import {IMintAndBurnTokenManager} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
+
+interface IMintAndBurnTokenManager {
+    event Minted(address indexed token, address indexed recipient, uint amount);
+    event Burned(address indexed token, address indexed from, uint amount);
+    event BridgedTokenDeployed(
+        address token,
+        address remoteToken,
+        address remoteTokenManager,
+        uint remoteChainId
+    );
+}
 
 contract MintAndBurnTokenManagerUpgradeableV2 is
     IMintAndBurnTokenManager,
