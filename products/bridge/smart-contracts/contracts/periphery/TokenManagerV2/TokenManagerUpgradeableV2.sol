@@ -136,6 +136,10 @@ abstract contract TokenManagerUpgradeableV2 is
         _setFees(newFees);
     }
 
+    function withdrawFees(address payable to) external override onlyOwner {
+        _withdrawFees(to);
+    }
+
     // TO OVERRIDE – Incoming
     function _handleTransfer(
         address token,

@@ -47,4 +47,10 @@ abstract contract TokenManagerFees {
     }
 
     function setFees(uint newFees) external virtual;
+
+    function _withdrawFees(address payable to) internal {
+        to.transfer(address(this).balance);
+    }
+
+    function withdrawFees(address payable to) external virtual;
 }
