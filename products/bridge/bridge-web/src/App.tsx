@@ -160,91 +160,94 @@ function App() {
         <div className="card min-h-96 bg-neutral shadow-xl">
           <div className="card-body">
             <div className="card-title">
-              <p className="text-4xl">Zilliqa Bridge</p>
+              <p className="text-4xl text-center tracking-wide">BRIDGE</p>
             </div>
 
-            <label>Network</label>
-            <div className="flex justify-between items-center gap-3">
-              <div className="dropdown">
-                <div tabIndex={0} role="button" className="btn m-1 w-52">
-                  {fromChainConfig.name}
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    className="ml-auto"
-                    color="white"
-                  />
-                </div>
-
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-                >
-                  {Object.values(chainConfigs)
-                    .filter((config) => config.chain !== fromChainConfig.chain)
-                    .map(({ chain, name }) => (
-                      <li
-                        key={`from${chain}`}
-                        onClick={() => {
-                          if (chain === toChain) {
-                            setToChain(fromChain);
-                          }
-                          setFromChain(chain);
-                          blur();
-                        }}
-                      >
-                        <a>{name}</a>
-                      </li>
-                    ))}
-                </ul>
+            <div className="form-control">
+              <div className="label">
+                <span>Networks</span>
               </div>
-              <FontAwesomeIcon icon={faArrowRight} color="white" />
-              <div className="dropdown">
-                <div tabIndex={0} role="button" className="btn m-1 w-52">
-                  {toChainConfig.name}
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    color="white"
-                    className="ml-auto"
-                  />
+              <div className="join">
+                <div className="dropdown">
+                  <div tabIndex={0} role="button" className="btn w-52">
+                    {fromChainConfig.name}
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      className="ml-auto"
+                      color="white"
+                    />
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                  >
+                    {Object.values(chainConfigs)
+                      .filter(
+                        (config) => config.chain !== fromChainConfig.chain
+                      )
+                      .map(({ chain, name }) => (
+                        <li
+                          key={`from${chain}`}
+                          onClick={() => {
+                            if (chain === toChain) {
+                              setToChain(fromChain);
+                            }
+                            setFromChain(chain);
+                            blur();
+                          }}
+                        >
+                          <a>{name}</a>
+                        </li>
+                      ))}
+                  </ul>
                 </div>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-                >
-                  {Object.values(chainConfigs)
-                    .filter(({ chain }) => chain !== toChainConfig.chain)
-                    .map(({ chain, name }) => (
-                      <li
-                        key={`to${chain}`}
-                        onClick={() => {
-                          if (chain === fromChain) {
-                            setFromChain(toChain);
-                          }
-                          setToChain(chain);
-                          blur();
-                        }}
-                      >
-                        <a>{name}</a>
-                      </li>
-                    ))}
-                </ul>
+                <FontAwesomeIcon
+                  className="w-10 self-center"
+                  icon={faArrowRight}
+                  color="white"
+                />
+                <div className="dropdown">
+                  <div tabIndex={0} role="button" className="btn w-52">
+                    {toChainConfig.name}
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      color="white"
+                      className="ml-auto"
+                    />
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                  >
+                    {Object.values(chainConfigs)
+                      .filter(({ chain }) => chain !== toChainConfig.chain)
+                      .map(({ chain, name }) => (
+                        <li
+                          key={`to${chain}`}
+                          onClick={() => {
+                            if (chain === fromChain) {
+                              setFromChain(toChain);
+                            }
+                            setToChain(chain);
+                            blur();
+                          }}
+                        >
+                          <a>{name}</a>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
               </div>
             </div>
 
             <div className="form-control">
-              <label>Recipient Address</label>
+              <div className="label">
+                <span>Recipient</span>
+              </div>
               <div className="join">
-                <input
-                  className={`input join-item input-bordered w-full ${
-                    !hasValidAddress && "input-warning"
-                  }`}
-                  placeholder="Address"
-                  value={recipient}
-                  onChange={({ target }) => setRecipient(target.value)}
-                />
                 <div className="indicator">
                   <button
-                    className="btn join-item w-9"
+                    className="btn join-item"
                     disabled={!hasValidAddress}
                     onClick={() => {
                       setRecipient((_recipient) => {
@@ -267,18 +270,32 @@ function App() {
                     />
                   </button>
                 </div>
+                <input
+                  className={`input join-item input-bordered w-full font-mono text-sm text-end ${
+                    !hasValidAddress && "input-warning"
+                  }`}
+                  placeholder="Address"
+                  value={recipient}
+                  onChange={({ target }) => setRecipient(target.value)}
+                />
               </div>
-              <div className="label align-bottom place-content-end">
-                {!hasValidAddress && (
+              {!hasValidAddress && (
+                <div className="label align-bottom place-content-end">
                   <span className="label-text-alt text-warning">
                     Invalid Address
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="form-control">
-              <label>Token</label>
+              <div className="label">
+                <span>Token</span>
+                <span className="label-text-alt self-end">
+                  Balance:{" "}
+                  {balance && decimals ? formatUnits(balance, decimals) : null}
+                </span>
+              </div>
               <div className="join">
                 <div className="indicator">
                   <button
@@ -302,17 +319,13 @@ function App() {
                   onChange={({ target }) => setAmount(Number(target.value))}
                 />
               </div>
-              <div className="label align-bottom">
-                <span className="label-text-alt">
-                  Balance:{" "}
-                  {balance && decimals ? formatUnits(balance, decimals) : null}
-                </span>
-                {!hasEnoughAllowance && (
+              {!hasEnoughAllowance && (
+                <div className="label align-bottom place-content-end">
                   <span className="label-text-alt text-warning">
                     Insufficient allowance
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
             <div className="card-actions mt-auto pt-4">
               {hasEnoughAllowance ? (

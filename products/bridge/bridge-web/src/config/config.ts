@@ -13,7 +13,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
     tokenManagerType: TokenManagerType.MintAndBurn,
     tokens: [
       {
-        name: "FPS",
+        name: "TST",
         address: "0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B",
         blockExplorer:
           "https://testnet.bscscan.com/address/0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B",
@@ -29,7 +29,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
     tokenManagerType: TokenManagerType.LockAndRelease,
     tokens: [
       {
-        name: "FPS",
+        name: "TST",
         address: "0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3",
         blockExplorer:
           "https://otterscan.testnet.zilliqa.com/address/0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3",
