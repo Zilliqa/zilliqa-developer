@@ -16,33 +16,28 @@ import {
   useAccount,
   useContractRead,
   useContractWrite,
+  useNetwork,
   usePrepareContractWrite,
   useSwitchNetwork,
 } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
 import { MintAndBurnTokenManagerAbi } from "./abi/MintAndBurnTokenManager";
+import { toast } from "react-toastify";
 
 function App() {
   const [fromChain, setFromChain] = useState<Chains>("zq-testnet");
-  const account = useAccount();
+  const { address: account } = useAccount();
   const [toChain, setToChain] = useState<Chains>("bsc-testnet");
   const [amount, setAmount] = useState<number>(0);
   const fromChainConfig = chainConfigs[fromChain];
   const toChainConfig = chainConfigs[toChain];
   const { switchNetwork } = useSwitchNetwork();
+  const { chain } = useNetwork();
 
   const [recipient, setRecipient] = useState<string>();
   const [token, selectedToken] = useState<TokenConfig>(
     chainConfigs["zq-testnet"].tokens[0]
   );
-
-  const blur = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const activeElement: any | null = document.activeElement;
-    if (activeElement) {
-      activeElement.blur();
-    }
-  };
 
   useEffect(() => {
     switchNetwork && switchNetwork(fromChainConfig.chainId);
@@ -52,31 +47,47 @@ function App() {
     selectedToken(fromChainConfig.tokens[0]);
   }, [fromChain, fromChainConfig.tokens]);
 
-  const { data: balance } = useContractRead({
-    abi: erc20ABI,
-    functionName: "balanceOf",
-    args: account ? [account.address!] : undefined,
-    address: token.address,
-    enabled: !!account.address,
-    watch: true,
-  });
+  useEffect(() => {
+    setRecipient(account);
+  }, [account]);
 
   useEffect(() => {
-    setRecipient(account.address);
-  }, [account.address]);
+    if (chain !== fromChainConfig.wagmiChain) {
+      const newFromChain = Object.values(chainConfigs).find(
+        (chainConfig) => chainConfig.chainId == chain?.id
+      );
+      if (!newFromChain?.chain) {
+        return;
+      }
+      if (newFromChain === toChainConfig) {
+        setToChain(fromChain);
+      }
+      setFromChain(newFromChain?.chain);
+    }
+  }, [chain, fromChain, fromChainConfig.wagmiChain, toChainConfig]);
 
   const { data: decimals } = useContractRead({
     abi: erc20ABI,
     functionName: "decimals",
     address: token.address,
+    enabled: !!token.address,
+  });
+  const { data: balance } = useContractRead({
+    abi: erc20ABI,
+    functionName: "balanceOf",
+    args: account ? [account!] : undefined,
+    address: token.address,
+    enabled: !!account && !!token.address,
+    watch: true,
   });
 
   const { data: allowance } = useContractRead({
     abi: erc20ABI,
     functionName: "allowance",
     address: token.address,
-    args: [account.address!, fromChainConfig.tokenManagerAddress],
-    enabled: !!account.address,
+    args: [account!, fromChainConfig.tokenManagerAddress],
+    enabled:
+      !!account && !!token.address && !!fromChainConfig.tokenManagerAddress,
     watch: true,
   });
 
@@ -84,6 +95,10 @@ function App() {
     decimals && allowance
       ? allowance > parseUnits(amount.toString(), decimals)
       : false;
+  const hasEnoughBalance =
+    decimals && balance
+      ? parseUnits(amount.toString(), decimals) < balance
+      : true;
   const hasValidAddress = recipient
     ? validation.isBech32(recipient) || validation.isAddress(recipient)
     : false;
@@ -91,30 +106,42 @@ function App() {
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
     abi: MintAndBurnTokenManagerAbi,
-    args:
-      toChainConfig && recipient && amount && decimals
-        ? [
-            token.address,
-            BigInt(toChainConfig.chainId),
-            recipient as `0x${string}`,
-            parseUnits(amount.toString(), decimals),
-          ]
-        : undefined,
+    args: [
+      token.address,
+      BigInt(toChainConfig.chainId),
+      recipient as `0x${string}`,
+      parseUnits(amount.toString(), decimals ?? 0),
+    ],
     functionName: "transfer",
+    enabled: !!(
+      toChainConfig &&
+      fromChainConfig &&
+      !fromChainConfig.isZilliqa &&
+      recipient &&
+      amount &&
+      decimals
+    ),
   });
 
-  const { writeAsync: bridgeZilliqa } = useContractWrite({
+  const { writeAsync: bridge, isLoading: isLoadingBridge } =
+    useContractWrite(transferConfig);
+
+  // From Zilliqa Bridging
+  const {
+    writeAsync: bridgeFromZilliqa,
+    isLoading: isLoadingBridgeFromZilliqa,
+  } = useContractWrite({
     mode: "prepared",
     request: {
       address: fromChainConfig.tokenManagerAddress,
       chain: fromChainConfig.wagmiChain,
-      account: account.address!,
+      account: account!,
       abi: MintAndBurnTokenManagerAbi,
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
         recipient as `0x${string}`,
-        parseUnits(amount.toString(), decimals!),
+        parseUnits(amount.toString(), decimals || 0),
       ],
       functionName: "transfer",
       gas: 600_000n,
@@ -122,27 +149,29 @@ function App() {
     },
   });
 
-  const { writeAsync: bridge, isLoading: isLoadingBridge } =
-    useContractWrite(transferConfig);
-
-  const { config: approveConfig, isError: isErrorApprove } =
-    usePrepareContractWrite({
-      address: token.address,
-      abi: erc20ABI,
-      args: [
-        fromChainConfig.tokenManagerAddress,
-        parseUnits(amount.toString(), decimals ?? 0),
-      ],
-      functionName: "approve",
-      type: "legacy",
-    });
+  // Approvals
+  const { config: approveConfig } = usePrepareContractWrite({
+    address: token.address,
+    abi: erc20ABI,
+    args: [
+      fromChainConfig.tokenManagerAddress,
+      parseUnits(amount.toString(), decimals ?? 0),
+    ],
+    functionName: "approve",
+    type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
+  });
 
   const { writeAsync: approve, isLoading: isLoadingApprove } =
     useContractWrite(approveConfig);
 
   const canBridge =
-    !hasValidAddress ||
-    (fromChainConfig.isZilliqa ? false : !amount || isLoadingBridge);
+    amount &&
+    hasValidAddress &&
+    hasEnoughAllowance &&
+    hasEnoughBalance &&
+    (fromChainConfig.isZilliqa
+      ? !isLoadingBridgeFromZilliqa
+      : !isLoadingBridge);
 
   return (
     <>
@@ -192,7 +221,6 @@ function App() {
                               setToChain(fromChain);
                             }
                             setFromChain(chain);
-                            blur();
                           }}
                         >
                           <a>{name}</a>
@@ -311,48 +339,37 @@ function App() {
                 </div>
                 <input
                   className={`input join-item input-bordered w-full text-right ${
-                    !hasEnoughAllowance && "input-warning"
+                    !hasEnoughBalance
+                      ? "input-error"
+                      : !hasEnoughAllowance && "input-warning"
                   }`}
                   placeholder="Amount"
                   type="number"
+                  value={amount || ""}
                   onChange={({ target }) => setAmount(Number(target.value))}
                 />
               </div>
-              {!hasEnoughAllowance && (
+              {!hasEnoughBalance ? (
                 <div className="label align-bottom place-content-end">
-                  <span className="label-text-alt text-warning">
-                    Insufficient allowance
+                  <span className="label-text-alt text-error">
+                    Insufficient balance
                   </span>
                 </div>
+              ) : (
+                !hasEnoughAllowance && (
+                  <div className="label align-bottom place-content-end">
+                    <span className="label-text-alt text-warning">
+                      Insufficient allowance
+                    </span>
+                  </div>
+                )
               )}
             </div>
             <div className="card-actions mt-auto pt-4">
-              {hasEnoughAllowance ? (
-                <button
-                  className="btn w-5/6 mx-10 btn-primary text-primary-content"
-                  disabled={canBridge}
-                  onClick={async () => {
-                    if (fromChainConfig.isZilliqa && bridgeZilliqa) {
-                      const tx = await bridgeZilliqa();
-                      console.log(tx.hash);
-                    } else if (bridge) {
-                      const res = await bridge();
-                      console.log(res.hash);
-                    }
-                  }}
-                >
-                  Bridge
-                </button>
-              ) : (
+              {!hasEnoughAllowance && hasEnoughBalance ? (
                 <button
                   className="btn w-5/6 mx-10 btn-outline"
-                  disabled={
-                    !amount ||
-                    !approve ||
-                    isLoadingApprove ||
-                    isErrorApprove ||
-                    hasEnoughAllowance
-                  }
+                  disabled={isLoadingApprove}
                   onClick={async () => {
                     if (approve) {
                       const res = await approve();
@@ -361,6 +378,49 @@ function App() {
                   }}
                 >
                   Approve
+                </button>
+              ) : (
+                <button
+                  className="btn w-5/6 mx-10 btn-primary text-primary-content"
+                  disabled={!canBridge}
+                  onClick={async () => {
+                    let tx;
+                    if (fromChainConfig.isZilliqa && bridgeFromZilliqa) {
+                      tx = await bridgeFromZilliqa();
+                      console.log(tx.hash);
+                    } else if (bridge) {
+                      tx = await bridge();
+                      console.log(tx.hash);
+                    } else {
+                      return;
+                    }
+                    setAmount(0);
+                    toast.success(
+                      <div>
+                        Bridge request txn sent. View on{" "}
+                        <a
+                          className="link text-ellipsis w-10"
+                          onClick={() =>
+                            window.open(
+                              `${fromChainConfig.blockExplorer}${tx.hash}`,
+                              "_blank"
+                            )
+                          }
+                        >
+                          block explorer
+                        </a>
+                      </div>
+                    );
+                  }}
+                >
+                  {isLoadingBridge || isLoadingBridgeFromZilliqa ? (
+                    <>
+                      <span className="loading loading-spinner"></span>
+                      loading
+                    </>
+                  ) : (
+                    "Bridge"
+                  )}
                 </button>
               )}
             </div>

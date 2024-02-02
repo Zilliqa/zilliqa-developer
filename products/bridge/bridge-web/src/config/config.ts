@@ -25,6 +25,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
     ],
     chainId: 97,
     isZilliqa: false,
+    blockExplorer: "https://testnet.bscscan.com/tx/",
   },
   "zq-testnet": {
     chain: "zq-testnet",
@@ -42,6 +43,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
     ],
     chainId: 33101,
     isZilliqa: true,
+    blockExplorer: "https://otterscan.testnet.zilliqa.com/tx/",
   },
 };
 
@@ -54,6 +56,7 @@ export type ChainConfig = {
   tokens: TokenConfig[];
   chainId: number;
   isZilliqa: boolean;
+  blockExplorer: string;
 };
 
 export type TokenConfig = {
