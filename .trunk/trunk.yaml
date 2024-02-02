@@ -31,6 +31,7 @@ lint:
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
         - products/bridge/smart-contracts/script/config.ts
         - products/bridge/smart-contracts/script/**/*.s.sol
+        - products/bridge/bridge-web/src/config/config.ts
     - linters: [eslint]
       paths:
         - contracts/audited/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
