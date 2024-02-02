@@ -107,16 +107,15 @@ function App() {
     mode: "prepared",
     request: {
       address: fromChainConfig.tokenManagerAddress,
+      chain: fromChainConfig.wagmiChain,
+      account: account.address!,
       abi: MintAndBurnTokenManagerAbi,
-      args:
-        toChainConfig && recipient && amount && decimals
-          ? [
-              token.address,
-              BigInt(toChainConfig.chainId),
-              recipient as `0x${string}`,
-              parseUnits(amount.toString(), decimals),
-            ]
-          : undefined,
+      args: [
+        token.address,
+        BigInt(toChainConfig.chainId),
+        recipient as `0x${string}`,
+        parseUnits(amount.toString(), decimals!),
+      ],
       functionName: "transfer",
       gas: 600_000n,
       type: "legacy",
@@ -132,7 +131,7 @@ function App() {
       abi: erc20ABI,
       args: [
         fromChainConfig.tokenManagerAddress,
-        parseUnits(amount.toString(), decimals || 0),
+        parseUnits(amount.toString(), decimals ?? 0),
       ],
       functionName: "approve",
       type: "legacy",

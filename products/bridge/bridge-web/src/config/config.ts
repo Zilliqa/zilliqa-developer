@@ -1,3 +1,6 @@
+import { Chain } from "viem";
+import { bscTestnet, zilliqaTestnet } from "viem/chains";
+
 export enum TokenManagerType {
   MintAndBurn,
   LockAndRelease,
@@ -9,6 +12,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
   "bsc-testnet": {
     chain: "bsc-testnet",
     name: "BSC Testnet",
+    wagmiChain: bscTestnet,
     tokenManagerAddress: "0xA6D73210AF20a59832F264fbD991D2abf28401d0",
     tokenManagerType: TokenManagerType.MintAndBurn,
     tokens: [
@@ -27,6 +31,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
     name: "Zilliqa Testnet",
     tokenManagerAddress: "0x1509988c41f02014aA59d455c6a0D67b5b50f129",
     tokenManagerType: TokenManagerType.LockAndRelease,
+    wagmiChain: zilliqaTestnet,
     tokens: [
       {
         name: "TST",
@@ -43,6 +48,7 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
 export type ChainConfig = {
   name: string;
   chain: Chains;
+  wagmiChain: Chain;
   tokenManagerAddress: `0x${string}`;
   tokenManagerType: TokenManagerType;
   tokens: TokenConfig[];
