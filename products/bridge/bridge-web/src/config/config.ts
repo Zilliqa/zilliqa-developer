@@ -15,6 +15,8 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
       {
         name: "FPS",
         address: "0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B",
+        blockExplorer:
+          "https://testnet.bscscan.com/address/0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B",
       },
     ],
     chainId: 97,
@@ -29,6 +31,8 @@ export const chainConfigs: Record<Chains, ChainConfig> = {
       {
         name: "FPS",
         address: "0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3",
+        blockExplorer:
+          "https://otterscan.testnet.zilliqa.com/address/0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3",
       },
     ],
     chainId: 33101,
@@ -43,10 +47,11 @@ export type ChainConfig = {
   tokenManagerType: TokenManagerType;
   tokens: TokenConfig[];
   chainId: number;
-  isZilliqa: bool;
+  isZilliqa: boolean;
 };
 
 export type TokenConfig = {
   name: string;
   address: `0x${string}`;
+  blockExplorer: string;
 };
