@@ -163,6 +163,7 @@ function App() {
       parseUnits(amount.toString(), decimals ?? 0),
     ],
     functionName: "approve",
+    gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
     type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
   });
 
@@ -325,7 +326,9 @@ function App() {
                 <span>Token</span>
                 <span className="label-text-alt self-end">
                   Balance:{" "}
-                  {balance && decimals ? formatUnits(balance, decimals) : null}
+                  {balance !== undefined && decimals
+                    ? formatUnits(balance, decimals)
+                    : null}
                 </span>
               </div>
               <div className="join">
