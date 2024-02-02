@@ -380,8 +380,24 @@ function App() {
                   disabled={isLoadingApprove}
                   onClick={async () => {
                     if (approve) {
-                      const res = await approve();
-                      console.log(res.hash);
+                      const tx = await approve();
+                      toast.success(
+                        <div>
+                          Approve txn sent. View on{" "}
+                          <a
+                            className="link text-ellipsis w-10"
+                            onClick={() =>
+                              window.open(
+                                `${fromChainConfig.blockExplorer}${tx.hash}`,
+                                "_blank"
+                              )
+                            }
+                          >
+                            block explorer
+                          </a>
+                        </div>
+                      );
+                      console.log(tx.hash);
                     }
                   }}
                 >
@@ -402,10 +418,11 @@ function App() {
                     } else {
                       return;
                     }
-                    setAmount(0);
                     toast.success(
                       <div>
-                        Bridge request txn sent. View on{" "}
+                        Bridge request txn sent. From {fromChainConfig.name} to{" "}
+                        {toChainConfig.name} {amount} {token.name} tokens. View
+                        on{" "}
                         <a
                           className="link text-ellipsis w-10"
                           onClick={() =>
@@ -419,6 +436,7 @@ function App() {
                         </a>
                       </div>
                     );
+                    setAmount(0);
                   }}
                 >
                   {isLoadingBridge || isLoadingBridgeFromZilliqa ? (
