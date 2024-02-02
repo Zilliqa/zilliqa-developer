@@ -92,16 +92,21 @@ function App() {
   });
 
   const hasEnoughAllowance =
-    decimals && allowance
-      ? allowance > parseUnits(amount.toString(), decimals)
+    decimals && amount
+      ? allowance ?? 0n > parseUnits(amount.toString(), decimals)
       : true;
   const hasEnoughBalance =
     decimals && balance
       ? parseUnits(amount.toString(), decimals) < balance
       : true;
+  const validBech32Address = recipient && validation.isBech32(recipient);
+  const validEthAddress = recipient && validation.isAddress(recipient);
   const hasValidAddress = recipient
-    ? validation.isBech32(recipient) || validation.isAddress(recipient)
+    ? validBech32Address != validEthAddress
     : true;
+  const ethRecipient = validBech32Address
+    ? fromBech32Address(recipient)
+    : recipient;
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
@@ -109,7 +114,7 @@ function App() {
     args: [
       token.address,
       BigInt(toChainConfig.chainId),
-      recipient as `0x${string}`,
+      ethRecipient as `0x${string}`,
       parseUnits(amount.toString(), decimals ?? 0),
     ],
     functionName: "transfer",
@@ -117,7 +122,7 @@ function App() {
       toChainConfig &&
       fromChainConfig &&
       !fromChainConfig.isZilliqa &&
-      recipient &&
+      ethRecipient &&
       amount &&
       decimals
     ),
@@ -140,7 +145,7 @@ function App() {
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
-        recipient as `0x${string}`,
+        ethRecipient as `0x${string}`,
         parseUnits(amount.toString(), decimals || 0),
       ],
       functionName: "transfer",
