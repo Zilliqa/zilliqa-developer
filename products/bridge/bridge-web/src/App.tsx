@@ -208,7 +208,7 @@ function App() {
               <div className="join">
                 <div className="dropdown w-1/2">
                   <div tabIndex={0} role="button" className="btn w-full">
-                    {fromChainConfig.name}
+                    <p className="w-12">{fromChainConfig.name}</p>
                     <FontAwesomeIcon
                       icon={faChevronDown}
                       className="ml-auto"
@@ -245,7 +245,7 @@ function App() {
                 />
                 <div className="dropdown w-1/2">
                   <div tabIndex={0} role="button" className="btn w-full">
-                    {toChainConfig.name}
+                    <p className="w-12">{toChainConfig.name}</p>
                     <FontAwesomeIcon
                       icon={faChevronDown}
                       color="white"
