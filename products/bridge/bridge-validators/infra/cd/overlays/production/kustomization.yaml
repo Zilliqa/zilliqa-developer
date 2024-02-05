@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
 
-namespace: bridge-validator-staging
+namespace: bridge-validator-prd
 patches:
   - path: app-secrets.yaml
   - path: config-leader.yaml

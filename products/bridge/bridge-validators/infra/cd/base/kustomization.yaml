@@ -4,11 +4,4 @@ resources:
   - namespace.yaml
   - app-secrets.yaml
   - deployment.yaml
-
-configMapGenerator:
-  - name: zilliqa-bridge-validator-config
-    files:
-      - config.toml
-  - name: zilliqa-bridge-validator-leader-config
-    files:
-      - config-leader.toml
+  - config-leader.yaml
