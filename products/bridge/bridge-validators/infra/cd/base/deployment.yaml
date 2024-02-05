@@ -37,5 +37,5 @@ spec:
               subPath: config-leader.toml
       volumes:
         - name: config-volume
-          configMap:
-            name: zilliqa-bridge-validator-leader-config
+          secret:
+            secretName: zilliqa-bridge-validator-leader-config
