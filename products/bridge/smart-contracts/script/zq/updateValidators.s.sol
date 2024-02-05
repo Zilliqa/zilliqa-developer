@@ -10,7 +10,7 @@ contract Update is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
         address validatorManagerAddress = 0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23;
         address currentValidator = 0x5807b970DB344d9d2386BbF5c3ec4cDA5CCdF1C8;
-        address newValidator = address(0);
+        address newValidator = 0x250572Ed005BaD64Ff24FbDc0d41875dAF58944f;
 
         vm.startBroadcast(deployerPrivateKey);
 
