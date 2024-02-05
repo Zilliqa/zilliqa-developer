@@ -20,5 +20,8 @@ spec:
       containers:
         - image: zilliqa-bridge-web
           name: zilliqa-bridge-web
+          env:
+            - name: VITE_ENV
+              value: "STG"
           ports:
             - containerPort: 4173
