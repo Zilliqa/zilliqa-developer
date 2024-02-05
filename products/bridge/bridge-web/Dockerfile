@@ -5,6 +5,8 @@
 # https://docs.docker.com/go/dockerfile-reference/
 
 ARG NODE_VERSION=18.17.0
+ARG VITE_ENV="STG"
+ENV VITE_ENV=${VITE_ENV}
 
 ################################################################################
 # Use node image for base image for all stages.
