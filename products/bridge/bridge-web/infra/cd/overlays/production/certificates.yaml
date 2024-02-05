@@ -7,4 +7,4 @@ metadata:
     app.kubernetes.io/name: xbridge-frontend
 spec:
   domains:
-    - xbridge.zilstg.dev
+    - xbridge.zilliqa.com
