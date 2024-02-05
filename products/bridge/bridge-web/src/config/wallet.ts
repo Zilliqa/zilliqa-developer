@@ -12,7 +12,8 @@ export const { chains, publicClient } = configureChains(
 const connectors = connectorsForWallets([
   {
     groupName: "Recommended",
-    wallets: [metaMaskWallet({ chains, projectId: "" })],
+    // Project ID for WalletConnect Cloud.
+    wallets: [metaMaskWallet({ chains, projectId: "f4d0c28ceef8b7064e5d92457c6f283b" })],
   },
 ]);
 
