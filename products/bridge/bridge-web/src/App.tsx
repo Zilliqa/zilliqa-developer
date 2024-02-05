@@ -183,7 +183,7 @@ function App() {
     <>
       <div className="h-screen flex items-center justify-center">
         <div className="fixed top-0 navbar py-6 px-10 ">
-          <div className="flex-1">
+          <div className="flex-1 hidden sm:block">
             <img src={zilliqa} className="h-16" alt="Zilliqa Logo" />
           </div>
           <div className="flex-none">
@@ -202,8 +202,8 @@ function App() {
                 <span>Networks</span>
               </div>
               <div className="join">
-                <div className="dropdown">
-                  <div tabIndex={0} role="button" className="btn w-52">
+                <div className="dropdown w-1/2">
+                  <div tabIndex={0} role="button" className="btn w-full">
                     {fromChainConfig.name}
                     <FontAwesomeIcon
                       icon={faChevronDown}
@@ -213,7 +213,7 @@ function App() {
                   </div>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full"
                   >
                     {Object.values(chainConfigs)
                       .filter(
@@ -235,12 +235,12 @@ function App() {
                   </ul>
                 </div>
                 <FontAwesomeIcon
-                  className="w-10 self-center"
+                  className="w-1/6 self-center"
                   icon={faArrowRight}
                   color="white"
                 />
-                <div className="dropdown">
-                  <div tabIndex={0} role="button" className="btn w-52">
+                <div className="dropdown w-1/2">
+                  <div tabIndex={0} role="button" className="btn w-full">
                     {toChainConfig.name}
                     <FontAwesomeIcon
                       icon={faChevronDown}
@@ -250,7 +250,7 @@ function App() {
                   </div>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full"
                   >
                     {Object.values(chainConfigs)
                       .filter(({ chain }) => chain !== toChainConfig.chain)
