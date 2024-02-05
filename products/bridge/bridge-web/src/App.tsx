@@ -25,18 +25,22 @@ import { MintAndBurnTokenManagerAbi } from "./abi/MintAndBurnTokenManager";
 import { toast } from "react-toastify";
 
 function App() {
-  const [fromChain, setFromChain] = useState<Chains>("zq-testnet");
+  const [fromChain, setFromChain] = useState<Chains>(
+    Object.values(chainConfigs)[0].chain
+  );
   const { address: account } = useAccount();
-  const [toChain, setToChain] = useState<Chains>("bsc-testnet");
+  const [toChain, setToChain] = useState<Chains>(
+    Object.values(chainConfigs)[1].chain
+  );
   const [amount, setAmount] = useState<number>(0);
-  const fromChainConfig = chainConfigs[fromChain];
-  const toChainConfig = chainConfigs[toChain];
+  const fromChainConfig = chainConfigs[fromChain]!;
+  const toChainConfig = chainConfigs[toChain]!;
   const { switchNetwork } = useSwitchNetwork();
   const { chain } = useNetwork();
 
   const [recipient, setRecipient] = useState<string>();
   const [token, selectedToken] = useState<TokenConfig>(
-    chainConfigs["zq-testnet"].tokens[0]
+    Object.values(chainConfigs)[0].tokens[0]
   );
 
   useEffect(() => {
@@ -347,9 +351,12 @@ function App() {
                 </div>
                 <input
                   className={`input join-item input-bordered w-full text-right ${
-                    !hasEnoughBalance
+                    !hasEnoughBalance && amount > 0
                       ? "input-error"
-                      : !hasEnoughAllowance && "input-warning"
+                      : !hasEnoughAllowance &&
+                        amount > 0 &&
+                        !!allowance &&
+                        "input-warning"
                   }`}
                   placeholder="Amount"
                   type="number"
@@ -357,14 +364,16 @@ function App() {
                   onChange={({ target }) => setAmount(Number(target.value))}
                 />
               </div>
-              {!hasEnoughBalance ? (
+              {!hasEnoughBalance && amount > 0 ? (
                 <div className="label align-bottom place-content-end">
                   <span className="label-text-alt text-error">
                     Insufficient balance
                   </span>
                 </div>
               ) : (
-                !hasEnoughAllowance && (
+                !hasEnoughAllowance &&
+                amount > 0 &&
+                !!allowance && (
                   <div className="label align-bottom place-content-end">
                     <span className="label-text-alt text-warning">
                       Insufficient allowance
