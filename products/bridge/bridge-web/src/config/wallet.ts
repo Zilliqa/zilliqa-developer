@@ -1,11 +1,11 @@
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import { metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
-import { bscTestnet, zilliqaTestnet } from "viem/chains";
 import { configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
+import { chainConfigs } from "./config";
 
 export const { chains, publicClient } = configureChains(
-  [bscTestnet, zilliqaTestnet],
+  Object.values(chainConfigs).map((chain) => chain.wagmiChain),
   [publicProvider()]
 );
 
