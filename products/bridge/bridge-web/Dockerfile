@@ -6,7 +6,6 @@
 
 ARG NODE_VERSION=18.17.0
 ARG VITE_ENV="STG"
-ENV VITE_ENV=${VITE_ENV}
 
 ################################################################################
 # Use node image for base image for all stages.
@@ -33,6 +32,8 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # Create a stage for building the application.
 FROM deps as build
 
+ENV VITE_ENV=${VITE_ENV}
+
 # Download additional development dependencies before building, as some projects require
 # "devDependencies" to be installed to build. If you don't need this, remove this step.
 RUN --mount=type=bind,source=package.json,target=package.json \
@@ -52,6 +53,7 @@ FROM base as final
 
 # Use production node environment by default.
 ENV NODE_ENV production
+ENV VITE_ENV=${VITE_ENV}
 
 # Run the application as a non-root user.
 USER node
