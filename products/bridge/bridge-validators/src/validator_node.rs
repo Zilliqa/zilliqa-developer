@@ -1,7 +1,7 @@
 use std::{collections::HashMap, time::Duration};
 
 use anyhow::Result;
-use ethers::{providers::StreamExt, types::U256};
+use ethers::{providers::StreamExt, signers::Signer, types::U256};
 use libp2p::{Multiaddr, PeerId};
 use tokio::{
     select,
@@ -51,6 +51,8 @@ impl ValidatorNode {
         let mut chain_node_senders = HashMap::new();
         let mut chain_clients = HashMap::new();
         let wallet = config.private_key.as_wallet()?;
+
+        println!("Node address is: {:?}", wallet.address());
 
         let (bridge_message_sender, bridge_message_receiver) = mpsc::unbounded_channel();
         let bridge_message_receiver = UnboundedReceiverStream::new(bridge_message_receiver);
