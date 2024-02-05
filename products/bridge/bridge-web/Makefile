@@ -15,3 +15,4 @@ image/build-and-push:
 	else \
 		docker build -t "${IMAGE_TAG}" .; \
 	fi
+	docker push "${IMAGE_TAG}"
