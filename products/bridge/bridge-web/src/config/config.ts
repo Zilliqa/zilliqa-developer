@@ -8,10 +8,8 @@ export enum TokenManagerType {
 
 export type Chains = "bsc-testnet" | "zq-testnet" | "bsc" | "zq";
 
-console.log(import.meta.env.VITE_ENV);
-
 export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
-  import.meta.env.VITE_ENV === "PROD"
+  import.meta.env.MODE === "production"
     ? {
         zq: {
           chain: "zq",
