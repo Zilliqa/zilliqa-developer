@@ -34,7 +34,7 @@ patches:
           beta.cloud.google.com/backend-config: '{"default": "xbridge-frontend"}'
   - patch: |-
       - op: replace
-        path: "/spec/template/spec/containers/0/env/-"
+        path: "/spec/template/spec/containers/0/env/0"
         value:
           name: VITE_ENV
           value: "PROD"
