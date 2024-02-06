@@ -21,9 +21,9 @@ import {
   useSwitchNetwork,
   useWaitForTransaction,
 } from "wagmi";
-import { formatUnits, parseUnits } from "viem";
-import { MintAndBurnTokenManagerAbi } from "./abi/MintAndBurnTokenManager";
+import { formatEther, formatUnits, parseUnits } from "viem";
 import { Id, toast } from "react-toastify";
+import { tokenManagerAbi } from "./abi/TokenManager";
 
 type TxnType = "approve" | "bridge";
 
@@ -82,6 +82,12 @@ function App() {
     address: token.address,
     enabled: !!token.address,
   });
+  const { data: fees } = useContractRead({
+    abi: tokenManagerAbi,
+    functionName: "getFees",
+    address: fromChainConfig.tokenManagerAddress,
+    enabled: !!fromChainConfig.tokenManagerAddress,
+  });
   const { data: balance } = useContractRead({
     abi: erc20ABI,
     functionName: "balanceOf",
@@ -118,7 +124,7 @@ function App() {
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
-    abi: MintAndBurnTokenManagerAbi,
+    abi: tokenManagerAbi,
     args: [
       token.address,
       BigInt(toChainConfig.chainId),
@@ -126,6 +132,7 @@ function App() {
       parseUnits(amount!, decimals ?? 0),
     ],
     functionName: "transfer",
+    value: fees ?? 0n,
     enabled: !!(
       toChainConfig &&
       fromChainConfig &&
@@ -149,7 +156,8 @@ function App() {
       address: fromChainConfig.tokenManagerAddress,
       chain: fromChainConfig.wagmiChain,
       account: account!,
-      abi: MintAndBurnTokenManagerAbi,
+      abi: tokenManagerAbi,
+      value: fees ?? 0n,
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
@@ -282,7 +290,7 @@ function App() {
   return (
     <>
       <div className="h-screen flex items-center justify-center">
-        <div className="fixed top-0 navbar py-6 px-10 ">
+        <div className="fixed top-0 navbar py-6 px-10">
           <div className="flex-1 hidden sm:block">
             <img src={zilliqa} className="h-16" alt="Zilliqa Logo" />
           </div>
@@ -485,6 +493,38 @@ function App() {
                 )
               )}
             </div>
+
+            {!!fees && !!amount && (
+              <>
+                <div className="divider"></div>
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between">
+                    <label className="label-text-alt">Fees:</label>
+                    <label className="label-text-alt">
+                      {formatEther(fees).toString()}{" "}
+                      {fromChainConfig.nativeTokenSymbol}
+                    </label>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <label className="label-text-alt">
+                      Recipient Receives:
+                    </label>
+                    <label className="label-text-alt">
+                      {amount} {token.name}
+                    </label>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <label className="label-text-alt">Total:</label>
+                    <label className="label-text-alt">
+                      {amount} {token.name} + {formatEther(fees).toString()}{" "}
+                      {fromChainConfig.nativeTokenSymbol}
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
             <div className="card-actions mt-auto pt-4">
               {!hasEnoughAllowance && hasEnoughBalance ? (
                 <button

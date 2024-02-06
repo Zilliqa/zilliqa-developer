@@ -30,6 +30,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
           chainId: 32769,
           isZilliqa: true,
           blockExplorer: "https://otterscan.zilliqa.com/tx/",
+          nativeTokenSymbol: "ZIL",
         },
         bsc: {
           chain: "bsc",
@@ -49,6 +50,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
           chainId: 56,
           isZilliqa: false,
           blockExplorer: "https://bscscan.com/tx/",
+          nativeTokenSymbol: "BNB",
         },
       }
     : {
@@ -69,6 +71,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
           chainId: 33101,
           isZilliqa: true,
           blockExplorer: "https://otterscan.testnet.zilliqa.com/tx/",
+          nativeTokenSymbol: "ZIL",
         },
         "bsc-testnet": {
           chain: "bsc-testnet",
@@ -87,6 +90,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
           chainId: 97,
           isZilliqa: false,
           blockExplorer: "https://testnet.bscscan.com/tx/",
+          nativeTokenSymbol: "BNB",
         },
       };
 
@@ -100,6 +104,7 @@ export type ChainConfig = {
   chainId: number;
   isZilliqa: boolean;
   blockExplorer: string;
+  nativeTokenSymbol: string;
 };
 
 export type TokenConfig = {

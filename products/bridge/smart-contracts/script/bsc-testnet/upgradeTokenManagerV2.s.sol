@@ -34,11 +34,11 @@ contract Upgrade is Script {
             encodedReinitializerCall
         );
 
-        vm.stopBroadcast();
-
         MintAndBurnTokenManagerUpgradeableV2 tokenManagerV2 = MintAndBurnTokenManagerUpgradeableV2(
                 tokenManagerAddress
             );
         console.log("New fees are %s", tokenManagerV2.getFees());
+
+        vm.stopBroadcast();
     }
 }

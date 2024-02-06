@@ -34,11 +34,11 @@ contract Upgrade is Script {
             encodedReinitializerCall
         );
 
-        vm.stopBroadcast();
-
         LockAndReleaseTokenManagerUpgradeableV2 tokenManagerV2 = LockAndReleaseTokenManagerUpgradeableV2(
                 tokenManagerAddress
             );
         console.log("New fees are %s", tokenManagerV2.getFees());
+
+        vm.stopBroadcast();
     }
 }
