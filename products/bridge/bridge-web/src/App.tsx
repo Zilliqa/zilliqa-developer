@@ -35,7 +35,8 @@ function App() {
   const [toChain, setToChain] = useState<Chains>(
     Object.values(chainConfigs)[1].chain
   );
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>("");
+  const isAmountNonZero = Number(amount) > 0;
   const fromChainConfig = chainConfigs[fromChain]!;
   const toChainConfig = chainConfigs[toChain]!;
   const { switchNetwork } = useSwitchNetwork();
@@ -101,13 +102,11 @@ function App() {
   });
 
   const hasEnoughAllowance =
-    !!decimals && !!amount
-      ? (allowance ?? 0n) >= parseUnits(amount.toString(), decimals)
+    !!decimals && isAmountNonZero
+      ? (allowance ?? 0n) >= parseUnits(amount!, decimals)
       : true;
   const hasEnoughBalance =
-    decimals && balance
-      ? parseUnits(amount.toString(), decimals) <= balance
-      : false;
+    decimals && balance ? parseUnits(amount!, decimals) <= balance : false;
   const validBech32Address = recipient && validation.isBech32(recipient);
   const validEthAddress = recipient && validation.isAddress(recipient);
   const hasValidAddress = recipient
@@ -124,7 +123,7 @@ function App() {
       token.address,
       BigInt(toChainConfig.chainId),
       ethRecipient as `0x${string}`,
-      parseUnits(amount.toString(), decimals ?? 0),
+      parseUnits(amount!, decimals ?? 0),
     ],
     functionName: "transfer",
     enabled: !!(
@@ -155,7 +154,7 @@ function App() {
         token.address,
         BigInt(toChainConfig.chainId),
         ethRecipient as `0x${string}`,
-        parseUnits(amount.toString(), decimals || 0),
+        parseUnits(amount!, decimals || 0),
       ],
       functionName: "transfer",
       gas: 600_000n,
@@ -169,7 +168,7 @@ function App() {
     abi: erc20ABI,
     args: [
       fromChainConfig.tokenManagerAddress,
-      parseUnits(amount.toString(), decimals ?? 0),
+      parseUnits(amount!, decimals ?? 0),
     ],
     functionName: "approve",
     gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
@@ -227,7 +226,7 @@ function App() {
             </a>
           </div>
         );
-        setAmount(0);
+        setAmount("");
       } else if (latestTxn[0] === "approve") {
         description = (
           <div>
@@ -449,20 +448,20 @@ function App() {
                 </div>
                 <input
                   className={`input join-item input-bordered w-full text-right ${
-                    !hasEnoughBalance && amount > 0
+                    !hasEnoughBalance && isAmountNonZero
                       ? "input-error"
                       : !hasEnoughAllowance &&
-                        amount > 0 &&
+                        isAmountNonZero &&
                         !!allowance &&
                         "input-warning"
                   }`}
                   placeholder="Amount"
                   type="number"
-                  value={amount || ""}
-                  onChange={({ target }) => setAmount(Number(target.value))}
+                  value={amount}
+                  onChange={({ target }) => setAmount(target.value)}
                 />
               </div>
-              {!hasEnoughBalance && amount > 0 ? (
+              {!hasEnoughBalance && isAmountNonZero ? (
                 <div className="label align-bottom place-content-end">
                   <span className="label-text-alt text-error">
                     Insufficient balance
@@ -470,7 +469,7 @@ function App() {
                 </div>
               ) : (
                 !hasEnoughAllowance &&
-                amount > 0 &&
+                isAmountNonZero &&
                 !!allowance && (
                   <div className="label align-bottom place-content-end">
                     <span className="label-text-alt text-warning">
