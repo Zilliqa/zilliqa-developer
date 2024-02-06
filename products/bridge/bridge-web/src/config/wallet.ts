@@ -12,7 +12,9 @@ export const { chains, publicClient } = configureChains(
 const connectors = connectorsForWallets([
   {
     groupName: "Recommended",
-    wallets: [metaMaskWallet({ chains, projectId: "" })],
+    wallets: [
+      metaMaskWallet({ chains, projectId: "", walletConnectVersion: "1" }),
+    ],
   },
 ]);
 
