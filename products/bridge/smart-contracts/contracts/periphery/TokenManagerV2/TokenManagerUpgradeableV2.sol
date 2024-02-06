@@ -7,6 +7,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ITokenManagerEvents, ITokenManagerStructs} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {TokenManagerFees} from "contracts/periphery/TokenManagerV2/TokenManagerFees.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pausable.sol";
 
 interface ITokenManager is ITokenManagerEvents, ITokenManagerStructs {
     error InvalidSourceChainId();
@@ -27,6 +28,14 @@ interface ITokenManager is ITokenManagerEvents, ITokenManagerStructs {
         RemoteToken memory remoteToken
     ) external;
 
+    function setFees(uint newFees) external;
+
+    function withdrawFees(uint payable to) external;
+
+    function pause() external;
+
+    function unpause() external;
+
     function transfer(
         address token,
         uint remoteChainId,
@@ -45,7 +54,8 @@ abstract contract TokenManagerUpgradeableV2 is
     Initializable,
     UUPSUpgradeable,
     OwnableUpgradeable,
-    TokenManagerFees
+    TokenManagerFees, // V2 New inheritance
+    PausableUpgradeable // V2 New inheritance
 {
     /// @custom:storage-location erc7201:zilliqa.storage.TokenManager
     struct TokenManagerStorage {
@@ -132,12 +142,24 @@ abstract contract TokenManagerUpgradeableV2 is
         _registerToken(token, remoteToken);
     }
 
+    // V2 New Function
     function setFees(uint newFees) external override onlyOwner {
         _setFees(newFees);
     }
 
+    // V2 New Function
     function withdrawFees(address payable to) external override onlyOwner {
         _withdrawFees(to);
+    }
+
+    // V2 New Function
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    // V2 New Function
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     // TO OVERRIDE – Incoming
@@ -154,12 +176,13 @@ abstract contract TokenManagerUpgradeableV2 is
         uint amount
     ) internal virtual;
 
+    // V2 Modified: `whenNotPaused` & `checkFees` modifiers, also made payable
     function transfer(
         address token,
         uint remoteChainId,
         address remoteRecipient,
         uint amount
-    ) external payable virtual checkFees {
+    ) external payable virtual whenNotPaused checkFees {
         RemoteToken memory remoteToken = getRemoteTokens(token, remoteChainId);
 
         _handleTransfer(token, msg.sender, amount);
