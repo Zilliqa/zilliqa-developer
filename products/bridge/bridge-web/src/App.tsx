@@ -19,10 +19,13 @@ import {
   useNetwork,
   usePrepareContractWrite,
   useSwitchNetwork,
+  useWaitForTransaction,
 } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
 import { MintAndBurnTokenManagerAbi } from "./abi/MintAndBurnTokenManager";
-import { toast } from "react-toastify";
+import { Id, toast } from "react-toastify";
+
+type TxnType = "approve" | "bridge";
 
 function App() {
   const [fromChain, setFromChain] = useState<Chains>(
@@ -32,11 +35,14 @@ function App() {
   const [toChain, setToChain] = useState<Chains>(
     Object.values(chainConfigs)[1].chain
   );
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>("");
+  const isAmountNonZero = Number(amount) > 0;
   const fromChainConfig = chainConfigs[fromChain]!;
   const toChainConfig = chainConfigs[toChain]!;
   const { switchNetwork } = useSwitchNetwork();
   const { chain } = useNetwork();
+  const [latestTxn, setLatestTxn] = useState<[TxnType, `0x${string}`]>();
+  const [loadingId, setLoadingId] = useState<Id>();
 
   const [recipient, setRecipient] = useState<string>();
   const [token, selectedToken] = useState<TokenConfig>(
@@ -96,13 +102,11 @@ function App() {
   });
 
   const hasEnoughAllowance =
-    !!decimals && !!amount
-      ? (allowance ?? 0n) >= parseUnits(amount.toString(), decimals)
+    !!decimals && isAmountNonZero
+      ? (allowance ?? 0n) >= parseUnits(amount!, decimals)
       : true;
   const hasEnoughBalance =
-    decimals && balance
-      ? parseUnits(amount.toString(), decimals) <= balance
-      : false;
+    decimals && balance ? parseUnits(amount!, decimals) <= balance : false;
   const validBech32Address = recipient && validation.isBech32(recipient);
   const validEthAddress = recipient && validation.isAddress(recipient);
   const hasValidAddress = recipient
@@ -119,7 +123,7 @@ function App() {
       token.address,
       BigInt(toChainConfig.chainId),
       ethRecipient as `0x${string}`,
-      parseUnits(amount.toString(), decimals ?? 0),
+      parseUnits(amount!, decimals ?? 0),
     ],
     functionName: "transfer",
     enabled: !!(
@@ -150,7 +154,7 @@ function App() {
         token.address,
         BigInt(toChainConfig.chainId),
         ethRecipient as `0x${string}`,
-        parseUnits(amount.toString(), decimals || 0),
+        parseUnits(amount!, decimals || 0),
       ],
       functionName: "transfer",
       gas: 600_000n,
@@ -164,11 +168,12 @@ function App() {
     abi: erc20ABI,
     args: [
       fromChainConfig.tokenManagerAddress,
-      parseUnits(amount.toString(), decimals ?? 0),
+      parseUnits(amount!, decimals ?? 0),
     ],
     functionName: "approve",
     gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
     type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
+    enabled: hasEnoughAllowance,
   });
 
   const { writeAsync: approve, isLoading: isLoadingApprove } =
@@ -182,6 +187,98 @@ function App() {
     (fromChainConfig.isZilliqa
       ? !isLoadingBridgeFromZilliqa
       : !isLoadingBridge);
+
+  const {
+    data: txnReceipt,
+    isLoading: isWaitingForTxn,
+    error,
+    refetch,
+  } = useWaitForTransaction({
+    hash: latestTxn?.[1],
+    enabled: !!latestTxn?.[1],
+  });
+
+  useEffect(() => {
+    if (error) {
+      // Little hack to get Zilliqa to refetch the pending txns
+      refetch();
+    }
+  }, [error, refetch]);
+
+  useEffect(() => {
+    if (txnReceipt && loadingId && latestTxn) {
+      let description;
+      if (latestTxn[0] === "bridge") {
+        description = (
+          <div>
+            Bridge request txn sent. From {fromChainConfig.name} to{" "}
+            {toChainConfig.name} {amount} {token.name} tokens. View on{" "}
+            <a
+              className="link text-ellipsis w-10"
+              onClick={() =>
+                window.open(
+                  `${fromChainConfig.blockExplorer}${txnReceipt.transactionHash}`,
+                  "_blank"
+                )
+              }
+            >
+              block explorer
+            </a>
+          </div>
+        );
+        setAmount("");
+      } else if (latestTxn[0] === "approve") {
+        description = (
+          <div>
+            Approve txn successful. View on{" "}
+            <a
+              className="link text-ellipsis w-10"
+              onClick={() =>
+                window.open(
+                  `${fromChainConfig.blockExplorer}${txnReceipt.transactionHash}`,
+                  "_blank"
+                )
+              }
+            >
+              block explorer
+            </a>
+          </div>
+        );
+      } else {
+        return;
+      }
+      toast.update(loadingId, {
+        render: description,
+        type: "success",
+        isLoading: false,
+      });
+      setLoadingId(undefined);
+      setLatestTxn(undefined);
+    }
+  }, [
+    isWaitingForTxn,
+    txnReceipt,
+    loadingId,
+    latestTxn,
+    fromChainConfig.name,
+    fromChainConfig.blockExplorer,
+    toChainConfig.name,
+    amount,
+    token.name,
+  ]);
+
+  useEffect(() => {
+    if (!loadingId && isWaitingForTxn && latestTxn) {
+      const id = toast.loading("Transaction being processed...");
+      setLoadingId(id);
+    }
+  }, [isWaitingForTxn, latestTxn, loadingId]);
+
+  const showLoadingButton =
+    isLoadingBridgeFromZilliqa ||
+    isLoadingBridge ||
+    isLoadingApprove ||
+    isWaitingForTxn;
 
   return (
     <>
@@ -352,20 +449,20 @@ function App() {
                 </div>
                 <input
                   className={`input join-item input-bordered w-full text-right ${
-                    !hasEnoughBalance && amount > 0
+                    !hasEnoughBalance && isAmountNonZero
                       ? "input-error"
                       : !hasEnoughAllowance &&
-                        amount > 0 &&
+                        isAmountNonZero &&
                         !!allowance &&
                         "input-warning"
                   }`}
                   placeholder="Amount"
                   type="number"
-                  value={amount || ""}
-                  onChange={({ target }) => setAmount(Number(target.value))}
+                  value={amount}
+                  onChange={({ target }) => setAmount(target.value)}
                 />
               </div>
-              {!hasEnoughBalance && amount > 0 ? (
+              {!hasEnoughBalance && isAmountNonZero ? (
                 <div className="label align-bottom place-content-end">
                   <span className="label-text-alt text-error">
                     Insufficient balance
@@ -373,7 +470,7 @@ function App() {
                 </div>
               ) : (
                 !hasEnoughAllowance &&
-                amount > 0 &&
+                isAmountNonZero &&
                 !!allowance && (
                   <div className="label align-bottom place-content-end">
                     <span className="label-text-alt text-warning">
@@ -387,34 +484,19 @@ function App() {
               {!hasEnoughAllowance && hasEnoughBalance ? (
                 <button
                   className="btn w-5/6 mx-10 btn-outline"
-                  disabled={isLoadingApprove}
+                  disabled={showLoadingButton}
                   onClick={async () => {
                     if (approve) {
                       const tx = await approve();
-                      toast.success(
-                        <div>
-                          Approve txn sent. View on{" "}
-                          <a
-                            className="link text-ellipsis w-10"
-                            onClick={() =>
-                              window.open(
-                                `${fromChainConfig.blockExplorer}${tx.hash}`,
-                                "_blank"
-                              )
-                            }
-                          >
-                            block explorer
-                          </a>
-                        </div>
-                      );
                       console.log(tx.hash);
+                      setLatestTxn(["approve", tx.hash]);
                     }
                   }}
                 >
-                  {isLoadingApprove ? (
+                  {showLoadingButton ? (
                     <>
                       <span className="loading loading-spinner"></span>
-                      loading
+                      Loading
                     </>
                   ) : (
                     "Approve"
@@ -423,43 +505,24 @@ function App() {
               ) : (
                 <button
                   className="btn w-5/6 mx-10 btn-primary text-primary-content"
-                  disabled={!canBridge}
+                  disabled={!canBridge || showLoadingButton}
                   onClick={async () => {
-                    let tx: { hash: string };
+                    let tx: { hash: `0x${string}` };
                     if (fromChainConfig.isZilliqa && bridgeFromZilliqa) {
                       tx = await bridgeFromZilliqa();
-                      console.log(tx.hash);
                     } else if (bridge) {
                       tx = await bridge();
-                      console.log(tx.hash);
                     } else {
                       return;
                     }
-                    toast.success(
-                      <div>
-                        Bridge request txn sent. From {fromChainConfig.name} to{" "}
-                        {toChainConfig.name} {amount} {token.name} tokens. View
-                        on{" "}
-                        <a
-                          className="link text-ellipsis w-10"
-                          onClick={() =>
-                            window.open(
-                              `${fromChainConfig.blockExplorer}${tx.hash}`,
-                              "_blank"
-                            )
-                          }
-                        >
-                          block explorer
-                        </a>
-                      </div>
-                    );
-                    setAmount(0);
+                    console.log(tx.hash);
+                    setLatestTxn(["bridge", tx.hash]);
                   }}
                 >
-                  {isLoadingBridge || isLoadingBridgeFromZilliqa ? (
+                  {showLoadingButton ? (
                     <>
                       <span className="loading loading-spinner"></span>
-                      loading
+                      Loading
                     </>
                   ) : (
                     "Bridge"
