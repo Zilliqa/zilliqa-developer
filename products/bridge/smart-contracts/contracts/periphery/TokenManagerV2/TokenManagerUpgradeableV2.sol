@@ -6,10 +6,14 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ITokenManagerEvents, ITokenManagerStructs} from "contracts/periphery/TokenManagerUpgradeable.sol";
-import {TokenManagerFees} from "contracts/periphery/TokenManagerV2/TokenManagerFees.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pausable.sol";
+import {TokenManagerFees, ITokenManagerFees} from "contracts/periphery/TokenManagerV2/TokenManagerFees.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-interface ITokenManager is ITokenManagerEvents, ITokenManagerStructs {
+interface ITokenManager is
+    ITokenManagerEvents,
+    ITokenManagerStructs,
+    ITokenManagerFees
+{
     error InvalidSourceChainId();
     error InvalidTokenManager();
     error NotGateway();
@@ -30,7 +34,7 @@ interface ITokenManager is ITokenManagerEvents, ITokenManagerStructs {
 
     function setFees(uint newFees) external;
 
-    function withdrawFees(uint payable to) external;
+    function withdrawFees(address payable to) external;
 
     function pause() external;
 
@@ -143,12 +147,16 @@ abstract contract TokenManagerUpgradeableV2 is
     }
 
     // V2 New Function
-    function setFees(uint newFees) external override onlyOwner {
+    function setFees(
+        uint newFees
+    ) external override(ITokenManager, TokenManagerFees) onlyOwner {
         _setFees(newFees);
     }
 
     // V2 New Function
-    function withdrawFees(address payable to) external override onlyOwner {
+    function withdrawFees(
+        address payable to
+    ) external override(ITokenManager, TokenManagerFees) onlyOwner {
         _withdrawFees(to);
     }
 

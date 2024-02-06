@@ -3,11 +3,22 @@ pragma solidity ^0.8.20;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract TokenManagerFees {
+interface ITokenManagerFeesEvents {
     event FeesUpdated(uint feesBefore, uint feesAfter);
+    event FeesWithdrawn(uint amount);
+}
 
+interface ITokenManagerFees is ITokenManagerFeesEvents {
     error InsufficientFees(uint received, uint expected);
 
+    function getFees() external view returns (uint);
+
+    function setFees(uint newFees) external;
+
+    function withdrawFees(address payable to) external;
+}
+
+abstract contract TokenManagerFees is ITokenManagerFees {
     /// @custom:storage-location erc7201:zilliqa.storage.TokenManagerFees
     struct TokenManagerFeeStorage {
         uint fees;
@@ -49,7 +60,9 @@ abstract contract TokenManagerFees {
     function setFees(uint newFees) external virtual;
 
     function _withdrawFees(address payable to) internal {
-        to.transfer(address(this).balance);
+        uint amount = address(this).balance;
+        emit FeesWithdrawn(amount);
+        to.transfer(amount);
     }
 
     function withdrawFees(address payable to) external virtual;
