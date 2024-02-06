@@ -1,4 +1,4 @@
-export const TokenManagerAbi = [
+export const tokenManagerAbi = [
   {
     type: "function",
     name: "accept",

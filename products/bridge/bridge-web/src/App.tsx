@@ -23,7 +23,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
 import { Id, toast } from "react-toastify";
-import { TokenManagerAbi } from "./abi/TokenManager";
+import { tokenManagerAbi } from "./abi/TokenManager";
 
 type TxnType = "approve" | "bridge";
 
@@ -82,6 +82,12 @@ function App() {
     address: token.address,
     enabled: !!token.address,
   });
+  const { data: fees } = useContractRead({
+    abi: tokenManagerAbi,
+    functionName: "getFees",
+    address: fromChainConfig.tokenManagerAddress,
+    enabled: !!fromChainConfig.tokenManagerAddress,
+  });
   const { data: balance } = useContractRead({
     abi: erc20ABI,
     functionName: "balanceOf",
@@ -118,7 +124,7 @@ function App() {
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
-    abi: TokenManagerAbi,
+    abi: tokenManagerAbi,
     args: [
       token.address,
       BigInt(toChainConfig.chainId),
@@ -149,7 +155,7 @@ function App() {
       address: fromChainConfig.tokenManagerAddress,
       chain: fromChainConfig.wagmiChain,
       account: account!,
-      abi: TokenManagerAbi,
+      abi: tokenManagerAbi,
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
