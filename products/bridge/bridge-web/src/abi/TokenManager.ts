@@ -1,4 +1,4 @@
-export const MintAndBurnTokenManagerAbi = [
+export const TokenManagerAbi = [
   {
     type: "function",
     name: "accept",
@@ -8,7 +8,11 @@ export const MintAndBurnTokenManagerAbi = [
         type: "tuple",
         internalType: "struct CallMetadata",
         components: [
-          { name: "sourceChainId", type: "uint256", internalType: "uint256" },
+          {
+            name: "sourceChainId",
+            type: "uint256",
+            internalType: "uint256",
+          },
           { name: "sender", type: "address", internalType: "address" },
         ],
       },
@@ -16,6 +20,13 @@ export const MintAndBurnTokenManagerAbi = [
     ],
     outputs: [],
     stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "getFees",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -29,7 +40,11 @@ export const MintAndBurnTokenManagerAbi = [
     name: "getRemoteTokens",
     inputs: [
       { name: "token", type: "address", internalType: "address" },
-      { name: "remoteChainId", type: "uint256", internalType: "uint256" },
+      {
+        name: "remoteChainId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
       {
@@ -38,12 +53,23 @@ export const MintAndBurnTokenManagerAbi = [
         internalType: "struct ITokenManagerStructs.RemoteToken",
         components: [
           { name: "token", type: "address", internalType: "address" },
-          { name: "tokenManager", type: "address", internalType: "address" },
+          {
+            name: "tokenManager",
+            type: "address",
+            internalType: "address",
+          },
           { name: "chainId", type: "uint256", internalType: "uint256" },
         ],
       },
     ],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "pause",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -56,11 +82,22 @@ export const MintAndBurnTokenManagerAbi = [
         internalType: "struct ITokenManagerStructs.RemoteToken",
         components: [
           { name: "token", type: "address", internalType: "address" },
-          { name: "tokenManager", type: "address", internalType: "address" },
+          {
+            name: "tokenManager",
+            type: "address",
+            internalType: "address",
+          },
           { name: "chainId", type: "uint256", internalType: "uint256" },
         ],
       },
     ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setFees",
+    inputs: [{ name: "newFees", type: "uint256", internalType: "uint256" }],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -76,51 +113,47 @@ export const MintAndBurnTokenManagerAbi = [
     name: "transfer",
     inputs: [
       { name: "token", type: "address", internalType: "address" },
-      { name: "remoteChainId", type: "uint256", internalType: "uint256" },
-      { name: "remoteRecipient", type: "address", internalType: "address" },
+      {
+        name: "remoteChainId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "remoteRecipient",
+        type: "address",
+        internalType: "address",
+      },
       { name: "amount", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [],
+    stateMutability: "payable",
+  },
+  {
+    type: "function",
+    name: "unpause",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "withdrawFees",
+    inputs: [{ name: "to", type: "address", internalType: "address payable" }],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "event",
-    name: "Locked",
+    name: "FeesUpdated",
     inputs: [
       {
-        name: "token",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      { name: "from", type: "address", indexed: true, internalType: "address" },
-      {
-        name: "amount",
+        name: "feesBefore",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
       },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "Released",
-    inputs: [
       {
-        name: "token",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "recipient",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "amount",
+        name: "feesAfter",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -177,6 +210,14 @@ export const MintAndBurnTokenManagerAbi = [
       },
     ],
     anonymous: false,
+  },
+  {
+    type: "error",
+    name: "InsufficientFees",
+    inputs: [
+      { name: "received", type: "uint256", internalType: "uint256" },
+      { name: "expected", type: "uint256", internalType: "uint256" },
+    ],
   },
   { type: "error", name: "InvalidSourceChainId", inputs: [] },
   { type: "error", name: "InvalidTokenManager", inputs: [] },

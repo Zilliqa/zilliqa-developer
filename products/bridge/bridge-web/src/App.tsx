@@ -22,8 +22,8 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
-import { MintAndBurnTokenManagerAbi } from "./abi/MintAndBurnTokenManager";
 import { Id, toast } from "react-toastify";
+import { TokenManagerAbi } from "./abi/TokenManager";
 
 type TxnType = "approve" | "bridge";
 
@@ -118,7 +118,7 @@ function App() {
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
-    abi: MintAndBurnTokenManagerAbi,
+    abi: TokenManagerAbi,
     args: [
       token.address,
       BigInt(toChainConfig.chainId),
@@ -149,7 +149,7 @@ function App() {
       address: fromChainConfig.tokenManagerAddress,
       chain: fromChainConfig.wagmiChain,
       account: account!,
-      abi: MintAndBurnTokenManagerAbi,
+      abi: TokenManagerAbi,
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
