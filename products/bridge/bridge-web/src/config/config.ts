@@ -10,8 +10,7 @@ export enum TokenManagerType {
 export type Chains = "bsc-testnet" | "zq-testnet" | "bsc" | "zq";
 
 export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
-  //import.meta.env.MODE === "production"
-  true
+  import.meta.env.MODE === "production"
     ? {
         zq: {
           chain: "zq",
@@ -107,5 +106,5 @@ export type TokenConfig = {
   name: string;
   address: `0x${string}`;
   blockExplorer: string;
-  logo: string | undefined;
+  logo?: string;
 };
