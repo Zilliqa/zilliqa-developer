@@ -132,6 +132,7 @@ function App() {
       parseUnits(amount!, decimals ?? 0),
     ],
     functionName: "transfer",
+    value: fees ?? 0n,
     enabled: !!(
       toChainConfig &&
       fromChainConfig &&
@@ -156,6 +157,7 @@ function App() {
       chain: fromChainConfig.wagmiChain,
       account: account!,
       abi: tokenManagerAbi,
+      value: fees ?? 0n,
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
