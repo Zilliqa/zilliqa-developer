@@ -1,5 +1,6 @@
 import { Chain } from "viem";
 import { bsc, bscTestnet, zilliqa, zilliqaTestnet } from "viem/chains";
+import fps_token from "../assets/fps_token.png";
 
 export enum TokenManagerType {
   MintAndBurn,
@@ -9,7 +10,8 @@ export enum TokenManagerType {
 export type Chains = "bsc-testnet" | "zq-testnet" | "bsc" | "zq";
 
 export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
-  import.meta.env.MODE === "production"
+  //import.meta.env.MODE === "production"
+  true
     ? {
         zq: {
           chain: "zq",
@@ -23,6 +25,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               address: "0x241c677D9969419800402521ae87C411897A029f",
               blockExplorer:
                 "https://otterscan.zilliqa.com/address/0x241c677D9969419800402521ae87C411897A029f",
+              logo: fps_token,
             },
           ],
           chainId: 32769,
@@ -41,6 +44,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               address: "0x351dA1E7500aBA1d168b9435DCE73415718d212F",
               blockExplorer:
                 "https://bscscan.com/address/0x351dA1E7500aBA1d168b9435DCE73415718d212F",
+              logo: fps_token,
             },
           ],
           chainId: 56,
@@ -103,4 +107,5 @@ export type TokenConfig = {
   name: string;
   address: `0x${string}`;
   blockExplorer: string;
+  logo: string | undefined;
 };
