@@ -154,7 +154,7 @@ function App() {
         token.address,
         BigInt(toChainConfig.chainId),
         ethRecipient as `0x${string}`,
-        parseUnits(amount!, decimals || 0),
+        parseUnits(amount!, decimals ?? 0),
       ],
       functionName: "transfer",
       gas: 600_000n,
@@ -173,7 +173,6 @@ function App() {
     functionName: "approve",
     gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
     type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
-    enabled: hasEnoughAllowance,
   });
 
   const { writeAsync: approve, isLoading: isLoadingApprove } =
@@ -438,7 +437,13 @@ function App() {
                     onClick={() => window.open(token.blockExplorer, "_blank")}
                     className="btn join-item w-32"
                   >
-                    {token.logo && <img src={token.logo} className="h-8" alt="Zilliqa Logo" />}
+                    {token.logo && (
+                      <img
+                        src={token.logo}
+                        className="h-8"
+                        alt="Zilliqa Logo"
+                      />
+                    )}
                     <p>{token.name}</p>
                     <FontAwesomeIcon
                       icon={faArrowUpRightFromSquare}
