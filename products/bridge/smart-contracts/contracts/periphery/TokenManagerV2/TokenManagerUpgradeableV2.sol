@@ -205,6 +205,7 @@ abstract contract TokenManagerUpgradeableV2 is
     }
 
     // Incoming
+    // No pausing here because we want incoming txns to go through that have already initiated
     function accept(
         CallMetadata calldata metadata,
         bytes calldata _args
