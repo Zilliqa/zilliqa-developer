@@ -341,6 +341,7 @@ function App() {
                     onClick={() => window.open(token.blockExplorer, "_blank")}
                     className="btn join-item w-32"
                   >
+                    {token.logo && <img src={token.logo} className="h-8" alt="Zilliqa Logo" />}
                     <p>{token.name}</p>
                     <FontAwesomeIcon
                       icon={faArrowUpRightFromSquare}
