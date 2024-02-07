@@ -3,7 +3,6 @@ import {
   faArrowRight,
   faArrowUpRightFromSquare,
   faChevronDown,
-  faRepeat,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { Chains, TokenConfig, chainConfigs } from "./config/config";
@@ -21,7 +20,8 @@ import { formatEther, formatUnits, parseUnits } from "viem";
 import { Id, toast } from "react-toastify";
 import { tokenManagerAbi } from "./abi/TokenManager";
 import Navbar from "./components/Navbar";
-import useRecipient from "./hooks/useRecipient";
+import useRecipientInput from "./hooks/useRecipientInput";
+import RecipientInput from "./components/RecipientInput";
 
 type TxnType = "approve" | "bridge";
 
@@ -44,13 +44,7 @@ function App() {
     Object.values(chainConfigs)[0].tokens[0]
   );
 
-  const {
-    recipient,
-    recipientEth,
-    toggleAddress,
-    handleUpdateAddress,
-    isAddressValid,
-  } = useRecipient();
+  const { recipientEth, isAddressValid } = useRecipientInput();
 
   const fromChainConfig = chainConfigs[fromChain]!;
   const toChainConfig = chainConfigs[toChain]!;
@@ -384,41 +378,7 @@ function App() {
               </div>
             </div>
 
-            <div className="form-control">
-              <div className="label">
-                <span>Recipient</span>
-              </div>
-              <div className="join">
-                <div className="indicator">
-                  <button
-                    className="btn join-item"
-                    disabled={!isAddressValid}
-                    onClick={() => toggleAddress()}
-                  >
-                    <FontAwesomeIcon
-                      icon={faRepeat}
-                      color="white"
-                      className="ml-auto"
-                    />
-                  </button>
-                </div>
-                <input
-                  className={`input join-item input-bordered w-full font-mono text-sm text-end ${
-                    !isAddressValid && "input-warning"
-                  }`}
-                  placeholder="Address"
-                  value={recipient}
-                  onChange={({ target }) => handleUpdateAddress(target.value)}
-                />
-              </div>
-              {!isAddressValid && (
-                <div className="label align-bottom place-content-end">
-                  <span className="label-text-alt text-warning">
-                    Invalid Address
-                  </span>
-                </div>
-              )}
-            </div>
+            <RecipientInput />
 
             <div className="form-control">
               <div className="label">
