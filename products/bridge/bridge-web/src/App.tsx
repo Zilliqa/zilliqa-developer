@@ -13,15 +13,17 @@ import {
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
+  usePublicClient,
   useSwitchNetwork,
   useWaitForTransaction,
 } from "wagmi";
-import { formatEther, formatUnits, parseUnits } from "viem";
+import { formatEther, formatUnits, getAbiItem, parseUnits } from "viem";
 import { Id, toast } from "react-toastify";
 import { tokenManagerAbi } from "./abi/TokenManager";
 import Navbar from "./components/Navbar";
 import useRecipientInput from "./hooks/useRecipientInput";
 import RecipientInput from "./components/RecipientInput";
+import { chainGatewayAbi } from "./abi/ChainGateway";
 
 type TxnType = "approve" | "bridge";
 
@@ -48,7 +50,9 @@ function App() {
 
   const fromChainConfig = chainConfigs[fromChain]!;
   const toChainConfig = chainConfigs[toChain]!;
-  const fromChainIsCurrentChain = fromChainConfig.wagmiChain == chain;
+
+  const fromChainClient = usePublicClient();
+  const toChainClient = usePublicClient({ chainId: toChainConfig.chainId });
 
   useEffect(() => {
     switchNetwork && switchNetwork(fromChainConfig.chainId);
@@ -77,26 +81,26 @@ function App() {
     abi: erc20ABI,
     functionName: "decimals",
     address: token.address,
-    enabled: !!token.address && fromChainIsCurrentChain,
+    enabled: !!token.address,
   });
   const { data: fees } = useContractRead({
     abi: tokenManagerAbi,
     functionName: "getFees",
     address: fromChainConfig.tokenManagerAddress,
-    enabled: !!fromChainConfig.tokenManagerAddress && fromChainIsCurrentChain,
+    enabled: !!fromChainConfig.tokenManagerAddress,
   });
   const { data: paused } = useContractRead({
     abi: tokenManagerAbi,
     functionName: "paused",
     address: fromChainConfig.tokenManagerAddress,
-    enabled: !!fromChainConfig.tokenManagerAddress && fromChainIsCurrentChain,
+    enabled: !!fromChainConfig.tokenManagerAddress,
   });
   const { data: balance } = useContractRead({
     abi: erc20ABI,
     functionName: "balanceOf",
     args: account ? [account!] : undefined,
     address: token.address,
-    enabled: !!account && !!token.address && fromChainIsCurrentChain,
+    enabled: !!account && !!token.address,
     watch: true,
   });
 
@@ -106,16 +110,13 @@ function App() {
     address: token.address,
     args: [account!, fromChainConfig.tokenManagerAddress],
     enabled:
-      !!account &&
-      !!token.address &&
-      !!fromChainConfig.tokenManagerAddress &&
-      fromChainIsCurrentChain,
+      !!account && !!token.address && !!fromChainConfig.tokenManagerAddress,
     watch: true,
   });
 
   const hasEnoughAllowance =
-    decimals && isAmountNonZero && amount
-      ? (allowance ?? 0n) >= parseUnits(amount, decimals)
+    decimals && isAmountNonZero
+      ? (allowance ?? 0n) >= parseUnits(amount!, decimals)
       : true;
   const hasEnoughBalance =
     decimals && balance && amount
@@ -139,9 +140,7 @@ function App() {
       fromChainConfig &&
       !fromChainConfig.isZilliqa &&
       recipientEth &&
-      amount &&
-      decimals &&
-      fromChainIsCurrentChain
+      decimals
     ),
   });
 
@@ -183,14 +182,14 @@ function App() {
     functionName: "approve",
     gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
     type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
-    enabled: fromChainIsCurrentChain && !hasEnoughAllowance,
+    enabled: !hasEnoughAllowance,
   });
 
   const { writeAsync: approve, isLoading: isLoadingApprove } =
     useContractWrite(approveConfig);
 
   const canBridge =
-    amount &&
+    isAmountNonZero &&
     isAddressValid &&
     hasEnoughAllowance &&
     hasEnoughBalance &&
@@ -237,6 +236,56 @@ function App() {
             </a>
           </div>
         );
+        (async () => {
+          const logs = await fromChainClient.getLogs({
+            address: fromChainConfig.chainGatewayAddress,
+            event: getAbiItem({
+              abi: chainGatewayAbi,
+              name: "Relayed",
+              args: [toChainConfig.chainId],
+            }),
+            blockHash: txnReceipt.blockHash,
+          });
+          const nonce = logs.find(
+            (log) => log.transactionHash === txnReceipt.transactionHash
+          )?.args.nonce;
+
+          const id = toast.loading(`Bridging to ${toChainConfig.name}...`);
+
+          // TODO: find a way to stop watching once event arrives
+          toChainClient.watchContractEvent({
+            abi: chainGatewayAbi,
+            address: toChainConfig.chainGatewayAddress,
+            eventName: "Dispatched",
+            args: {
+              nonce,
+            },
+            onLogs: (logs) => {
+              toast.update(id, {
+                render: (
+                  <div>
+                    Bridge txn complete, funds arrived to {toChainConfig.name}{" "}
+                    chain. View on{" "}
+                    <a
+                      className="link text-ellipsis w-10"
+                      onClick={() =>
+                        window.open(
+                          `${toChainConfig.blockExplorer}${logs[0].transactionHash}`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      block explorer
+                    </a>
+                  </div>
+                ),
+                type: "success",
+                isLoading: false,
+              });
+            },
+          });
+        })();
+
         setAmount("");
       } else if (latestTxn[0] === "approve") {
         description = (
@@ -276,6 +325,12 @@ function App() {
     toChainConfig.name,
     amount,
     token.name,
+    fromChainConfig.chainGatewayAddress,
+    toChainConfig.chainId,
+    toChainConfig.chainGatewayAddress,
+    fromChainClient,
+    toChainClient,
+    toChainConfig.blockExplorer,
   ]);
 
   useEffect(() => {
