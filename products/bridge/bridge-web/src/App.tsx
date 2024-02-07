@@ -139,14 +139,7 @@ function App() {
     ],
     functionName: "transfer",
     value: fees ?? 0n,
-    enabled: !!(
-      toChainConfig &&
-      fromChainConfig &&
-      !fromChainConfig.isZilliqa &&
-      ethRecipient &&
-      amount &&
-      decimals
-    ),
+    enabled: hasEnoughAllowance,
   });
 
   const { writeAsync: bridge, isLoading: isLoadingBridge } =
