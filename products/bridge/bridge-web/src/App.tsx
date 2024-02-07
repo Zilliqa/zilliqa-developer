@@ -1,7 +1,3 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import zilliqa from "./assets/zilliqa.png";
-import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
-import { validation } from "@zilliqa-js/util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -24,6 +20,8 @@ import {
 import { formatEther, formatUnits, parseUnits } from "viem";
 import { Id, toast } from "react-toastify";
 import { tokenManagerAbi } from "./abi/TokenManager";
+import Navbar from "./components/Navbar";
+import useRecipient from "./hooks/useRecipient";
 
 type TxnType = "approve" | "bridge";
 
@@ -42,10 +40,17 @@ function App() {
   const isAmountNonZero = Number(amount) > 0;
   const [latestTxn, setLatestTxn] = useState<[TxnType, `0x${string}`]>();
   const [loadingId, setLoadingId] = useState<Id>();
-  const [recipient, setRecipient] = useState<string>();
   const [token, selectedToken] = useState<TokenConfig>(
     Object.values(chainConfigs)[0].tokens[0]
   );
+
+  const {
+    recipient,
+    recipientEth,
+    toggleAddress,
+    handleUpdateAddress,
+    isAddressValid,
+  } = useRecipient();
 
   const fromChainConfig = chainConfigs[fromChain]!;
   const toChainConfig = chainConfigs[toChain]!;
@@ -58,10 +63,6 @@ function App() {
   useEffect(() => {
     selectedToken(fromChainConfig.tokens[0]);
   }, [fromChain, fromChainConfig.tokens]);
-
-  useEffect(() => {
-    setRecipient(account);
-  }, [account]);
 
   useEffect(() => {
     if (chain !== fromChainConfig.wagmiChain) {
@@ -126,22 +127,14 @@ function App() {
     decimals && balance && amount
       ? parseUnits(amount, decimals) <= balance
       : false;
-  const validBech32Address = recipient && validation.isBech32(recipient);
-  const validEthAddress = recipient && validation.isAddress(recipient);
-  const hasValidAddress = recipient
-    ? validBech32Address != validEthAddress
-    : true;
-  const ethRecipient = validBech32Address
-    ? fromBech32Address(recipient)
-    : recipient;
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
     abi: tokenManagerAbi,
-    args: [
+    args: recipientEth && [
       token.address,
       BigInt(toChainConfig.chainId),
-      ethRecipient as `0x${string}`,
+      recipientEth,
       amount ? parseUnits(amount, decimals ?? 0) : 0n,
     ],
     functionName: "transfer",
@@ -151,7 +144,7 @@ function App() {
       toChainConfig &&
       fromChainConfig &&
       !fromChainConfig.isZilliqa &&
-      ethRecipient &&
+      recipientEth &&
       amount &&
       decimals &&
       fromChainIsCurrentChain
@@ -176,7 +169,7 @@ function App() {
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
-        ethRecipient as `0x${string}`,
+        recipientEth!,
         amount ? parseUnits(amount, decimals ?? 0) : 0n,
       ],
       functionName: "transfer",
@@ -204,7 +197,7 @@ function App() {
 
   const canBridge =
     amount &&
-    hasValidAddress &&
+    isAddressValid &&
     hasEnoughAllowance &&
     hasEnoughBalance &&
     !paused &&
@@ -307,14 +300,7 @@ function App() {
   return (
     <>
       <div className="h-screen flex items-center justify-center">
-        <div className="fixed top-0 navbar py-6 px-10">
-          <div className="flex-1 hidden sm:block">
-            <img src={zilliqa} className="h-16" alt="Zilliqa Logo" />
-          </div>
-          <div className="flex-none">
-            <ConnectButton />
-          </div>
-        </div>
+        <Navbar />
 
         <div className="card min-h-96 bg-neutral shadow-xl">
           <div className="card-body">
@@ -406,20 +392,8 @@ function App() {
                 <div className="indicator">
                   <button
                     className="btn join-item"
-                    disabled={!hasValidAddress}
-                    onClick={() => {
-                      setRecipient((_recipient) => {
-                        if (!_recipient) {
-                          return _recipient;
-                        }
-                        if (validation.isBech32(_recipient)) {
-                          return fromBech32Address(_recipient!);
-                        }
-                        if (validation.isAddress(_recipient)) {
-                          return toBech32Address(_recipient);
-                        }
-                      });
-                    }}
+                    disabled={!isAddressValid}
+                    onClick={() => toggleAddress()}
                   >
                     <FontAwesomeIcon
                       icon={faRepeat}
@@ -430,14 +404,14 @@ function App() {
                 </div>
                 <input
                   className={`input join-item input-bordered w-full font-mono text-sm text-end ${
-                    !hasValidAddress && "input-warning"
+                    !isAddressValid && "input-warning"
                   }`}
                   placeholder="Address"
                   value={recipient}
-                  onChange={({ target }) => setRecipient(target.value)}
+                  onChange={({ target }) => handleUpdateAddress(target.value)}
                 />
               </div>
-              {!hasValidAddress && (
+              {!isAddressValid && (
                 <div className="label align-bottom place-content-end">
                   <span className="label-text-alt text-warning">
                     Invalid Address
