@@ -28,26 +28,28 @@ import { tokenManagerAbi } from "./abi/TokenManager";
 type TxnType = "approve" | "bridge";
 
 function App() {
+  const { address: account } = useAccount();
+  const { switchNetwork } = useSwitchNetwork();
+  const { chain } = useNetwork();
+
   const [fromChain, setFromChain] = useState<Chains>(
     Object.values(chainConfigs)[0].chain
   );
-  const { address: account } = useAccount();
   const [toChain, setToChain] = useState<Chains>(
     Object.values(chainConfigs)[1].chain
   );
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string | undefined>();
   const isAmountNonZero = Number(amount) > 0;
-  const fromChainConfig = chainConfigs[fromChain]!;
-  const toChainConfig = chainConfigs[toChain]!;
-  const { switchNetwork } = useSwitchNetwork();
-  const { chain } = useNetwork();
   const [latestTxn, setLatestTxn] = useState<[TxnType, `0x${string}`]>();
   const [loadingId, setLoadingId] = useState<Id>();
-
   const [recipient, setRecipient] = useState<string>();
   const [token, selectedToken] = useState<TokenConfig>(
     Object.values(chainConfigs)[0].tokens[0]
   );
+
+  const fromChainConfig = chainConfigs[fromChain]!;
+  const toChainConfig = chainConfigs[toChain]!;
+  const fromChainIsCurrentChain = fromChainConfig.wagmiChain == chain;
 
   useEffect(() => {
     switchNetwork && switchNetwork(fromChainConfig.chainId);
@@ -80,26 +82,26 @@ function App() {
     abi: erc20ABI,
     functionName: "decimals",
     address: token.address,
-    enabled: !!token.address,
+    enabled: !!token.address && fromChainIsCurrentChain,
   });
   const { data: fees } = useContractRead({
     abi: tokenManagerAbi,
     functionName: "getFees",
     address: fromChainConfig.tokenManagerAddress,
-    enabled: !!fromChainConfig.tokenManagerAddress,
+    enabled: !!fromChainConfig.tokenManagerAddress && fromChainIsCurrentChain,
   });
   const { data: paused } = useContractRead({
     abi: tokenManagerAbi,
     functionName: "paused",
     address: fromChainConfig.tokenManagerAddress,
-    enabled: !!fromChainConfig.tokenManagerAddress,
+    enabled: !!fromChainConfig.tokenManagerAddress && fromChainIsCurrentChain,
   });
   const { data: balance } = useContractRead({
     abi: erc20ABI,
     functionName: "balanceOf",
     args: account ? [account!] : undefined,
     address: token.address,
-    enabled: !!account && !!token.address,
+    enabled: !!account && !!token.address && fromChainIsCurrentChain,
     watch: true,
   });
 
@@ -109,16 +111,21 @@ function App() {
     address: token.address,
     args: [account!, fromChainConfig.tokenManagerAddress],
     enabled:
-      !!account && !!token.address && !!fromChainConfig.tokenManagerAddress,
+      !!account &&
+      !!token.address &&
+      !!fromChainConfig.tokenManagerAddress &&
+      fromChainIsCurrentChain,
     watch: true,
   });
 
   const hasEnoughAllowance =
-    !!decimals && isAmountNonZero
-      ? (allowance ?? 0n) >= parseUnits(amount!, decimals)
+    decimals && isAmountNonZero && amount
+      ? (allowance ?? 0n) >= parseUnits(amount, decimals)
       : true;
   const hasEnoughBalance =
-    decimals && balance ? parseUnits(amount!, decimals) <= balance : false;
+    decimals && balance && amount
+      ? parseUnits(amount, decimals) <= balance
+      : false;
   const validBech32Address = recipient && validation.isBech32(recipient);
   const validEthAddress = recipient && validation.isAddress(recipient);
   const hasValidAddress = recipient
@@ -135,11 +142,20 @@ function App() {
       token.address,
       BigInt(toChainConfig.chainId),
       ethRecipient as `0x${string}`,
-      parseUnits(amount!, decimals ?? 0),
+      amount ? parseUnits(amount, decimals ?? 0) : 0n,
     ],
     functionName: "transfer",
     value: fees ?? 0n,
-    enabled: hasEnoughAllowance,
+    enabled: !!(
+      hasEnoughAllowance &&
+      toChainConfig &&
+      fromChainConfig &&
+      !fromChainConfig.isZilliqa &&
+      ethRecipient &&
+      amount &&
+      decimals &&
+      fromChainIsCurrentChain
+    ),
   });
 
   const { writeAsync: bridge, isLoading: isLoadingBridge } =
@@ -161,7 +177,7 @@ function App() {
         token.address,
         BigInt(toChainConfig.chainId),
         ethRecipient as `0x${string}`,
-        parseUnits(amount!, decimals ?? 0),
+        amount ? parseUnits(amount, decimals ?? 0) : 0n,
       ],
       functionName: "transfer",
       gas: 600_000n,
@@ -175,11 +191,12 @@ function App() {
     abi: erc20ABI,
     args: [
       fromChainConfig.tokenManagerAddress,
-      parseUnits(amount!, decimals ?? 0),
+      amount ? parseUnits(amount, decimals ?? 0) : 0n,
     ],
     functionName: "approve",
     gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
     type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
+    enabled: fromChainIsCurrentChain && !hasEnoughAllowance,
   });
 
   const { writeAsync: approve, isLoading: isLoadingApprove } =
