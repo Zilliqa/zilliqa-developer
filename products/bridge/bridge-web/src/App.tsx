@@ -1,13 +1,8 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import zilliqa from "./assets/zilliqa.png";
-import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
-import { validation } from "@zilliqa-js/util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
   faArrowUpRightFromSquare,
   faChevronDown,
-  faRepeat,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { Chains, TokenConfig, chainConfigs } from "./config/config";
@@ -18,36 +13,46 @@ import {
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
+  usePublicClient,
   useSwitchNetwork,
   useWaitForTransaction,
 } from "wagmi";
-import { formatEther, formatUnits, parseUnits } from "viem";
+import { formatEther, formatUnits, getAbiItem, parseUnits } from "viem";
 import { Id, toast } from "react-toastify";
 import { tokenManagerAbi } from "./abi/TokenManager";
+import Navbar from "./components/Navbar";
+import useRecipientInput from "./hooks/useRecipientInput";
+import RecipientInput from "./components/RecipientInput";
+import { chainGatewayAbi } from "./abi/ChainGateway";
 
 type TxnType = "approve" | "bridge";
 
 function App() {
+  const { address: account } = useAccount();
+  const { switchNetwork } = useSwitchNetwork();
+  const { chain } = useNetwork();
+
   const [fromChain, setFromChain] = useState<Chains>(
     Object.values(chainConfigs)[0].chain
   );
-  const { address: account } = useAccount();
   const [toChain, setToChain] = useState<Chains>(
     Object.values(chainConfigs)[1].chain
   );
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string | undefined>();
   const isAmountNonZero = Number(amount) > 0;
-  const fromChainConfig = chainConfigs[fromChain]!;
-  const toChainConfig = chainConfigs[toChain]!;
-  const { switchNetwork } = useSwitchNetwork();
-  const { chain } = useNetwork();
   const [latestTxn, setLatestTxn] = useState<[TxnType, `0x${string}`]>();
   const [loadingId, setLoadingId] = useState<Id>();
-
-  const [recipient, setRecipient] = useState<string>();
   const [token, selectedToken] = useState<TokenConfig>(
     Object.values(chainConfigs)[0].tokens[0]
   );
+
+  const { recipientEth, isAddressValid } = useRecipientInput();
+
+  const fromChainConfig = chainConfigs[fromChain]!;
+  const toChainConfig = chainConfigs[toChain]!;
+
+  const fromChainClient = usePublicClient();
+  const toChainClient = usePublicClient({ chainId: toChainConfig.chainId });
 
   useEffect(() => {
     switchNetwork && switchNetwork(fromChainConfig.chainId);
@@ -56,10 +61,6 @@ function App() {
   useEffect(() => {
     selectedToken(fromChainConfig.tokens[0]);
   }, [fromChain, fromChainConfig.tokens]);
-
-  useEffect(() => {
-    setRecipient(account);
-  }, [account]);
 
   useEffect(() => {
     if (chain !== fromChainConfig.wagmiChain) {
@@ -114,32 +115,33 @@ function App() {
   });
 
   const hasEnoughAllowance =
-    !!decimals && isAmountNonZero
+    decimals && isAmountNonZero
       ? (allowance ?? 0n) >= parseUnits(amount!, decimals)
       : true;
   const hasEnoughBalance =
-    decimals && balance ? parseUnits(amount!, decimals) <= balance : false;
-  const validBech32Address = recipient && validation.isBech32(recipient);
-  const validEthAddress = recipient && validation.isAddress(recipient);
-  const hasValidAddress = recipient
-    ? validBech32Address != validEthAddress
-    : true;
-  const ethRecipient = validBech32Address
-    ? fromBech32Address(recipient)
-    : recipient;
+    decimals && balance && amount
+      ? parseUnits(amount, decimals) <= balance
+      : false;
 
   const { config: transferConfig } = usePrepareContractWrite({
     address: fromChainConfig.tokenManagerAddress,
     abi: tokenManagerAbi,
-    args: [
+    args: recipientEth && [
       token.address,
       BigInt(toChainConfig.chainId),
-      ethRecipient as `0x${string}`,
-      parseUnits(amount!, decimals ?? 0),
+      recipientEth,
+      amount ? parseUnits(amount, decimals ?? 0) : 0n,
     ],
     functionName: "transfer",
     value: fees ?? 0n,
-    enabled: hasEnoughAllowance,
+    enabled: !!(
+      hasEnoughAllowance &&
+      toChainConfig &&
+      fromChainConfig &&
+      !fromChainConfig.isZilliqa &&
+      recipientEth &&
+      decimals
+    ),
   });
 
   const { writeAsync: bridge, isLoading: isLoadingBridge } =
@@ -160,8 +162,8 @@ function App() {
       args: [
         token.address,
         BigInt(toChainConfig.chainId),
-        ethRecipient as `0x${string}`,
-        parseUnits(amount!, decimals ?? 0),
+        recipientEth!,
+        amount ? parseUnits(amount, decimals ?? 0) : 0n,
       ],
       functionName: "transfer",
       gas: 600_000n,
@@ -175,19 +177,20 @@ function App() {
     abi: erc20ABI,
     args: [
       fromChainConfig.tokenManagerAddress,
-      parseUnits(amount!, decimals ?? 0),
+      amount ? parseUnits(amount, decimals ?? 0) : 0n,
     ],
     functionName: "approve",
     gas: fromChainConfig.isZilliqa ? 400_000n : undefined,
     type: fromChainConfig.isZilliqa ? "legacy" : "eip1559",
+    enabled: !hasEnoughAllowance,
   });
 
   const { writeAsync: approve, isLoading: isLoadingApprove } =
     useContractWrite(approveConfig);
 
   const canBridge =
-    amount &&
-    hasValidAddress &&
+    isAmountNonZero &&
+    isAddressValid &&
     hasEnoughAllowance &&
     hasEnoughBalance &&
     !paused &&
@@ -233,6 +236,56 @@ function App() {
             </a>
           </div>
         );
+        (async () => {
+          const logs = await fromChainClient.getLogs({
+            address: fromChainConfig.chainGatewayAddress,
+            event: getAbiItem({
+              abi: chainGatewayAbi,
+              name: "Relayed",
+              args: [toChainConfig.chainId],
+            }),
+            blockHash: txnReceipt.blockHash,
+          });
+          const nonce = logs.find(
+            (log) => log.transactionHash === txnReceipt.transactionHash
+          )?.args.nonce;
+
+          const id = toast.loading(`Bridging to ${toChainConfig.name}...`);
+
+          // TODO: find a way to stop watching once event arrives
+          toChainClient.watchContractEvent({
+            abi: chainGatewayAbi,
+            address: toChainConfig.chainGatewayAddress,
+            eventName: "Dispatched",
+            args: {
+              nonce,
+            },
+            onLogs: (logs) => {
+              toast.update(id, {
+                render: (
+                  <div>
+                    Bridge txn complete, funds arrived to {toChainConfig.name}{" "}
+                    chain. View on{" "}
+                    <a
+                      className="link text-ellipsis w-10"
+                      onClick={() =>
+                        window.open(
+                          `${toChainConfig.blockExplorer}${logs[0].transactionHash}`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      block explorer
+                    </a>
+                  </div>
+                ),
+                type: "success",
+                isLoading: false,
+              });
+            },
+          });
+        })();
+
         setAmount("");
       } else if (latestTxn[0] === "approve") {
         description = (
@@ -272,6 +325,12 @@ function App() {
     toChainConfig.name,
     amount,
     token.name,
+    fromChainConfig.chainGatewayAddress,
+    toChainConfig.chainId,
+    toChainConfig.chainGatewayAddress,
+    fromChainClient,
+    toChainClient,
+    toChainConfig.blockExplorer,
   ]);
 
   useEffect(() => {
@@ -290,14 +349,7 @@ function App() {
   return (
     <>
       <div className="h-screen flex items-center justify-center">
-        <div className="fixed top-0 navbar py-6 px-10">
-          <div className="flex-1 hidden sm:block">
-            <img src={zilliqa} className="h-16" alt="Zilliqa Logo" />
-          </div>
-          <div className="flex-none">
-            <ConnectButton />
-          </div>
-        </div>
+        <Navbar />
 
         <div className="card min-h-96 bg-neutral shadow-xl">
           <div className="card-body">
@@ -381,53 +433,7 @@ function App() {
               </div>
             </div>
 
-            <div className="form-control">
-              <div className="label">
-                <span>Recipient</span>
-              </div>
-              <div className="join">
-                <div className="indicator">
-                  <button
-                    className="btn join-item"
-                    disabled={!hasValidAddress}
-                    onClick={() => {
-                      setRecipient((_recipient) => {
-                        if (!_recipient) {
-                          return _recipient;
-                        }
-                        if (validation.isBech32(_recipient)) {
-                          return fromBech32Address(_recipient!);
-                        }
-                        if (validation.isAddress(_recipient)) {
-                          return toBech32Address(_recipient);
-                        }
-                      });
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faRepeat}
-                      color="white"
-                      className="ml-auto"
-                    />
-                  </button>
-                </div>
-                <input
-                  className={`input join-item input-bordered w-full font-mono text-sm text-end ${
-                    !hasValidAddress && "input-warning"
-                  }`}
-                  placeholder="Address"
-                  value={recipient}
-                  onChange={({ target }) => setRecipient(target.value)}
-                />
-              </div>
-              {!hasValidAddress && (
-                <div className="label align-bottom place-content-end">
-                  <span className="label-text-alt text-warning">
-                    Invalid Address
-                  </span>
-                </div>
-              )}
-            </div>
+            <RecipientInput />
 
             <div className="form-control">
               <div className="label">
