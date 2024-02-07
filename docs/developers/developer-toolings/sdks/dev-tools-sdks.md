@@ -31,10 +31,14 @@ yours is not listed here, please
 [create a PR](https://github.com/Zilliqa/dev-portal/pulls) on this repository.
 
 [zilliqa-js](https://github.com/Zilliqa/zilliqa-js),
+[zilliqa-rs](https://github.com/Zilliqa/zilliqa-rs),
+[pyzil](https://github.com/zilliqa/pyzil),
 [gozilliqa (formerly laksago)](https://github.com/Zilliqa/gozilliqa-sdk) and
 [laksaj](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/laksaj) are active SDKs maintained by
 the Zilliqa core team but the zilliqa community members also actively maintain
 multiple SDKs.
+
+The core team also maintains a fork of [ethers.js](https://github.com/Zilliqa/ethers.js) to keep it working with zilliqa EVM.
 
 ## SDKs Maintained By the Community
 
