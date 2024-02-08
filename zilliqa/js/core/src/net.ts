@@ -23,6 +23,7 @@ import { WithRequest } from "./util";
 export enum RPCMethod {
   // Network-related methods
   GetNetworkId = "GetNetworkId",
+  GetVersion = "GetVersion",
 
   // Blockchain-related methods
   GetBlockchainInfo = "GetBlockchainInfo",

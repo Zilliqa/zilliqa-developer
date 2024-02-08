@@ -15,14 +15,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Provider, ZilliqaModule } from '@zilliqa-js/core';
-import { Wallet } from '@zilliqa-js/account';
-
-const enum NetworkMethods {
-  GetClientVersion = 'GetClientVersion',
-  GetNetworkId = 'GetNetworkId',
-  GetProtocolVersion = 'GetProtocolVersion',
-}
+import {
+  Provider,
+  RPCMethod,
+  RPCResponse,
+  ZilliqaModule,
+} from "@zilliqa-js/core";
+import { Wallet } from "@zilliqa-js/account";
 
 export class Network implements ZilliqaModule {
   provider: Provider;
@@ -33,15 +32,11 @@ export class Network implements ZilliqaModule {
     this.signer = signer;
   }
 
-  getClientVersion(): Promise<any> {
-    return this.provider.send(NetworkMethods.GetClientVersion);
+  getNetworkId(): Promise<RPCResponse<string, string>> {
+    return this.provider.send(RPCMethod.GetNetworkId);
   }
 
-  GetNetworkId(): Promise<any> {
-    return this.provider.send(NetworkMethods.GetNetworkId);
-  }
-
-  GetProtocolVersion(blockNum: number): Promise<any> {
-    return this.provider.send(NetworkMethods.GetProtocolVersion);
+  getVersion(): Promise<RPCResponse<string, string>> {
+    return this.provider.send(RPCMethod.GetVersion);
   }
 }
