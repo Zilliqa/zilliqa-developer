@@ -39,4 +39,12 @@ export class Network implements ZilliqaModule {
   getVersion(): Promise<RPCResponse<string, string>> {
     return this.provider.send(RPCMethod.GetVersion);
   }
+
+  getNodeType(): Promise<RPCResponse<string, string>> {
+    return this.provider.send(RPCMethod.GetNodeType);
+  }
+
+  getNumPeers(): Promise<RPCResponse<number, string>> {
+    return this.provider.send(RPCMethod.GetNumPeers);
+  }
 }

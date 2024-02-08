@@ -24,6 +24,8 @@ export enum RPCMethod {
   // Network-related methods
   GetNetworkId = "GetNetworkId",
   GetVersion = "GetVersion",
+  GetNodeType = "GetNodeType",
+  GetNumPeers = "GetNumPeers",
 
   // Blockchain-related methods
   GetBlockchainInfo = "GetBlockchainInfo",
@@ -45,6 +47,7 @@ export enum RPCMethod {
   GetPrevDifficulty = "GetPrevDifficulty",
   GetPrevDSDifficulty = "GetPrevDSDifficulty",
   GetTotalCoinSupply = "GetTotalCoinSupply",
+  GetTotalCoinSupplyAsInt = "GetTotalCoinSupplyAsInt",
   GetMinerInfo = "GetMinerInfo",
 
   // Transaction-related methods
