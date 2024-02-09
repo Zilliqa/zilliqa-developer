@@ -29,6 +29,11 @@ spec:
             - containerPort: 80
         - image: zilliqa-isolated-server
           name: zilliqa-isolated-server
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              memory: 200Mi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:

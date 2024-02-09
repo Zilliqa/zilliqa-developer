@@ -52,6 +52,7 @@ field coinbase_reward_per_ds: Uint128 = coinbase_default
 (* Reward percentages, scaled by percent_precision - 100 means % * 100 *)
 field base_reward_in_percent : Uint32 = twenty
 field lookup_reward_in_percent : Uint32 = forty
+field node_reward_in_percent : Uint32 = forty
 field percent_precision : Uint32 = one_hundred
 
 (* The denominator here is a fixed 1000 *)
@@ -136,6 +137,12 @@ end
 transition ChangeLookupReward(lookup_reward_val: Uint32)
     IsAdmin _sender;
     lookup_reward_in_percent := lookup_reward_val
+end
+
+(* @multi-sig *)
+transition ChangeNodeReward(node_reward_val: Uint32)
+    IsAdmin _sender;
+    node_reward_in_percent := node_reward_val
 end
 
 (* @dev: Change the coinbase reward percent *)

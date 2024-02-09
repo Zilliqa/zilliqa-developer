@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: xbridge-frontend
+  namespace: xbridge-fe
+  labels:
+    app.kubernetes.io/name: xbridge-frontend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4173
+      targetPort: 4173
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: xbridge-frontend

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zilliqa-bridge-validator-leader-config
+  labels:
+    app.kubernetes.io/name: zilliqa-bridge-validator
+  annotations:
+    zilliqa.com/replace-and-encode: true
+type: Opaque
+data:
+  config-leader.toml: ""
