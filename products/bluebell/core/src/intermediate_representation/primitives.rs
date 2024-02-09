@@ -1,8 +1,8 @@
 use std::collections::{BTreeSet, HashMap, VecDeque};
 
-use crate::{
-    intermediate_representation::symbol_table::SymbolTable, parser::lexer::SourcePosition,
-};
+use scilla_parser::parser::lexer::SourcePosition;
+
+use crate::intermediate_representation::symbol_table::SymbolTable;
 
 /// Enum representing the different kinds of identifiers in the intermediate representation.
 #[derive(Debug, Clone, PartialEq)]
