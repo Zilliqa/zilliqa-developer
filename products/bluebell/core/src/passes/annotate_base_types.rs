@@ -1,7 +1,12 @@
 use std::mem;
 
+use scilla_parser::{
+    ast::{TraversalResult, TreeTraversalMode},
+    parser::lexer::SourcePosition,
+};
+
 use crate::{
-    constants::{TraversalResult, TreeTraversalMode, NAMESPACE_SEPARATOR},
+    constants::NAMESPACE_SEPARATOR,
     intermediate_representation::{
         pass::IrPass,
         pass_executor::PassExecutor,
@@ -12,7 +17,6 @@ use crate::{
         },
         symbol_table::{SymbolTable, TypeInfo},
     },
-    parser::lexer::SourcePosition,
 };
 
 pub struct AnnotateBaseTypes {
