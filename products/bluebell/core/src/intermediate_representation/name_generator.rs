@@ -1,6 +1,7 @@
-use crate::{
-    intermediate_representation::primitives::{FunctionBlock, IrIdentifier, IrIndentifierKind},
-    parser::lexer::SourcePosition,
+use scilla_parser::parser::lexer::SourcePosition;
+
+use crate::intermediate_representation::primitives::{
+    FunctionBlock, IrIdentifier, IrIndentifierKind,
 };
 
 #[derive(Debug, Clone)]
