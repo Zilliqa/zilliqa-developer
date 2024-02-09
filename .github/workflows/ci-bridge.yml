@@ -1,7 +1,7 @@
 name: "CI for Product Bridge"
 
 on:
-  pull_request:
+  push:
     paths:
       - products/bridge/**
       - ".github/workflows/**"
@@ -9,39 +9,26 @@ on:
 jobs:
   testing:
     runs-on: ubuntu-latest
-    name: "Linting"
+    name: "Bridge Tests"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          submodules: recursive
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
+      - name: Install nodes packages
+        run: npm ci
+        working-directory: products/bridge/bridge-web
+
+      - name: Check bridge-web build
+        run: npm run build
+        working-directory: products/bridge/bridge-web
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: 8
-          run_install: false
+          version: nightly
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: products/bridge/smart-contracts
-
-      - name: Run tests
-        run: pnpm test
+      - name: Run Foundry tests
+        run: forge test
         working-directory: products/bridge/smart-contracts
