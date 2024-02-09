@@ -126,5 +126,5 @@ There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupp
 | --------- | ------ | -------- | ------------------------------------------------- |
 | `id`      | string | Required | `"1"`                                             |
 | `jsonrpc` | string | Required | `"2.0"`                                           |
-| `method`  | string | Required | `"GetTotalCoinSupply or GetTotalCoinSupplyAsint"` |
+| `method`  | string | Required | `"GetTotalCoinSupply or GetTotalCoinSupplyAsInt"` |
 | `params`  | string | Required | Empty string `""`                                 |

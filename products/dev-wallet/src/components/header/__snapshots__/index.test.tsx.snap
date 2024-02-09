@@ -1,0 +1,232 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches the snapshot 1`] = `
+<div>
+  <div>
+    <nav
+      class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top"
+    >
+      <a
+        class="navbar-brand"
+        href="/"
+      >
+        Dev Wallet
+      </a>
+      <button
+        aria-label="toggler"
+        class="navbar-toggler"
+        type="button"
+      >
+        <span
+          class="navbar-toggler-icon"
+        />
+      </button>
+      <div
+        class="collapse navbar-collapse"
+      >
+        <ul
+          class="ml-auto navbar-nav"
+        >
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/home"
+            >
+              Home
+            </a>
+          </li>
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/generate"
+            >
+              Create New Wallet
+            </a>
+          </li>
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/send"
+            >
+              Send ZIL
+            </a>
+          </li>
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/faucet"
+            >
+              ZIL Faucet
+            </a>
+          </li>
+          <div
+            class="btn-group"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="network-button btn btn-secondary"
+              type="button"
+            >
+              <span
+                class="network"
+              >
+                Testnet
+              </span>
+            </button>
+            <div
+              aria-hidden="true"
+              class="dropdown-menu"
+              role="menu"
+              tabindex="-1"
+            >
+              <button
+                class="dropdown-item"
+                role="menuitem"
+                tabindex="0"
+                type="button"
+              >
+                Testnet
+              </button>
+              <button
+                class="dropdown-item"
+                role="menuitem"
+                tabindex="0"
+                type="button"
+              >
+                Isolated Server
+              </button>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</div>
+`;
+
+exports[`matches the snapshot 2`] = `
+<div>
+  <div>
+    <nav
+      class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top"
+    >
+      <a
+        class="navbar-brand"
+        href="/"
+      >
+        Dev Wallet
+      </a>
+      <button
+        aria-label="toggler"
+        class="navbar-toggler"
+        type="button"
+      >
+        <span
+          class="navbar-toggler-icon"
+        />
+      </button>
+      <div
+        class="collapse navbar-collapse"
+      >
+        <ul
+          class="ml-auto navbar-nav"
+        >
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/home"
+            >
+              Home
+            </a>
+          </li>
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/generate"
+            >
+              Create New Wallet
+            </a>
+          </li>
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/send"
+            >
+              Send ZIL
+            </a>
+          </li>
+          <li
+            class="sidebar-link nav-item"
+          >
+            <a
+              class="nav-link"
+              href="/faucet"
+            >
+              ZIL Faucet
+            </a>
+          </li>
+          <a
+            class="pr-4 cursor-pointer nav-link"
+          >
+            Sign Out
+          </a>
+          <div
+            class="btn-group"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="network-button btn btn-secondary"
+              type="button"
+            >
+              <span
+                class="network"
+              >
+                Testnet
+              </span>
+            </button>
+            <div
+              aria-hidden="true"
+              class="dropdown-menu"
+              role="menu"
+              tabindex="-1"
+            >
+              <button
+                class="dropdown-item"
+                role="menuitem"
+                tabindex="0"
+                type="button"
+              >
+                Testnet
+              </button>
+              <button
+                class="dropdown-item"
+                role="menuitem"
+                tabindex="0"
+                type="button"
+              >
+                Isolated Server
+              </button>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</div>
+`;

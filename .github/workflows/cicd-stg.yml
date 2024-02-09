@@ -26,9 +26,13 @@ jobs:
             developer-portal,
             devex,
             devex-apollo,
+            dev-wallet,
+            faucet-service,
             governance-api,
             governance-snapshot,
+            multisig,
             neo-savant,
+            scilla-server,
             zillion,
             zilliqa-isolated-server,
           ]
@@ -46,6 +50,21 @@ jobs:
           - application: devex-apollo
             image_name: devex-apollo
             path: products/devex-apollo
+            tag_length: 8
+            tag_latest: false
+          - application: dev-wallet
+            image_name: dev-wallet
+            path: products/dev-wallet
+            tag_length: 8
+            tag_latest: false
+          - application: faucet-service
+            image_name: faucet-service
+            path: products/faucet-service
+            tag_length: 8
+            tag_latest: false
+          - application: multisig
+            image_name: multisig
+            path: products/multisig
             tag_length: 8
             tag_latest: false
           - application: neo-savant
@@ -68,6 +87,11 @@ jobs:
             path: products/pdt
             tag_length: 8
             tag_latest: false
+          - application: scilla-server
+            image_name: scilla-server
+            path: products/scilla-server
+            tag_length: 8
+            tag_latest: false
           - application: zillion
             image_name: zillion
             path: products/zillion
@@ -78,6 +102,16 @@ jobs:
             path: products/zilliqa-isolated-server
             tag_length: 8
             tag_latest: true
+          - application: zilliqa-bridge
+            image_name: zilliqa-bridge-validator
+            path: products/bridge/bridge-validators
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-bridge-web
+            image_name: zilliqa-bridge-web
+            path: products/bridge/bridge-web
+            tag_length: 8
+            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
@@ -85,6 +119,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          submodules: recursive
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
