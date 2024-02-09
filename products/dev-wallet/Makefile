@@ -7,6 +7,7 @@ SHELL := /bin/bash
 
 ENVIRONMENT ?= dev
 VALID_ENVIRONMENTS := dev stg prd
+IMAGE_TAG ?= localhost:5001/dev-wallet:latest
 
 # Check if the ENVIRONMENT variable is in the list of valid environments
 ifeq ($(filter $(ENVIRONMENT),$(VALID_ENVIRONMENTS)),)
@@ -15,4 +16,5 @@ endif
 
 ## Build and push the Docker image
 image/build-and-push:
-	bazelisk run --test_output=all --keep_going //products/dev-wallet:push_image_${ENVIRONMENT}
+	docker build -t "${IMAGE_TAG}" .
+	docker push "${IMAGE_TAG}"

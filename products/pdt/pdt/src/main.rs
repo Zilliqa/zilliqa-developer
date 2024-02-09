@@ -145,7 +145,7 @@ struct ListenOptions {
 }
 
 const TESTNET_BUCKET: &str = "zq1-testnet-persistence";
-const MAINNET_BUCKET: &str = "c5b68604-8540-4887-ad29-2ab9e680f997";
+const MAINNET_BUCKET: &str = "zq1-mainnet-persistence";
 
 const DEV_API_URL: &str = "https://dev-api.zilliqa.com/";
 const MAINNET_API_URL: &str = "https://api.zilliqa.com/";

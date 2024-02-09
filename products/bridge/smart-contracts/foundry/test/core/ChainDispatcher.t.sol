@@ -333,6 +333,7 @@ contract DispatcherTests is IChainDispatcherEvents, DispatcherFixture {
 
     function test_enoughFeeRefundWhenSingleValidator() external {
         // Setup single validator
+        vm.stopPrank();
         (
             Vm.Wallet[] memory _validators,
             ValidatorManager _validatorManager
@@ -340,6 +341,7 @@ contract DispatcherTests is IChainDispatcherEvents, DispatcherFixture {
         dispatcher.workaround_updateValidatorManager(_validatorManager);
         validators = _validators;
         address sender = validators[0].addr;
+        vm.startPrank(sender);
 
         // Fix gas price
         vm.txGasPrice(10 gwei);
@@ -382,6 +384,7 @@ contract DispatcherTests is IChainDispatcherEvents, DispatcherFixture {
 
     function test_enoughFeeRefundWhenManyValidators() external {
         // Setup single validator
+        vm.stopPrank();
         (
             Vm.Wallet[] memory _validators,
             ValidatorManager _validatorManager
@@ -389,6 +392,7 @@ contract DispatcherTests is IChainDispatcherEvents, DispatcherFixture {
         dispatcher.workaround_updateValidatorManager(_validatorManager);
         validators = _validators;
         address sender = validators[0].addr;
+        vm.startPrank(sender);
 
         // Fix gas price
         vm.txGasPrice(10 gwei);

@@ -32,8 +32,9 @@ library SignatureValidator {
         bytes[] calldata signatures
     ) internal view {
         address lastSigner = address(0);
+        uint signaturesLength = signatures.length;
 
-        for (uint i = 0; i < signatures.length; ++i) {
+        for (uint i = 0; i < signaturesLength; ) {
             address signer = ethSignedMessageHash.recover(signatures[i]);
             if (signer <= lastSigner) {
                 revert ISignatureValidatorErrors
@@ -43,9 +44,12 @@ library SignatureValidator {
                 revert ISignatureValidatorErrors.InvalidValidatorOrSignatures();
             }
             lastSigner = signer;
+            unchecked {
+                ++i;
+            }
         }
 
-        if (!isSupermajority(self, signatures.length)) {
+        if (!isSupermajority(self, signaturesLength)) {
             revert ISignatureValidatorErrors.NoSupermajority();
         }
     }
