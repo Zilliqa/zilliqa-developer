@@ -22,6 +22,11 @@ spec:
           name: governance-api
           ports:
             - containerPort: 3000
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              memory: 300Mi
           env:
             - name: NODE_ENV
               valueFrom:

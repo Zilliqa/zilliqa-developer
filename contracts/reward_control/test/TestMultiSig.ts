@@ -160,6 +160,33 @@ describe(utils.TestGeneral(0, "TestMultiSigRewardsParam"), function () {
     ).to.be.eq(35);
   });
 
+  it("Multi sig wallet can change node reward to 25", async function () {
+    const rewardsContractAddress = scillaRewardsParamsContract.address;
+    let acc_0 =
+      utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_0);
+
+    let result = await scillaMultiSigRewardsParamContract
+      .connect(acc_0)
+      .SubmitCustomChangeNodeRewardTransaction(rewardsContractAddress, 25);
+    const multisig_txn_id = result.receipt.event_logs[0].params[0].value;
+    if (DEBUG) {
+      console.log("Multisig txn id is: ", multisig_txn_id);
+    }
+
+    let acc_1 =
+      utils.getZilliqaAccountForAccountByHardhatWallet(WALLET_INDEX_1);
+    let result_1 = await scillaMultiSigRewardsParamContract
+      .connect(acc_1)
+      .SignTransaction(multisig_txn_id);
+    let result_2 = await scillaMultiSigRewardsParamContract
+      .connect(acc_1)
+      .ExecuteTransaction(multisig_txn_id);
+
+    expect(await scillaRewardsParamsContract.node_reward_in_percent()).to.be.eq(
+      25
+    );
+  });
+
   it("Multi sig wallet can change RewardEachMulInMillis to 1234", async function () {
     const rewardsContractAddress = scillaRewardsParamsContract.address;
     let acc_0 =

@@ -1,6 +1,8 @@
-use crate::{
-    ast::{converting::AstConverting, nodes::*, visitor::AstVisitor},
-    constants::{TraversalResult, TreeTraversalMode},
+use scilla_parser::{
+    ast::{
+        converting::AstConverting, nodes::*, visitor::AstVisitor, TraversalResult,
+        TreeTraversalMode,
+    },
     parser::lexer::SourcePosition,
 };
 

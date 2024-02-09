@@ -6,7 +6,6 @@ namespace: xcad-isolated-server-prd
 resources:
   - ../../base
   - configmap.yaml
-  - app-secret.yaml
   - certificate.yaml
   - backend-config.yaml
   - frontend-config.yaml
@@ -34,3 +33,9 @@ patches:
         path: /metadata/annotations
         value:
           beta.cloud.google.com/backend-config: '{"default": "zilliqa-isolated-server"}'
+  - target:
+      kind: Deployment
+      name: zilliqa-isolated-server
+    patch: |-
+      - op: remove
+        path: "/spec/template/spec/containers/1/envFrom/1"

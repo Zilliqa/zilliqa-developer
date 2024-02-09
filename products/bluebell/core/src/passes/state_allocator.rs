@@ -1,17 +1,15 @@
 use primitive_types::U256;
+use scilla_parser::ast::{TraversalResult, TreeTraversalMode};
 
-use crate::{
-    constants::{TraversalResult, TreeTraversalMode},
-    intermediate_representation::{
-        pass::IrPass,
-        pass_executor::PassExecutor,
-        primitives::{
-            CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
-            FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
-            IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
-        },
-        symbol_table::{StateLayoutEntry, SymbolTable},
+use crate::intermediate_representation::{
+    pass::IrPass,
+    pass_executor::PassExecutor,
+    primitives::{
+        CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+        FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+        IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
     },
+    symbol_table::{StateLayoutEntry, SymbolTable},
 };
 
 pub struct StateCollector {
