@@ -1,16 +1,16 @@
 use std::{fs::File, io::Read, process};
 
-use bluebell::{
-    ast::nodes::NodeProgram,
-    parser::{lexer, lexer::Lexer, parser, ParserError},
-    support::{
-        evm::EvmCompiler,
-        modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
-    },
+use bluebell::support::{
+    evm::EvmCompiler,
+    modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
 };
 use clap::{Parser, Subcommand, ValueEnum};
 use evm_assembly::types::EvmTypeValue;
 use log::{Log, Metadata, Record};
+use scilla_parser::{
+    ast::nodes::NodeProgram,
+    parser::{lexer, lexer::Lexer, parser, ParserError},
+};
 
 // Logger struct to capture logs
 struct CaptureLogger {}

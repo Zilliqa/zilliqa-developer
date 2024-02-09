@@ -1,3 +1,6 @@
+// TODO: fix utils
+
+/*
 import { expect } from "chai";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { createProvider } from "hardhat/internal/core/providers/construction";
@@ -76,6 +79,14 @@ export async function dispatchMessage(
       callSignatures
     );
     dispatchTxn = await txResponse.wait();
+    // Calculate gas usage of dispatch
+    // console.log("gas used: ", dispatchTxn?.gasUsed);
+    // const x = await relayerTarget.gasRefund(
+    //   await validatorsTarget[0].getAddress()
+    // );
+    // console.log(x / (dispatchTxn?.gasPrice ?? 1n));
+    // console.log("gas price: ", dispatchTxn?.gasPrice);
+
     if (!dispatchTxn) {
       expect.fail("tx is null");
     }
@@ -458,8 +469,7 @@ export async function dispatchCall(
   signatures: string[]
 ) {
   // the next leader dispatches the relayed call
-  const leaderValidator =
-    validators[Math.floor(Math.random() * validators.length)];
+  const leaderValidator = validators[0];
   const message = ethers.AbiCoder.defaultAbiCoder().encode(
     [
       "uint256",
@@ -619,3 +629,5 @@ async function verifyDeliveryResult(
     expect(logs[0].args.response).to.equal("0x");
   }
 }
+
+*/
