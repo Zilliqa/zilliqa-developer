@@ -42,3 +42,14 @@ You can use the
 [testnet faucet](../../developers/developer-toolings/dev-tools-faucet.md) to add
 ZIL to your EVM account; just paste your ethereum address (given by your wallet)
 into the faucet destination address.
+
+#### EVM Explorer
+
+You can use otterscan to explore testnet and devnet.
+
+| Network | URL                                            |
+| :------ | :--------------------------------------------- |
+| testnet | [Link](https://otterscan.testnet.zilliqa.com/) |
+| devnet  | [Link](https://otterscan.devnet.zilliqa.com/)  |
+
+Zilliqa has its own fork of [otterscan](https://github.com/Zilliqa/otterscan) for more customizations and features.
