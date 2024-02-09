@@ -210,6 +210,11 @@ export class Blockchain implements ZilliqaModule {
     return this.provider.send(RPCMethod.GetTotalCoinSupply);
   }
 
+  // Returns the total supply (ZIL) of coins in the network as a number.
+  getTotalCoinSupplyAsInt(): Promise<RPCResponse<number, string>> {
+    return this.provider.send(RPCMethod.GetTotalCoinSupplyAsInt);
+  }
+
   // Returns the mining nodes (i.e., the members of the DS committee and shards)
   // at the specified DS block.
   getMinerInfo(dsBlockNumber: string): Promise<RPCResponse<MinerInfo, any>> {
