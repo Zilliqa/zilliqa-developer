@@ -1,0 +1,39 @@
+openapi: "3.0.2"
+info:
+  title: Faucet Service
+  version: "1.0"
+servers:
+  - url: https://isolated-server-faucet.api.zilliqa.com/api/v1
+  - url: https://testnet-faucet.api.zilliqa.com/api/v1
+paths:
+  /faucet:
+    post:
+      summary: Requests funds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address:
+                  type: string
+                  example: d1F9288cE6e645AB758366964D51ba5C001517d5
+                token:
+                  type: string
+                  example: <recaptcha token>
+              required:
+                - address
+                - token
+            examples:
+              example:
+                value:
+                  address: d1F9288cE6e645AB758366964D51ba5C001517d5
+                  token: <recaptcha token>
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "429":
+          description: Too many requests
