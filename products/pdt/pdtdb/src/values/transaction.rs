@@ -1,13 +1,13 @@
-use crate::utils;
+use crate::utils::{self, decode_u8, encode_u8};
 use crate::zqproj::PSQLInsertable;
 use anyhow::{anyhow, Result};
-use base64::Engine;
 use ethers::types::Transaction;
 use hex;
 use pdtlib::proto::ProtoTransactionWithReceipt;
 use primitive_types::{H160, H256};
 use psql_derive::PSQLInsertable;
 use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DisplayFromStr};
 use sqlx::FromRow;
 #[derive(Serialize, Deserialize, Clone, FromRow, PSQLInsertable, Debug, PartialEq)]
 pub struct BQTransaction {
@@ -153,13 +153,6 @@ impl BQTransaction {
                 <u64>::try_into(*z).ok()
             })
         });
-        // println!(
-        //     "C {:?} D {:?}",
-        //     core.amount.clone().and_then(|x| Some(hex::encode(&x.data))),
-        //     core.gasprice
-        //         .clone()
-        //         .and_then(|x| Some(hex::encode(&x.data)))
-        // );
         let amount = core
             .amount
             .clone()
@@ -258,7 +251,7 @@ impl BQTransaction {
             raw_receipt: None,
             receipt: None,
             sender_public_key: None,
-            from_addr_zil: None, //TODO: we should be able to get this.
+            from_addr_zil: None,
             from_addr_eth,
             signature: None,
             to_addr,
@@ -274,6 +267,35 @@ impl BQTransaction {
             eth_transaction_type,
         })
     }
+
+    pub fn from_eth_with_zil_txn_bodies(
+        in_val: &Transaction,
+        zil_txn_body: &ZILTransactionBody,
+        zqversion: i64,
+    ) -> Result<Self> {
+        let txn_body =
+            Self::from_eth(in_val, zqversion).expect("should be compatible with eth transactions");
+
+        let from_addr_zil = utils::maybe_hex_address_from_public_key(
+            zil_txn_body.sender_pub_key.as_bytes(),
+            utils::API::Zilliqa,
+        );
+        let raw_receipt = encode_u8(zil_txn_body.receipt.as_bytes());
+        let code = zil_txn_body
+            .code
+            .as_ref()
+            .map(|code| encode_u8(code.as_bytes()));
+        Ok(BQTransaction {
+            code,
+            receipt: Some(zil_txn_body.receipt.clone()),
+            raw_receipt: Some(raw_receipt),
+            sender_public_key: Some(zil_txn_body.sender_pub_key.clone()),
+            from_addr_zil,
+            signature: Some(zil_txn_body.signature.clone()),
+            ..txn_body
+        })
+    }
+
     pub fn to_json(&self) -> Result<String> {
         Ok(serde_json::to_string(self)?)
     }
@@ -436,16 +458,27 @@ impl PSQLTransaction {
     }
 }
 
-fn encode_u8(y: &[u8]) -> String {
-    base64::engine::general_purpose::STANDARD
-        .encode(y)
-        .to_string()
-}
-
-fn decode_u8(x: String) -> Vec<u8> {
-    base64::engine::general_purpose::STANDARD
-        .decode(x)
-        .expect("base64-encoding should be decodeable")
+#[serde_as]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ZILTransactionBody {
+    #[serde(rename = "ID")]
+    pub id: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub amount: String,
+    pub code: Option<String>, // sometimes has
+    pub data: Option<String>,
+    #[serde_as(as = "DisplayFromStr")]
+    pub gas_limit: i64,
+    pub gas_price: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub nonce: i64,
+    pub receipt: String,
+    pub sender_pub_key: String,
+    pub signature: String,
+    pub to_addr: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub version: i64,
 }
 
 #[test]

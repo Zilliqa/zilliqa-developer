@@ -1,21 +1,23 @@
-use crate::constants::NAMESPACE_SEPARATOR;
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::pass_executor::PassExecutor;
-use crate::intermediate_representation::primitives::CaseClause;
-use crate::intermediate_representation::primitives::ContractField;
-use crate::intermediate_representation::primitives::Instruction;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
-    VariableDeclaration, Variant,
-};
-use crate::intermediate_representation::symbol_table::SymbolTable;
-use crate::intermediate_representation::symbol_table::TypeInfo;
-use crate::parser::lexer::SourcePosition;
-
-use log::info;
 use std::mem;
+
+use scilla_parser::{
+    ast::{TraversalResult, TreeTraversalMode},
+    parser::lexer::SourcePosition,
+};
+
+use crate::{
+    constants::NAMESPACE_SEPARATOR,
+    intermediate_representation::{
+        pass::IrPass,
+        pass_executor::PassExecutor,
+        primitives::{
+            CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+            FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+            IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+        },
+        symbol_table::{SymbolTable, TypeInfo},
+    },
+};
 
 pub struct AnnotateBaseTypes {
     previous_namespaces: Vec<String>,
@@ -52,7 +54,7 @@ impl AnnotateBaseTypes {
         symbol_table: &mut SymbolTable,
     ) -> Option<Box<TypeInfo>> {
         if let Some(name) = &symbol.resolved {
-            symbol_table.type_of(name)
+            symbol_table.type_of(name, &self.namespace)
         } else {
             None
         }
@@ -225,7 +227,7 @@ impl IrPass for AnnotateBaseTypes {
         match symbol.kind {
             IrIndentifierKind::Unknown => {
                 if let Some(typeinfo) = self.type_of(symbol, symbol_table) {
-                    symbol.type_reference = Some(typeinfo.name.clone());
+                    symbol.type_reference = Some(typeinfo.typename.clone());
 
                     // We only move constructors out of line
                     if !typeinfo.is_constructor() {
@@ -320,18 +322,7 @@ impl IrPass for AnnotateBaseTypes {
                         symbol_table.resolve_qualified_name(&symbol.unresolved, &self.namespace)
                     {
                         symbol.resolved = Some(resolved_name);
-                    } else {
-                        info!("Not resolved!!");
                     }
-
-                    /*
-                    // In the event of a definition we make a qualified name
-                    if let Some(ns) = &self.namespace {
-                        symbol.resolved = Some(
-                            format!("{}{}{}", ns, NAMESPACE_SEPARATOR, symbol.unresolved).to_string(),
-                        );
-                    }
-                    */
                 }
             }
             IrIndentifierKind::VirtualRegister
@@ -393,18 +384,11 @@ impl IrPass for AnnotateBaseTypes {
     ) -> Result<TraversalResult, String> {
         // TODO: These types should be stored somewhere (in the symbol table maybe?)
         let typename = match &mut instr.operation {
-            Operation::TerminatingRef(identifier) => {
+            Operation::TerminatingRef(_identifier) => {
                 "Void".to_string() // TODO: Fetch from somewhere
             }
             Operation::Noop => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::Jump(_) => "Void".to_string(), // TODO: Fetch from somewhere
-            Operation::Switch { cases, on_default } => {
-                for case in cases.iter_mut() {
-                    case.visit(self, symbol_table)?;
-                }
-                on_default.visit(self, symbol_table)?;
-                "TODO".to_string()
-            }
             Operation::ConditionalJump {
                 expression,
                 on_success,
@@ -521,13 +505,34 @@ impl IrPass for AnnotateBaseTypes {
                 };
 
                 let function_type = format!("{}::<{}>", name_value, argument_type_args).to_string();
+
+                let function_type = if let Some(typeinfo)= symbol_table.type_of(&function_type, &self.namespace) {
+                    typeinfo.symbol_name
+                } else {
+                    panic!("Unable to find symbol {}", function_type);
+                };
+
                 name.resolved = Some(function_type.clone());
+
 
                 // The value of the SSA is the return type of the function
                 // TODO: To this end we need to resolve the type refernce from the resolved name
                 name.type_reference = Some(function_type.clone()); // TODO: Should contain return type as this is a function pointer
 
-                "TODO-lookup".to_string()
+                let type_info = match symbol_table.type_of(&function_type, &self.namespace) {
+                    Some(v) => {
+                        match v.return_type {
+                            Some(r) => r,
+                            None => "Void".to_string() // TODO: Get value from somewhere
+                        }
+                    }
+                    None => {
+                        println!("{:#?}", symbol_table);
+                        panic!("Undeclared function {}", function_type)
+                    }
+                };
+
+                type_info
             }
             Operation::CallStaticFunction {
                 name,
@@ -540,7 +545,7 @@ impl IrPass for AnnotateBaseTypes {
                 }
 
                 let return_type = if let Some(function_type) = &name.type_reference {
-                    let function_typeinfo = symbol_table.type_of(function_type);
+                    let function_typeinfo = symbol_table.type_of(function_type, &self.namespace);
 
                     if let Some(function_typeinfo) = function_typeinfo {
                         function_typeinfo.return_type.expect("").clone()
@@ -549,7 +554,6 @@ impl IrPass for AnnotateBaseTypes {
                             .to_string());
                     }
                 } else {
-                    println!("Extra detail: {:#?}, {:#?}", name, arguments);
                     return Err(format!(
                         "Unable to determine return type of {:?}",
                         name.unresolved
@@ -569,7 +573,7 @@ impl IrPass for AnnotateBaseTypes {
                     arg.visit(self, symbol_table)?;
                 }
 
-                "TODO-lookup".to_string()
+                unimplemented!()
             }
             Operation::ResolveSymbol { symbol } => {
                 symbol.visit(self, symbol_table)?;
@@ -608,7 +612,6 @@ impl IrPass for AnnotateBaseTypes {
                     }
                 }
             }
-            Operation::AcceptTransfer => "Void".to_string(), // TODO: Fetch from somewhere
             Operation::PhiNode(inputs) => {
                 let mut type_name = None;
                 for input in inputs.iter_mut() {

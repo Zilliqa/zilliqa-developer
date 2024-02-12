@@ -1,18 +1,13 @@
 // use strum_macros::{Display, EnumIter};
 
-use yew::prelude::*;
-
-use crate::Dispatch;
-use gloo_console as console;
-use yew::Component;
-use yew::Context;
-
-use serde::{Deserialize, Serialize};
-
 use std::rc::Rc;
 
-use yewdux::prelude::Reducer;
-use yewdux::store::Store;
+use gloo_console as console;
+use serde::{Deserialize, Serialize};
+use yew::{prelude::*, Component, Context};
+use yewdux::{prelude::Reducer, store::Store};
+
+use crate::Dispatch;
 
 #[derive(Store, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[store(storage = "local")]
@@ -47,7 +42,7 @@ impl Reducer<LoggerState> for LoggerMessage {
 }
 
 pub struct LoggerView {
-    dispatch: Dispatch<LoggerState>, // Ignore unused warning. Dispatcher needs to be present for state to update
+    _dispatch: Dispatch<LoggerState>, // Ignore unused warning. Dispatcher needs to be present for state to update
     state: Rc<LoggerState>,
 }
 
@@ -64,7 +59,7 @@ impl Component for LoggerView {
         let dispatch = Dispatch::<LoggerState>::subscribe(state_callback);
         Self {
             state: dispatch.get(),
-            dispatch,
+            _dispatch: dispatch,
         }
     }
 

@@ -14,24 +14,15 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  Label,
-  Input,
-  FormGroup,
-  Form,
-  Row,
-  Col,
-  FormFeedback,
-} from "reactstrap";
-import Steps, { Step } from "rc-steps";
-import Button from "../button";
-import Spinner from "../spinner";
+import React, { useState, useEffect } from 'react';
+import { Card, Label, Input, FormGroup, Form, Row, Col, FormFeedback } from 'reactstrap';
+import Steps, { Step } from 'rc-steps';
+import Button from '../button';
+import Spinner from '../spinner';
 
-import { getInputValidationState, downloadObjectAsJson } from "../../utils";
-import { requestStatus } from "../../constants";
-import Disclaimer from "../disclaimer";
+import { getInputValidationState, downloadObjectAsJson } from '../../utils';
+import { requestStatus } from '../../constants';
+import Disclaimer from '../disclaimer';
 
 const FIRST_STEP = 0;
 const SECOND_STEP = 1;
@@ -40,7 +31,7 @@ const FINAL_STEP = 2;
 const GenerateForm: React.FunctionComponent = () => {
   const [currentStep, setCurrentStep] = useState(FIRST_STEP);
   const [privateKey, setPrivateKey] = useState();
-  const [passphrase, setPassphrase] = useState("");
+  const [passphrase, setPassphrase] = useState('');
 
   return (
     <div>
@@ -90,12 +81,8 @@ const PassphraseStep = ({ passphrase, setPassphrase, setCurrentStep }) => {
   const changePassphrase = (e: React.ChangeEvent<HTMLInputElement>): void => {
     e.preventDefault();
     const value = e.target.value;
-    const key = "passphrase";
-    const validationResult: any = getInputValidationState(
-      key,
-      value,
-      /^.{8,}$/
-    );
+    const key = 'passphrase';
+    const validationResult: any = getInputValidationState(key, value, /^.{8,}$/);
     setPassphrase(value);
     setPassphraseValid(validationResult.passphraseValid);
     setPassphraseInvalid(validationResult.passphraseInvalid);
@@ -107,16 +94,18 @@ const PassphraseStep = ({ passphrase, setPassphrase, setCurrentStep }) => {
     <div>
       <div className="text-center">
         <h2 className="pt-5">
-          <b>{"Set Passphrase for your Keystore File"}</b>
+          <b>{'Set Passphrase for your Keystore File'}</b>
         </h2>
-        <p className="text-secondary py-3">{`Please set the password for the keystore file for your new wallet.`}</p>
+        <p className="text-secondary py-3">
+          {`Please set the password for the keystore file for your new wallet.`}
+        </p>
       </div>
       <div>
         <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
           <FormGroup>
             <Label for="passphrase">
               <small>
-                <b>{"Passphrase"}</b>
+                <b>{'Passphrase'}</b>
               </small>
             </Label>
             <Input
@@ -134,8 +123,8 @@ const PassphraseStep = ({ passphrase, setPassphrase, setCurrentStep }) => {
               maxLength={32}
               minLength={8}
             />
-            <FormFeedback>{"invalid passphrase"}</FormFeedback>
-            <FormFeedback valid={true}>{"valid passphrase"}</FormFeedback>
+            <FormFeedback>{'invalid passphrase'}</FormFeedback>
+            <FormFeedback valid={true}>{'valid passphrase'}</FormFeedback>
           </FormGroup>
           <br />
 
@@ -147,7 +136,7 @@ const PassphraseStep = ({ passphrase, setPassphrase, setCurrentStep }) => {
             </FormGroup>
             <div className="text-center">
               <Button
-                text={"Confirm"}
+                text={'Confirm'}
                 level="primary"
                 onClick={() => setCurrentStep(SECOND_STEP)}
                 disabled={isDisabled}
@@ -160,18 +149,13 @@ const PassphraseStep = ({ passphrase, setPassphrase, setCurrentStep }) => {
   );
 };
 
-const KeystoreStep = ({
-  setCurrentStep,
-  setPrivateKey,
-  privateKey,
-  passphrase,
-}) => {
+const KeystoreStep = ({ setCurrentStep, setPrivateKey, privateKey, passphrase }) => {
   const [worker, setWorker] = useState();
   const [encryptStatus, setEncryptStatus] = useState(requestStatus.INITIAL);
-  const [keystoreJSON, setKeystoreJSON] = useState("");
+  const [keystoreJSON, setKeystoreJSON] = useState('');
 
   const downloadKeystore = () => {
-    if (keystoreJSON === "") {
+    if (keystoreJSON === '') {
       return;
     }
     const keystoreObject = JSON.parse(keystoreJSON);
@@ -190,8 +174,7 @@ const KeystoreStep = ({
 
   useEffect(() => {
     if (worker === undefined) {
-      const name: string = "./encrypt.worker";
-      const myWorker = new Worker(name, { type: "module" });
+      const myWorker = new Worker('./encrypt.worker', { type: 'module' });
 
       myWorker.onmessage = (event) => {
         const { data } = event;
@@ -212,14 +195,12 @@ const KeystoreStep = ({
   };
 
   const isPending = encryptStatus === requestStatus.PENDING;
-  const buttonText = isPending
-    ? "Generating Keystore File"
-    : "Generate Keystore File";
+  const buttonText = isPending ? 'Generating Keystore File' : 'Generate Keystore File';
   return (
     <div>
       <div className="text-center">
         <h2 className="pt-5">
-          <b>{"Generate Keystore File"}</b>
+          <b>{'Generate Keystore File'}</b>
         </h2>
         <p className="text-secondary py-3">
           {`The password for your keystore file for a new wallet has been set. Please click the tab below to generate your keystore to setup your wallet and move on to the last step.`}
@@ -249,7 +230,7 @@ const FinalStep = ({ privateKey }) => {
     <div>
       <div className="text-center">
         <h2 className="pt-5">
-          <b>{"Please Save Your Private Key"}</b>
+          <b>{'Please Save Your Private Key'}</b>
         </h2>
         <p className="text-secondary py-3">
           {`Your new wallet has been created.`}

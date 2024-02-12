@@ -1,5 +1,6 @@
 // Here
 use anyhow::Result;
+use base64::Engine;
 use pdtlib::proto::ByteArray;
 use primitive_types::H160;
 use sha2::{Digest, Sha256};
@@ -40,10 +41,9 @@ pub enum API {
 
 /// address_from_public_key() but generate hex.
 pub fn maybe_hex_address_from_public_key(pubkey: &[u8], api: API) -> Option<String> {
-    match address_from_public_key(pubkey, api) {
-        Err(_) => None,
-        Ok(val) => Some(hex::encode(val.as_bytes())),
-    }
+    address_from_public_key(pubkey, api)
+        .map(|x| hex::encode(x.as_bytes()))
+        .ok()
 }
 
 /// Address from public key.
@@ -68,9 +68,7 @@ pub fn address_from_public_key(pubkey: &[u8], api: API) -> Result<H160> {
 }
 
 pub fn u128_string_from_storage(val: &ByteArray) -> Option<String> {
-    u128_from_storage(val)
-        .ok()
-        .and_then(|x| Some(x.to_string()))
+    u128_from_storage(val).map(|x| x.to_string()).ok()
 }
 
 pub fn u128_from_storage(val: &ByteArray) -> Result<u128> {
@@ -78,12 +76,14 @@ pub fn u128_from_storage(val: &ByteArray) -> Result<u128> {
     Ok(u128::from_be_bytes(the_bytes))
 }
 
-pub fn str_from_u8(val: Option<ByteArray>) -> Result<Option<String>> {
-    if let Some(inner) = val {
-        Ok(Some(std::str::from_utf8(&inner.data)?.to_string()))
-    } else {
-        Ok(None)
-    }
+pub fn encode_u8(y: &[u8]) -> String {
+    base64::engine::general_purpose::STANDARD.encode(y)
+}
+
+pub fn decode_u8(x: String) -> Vec<u8> {
+    base64::engine::general_purpose::STANDARD
+        .decode(x)
+        .expect("base64-encoding should be decodeable")
 }
 
 #[test]

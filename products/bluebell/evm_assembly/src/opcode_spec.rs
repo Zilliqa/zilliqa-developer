@@ -1,5 +1,6 @@
-use evm::Opcode;
 use std::collections::HashMap;
+
+use evm::Opcode;
 
 #[derive(Debug, Clone)]
 pub struct OpcodeSpecification {
