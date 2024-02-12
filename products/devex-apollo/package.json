@@ -23,7 +23,7 @@
     "graphql-compose-mongoose": "^9.7.0",
     "mongodb": "^3.6.10",
     "mongoose": "^5.10.9",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.3.2",
     "remove": "^0.1.5"
   },
   "devDependencies": {

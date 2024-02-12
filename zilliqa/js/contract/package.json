@@ -36,7 +36,7 @@
     "buffer-from": "^1.1.2",
     "cross-fetch": "2.2.6",
     "hash.js": "^1.1.5",
-    "node-fetch": "^3.2.10",
+    "node-fetch": "^3.3.2",
     "tslib": "2.3.1",
     "utility-types": "^2.1.0"
   },

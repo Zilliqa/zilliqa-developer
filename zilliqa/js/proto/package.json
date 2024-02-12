@@ -27,7 +27,7 @@
     "clean": "rimraf ./dist ./tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "protobufjs": "^6.11.4"
+    "protobufjs": "^7.2.4"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
