@@ -1,0 +1,9 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: faucet-service
+  labels:
+    app.kubernetes.io/name: faucet-service
+spec:
+  domains:
+    - stg-testnet-faucet.zilliqa.com

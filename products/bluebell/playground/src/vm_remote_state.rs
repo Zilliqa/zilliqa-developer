@@ -1,12 +1,14 @@
+use std::rc::Rc;
+
 use evm_assembly::function_signature::EvmFunctionSignature;
 use serde::{Deserialize, Serialize};
-use std::rc::Rc;
-use yewdux::prelude::Reducer;
-use yewdux::store::Store;
+use yewdux::{prelude::Reducer, store::Store};
 
 #[derive(Store, Serialize, Deserialize, Clone)]
 #[store(storage = "local")]
 pub struct VmRemoteState {
+    pub caller: String,
+
     #[serde(skip)]
     pub function_signature: Option<EvmFunctionSignature>,
     #[serde(skip)]
@@ -16,6 +18,7 @@ pub struct VmRemoteState {
 impl Default for VmRemoteState {
     fn default() -> Self {
         Self {
+            caller: "".to_string(),
             function_signature: None,
             arguments: [].to_vec(),
         }
@@ -23,7 +26,7 @@ impl Default for VmRemoteState {
 }
 
 impl PartialEq for VmRemoteState {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, _other: &Self) -> bool {
         false
     }
 }
@@ -34,6 +37,7 @@ impl VmRemoteState {}
 pub enum VmRemoteMessage {
     UpdateFunctionSignature(Option<EvmFunctionSignature>),
     SetArgument(usize, String),
+    SetCaller(String),
 }
 
 impl Reducer<VmRemoteState> for VmRemoteMessage {
@@ -53,6 +57,9 @@ impl Reducer<VmRemoteState> for VmRemoteMessage {
             }
             VmRemoteMessage::SetArgument(i, v) => {
                 state.arguments[i] = v;
+            }
+            VmRemoteMessage::SetCaller(v) => {
+                state.caller = v;
             }
         }
 

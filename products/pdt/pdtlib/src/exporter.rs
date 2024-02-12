@@ -31,7 +31,7 @@ impl Exporter {
     }
 
     pub fn micro_blocks(&self, end_blk: u64, start_at: Option<u64>) -> Result<MicroBlocks> {
-        let lower_blk_id: u64 = if let Some(x) = start_at { x } else { 0 };
+        let lower_blk_id: u64 = start_at.unwrap_or(0);
         Ok(MicroBlocks {
             end_blk,
             blk_id: lower_blk_id,
@@ -50,11 +50,9 @@ impl Exporter {
         let blk_id = key.epochnum;
         Ok(Box::new(mb.tranhashes.iter().map(move |x| {
             let hash = H256::from_slice(&x);
-            if let Ok(maybe_txn) = self.db.get_tx_body(blk_id, hash) {
-                (hash, maybe_txn)
-            } else {
-                (hash, None)
-            }
+            let maybe_txn = self.db.get_tx_body(blk_id, hash).unwrap_or_default();
+
+            (hash, maybe_txn)
         })))
     }
 }
@@ -91,18 +89,14 @@ impl<'a> Iterator for MicroBlocks<'a> {
                 match self.db.get_shard_structure(self.blk_id) {
                     Ok(val) => {
                         if let Some(structure) = val {
-                            if structure.len() > 0 {
-                                self.shard_structure = structure.clone();
-                            } else {
+                            if structure.is_empty() {
                                 continue;
                             }
+                            self.shard_structure = structure.clone();
                         } else {
                             // No shard structure for this block :-(
                             // println!("no shard structure for blk {}", self.blk_id);
-                            self.shard_structure = Vec::new();
-                            for i in 0..MAX_SHARDS {
-                                self.shard_structure.push(i);
-                            }
+                            self.shard_structure = (0..MAX_SHARDS).collect();
                         }
                     }
                     Err(val) => {

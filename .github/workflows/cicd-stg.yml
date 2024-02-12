@@ -9,9 +9,6 @@ on:
   push:
     branches:
       - main
-  # On released
-  release:
-    types: [created]
 
 jobs:
   build-docker:
@@ -19,28 +16,102 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main' && github.event_name != 'release'
-    name: "Build and push images"
+    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
+    name: "Deploy image"
     strategy:
       fail-fast: false
       matrix:
-        application: [developer-portal, devex, devex-apollo, neo-savant]
+        application:
+          [
+            developer-portal,
+            devex,
+            devex-apollo,
+            dev-wallet,
+            faucet-service,
+            governance-api,
+            governance-snapshot,
+            multisig,
+            neo-savant,
+            scilla-server,
+            zillion,
+            zilliqa-isolated-server,
+          ]
         include:
           - application: developer-portal
             image_name: developer-portal
             path: products/developer-portal
+            tag_length: 8
+            tag_latest: false
           - application: devex
             image_name: devex
             path: products/devex
+            tag_length: 8
+            tag_latest: false
           - application: devex-apollo
             image_name: devex-apollo
             path: products/devex-apollo
+            tag_length: 8
+            tag_latest: false
+          - application: dev-wallet
+            image_name: dev-wallet
+            path: products/dev-wallet
+            tag_length: 8
+            tag_latest: false
+          - application: faucet-service
+            image_name: faucet-service
+            path: products/faucet-service
+            tag_length: 8
+            tag_latest: false
+          - application: multisig
+            image_name: multisig
+            path: products/multisig
+            tag_length: 8
+            tag_latest: false
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
+          - application: governance-api
+            image_name: governance-api
+            path: products/governance-api
+            tag_length: 8
+            tag_latest: false
+          - application: governance-snapshot
+            image_name: governance-snapshot
+            path: products/governance-snapshot
+            tag_length: 8
+            tag_latest: false
           - application: pdt
             image_name: pdt
             path: products/pdt
+            tag_length: 8
+            tag_latest: false
+          - application: scilla-server
+            image_name: scilla-server
+            path: products/scilla-server
+            tag_length: 8
+            tag_latest: false
+          - application: zillion
+            image_name: zillion
+            path: products/zillion
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-isolated-server
+            image_name: zilliqa-isolated-server
+            path: products/zilliqa-isolated-server
+            tag_length: 8
+            tag_latest: true
+          - application: zilliqa-bridge
+            image_name: zilliqa-bridge-validator
+            path: products/bridge/bridge-validators
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-bridge-web
+            image_name: zilliqa-bridge-web
+            path: products/bridge/bridge-web
+            tag_length: 8
+            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
@@ -48,6 +119,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          submodules: recursive
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
@@ -68,17 +140,26 @@ jobs:
           username: "oauth2accesstoken"
           password: "${{ steps.google-auth.outputs.access_token }}"
 
-      - name: Get tag version staging - staging
+      - name: Get tag version - staging
         id: set-tag
         uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
         with:
           tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
-          length: 8
+          length: ${{ matrix.tag_length }}
 
       - name: "Build and push ${{ matrix.application }} - staging"
         env:
           ENVIRONMENT: stg
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
+      - name: "Build and push ${{ matrix.application }} tag latest - staging"
+        if: ${{ matrix.tag_latest == true }}
+        env:
+          ENVIRONMENT: stg
+          IMAGE_TAG: "${{ env.REGISTRY }}/${{ matrix.image_name }}:latest"
         run: |
           cd ${{ matrix.path }}
           make image/build-and-push

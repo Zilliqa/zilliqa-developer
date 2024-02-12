@@ -8,10 +8,32 @@ resources:
 namespace: pdt-staging
 
 patches:
-  - target:
-      kind: Deployment
-      name: pdt
-    patch: |-
+  - patch: |-
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: CronJob
+      name: pdt-cronjob-testnet
+  - patch: |-
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: CronJob
+      name: pdt-cronjob-mainnet
+  - patch: |-
       - op: replace
         path: /spec/template/spec/serviceAccountName
         value: pdt
+    target:
+      kind: Deployment
+      name: pdt-listen-testnet
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: Deployment
+      name: pdt-listen-mainnet
+  - path: configmap.yaml

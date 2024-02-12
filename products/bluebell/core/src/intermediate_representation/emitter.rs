@@ -1,46 +1,99 @@
-use crate::ast::converting::AstConverting;
-use crate::ast::nodes::*;
-use crate::ast::visitor::AstVisitor;
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::primitives::*;
-use crate::parser::lexer::SourcePosition;
-
-use log::warn;
 use std::mem;
 
+use log::info;
+use scilla_parser::{
+    ast::{
+        converting::AstConverting, nodes::*, visitor::AstVisitor, TraversalResult,
+        TreeTraversalMode,
+    },
+    parser::lexer::SourcePosition,
+};
+
+use crate::intermediate_representation::{primitives::*, symbol_table::SymbolTable};
+
+/// Byte Code Generation Process
+///
+/// The process of generating byte code from Scilla source code involves several steps and transformations.
+/// Here is a high-level overview of the process:
+///
+/// ```plaintext
+/// [Scilla source code]
+///        |
+///        v
+/// [Abstract Syntax Tree (AST)]
+///        |
+///        | (AstConverting)
+///        v
+/// [Intermediate Representation (IR)]
+///        |
+///        | (PassManager)
+///        v
+/// [Optimized Intermediate Representation]
+///        |
+///        | (EvmBytecodeGenerator)
+///        v
+/// [EVM Bytecode]
+/// ```
+///
+/// Each arrow (`|        v`) represents a transformation or a step in the process.
+/// The name in parentheses (e.g., `(AstConverting)`) is the component or the process that performs the transformation.
+///
+/// 1. Scilla source code is parsed into an Abstract Syntax Tree (AST).
+/// 2. The AST is converted into an Intermediate Representation (IR) using the `AstConverting` trait.
+/// 3. The IR is optimized using the `PassManager`.
+/// 4. The optimized IR is then converted into EVM bytecode using the `EvmBytecodeGenerator`.
+///
+
+/// `StackObject` is an enum representing the different types of objects that can be placed on the stack during the conversion process.
+/// It includes EnumValue, IrIdentifier, Instruction, VariableDeclaration, FunctionBody, and FunctionBlock.
 #[derive(Debug, Clone)]
 enum StackObject {
+    /// Represents an EnumValue object on the stack.
     EnumValue(EnumValue),
 
+    /// Represents an IrIdentifier object on the stack.
     IrIdentifier(IrIdentifier),
+
+    /// Represents an Instruction object on the stack.
     Instruction(Box<Instruction>),
 
+    /// Represents a VariableDeclaration object on the stack.
     VariableDeclaration(VariableDeclaration),
+
+    /// Represents a FunctionBody object on the stack.
     FunctionBody(Box<FunctionBody>),
+
+    /// Represents a FunctionBlock object on the stack.
     FunctionBlock(Box<FunctionBlock>),
 }
 
+/// The `IrEmitter` struct is used for bookkeeping during the conversion of a Scilla AST to an intermediate representation.
+/// It implements the `AstConverting` trait, which is a generic trait for AST conversions.
 pub struct IrEmitter {
+    /// Stack of objects used during the conversion process.
     stack: Vec<StackObject>,
 
-    // Used for transition and procedure
+    /// Current function block being processed.
     current_block: Box<FunctionBlock>,
+
+    /// Current function body being processed.
     current_body: Box<FunctionBody>,
 
-    // Used for let function declarations
-    //    current_state: Option< Box< ComputableState > >,
-
-    // Other
+    /// Current namespace being processed.
     current_namespace: IrIdentifier,
+
+    /// Stack of namespaces used during the conversion process.
     namespace_stack: Vec<IrIdentifier>,
 
+    /// Intermediate representation of the AST.
     ir: Box<IntermediateRepresentation>,
 
+    /// Source positions of the AST nodes.
     source_positions: Vec<(SourcePosition, SourcePosition)>,
 }
 
 impl IrEmitter {
-    pub fn new() -> Self {
+    pub fn new(symbol_table: SymbolTable) -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         let ns = IrIdentifier {
@@ -62,7 +115,7 @@ impl IrEmitter {
             current_namespace: ns.clone(),
             namespace_stack: [ns].to_vec(),
             /// current_function: None,
-            ir: Box::new(IntermediateRepresentation::new()),
+            ir: Box::new(IntermediateRepresentation::new(symbol_table)),
             source_positions: [(
                 SourcePosition::invalid_position(),
                 SourcePosition::invalid_position(),
@@ -213,6 +266,10 @@ impl IrEmitter {
     }
 
     pub fn emit(&mut self, node: &NodeProgram) -> Result<Box<IntermediateRepresentation>, String> {
+        // Copying original symbol table to create a new instance of the IR at the end
+        // of traversing
+        let symbol_table = self.ir.symbol_table.clone();
+
         let result = node.visit(self);
         match result {
             Err(m) => panic!("{}", m),
@@ -224,7 +281,7 @@ impl IrEmitter {
         // Annotating symbols with types
 
         // Returning
-        let mut ret = Box::new(IntermediateRepresentation::new());
+        let mut ret = Box::new(IntermediateRepresentation::new(symbol_table));
         mem::swap(&mut self.ir, &mut ret);
 
         Ok(ret)
@@ -466,7 +523,7 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeFullExpression::LocalVariableDeclaration {
-                identifier_name,
+                identifier_name: _,
                 expression,
                 type_annotation: _,
                 containing_expression,
@@ -539,152 +596,158 @@ impl AstConverting for IrEmitter {
                 unimplemented!();
             }
             NodeFullExpression::Match {
-                match_expression,
-                clauses,
+                match_expression: _,
+                clauses: _,
             } => {
-                let _ = match_expression.visit(self)?;
-                let expression = self.pop_instruction()?;
-                let source_location = expression.source_location.clone();
+                unimplemented!();
+            } /* TODO: {
 
-                let main_expression_symbol = self.convert_instruction_to_symbol(expression);
+            info!("Match statement");
+            let _ = match_expression.visit(self)?;
+            let expression = self.pop_instruction()?;
+            let source_location = expression.source_location.clone();
 
-                let finally_exit_label = self
-                    .ir
-                    .symbol_table
-                    .name_generator
-                    .new_block_label("match_finally");
+            let main_expression_symbol = self.convert_instruction_to_symbol(expression);
 
-                // Checking for catch all
-                let mut catch_all: Option<&NodePatternMatchExpressionClause> = None;
-                for clause in clauses.iter() {
-                    match clause.node.pattern.node {
-                        NodePattern::Wildcard => {
-                            catch_all = Some(&clause.node);
-                            break;
-                        }
-                        _ => {}
-                    }
-                }
+            let finally_exit_label = self
+            .ir
+            .symbol_table
+            .name_generator
+            .new_block_label("match_finally");
 
-                let mut phi_results: Vec<IrIdentifier> = Vec::new();
+            let mut phi_results: Vec<IrIdentifier> = Vec::new();
 
-                for clause in clauses.iter() {
-                    clause.node.pattern.visit(self)?;
+            for clause in clauses.iter() {
+            info!("Next clause");
+            let fail_label = self
+            .ir
+            .symbol_table
+            .name_generator
+            .new_block_label("match_fail");
+            todo!("Catch all is untested."); //
 
-                    // Creating compare instruction
-                    // TODO: Pop instruction or symbol
-                    let expected_value = self.pop_ir_identifier()?;
-                    assert!(expected_value.kind == IrIndentifierKind::Unknown);
-
-                    let source_location = expected_value.source_location.clone();
-
-                    let compare_instr = Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::IsEqual {
-                            left: main_expression_symbol.clone(),
-                            right: expected_value,
-                        },
-                        source_location: source_location.clone(),
-                    });
-                    let case = self.convert_instruction_to_symbol(compare_instr);
-
-                    // Blocks for success and fail
-                    let fail_label = self
-                        .ir
-                        .symbol_table
-                        .name_generator
-                        .new_block_label("match_fail");
-
-                    let success_label = self
-                        .ir
-                        .symbol_table
-                        .name_generator
-                        .new_block_label("match_success");
-                    let mut success_block = FunctionBlock::new_from_symbol(success_label.clone());
-
-                    // Terminating current block
-                    let op = Operation::ConditionalJump {
-                        expression: case,
-                        on_success: success_label,
-                        on_failure: fail_label.clone(),
-                    };
-                    self.current_block
-                        .instructions
-                        .push_back(Box::new(Instruction {
-                            ssa_name: None,
-                            result_type: None,
-                            operation: op,
-                            source_location,
-                        }));
-                    self.current_block.terminated = true;
-
-                    // Finishing current_block and moving it onto
-                    // to the current body while preparing the success block
-                    // as current
-                    mem::swap(&mut success_block, &mut self.current_block);
-                    self.current_body.blocks.push(success_block);
-
-                    let _ = clause.node.expression.visit(self)?;
-                    let expr_instr = self.pop_instruction()?;
-                    let source_location = expr_instr.source_location.clone();
-
-                    let result_sym = self.convert_instruction_to_symbol(expr_instr);
-                    phi_results.push(result_sym);
-
-                    let exit_instruction = Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::Jump(finally_exit_label.clone()),
-                        source_location,
-                    });
-                    self.current_block.instructions.push_back(exit_instruction);
-
-                    // Pushing sucess block and creating fail block
-
-                    let mut fail_block = FunctionBlock::new_from_symbol(fail_label.clone());
-                    mem::swap(&mut fail_block, &mut self.current_block);
-                    self.current_body.blocks.push(fail_block);
-
-                    // let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_case");
-                    // let fail_block = FunctionBlock::new_from_symbol(fail_label);
-                }
-
-                // Currently in the last fail block
-                // TODO: Catch all if needed
-
-                let exit_instruction = Box::new(Instruction {
-                    ssa_name: None,
-                    result_type: None,
-                    operation: Operation::Jump(finally_exit_label.clone()),
-                    source_location: source_location.clone(),
-                });
-                self.current_block.instructions.push_back(exit_instruction);
-
-                if let Some(_) = catch_all {
-                    unimplemented!();
-                }
-
-                // Attaching exit block
-                let mut finally_exit_block =
-                    FunctionBlock::new_from_symbol(finally_exit_label.clone());
-                mem::swap(&mut finally_exit_block, &mut self.current_block);
-                self.current_body.blocks.push(finally_exit_block);
-
-                self.stack
-                    .push(StackObject::Instruction(Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::PhiNode(phi_results),
-                        source_location: source_location.clone(),
-                    })));
-                // unimplemented!();
+            match &clause.node.pattern.node {
+            NodePattern::Wildcard => {
+            info!("Dealing with wildcard");
+            // Doing nothing as we will just write the instructions to the current block
             }
+            NodePattern::Binder(_) => {
+            unimplemented!()
+            }
+            NodePattern::Constructor(name, args) => {
+            info!("Setting {} up", name);
+            clause.node.pattern.visit(self)?;
+
+            // Creating compare instruction
+            // TODO: Pop instruction or symbol
+            let expected_value = self.pop_ir_identifier()?;
+            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+
+            let source_location = expected_value.source_location.clone();
+
+            let compare_instr = Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::IsEqual {
+            left: main_expression_symbol.clone(),
+            right: expected_value,
+            },
+            source_location: source_location.clone(),
+            });
+            let case = self.convert_instruction_to_symbol(compare_instr);
+
+            // Blocks for success
+
+            let success_label = self
+            .ir
+            .symbol_table
+            .name_generator
+            .new_block_label("match_success");
+            let mut success_block =
+            FunctionBlock::new_from_symbol(success_label.clone());
+
+            // Terminating current block
+            let op = Operation::ConditionalJump {
+            expression: case,
+            on_success: success_label,
+            on_failure: fail_label.clone(),
+            };
+            self.current_block
+            .instructions
+            .push_back(Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: op,
+            source_location,
+            }));
+
+            // Finishing current_block and moving it onto
+            // to the current body while preparing the success block
+            // as current
+            mem::swap(&mut success_block, &mut self.current_block);
+            self.current_body.blocks.push(success_block);
+            }
+            }
+
+            let _ = clause.node.expression.visit(self)?;
+            let expr_instr = self.pop_instruction()?;
+            let source_location = expr_instr.source_location.clone();
+
+            let result_sym = self.convert_instruction_to_symbol(expr_instr);
+            phi_results.push(result_sym);
+
+            let exit_instruction = Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::Jump(finally_exit_label.clone()),
+            source_location,
+            });
+            self.current_block.instructions.push_back(exit_instruction);
+            self.current_block.terminated = true;
+            // Pushing sucess block and creating fail block
+
+            let mut fail_block = FunctionBlock::new_from_symbol(fail_label.clone());
+            mem::swap(&mut fail_block, &mut self.current_block);
+            self.current_body.blocks.push(fail_block);
+
+            // let fail_label = self.ir.symbol_table.name_generator.new_block_label("match_case");
+            // let fail_block = FunctionBlock::new_from_symbol(fail_label);
+            }
+
+            // TODO: Catch all if needed
+
+            // Exiting
+            let exit_instruction = Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::Jump(finally_exit_label.clone()),
+            source_location: source_location.clone(),
+            });
+            self.current_block.instructions.push_back(exit_instruction);
+
+            // Attaching exit block
+            let mut finally_exit_block =
+            FunctionBlock::new_from_symbol(finally_exit_label.clone());
+            mem::swap(&mut finally_exit_block, &mut self.current_block);
+            self.current_body.blocks.push(finally_exit_block);
+
+            self.stack
+            .push(StackObject::Instruction(Box::new(Instruction {
+            ssa_name: None,
+            result_type: None,
+            operation: Operation::PhiNode(phi_results),
+            source_location: source_location.clone(),
+            })));
+            // unimplemented!();
+            }
+             */
             NodeFullExpression::ConstructorCall {
                 identifier_name,
                 contract_type_arguments,
                 argument_list,
             } => {
+                self.push_source_position(&identifier_name.start, &identifier_name.end);
+
                 let _ = identifier_name.visit(self)?;
 
                 // Expecting function name symbol
@@ -706,13 +769,14 @@ impl AstConverting for IrEmitter {
                     owner: None, // We cannot deduce the type from the AST
                     arguments,
                 };
+
                 let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
                     operation,
                     source_location: self.current_location(),
                 });
-
+                self.pop_source_position();
                 self.stack.push(StackObject::Instruction(instr));
             }
             NodeFullExpression::TemplateFunction {
@@ -784,8 +848,19 @@ impl AstConverting for IrEmitter {
                 });
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeValueLiteral::LiteralHex(_value) => {
-                unimplemented!();
+            NodeValueLiteral::LiteralHex(value) => {
+                let typename = self.ir.symbol_table.name_generator.hex_type();
+                let operation = Operation::Literal {
+                    data: value.to_string(),
+                    typename,
+                };
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                    source_location: self.current_location(),
+                });
+                self.stack.push(StackObject::Instruction(instr));
             }
             NodeValueLiteral::LiteralString(value) => {
                 let typename = self.ir.symbol_table.name_generator.string_type();
@@ -821,7 +896,8 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match &node {
             NodePattern::Wildcard => {
-                unimplemented!()
+                info!("Visiting wildcard!");
+                // Wild card does not change anything
             }
             NodePattern::Binder(_name) => {
                 unimplemented!()
@@ -1002,12 +1078,28 @@ impl AstConverting for IrEmitter {
             } => {
                 unimplemented!()
             }
-            NodeStatement::Accept => Some(Box::new(Instruction {
-                ssa_name: None,
-                result_type: None,
-                operation: Operation::AcceptTransfer,
-                source_location: self.current_location(),
-            })),
+            NodeStatement::Accept => {
+                let arguments: Vec<IrIdentifier> = [].to_vec();
+                let name = IrIdentifier {
+                    unresolved: "__intrinsic_accept_transfer".to_string(), // TODO: Register somewhere globally
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::ProcedureName,
+                    is_definition: false,
+                    source_location: self.current_location(),
+                };
+
+                let operation = Operation::CallFunction { name, arguments };
+                // TODO: Location from component_id
+                let instr = Box::new(Instruction {
+                    ssa_name: None,
+                    result_type: None,
+                    operation,
+                    source_location: self.current_location(),
+                });
+
+                Some(instr)
+            }
             NodeStatement::Send { identifier_name: _ } => {
                 unimplemented!()
             }
@@ -1034,7 +1126,7 @@ impl AstConverting for IrEmitter {
                     ssa_name: None,
                     result_type: None,
                     operation: Operation::Jump(match_exit.clone()),
-                    source_location,
+                    source_location: source_location.clone(),
                 });
                 self.current_block.instructions.push_back(jump);
 
@@ -1051,6 +1143,14 @@ impl AstConverting for IrEmitter {
                         .name_generator
                         .new_block_label(&format!("clause_{}_block", i));
 
+                    let next_jump_label = match &clause.node.pattern_expression.node {
+                        NodePattern::Wildcard => label_block.clone(),
+                        NodePattern::Binder(_) => {
+                            unimplemented!()
+                        }
+                        NodePattern::Constructor(_, _) => label_condition.clone(),
+                    };
+
                     let last_instruction = &mut self.current_block.instructions.back_mut().unwrap();
 
                     match &mut last_instruction.operation {
@@ -1062,45 +1162,56 @@ impl AstConverting for IrEmitter {
                             on_success: _,
                             ref mut on_failure,
                         } => {
-                            *on_failure = label_condition.clone();
+                            *on_failure = next_jump_label;
                         }
                         _ => {
                             panic!("Expected previous block to be a terminating jump.");
                         }
                     }
 
-                    // Instating condition checking block as self.current_block
-                    let mut clause_condition_block =
-                        FunctionBlock::new_from_symbol(label_condition);
-                    mem::swap(&mut clause_condition_block, &mut self.current_block);
-                    self.current_body.blocks.push(clause_condition_block);
+                    match &clause.node.pattern_expression.node {
+                        NodePattern::Wildcard => {
+                            // In the event of a wildcard, we jump right to the clause block.
+                            // TODO: Check that the wildcard is last block in the match statement.
+                        }
+                        NodePattern::Binder(_) => {
+                            unimplemented!()
+                        }
+                        NodePattern::Constructor(_, _) => {
+                            // Instating condition checking block as self.current_block
+                            let mut clause_condition_block =
+                                FunctionBlock::new_from_symbol(label_condition);
+                            mem::swap(&mut clause_condition_block, &mut self.current_block);
+                            self.current_body.blocks.push(clause_condition_block);
 
-                    clause.node.pattern_expression.visit(self)?;
-                    let expected_value = self.pop_ir_identifier()?;
-                    assert!(expected_value.kind == IrIndentifierKind::Unknown);
-                    let source_location = expected_value.source_location.clone();
+                            clause.node.pattern_expression.visit(self)?;
+                            let expected_value = self.pop_ir_identifier()?;
+                            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+                            let source_location = expected_value.source_location.clone();
 
-                    let jump_condition = Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::IsEqual {
-                            left: main_expression_symbol.clone(),
-                            right: expected_value,
-                        },
-                        source_location: source_location.clone(),
-                    });
+                            let jump_condition = Box::new(Instruction {
+                                ssa_name: None,
+                                result_type: None,
+                                operation: Operation::IsEqual {
+                                    left: main_expression_symbol.clone(),
+                                    right: expected_value,
+                                },
+                                source_location: source_location.clone(),
+                            });
 
-                    let jump_if = Box::new(Instruction {
-                        ssa_name: None,
-                        result_type: None,
-                        operation: Operation::ConditionalJump {
-                            expression: self.convert_instruction_to_symbol(jump_condition),
-                            on_success: label_block.clone(),
-                            on_failure: match_exit.clone(), // Exit or Placeholder - will be overwritten in next cycle
-                        },
-                        source_location: source_location.clone(),
-                    });
-                    self.current_block.instructions.push_back(jump_if);
+                            let jump_if = Box::new(Instruction {
+                                ssa_name: None,
+                                result_type: None,
+                                operation: Operation::ConditionalJump {
+                                    expression: self.convert_instruction_to_symbol(jump_condition),
+                                    on_success: label_block.clone(),
+                                    on_failure: match_exit.clone(), // Exit or Placeholder - will be overwritten in next cycle
+                                },
+                                source_location: source_location.clone(),
+                            });
+                            self.current_block.instructions.push_back(jump_if);
+                        }
+                    };
 
                     let mut clause_block = match &clause.node.statement_block {
                         Some(statement_block) => {
@@ -1110,7 +1221,8 @@ impl AstConverting for IrEmitter {
                         }
                         None => FunctionBlock::new("empty_block".to_string()),
                     };
-
+                    // TODO: Get source location properly
+                    let source_location = source_location.clone();
                     clause_block.name = label_block.clone();
 
                     let terminator_instr = Box::new(Instruction {
@@ -1134,8 +1246,9 @@ impl AstConverting for IrEmitter {
                 component_id,
                 arguments: call_args,
             } => {
+                self.push_source_position(&component_id.start, &component_id.end);
+
                 let mut arguments: Vec<IrIdentifier> = [].to_vec();
-                warn!("Emitter call '{:?}' with {:#?}", component_id, call_args);
                 for arg in call_args.iter() {
                     // TODO: xs should be rename .... not clear what this is, but it means function arguments
                     let _ = arg.visit(self)?;
@@ -1160,7 +1273,7 @@ impl AstConverting for IrEmitter {
                 };
 
                 let operation = Operation::CallFunction { name, arguments };
-
+                // TODO: Location from component_id
                 let instr = Box::new(Instruction {
                     ssa_name: None,
                     result_type: None,
@@ -1168,6 +1281,7 @@ impl AstConverting for IrEmitter {
                     source_location: self.current_location(),
                 });
 
+                self.pop_source_position();
                 // self.stack.push(StackObject::Instruction(instr));
                 Some(instr)
             }

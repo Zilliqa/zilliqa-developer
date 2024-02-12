@@ -14,21 +14,20 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: useLocation is broken
-// import { useLocation } from "react-router";
-import { NavItem } from "reactstrap";
-import { Link } from "react-router-dom";
-import { paths } from "../../routes";
-import "./style.css";
-import { FaHome, FaPlusSquare, FaTint, FaPaperPlane } from "react-icons/fa";
+import { withRouter } from 'react-router';
+import { NavItem } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import { paths } from '../../routes';
+import './style.css';
+import { FaHome, FaPlusSquare, FaTint, FaPaperPlane } from 'react-icons/fa';
 
-const Sidebar = () => {
-  // const { pathname } = useLocation();
-  const pathname = "";
+const Sidebar = (props) => {
+  const { pathname } = props.location;
+
   const renderLink = (path, name, icon) => (
     <Link
       to={path + window.location.search}
-      className={`nav-link ${pathname === path ? "active" : ""}`}
+      className={`nav-link ${pathname === path ? 'active' : ''}`}
     >
       <span className="sidebar-icon pr-2">{icon}</span>
       {name}
@@ -40,20 +39,10 @@ const Sidebar = () => {
       <div className="sidebar-background">
         <div className="sidebar-wrapper">
           <ul className="sidebar-nav">
-            <NavItem>{renderLink(paths.home, "Home", <FaHome />)}</NavItem>
-            <NavItem>
-              {renderLink(
-                paths.generate,
-                "Create New Wallet",
-                <FaPlusSquare />
-              )}
-            </NavItem>
-            <NavItem>
-              {renderLink(paths.send, "Access Wallet", <FaPaperPlane />)}
-            </NavItem>
-            <NavItem>
-              {renderLink(paths.faucet, "ZIL Faucet", <FaTint />)}
-            </NavItem>
+            <NavItem>{renderLink(paths.home, 'Home', <FaHome />)}</NavItem>
+            <NavItem>{renderLink(paths.generate, 'Create New Wallet', <FaPlusSquare />)}</NavItem>
+            <NavItem>{renderLink(paths.send, 'Access Wallet', <FaPaperPlane />)}</NavItem>
+            <NavItem>{renderLink(paths.faucet, 'ZIL Faucet', <FaTint />)}</NavItem>
           </ul>
         </div>
       </div>
@@ -61,4 +50,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default withRouter(Sidebar);

@@ -12,9 +12,9 @@ description: Learn how to use Chainlink oracles on Zilliqa.
 
 ---
 
-## How to use Chainlink feeds with smart contracts on Zilliqa
+## How to use Chainlink Community Deployment price feeds with smart contracts on Zilliqa
 
-In this tutorial we will show you how to get the current ZIL/ USDT price from one of the Chainlink price feed oracles operating on the Zilliqa network.
+In this tutorial we will show you how to get the current ZIL/ USDT price from one of the price feed oracles operating as part of the [Chainlink Community Deployment](https://docs.chain.link/data-feeds/selecting-data-feeds/#chainlink-community-deployments) on the Zilliqa network.
 
 > **Note**: This tutorial is aimed towards developers as you will need to have some basic knowledge of smart contracts and programming to complete the steps below.
 
@@ -23,6 +23,8 @@ This guide will explain how to accomplish the following:
 1. Configure Metamask to the Zilliqa testnet
 2. Deploy a smart contract to the testnet.
 3. Have our new smart contract get the current price of ZIL from the oracle contract
+
+> **Note**: Chainlink Community Deployment price feeds are not official integrations. Developers should understand risks associated with community deployments. [Learn More](https://docs.chain.link/data-feeds/selecting-data-feeds/#chainlink-community-deployments)
 
 ## Connecting to Zilliqa Testnet
 
@@ -39,13 +41,13 @@ Using the information above, follow this guide: [How to add a custom network to 
 
 ## Deploy Smart Contract via Remix
 
-Remix is great as it is a zero-setup tool for working with smart contracts, allowing us to easily demonstrate the Chainlink oracle contracts. But first - let’s inspect the contracts we’ll be working with!
+Remix is great as it is a zero-setup tool for working with smart contracts, allowing us to easily demonstrate the oracle contracts. But first - let’s inspect the contracts we’ll be working with!
 
 ## FeedConsumer
 
-This is the contract you will deploy. This is just a minimal example to demonstrate how to consume Chainlink data feeds on Zilliqa. You can extend this to be a decentralised borrowing and lending protocol, a DEX, game, NFT minting contract - anything you can think of!
+This is the contract you will deploy. This is just a minimal example to demonstrate how to consume these data feeds on Zilliqa. You can extend this to be a decentralised borrowing and lending protocol, a DEX, game, NFT minting contract - anything you can think of!
 
-If you look at the last function, it only returns the current answer, or price. You can see that it also is capable of returning other pieces of information such as timestamp data. Chainlink encourages dAapp developers to verify the timestamp together with the price information to protect against stale data. While the oracles should be publishing fresh data every other minute, there can be unexpected downtime.
+If you look at the last function, it only returns the current answer, or price. You can see that it also is capable of returning other pieces of information such as timestamp data. Chainlink documentation encourages dAapp developers to verify the timestamp together with the price information to protect against stale data. While the oracles should be publishing fresh data every other minute, there can be unexpected downtime.
 
 This is a public view function, meaning that getting the price data has zero cost. You can add pricing data to your dApp with no extra charge to your team or your users.
 
@@ -127,7 +129,7 @@ Go to [Remix IDE](https://remix.ethereum.org/). In the File Explorer tab, add bo
 
 The next thing to do is to compile our contracts with the built-in compiler. Do this for both contracts:
 
-<img alt="Remix File Explorer" width="1600" src="../../../../assets/img/chainlink/remix-compiler.png" />
+<img alt="Remix File Explorer" width="800" src="../../../../assets/img/chainlink/remix-compiler.png" />
 
 Now we are ready to deploy the contract! Go to the Remix Deployer. Make sure you have selected Zilliqa Testnet in Metamask from the earlier step.
 
@@ -140,18 +142,18 @@ There are three actions we need to take here:
 <img alt="Remix File Explorer" width="1600" src="../../../../assets/img/chainlink/remix-transactions-0.png" />
 
 If all went well you should now see your FeedConsumer contract appear under “Deployed Contracts”:
-<img alt="Remix File Explorer" width="1600" src="../../../../assets/img/chainlink/remix-transactions-1.png" />
+<img alt="Remix File Explorer" width="800" src="../../../../assets/img/chainlink/remix-transactions-1.png" />
 
 If so, great! Let’s open this up and call a few of its functions:
 
 Let’s call the description function: after a couple of seconds you should see “ZIL / USD”. Do the same with decimals and getLatestAnswer() and you should see a similar result as below:
-<img alt="Remix File Explorer" width="1600" src="../../../../assets/img/chainlink/remix-deployed-contracts.png" />
+<img alt="Remix File Explorer" width="800" src="../../../../assets/img/chainlink/remix-deployed-contracts.png" />
 
 Remember since this is on-chain data, there are no floats / decimal numbers. So to get the nominal value in a more human readable format, you divide the answer with the decimal points as follows:
 
 `1791000 / 1e8 = 0.01791 USD for 1 ZIL.`
 
-There you have it! While this a simple demonstration, it should illuminate the wide range of possibilities that can be materialised on Zilliqa now that Chainlink oracles are active on the network.
+There you have it! While this a simple demonstration, it should illuminate the wide range of possibilities that can be materialised on Zilliqa now that price feed oracles are active on the network.
 
 ## Resources
 
@@ -161,3 +163,4 @@ There you have it! While this a simple demonstration, it should illuminate the w
 - [Remix](https://remix.ethereum.org/)
 - [Zilliqa public RPCs](https://chainlist.org/?search=zilliqa&testnets=true)
 - [DefiLlama](https://defillama.com/)
+- [Chainlink Community Deployments](https://docs.chain.link/data-feeds/selecting-data-feeds/#chainlink-community-deployments)
