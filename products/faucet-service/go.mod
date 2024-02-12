@@ -5,10 +5,10 @@ go 1.17
 require (
 	github.com/Zilliqa/gozilliqa-sdk v1.2.0
 	github.com/gin-gonic/gin v1.7.4
-	github.com/google/uuid v1.3.0
-	github.com/hashicorp/go-memdb v1.3.2
-	github.com/robfig/cron/v3 v3.0.0
-	github.com/sirupsen/logrus v1.7.0
+	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-memdb v1.3.4
+	github.com/robfig/cron/v3 v3.0.1
+	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
