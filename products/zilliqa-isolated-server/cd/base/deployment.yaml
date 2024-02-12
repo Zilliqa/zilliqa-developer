@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zilliqa-isolated-server
-  namespace: zilliqa-isolated-server
   labels:
     app.kubernetes.io/name: zilliqa-isolated-server
 spec:
@@ -30,6 +29,11 @@ spec:
             - containerPort: 80
         - image: zilliqa-isolated-server
           name: zilliqa-isolated-server
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              memory: 200Mi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:

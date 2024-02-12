@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es6",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
+  },
+  "noEmitOnError": true,
+  "noFallthroughCasesInSwitch": true,
+  "noImplicitAny": true,
+  "noImplicitReturns": true,
+  "noImplicitThis": true,
+  "noUnusedLocals": true,
+  "strictPropertyInitialization": false,
+  "strict": true,
+  "pretty": true,
+  "removeComments": true,
+  "sourceMap": true,
+  "preserveWatchOutput": true,
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "src/**/*.spec.*"]
+}

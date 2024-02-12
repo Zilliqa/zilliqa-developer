@@ -67,6 +67,12 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     ).to.be.eq(4000);
   });
 
+  it("Default node reward should be 4000", async function () {
+    expect(await scillaRewardsParamsContract.node_reward_in_percent()).to.be.eq(
+      4000
+    );
+  });
+
   it("Default coinbase reward per ds should be 204000000000000000", async function () {
     expect(await scillaRewardsParamsContract.coinbase_reward_per_ds()).to.be.eq(
       204000000000000000
@@ -99,6 +105,13 @@ describe(utils.TestGeneral(0, "TestParams"), function () {
     expect(
       await scillaRewardsParamsContract.lookup_reward_in_percent()
     ).to.be.eq(35);
+  });
+
+  it("Admin can change node reward to 25", async function () {
+    let result1 = await scillaRewardsParamsContract.ChangeNodeReward(25);
+    expect(await scillaRewardsParamsContract.node_reward_in_percent()).to.be.eq(
+      25
+    );
   });
 
   it("Admin can change coinbase reward per ds to 180000000000000000", async function () {

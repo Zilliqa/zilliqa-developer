@@ -1,4 +1,4 @@
-use crate::parser::lexer;
+use scilla_parser::parser::lexer;
 
 // Struct to represent source errors
 // Contains the position of the error in the source code and the error message
