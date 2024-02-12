@@ -284,6 +284,45 @@ function App() {
               });
             },
           });
+
+          // Double check if it has already been dispatched before event listener catches it
+          const blockNumber = await toChainClient.getBlockNumber();
+          const dispatched = await toChainClient.getLogs({
+            address: toChainConfig.chainGatewayAddress,
+            event: getAbiItem({
+              abi: chainGatewayAbi,
+              name: "Dispatched",
+            }),
+            args: {
+              nonce,
+            },
+            fromBlock: blockNumber - 50n,
+            toBlock: "latest",
+          });
+
+          if (dispatched.length > 0) {
+            toast.update(id, {
+              render: (
+                <div>
+                  Bridge txn complete, funds arrived to {toChainConfig.name}{" "}
+                  chain. View on{" "}
+                  <a
+                    className="link text-ellipsis w-10"
+                    onClick={() =>
+                      window.open(
+                        `${toChainConfig.blockExplorer}${dispatched[0].transactionHash}`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    block explorer
+                  </a>
+                </div>
+              ),
+              type: "success",
+              isLoading: false,
+            });
+          }
         })();
 
         setAmount("");
