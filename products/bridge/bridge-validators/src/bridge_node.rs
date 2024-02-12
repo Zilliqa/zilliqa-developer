@@ -28,6 +28,7 @@ use crate::{
 #[derive(Debug)]
 pub struct BridgeNode {
     event_signatures: HashMap<U256, RelayEventSignatures>,
+    relay_nonces: HashSet<U256>,
     outbound_message_sender: UnboundedSender<OutboundBridgeMessage>,
     inbound_message_receiver: UnboundedReceiverStream<InboundBridgeMessage>,
     inbound_message_sender: UnboundedSender<InboundBridgeMessage>,
@@ -53,6 +54,7 @@ impl BridgeNode {
             inbound_message_receiver,
             inbound_message_sender,
             is_leader,
+            relay_nonces: HashSet::new(),
         };
 
         bridge_node.update_validators().await?;
@@ -199,7 +201,15 @@ impl BridgeNode {
         Ok(())
     }
 
-    fn handle_relay_event(&self, event: RelayedFilter) -> Result<()> {
+    fn handle_relay_event(&mut self, event: RelayedFilter) -> Result<()> {
+        if self.relay_nonces.contains(&event.nonce) {
+            info!(
+                "Chain: {} event duplicated {}",
+                self.chain_client.chain_id, event
+            );
+            return Ok(());
+        }
+
         info!(
             "Chain: {} event found to be broadcasted: {}",
             self.chain_client.chain_id, event
@@ -214,6 +224,8 @@ impl BridgeNode {
         }
 
         let relay_event = RelayEvent::from(event, self.chain_client.chain_id);
+
+        self.relay_nonces.insert(relay_event.nonce);
 
         self.broadcast_message(Relay {
             signature: relay_event.sign(&self.chain_client.wallet)?,

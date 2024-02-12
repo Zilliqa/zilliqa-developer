@@ -188,7 +188,6 @@ impl ValidatorNode {
 
         for i in 1..6 {
             info!("Dispatch Attempt {:?}", i);
-            // Simulate call, if fails decode error and exit early
 
             // Get gas estimate
             // TODO: refactor configs specifically for zilliqa
@@ -205,6 +204,7 @@ impl ValidatorNode {
             } else {
                 let function_call = function_call.clone();
                 // `eth_call` does not seem to work on ZQ so it had to be skipped
+                // Simulate call, if fails decode error and exit early
                 if let Err(contract_err) = function_call.call().await {
                     match contract_err.decode_contract_revert::<ChainGatewayErrors>() {
                         Some(ChainGatewayErrors::AlreadyDispatched(_)) => {
@@ -231,8 +231,13 @@ impl ValidatorNode {
             // Make the actual call
             match _function_call.send().await {
                 Ok(tx) => {
-                    tx.log_msg("Pending txn hash");
-                    println!("Transaction Sent {}.{}", event.target_chain_id, event.nonce);
+                    println!(
+                        "Transaction Sent {}.{} {:?}",
+                        event.target_chain_id,
+                        event.nonce,
+                        tx.tx_hash()
+                    );
+
                     return Ok(());
                 }
                 Err(err) => {
