@@ -21,7 +21,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [developer-portal, devex, devex-apollo, neo-savant]
+        application:
+          [
+            developer-portal,
+            devex,
+            devex-apollo,
+            dev-wallet,
+            faucet-service,
+            governance-api,
+            governance-snapshot,
+            multisig,
+            neo-savant,
+            scilla-server,
+            zillion,
+            zilliqa-isolated-server,
+          ]
         include:
           - application: developer-portal
             image_name: developer-portal
@@ -38,14 +52,64 @@ jobs:
             path: products/devex-apollo
             tag_length: 8
             tag_latest: false
+          - application: dev-wallet
+            image_name: dev-wallet
+            path: products/dev-wallet
+            tag_length: 8
+            tag_latest: false
+          - application: faucet-service
+            image_name: faucet-service
+            path: products/faucet-service
+            tag_length: 8
+            tag_latest: false
+          - application: multisig
+            image_name: multisig
+            path: products/multisig
+            tag_length: 8
+            tag_latest: false
           - application: neo-savant
             image_name: neo-savant
             path: products/neo-savant
             tag_length: 8
             tag_latest: false
+          - application: governance-api
+            image_name: governance-api
+            path: products/governance-api
+            tag_length: 8
+            tag_latest: false
+          - application: governance-snapshot
+            image_name: governance-snapshot
+            path: products/governance-snapshot
+            tag_length: 8
+            tag_latest: false
           - application: pdt
             image_name: pdt
             path: products/pdt
+            tag_length: 8
+            tag_latest: false
+          - application: scilla-server
+            image_name: scilla-server
+            path: products/scilla-server
+            tag_length: 8
+            tag_latest: false
+          - application: zillion
+            image_name: zillion
+            path: products/zillion
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-isolated-server
+            image_name: zilliqa-isolated-server
+            path: products/zilliqa-isolated-server
+            tag_length: 8
+            tag_latest: true
+          - application: zilliqa-bridge
+            image_name: zilliqa-bridge-validator
+            path: products/bridge/bridge-validators
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-bridge-web
+            image_name: zilliqa-bridge-web
+            path: products/bridge/bridge-web
             tag_length: 8
             tag_latest: false
     env:
@@ -55,6 +119,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          submodules: recursive
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
