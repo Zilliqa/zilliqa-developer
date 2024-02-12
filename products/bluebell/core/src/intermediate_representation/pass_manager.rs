@@ -1,11 +1,12 @@
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::primitives::IntermediateRepresentation;
-use crate::passes::annotate_base_types::AnnotateBaseTypes;
-use crate::passes::balance_block_args::BalanceBlockArguments;
-use crate::passes::block_dependencies::DeduceBlockDependencies;
-use crate::passes::collect_type_definitions::CollectTypeDefinitionsPass;
-use crate::passes::debug_printer::DebugPrinter;
-use crate::passes::state_allocator::StateCollector;
+use crate::{
+    intermediate_representation::{pass::IrPass, primitives::IntermediateRepresentation},
+    passes::{
+        annotate_base_types::AnnotateBaseTypes, balance_block_args::BalanceBlockArguments,
+        block_dependencies::DeduceBlockDependencies,
+        collect_type_definitions::CollectTypeDefinitionsPass, debug_printer::DebugPrinter,
+        state_allocator::StateCollector,
+    },
+};
 
 pub struct PassManager {
     passes: Vec<Box<dyn IrPass>>,

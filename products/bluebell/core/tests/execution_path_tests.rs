@@ -1,11 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use bluebell::support::evm::EvmCompiler;
-    use bluebell::support::modules::ScillaDebugBuiltins;
-    use bluebell::support::modules::ScillaDefaultBuiltins;
-    use bluebell::support::modules::ScillaDefaultTypes;
-    use evm_assembly::executor::ExecutorResult;
-    use evm_assembly::types::EvmTypeValue;
+    use bluebell::support::{
+        evm::EvmCompiler,
+        modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
+    };
+    use evm_assembly::{executor::ExecutorResult, types::EvmTypeValue};
     use serde_json;
 
     fn result_to_string(ret: ExecutorResult) -> String {

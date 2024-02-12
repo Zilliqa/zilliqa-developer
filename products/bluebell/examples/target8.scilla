@@ -10,7 +10,7 @@ end
 
 transition readValue ()
   x <- welcome_msg;
-  x = builtin print__impl x
+  print x
 end
 
 

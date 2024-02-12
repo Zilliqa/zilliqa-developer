@@ -331,20 +331,15 @@ impl Trackable for TrackedPartitionedTable {
     ) -> Result<(), InsertionErrors> {
         // This is a bit horrid. If there is any action at all, we need to check what the highest txn
         // we successfully inserted was.
-        let mut last_blk: i64 = -1;
-        let mut last_txn: i64 = -1;
-        if req.req.len() > 1 {
-            let last_blks = self.get_last_txn_for_blocks(client, blks).await;
-            match last_blks {
-                Ok((a, b)) => (last_blk, last_txn) = (a, b),
-                Err(x) => {
-                    return Err(InsertionErrors::from_msg(&format!(
-                        "Cannot find inserted txn ids - {}",
-                        x
-                    )));
-                }
-            }
-        }
+        let (last_blk, last_txn) = if req.req.is_empty() {
+            (-1, -1)
+        } else {
+            self.get_last_txn_for_blocks(client, blks)
+                .await
+                .map_err(|err| {
+                    InsertionErrors::from_msg(&format!("Cannot find inserted txn ids - {}", err))
+                })?
+        };
 
         let part1_start = blks.start - blks.start % self.partition_size;
         let part2_start = blks.end - blks.end % self.partition_size;

@@ -13,5 +13,4 @@ pub mod observable_machine;
 pub mod opcode_spec;
 pub mod types;
 
-pub use self::evm_bytecode_builder::EvmByteCodeBuilder;
-pub use self::evm_decompiler::EvmAssemblyGenerator;
+pub use self::{evm_bytecode_builder::EvmByteCodeBuilder, evm_decompiler::EvmAssemblyGenerator};

@@ -1,5 +1,4 @@
 // Here
-use anyhow::Result;
 use gcp_bigquery_client::model::table::Table;
 use gcp_bigquery_client::Client;
 
@@ -46,19 +45,17 @@ impl BigQueryTableLocation {
     pub fn get_table_desc(&self) -> String {
         format!("{}.{}", self.dataset.get_dataset_desc(), self.table_id)
     }
-}
-pub async fn find_table(client: &Client, loc: &BigQueryTableLocation) -> Result<Option<Table>> {
-    match client
-        .table()
-        .get(
-            &loc.dataset.project_id,
-            &loc.dataset.dataset_id,
-            &loc.table_id,
-            Option::None,
-        )
-        .await
-    {
-        Ok(tbl) => Ok(Some(tbl)),
-        _ => Ok(None),
+
+    pub async fn find_table(&self, client: &Client) -> Option<Table> {
+        client
+            .table()
+            .get(
+                &self.dataset.project_id,
+                &self.dataset.dataset_id,
+                &self.table_id,
+                Option::None,
+            )
+            .await
+            .ok()
     }
 }

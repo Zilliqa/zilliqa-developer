@@ -1,7 +1,8 @@
-use crate::utils::{self};
+use std::ops::Mul;
+
+use crate::utils::{self, decode_u8, encode_u8};
 use anyhow::{anyhow, Result};
-use base64::Engine;
-use ethers::types::{Block, Transaction, Withdrawal};
+use ethers::types::{Block, Transaction, Withdrawal, U256};
 // use hex;
 use crate::zqproj::PSQLInsertable;
 use pdtlib::proto::ProtoMicroBlock;
@@ -271,6 +272,7 @@ impl BQMicroblock {
         ));
         let timestamp: i64 = val
             .timestamp
+            .mul(U256::from(1000)) // pad to convert: milliseconds -> microseconds
             .try_into()
             .expect("timestamp should fit in an i64!");
         let eth_parent_hash = Some(encode_u8(val.parent_hash.as_bytes()));
@@ -539,16 +541,6 @@ impl PSQLMicroblock {
     pub fn to_json(&self) -> Result<String> {
         Ok(serde_json::to_string(self)?)
     }
-}
-
-fn encode_u8(y: &[u8]) -> String {
-    base64::engine::general_purpose::STANDARD.encode(y)
-}
-
-fn decode_u8(x: String) -> Vec<u8> {
-    base64::engine::general_purpose::STANDARD
-        .decode(x)
-        .expect("base64-encoding should be decodeable")
 }
 
 #[test]
