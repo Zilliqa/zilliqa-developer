@@ -431,4 +431,17 @@ contract MintAndBurnTokenManagerUpgradeableV3Tests is
         // Verify if remoteToken has been deleted
         assertEq(abi.encode(newRemoteToken), abi.encode(expected));
     }
+
+    function test_transferOwneship2Step() external {
+        address newOwner = vm.createWallet("newOwner").addr;
+
+        vm.prank(deployer);
+        tokenManagerV3.transferOwnership(newOwner);
+        // Ownership should only be transferred after newOwner accepts
+        assertEq(tokenManagerV3.owner(), deployer);
+
+        vm.prank(newOwner);
+        tokenManagerV3.acceptOwnership();
+        assertEq(tokenManagerV3.owner(), newOwner);
+    }
 }

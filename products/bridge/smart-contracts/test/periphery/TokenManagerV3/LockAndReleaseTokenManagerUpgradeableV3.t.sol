@@ -406,4 +406,17 @@ contract LockAndReleaseTokenManagerUpgradeableV3Tests is
 
         assertEq(tokenManagerV3.paused(), true);
     }
+
+    function test_transferOwneship2Step() external {
+        address newOwner = vm.createWallet("newOwner").addr;
+
+        vm.prank(deployer);
+        tokenManagerV3.transferOwnership(newOwner);
+        // Ownership should only be transferred after newOwner accepts
+        assertEq(tokenManagerV3.owner(), deployer);
+
+        vm.prank(newOwner);
+        tokenManagerV3.acceptOwnership();
+        assertEq(tokenManagerV3.owner(), newOwner);
+    }
 }
