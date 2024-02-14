@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {Test, Vm} from "forge-std/Test.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import {Target, ValidatorManagerFixture, IReentrancy} from "foundry/test/Helpers.sol";
+import {Target, ValidatorManagerFixture, IReentrancy} from "test/Helpers.sol";
 
 import {ChainDispatcher, IChainDispatcherEvents, IChainDispatcherErrors} from "contracts/core/ChainDispatcher.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {Tester} from "foundry/test/Tester.sol";
-import {UUPSUpgrader} from "foundry/test/Helpers.sol";
+import {Tester} from "test/Tester.sol";
+import {UUPSUpgrader} from "test/Helpers.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {ITokenManagerStructs} from "contracts/periphery/TokenManagerUpgradeable.sol";
