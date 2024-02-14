@@ -2,16 +2,15 @@
 pragma solidity 0.8.20;
 
 import {Tester} from "test/Tester.sol";
-import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {MintAndBurnTokenManagerUpgradeableV2} from "contracts/periphery/TokenManagerV2/MintAndBurnTokenManagerUpgradeableV2.sol";
 import {MintAndBurnTokenManagerUpgradeableV3} from "contracts/periphery/TokenManagerV3/MintAndBurnTokenManagerUpgradeableV3.sol";
 import {ITokenManager, ITokenManagerFees, ITokenManagerStructs, ITokenManagerEvents} from "contracts/periphery/TokenManagerV2/TokenManagerUpgradeableV2.sol";
 import {ITokenManagerFeesEvents} from "contracts/periphery/TokenManagerV2/TokenManagerFees.sol";
-import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {IRelayer} from "contracts/core/Relayer.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {MintAndBurnTokenManagerDeployer} from "test/periphery/TokenManagerDeployers/MintAndBurnTokenManagerDeployer.sol";
 
 interface IPausable {
     event Paused(address account);
@@ -23,7 +22,8 @@ contract MintAndBurnTokenManagerUpgradeableV3Tests is
     ITokenManagerEvents,
     ITokenManagerStructs,
     ITokenManagerFeesEvents,
-    IPausable
+    IPausable,
+    MintAndBurnTokenManagerDeployer
 {
     address deployer = vm.createWallet("deployer").addr;
     address chainGateway = vm.createWallet("chainGateway").addr;
@@ -38,82 +38,37 @@ contract MintAndBurnTokenManagerUpgradeableV3Tests is
     uint transferAmount = 10 ether;
     uint fees = 0.1 ether;
 
-    MintAndBurnTokenManagerUpgradeable tokenManager;
     MintAndBurnTokenManagerUpgradeableV2 tokenManagerV2;
     MintAndBurnTokenManagerUpgradeableV3 tokenManagerV3;
     BridgedToken bridgedToken;
 
     function setUp() external {
         vm.startPrank(deployer);
-        address implementation = address(
-            new MintAndBurnTokenManagerUpgradeable()
-        );
-        address proxy = address(
-            new ERC1967Proxy(
-                implementation,
-                abi.encodeCall(
-                    MintAndBurnTokenManagerUpgradeable.initialize,
-                    chainGateway
-                )
-            )
-        );
-        tokenManager = MintAndBurnTokenManagerUpgradeable(proxy);
-
-        assertEq(tokenManager.getGateway(), chainGateway);
+        tokenManagerV2 = deployMintAndBurnTokenManagerV2(chainGateway, fees);
 
         // Deploy new token
-        bridgedToken = tokenManager.deployToken(
+        bridgedToken = tokenManagerV2.deployToken(
             "USDZ",
             "Zilliqa USD",
             remoteToken.token,
             remoteToken.tokenManager,
             remoteToken.chainId
         );
+        // Premint some tokens for user testing
+        vm.startPrank(address(tokenManagerV2));
+        bridgedToken.mint(user, transferAmount);
+        assertEq(bridgedToken.balanceOf(user), transferAmount);
 
-        // Check
-        RemoteToken memory actualRemoteToken = tokenManager.getRemoteTokens(
-            address(bridgedToken),
-            remoteToken.chainId
-        );
-        assertEq(abi.encode(remoteToken), abi.encode(actualRemoteToken));
-
-        // Carry out upgrade
-        address implementationV2 = address(
-            new MintAndBurnTokenManagerUpgradeableV2()
-        );
-        bytes memory encodedInitializerCall = abi.encodeCall(
-            MintAndBurnTokenManagerUpgradeableV2.reinitialize,
-            fees
-        );
-        tokenManager.upgradeToAndCall(implementationV2, encodedInitializerCall);
-        tokenManagerV2 = MintAndBurnTokenManagerUpgradeableV2(
-            address(tokenManager)
-        );
-        // Check new fees introduced
-        assertEq(tokenManagerV2.getFees(), fees);
-
-        // Then check existing data is still intact
-        assertEq(tokenManagerV2.getGateway(), chainGateway);
-        actualRemoteToken = tokenManagerV2.getRemoteTokens(
-            address(bridgedToken),
-            remoteToken.chainId
-        );
-        assertEq(abi.encode(remoteToken), abi.encode(actualRemoteToken));
-
+        vm.startPrank(deployer);
         // Carry out upgrade v3
         address implementationV3 = address(
             new MintAndBurnTokenManagerUpgradeableV3()
         );
         tokenManagerV2.upgradeToAndCall(implementationV3, "");
         tokenManagerV3 = MintAndBurnTokenManagerUpgradeableV3(
-            address(tokenManager)
+            address(tokenManagerV2)
         );
-
         vm.stopPrank();
-
-        // Premint some tokens for user testing
-        vm.prank(address(tokenManagerV2));
-        bridgedToken.mint(user, transferAmount);
     }
 
     function test_feesOnTransfer() external {
@@ -423,7 +378,7 @@ contract MintAndBurnTokenManagerUpgradeableV3Tests is
             remoteToken.chainId,
             newOwner
         );
-        ITokenManagerStructs.RemoteToken memory newRemoteToken = tokenManager
+        ITokenManagerStructs.RemoteToken memory newRemoteToken = tokenManagerV3
             .getRemoteTokens(address(bridgedToken), remoteToken.chainId);
         ITokenManagerStructs.RemoteToken memory expected;
         // Verify if owner has been updated

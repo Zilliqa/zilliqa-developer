@@ -2,17 +2,16 @@
 pragma solidity 0.8.20;
 
 import {Tester} from "test/Tester.sol";
-import {LockAndReleaseTokenManagerUpgradeable} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {LockAndReleaseTokenManagerUpgradeableV2} from "contracts/periphery/TokenManagerV2/LockAndReleaseTokenManagerUpgradeableV2.sol";
 import {LockAndReleaseTokenManagerUpgradeableV3} from "contracts/periphery/TokenManagerV3/LockAndReleaseTokenManagerUpgradeableV3.sol";
 import {ITokenManager, ITokenManagerFees, ITokenManagerStructs, ITokenManagerEvents} from "contracts/periphery/TokenManagerV2/TokenManagerUpgradeableV2.sol";
 import {ITokenManagerFeesEvents} from "contracts/periphery/TokenManagerV2/TokenManagerFees.sol";
-import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
+import {IRelayer} from "contracts/core/Relayer.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {TestToken} from "test/Helpers.sol";
+import {LockAndReleaseTokenManagerDeployer} from "test/periphery/TokenManagerDeployers/LockAndReleaseTokenManagerDeployer.sol";
 
 interface IPausable {
     event Paused(address account);
@@ -24,7 +23,8 @@ contract LockAndReleaseTokenManagerUpgradeableV3Tests is
     ITokenManagerEvents,
     ITokenManagerStructs,
     ITokenManagerFeesEvents,
-    IPausable
+    IPausable,
+    LockAndReleaseTokenManagerDeployer
 {
     address deployer = vm.addr(1);
     address chainGateway = vm.addr(102);
@@ -39,62 +39,17 @@ contract LockAndReleaseTokenManagerUpgradeableV3Tests is
     uint transferAmount = 10 ether;
     uint fees = 0.1 ether;
 
-    LockAndReleaseTokenManagerUpgradeable tokenManager;
     LockAndReleaseTokenManagerUpgradeableV2 tokenManagerV2;
     LockAndReleaseTokenManagerUpgradeableV3 tokenManagerV3;
     TestToken token;
 
     function setUp() external {
         vm.startPrank(deployer);
-        address implementation = address(
-            new LockAndReleaseTokenManagerUpgradeable()
-        );
-        address proxy = address(
-            new ERC1967Proxy(
-                implementation,
-                abi.encodeCall(
-                    LockAndReleaseTokenManagerUpgradeable.initialize,
-                    chainGateway
-                )
-            )
-        );
-        tokenManager = LockAndReleaseTokenManagerUpgradeable(proxy);
-
-        assertEq(tokenManager.getGateway(), chainGateway);
+        tokenManagerV2 = deployLockAndReleaseTokenManagerV2(chainGateway, fees);
 
         // Deploy new token
         token = new TestToken(transferAmount);
-        tokenManager.registerToken(address(token), remoteToken);
-
-        // Check
-        RemoteToken memory actualRemoteToken = tokenManager.getRemoteTokens(
-            address(token),
-            remoteToken.chainId
-        );
-        assertEq(abi.encode(remoteToken), abi.encode(actualRemoteToken));
-
-        // Carry out upgrade V2
-        address implementationV2 = address(
-            new LockAndReleaseTokenManagerUpgradeableV2()
-        );
-        bytes memory encodedInitializerCall = abi.encodeCall(
-            LockAndReleaseTokenManagerUpgradeableV2.reinitialize,
-            fees
-        );
-        tokenManager.upgradeToAndCall(implementationV2, encodedInitializerCall);
-        tokenManagerV2 = LockAndReleaseTokenManagerUpgradeableV2(
-            address(tokenManager)
-        );
-        // Check new fees introduced
-        assertEq(tokenManagerV2.getFees(), fees);
-
-        // Then check existing data is still intact
-        assertEq(tokenManagerV2.getGateway(), chainGateway);
-        actualRemoteToken = tokenManagerV2.getRemoteTokens(
-            address(token),
-            remoteToken.chainId
-        );
-        assertEq(abi.encode(remoteToken), abi.encode(actualRemoteToken));
+        tokenManagerV2.registerToken(address(token), remoteToken);
 
         // Premint some tokens for user testing
         token.transfer(user, transferAmount);
@@ -107,7 +62,7 @@ contract LockAndReleaseTokenManagerUpgradeableV3Tests is
         );
         tokenManagerV2.upgradeToAndCall(implementationV3, "");
         tokenManagerV3 = LockAndReleaseTokenManagerUpgradeableV3(
-            address(tokenManager)
+            address(tokenManagerV2)
         );
 
         vm.stopPrank();
