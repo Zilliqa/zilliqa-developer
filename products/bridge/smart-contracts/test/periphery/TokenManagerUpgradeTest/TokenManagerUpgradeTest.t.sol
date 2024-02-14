@@ -17,7 +17,7 @@ import {TokenManagerTestV8} from "./TokenManagerTestV8.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract TokenManagerTest is Tester {
+contract TokenManagerUpgradeTest is Tester {
     address deployer = vm.addr(1);
     address mockChainGateway = vm.addr(102);
     address mockToken = vm.addr(103);
