@@ -68,15 +68,13 @@ contract ValidatorManagerTests is Tester {
     function test_transferOwnership() external {
         address newOwner = vm.createWallet("NewOwner").addr;
 
-        vm.startPrank(owner);
+        vm.prank(owner);
         validatorManager.transferOwnership(newOwner);
-        // Ownership should only be transferred after the 2-step process
+        // Ownership should only be transferred after newOwner accepts
         assertEq(validatorManager.owner(), owner);
 
-        vm.startPrank(newOwner);
+        vm.prank(newOwner);
         validatorManager.acceptOwnership();
         assertEq(validatorManager.owner(), newOwner);
-
-        vm.stopPrank();
     }
 }
