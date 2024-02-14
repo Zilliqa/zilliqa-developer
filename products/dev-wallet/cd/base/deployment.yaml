@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-wallet
+  namespace: dev-wallet
+  labels:
+    "app.kubernetes.io/name": "dev-wallet"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "dev-wallet"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "dev-wallet"
+    spec:
+      containers:
+        - image: dev-wallet
+          name: dev-wallet
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              memory: 200Mi
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html/config.js
+              name: dev-wallet-config
+              subPath: config.js
+      volumes:
+        - name: dev-wallet-config
+          configMap:
+            name: dev-wallet-config
