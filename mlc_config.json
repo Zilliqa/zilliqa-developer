@@ -31,6 +31,18 @@
       "pattern": "^https://evm-api-dev.zilliqa.com"
     },
     {
+      "pattern": "^http://evm-api-filters.zilliqa.com"
+    },
+    {
+      "pattern": "^https://api.testnet.zilliqa.com"
+    },
+    {
+      "pattern": "^http://evm-api-filters.testnet.zilliqa.com"
+    },
+    {
+      "pattern": "^http://evm-api-filters-dev.zilliqa.com"
+    },
+    {
       "pattern": "^https://devex.zilliqa.com"
     },
     {
@@ -53,6 +65,21 @@
     },
     {
       "pattern": "^https://stg-indexer-api.rialto.studio/zilliqa"
+    },
+    {
+      "pattern": "^http://evm-api-filters.zilliqa.com/"
+    },
+    {
+      "pattern": "^http://evm-api-filters-dev.zilliqa.com/"
+    },
+    {
+      "pattern": "^https://api.testnet.zilliqa.com/"
+    },
+    {
+      "pattern": "^http://evm-api-filters.testnet.zilliqa.com/"
+    },
+    {
+      "pattern": "^https://coq.inria.fr"
     }
   ],
   "replacementPatterns": [],
@@ -60,7 +87,7 @@
   "retryOn429": true,
   "retryCount": 5,
   "fallbackRetryDelay": "30s",
-  "aliveStatusCodes": [200, 429],
+  "aliveStatusCodes": [200, 429, 405],
   "httpHeaders": [
     {
       "urls": [
@@ -71,6 +98,11 @@
       ],
       "headers": {
         "Accept-Encoding": "zstd, br, gzip, deflate"
+      }
+    },
+    {
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
       }
     }
   ]

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select * from (select unnest(imported_ranges) as range from microblocks_meta) as r",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "range",
+        "type_info": "Int8Range"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "71113d4ffbd55c0d24f5b226118f8c3813aacb56a0339863aa559c31d543bbb2"
+}

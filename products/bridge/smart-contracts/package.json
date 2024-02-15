@@ -1,0 +1,40 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "compile": "hardhat compile",
+    "node": "hardhat node",
+    "node:two": "HARDHAT_CHAIN_ID=31338 hardhat node --port 8546",
+    "test:only": "hardhat test",
+    "test": "concurrently npm:test:only npm:node npm:node:two -k -s first --hide node,node:two -p \" \"",
+    "test:foundry": "forge t --no-match-path ./contracts/Test.sol -vvv",
+    "test:foundry:watch": "pnpm test:foundry --watch"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-foundry": "^1.1.1",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.9",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.1",
+    "@openzeppelin/hardhat-upgrades": "^3.0.2",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.10",
+    "@types/mocha": ">=10.0.4",
+    "@types/node": ">=20.9.0",
+    "chai": "^4.3.10",
+    "concurrently": "^8.2.2",
+    "ethers": "^6.8.1",
+    "hardhat": "^2.19.1",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.5",
+    "ts-node": ">=10.9.1",
+    "typechain": "^8.3.2",
+    "typescript": ">=5.2.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "@openzeppelin/contracts-upgradeable": "^5.0.1",
+    "dotenv": "^16.3.1"
+  }
+}

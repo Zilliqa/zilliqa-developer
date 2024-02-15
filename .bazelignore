@@ -9,6 +9,8 @@ node_modules
 **/node_modules
 products/developer-portal/node_modules
 products/developer-portal-ng/node_modules
+products/bridge/bridge-web/node_modules
+products/bridge/smart-contracts/node_modules
 
 zilliqa/js/account/node_modules
 zilliqa/js/blockchain/node_modules
@@ -21,3 +23,4 @@ zilliqa/js/util/node_modules
 zilliqa/js/zilliqa/node_modules
 examples/zilliqa-js/latest-block/node_modules
 examples/zilliqa-js/react-zilliqa-js/node_modules
+contracts/experimental/ERC20ProxyForZRC2/node_modules

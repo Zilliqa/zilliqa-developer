@@ -1,0 +1,9 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: scilla-server
+  labels:
+    app.kubernetes.io/name: scilla-server
+spec:
+  domains:
+    - scilla-server.zilliqa.com

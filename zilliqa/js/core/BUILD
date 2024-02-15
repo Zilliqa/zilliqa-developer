@@ -11,6 +11,9 @@ stamped_package_json(
 _SRCS = [
     ":package",
     "//zilliqa/js:aes-js.d",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
 ] + glob(
     [
         "src/*.ts",

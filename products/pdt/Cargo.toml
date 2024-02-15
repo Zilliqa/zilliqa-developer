@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+  "pdtlib",
+  "pdtbq",
+  "pdt",
+  "pdtdb",
+  "pdtpsql",
+  "pdtdb/psql_derive",
+  "pdtparse",
+  "pdtlisten",
+]

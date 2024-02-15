@@ -148,7 +148,7 @@ connection.once("open", function () {
           .sort({ customId: -1 })
           .limit(1)
           .exec((err, res) => {
-            const latestBlockInDB = res === null ? 0 : res.customId;
+            const latestBlockInDB = res == null ? 0 : res.customId;
             console.log(
               `Blocks need to be synced from ${latestBlockInNetwork} to ${latestBlockInDB}`
             );
@@ -162,6 +162,6 @@ connection.once("open", function () {
   });
 });
 
-app.listen(5000, () => {
-  console.log("🚀  Server ready at port 5000");
+app.listen(80, () => {
+  console.log("🚀  Server ready at port 80");
 });

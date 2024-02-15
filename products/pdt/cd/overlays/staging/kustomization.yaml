@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - service_account.yaml
+
+namespace: pdt-staging
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: CronJob
+      name: pdt-cronjob-testnet
+  - patch: |-
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: CronJob
+      name: pdt-cronjob-mainnet
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: Deployment
+      name: pdt-listen-testnet
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/serviceAccountName
+        value: pdt
+    target:
+      kind: Deployment
+      name: pdt-listen-mainnet
+  - path: configmap.yaml

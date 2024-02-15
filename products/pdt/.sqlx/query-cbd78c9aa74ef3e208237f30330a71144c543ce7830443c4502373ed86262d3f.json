@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select relispartition from pg_class where relname=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "relispartition",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Name"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cbd78c9aa74ef3e208237f30330a71144c543ce7830443c4502373ed86262d3f"
+}
