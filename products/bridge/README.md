@@ -193,3 +193,71 @@ The middle layer are cross-chain applications that use the cross-chain conctract
 - the twin contract checks the expiration and whether the approved token and amount are as required, transfers the amount to user 1 and returns true as response
 - the swap contract on Zilliqa receives the response of its twin and transfers the locked amount to user 2
 - if the swap contract does not receive a response from its twin before the expiration, user 1 can claim the approved amount and the swap contract sends it back to user 1
+
+## Roadmap
+
+The bridge will have the following deliverables:
+
+- **Smart Contracts** – these will be written with the combination of:
+  - Hardhat - E2E testing + deployment
+  - Foundry - Unit testing + fuzzing + invariant testing + gas reporting
+- **Validator Node Lib**
+  - Written in Rust
+  - Should encapsulate most functionality required for a validator to run the bridge protocol
+- **Off-chain Validator Nodes**
+  - Written in Rust
+  - Will use `Validator Node Lib` as a dependency for most shared code
+  - This will run the validator set
+  - Signature aggregation through a gossip network
+  - Validators run by Zilliqa
+- **Frontend DApp**
+  - Written in React
+  - Simple DApp enabling bridge activities
+- **Integrate bridge into ZQ2 consensus**
+  - Integrate `Validator Node Lib`
+  - Migrate validators to ZQ2 once released and stable
+
+### MVP
+
+The MVP bridge will run on a gossip network with validators managed by Zilliqa
+
+- [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
+  - [x] Integrate foundry to support effective unit testing on contracts
+  - [x] Finish remaining TODO tests
+  - [x] Update error handling on contracts
+  - [x] Integrate mechanism for gas reversal
+  - [x] Multichain support - appending chain-ids to event calls
+  - [x] CI automated testing
+  - [x] Gas limit parameters for dispatch
+  - [x] Move resume from core to periphery
+  - [x] Update interface to support cross-shard
+  - [x] Add cross-shard support for contracts
+  - [x] Global nonces
+  - [x] Remove Collector
+  - [ ] Validator rewards
+  - [ ] Update periphery contracts
+    - [x] Split bridged incoming and outgoing interfaces
+    - [ ] Support response instead of fire&forget
+  - [x] Update foundry tests
+  - [ ] Update hardhat tests
+  - [ ] Synchronizing validators cross-chain
+    - [ ] Update validator set
+  - [-] Fuzz + invariant testing
+  - [ ] Write deployment scripts
+    - [ ] Support CREATE2
+    - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
+  - [ ] Track last event block number for light client event censorship resistance
+- [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
+  - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
+  - [x] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
+  - [x] Read & Write to chains
+  - [ ] Validator slashing
+  - [ ] Integrate into ZQ2 consensus network to share signatures
+  - [ ] Periodic gas refund for validators
+  - [ ] Light client implementation
+    - [ ] Determine type of connection to use to connect to non-zilliqa chains
+    - [ ] Zilliqa maintained full nodes of non-zq chain. UCCB validators use light nodes on it
+    - [ ] Check logsBloom for potential events in the block
+    - [ ] Retrieve block receipts, check for logs and verify receipt root
+- [ ] **Frontend DApp**
+  - [ ] Boilerplate setup (Vite React with Rainbow Kit)

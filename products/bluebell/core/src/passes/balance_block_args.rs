@@ -3,18 +3,19 @@ use std::{
     mem,
 };
 
-use crate::{
-    constants::{TraversalResult, TreeTraversalMode},
-    intermediate_representation::{
-        pass::IrPass,
-        primitives::{
-            CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
-            FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
-            IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
-        },
-        symbol_table::SymbolTable,
-    },
+use scilla_parser::{
+    ast::{TraversalResult, TreeTraversalMode},
     parser::lexer::SourcePosition,
+};
+
+use crate::intermediate_representation::{
+    pass::IrPass,
+    primitives::{
+        CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+        FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+        IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+    },
+    symbol_table::SymbolTable,
 };
 
 pub struct BalanceBlockArguments {
