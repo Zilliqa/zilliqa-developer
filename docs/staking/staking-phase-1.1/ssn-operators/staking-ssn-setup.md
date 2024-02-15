@@ -18,6 +18,16 @@ import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
     The Mainnet has been upgraded to support staking phase 1.1. You can now start to run a staked seed node on the Mainnet.
 
+## SSNs minimum system requirements
+
+- Ubuntu Linux 22.04
+- Recent dual-core processor @ 2.2 GHZ. Examples: Intel Xeon (Skylake)
+- 8GB DRR3 RAM or higher
+- Public static IP address
+- 300GB Solid State Drive
+- 100MB/s upload and download bandwidth
+- Docker version 24+
+
 ## Default Port Requirements for SSNs
 
 Before preparing to host an SSN, please note that these are the ports that

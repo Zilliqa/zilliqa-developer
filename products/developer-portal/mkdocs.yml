@@ -111,6 +111,8 @@ extra:
       link: https://twitter.com/zilliqa
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/channel/UCvinnFbf0u71cajoxKcfZIQ
+    - icon: octicons/server-16
+      link: https://status.zilliqa.com
 
 plugins:
   - search
@@ -222,6 +224,7 @@ nav:
           - Ds Block Listing: api/blockchain-related-methods/api-blockchain-ds-block-listing.md
           - Get Blockchain Info: api/blockchain-related-methods/api-blockchain-get-blockchain-info.md
           - Get Current Ds Epoch: api/blockchain-related-methods/api-blockchain-get-current-ds-epoch.md
+          - Get Current Ds Comm: api/blockchain-related-methods/api-blockchain-get-current-ds-comm.md
           - Get Current Mini Epoch: api/blockchain-related-methods/api-blockchain-get-current-mini-epoch.md
           - Get Ds Block: api/blockchain-related-methods/api-blockchain-get-ds-block.md
           - Get Ds Block Rate: api/blockchain-related-methods/api-blockchain-get-ds-block-rate.md
@@ -229,6 +232,9 @@ nav:
           - Get Latest Tx Block: api/blockchain-related-methods/api-blockchain-get-latest-tx-block.md
           - Get Miner Info: api/blockchain-related-methods/api-blockchain-get-miner-info.md
           - Get Network Id: api/blockchain-related-methods/api-blockchain-get-network-id.md
+          - Get Node Type: api/blockchain-related-methods/api-blockchain-get-node-type.md
+          - Get Num Peers: api/blockchain-related-methods/api-blockchain-get-num-peers.md
+          - Get Sharding Structure: api/blockchain-related-methods/api-blockchain-get-sharding-structure.md
           - Num Ds Blocks: api/blockchain-related-methods/api-blockchain-get-num-ds-blocks.md
           - Get Num Tx: api/blockchain-related-methods/api-blockchain-get-num-tx.md
           - Get Num Tx Blocks: api/blockchain-related-methods/api-blockchain-get-num-tx-blocks.md
@@ -247,6 +253,7 @@ nav:
           - Get Num Txns Txepoch: api/transaction-related-methods/api-transaction-get-num-txns-txepoch.md
           - Get Recent Txs: api/transaction-related-methods/api-transaction-get-recent-txs.md
           - Get Tx: api/transaction-related-methods/api-transaction-get-tx.md
+          - Get Soft Confirmed Tx: api/transaction-related-methods/api-transaction-get-soft-confirmed-tx.md
           - Get Transaction Status: api/transaction-related-methods/api-transaction-get-transaction-status.md
           - Get Txs For Txblock: api/transaction-related-methods/api-transaction-get-txs-for-txblock.md
           - Get Txs For Txblock Ex: api/transaction-related-methods/api-transaction-get-txs-for-txblock-ex.md
@@ -267,8 +274,6 @@ nav:
           - Introduction: developers/getting-started/dev-started-introduction.md
           - Helloworld: developers/getting-started/dev-started-helloworld.md
           - Environment: developers/getting-started/dev-started-env.md
-      - Upgrade Notices:
-          - Upgrade to v. 8: developers/upgrade-notices/dev-upgrade-v8.md
       - User Key Management:
           - Introduction: developers/user-key-management/dev-keys-introduction.md
           - Zilpay: developers/user-key-management/dev-keys-zilpay.md
@@ -278,7 +283,9 @@ nav:
       - Developer Toolings:
           - Ceres: developers/developer-toolings/dev-tools-ceres.md
           - SDKs:
-              - Zilliqajs: developers/developer-toolings/sdks/dev-tools-zilliqajs.md
+              - Zilliqa-js: developers/developer-toolings/sdks/dev-tools-zilliqajs.md
+              - Zilliqa-rs: developers/developer-toolings/sdks/dev-tools-zilliqars.md
+              - Pyzil: developers/developer-toolings/sdks/dev-tools-pyzil.md
               - Gozilliqa: developers/developer-toolings/sdks/dev-tools-gozilliqa.md
               - Java: developers/developer-toolings/sdks/dev-tools-java.md
               - Sdks: developers/developer-toolings/sdks/dev-tools-sdks.md
@@ -286,6 +293,7 @@ nav:
           - Cli: developers/developer-toolings/dev-tools-cli.md
           - Explorer: developers/developer-toolings/dev-tools-explorer.md
           - Faucet: developers/developer-toolings/dev-tools-faucet.md
+          - Scilla Parser: developers/developer-toolings/dev-tools-scillaparser.md
       - Other Developer Information:
           - Dev Wrapped Zil: developers/other-developer-information/dev-wrapped-tokens.md
           - v9.3.0 Miners rehearsal join: developers/other-developer-information/dev-miners-rehearsal-v93-join.md
@@ -478,4 +486,5 @@ nav:
               - Diagnostic Data: contributors/core-protocol-design/mitigation-measures/core-diagnostic-data.md
               - Status Server: contributors/core-protocol-design/mitigation-measures/core-status-server.md
   - Ecosystem: ecosystem/index.md
+  - News: news/index.md
   - FAQ: faq/faq-introduction.md

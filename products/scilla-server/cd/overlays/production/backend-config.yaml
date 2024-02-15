@@ -1,0 +1,11 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: scilla-server
+  labels:
+    app.kubernetes.io/name: scilla-server
+spec:
+  timeoutSec: 30
+  healthCheck:
+    requestPath: /healthcheck
+    port: 4000
