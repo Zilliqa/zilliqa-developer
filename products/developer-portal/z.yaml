@@ -1,0 +1,15 @@
+backend: kind
+
+clusters:
+  localdev:
+    manifests:
+      nginx-ingress:
+        from: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
+        options: "-f"
+    region: asia-southeast1
+    name: local-cluster
+    apps:
+      developer-portal-dev:
+        path: products/developer-portal/cd/base
+        track: development
+        type: kustomize

@@ -1,0 +1,20 @@
+[package]
+name = "pdtpsql"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.71"
+pdtlib = { path = "../pdtlib" }
+pdtdb = { path = "../pdtdb" }
+serde = { version = "1.0.188", features = ["derive"] }
+sqlx = { version = "0.7.1", features = [
+  "postgres",
+  "runtime-tokio",
+  "tls-native-tls",
+  "macros",
+] }
+async-trait = "0.1.71"
+serde_json = { version = "1.0.102" }

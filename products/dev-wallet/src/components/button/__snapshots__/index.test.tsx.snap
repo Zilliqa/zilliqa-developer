@@ -1,0 +1,276 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches the snapshot 1`] = `
+<button
+  aria-label="primary small"
+  class="sc-bdVaJa iDGSni"
+  data-testid="primary-small"
+  disabled=""
+  type="submit"
+>
+   
+  primary small
+   
+</button>
+`;
+
+exports[`matches the snapshot 2`] = `
+<button
+  aria-label="primary small"
+  class="sc-bdVaJa iDGSni"
+  data-testid="primary-small"
+  type="submit"
+>
+   
+  primary small
+   
+</button>
+`;
+
+exports[`matches the snapshot 3`] = `
+<button
+  aria-label="primary medium"
+  class="sc-bdVaJa iXJpiU"
+  data-testid="primary-medium"
+  disabled=""
+  type="submit"
+>
+   
+  primary medium
+   
+</button>
+`;
+
+exports[`matches the snapshot 4`] = `
+<button
+  aria-label="primary medium"
+  class="sc-bdVaJa iXJpiU"
+  data-testid="primary-medium"
+  type="submit"
+>
+   
+  primary medium
+   
+</button>
+`;
+
+exports[`matches the snapshot 5`] = `
+<button
+  aria-label="primary large"
+  class="sc-bdVaJa jTWclE"
+  data-testid="primary-large"
+  disabled=""
+  type="submit"
+>
+   
+  primary large
+   
+</button>
+`;
+
+exports[`matches the snapshot 6`] = `
+<button
+  aria-label="primary large"
+  class="sc-bdVaJa jTWclE"
+  data-testid="primary-large"
+  type="submit"
+>
+   
+  primary large
+   
+</button>
+`;
+
+exports[`matches the snapshot 7`] = `
+<button
+  aria-label="secondary small"
+  class="sc-bdVaJa jvUehg"
+  data-testid="secondary-small"
+  disabled=""
+  type="submit"
+>
+   
+  secondary small
+   
+</button>
+`;
+
+exports[`matches the snapshot 8`] = `
+<button
+  aria-label="secondary small"
+  class="sc-bdVaJa jvUehg"
+  data-testid="secondary-small"
+  type="submit"
+>
+   
+  secondary small
+   
+</button>
+`;
+
+exports[`matches the snapshot 9`] = `
+<button
+  aria-label="secondary medium"
+  class="sc-bdVaJa bFmqiI"
+  data-testid="secondary-medium"
+  disabled=""
+  type="submit"
+>
+   
+  secondary medium
+   
+</button>
+`;
+
+exports[`matches the snapshot 10`] = `
+<button
+  aria-label="secondary medium"
+  class="sc-bdVaJa bFmqiI"
+  data-testid="secondary-medium"
+  type="submit"
+>
+   
+  secondary medium
+   
+</button>
+`;
+
+exports[`matches the snapshot 11`] = `
+<button
+  aria-label="secondary large"
+  class="sc-bdVaJa buxHUR"
+  data-testid="secondary-large"
+  disabled=""
+  type="submit"
+>
+   
+  secondary large
+   
+</button>
+`;
+
+exports[`matches the snapshot 12`] = `
+<button
+  aria-label="secondary large"
+  class="sc-bdVaJa buxHUR"
+  data-testid="secondary-large"
+  type="submit"
+>
+   
+  secondary large
+   
+</button>
+`;
+
+exports[`matches the snapshot 13`] = `
+<button
+  aria-label="tertiary small"
+  class="sc-bdVaJa gXMpwE"
+  data-testid="tertiary-small"
+  disabled=""
+  type="submit"
+>
+   
+  tertiary small
+   
+</button>
+`;
+
+exports[`matches the snapshot 14`] = `
+<button
+  aria-label="tertiary small"
+  class="sc-bdVaJa gXMpwE"
+  data-testid="tertiary-small"
+  type="submit"
+>
+   
+  tertiary small
+   
+</button>
+`;
+
+exports[`matches the snapshot 15`] = `
+<button
+  aria-label="tertiary medium"
+  class="sc-bdVaJa jUDwrg"
+  data-testid="tertiary-medium"
+  disabled=""
+  type="submit"
+>
+   
+  tertiary medium
+   
+</button>
+`;
+
+exports[`matches the snapshot 16`] = `
+<button
+  aria-label="tertiary medium"
+  class="sc-bdVaJa jUDwrg"
+  data-testid="tertiary-medium"
+  type="submit"
+>
+   
+  tertiary medium
+   
+</button>
+`;
+
+exports[`matches the snapshot 17`] = `
+<button
+  aria-label="tertiary large"
+  class="sc-bdVaJa dvElSX"
+  data-testid="tertiary-large"
+  disabled=""
+  type="submit"
+>
+   
+  tertiary large
+   
+</button>
+`;
+
+exports[`matches the snapshot 18`] = `
+<button
+  aria-label="tertiary large"
+  class="sc-bdVaJa dvElSX"
+  data-testid="tertiary-large"
+  type="submit"
+>
+   
+  tertiary large
+   
+</button>
+`;
+
+exports[`matches the snapshot 19`] = `
+<button
+  aria-label="before"
+  class="sc-bdVaJa iXJpiU"
+  data-testid="button-before"
+  type="submit"
+>
+  <span>
+    Pre
+  </span>
+   
+  before
+   
+</button>
+`;
+
+exports[`matches the snapshot 20`] = `
+<button
+  aria-label="before"
+  class="sc-bdVaJa iXJpiU"
+  data-testid="button-before"
+  type="submit"
+>
+   
+  before
+   
+  <span>
+    Post
+  </span>
+</button>
+`;

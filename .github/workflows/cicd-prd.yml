@@ -1,0 +1,188 @@
+name: "CICD production"
+
+on:
+  # On merged
+  push:
+    branches:
+      - main
+  # On released
+  release:
+    types: [published]
+
+jobs:
+  build-docker:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-22.04
+    if: github.actor != 'dependabot[bot]'
+    name: "Deploy image"
+    strategy:
+      fail-fast: false
+      matrix:
+        application:
+          [
+            bluebell-playground,
+            developer-portal,
+            devex,
+            devex-apollo,
+            dev-wallet,
+            faucet-service,
+            eth-spout,
+            governance-api,
+            governance-snapshot,
+            multisig,
+            neo-savant,
+            scilla-server,
+            zillion,
+            zilliqa-bridge-validator,
+            zilliqa-bridge-web,
+            zilliqa-isolated-server,
+          ]
+        include:
+          - application: bluebell-playground
+            image_name: bluebell-playground
+            path: products/bluebell
+            tag_length: 8
+            tag_latest: false
+          - application: developer-portal
+            image_name: developer-portal
+            path: products/developer-portal
+            tag_length: 8
+            tag_latest: false
+          - application: devex
+            image_name: devex
+            path: products/devex
+            tag_length: 8
+            tag_latest: false
+          - application: devex-apollo
+            image_name: devex-apollo
+            path: products/devex-apollo
+            tag_length: 8
+            tag_latest: false
+          - application: dev-wallet
+            image_name: dev-wallet
+            path: products/dev-wallet
+            tag_length: 8
+            tag_latest: false
+          - application: faucet-service
+            image_name: faucet-service
+            path: products/faucet-service
+            tag_length: 8
+            tag_latest: false
+          - application: eth-spout
+            image_name: eth-spout
+            path: products/eth-spout
+            tag_length: 9
+            tag_latest: true
+          - application: governance-api
+            image_name: governance-api
+            path: products/governance-api
+            tag_length: 8
+            tag_latest: false
+          - application: governance-snapshot
+            image_name: governance-snapshot
+            path: products/governance-snapshot
+            tag_length: 8
+            tag_latest: false
+          - application: multisig
+            image_name: multisig
+            path: products/multisig
+            tag_length: 8
+            tag_latest: false
+          - application: neo-savant
+            image_name: neo-savant
+            path: products/neo-savant
+            tag_length: 8
+            tag_latest: false
+          - application: scilla-server
+            image_name: scilla-server
+            path: products/scilla-server
+            tag_length: 8
+            tag_latest: false
+          - application: zillion
+            image_name: zillion
+            path: products/zillion
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-isolated-server
+            image_name: zilliqa-isolated-server
+            path: products/zilliqa-isolated-server
+            tag_length: 8
+            tag_latest: true
+          - application: zilliqa-bridge-validator
+            image_name: zilliqa-bridge-validator
+            path: products/bridge/bridge-validators
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-bridge-web
+            image_name: zilliqa-bridge-web
+            path: products/bridge/bridge-web
+            tag_length: 8
+            tag_latest: false
+    env:
+      DOCKER_DOMAIN: asia-docker.pkg.dev
+      REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+
+      - name: "Authenticate to Google Cloud - production"
+        id: google-auth
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service_account: "${{ secrets.GCP_PRD_GITHUB_SA_DOCKER_REGISTRY }}"
+          create_credentials_file: true
+
+      - name: Login to the registry - production
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_DOMAIN }}
+          username: "oauth2accesstoken"
+          password: "${{ steps.google-auth.outputs.access_token }}"
+
+      - name: Get tag version - production
+        if: github.event_name == 'push'
+        id: set-tag
+        uses: Zilliqa/gh-actions-workflows/actions/generate-tag@v1
+        with:
+          tag: ${{ env.REGISTRY }}/${{ matrix.image_name }}
+          length: ${{ matrix.tag_length }}
+
+      - name: "Build and push ${{ matrix.application }} - production"
+        if: github.event_name == 'push'
+        env:
+          ENVIRONMENT: prd
+          IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
+      - name: "Build and push ${{ matrix.application }} - production"
+        if: github.event_name == 'release'
+        env:
+          ENVIRONMENT: prd
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ github.ref_name }}
+          ENV_FILES_DECRYPTER_NONPRD: ${{ secrets.ENV_FILES_DECRYPTER_NONPRD }}
+          ENV_FILES_DECRYPTER_PRD: ${{ secrets.ENV_FILES_DECRYPTER_PRD }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push
+
+      - name: "Build and push ${{ matrix.application }} tag latest - production"
+        if: matrix.tag_latest == true && github.event_name == 'release'
+        env:
+          ENVIRONMENT: prd
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ matrix.image_name }}:latest
+          ENV_FILES_DECRYPTER_NONPRD: ${{ secrets.ENV_FILES_DECRYPTER_NONPRD }}
+          ENV_FILES_DECRYPTER_PRD: ${{ secrets.ENV_FILES_DECRYPTER_PRD }}
+        run: |
+          cd ${{ matrix.path }}
+          make image/build-and-push

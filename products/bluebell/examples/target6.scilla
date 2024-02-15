@@ -1,0 +1,24 @@
+scilla_version 0
+
+library HelloWorld
+type Bool = 
+  | True
+  | False
+
+
+
+contract HelloWorld()
+
+
+field welcome_msg : Uint64 = Uint64 0
+
+transition setHello (msg : Uint64)
+  is_owner = False;
+  match is_owner with
+  | True =>
+    print msg
+  | False =>
+    print msg;
+    print msg
+  end
+end

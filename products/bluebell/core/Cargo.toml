@@ -1,0 +1,53 @@
+[package]
+name = "bluebell"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies] 
+lalrpop = "0.19.9"
+
+[dependencies]
+lalrpop-util = {version = "0.19", features = ["lexer"]}
+
+# DEPRECATED
+# # LLVM stuff
+# inkwell = {version = "0.2.0", features= ["llvm16-0"]}
+
+scilla-parser = { git = "https://github.com/Zilliqa/rs-scilla-parser.git", branch="main" }
+
+# EVM stuff
+evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
+evm_assembly = { path = "../evm_assembly" }
+primitive-types = { version = "0.12", default-features = false }
+hex = "0.4"
+sha3 = "0.10.8"
+
+
+# Logging
+log = "0.4.2"
+
+# Test
+regex = "1.10.2"
+diffy = "0.3.0"
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+
+
+[package.metadata.raze]
+workspace_path = "//products/bluebell"
+targets = [
+    "aarch64-apple-darwin",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+]
+output_buildfile_suffix = "BUILD.bazel"
+gen_workspace_prefix = "vendored_hello_cargo_library"
+genmode = "Vendored"
+package_aliases_dir = "cargo"
+default_gen_buildrs = false

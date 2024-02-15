@@ -13,7 +13,6 @@
     "preserveConstEnums": true,
     "importHelpers": true,
     "lib": ["esnext", "dom"],
-    "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -45,5 +44,6 @@
       "./bazel-out/k8-dbg/bin/zilliqa",
       "./bazel-out/x64_windows-dbg/bin/zilliqa"
     ]
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }

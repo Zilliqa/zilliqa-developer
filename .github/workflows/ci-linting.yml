@@ -18,9 +18,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6.0.2
+
       - name: "Installing dependencies"
         run: |
-          yarn install
+          pnpm i
 
       - name: Trunk cache
         id: cache-trunk

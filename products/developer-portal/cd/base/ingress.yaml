@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: developer-portal
+  namespace: developer-portal
+  labels:
+    app.kubernetes.io/name: "developer-portal"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: developer-portal
+                port:
+                  number: 80
+    - host: dev.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: developer-portal
+                port:
+                  number: 80

@@ -15,7 +15,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { BN } from '@zilliqa-js/util';
+import { BN } from "@zilliqa-js/util";
+
+// @ts-ignore
+import { Buffer } from "buffer";
 
 interface SignatureOptions {
   r: number | string | number[] | Uint8Array | Buffer | BN;
@@ -31,7 +34,7 @@ export class Signature {
   constructor(options: SignatureOptions) {
     const isValid = options.r && options.s;
     if (!isValid) {
-      throw new Error('Signature without r or s');
+      throw new Error("Signature without r or s");
     }
     this.r = new BN(options.r, 16);
     this.s = new BN(options.s, 16);

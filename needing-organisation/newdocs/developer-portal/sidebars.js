@@ -75,7 +75,6 @@ module.exports = {
       "dev/dev-started-helloworld",
       "dev/dev-started-env",
     ],
-    "Upgrade Notices": ["dev/dev-upgrade-v8"],
 
     "User Key Management": [
       "dev/dev-keys-introduction",
@@ -90,6 +89,7 @@ module.exports = {
       {
         SDKs: [
           "dev/dev-tools-zilliqajs",
+          "dev/dev-tools-zilliqars",
           "dev/dev-tools-gozilliqa",
           "dev/dev-tools-java",
           "dev/dev-tools-sdks",

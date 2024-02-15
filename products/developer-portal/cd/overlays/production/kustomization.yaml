@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - certificate.yaml
+  - frontend-config.yaml
+
+patches:
+  - target:
+      kind: Ingress
+      name: developer-portal
+    patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: dev.zilliqa.com
+      - op: remove
+        path: "/spec/rules/1"
+      - op: replace
+        path: /metadata/annotations
+        value:
+          kubernetes.io/ingress.class: gce
+          kubernetes.io/ingress.global-static-ip-name: dev-zilliqa-com
+          networking.gke.io/managed-certificates: developer-portal
+          networking.gke.io/v1beta1.FrontendConfig: developer-portal
+
+namespace: developer-portal-prd

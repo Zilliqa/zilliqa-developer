@@ -38,6 +38,7 @@ Run the following to clone the repository to your local machine
 git clone[https://github.com/Zilliqa/gozilliqa-sdk.git](https://github.com/Zilliqa/gozilliqa-sdk.git)```
 
 > If you wish to use the release version, please switch your branch to the particular release version. You can find out more information about the releases at [https://github.com/Zilliqa/gozilliqa-sdk/releases](https://github.com/Zilliqa/gozilliqa-sdk/releases)
+````
 
 ## Installation
 
@@ -47,7 +48,7 @@ Install the dependent libraries:
 
 ```go
 go get ./...
-````
+```
 
 The SDK itself cannot be built into a binary as it does not contains any `main`
 function, you can directly add it to your own project as a library. Also, we

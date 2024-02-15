@@ -1,0 +1,69 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  background: linear-gradient(to bottom right, #444444, #009a5b);
+}
+
+main {
+  color: #fff6d5;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.editor-container {
+  position: relative;
+}
+
+.highlighted-code {
+  /* This is your styled code output from Prism.js */
+}
+
+.overlay-textarea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  color: transparent; /* Hide the actual text but still show cursor and selection */
+  border: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.error-annotation {
+  position: absolute;
+  left: 100%; /* or wherever you want it relative to the code line */
+  color: red;
+}
+
+textarea:focus {
+  caret-color: green; /* or any other contrasting color */
+}
+
+.token.keyword {
+  color: #6699cc;
+}
+.token.string {
+  color: #f8c555;
+}
+.token.number {
+  color: #f77;
+}
+.token.boolean {
+  color: #116611;
+}
+.token.operator {
+  color: #a67f59;
+}
+.token.comment {
+  color: #999;
+  font-style: italic;
+}

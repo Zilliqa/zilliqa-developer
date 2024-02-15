@@ -69,11 +69,13 @@ export let defaultNetworks: NetworkMap =
     ? new Map([
         ["https://api.zilliqa.com", "Mainnet"],
         ["https://dev-api.zilliqa.com", "Testnet"],
+        ["https://api.devnet.zilliqa.com", "Devnet"],
         ["https://zilliqa-isolated-server.zilliqa.com", "Isolated Server"],
       ])
     : new Map([
         ["https://api.zilliqa.com", "Mainnet"],
         ["https://dev-api.zilliqa.com", "Testnet"],
+        ["https://api.devnet.zilliqa.com", "Devnet"],
         ["https://zilliqa-isolated-server.zilliqa.com", "Isolated Server"],
         [
           "https://stg-zilliqa-isolated-server.zilliqa.com",

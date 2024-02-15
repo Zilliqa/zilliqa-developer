@@ -1,0 +1,12 @@
+scilla_version 0
+
+import BoolUtils
+import IntUtils
+import ListUtils
+import NatUtils
+import PairUtils
+
+contract Empty()
+
+transition dummy()
+end
