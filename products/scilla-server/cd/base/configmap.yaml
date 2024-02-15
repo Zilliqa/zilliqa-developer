@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scilla-server
+  labels:
+    app.kubernetes.io/name: scilla-server
+data:
+  NODE_ENV: "production"
+  NODE_PORT: "4000"
+  NODE_HOST: "0.0.0.0"
+  SCILLA_VERSION: "0"

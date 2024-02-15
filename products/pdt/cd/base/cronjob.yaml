@@ -1,0 +1,139 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pdt-cronjob-testnet
+  namespace: pdt
+  labels:
+    app.kubernetes.io/name: "pdt-cronjob-testnet"
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: "pdt-cronjob-testnet"
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: default
+          containers:
+            - image: pdt
+              name: pdt-cronjob-testnet
+              volumeMounts:
+                - mountPath: /data
+                  name: data
+              env:
+                - name: PROJECT_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: PROJECT_ID
+                - name: DATASET_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: DATASET_ID_TESTNET
+                - name: NETWORK
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: NETWORK_TESTNET
+                - name: DOWNLOAD_DIR
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: DOWNLOAD_DIR
+                - name: UNPACK_DIR
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: UNPACK_DIR
+                - name: NR_THREADS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: NR_THREADS
+                - name: BATCH_BLOCKS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: BATCH_BLOCKS
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  ./pdt --download-dir=$DOWNLOAD_DIR --unpack-dir=$UNPACK_DIR --network=$NETWORK download
+                  ./pdt --unpack-dir=$UNPACK_DIR bqmulti --project-id=$PROJECT_ID --dataset-id=$DATASET_ID --nr-threads=$NR_THREADS --batch-blocks=$BATCH_BLOCKS
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: pdt-pvc-testnet
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pdt-cronjob-mainnet
+  namespace: pdt
+  labels:
+    app.kubernetes.io/name: "pdt-cronjob-mainnet"
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: "pdt-cronjob-mainnet"
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: default
+          containers:
+            - image: pdt
+              name: pdt-cronjob-mainnet
+              volumeMounts:
+                - mountPath: /data
+                  name: data
+              env:
+                - name: PROJECT_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: PROJECT_ID
+                - name: DATASET_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: DATASET_ID_MAINNET
+                - name: NETWORK
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: NETWORK_MAINNET
+                - name: DOWNLOAD_DIR
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: DOWNLOAD_DIR
+                - name: UNPACK_DIR
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: UNPACK_DIR
+                - name: NR_THREADS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: NR_THREADS
+                - name: BATCH_BLOCKS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: pdt
+                      key: BATCH_BLOCKS
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  ./pdt --download-dir=$DOWNLOAD_DIR --unpack-dir=$UNPACK_DIR --network=$NETWORK download
+                  ./pdt --unpack-dir=$UNPACK_DIR bqmulti --project-id=$PROJECT_ID --dataset-id=$DATASET_ID --nr-threads=$NR_THREADS --batch-blocks=$BATCH_BLOCKS
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: pdt-pvc-mainnet

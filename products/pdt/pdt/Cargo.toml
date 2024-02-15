@@ -1,0 +1,36 @@
+[package]
+name = "pdt"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+pdtlib = { path = "../pdtlib" }
+pdtbq = { path = "../pdtbq" }
+pdtdb = { path = "../pdtdb" }
+pdtpsql = { path = "../pdtpsql" }
+pdtparse = { path = "../pdtparse" }
+pdtlisten = { path = "../pdtlisten" }
+openssl = { version = "0.10.60", features = ["vendored"] }
+tokio = { version = "1.28.1", features = [
+  "macros",
+  "rt-multi-thread",
+  "fs",
+  "process",
+] }
+primitive-types = { version = "0.12.2", features = ["serde"] }
+anyhow = "1.0.71"
+clap = { version = "4.3.1", features = ["derive"] }
+async-trait = "0.1.68"
+sqlx = { version = "0.7.1", features = [
+  "postgres",
+  "runtime-tokio",
+  "tls-native-tls",
+  "macros",
+  "rust_decimal",
+] }
+tokio-stream = "0.1.14"
+futures = "0.3.28"
+serde_json = "1.0.105"
+serde = "1.0.188"

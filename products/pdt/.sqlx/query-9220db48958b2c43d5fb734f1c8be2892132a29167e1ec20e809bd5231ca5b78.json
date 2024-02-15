@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tablename FROM pg_tables WHERE tablename=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tablename",
+        "type_info": "Name"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Name"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9220db48958b2c43d5fb734f1c8be2892132a29167e1ec20e809bd5231ca5b78"
+}

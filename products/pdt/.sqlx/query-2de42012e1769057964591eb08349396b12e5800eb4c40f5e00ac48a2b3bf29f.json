@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "CREATE TABLE IF NOT EXISTS transactions (\n    id text NOT NULL,\n    block BIGINT NOT NULL,\n    offset_in_block BIGINT NOT NULL,\n    zqversion BIGINT NOT NULL,\n    amount numeric(76, 38),\n    api_type text,\n    code bytea,\n    data bytea,\n    gas_limit BIGINT NOT NULL,\n    gas_price numeric(76, 38),\n    nonce BIGINT,\n    raw_receipt bytea,\n    receipt jsonb,\n    sender_public_key bytea,\n    from_addr_zil varchar(40),\n    from_addr_eth varchar(40),\n    signature bytea,\n    to_addr varchar(40),\n    version BIGINT NOT NULL,\n    cum_gas BIGINT,\n    shard_id BIGINT,\n    imported_from text NOT NULL,\n    eth_transaction_index bigint,\n    eth_value numeric,\n    eth_input bytea,\n    eth_v BIGINT,\n    eth_r text,\n    eth_s text,\n    eth_transaction_type BIGINT\n) PARTITION BY RANGE (block);",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "2de42012e1769057964591eb08349396b12e5800eb4c40f5e00ac48a2b3bf29f"
+}

@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: governance-api
+spec:
+  domains:
+    - stg-governance-api.zilliqa.com

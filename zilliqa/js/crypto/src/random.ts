@@ -14,24 +14,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import cryptoJs from "crypto-js";
 
 /**
- * randomBytes
- *
- * Uses JS-native CSPRNG to generate a specified number of bytes.
- * NOTE: this method throws if no PRNG is available.
+ * Generates random bytes using native crypto module version available in the current execution environment.
  *
  * @param {number} bytes
  * @returns {string}
  */
 
-import randbytes from 'sodium-randbytes';
-
 export const randomBytes = (bytes: number) => {
-  // For node enviroment, use sodium-native because we prefer kernel CSPRNG.
-  // References:
-  // - https://paragonie.com/blog/2016/05/how-generate-secure-random-numbers-in-various-programming-languages#nodejs-csprng
-  // - https://github.com/nodejs/node/issues/5798
-  const b = randbytes(bytes);
-  return b.toString('hex');
+  return cryptoJs.lib.WordArray.random(bytes).toString(cryptoJs.enc.Hex);
 };

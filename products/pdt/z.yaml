@@ -1,0 +1,12 @@
+backend: kind
+
+clusters:
+  localdev:
+    manifests:
+    region: asia-southeast1
+    name: local-cluster
+    apps:
+      pdt-dev:
+        path: products/pdt/cd/base
+        track: development
+        type: kustomize

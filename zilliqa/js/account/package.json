@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/account",
-  "version": "3.4.3",
+  "version": "3.5.0",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
   ],
@@ -27,8 +27,6 @@
     "build:cjs": "tsc -b tsconfig.cjs.json"
   },
   "dependencies": {
-    "@types/bip39": "^2.4.0",
-    "@types/hdkey": "^0.7.0",
     "@zilliqa-js/core": "workspace:*",
     "@zilliqa-js/crypto": "workspace:*",
     "@zilliqa-js/proto": "workspace:*",
@@ -49,6 +47,8 @@
     "@types/jest": "27.0.1",
     "@types/node": "^20.2.3",
     "@types/webpack": "^4.4.17",
+    "@types/bip39": "^2.4.0",
+    "@types/hdkey": "^0.7.0",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "camelcase": "^5.0.0",
@@ -70,7 +70,6 @@
     "rollup-plugin-polyfill-node": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.34.1",
-    "sodium-randbytes": "0.14.0",
     "ts-jest": "^27.1.3",
     "ts-loader": "8.0.4",
     "ts-node": "^7.0.1",

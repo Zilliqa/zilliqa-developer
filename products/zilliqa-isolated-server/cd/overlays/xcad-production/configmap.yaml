@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zilliqa-isolated-server
+  namespace: zilliqa-isolated-server
+  labels:
+    app.kubernetes.io/name: zilliqa-isolated-server
+data:
+  MANUAL_MODE: "true"

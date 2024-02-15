@@ -21,3 +21,5 @@ yarn-error.log*
 *.sw?
 
 savant-artifact/
+.z
+_infra

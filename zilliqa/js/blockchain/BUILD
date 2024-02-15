@@ -11,6 +11,9 @@ stamped_package_json(
 _SRCS = [
     ":package",
     "//zilliqa/js:aes-js.d",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
 ] + glob(
     [
         "src/*.ts",
@@ -36,7 +39,6 @@ ts_project(
         "//:node_modules/@zilliqa-js/core",
         "//:node_modules/@zilliqa-js/crypto",
         "//:node_modules/@zilliqa-js/util",
-        "//:node_modules/utility-types",
     ],
     declaration = True,
     declaration_map = True,
@@ -59,7 +61,6 @@ ts_project(
         "//:node_modules/@zilliqa-js/crypto",
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/tslib",
-        "//:node_modules/utility-types",
     ],
 )
 
