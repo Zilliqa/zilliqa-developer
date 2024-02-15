@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ISignatureValidatorErrors, SignatureValidator} from "contracts/core/SignatureValidator.sol";
-import {Tester, Vm} from "foundry/test/Tester.sol";
+import {Tester, Vm} from "test/Tester.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract SignatureValidatorHarness is Tester {

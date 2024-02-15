@@ -6,3 +6,4 @@ artifacts_foundry
 broadcast
 out
 .env
+cache-foundry

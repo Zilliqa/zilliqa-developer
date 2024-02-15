@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {Tester} from "foundry/test/Tester.sol";
+import {Tester} from "test/Tester.sol";
 import {Relayer, IRelayerEvents, CallMetadata} from "contracts/core/Relayer.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Registry} from "contracts/core/Registry.sol";

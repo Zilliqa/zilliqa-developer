@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {Tester} from "foundry/test/Tester.sol";
+import {Tester} from "test/Tester.sol";
 import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
 import {ITokenManagerStructs, ITokenManagerEvents} from "contracts/periphery/TokenManagerUpgradeable.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";

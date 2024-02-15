@@ -1,23 +1,24 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {Tester} from "foundry/test/Tester.sol";
-import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
-import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
+import {Tester} from "test/Tester.sol";
+import {LockAndReleaseTokenManagerUpgradeable} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {MintAndBurnTokenManagerUpgradeableV2} from "contracts/periphery/TokenManagerV2/MintAndBurnTokenManagerUpgradeableV2.sol";
+import {LockAndReleaseTokenManagerUpgradeableV2} from "contracts/periphery/TokenManagerV2/LockAndReleaseTokenManagerUpgradeableV2.sol";
 import {ITokenManager, ITokenManagerFees, ITokenManagerStructs, ITokenManagerEvents} from "contracts/periphery/TokenManagerV2/TokenManagerUpgradeableV2.sol";
 import {ITokenManagerFeesEvents} from "contracts/periphery/TokenManagerV2/TokenManagerFees.sol";
 import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {TestToken} from "test/Helpers.sol";
 
 interface IPausable {
     event Paused(address account);
     event Unpaused(address account);
 }
 
-contract MintAndBurnTokenManagerUpgradeableV2Tests is
+contract LockAndReleaseTokenManagerUpgradeableV2Tests is
     Tester,
     ITokenManagerEvents,
     ITokenManagerStructs,
@@ -37,54 +38,49 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
     uint transferAmount = 10 ether;
     uint fees = 0.1 ether;
 
-    MintAndBurnTokenManagerUpgradeable tokenManager;
-    MintAndBurnTokenManagerUpgradeableV2 tokenManagerV2;
-    BridgedToken bridgedToken;
+    LockAndReleaseTokenManagerUpgradeable tokenManager;
+    LockAndReleaseTokenManagerUpgradeableV2 tokenManagerV2;
+    TestToken token;
 
     function setUp() external {
         vm.startPrank(deployer);
         address implementation = address(
-            new MintAndBurnTokenManagerUpgradeable()
+            new LockAndReleaseTokenManagerUpgradeable()
         );
         address proxy = address(
             new ERC1967Proxy(
                 implementation,
                 abi.encodeCall(
-                    MintAndBurnTokenManagerUpgradeable.initialize,
+                    LockAndReleaseTokenManagerUpgradeable.initialize,
                     chainGateway
                 )
             )
         );
-        tokenManager = MintAndBurnTokenManagerUpgradeable(proxy);
+        tokenManager = LockAndReleaseTokenManagerUpgradeable(proxy);
 
         assertEq(tokenManager.getGateway(), chainGateway);
 
         // Deploy new token
-        bridgedToken = tokenManager.deployToken(
-            "USDZ",
-            "Zilliqa USD",
-            remoteToken.token,
-            remoteToken.tokenManager,
-            remoteToken.chainId
-        );
+        token = new TestToken(transferAmount);
+        tokenManager.registerToken(address(token), remoteToken);
 
         // Check
         RemoteToken memory actualRemoteToken = tokenManager.getRemoteTokens(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId
         );
         assertEq(abi.encode(remoteToken), abi.encode(actualRemoteToken));
 
         // Carry out upgrade
         address implementationV2 = address(
-            new MintAndBurnTokenManagerUpgradeableV2()
+            new LockAndReleaseTokenManagerUpgradeableV2()
         );
         bytes memory encodedInitializerCall = abi.encodeCall(
-            MintAndBurnTokenManagerUpgradeableV2.reinitialize,
+            LockAndReleaseTokenManagerUpgradeableV2.reinitialize,
             fees
         );
         tokenManager.upgradeToAndCall(implementationV2, encodedInitializerCall);
-        tokenManagerV2 = MintAndBurnTokenManagerUpgradeableV2(
+        tokenManagerV2 = LockAndReleaseTokenManagerUpgradeableV2(
             address(tokenManager)
         );
         // Check new fees introduced
@@ -93,22 +89,23 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
         // Then check existing data is still intact
         assertEq(tokenManagerV2.getGateway(), chainGateway);
         actualRemoteToken = tokenManagerV2.getRemoteTokens(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId
         );
         assertEq(abi.encode(remoteToken), abi.encode(actualRemoteToken));
 
-        vm.stopPrank();
-
         // Premint some tokens for user testing
-        vm.prank(address(tokenManagerV2));
-        bridgedToken.mint(user, transferAmount);
+        token.transfer(user, transferAmount);
+        assertEq(token.balanceOf(user), transferAmount);
+        assertEq(token.balanceOf(deployer), 0);
+
+        vm.stopPrank();
     }
 
     function test_feesOnTransfer() external {
         startHoax(user);
 
-        bridgedToken.approve(address(tokenManagerV2), transferAmount);
+        token.approve(address(tokenManagerV2), transferAmount);
 
         vm.mockCall(
             chainGateway,
@@ -127,13 +124,13 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
             abi.encode(0)
         );
         tokenManagerV2.transfer{value: fees}(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId,
             user,
             transferAmount
         );
-        assertEq(bridgedToken.balanceOf(address(tokenManagerV2)), 0);
-        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(token.balanceOf(address(tokenManagerV2)), transferAmount);
+        assertEq(token.balanceOf(user), 0);
         assertEq(address(tokenManagerV2).balance, fees);
 
         vm.stopPrank();
@@ -142,7 +139,7 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
     function test_extraFeesOnTransfer() external {
         startHoax(user);
 
-        bridgedToken.approve(address(tokenManagerV2), transferAmount);
+        token.approve(address(tokenManagerV2), transferAmount);
 
         vm.mockCall(
             chainGateway,
@@ -161,13 +158,13 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
             abi.encode(0)
         );
         tokenManagerV2.transfer{value: fees * 2}(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId,
             user,
             transferAmount
         );
-        assertEq(bridgedToken.balanceOf(address(tokenManagerV2)), 0);
-        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(token.balanceOf(address(tokenManagerV2)), transferAmount);
+        assertEq(token.balanceOf(user), 0);
         assertEq(address(tokenManagerV2).balance, fees * 2);
 
         vm.stopPrank();
@@ -176,7 +173,7 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
     function test_RevertWhenNoFeesProvidedOnTransfer() external {
         startHoax(user);
 
-        bridgedToken.approve(address(tokenManagerV2), transferAmount);
+        token.approve(address(tokenManagerV2), transferAmount);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -186,14 +183,14 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
             )
         );
         tokenManagerV2.transfer{value: 0}(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId,
             user,
             transferAmount
         );
 
-        assertEq(bridgedToken.balanceOf(address(tokenManagerV2)), 0);
-        assertEq(bridgedToken.balanceOf(user), transferAmount);
+        assertEq(token.balanceOf(address(tokenManagerV2)), 0);
+        assertEq(token.balanceOf(user), transferAmount);
         assertEq(address(tokenManagerV2).balance, 0);
 
         vm.stopPrank();
@@ -203,7 +200,7 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
         startHoax(user);
         uint halfFees = fees / 2;
 
-        bridgedToken.approve(address(tokenManagerV2), transferAmount);
+        token.approve(address(tokenManagerV2), transferAmount);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -213,14 +210,14 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
             )
         );
         tokenManagerV2.transfer{value: halfFees}(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId,
             user,
             transferAmount
         );
 
-        assertEq(bridgedToken.balanceOf(address(tokenManagerV2)), 0);
-        assertEq(bridgedToken.balanceOf(user), transferAmount);
+        assertEq(token.balanceOf(address(tokenManagerV2)), 0);
+        assertEq(token.balanceOf(user), transferAmount);
         assertEq(address(tokenManagerV2).balance, 0);
 
         vm.stopPrank();
@@ -237,18 +234,18 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
         startHoax(user);
         uint halfFees = fees / 2;
 
-        bridgedToken.approve(address(tokenManagerV2), transferAmount);
+        token.approve(address(tokenManagerV2), transferAmount);
 
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
         tokenManagerV2.transfer{value: halfFees}(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId,
             user,
             transferAmount
         );
 
-        assertEq(bridgedToken.balanceOf(address(tokenManagerV2)), 0);
-        assertEq(bridgedToken.balanceOf(user), transferAmount);
+        assertEq(token.balanceOf(address(tokenManagerV2)), 0);
+        assertEq(token.balanceOf(user), transferAmount);
         assertEq(address(tokenManagerV2).balance, 0);
 
         vm.stopPrank();
@@ -311,7 +308,7 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
         // Test transfer
         startHoax(user);
 
-        bridgedToken.approve(address(tokenManagerV2), transferAmount);
+        token.approve(address(tokenManagerV2), transferAmount);
         vm.mockCall(
             chainGateway,
             abi.encodeCall(
@@ -329,14 +326,14 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
             abi.encode(0)
         );
         tokenManagerV2.transfer{value: newFees}(
-            address(bridgedToken),
+            address(token),
             remoteToken.chainId,
             user,
             transferAmount
         );
 
-        assertEq(bridgedToken.balanceOf(address(tokenManagerV2)), 0);
-        assertEq(bridgedToken.balanceOf(user), 0);
+        assertEq(token.balanceOf(address(tokenManagerV2)), transferAmount);
+        assertEq(token.balanceOf(user), 0);
         assertEq(address(tokenManagerV2).balance, newFees);
 
         vm.stopPrank();
@@ -397,27 +394,5 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
         tokenManagerV2.unpause();
 
         assertEq(tokenManagerV2.paused(), true);
-    }
-
-    function test_TokenOwnershipTransferred() external {
-        address newOwner = vm.addr(200);
-        vm.expectEmit(address(tokenManagerV2));
-        emit ITokenManagerEvents.TokenRemoved(
-            address(bridgedToken),
-            remoteToken.chainId
-        );
-        vm.prank(deployer);
-        tokenManagerV2.transferTokenOwnership(
-            address(bridgedToken),
-            remoteToken.chainId,
-            newOwner
-        );
-        ITokenManagerStructs.RemoteToken memory newRemoteToken = tokenManager
-            .getRemoteTokens(address(bridgedToken), remoteToken.chainId);
-        ITokenManagerStructs.RemoteToken memory expected;
-        // Verify if owner has been updated
-        assertEq(bridgedToken.owner(), newOwner);
-        // Verify if remoteToken has been deleted
-        assertEq(abi.encode(newRemoteToken), abi.encode(expected));
     }
 }
