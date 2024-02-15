@@ -15,8 +15,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { RPCResponse } from './net';
-import { Middleware } from './util';
+import { RPCResponse } from "./net";
+import { Middleware } from "./util";
+
+// @ts-ignore
+import { Buffer } from "buffer";
 
 export type Subscriber = (event: any) => void;
 export type Subscribers = Map<SubscriptionToken, Subscriber>;

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "CREATE TABLE IF NOT EXISTS microblocks (\n    block BIGINT NOT NULL,\n    offset_in_block BIGINT,\n    shard_id BIGINT,\n    header_version BIGINT NOT NULL,\n    header_committee_hash bytea,\n    header_prev_hash bytea,\n    gas_limit BIGINT NOT NULL,\n    rewards numeric(76, 38),\n    --matching bq bignumeric\n    prev_hash bytea,\n    tx_root_hash bytea,\n    miner_pubkey bytea,\n    miner_addr_zil varchar(40),\n    miner_addr_eth varchar(40),\n    ds_block_num BIGINT,\n    state_delta_hash bytea,\n    tran_receipt_hash bytea,\n    block_shard_id BIGINT,\n    gas_used BIGINT NOT NULL,\n    epoch_num BIGINT,\n    num_txs BIGINT NOT NULL,\n    blockhash bytea,\n    --blockhash is unique\n    timestamp BIGINT NOT NULL,\n    cs1 bytea,\n    b1 varchar(10),\n    cs2 bytea,\n    b2 varchar(10),\n    imported_from text,\n    --zq or eth\n    eth_parent_hash bytea,\n    eth_uncles_hash bytea,\n    eth_state_root bytea,\n    eth_extra_data bytea,\n    eth_logs_bloom bytea,\n    eth_difficulty BIGINT,\n    eth_total_difficulty BIGINT,\n    eth_nonce bytea,\n    eth_base_fee_per_gas BIGINT,\n    eth_withdrawals_root bytea,\n    eth_withdrawals jsonb\n) PARTITION BY RANGE (block);",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "1d578c16098148769ec757f2ad5ac179efbb9df801e6efb24f050f7ea700e558"
+}

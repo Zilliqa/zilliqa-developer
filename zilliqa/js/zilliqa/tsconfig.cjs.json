@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS" /* Specify module code generation */,
+    "outDir": "dist/cjs",
+    "strict": true /* Enable all strict type-checking options */,
+    "esModuleInterop": true /* Enable full interoperability between CommonJS and ES Modules */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+  },
+  "include": ["src", "../typings/**/*.d.ts"]
+}

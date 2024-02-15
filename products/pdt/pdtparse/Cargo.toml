@@ -1,0 +1,28 @@
+[package]
+name = "pdtparse"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.71"
+tokio = { version = "1.28.1", features = [
+  "macros",
+  "rt-multi-thread",
+  "fs",
+  "process",
+] }
+async-trait = "0.1.68"
+sqlx = { version = "0.7.1", features = [
+  "postgres",
+  "runtime-tokio",
+  "tls-native-tls",
+  "macros",
+  "rust_decimal",
+] }
+tokio-stream = "0.1.14"
+futures = "0.3.28"
+
+serde = { version = "1.0.163", features = ["derive"] }
+serde_json = "1.0.105"

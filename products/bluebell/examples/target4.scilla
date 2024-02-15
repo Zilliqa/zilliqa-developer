@@ -1,0 +1,8 @@
+scilla_version 0
+
+library HelloWorld
+contract HelloWorld()
+
+transition setHello (msg : Uint64)
+  print msg
+end

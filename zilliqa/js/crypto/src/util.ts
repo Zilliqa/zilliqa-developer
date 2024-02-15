@@ -15,14 +15,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import elliptic from 'elliptic';
-import hashjs from 'hash.js';
+import elliptic from "elliptic";
+import hashjs from "hash.js";
 
-import { BN, validation } from '@zilliqa-js/util';
+import { BN, validation } from "@zilliqa-js/util";
 
-import { fromBech32Address, toBech32Address } from './bech32';
+import { fromBech32Address, toBech32Address } from "./bech32";
 
-const secp256k1 = new elliptic.ec('secp256k1');
+const secp256k1 = new elliptic.ec("secp256k1");
 
 /**
  * getAddressFromPrivateKey
@@ -35,11 +35,11 @@ const secp256k1 = new elliptic.ec('secp256k1');
  */
 export const getAddressFromPrivateKey = (privateKey: string): string => {
   const normalizedPrviateKey = normalizePrivateKey(privateKey);
-  const keyPair = secp256k1.keyFromPrivate(normalizedPrviateKey, 'hex');
-  const pub = keyPair.getPublic(true, 'hex');
+  const keyPair = secp256k1.keyFromPrivate(normalizedPrviateKey, "hex");
+  const pub = keyPair.getPublic(true, "hex");
 
   return toChecksumAddress(
-    hashjs.sha256().update(pub, 'hex').digest('hex').slice(24),
+    hashjs.sha256().update(pub, "hex").digest("hex").slice(24)
   );
 };
 
@@ -54,8 +54,8 @@ export const getAddressFromPrivateKey = (privateKey: string): string => {
  */
 export const getPubKeyFromPrivateKey = (privateKey: string) => {
   const normalizedPrviateKey = normalizePrivateKey(privateKey);
-  const keyPair = secp256k1.keyFromPrivate(normalizedPrviateKey, 'hex');
-  return keyPair.getPublic(true, 'hex');
+  const keyPair = secp256k1.keyFromPrivate(normalizedPrviateKey, "hex");
+  return keyPair.getPublic(true, "hex");
 };
 
 /**
@@ -68,8 +68,8 @@ export const getPubKeyFromPrivateKey = (privateKey: string) => {
 
 export const getAccountFrom0xPrivateKey = (privateKeyWith0x: string) => {
   const privateKeyWithout0x = normalizePrivateKey(privateKeyWith0x);
-  const keyPair = secp256k1.keyFromPrivate(privateKeyWith0x, 'hex');
-  const publicKeyWith0x = keyPair.getPublic(true, 'hex');
+  const keyPair = secp256k1.keyFromPrivate(privateKeyWith0x, "hex");
+  const publicKeyWith0x = keyPair.getPublic(true, "hex");
   const addressWith0x = getAddressFromPublicKey(publicKeyWith0x);
   const bech32With0x = toBech32Address(addressWith0x);
   const with0x = {
@@ -79,8 +79,8 @@ export const getAccountFrom0xPrivateKey = (privateKeyWith0x: string) => {
     bech32: bech32With0x,
   };
 
-  const keyPair2 = secp256k1.keyFromPrivate(privateKeyWithout0x, 'hex');
-  const publicKeyWithout0x = keyPair2.getPublic(true, 'hex');
+  const keyPair2 = secp256k1.keyFromPrivate(privateKeyWithout0x, "hex");
+  const publicKeyWithout0x = keyPair2.getPublic(true, "hex");
   const addressWithout0x = getAddressFromPublicKey(publicKeyWithout0x);
   const bech32Without0x = toBech32Address(addressWithout0x);
   const without0x = {
@@ -90,8 +90,8 @@ export const getAccountFrom0xPrivateKey = (privateKeyWith0x: string) => {
     bech32: bech32Without0x,
   };
 
-  const privateKeyAfterChange = keyPair.getPrivate('hex');
-  const publicKeyAfterChange = keyPair.getPublic(true, 'hex');
+  const privateKeyAfterChange = keyPair.getPrivate("hex");
+  const publicKeyAfterChange = keyPair.getPublic(true, "hex");
   const addressAfterChange = getAddressFromPublicKey(publicKeyAfterChange);
   const bech32AfterChange = toBech32Address(addressAfterChange);
 
@@ -117,7 +117,7 @@ export const getAccountFrom0xPrivateKey = (privateKeyWith0x: string) => {
  * @returns {string}
  */
 export const compressPublicKey = (publicKey: string): string => {
-  return secp256k1.keyFromPublic(publicKey, 'hex').getPublic(true, 'hex');
+  return secp256k1.keyFromPublic(publicKey, "hex").getPublic(true, "hex");
 };
 
 /**
@@ -129,9 +129,9 @@ export const compressPublicKey = (publicKey: string): string => {
  * @returns {string}
  */
 export const getAddressFromPublicKey = (publicKey: string) => {
-  const normalized = publicKey.toLowerCase().replace('0x', '');
+  const normalized = publicKey.toLowerCase().replace("0x", "");
   return toChecksumAddress(
-    hashjs.sha256().update(normalized, 'hex').digest('hex').slice(24),
+    hashjs.sha256().update(normalized, "hex").digest("hex").slice(24)
   );
 };
 
@@ -148,13 +148,13 @@ export const toChecksumAddress = (address: string): string => {
     throw new Error(`${address} is not a valid base 16 address`);
   }
 
-  address = address.toLowerCase().replace('0x', '');
-  const hash = hashjs.sha256().update(address, 'hex').digest('hex');
-  const v = new BN(hash, 'hex', 'be');
-  let ret = '0x';
+  address = address.toLowerCase().replace("0x", "");
+  const hash = hashjs.sha256().update(address, "hex").digest("hex");
+  const v = new BN(hash, "hex", "be");
+  let ret = "0x";
 
   for (let i = 0; i < address.length; i++) {
-    if ('0123456789'.indexOf(address[i]) !== -1) {
+    if ("0123456789".indexOf(address[i]) !== -1) {
       ret += address[i];
     } else {
       ret += v.and(new BN(2).pow(new BN(255 - 6 * i))).gte(new BN(1))
@@ -176,7 +176,7 @@ export const toChecksumAddress = (address: string): string => {
  */
 export const isValidChecksumAddress = (address: string): boolean => {
   return (
-    validation.isAddress(address.replace('0x', '')) &&
+    validation.isAddress(address.replace("0x", "")) &&
     toChecksumAddress(address) === address
   );
 };
@@ -197,7 +197,7 @@ export const normaliseAddress = (address: string): string => {
 
   if (!isValidChecksumAddress(address)) {
     throw Error(
-      'Wrong address format, should be either bech32 or checksummed address',
+      "Wrong address format, should be either bech32 or checksummed address"
     );
   }
 
@@ -212,12 +212,12 @@ export const normaliseAddress = (address: string): string => {
  * @returns {string} - big endian base 58 encoded string
  */
 export const encodeBase58 = (hex: string): string => {
-  const clean = hex.toLowerCase().replace('0x', '');
-  const tbl = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const clean = hex.toLowerCase().replace("0x", "");
+  const tbl = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   const base = new BN(58);
   const zero = new BN(0);
   let x = new BN(clean, 16);
-  let res = '';
+  let res = "";
 
   while (x.gt(zero)) {
     const rem = x.mod(base).toNumber(); // safe, always < 58
@@ -228,9 +228,9 @@ export const encodeBase58 = (hex: string): string => {
   }
 
   // convert to big endian in case the input hex is little endian
-  const hexBE = x.toString('hex', clean.length);
+  const hexBE = x.toString("hex", clean.length);
   for (let i = 0; i < hexBE.length; i += 2) {
-    if (hex[i] === '0' && hex[i + 1] === '0') {
+    if (hex[i] === "0" && hex[i + 1] === "0") {
       res = tbl[0] + res;
     } else {
       break;
@@ -248,12 +248,12 @@ export const encodeBase58 = (hex: string): string => {
  * @returns {string} - big endian base 16 string
  */
 export const decodeBase58 = (raw: string): string => {
-  const tbl = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const tbl = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   const base = new BN(58);
   const zero = new BN(0);
   let isBreak = false;
   let n = new BN(0);
-  let leader = '';
+  let leader = "";
 
   for (let i = 0; i < raw.length; i++) {
     const char = raw.charAt(i);
@@ -262,12 +262,12 @@ export const decodeBase58 = (raw: string): string => {
 
     // check if padding required
     if (!isBreak) {
-      if (i - 1 > 0 && raw[i - 1] !== '1') {
+      if (i - 1 > 0 && raw[i - 1] !== "1") {
         isBreak = true;
         continue;
       }
-      if (char === '1') {
-        leader += '00';
+      if (char === "1") {
+        leader += "00";
       }
     }
   }
@@ -275,9 +275,9 @@ export const decodeBase58 = (raw: string): string => {
     return leader;
   }
 
-  let res = leader + n.toString('hex');
+  let res = leader + n.toString("hex");
   if (res.length % 2 !== 0) {
-    res = '0' + res;
+    res = "0" + res;
   }
 
   return res;
@@ -290,7 +290,7 @@ export const decodeBase58 = (raw: string): string => {
  * @returns {boolean}
  */
 export const verifyPrivateKey = (privateKey: string): boolean => {
-  const keyPair = secp256k1.keyFromPrivate(privateKey, 'hex');
+  const keyPair = secp256k1.keyFromPrivate(privateKey, "hex");
   const { result } = keyPair.validate();
   return result;
 };
@@ -305,11 +305,11 @@ export const verifyPrivateKey = (privateKey: string): boolean => {
 export const normalizePrivateKey = (privateKey: string): string => {
   try {
     if (!validation.isPrivateKey(privateKey)) {
-      throw new Error('Private key is not correct');
+      throw new Error("Private key is not correct");
     }
-    const normalized = privateKey.toLowerCase().replace('0x', '');
+    const normalized = privateKey.toLowerCase().replace("0x", "");
     if (!verifyPrivateKey(normalized)) {
-      throw new Error('Private key is not correct');
+      throw new Error("Private key is not correct");
     }
     return normalized;
   } catch (error) {

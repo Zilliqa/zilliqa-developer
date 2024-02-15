@@ -28,18 +28,22 @@
  * THE SOFTWARE.
  */
 
-import { ec } from 'elliptic';
-import hashjs from 'hash.js';
-import DRBG from 'hmac-drbg';
+import elliptic from "elliptic";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
-import { BN } from '@zilliqa-js/util';
+import hashjs from "hash.js";
+import DRBG from "hmac-drbg";
 
-import { randomBytes } from './random';
-import { Signature } from '.';
+import { BN } from "@zilliqa-js/util";
 
-const secp256k1 = new ec('secp256k1');
+import { randomBytes } from "./random";
+import { Signature } from ".";
+
+const ec = elliptic.ec;
+const secp256k1 = new ec("secp256k1");
 const curve = secp256k1.curve;
 const PRIVKEY_SIZE_BYTES = 32;
+
 // Public key is a point (x, y) on the curve.
 // Each coordinate requires 32 bytes.
 // In its compressed form it suffices to store the x co-ordinate
@@ -47,13 +51,13 @@ const PRIVKEY_SIZE_BYTES = 32;
 // Hence a total of 33 bytes.
 const PUBKEY_COMPRESSED_SIZE_BYTES = 33;
 // Personalization string used for HMAC-DRBG instantiation.
-const ALG = Buffer.from('Schnorr+SHA256  ', 'ascii');
+const ALG = Buffer.from("Schnorr+SHA256  ", "ascii");
 // The length in bytes of the string above.
 const ALG_LEN = 16;
 // The length in bytes of entropy inputs to HMAC-DRBG
 const ENT_LEN = 32;
 
-const HEX_ENC: 'hex' = 'hex';
+const HEX_ENC: "hex" = "hex";
 
 /**
  * generatePrivateKey
@@ -65,7 +69,7 @@ export const generatePrivateKey = (): string => {
     .genKeyPair({
       entropy: randomBytes(secp256k1.curve.n.byteLength()),
       entropyEnc: HEX_ENC,
-      pers: 'zilliqajs+secp256k1+SHA256',
+      pers: "zilliqajs+secp256k1+SHA256",
     })
     .getPrivate()
     .toString(16, PRIVKEY_SIZE_BYTES * 2);
@@ -82,14 +86,14 @@ export const generatePrivateKey = (): string => {
 export const hash = (q: BN, pubkey: Buffer, msg: Buffer) => {
   const sha256 = hashjs.sha256();
   const totalLength = PUBKEY_COMPRESSED_SIZE_BYTES * 2 + msg.byteLength; // 33 q + 33 pubkey + variable msgLen
-  const Q = q.toArrayLike(Buffer, 'be', 33);
+  const Q = q.toArrayLike(Buffer, "be", 33);
   const B = Buffer.allocUnsafe(totalLength);
 
   Q.copy(B, 0);
   pubkey.copy(B, 33);
   msg.copy(B, 66);
 
-  return new BN(sha256.update(B).digest('hex'), 16);
+  return new BN(sha256.update(B).digest("hex"), 16);
 };
 
 /**
@@ -104,7 +108,7 @@ export const hash = (q: BN, pubkey: Buffer, msg: Buffer) => {
 export const sign = (
   msg: Buffer,
   privKey: Buffer,
-  pubKey: Buffer,
+  pubKey: Buffer
 ): Signature => {
   const prv = new BN(privKey);
   const drbg = getDRBG(msg);
@@ -133,14 +137,14 @@ export const trySign = (
   msg: Buffer,
   k: BN,
   privKey: BN,
-  pubKey: Buffer,
+  pubKey: Buffer
 ): Signature | null => {
   if (privKey.isZero()) {
-    throw new Error('Bad private key.');
+    throw new Error("Bad private key.");
   }
 
   if (privKey.gte(curve.n)) {
-    throw new Error('Bad private key.');
+    throw new Error("Bad private key.");
   }
 
   // 1a. check that k is not 0
@@ -198,20 +202,20 @@ export const verify = (msg: Buffer, signature: Signature, key: Buffer) => {
   const sig = new Signature(signature);
 
   if (sig.s.isZero() || sig.r.isZero()) {
-    throw new Error('Invalid signature');
+    throw new Error("Invalid signature");
   }
 
   if (sig.s.isNeg() || sig.r.isNeg()) {
-    throw new Error('Invalid signature');
+    throw new Error("Invalid signature");
   }
 
   if (sig.s.gte(curve.n) || sig.r.gte(curve.n)) {
-    throw new Error('Invalid signature');
+    throw new Error("Invalid signature");
   }
 
   const kpub = curve.decodePoint(key);
   if (!curve.validate(kpub)) {
-    throw new Error('Invalid public key');
+    throw new Error("Invalid public key");
   }
 
   const l = kpub.mul(sig.r);
@@ -220,7 +224,7 @@ export const verify = (msg: Buffer, signature: Signature, key: Buffer) => {
   const Q = l.add(r);
 
   if (Q.isInfinity()) {
-    throw new Error('Invalid intermediate point.');
+    throw new Error("Invalid intermediate point.");
   }
 
   const compressedQ = new BN(Q.encodeCompressed());
@@ -228,7 +232,7 @@ export const verify = (msg: Buffer, signature: Signature, key: Buffer) => {
   const r1 = hash(compressedQ, key, msg).umod(curve.n);
 
   if (r1.isZero()) {
-    throw new Error('Invalid hash.');
+    throw new Error("Invalid hash.");
   }
 
   return r1.eq(sig.r);

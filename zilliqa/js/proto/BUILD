@@ -14,7 +14,12 @@ proto_library(
 
 ts_proto_library(
     name = "lib",
-    srcs = [":package"],
+    srcs = [
+        "CHANGELOG.md",
+        "LICENSE",
+        "README.md",
+        ":package",
+    ],
     proto = ":proto_lib",
     visibility = ["//visibility:public"],
 )
