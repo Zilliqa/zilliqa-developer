@@ -1,0 +1,21 @@
+scilla_version 0
+
+library HelloWorld
+contract HelloWorld()
+
+field welcome_msg : Uint64 = Uint64 0
+transition setHelloImpl(msg: Uint64)
+  welcome_msg := msg
+end
+
+transition setHello (msg : Uint64)
+  setHelloImpl msg;
+  msg <- welcome_msg;
+  x = builtin print msg
+end
+
+
+transition printState()
+  msg <- welcome_msg;
+  x = builtin print msg
+end

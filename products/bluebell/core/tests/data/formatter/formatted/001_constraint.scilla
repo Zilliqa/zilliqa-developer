@@ -1,0 +1,5 @@
+scilla_version 0
+
+library Constraint
+
+contract Constraint(param : Bool) with param =>

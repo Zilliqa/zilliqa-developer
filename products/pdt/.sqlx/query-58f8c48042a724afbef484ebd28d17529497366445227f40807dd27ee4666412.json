@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id, block, params, event from txn_with_events\n                where event = ANY($1) and (block > $2 or (block = $2 and id > $3)) order by block asc, id asc",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "block",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "params",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 3,
+        "name": "event",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "58f8c48042a724afbef484ebd28d17529497366445227f40807dd27ee4666412"
+}

@@ -1,0 +1,9 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: zilliqa-isolated-server
+  labels:
+    app.kubernetes.io/name: zilliqa-isolated-server
+spec:
+  domains:
+    - zilliqa-isolated-server.zilliqa.com

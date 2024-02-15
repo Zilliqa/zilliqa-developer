@@ -1,0 +1,10 @@
+scilla_version 0
+
+library TheLibraryPart
+
+contract TheContractPart()
+
+transition hello()
+  msg = "Zilliqa Rocks!";
+  x = builtin print msg
+end

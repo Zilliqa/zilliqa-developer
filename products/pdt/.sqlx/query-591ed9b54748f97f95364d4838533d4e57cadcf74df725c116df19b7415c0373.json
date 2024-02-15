@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select max(id) as max_id,\n            max(block)\n        from ledger\n        where block =(\n                select max(block)\n                from ledger\n            )",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "max",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "591ed9b54748f97f95364d4838533d4e57cadcf74df725c116df19b7415c0373"
+}

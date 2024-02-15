@@ -22,20 +22,31 @@ lint:
     - flake8@6.0.0
     - isort@5.12.0
     - black@23.1.0
-    - rustfmt@1.61.0    
+    - rustfmt@1.61.0
     # - shellcheck@0.9.0 - removed for being over-prissy and wanting tab indents - rrw 2023-04-25
   ignore:
     - linters: [gitleaks]
       paths:
-        - products/laksaj  # laksaj contains a lot of embedded testnet privkeys - ignore them.
+        - products/laksaj # laksaj contains a lot of embedded testnet privkeys - ignore them.
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
+        - products/bridge/smart-contracts/script/config.ts
+        - products/bridge/smart-contracts/script/**/*.s.sol
+        - products/bridge/bridge-web/src/config/config.ts
     - linters: [eslint]
       paths:
-        - contracts/experimental/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
+        - contracts/audited/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
+        - contracts/reward_control # and again
+        - products/bridge/bridge-web
     - linters: [ALL]
       paths:
         - needing-organisation/**/*
-        - products/devex/public/*.js    
+        - products/devex/public/*.js
+        - products/dev-wallet/**
+        - products/governance-api/**
+        - products/governance-snapshot/**
+        - products/multisig/**
+        - products/scilla-server/**
+        - products/zillion/**
         - .devcontainer/*
         - .devcontainer/**
         - .trunk/*out/**

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into ledger(id, block, account, amount)\n        select * from unnest($1::text[], $2::bigint[], $3::text[], $4::numeric[])\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Int8Array",
+        "TextArray",
+        "NumericArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bef964da8bd0b24fe20c34e0e6d0200da91b642077ccd1d5be675d2a20a95cd4"
+}
