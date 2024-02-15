@@ -1,0 +1,503 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x3Be6E686397f04901Be15e3e02EDC0c7565e4b13",
+      "txHash": "0xb56b10f34d5550fae73647475493c5a2e627264398eedfab92897b4e5c114be7",
+      "kind": "uups"
+    },
+    {
+      "address": "0xd55b77e17b3Aaa4c5Ffc776940A38e308A7448da",
+      "txHash": "0x1f06615461f2aaf9493d38a584a9f0cd3be2fd4a449ccd25eb13255d93cb1b94",
+      "kind": "uups"
+    },
+    {
+      "address": "0x7919b885894767AE15309F0AeECB2016f977F325",
+      "txHash": "0x9440db21894f8eeb81bca8cafa940a076fc21cf7b254f2db7ee6cb1842379f34",
+      "kind": "uups"
+    },
+    {
+      "address": "0x6D61eFb60C17979816E4cE12CD5D29054E755948",
+      "txHash": "0xee753f2e8f300d48f4d5f54bc28f1a82dd08321fa75609cc971def35977c016c",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "d572366951e9a3015fe5efeb749b7e89a68670debb6a36e8fd8aee4155466784": {
+      "address": "0xf42aa5b0D9B14f37c5de088178DA68DF841879E1",
+      "txHash": "0x28163fc8293d20c14c8dcdce247631a2358e020dc721a9cb2d62fb89011cbe51",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)1333_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct RemoteToken))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RemoteToken)1333_storage)": {
+            "label": "mapping(uint256 => struct RemoteToken)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RemoteToken)1333_storage": {
+            "label": "struct RemoteToken",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "tokenManager",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "chainId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(TokenManagerStorage)1378_storage": {
+            "label": "struct TokenManagerUpgradeable.TokenManagerStorage",
+            "members": [
+              {
+                "label": "gateway",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "remoteTokens",
+                "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)1333_storage))",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:zilliqa.storage.TokenManager": [
+            {
+              "contract": "TokenManagerUpgradeable",
+              "label": "gateway",
+              "type": "t_address",
+              "src": "contracts/periphery/TokenManagerUpgradeable.sol:74",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "TokenManagerUpgradeable",
+              "label": "remoteTokens",
+              "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)1333_storage))",
+              "src": "contracts/periphery/TokenManagerUpgradeable.sol:76",
+              "offset": 0,
+              "slot": "1"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "35c1b97d2ec9c4a32beed199867de0893a1eaa853e6807217a6924fe5ee08967": {
+      "address": "0x2310611B728C44b7dA9d9F805a4780a916609BFb",
+      "txHash": "0xda8f6cd12a80e6ba33f1e14e46ae00e72b7af04badf846d862138c6d429d2012",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)1370_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct ITokenManagerStructs.RemoteToken))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RemoteToken)1370_storage)": {
+            "label": "mapping(uint256 => struct ITokenManagerStructs.RemoteToken)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RemoteToken)1370_storage": {
+            "label": "struct ITokenManagerStructs.RemoteToken",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "tokenManager",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "chainId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(TokenManagerStorage)1413_storage": {
+            "label": "struct TokenManagerUpgradeable.TokenManagerStorage",
+            "members": [
+              {
+                "label": "gateway",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "remoteTokens",
+                "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)1370_storage))",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:zilliqa.storage.TokenManager": [
+            {
+              "contract": "TokenManagerUpgradeable",
+              "label": "gateway",
+              "type": "t_address",
+              "src": "contracts/periphery/TokenManagerUpgradeable.sol:74",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "TokenManagerUpgradeable",
+              "label": "remoteTokens",
+              "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)1370_storage))",
+              "src": "contracts/periphery/TokenManagerUpgradeable.sol:76",
+              "offset": 0,
+              "slot": "1"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "dd621d651f946f773a7eaddb552038b3f64f5c9844f541b3c86e89201c21df8e": {
+      "address": "0x4277Bbb91932cdD38EF9861BA7d8a02F2bF1fa49",
+      "txHash": "0xdfb7b732e6f1ec542d622e16fc5c06dc11999c07edf13ea3f381205ef0931cb7",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)796_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct ITokenManagerStructs.RemoteToken))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RemoteToken)796_storage)": {
+            "label": "mapping(uint256 => struct ITokenManagerStructs.RemoteToken)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RemoteToken)796_storage": {
+            "label": "struct ITokenManagerStructs.RemoteToken",
+            "members": [
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "tokenManager",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "chainId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(TokenManagerStorage)841_storage": {
+            "label": "struct TokenManagerUpgradeableV2.TokenManagerStorage",
+            "members": [
+              {
+                "label": "gateway",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "remoteTokens",
+                "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)796_storage))",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "count",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          }
+        },
+        "namespaces": {
+          "erc7201:zilliqa.storage.TokenManager": [
+            {
+              "contract": "TokenManagerUpgradeableV2",
+              "label": "gateway",
+              "type": "t_address",
+              "src": "contracts/periphery/TokenManagerUpgradeableV2.sol:74",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "TokenManagerUpgradeableV2",
+              "label": "remoteTokens",
+              "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(RemoteToken)796_storage))",
+              "src": "contracts/periphery/TokenManagerUpgradeableV2.sol:76",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "TokenManagerUpgradeableV2",
+              "label": "count",
+              "type": "t_uint256",
+              "src": "contracts/periphery/TokenManagerUpgradeableV2.sol:77",
+              "offset": 0,
+              "slot": "2"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

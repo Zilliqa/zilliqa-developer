@@ -41,13 +41,8 @@ impl Context {
         let region_provider = RegionProviderChain::first_try(Region::new("us-west-2")); // FIXME
         let config_loader = aws_config::from_env()
             .no_credentials()
-            .region(region_provider);
-        // Temporary whilst migrations are being carried out
-        let config_loader = if network_name.starts_with("testnet-") {
-            config_loader.endpoint_url("https://storage.googleapis.com")
-        } else {
-            config_loader
-        };
+            .region(region_provider)
+            .endpoint_url("https://storage.googleapis.com");
 
         let config = config_loader.load().await;
 
