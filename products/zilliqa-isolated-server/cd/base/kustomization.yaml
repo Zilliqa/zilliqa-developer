@@ -5,3 +5,5 @@ resources:
   - deployment.yaml
   - svc.yaml
   - ingress.yaml
+
+namespace: zilliqa-isolated-server
