@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {TransferReentrancyTester} from "foundry/test/Helpers.sol";
+import {TransferReentrancyTester} from "test/Helpers.sol";
 import {FeeTracker, IFeeTrackerErrors} from "contracts/core/FeeTracker.sol";
 import {stdStorage, StdStorage} from "forge-std/Test.sol";
-import {Tester} from "foundry/test/Tester.sol";
+import {Tester} from "test/Tester.sol";
 
 contract FeeTrackerTester is FeeTracker {
     bool public writeSuccessful;

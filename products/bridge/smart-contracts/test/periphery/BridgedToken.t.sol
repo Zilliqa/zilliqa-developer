@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {Tester} from "foundry/test/Tester.sol";
+import {Tester} from "test/Tester.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
