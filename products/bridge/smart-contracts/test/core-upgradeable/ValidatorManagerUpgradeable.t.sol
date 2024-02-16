@@ -1,23 +1,40 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity 0.8.20;
 
-import {Tester} from "test/Tester.sol";
-import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import {Vm, Tester} from "test/Tester.sol";
+import {ValidatorManagerUpgradeable} from "contracts/core-upgradeable/ValidatorManagerUpgradeable.sol";
 
-contract ValidatorManagerTests is Tester {
-    address owner = vm.createWallet("Owner").addr;
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+
+contract ValidatorManagerUpgradeableTests is Tester {
+    using ECDSA for bytes32;
+    using MessageHashUtils for bytes;
+
+    Vm.Wallet ownerWallet = vm.createWallet("Owner");
+    address owner = ownerWallet.addr;
     address validator1 = vm.createWallet("Validator1").addr;
     address validator2 = vm.createWallet("Validator2").addr;
-    ValidatorManager validatorManager;
+    ValidatorManagerUpgradeable validatorManager;
 
     function setUp() external {
-        validatorManager = new ValidatorManager(owner);
         address[] memory validators = new address[](1);
         validators[0] = validator1;
 
-        vm.prank(owner);
-        validatorManager.initialize(validators);
+        address implementation = address(new ValidatorManagerUpgradeable());
+        address proxy = address(
+            new ERC1967Proxy(
+                implementation,
+                abi.encodeCall(
+                    ValidatorManagerUpgradeable.initialize,
+                    (owner, validators)
+                )
+            )
+        );
+
+        validatorManager = ValidatorManagerUpgradeable(proxy);
     }
 
     function test_addValidator() external {
@@ -45,7 +62,7 @@ contract ValidatorManagerTests is Tester {
         vm.prank(nonOwner);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
+                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
                 nonOwner
             )
         );
@@ -58,12 +75,14 @@ contract ValidatorManagerTests is Tester {
         vm.prank(nonOwner);
         vm.expectRevert(
             abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
+                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
                 nonOwner
             )
         );
         validatorManager.removeValidator(validator2);
     }
+
+    function test_validateMessageWithSupermajority() external {}
 
     function test_transferOwnership() external {
         address newOwner = vm.createWallet("NewOwner").addr;
