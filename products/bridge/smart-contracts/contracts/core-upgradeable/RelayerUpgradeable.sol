@@ -84,7 +84,8 @@ abstract contract RelayerUpgradeable is
         uint gasLimit
     ) internal isRegistered(msg.sender) returns (uint) {
         RelayerStorage storage $ = _getRelayerStorage();
-        uint _nonce = $.nonce[targetChainId]++;
+        $.nonce[targetChainId]++;
+        uint _nonce = $.nonce[targetChainId];
 
         emit Relayed(targetChainId, target, call, gasLimit, _nonce);
         return _nonce;

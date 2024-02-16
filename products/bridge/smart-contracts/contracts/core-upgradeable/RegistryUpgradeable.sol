@@ -40,7 +40,7 @@ abstract contract RegistryUpgradeable is IRegistry {
 
     modifier isRegistered(address target) {
         RegistryStorage storage $ = _getRegistryStorage();
-        if (registered(target)) {
+        if (!registered(target)) {
             revert NotRegistered(target);
         }
         _;
