@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {SignatureValidator} from "contracts/core/SignatureValidator.sol";
 
-contract ValidatorManager is Ownable {
+contract ValidatorManager is Ownable2Step {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SignatureValidator for EnumerableSet.AddressSet;
     bool initialized = false;

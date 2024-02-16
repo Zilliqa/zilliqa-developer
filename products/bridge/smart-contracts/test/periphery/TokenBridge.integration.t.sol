@@ -2,20 +2,25 @@
 pragma solidity 0.8.20;
 
 import {Tester, Vm} from "test/Tester.sol";
-import {LockAndReleaseTokenManagerUpgradeable} from "contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol";
 import {ITokenManagerStructs, TokenManagerUpgradeable} from "contracts/periphery/TokenManagerUpgradeable.sol";
-import {MintAndBurnTokenManagerUpgradeable} from "contracts/periphery/MintAndBurnTokenManagerUpgradeable.sol";
+import {LockAndReleaseTokenManagerUpgradeableV3} from "contracts/periphery/TokenManagerV3/LockAndReleaseTokenManagerUpgradeableV3.sol";
+import {MintAndBurnTokenManagerUpgradeableV3} from "contracts/periphery/TokenManagerV3/MintAndBurnTokenManagerUpgradeableV3.sol";
 import {BridgedToken} from "contracts/periphery/BridgedToken.sol";
 import {CallMetadata, IRelayerEvents} from "contracts/core/Relayer.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {TestToken} from "test/Helpers.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {LockAndReleaseTokenManagerDeployer} from "test/periphery/TokenManagerDeployers/LockAndReleaseTokenManagerDeployer.sol";
+import {MintAndBurnTokenManagerDeployer} from "test/periphery/TokenManagerDeployers/MintAndBurnTokenManagerDeployer.sol";
 
 // Integration Tests combining the TokenManagers and ChainGateway
-contract TokenBridgeTests is Tester, IRelayerEvents {
+contract TokenBridgeIntegrationTests is
+    Tester,
+    IRelayerEvents,
+    LockAndReleaseTokenManagerDeployer,
+    MintAndBurnTokenManagerDeployer
+{
     using MessageHashUtils for bytes;
 
     // Gateway shared between the two chains
@@ -25,23 +30,23 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
     address sourceUser = vm.addr(2);
     address remoteUser = vm.addr(3);
     uint originalTokenSupply = 1000 ether;
+    uint fees = 0.1 ether;
 
-    LockAndReleaseTokenManagerUpgradeable sourceTokenManager;
+    LockAndReleaseTokenManagerUpgradeableV3 sourceTokenManager;
     TestToken originalToken;
     ChainGateway sourceChainGateway;
     ValidatorManager sourceValidatorManager;
 
-    MintAndBurnTokenManagerUpgradeable remoteTokenManager;
+    MintAndBurnTokenManagerUpgradeableV3 remoteTokenManager;
     BridgedToken bridgedToken;
     ChainGateway remoteChainGateway;
     ValidatorManager remoteValidatorManager;
 
     function setUp() external {
+        vm.startPrank(validator);
         // Deploy Source Infra
         sourceValidatorManager = new ValidatorManager(validator);
-        vm.prank(validator);
         sourceValidatorManager.initialize(validators);
-        vm.prank(validator);
         sourceChainGateway = new ChainGateway(
             address(sourceValidatorManager),
             validator
@@ -49,46 +54,26 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
 
         // Deploy Target Infra
         remoteValidatorManager = new ValidatorManager(validator);
-        vm.prank(validator);
         remoteValidatorManager.initialize(validators);
-        vm.prank(validator);
         remoteChainGateway = new ChainGateway(
             address(remoteValidatorManager),
             validator
         );
 
         // Deploy LockAndReleaseTokenManagerUpgradeable
-        address implementation = address(
-            new LockAndReleaseTokenManagerUpgradeable()
+        sourceTokenManager = deployLatestLockAndReleaseTokenManager(
+            address(sourceChainGateway),
+            fees
         );
-        address proxy = address(
-            new ERC1967Proxy(
-                implementation,
-                abi.encodeCall(
-                    LockAndReleaseTokenManagerUpgradeable.initialize,
-                    address(sourceChainGateway)
-                )
-            )
-        );
-        sourceTokenManager = LockAndReleaseTokenManagerUpgradeable(proxy);
 
         // Deploy MintAndBurnTokenManagerUpgradeable
-        implementation = address(new MintAndBurnTokenManagerUpgradeable());
-        proxy = address(
-            new ERC1967Proxy(
-                implementation,
-                abi.encodeCall(
-                    MintAndBurnTokenManagerUpgradeable.initialize,
-                    address(remoteChainGateway)
-                )
-            )
+        remoteTokenManager = deployLatestMintAndBurnTokenManager(
+            address(remoteChainGateway),
+            fees
         );
-        remoteTokenManager = MintAndBurnTokenManagerUpgradeable(proxy);
 
         // Register contracts to chaingateway
-        vm.prank(validator);
         sourceChainGateway.register(address(sourceTokenManager));
-        vm.prank(validator);
         remoteChainGateway.register(address(remoteTokenManager));
 
         // Deploy original ERC20
@@ -113,10 +98,12 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
 
         // Register bridged token with original token
         sourceTokenManager.registerToken(address(originalToken), remoteToken);
+
+        vm.stopPrank();
     }
 
     function test_happyPath() external {
-        vm.startPrank(sourceUser);
+        startHoax(sourceUser);
         uint amount = originalTokenSupply;
         uint sourceChainId = block.chainid;
         uint remoteChainId = block.chainid;
@@ -144,7 +131,7 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
             1_000_000,
             0
         );
-        sourceTokenManager.transfer(
+        sourceTokenManager.transfer{value: fees}(
             address(originalToken),
             remoteChainId,
             remoteUser,
@@ -183,9 +170,9 @@ contract TokenBridgeTests is Tester, IRelayerEvents {
         assertEq(originalToken.balanceOf(sourceUser), 0);
 
         // Now sending it back
-        vm.startPrank(remoteUser);
+        startHoax(remoteUser);
         bridgedToken.approve(address(remoteTokenManager), amount);
-        remoteTokenManager.transfer(
+        remoteTokenManager.transfer{value: fees}(
             address(bridgedToken),
             sourceChainId,
             sourceUser,
