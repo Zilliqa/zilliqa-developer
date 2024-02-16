@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable, Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import {IValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {IDispatchReplayChecker, DispatchReplayCheckerUpgradeable} from "contracts/core-upgradeable/DispatchReplayCheckerUpgradeable.sol";
@@ -28,6 +29,8 @@ interface IChainDispatcher is
 {
     function validatorManager() external view returns (address);
 
+    function setValidatorManager(address validatorManager) external;
+
     function dispatch(
         uint sourceChainId,
         address target,
@@ -42,6 +45,7 @@ interface IChainDispatcher is
 abstract contract ChainDispatcherUpgradeable is
     IChainDispatcher,
     Initializable,
+    Ownable2StepUpgradeable,
     DispatchReplayCheckerUpgradeable
 {
     using MessageHashUtils for bytes;
@@ -66,15 +70,31 @@ abstract contract ChainDispatcherUpgradeable is
     }
 
     function __ChainDispatcher_init(
+        address _owner,
         address _validatorManager
     ) internal onlyInitializing {
-        ChainDispatcherStorage storage $ = _getChainDispatcherStorage();
-        $.validatorManager = IValidatorManager(_validatorManager);
+        __Ownable_init(_owner);
+        __ChainDispatcher_init_unchained(_validatorManager);
+    }
+
+    function __ChainDispatcher_init_unchained(
+        address _validatorManager
+    ) internal onlyInitializing {
+        _setValidatorManager(_validatorManager);
     }
 
     function validatorManager() external view returns (address) {
         ChainDispatcherStorage storage $ = _getChainDispatcherStorage();
         return address($.validatorManager);
+    }
+
+    function _setValidatorManager(address _validatorManager) internal {
+        ChainDispatcherStorage storage $ = _getChainDispatcherStorage();
+        $.validatorManager = IValidatorManager(_validatorManager);
+    }
+
+    function setValidatorManager(address _validatorManager) external onlyOwner {
+        _setValidatorManager(_validatorManager);
     }
 
     function dispatch(

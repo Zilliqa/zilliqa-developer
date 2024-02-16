@@ -28,7 +28,7 @@ contract ChainGatewayUpgradeable is
     ) external initializer {
         __Ownable_init(_owner);
         __Relayer_init_unchained();
-        __ChainDispatcher_init(_validatorManager);
+        __ChainDispatcher_init_unchained(_validatorManager);
     }
 
     function _authorizeUpgrade(address) internal virtual override onlyOwner {}
