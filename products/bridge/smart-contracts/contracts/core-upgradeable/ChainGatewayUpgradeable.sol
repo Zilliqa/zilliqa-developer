@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import {IChainDispatcher, ChainDispatcherUpgradeable} from "contracts/core-upgradeable/ChainDispatcherUpgradeable.sol";
-import {IRelayer, RelayerUpgradeable} from "contracts/core-upgradeable/RelayerUpgradeable.sol";
-
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+
+import {IChainDispatcher, ChainDispatcherUpgradeable} from "contracts/core-upgradeable/ChainDispatcherUpgradeable.sol";
+import {IRelayer, RelayerUpgradeable} from "contracts/core-upgradeable/RelayerUpgradeable.sol";
 
 interface IChainGateway is IRelayer, IChainDispatcher {}
 
