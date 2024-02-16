@@ -82,10 +82,9 @@ abstract contract RelayerUpgradeable is
         address target,
         bytes memory call,
         uint gasLimit
-    ) internal isRegistered(msg.sender) returns (uint) {
+    ) internal isRegistered(_msgSender()) returns (uint) {
         RelayerStorage storage $ = _getRelayerStorage();
-        $.nonce[targetChainId]++;
-        uint _nonce = $.nonce[targetChainId];
+        uint _nonce = ++$.nonce[targetChainId];
 
         emit Relayed(targetChainId, target, call, gasLimit, _nonce);
         return _nonce;
@@ -115,7 +114,7 @@ abstract contract RelayerUpgradeable is
                 target,
                 abi.encodeWithSelector(
                     callSelector,
-                    CallMetadata(block.chainid, msg.sender),
+                    CallMetadata(block.chainid, _msgSender()),
                     callData
                 ),
                 gasLimit
