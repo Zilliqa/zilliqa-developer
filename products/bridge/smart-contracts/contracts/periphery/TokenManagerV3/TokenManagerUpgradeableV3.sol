@@ -96,14 +96,14 @@ abstract contract TokenManagerUpgradeableV3 is
     }
 
     modifier onlyGateway() {
-        if (msg.sender != address(getGateway())) {
+        if (_msgSender() != address(getGateway())) {
             revert NotGateway();
         }
         _;
     }
 
     function __TokenManager_init(address _gateway) internal onlyInitializing {
-        __Ownable_init(msg.sender);
+        __Ownable_init(_msgSender());
         _setGateway(_gateway);
     }
 
@@ -193,7 +193,7 @@ abstract contract TokenManagerUpgradeableV3 is
     ) external payable virtual whenNotPaused checkFees {
         RemoteToken memory remoteToken = getRemoteTokens(token, remoteChainId);
 
-        _handleTransfer(token, msg.sender, amount);
+        _handleTransfer(token, _msgSender(), amount);
 
         IRelayer(getGateway()).relayWithMetadata(
             remoteToken.chainId,

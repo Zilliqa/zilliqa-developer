@@ -5,6 +5,23 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {SignatureValidator} from "contracts/core/SignatureValidator.sol";
 
+interface IValidatorManager {
+    function addValidator(address user) external returns (bool);
+
+    function removeValidator(address user) external returns (bool);
+
+    function getValidators() external view returns (address[] memory);
+
+    function isValidator(address user) external view returns (bool);
+
+    function validatorsSize() external view returns (uint);
+
+    function validateMessageWithSupermajority(
+        bytes32 ethSignedMessageHash,
+        bytes[] calldata signatures
+    ) external view;
+}
+
 contract ValidatorManager is Ownable2Step {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SignatureValidator for EnumerableSet.AddressSet;
