@@ -1,25 +1,24 @@
 export const chainGatewayAbi = [
+  { type: "constructor", inputs: [], stateMutability: "nonpayable" },
   {
-    type: "constructor",
-    inputs: [
-      {
-        name: "_validatorManager",
-        type: "address",
-        internalType: "address",
-      },
-      { name: "_owner", type: "address", internalType: "address" },
-    ],
+    type: "function",
+    name: "UPGRADE_INTERFACE_VERSION",
+    inputs: [],
+    outputs: [{ name: "", type: "string", internalType: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "acceptOwnership",
+    inputs: [],
+    outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "dispatch",
     inputs: [
-      {
-        name: "sourceChainId",
-        type: "uint256",
-        internalType: "uint256",
-      },
+      { name: "sourceChainId", type: "uint256", internalType: "uint256" },
       { name: "target", type: "address", internalType: "address" },
       { name: "call", type: "bytes", internalType: "bytes" },
       { name: "gasLimit", type: "uint256", internalType: "uint256" },
@@ -33,16 +32,26 @@ export const chainGatewayAbi = [
     type: "function",
     name: "dispatched",
     inputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "sourceChainId", type: "uint256", internalType: "uint256" },
+      { name: "nonce", type: "uint256", internalType: "uint256" },
     ],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "view",
   },
   {
     type: "function",
+    name: "initialize",
+    inputs: [
+      { name: "_validatorManager", type: "address", internalType: "address" },
+      { name: "_owner", type: "address", internalType: "address" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "nonce",
-    inputs: [],
+    inputs: [{ name: "chainId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -55,6 +64,20 @@ export const chainGatewayAbi = [
   },
   {
     type: "function",
+    name: "pendingOwner",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "proxiableUUID",
+    inputs: [],
+    outputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "register",
     inputs: [{ name: "newTarget", type: "address", internalType: "address" }],
     outputs: [],
@@ -63,7 +86,7 @@ export const chainGatewayAbi = [
   {
     type: "function",
     name: "registered",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
+    inputs: [{ name: "target", type: "address", internalType: "address" }],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "view",
   },
@@ -71,11 +94,7 @@ export const chainGatewayAbi = [
     type: "function",
     name: "relay",
     inputs: [
-      {
-        name: "targetChainId",
-        type: "uint256",
-        internalType: "uint256",
-      },
+      { name: "targetChainId", type: "uint256", internalType: "uint256" },
       { name: "target", type: "address", internalType: "address" },
       { name: "call", type: "bytes", internalType: "bytes" },
       { name: "gasLimit", type: "uint256", internalType: "uint256" },
@@ -87,11 +106,7 @@ export const chainGatewayAbi = [
     type: "function",
     name: "relayWithMetadata",
     inputs: [
-      {
-        name: "targetChainId",
-        type: "uint256",
-        internalType: "uint256",
-      },
+      { name: "targetChainId", type: "uint256", internalType: "uint256" },
       { name: "target", type: "address", internalType: "address" },
       { name: "callSelector", type: "bytes4", internalType: "bytes4" },
       { name: "callData", type: "bytes", internalType: "bytes" },
@@ -104,6 +119,15 @@ export const chainGatewayAbi = [
     type: "function",
     name: "renounceOwnership",
     inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setValidatorManager",
+    inputs: [
+      { name: "_validatorManager", type: "address", internalType: "address" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -125,16 +149,46 @@ export const chainGatewayAbi = [
   },
   {
     type: "function",
+    name: "upgradeToAndCall",
+    inputs: [
+      { name: "newImplementation", type: "address", internalType: "address" },
+      { name: "data", type: "bytes", internalType: "bytes" },
+    ],
+    outputs: [],
+    stateMutability: "payable",
+  },
+  {
+    type: "function",
     name: "validatorManager",
     inputs: [],
-    outputs: [
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "ContractRegistered",
+    inputs: [
       {
-        name: "",
+        name: "target",
         type: "address",
-        internalType: "contract ValidatorManager",
+        indexed: false,
+        internalType: "address",
       },
     ],
-    stateMutability: "view",
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ContractUnregistered",
+    inputs: [
+      {
+        name: "target",
+        type: "address",
+        indexed: false,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
   },
   {
     type: "event",
@@ -152,12 +206,7 @@ export const chainGatewayAbi = [
         indexed: true,
         internalType: "address",
       },
-      {
-        name: "success",
-        type: "bool",
-        indexed: false,
-        internalType: "bool",
-      },
+      { name: "success", type: "bool", indexed: false, internalType: "bool" },
       {
         name: "response",
         type: "bytes",
@@ -169,6 +218,38 @@ export const chainGatewayAbi = [
         type: "uint256",
         indexed: true,
         internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Initialized",
+    inputs: [
+      {
+        name: "version",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "OwnershipTransferStarted",
+    inputs: [
+      {
+        name: "previousOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "newOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
     ],
     anonymous: false,
@@ -208,12 +289,7 @@ export const chainGatewayAbi = [
         indexed: false,
         internalType: "address",
       },
-      {
-        name: "call",
-        type: "bytes",
-        indexed: false,
-        internalType: "bytes",
-      },
+      { name: "call", type: "bytes", indexed: false, internalType: "bytes" },
       {
         name: "gasLimit",
         type: "uint256",
@@ -229,20 +305,48 @@ export const chainGatewayAbi = [
     ],
     anonymous: false,
   },
+  {
+    type: "event",
+    name: "Upgraded",
+    inputs: [
+      {
+        name: "implementation",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "AddressEmptyCode",
+    inputs: [{ name: "target", type: "address", internalType: "address" }],
+  },
   { type: "error", name: "AlreadyDispatched", inputs: [] },
-  { type: "error", name: "NonContractCaller", inputs: [] },
+  {
+    type: "error",
+    name: "ERC1967InvalidImplementation",
+    inputs: [
+      { name: "implementation", type: "address", internalType: "address" },
+    ],
+  },
+  { type: "error", name: "ERC1967NonPayable", inputs: [] },
+  { type: "error", name: "FailedInnerCall", inputs: [] },
+  { type: "error", name: "InvalidInitialization", inputs: [] },
+  {
+    type: "error",
+    name: "NonContractCaller",
+    inputs: [{ name: "target", type: "address", internalType: "address" }],
+  },
+  { type: "error", name: "NotInitializing", inputs: [] },
   {
     type: "error",
     name: "NotRegistered",
     inputs: [
-      {
-        name: "targetAddress",
-        type: "address",
-        internalType: "address",
-      },
+      { name: "targetAddress", type: "address", internalType: "address" },
     ],
   },
-  { type: "error", name: "NotValidator", inputs: [] },
   {
     type: "error",
     name: "OwnableInvalidOwner",
@@ -252,5 +356,11 @@ export const chainGatewayAbi = [
     type: "error",
     name: "OwnableUnauthorizedAccount",
     inputs: [{ name: "account", type: "address", internalType: "address" }],
+  },
+  { type: "error", name: "UUPSUnauthorizedCallContext", inputs: [] },
+  {
+    type: "error",
+    name: "UUPSUnsupportedProxiableUUID",
+    inputs: [{ name: "slot", type: "bytes32", internalType: "bytes32" }],
   },
 ] as const;
