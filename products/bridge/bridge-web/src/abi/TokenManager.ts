@@ -15,16 +15,19 @@ export const tokenManagerAbi = [
         type: "tuple",
         internalType: "struct CallMetadata",
         components: [
-          {
-            name: "sourceChainId",
-            type: "uint256",
-            internalType: "uint256",
-          },
+          { name: "sourceChainId", type: "uint256", internalType: "uint256" },
           { name: "sender", type: "address", internalType: "address" },
         ],
       },
       { name: "_args", type: "bytes", internalType: "bytes" },
     ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "acceptOwnership",
+    inputs: [],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -47,11 +50,7 @@ export const tokenManagerAbi = [
     name: "getRemoteTokens",
     inputs: [
       { name: "token", type: "address", internalType: "address" },
-      {
-        name: "remoteChainId",
-        type: "uint256",
-        internalType: "uint256",
-      },
+      { name: "remoteChainId", type: "uint256", internalType: "uint256" },
     ],
     outputs: [
       {
@@ -60,11 +59,7 @@ export const tokenManagerAbi = [
         internalType: "struct ITokenManagerStructs.RemoteToken",
         components: [
           { name: "token", type: "address", internalType: "address" },
-          {
-            name: "tokenManager",
-            type: "address",
-            internalType: "address",
-          },
+          { name: "tokenManager", type: "address", internalType: "address" },
           { name: "chainId", type: "uint256", internalType: "uint256" },
         ],
       },
@@ -94,6 +89,13 @@ export const tokenManagerAbi = [
   },
   {
     type: "function",
+    name: "pendingOwner",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "proxiableUUID",
     inputs: [],
     outputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
@@ -110,11 +112,7 @@ export const tokenManagerAbi = [
         internalType: "struct ITokenManagerStructs.RemoteToken",
         components: [
           { name: "token", type: "address", internalType: "address" },
-          {
-            name: "tokenManager",
-            type: "address",
-            internalType: "address",
-          },
+          { name: "tokenManager", type: "address", internalType: "address" },
           { name: "chainId", type: "uint256", internalType: "uint256" },
         ],
       },
@@ -148,16 +146,8 @@ export const tokenManagerAbi = [
     name: "transfer",
     inputs: [
       { name: "token", type: "address", internalType: "address" },
-      {
-        name: "remoteChainId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "remoteRecipient",
-        type: "address",
-        internalType: "address",
-      },
+      { name: "remoteChainId", type: "uint256", internalType: "uint256" },
+      { name: "remoteRecipient", type: "address", internalType: "address" },
       { name: "amount", type: "uint256", internalType: "uint256" },
     ],
     outputs: [],
@@ -181,11 +171,7 @@ export const tokenManagerAbi = [
     type: "function",
     name: "upgradeToAndCall",
     inputs: [
-      {
-        name: "newImplementation",
-        type: "address",
-        internalType: "address",
-      },
+      { name: "newImplementation", type: "address", internalType: "address" },
       { name: "data", type: "bytes", internalType: "bytes" },
     ],
     outputs: [],
@@ -239,6 +225,25 @@ export const tokenManagerAbi = [
         type: "uint64",
         indexed: false,
         internalType: "uint64",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "OwnershipTransferStarted",
+    inputs: [
+      {
+        name: "previousOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "newOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
     ],
     anonymous: false,
@@ -360,11 +365,7 @@ export const tokenManagerAbi = [
     type: "error",
     name: "ERC1967InvalidImplementation",
     inputs: [
-      {
-        name: "implementation",
-        type: "address",
-        internalType: "address",
-      },
+      { name: "implementation", type: "address", internalType: "address" },
     ],
   },
   { type: "error", name: "ERC1967NonPayable", inputs: [] },
