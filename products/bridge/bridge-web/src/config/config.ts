@@ -16,7 +16,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
           chain: "zq",
           name: "Zilliqa",
           tokenManagerAddress: "0x6D61eFb60C17979816E4cE12CD5D29054E755948",
-          chainGatewayAddress: "0xE76669e1cCc150194eB92581baE79Ef6fa0E248E",
+          chainGatewayAddress: "0x71f3AD7cA177818399C9d79d74A6b284E4BEAAc9",
           tokenManagerType: TokenManagerType.LockAndRelease,
           wagmiChain: zilliqa,
           tokens: [
@@ -38,7 +38,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
           name: "BSC",
           wagmiChain: bsc,
           tokenManagerAddress: "0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23",
-          chainGatewayAddress: "0x2114e979b7CFDd8b358502e00f50Fd5f7787Fe63",
+          chainGatewayAddress: "0x3967f1a272Ed007e6B6471b942d655C802b42009",
           tokenManagerType: TokenManagerType.MintAndBurn,
           tokens: [
             {
