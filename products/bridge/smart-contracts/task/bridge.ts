@@ -83,29 +83,3 @@ task(
 
     console.log(`${notDispatched} transactions not dispatched`);
   });
-
-task("txn-payload", "Get the txn payload from relay event from source chain")
-  .addParam("nonce", "Nonce of the txn to retrieve")
-  .setAction(async ({ latestNonce }, hre) => {
-    hre.network.name;
-    let chainGatewayAddress;
-    let targetChainId;
-
-    switch (hre.network.name) {
-      case "bsc":
-        chainGatewayAddress = config.bsc.chainGateway;
-        targetChainId = config.bsc.remoteChainId;
-        break;
-      case "zq":
-        chainGatewayAddress = config.zq.chainGateway;
-        targetChainId = config.zq.remoteChainId;
-        break;
-      default:
-        throw new Error("Invalid source chain");
-    }
-
-    const chainGateway = await hre.ethers.getContractAt(
-      "ChainGatewayUpgradeable",
-      chainGatewayAddress
-    );
-  });
