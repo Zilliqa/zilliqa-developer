@@ -44,7 +44,6 @@ task(
 )
   .addParam("latestNonce", "Latest nonce on the target chain")
   .setAction(async ({ latestNonce }, hre) => {
-    hre.network.name;
     let chainGatewayAddress;
     let targetChainId;
 
@@ -83,3 +82,62 @@ task(
 
     console.log(`${notDispatched} transactions not dispatched`);
   });
+
+task("get-relayed", "Get every relayed event from chain").setAction(
+  async (_, hre) => {
+    if (hre.network.name === "bsc") {
+      // Ensure to use quicknode RPC for BSC, can be updated in hardhat.config.ts
+      // BSC quicknode limits query block interval to 10_000
+      const chainGateway = await hre.ethers.getContractAt(
+        "ChainGatewayUpgradeable",
+        config.bsc.chainGateway
+      );
+      const latestBlockNumber = await hre.ethers.provider.getBlockNumber();
+      const interval = 10_000;
+      const deployedBlock = config.bsc.gatewayDeployedBlock;
+
+      const filter = chainGateway.filters.Relayed;
+      for (let i = deployedBlock; i <= latestBlockNumber; i += interval) {
+        const events = await chainGateway.queryFilter(filter, i, i + 10000);
+        if (events.length > 0) {
+          events.forEach((e) => {
+            console.log(`Block: ${e.blockNumber} | Tx: ${e.blockHash}`);
+            console.log(`SourceChainId: ${e.args[0]}`);
+            console.log(`Target: ${e.args[1]}`);
+            console.log(`Call: ${e.args[2]}`);
+            console.log(`GasLimit: ${e.args[3]}`);
+            console.log(`Nonce: ${e.args[4]}\n`);
+          });
+        }
+      }
+      return;
+    } else if (hre.network.name === "zq") {
+      // ZQ only persists the latest 100 blocks of events
+      const chainGateway = await hre.ethers.getContractAt(
+        "ChainGatewayUpgradeable",
+        config.zq.chainGateway
+      );
+      const filter = chainGateway.filters.Relayed;
+      const latestBlockNumber = await hre.ethers.provider.getBlockNumber();
+      const events = await chainGateway.queryFilter(
+        filter,
+        latestBlockNumber - 100,
+        latestBlockNumber
+      );
+      // ZQ sometimes repeats some events when queried
+      if (events.length > 0) {
+        events.forEach((e) => {
+          console.log(`Block: ${e.blockNumber} | Tx: ${e.blockHash}`);
+          console.log(`SourceChainId: ${e.args[0]}`);
+          console.log(`Target: ${e.args[1]}`);
+          console.log(`Call: ${e.args[2]}`);
+          console.log(`GasLimit: ${e.args[3]}`);
+          console.log(`Nonce: ${e.args[4]}\n`);
+        });
+      }
+      return;
+    }
+
+    throw new Error("Invalid source chain");
+  }
+);
