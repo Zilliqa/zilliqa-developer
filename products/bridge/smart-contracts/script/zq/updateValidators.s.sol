@@ -8,7 +8,7 @@ import "forge-std/console.sol";
 contract Update is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
-        address validatorManagerAddress = 0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23;
+        address validatorManagerAddress = 0x71f3AD7cA177818399C9d79d74A6b284E4BEAAc9;
         address currentValidator = 0x5807b970DB344d9d2386BbF5c3ec4cDA5CCdF1C8;
         address newValidator = 0x250572Ed005BaD64Ff24FbDc0d41875dAF58944f;
 

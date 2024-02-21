@@ -13,8 +13,8 @@ contract Transfer is Script {
         address owner = vm.addr(deployerPrivateKey);
         console.log("Owner is %s", owner);
 
-        address tokenManagerAddress = 0xA6D73210AF20a59832F264fbD991D2abf28401d0;
-        address tokenAddress = 0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B;
+        address tokenManagerAddress = 0xd10077bCE4A9D19068965dE519CED8a2fC1B096C;
+        address tokenAddress = 0x6d78c86D66DfE5Be5F55FBAA8B1d3FD28edfF396;
 
         uint remoteChainId = 33101;
         address remoteRecipient = owner;
