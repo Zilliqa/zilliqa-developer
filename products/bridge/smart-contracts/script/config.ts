@@ -12,6 +12,7 @@ export const config = {
     amount: parseUnits("1000000", 12),
   },
   bsc: {
+    gatewayDeployedBlock: 36300137,
     tokenManager: "0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23",
     chainGateway: "0x3967f1a272Ed007e6B6471b942d655C802b42009",
     token: "0x351dA1E7500aBA1d168b9435DCE73415718d212F",
