@@ -8,7 +8,7 @@ import "forge-std/console.sol";
 
 contract Upgrade is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_OWNER");
         address owner = vm.addr(deployerPrivateKey);
         console.log("Signer is %s", owner);
 

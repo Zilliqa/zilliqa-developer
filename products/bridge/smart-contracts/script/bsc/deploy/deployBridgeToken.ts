@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { config } from "../config";
+import { config } from "../../config";
 
 async function main() {
   const tokenManagerAddress = config.bsc.tokenManager;
