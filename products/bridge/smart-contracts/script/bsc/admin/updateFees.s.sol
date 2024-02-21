@@ -7,7 +7,7 @@ import "forge-std/console.sol";
 
 contract Update is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_OWNER");
         address tokenManagerAddress = 0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23;
         // uint newFees = 10 gwei;
         uint newFees = 0.00025 ether;

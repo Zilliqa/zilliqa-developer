@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
-import { config } from "../config";
-import { ITokenManagerStructs } from "../../typechain-types/contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol/ILockAndReleaseTokenManager";
+import { config } from "../../config";
+import { ITokenManagerStructs } from "../../../typechain-types/contracts/periphery/LockAndReleaseTokenManagerUpgradeable.sol/ILockAndReleaseTokenManager";
 
 async function main() {
   const tokenManagerAddress = config.zq.tokenManager;

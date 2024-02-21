@@ -9,7 +9,7 @@ import "forge-std/console.sol";
 
 contract Deployment is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_OWNER");
         // Address: 0x5807b970DB344d9d2386BbF5c3ec4cDA5CCdF1C8
         address owner = vm.addr(deployerPrivateKey);
         console.log("Owner is %s", owner);
