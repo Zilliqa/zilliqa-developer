@@ -23,6 +23,7 @@ import LandingStatsTable from './landing-stats-table';
 
 import AvelyLogo from '../static/avely.svg'
 import IgniteLogo from '../static/ignite_dao.png'
+import PlunderswapLogo from '../static/plunderswap_dao.png'
 
 import useDarkMode from '../util/use-dark-mode';
 import { ToastContainer } from 'react-toastify';
@@ -242,6 +243,13 @@ function Home(props: any) {
               >
                 <img className='mr-1 cover-img' src={IgniteLogo} width={26} height={26}></img>
                 <span className='ml-1'>Ignite DAO</span>
+              </div>
+                <div
+                className='btn-logos d-flex justify-content-center align-items-center mx-2 mt-3 mt-sm-0'
+                onClick={() => window.location.href = 'https://plunderswap.com/'}
+              >
+                <img className='mr-1 cover-img' src={PlunderswapLogo} width={26} height={26}></img>
+                <span className='ml-1'>Plunderswap</span>
               </div>
             </div>
 
