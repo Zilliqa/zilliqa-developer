@@ -1,20 +1,26 @@
 mod importer;
+mod listener;
 mod types;
-use anyhow::{anyhow, bail, Context, Result};
-use ethers::prelude::*;
+use anyhow::{anyhow, bail, Context, Error, Result};
+use ethers::{prelude::*, providers::StreamExt, utils::hex};
+use itertools::Itertools;
 use jsonrpsee::{core::client::ClientT, http_client::HttpClient, rpc_params};
 use pdtbq::{bq::ZilliqaBQProject, bq_utils::BigQueryDatasetLocation};
 use pdtdb::{
     utils::ProcessCoordinates,
-    values::{BQMicroblock, BQTransaction, PSQLMicroblock, PSQLTransaction},
+    values::{BQMicroblock, BQTransaction, PSQLMicroblock, PSQLTransaction, ZILTransactionBody},
     zqproj::{Inserter, ZilliqaDBProject},
 };
 use pdtpsql::psql::ZilliqaPSQLProject;
 use serde::Serialize;
 use serde_json::{from_value, to_value, Value};
 use sqlx::postgres::PgPoolOptions;
-use std::{marker::PhantomData, time::Duration};
+use std::{collections::HashMap, marker::PhantomData, time::Duration};
+use tokio::pin;
 use tokio::task::JoinSet;
+use tokio_stream::StreamExt as TokioStreamExt;
+
+use crate::listener::listen_blocks;
 
 const MAX_TASKS: usize = 50;
 
@@ -28,22 +34,34 @@ async fn get_block_info(number: U64, client: &HttpClient) -> Result<types::GetTx
 
 fn convert_block_and_txns(
     block: &Block<Transaction>,
+    zil_txn_bodies: &Vec<ZILTransactionBody>,
 ) -> Result<(BQMicroblock, Vec<BQTransaction>)> {
     let my_block = block.clone();
     let bq_block = BQMicroblock::from_eth(&my_block)?;
     let version = bq_block.header_version;
-    let mut txn_errs = vec![];
-    let bq_transactions: Vec<BQTransaction> = my_block
+    let zil_transactions: HashMap<&str, &ZILTransactionBody> =
+        zil_txn_bodies.iter().map(|x| (x.id.as_str(), x)).collect();
+
+    let (bq_transactions, txn_errs): (Vec<BQTransaction>, Vec<Error>) = my_block
         .transactions
         .into_iter()
-        .map(|txn| BQTransaction::from_eth(&txn, version))
-        .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
-        .collect();
+        .map(|txn| {
+            zil_transactions
+                .get(hex::encode(txn.hash.as_bytes()).as_str())
+                .map_or(
+                    Err(anyhow!("zil transaction body not found")),
+                    |&txn_body| {
+                        BQTransaction::from_eth_with_zil_txn_bodies(&txn, txn_body, version)
+                    },
+                )
+        })
+        .partition_result();
+
     if !txn_errs.is_empty() {
-        return Err(anyhow!(
+        bail!(
             "some transactions could not be converted, skipping this block: {:#?}",
             txn_errs
-        ));
+        );
     }
     Ok((bq_block, bq_transactions))
 }
@@ -54,25 +72,12 @@ async fn insert_block_and_txns<P: ZilliqaDBProject>(
     block_num: i64,
     proj: &P,
 ) -> Result<()> {
-    match proj
-        .insert_microblocks(block_req, &(block_num..(block_num + 1)))
+    proj.insert_microblocks(block_req, &(block_num..(block_num + 1)))
         .await
-    {
-        Err(e) => {
-            bail!("could not insert block due to error: {:}", e)
-        }
-        Ok(_) => (),
-    }
-    match proj
-        .insert_transactions(txn_req, &(block_num..(block_num + 1)))
+        .map_err(|e| anyhow!("could not insert block to err: {:}", e))?;
+    proj.insert_transactions(txn_req, &(block_num..(block_num + 1)))
         .await
-    {
-        Err(e) => {
-            bail!("could not insert transactions due to error: {:}", e)
-        }
-        Ok(_) => (),
-    }
-    Ok(())
+        .map_err(|e| anyhow!("could not insert transactions due to error: {:}", e))
 }
 
 async fn postgres_insert_block_and_txns(
@@ -83,19 +88,22 @@ async fn postgres_insert_block_and_txns(
     let psql_block: PSQLMicroblock = BQMicroblock::from_eth(&my_block)?.into();
     let version = psql_block.header_version;
     let block_num = psql_block.block;
-    let mut txn_errs = vec![];
-    let psql_txns: Vec<PSQLTransaction> = my_block
+
+    let (txns, txn_errs): (Vec<BQTransaction>, Vec<Error>) = my_block
         .transactions
         .into_iter()
         .map(|txn| BQTransaction::from_eth(&txn, version))
-        .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
+        .partition_result();
+    let psql_txns = txns
+        .into_iter()
         .map(|txn| Into::<PSQLTransaction>::into(txn))
-        .collect();
+        .collect_vec();
+
     if !txn_errs.is_empty() {
-        return Err(anyhow!(
+        bail!(
             "some transactions could not be converted, skipping this block: {:#?}",
             txn_errs
-        ));
+        );
     }
     // let err_psql_block = psql_block.clone();
     let psql_block_req = Inserter {
@@ -143,22 +151,13 @@ async fn get_block_by_hash(x: H256, provider: &Provider<Http>) -> Result<Block<T
     Ok(block)
 }
 
-pub async fn listen(
-    bq_project_id: &str,
-    bq_dataset_id: &str,
-    postgres_url: &str,
-    api_url: &str,
-) -> Result<()> {
+pub async fn listen_psql(postgres_url: &str, api_url: &str) -> Result<()> {
     let mut jobs = JoinSet::new();
     let coords = ProcessCoordinates {
         nr_machines: 1,
         batch_blks: 1,
         machine_id: 0,
         client_id: "listen".to_string(),
-    };
-    let loc = BigQueryDatasetLocation {
-        project_id: bq_project_id.to_string(),
-        dataset_id: bq_dataset_id.to_string(),
     };
 
     let p_client = PgPoolOptions::new()
@@ -167,16 +166,8 @@ pub async fn listen(
         .await?;
 
     println!("checking schemas..");
-    ZilliqaBQProject::ensure_schema(&loc).await?;
     ZilliqaPSQLProject::ensure_schema(&p_client).await?;
     println!("all good.");
-
-    let zilliqa_bq_proj = ZilliqaBQProject::new(
-        &loc,
-        &coords.with_client_id("listen_bq"),
-        i64::MAX, //we don't need nr_blks, but max it out just in case
-    )
-    .await?;
 
     let zilliqa_psql_proj = ZilliqaPSQLProject::new(
         postgres_url,
@@ -186,23 +177,16 @@ pub async fn listen(
         10000,
     )?;
 
-    let mut bq_importer = importer::BatchedImporter::new();
-    bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
-
     let provider = Provider::<Http>::try_from(api_url)?;
 
-    let mut stream = provider
-        .watch_blocks()
-        .await?
-        .map(|hash: H256| get_block_by_hash(hash, &provider))
-        .buffered(MAX_TASKS);
+    let mut stream = StreamExt::map(provider.watch_blocks().await?, |hash: H256| {
+        get_block_by_hash(hash, &provider)
+    })
+    .buffered(MAX_TASKS);
 
-    // let http_client = HttpClientBuilder::default().build(DEV_API_URL)?;
-
-    while let Some(block) = stream.next().await {
+    while let Some(block) = StreamExt::next(&mut stream).await {
         match block {
             Ok(block) => {
-                let my_block = block.clone();
                 // let postgres go off and do its thing
 
                 // the projects themselves contain no state and should be cheap
@@ -221,23 +205,81 @@ pub async fn listen(
                         }
                     }
                 });
+            }
+            Err(e) => {
+                eprintln!("could not get block from hash due to error {:#?}", e);
+            }
+        }
+        println!("waiting for next block...");
+    }
+    println!("main: waiting for jobs to complete..");
+    while let Some(_) = jobs.join_next().await {
+        continue;
+    }
+    Ok(())
+}
 
-                // OK, time to deal with bigquery
+/// Have implemented a listening system that queries the latest found block in the meta table.
+/// This allows continuity from last listen or import was carried out
+/// The listen also keeps track blocks that it has encountered before, discarding any seen blocks
+/// If encounters a gap of block received with last seen, tries to patch it
+pub async fn listen_bq(
+    bq_project_id: &str,
+    bq_dataset_id: &str,
+    api_url: &str,
+    block_buffer_size: usize,
+) -> Result<()> {
+    // let mut jobs = JoinSet::new();
+    let coords = ProcessCoordinates {
+        nr_machines: 1,
+        batch_blks: 1,
+        machine_id: 0,
+        client_id: "listen".to_string(),
+    };
+    let loc = BigQueryDatasetLocation {
+        project_id: bq_project_id.to_string(),
+        dataset_id: bq_dataset_id.to_string(),
+    };
+
+    println!("checking schemas..");
+    ZilliqaBQProject::ensure_schema(&loc).await?;
+    println!("all good.");
+
+    let zilliqa_bq_proj = ZilliqaBQProject::new(
+        &loc,
+        &coords.with_client_id("listen_bq"),
+        i64::MAX, //we don't need nr_blks, but max it out just in case
+    )
+    .await?;
+
+    let mut bq_importer = importer::BatchedImporter::new();
+    bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
+
+    let provider = Provider::<Http>::try_from(api_url)?;
+
+    let stream = listen_blocks(&provider, zilliqa_bq_proj.get_latest_block().await?);
+    pin!(stream);
+
+    while let Some(blocks) = TokioStreamExt::next(&mut stream).await {
+        match blocks {
+            Ok(blocks) => {
                 if bq_importer.buffers.is_none() {
                     bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
                 }
-                // convert our blocks and insert it into our buffer
-                match {
-                    let (bq_block, bq_txns) = convert_block_and_txns(&my_block)?;
-                    bq_importer.insert_into_buffer(bq_block, bq_txns)
-                } {
-                    Ok(_) => (),
-                    Err(err) => {
-                        eprintln!("conversion to bq failed due to {:?}", err);
-                    }
+
+                for (block, zil_txn_bodies) in blocks {
+                    // convert our blocks and insert it into our buffer
+                    convert_block_and_txns(&block, &zil_txn_bodies)
+                        .and_then(|(bq_block, bq_txns)| {
+                            bq_importer.insert_into_buffer(bq_block, bq_txns)
+                        })
+                        .unwrap_or_else(|err| {
+                            eprintln!("conversion to bq failed due to {:?}", err);
+                        })
                 }
+
                 // if we've got enough blocks in hand
-                if bq_importer.n_blocks() >= MAX_TASKS {
+                if bq_importer.n_blocks() >= block_buffer_size {
                     let my_bq_proj = zilliqa_bq_proj.clone();
                     let buffers = bq_importer.take_buffers()?;
                     let range = bq_importer
@@ -267,13 +309,6 @@ pub async fn listen(
                     });
                     bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
                 }
-                // jobs.spawn(async move {
-                //     match bq_insert_block_and_txns(
-                //         &my_block,
-                //         &my_bq_proj
-                //     ).await {
-                //     }
-                // });
             }
             Err(e) => {
                 eprintln!("could not get block from hash due to error {:#?}", e);
@@ -282,8 +317,6 @@ pub async fn listen(
         println!("waiting for next block...");
     }
     println!("main: waiting for jobs to complete..");
-    while let Some(_) = jobs.join_next().await {
-        continue;
-    }
+
     Ok(())
 }

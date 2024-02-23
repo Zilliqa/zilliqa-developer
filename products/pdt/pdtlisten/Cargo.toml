@@ -15,7 +15,7 @@ pdtbq = { path = "../pdtbq" }
 pdtdb = { path = "../pdtdb" }
 pdtpsql = { path = "../pdtpsql" }
 sqlx = { version = "0.7.1", features = ["postgres", "runtime-tokio"] }
-gcp-bigquery-client = "0.17.0"
+gcp-bigquery-client = "0.18.0"
 
 tokio = { version = "1.28.1", features = [
   "macros",
@@ -23,3 +23,6 @@ tokio = { version = "1.28.1", features = [
   "fs",
   "process",
 ] }
+async-stream = "0.3.5"
+tokio-stream = "0.1.14"
+itertools = "0.11.0"

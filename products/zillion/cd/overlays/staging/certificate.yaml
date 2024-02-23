@@ -1,0 +1,9 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: zillion
+spec:
+  domains:
+    - zillion.zilstg.dev
+    - stg-stake.zilliqa.com
+    - testnet-stake.zilliqa.com

@@ -1,8 +1,10 @@
-use crate::ast::converting::AstConverting;
-use crate::ast::nodes::*;
-use crate::ast::visitor::AstVisitor;
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::parser::lexer::SourcePosition;
+use scilla_parser::{
+    ast::{
+        converting::AstConverting, nodes::*, visitor::AstVisitor, TraversalResult,
+        TreeTraversalMode,
+    },
+    parser::lexer::SourcePosition,
+};
 
 /// `BluebellFormatter` is a structure responsible for generating a formatted script from an AST.
 /// It stores the current indentation level for the partially generated script `script`.

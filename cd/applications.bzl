@@ -4,6 +4,4 @@ This module contains the applications which are deployed upon merge into main an
 
 APPLICATIONS_STAGING = []
 
-APPLICATIONS_PROD = [
-    "//products/devex-apollo",
-]
+APPLICATIONS_PROD = []

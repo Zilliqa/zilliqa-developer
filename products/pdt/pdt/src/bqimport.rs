@@ -20,7 +20,6 @@ pub async fn bq_multi_import(
     start_blk: Option<i64>,
     project_id: &str,
     dataset_id: &str,
-    duplicate_persistence: bool,
 ) -> Result<()> {
     // OK. Just go ..
     let mut jobs = JoinSet::new();
@@ -53,13 +52,17 @@ pub async fn bq_multi_import(
 
         jobs.spawn(async move {
             println!("Sync persistence to {:?}", &my_unpack_dir);
-            let unpack_str = my_unpack_dir
-                .to_str()
-                .ok_or(anyhow!("Cannot render thread-specific data dir"))?;
-            // Sync persistence
-            if duplicate_persistence {
-                pdtlib::utils::dup_directory(&orig_unpack_dir, &unpack_str)?;
-            }
+            let unpack_str = if nr_threads > 1 {
+                let new_unpack_dir = my_unpack_dir
+                    .to_str()
+                    .ok_or(anyhow!("Cannot render thread-specific data dir"))?;
+                // Sync persistence
+                pdtlib::utils::dup_directory(&orig_unpack_dir, &new_unpack_dir)?;
+                new_unpack_dir
+            } else {
+                &orig_unpack_dir
+            };
+
             println!("Starting thread {}/{}", idx, nr_threads);
             let exporter = Exporter::new(&unpack_str)?;
             let mut imp = TransactionMicroblockImporter::new();
@@ -117,7 +120,7 @@ pub async fn reconcile_blocks(
     // We should have coverage for every block, extant or not, up to the
     // last batch, which will be short.
     let mut blk: i64 = 0;
-    while blk < max_block {
+    while (blk + scale) < max_block {
         let span = std::cmp::min(scale, max_block - (blk + scale));
         println!("blk {} span {}", blk, span);
         match project.is_txn_range_covered_by_entry(blk, span).await? {
