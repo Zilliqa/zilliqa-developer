@@ -11,6 +11,7 @@ import {ITokenManagerFeesEvents} from "contracts/periphery/TokenManagerV2/TokenM
 import {IRelayer, CallMetadata} from "contracts/core/Relayer.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {MintAndBurnTokenManagerDeployer} from "test/periphery/TokenManagerDeployers/MintAndBurnTokenManagerDeployer.sol";
 
 interface IPausable {
     event Paused(address account);
@@ -22,7 +23,8 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
     ITokenManagerEvents,
     ITokenManagerStructs,
     ITokenManagerFeesEvents,
-    IPausable
+    IPausable,
+    MintAndBurnTokenManagerDeployer
 {
     address deployer = vm.addr(1);
     address chainGateway = vm.addr(102);
@@ -43,19 +45,7 @@ contract MintAndBurnTokenManagerUpgradeableV2Tests is
 
     function setUp() external {
         vm.startPrank(deployer);
-        address implementation = address(
-            new MintAndBurnTokenManagerUpgradeable()
-        );
-        address proxy = address(
-            new ERC1967Proxy(
-                implementation,
-                abi.encodeCall(
-                    MintAndBurnTokenManagerUpgradeable.initialize,
-                    chainGateway
-                )
-            )
-        );
-        tokenManager = MintAndBurnTokenManagerUpgradeable(proxy);
+        tokenManager = deployMintAndBurnTokenManagerV1(chainGateway);
 
         assertEq(tokenManager.getGateway(), chainGateway);
 

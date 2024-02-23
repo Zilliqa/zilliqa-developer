@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.20;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Registry} from "contracts/core/Registry.sol";
 
 interface IRelayerEvents {
@@ -36,7 +36,7 @@ struct CallMetadata {
     address sender;
 }
 
-contract Relayer is Ownable, Registry, IRelayer {
+contract Relayer is Ownable2Step, Registry, IRelayer {
     uint public nonce;
 
     constructor(address owner_) Ownable(owner_) {}

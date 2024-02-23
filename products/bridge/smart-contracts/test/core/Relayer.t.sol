@@ -21,8 +21,8 @@ interface ITest {
 
 contract RelayerTests is Tester, IRelayerEvents {
     Relayer relayer;
-    address owner = vm.addr(100);
-    address registered = vm.addr(101);
+    address owner = vm.createWallet("Owner").addr;
+    address registered = vm.createWallet("Registered").addr;
 
     function setUp() external {
         relayer = new Relayer(owner);
@@ -183,5 +183,18 @@ contract RelayerTests is Tester, IRelayerEvents {
             )
         );
         relayer.unregister(registered);
+    }
+
+    function test_transferOwnership() external {
+        address newOwner = vm.createWallet("newOwner").addr;
+
+        vm.prank(owner);
+        relayer.transferOwnership(newOwner);
+        // Ownership should only be transferred after newOwner accepts
+        assertEq(relayer.owner(), owner);
+
+        vm.prank(newOwner);
+        relayer.acceptOwnership();
+        assertEq(relayer.owner(), newOwner);
     }
 }

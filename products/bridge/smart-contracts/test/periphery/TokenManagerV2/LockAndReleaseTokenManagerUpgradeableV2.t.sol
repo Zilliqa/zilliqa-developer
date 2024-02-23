@@ -12,6 +12,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {TestToken} from "test/Helpers.sol";
+import {LockAndReleaseTokenManagerDeployer} from "test/periphery/TokenManagerDeployers/LockAndReleaseTokenManagerDeployer.sol";
 
 interface IPausable {
     event Paused(address account);
@@ -23,7 +24,8 @@ contract LockAndReleaseTokenManagerUpgradeableV2Tests is
     ITokenManagerEvents,
     ITokenManagerStructs,
     ITokenManagerFeesEvents,
-    IPausable
+    IPausable,
+    LockAndReleaseTokenManagerDeployer
 {
     address deployer = vm.addr(1);
     address chainGateway = vm.addr(102);
@@ -44,19 +46,7 @@ contract LockAndReleaseTokenManagerUpgradeableV2Tests is
 
     function setUp() external {
         vm.startPrank(deployer);
-        address implementation = address(
-            new LockAndReleaseTokenManagerUpgradeable()
-        );
-        address proxy = address(
-            new ERC1967Proxy(
-                implementation,
-                abi.encodeCall(
-                    LockAndReleaseTokenManagerUpgradeable.initialize,
-                    chainGateway
-                )
-            )
-        );
-        tokenManager = LockAndReleaseTokenManagerUpgradeable(proxy);
+        tokenManager = deployLockAndReleaseTokenManagerV1(chainGateway);
 
         assertEq(tokenManager.getGateway(), chainGateway);
 

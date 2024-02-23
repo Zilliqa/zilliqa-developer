@@ -13,26 +13,25 @@ contract Transfer is Script {
         address owner = vm.addr(deployerPrivateKey);
         console.log("Owner is %s", owner);
 
-        address tokenManagerAddress = 0x1509988c41f02014aA59d455c6a0D67b5b50f129;
-        address tokenAddress = 0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3;
+        address tokenManagerAddress = 0xd10077bCE4A9D19068965dE519CED8a2fC1B096C;
+        address tokenAddress = 0x63B6ebD476C84bFDd5DcaCB3f974794FC6C2e721;
 
         uint remoteChainId = 97;
         address remoteRecipient = owner;
-        uint amount = 1000;
+        uint amount = 10;
 
         ERC20 token = ERC20(tokenAddress);
         LockAndReleaseTokenManagerUpgradeable tokenManager = LockAndReleaseTokenManagerUpgradeable(
                 tokenManagerAddress
             );
 
+        vm.startBroadcast(deployerPrivateKey);
         console.log(
             "Owner Balance: %d, TokenManagerBalance %d, %s",
             token.balanceOf(owner),
             token.balanceOf(tokenManagerAddress),
             token.name()
         );
-
-        vm.startBroadcast(deployerPrivateKey);
 
         token.approve(tokenManagerAddress, amount);
         tokenManager.transfer(
@@ -42,12 +41,11 @@ contract Transfer is Script {
             amount
         );
 
-        vm.stopBroadcast();
-
         console.log(
             "New Owner Balance: %d, TokenManagerBalance %d",
             token.balanceOf(owner),
             token.balanceOf(tokenManagerAddress)
         );
+        vm.stopBroadcast();
     }
 }
