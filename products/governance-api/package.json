@@ -30,7 +30,7 @@
     "reflect-metadata": "^0.1.13",
     "require-context": "^1.1.0",
     "sequelize": "^5.12.2",
-    "sequelize-typescript": "^1.1.0",
+    "sequelize-typescript": "^2.1.6",
     "sqlite3": "^5.0.2",
     "strong-error-handler": "^4.0.0"
   },

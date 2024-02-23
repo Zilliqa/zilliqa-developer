@@ -5,7 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {Relayer} from "contracts/core/Relayer.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
-import {Target} from "foundry/test/Target.sol";
+import {Target} from "test/Target.sol";
 import "forge-std/console.sol";
 
 // Relayer Address: 0x46242abc24c6ba2d6B91a2a2e18008eeCac5eD71
