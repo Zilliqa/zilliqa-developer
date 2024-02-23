@@ -37,9 +37,13 @@ impl ChainClient {
                 .nonce_manager(wallet.address()),
         );
 
+        // TODO: get the validator_manager_address from chain_gateway itself
+        let chain_gateway = ChainGateway::new(config.chain_gateway_address, client.clone());
+        let validator_manager_address: Address = chain_gateway.validator_manager().call().await?;
+
         Ok(ChainClient {
             client,
-            validator_manager_address: config.validator_manager_address,
+            validator_manager_address,
             chain_gateway_address: config.chain_gateway_address,
             chain_id,
             wallet,

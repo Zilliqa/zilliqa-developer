@@ -3,7 +3,7 @@ use std::{marker::PhantomData, time::Duration};
 use async_stream::try_stream;
 use async_trait::async_trait;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use ethers::{
     providers::Middleware,
     types::{BlockNumber, Filter, Log, U64},

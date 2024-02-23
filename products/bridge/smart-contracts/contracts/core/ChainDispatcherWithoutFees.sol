@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ValidatorManager} from "contracts/core/ValidatorManager.sol";
-import {FeeTracker} from "contracts/core/FeeTracker.sol";
 import {DispatchReplayChecker} from "contracts/core/DispatchReplayChecker.sol";
 
 interface IChainDispatcherEvents {
