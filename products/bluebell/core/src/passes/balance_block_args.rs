@@ -1,24 +1,22 @@
-use crate::parser::lexer::SourcePosition;
-
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::IrPass;
-use std::collections::BTreeSet;
-
-use crate::intermediate_representation::primitives::ConcreteFunction;
-use crate::intermediate_representation::primitives::IrIdentifier;
-use crate::intermediate_representation::primitives::IrIndentifierKind;
-use std::collections::HashMap;
-
-use crate::intermediate_representation::primitives::CaseClause;
-use crate::intermediate_representation::primitives::ContractField;
-use crate::intermediate_representation::primitives::Instruction;
-use crate::intermediate_representation::primitives::{
-    ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind, IntermediateRepresentation,
-    Operation, Tuple, VariableDeclaration, Variant,
+use std::{
+    collections::{BTreeSet, HashMap, VecDeque},
+    mem,
 };
-use crate::intermediate_representation::symbol_table::SymbolTable;
-use std::collections::VecDeque;
-use std::mem;
+
+use scilla_parser::{
+    ast::{TraversalResult, TreeTraversalMode},
+    parser::lexer::SourcePosition,
+};
+
+use crate::intermediate_representation::{
+    pass::IrPass,
+    primitives::{
+        CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+        FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+        IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+    },
+    symbol_table::SymbolTable,
+};
 
 pub struct BalanceBlockArguments {
     blocks: HashMap<String, FunctionBlock>,

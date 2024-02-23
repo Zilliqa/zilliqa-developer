@@ -1,0 +1,10 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: xbridge-frontend
+  namespace: xbridge-fe-stg
+  labels:
+    app.kubernetes.io/name: xbridge-frontend
+spec:
+  domains:
+    - xbridge.zilstg.dev

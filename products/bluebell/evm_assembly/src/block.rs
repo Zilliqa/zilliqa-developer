@@ -1,15 +1,18 @@
-use crate::function_signature::EvmFunctionSignature;
-use crate::instruction::{EvmInstruction, EvmSourcePosition, RustPosition};
-use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
-use crate::types::EvmType;
-use crate::types::EvmTypeValue;
+use std::{
+    collections::{BTreeSet, HashMap},
+    mem,
+};
+
 use evm::Opcode;
 use log::info;
-
 use primitive_types::U256;
-use std::collections::BTreeSet;
-use std::collections::HashMap;
-use std::mem;
+
+use crate::{
+    function_signature::EvmFunctionSignature,
+    instruction::{EvmInstruction, EvmSourcePosition, RustPosition},
+    opcode_spec::{OpcodeSpec, OpcodeSpecification},
+    types::{EvmType, EvmTypeValue},
+};
 
 pub const ALLOCATION_POINTER: u8 = 0x40;
 pub const MEMORY_OFFSET: u8 = 0x80;
@@ -139,32 +142,36 @@ impl Scope {
     }
 
     fn swap(&mut self, depth: i32) {
-        let name_at_depth: Option<String> = match self.location_name.get(&depth) {
+        let position = self.stack_counter - depth;
+
+        let name_at_position: Option<String> = match self.location_name.get(&position) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        let name_at_zero: Option<String> = match self.location_name.get(&0) {
+        let name_at_zero: Option<String> = match self.location_name.get(&self.stack_counter) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        if let Some(name_at_depth) = &name_at_depth {
-            self.location_name.remove(&depth);
-            self.name_location.remove(name_at_depth);
+        if let Some(name_at_position) = &name_at_position {
+            self.location_name.remove(&position);
+            self.name_location.remove(name_at_position);
         }
 
         if let Some(name_at_zero) = name_at_zero {
-            self.location_name.remove(&0);
+            self.location_name.remove(&self.stack_counter);
             self.name_location.remove(&name_at_zero);
 
-            self.name_location.insert(name_at_zero.to_string(), depth);
-            self.location_name.insert(depth, name_at_zero.to_string());
+            self.name_location
+                .insert(name_at_zero.to_string(), position);
+            self.location_name
+                .insert(position, name_at_zero.to_string());
         }
 
-        if let Some(name_at_depth) = name_at_depth {
-            self.name_location.insert(name_at_depth.to_string(), 0);
-            self.location_name.insert(0, name_at_depth.to_string());
+        if let Some(name_at_position) = name_at_position {
+            self.name_location.insert(name_at_position.to_string(), 0);
+            self.location_name.insert(0, name_at_position.to_string());
         }
     }
 }
@@ -518,9 +525,20 @@ impl EvmBlock {
     }
 
     pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmType>) -> &mut Self {
+        if let Some(generator) = function.inline_assembly_generator {
+            generator(self);
+            return self;
+        }
+
         let address = match function.external_address {
             Some(a) => a,
-            None => panic!("TODO: Internal calls not supported yet."),
+            None => {
+                info!("{:#?}", function);
+                panic!(
+                    "TODO: Internal calls' not supported yet. Attempted to call {}",
+                    function.name
+                )
+            }
         };
         // TODO: Deal with internal calls
         // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4
@@ -528,9 +546,9 @@ impl EvmBlock {
 
         self.push1([ALLOCATION_POINTER].to_vec());
         // Stack:
-        // arg N  => arg N
-        //        => p
-        //        => p_data
+        // arg N     => arg N
+        // alloc_ptr => p
+        //           => p_data
 
         self.mload(); // Stack element is the pointer
 

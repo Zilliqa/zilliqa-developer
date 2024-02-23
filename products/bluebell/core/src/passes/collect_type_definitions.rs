@@ -1,17 +1,18 @@
-use crate::constants::NAMESPACE_SEPARATOR;
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::pass_executor::PassExecutor;
-use crate::intermediate_representation::primitives::CaseClause;
-use crate::intermediate_representation::primitives::ContractField;
-use crate::intermediate_representation::primitives::Instruction;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
-    VariableDeclaration, Variant,
+use scilla_parser::ast::{TraversalResult, TreeTraversalMode};
+
+use crate::{
+    constants::NAMESPACE_SEPARATOR,
+    intermediate_representation::{
+        pass::IrPass,
+        pass_executor::PassExecutor,
+        primitives::{
+            CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+            FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+            IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+        },
+        symbol_table::SymbolTable,
+    },
 };
-use crate::intermediate_representation::symbol_table::SymbolTable;
-use log::info;
 
 pub struct CollectTypeDefinitionsPass {
     namespace_stack: Vec<String>,
@@ -219,6 +220,7 @@ impl IrPass for CollectTypeDefinitionsPass {
         fnc.body.visit(self, symbol_table)?;
 
         // Declaring
+        let qualified_name = format!("{}::<{}>", qualified_name, args_types.join(","));
         let return_type = "TODO";
         symbol_table.declare_function_type(&qualified_name, &args_types, return_type)?;
 
@@ -276,7 +278,7 @@ impl IrPass for CollectTypeDefinitionsPass {
         &mut self,
         mode: TreeTraversalMode,
         _primitives: &mut IntermediateRepresentation,
-        symbol_table: &mut SymbolTable,
+        _symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => (),

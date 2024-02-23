@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pdt
+  namespace: pdt
+data:
+  PROJECT_ID: "prj-c-data-analytics-3xs14wez"
+  DATASET_ID_TESTNET: "ds_zq1_testnet"
+  DATASET_ID_MAINNET: "ds_zq1_mainnet"
+  NETWORK_TYPE_TESTNET: "testnet"
+  NETWORK_TYPE_MAINNET: "mainnet"
+  NETWORK_TESTNET: "testnet-v930rc19"
+  NETWORK_MAINNET: "mainnet-v930"
+  DOWNLOAD_DIR: "/data/download"
+  UNPACK_DIR: "/data/download"
+  NR_THREADS: "1"
+  BATCH_BLOCKS: "10000"
+  BUFFER_SIZE: "5"

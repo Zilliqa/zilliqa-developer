@@ -1,4 +1,3 @@
-# Requires alpine to get openssl and build
 FROM rust:1.71.0-bullseye as builder
 
 WORKDIR /pdt
@@ -18,10 +17,8 @@ FROM debian:bullseye-slim
 
 RUN apt-get update -y && \
   apt-get upgrade -y && \
-  apt-get install -y --no-install-recommends ca-certificates=20210119 && \
+  apt-get install -y --no-install-recommends ca-certificates=20210119 rsync=3.2.3-4+deb11u1 && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /pdt/build/pdt /pdt
-
-CMD ["/pdt", "test"]
