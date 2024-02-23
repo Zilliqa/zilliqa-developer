@@ -53,7 +53,7 @@ impl Meta {
         client: &Client,
         loc: &bq_utils::BigQueryTableLocation,
     ) -> Result<()> {
-        if let None = bq_utils::find_table(client, loc).await? {
+        if let None = loc.find_table(client).await {
             Self::create_table(client, loc).await?;
         }
         Ok(())
@@ -80,8 +80,9 @@ impl Meta {
             Err(_) => {
                 // Wait a bit and then fetch the table.
                 sleep(Duration::from_millis(5_000)).await;
-                Ok(bq_utils::find_table(client, loc)
-                    .await?
+                Ok(loc
+                    .find_table(client)
+                    .await
                     .ok_or(anyhow!("Couldn't create table {}", loc.table_id))?)
             }
         }
@@ -97,11 +98,11 @@ impl Meta {
             .query(&self.table.dataset.project_id, QueryRequest::new(&query))
             .await?;
         if result.next_row() {
-            let block = result
+            let start_block = result
                 .get_i64(0)?
                 .ok_or(anyhow!("No start_blk in record"))?;
-            let number = result.get_i64(1)?.ok_or(anyhow!("No nr_blks in record"))?;
-            Ok(Some(block + number))
+            let block_count = result.get_i64(1)?.ok_or(anyhow!("No nr_blks in record"))?;
+            Ok(Some(start_block + block_count - 1)) // inclusive of start_block => need subtract
         } else {
             Ok(None)
         }

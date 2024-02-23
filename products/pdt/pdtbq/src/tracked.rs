@@ -82,20 +82,15 @@ impl Trackable for TrackedTable {
 
         // This is a bit horrid. If there is any action at all, we need to check what the highest txn
         // we successfully inserted was.
-        let mut last_blk: i64 = -1;
-        let mut last_txn: i64 = -1;
-        if req.req.len() > 1 {
-            let last_blks = self.get_last_txn_for_blocks(client, blks).await;
-            match last_blks {
-                Ok((a, b)) => (last_blk, last_txn) = (a, b),
-                Err(x) => {
-                    return Err(InsertionErrors::from_msg(&format!(
-                        "Cannot find inserted txn ids - {}",
-                        x
-                    )));
-                }
-            }
-        }
+        let (last_blk, last_txn) = if req.req.is_empty() {
+            (-1, -1)
+        } else {
+            self.get_last_txn_for_blocks(client, blks)
+                .await
+                .map_err(|err| {
+                    InsertionErrors::from_msg(&format!("Cannot find inserted txn ids - {}", err))
+                })?
+        };
 
         async fn commit_request(
             client: &Client,
@@ -113,15 +108,16 @@ impl Trackable for TrackedTable {
                 )
                 .await
                 .or_else(|e| Err(InsertionErrors::from_msg(&format!("Cannot insert - {}", e))))?;
+
             if let Some(row_errors) = resp.insert_errors {
-                if row_errors.len() > 0 {
-                    for err in row_errors {
-                        let err_string = format!("{:?}: {:?}", err.index, err.errors);
-                        err_rows.push(err_string);
-                    }
-                }
+                err_rows.extend(
+                    row_errors
+                        .into_iter()
+                        .map(|e| format!("{:?}: {:?}", e.index, e.errors)),
+                );
             }
-            if err_rows.len() > 0 {
+
+            if !err_rows.is_empty() {
                 return Err(InsertionErrors {
                     errors: err_rows,
                     msg: "Insertion failed".to_string(),
@@ -134,17 +130,13 @@ impl Trackable for TrackedTable {
 
         for txn in req.req {
             let (txn_block, txn_offset_in_block) = txn.get_coords();
+            // Check if txn already seen
             if txn_block > last_blk || (txn_block == last_blk && txn_offset_in_block > last_txn) {
-                let nr_bytes = match txn.estimate_bytes() {
-                    Ok(val) => val,
-                    Err(x) => {
-                        return Err(InsertionErrors::from_msg(&format!(
-                            "Cannot get size of transaction - {}",
-                            x
-                        )))
-                    }
-                };
+                let nr_bytes = txn.estimate_bytes().map_err(|x| {
+                    InsertionErrors::from_msg(&format!("Cannot get size of transaction - {}", x))
+                })?;
 
+                // Check exceeded batch limit
                 if current_request_bytes + nr_bytes >= bq::MAX_QUERY_BYTES
                     || current_request.len() >= bq::MAX_QUERY_ROWS - 1
                 {
@@ -158,24 +150,19 @@ impl Trackable for TrackedTable {
                     );
 
                     commit_request(client, &self.location, current_request).await?;
+                    // Reset request parameters
                     current_request = TableDataInsertAllRequest::new();
                     current_request_bytes = 0;
                 }
 
+                current_request.add_row(None, &txn).map_err(|err| {
+                    InsertionErrors::from_msg(&format!("Cannot add row to request - {}", err))
+                })?;
                 current_request_bytes += nr_bytes;
-                // println!("T:{:?}", txn.to_json());
-                match current_request.add_row(None, &txn) {
-                    Ok(_) => (),
-                    Err(x) => {
-                        return Err(InsertionErrors::from_msg(&format!(
-                            "Cannot add row to request - {}",
-                            x
-                        )));
-                    }
-                }
             }
         }
-        if current_request.len() > 0 {
+
+        if !current_request.is_empty() {
             println!(
                 "{}: [F] Inserting {} rows at end of block",
                 self.meta.coords.client_id,
@@ -185,12 +172,10 @@ impl Trackable for TrackedTable {
         }
 
         // Mark that these blocks were done.
-        if let Err(e) = self.meta.commit_run(&client, &blks).await {
-            return Err(InsertionErrors::from_msg(&format!(
-                "Could not commit run result - {:?}",
-                e
-            )));
-        }
+        self.meta.commit_run(&client, &blks).await.map_err(|err| {
+            InsertionErrors::from_msg(&format!("Could not commit run result - {:?}", err))
+        })?;
+
         Ok(())
     }
 

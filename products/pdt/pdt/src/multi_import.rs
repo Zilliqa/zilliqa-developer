@@ -24,10 +24,7 @@ pub async fn import<T: Importer, P: ZilliqaDBProject + std::marker::Sync>(
     let coords = in_coords.with_client_id(&client_id);
     println!("{:?}", coords);
     let mut batch = 0;
-    let mut last_max = match start_block {
-        Some(x) => x,
-        None => 0,
-    };
+    let mut last_max = start_block.unwrap_or_default();
     while match nr_batches {
         None => true,
         Some(val) => batch < val,

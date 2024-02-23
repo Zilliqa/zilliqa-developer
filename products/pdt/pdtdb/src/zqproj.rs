@@ -10,7 +10,7 @@ pub const MICROBLOCKS_TABLE_NAME: &str = "microblocks";
 
 pub struct Inserter<T: Serialize> {
     pub _marker: PhantomData<T>,
-    pub req: Vec<T>, //req: Vec<TableDataInsertAllRequest>,
+    pub req: Vec<T>,
 }
 
 impl<T: Serialize> Inserter<T> {

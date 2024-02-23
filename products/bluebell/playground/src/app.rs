@@ -1,23 +1,19 @@
-use crate::logger::LoggerView;
-use crate::state::ExecutionStatus;
+use std::{collections::HashMap, rc::Rc};
 
-use std::collections::HashMap;
-use std::rc::Rc;
-
-use yew::virtual_dom::VNode;
-
-use gloo_console as console;
+use gloo_timers::callback::Timeout;
 use web_sys::HtmlInputElement;
-use yew::prelude::*;
+use yew::{prelude::*, virtual_dom::VNode};
 use yewdux::prelude::*;
 
-use crate::bytecode_view::ByteCodeView;
-use crate::dropdown::Dropdown;
-use crate::examples::EXAMPLES;
-use crate::machine_view::MachineView;
-use crate::state::{State, StateMessage};
-use crate::vm_remote::VmRemote;
-use gloo_timers::callback::Timeout;
+use crate::{
+    bytecode_view::ByteCodeView,
+    dropdown::Dropdown,
+    examples::EXAMPLES,
+    logger::LoggerView,
+    machine_view::MachineView,
+    state::{ExecutionStatus, State, StateMessage},
+    vm_remote::VmRemote,
+};
 
 #[derive(Clone, PartialEq)]
 pub struct MenuItem {
@@ -36,7 +32,7 @@ pub struct AppLayoutProps {
 
 pub struct AppLayout {
     props: AppLayoutProps,
-    dispatch: Dispatch<State>,
+    _dispatch: Dispatch<State>,
     state: Rc<State>,
 }
 
@@ -57,7 +53,7 @@ impl Component for AppLayout {
         Self {
             props: props.clone(),
             state: dispatch.get(),
-            dispatch,
+            _dispatch: dispatch,
         }
     }
 
@@ -290,7 +286,7 @@ pub fn app() -> Html {
                           <div class={
                                 match *error_code {
                                     ExecutionStatus::Succeeded => "pointer-events-auto flex items-center justify-between gap-x-6 bg-green-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5",
-                                    ExecutionStatus::Paused => "pointer-events-auto flex items-center justify-between gap-x-6 bg-yellow-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5",
+                                    // Unused ExecutionStatus::Paused => "pointer-events-auto flex items-center justify-between gap-x-6 bg-yellow-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5",
                                     ExecutionStatus::Failed => "pointer-events-auto flex items-center justify-between gap-x-6 bg-red-600 px-6 py-2.5 sm:rounded-xl sm:py-3 sm:pl-4 sm:pr-3.5"
                                 }
                             }>
@@ -300,7 +296,7 @@ pub fn app() -> Html {
     {
                                 match *error_code {
                                     ExecutionStatus::Succeeded => "Execution suceeded",
-                                    ExecutionStatus::Paused => "Execution paused",
+                                    // Unused ExecutionStatus::Paused => "Execution paused",
                                     ExecutionStatus::Failed => "Execution failed"
                                 }
                             }

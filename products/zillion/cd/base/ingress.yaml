@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zillion
+  namespace: zillion
+  labels:
+    "app.kubernetes.io/name": "zillion"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zillion
+                port:
+                  number: 80
+    - host: stg-stake.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zillion
+                port:
+                  number: 80
+    - host: testnet-stake.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zillion
+                port:
+                  number: 80

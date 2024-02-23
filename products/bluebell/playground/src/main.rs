@@ -10,12 +10,11 @@ mod vm_remote_state;
 
 mod logger;
 
-use crate::logger::LoggerMessage;
-use crate::logger::LoggerState;
-use yewdux::prelude::Dispatch;
-
 use app::App;
 use log::{Log, Metadata, Record};
+use yewdux::prelude::Dispatch;
+
+use crate::logger::{LoggerMessage, LoggerState};
 
 struct CaptureLogger {}
 
