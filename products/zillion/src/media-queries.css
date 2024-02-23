@@ -1,0 +1,51 @@
+/* small screens, phones */
+@media screen and (max-width: 767px) {
+    .cover {
+        background-position:
+            top 0px left -200px,
+            bottom 0% right -400%;
+    }
+}
+
+@media screen and (max-width: 524px) {
+    .cover .heading .tagline {
+        margin-left: -35%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .cover {
+        background-position:
+            top 0px left -600px,
+            bottom 0% right 240%;
+    }
+
+    .cover .heading .tagline {
+        font-size: 0.8em;
+        font-size: 3.5vw;
+        margin-left: -40%;
+        margin-top: -18%;
+    }
+
+    .explorer .explorer-wallet {
+        font-size: 0.85em;
+    }
+
+    .explorer-search .explorer-search-input {
+        font-size: 0.85em;
+        width: 350px;
+    }
+  
+    .zillion-logo {
+      width: 100%;
+    }
+
+    #explorer-mini-navbar .explorer-mini-navbar-disabled {
+        top: 138px;
+    }
+
+    #home-mini-navbar .home-mini-navbar-disabled{
+        margin-top: 2em !important;
+        top: 130px;
+    }
+}

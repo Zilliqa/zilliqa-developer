@@ -1,6 +1,7 @@
+use std::collections::BTreeMap;
+
 use evm::backend::{Backend, Basic};
 use primitive_types::{H160, H256, U256};
-use std::collections::BTreeMap;
 
 #[derive(Default, Clone, Debug, Eq, PartialEq)]
 pub struct CustomMemoryAccount {
@@ -75,7 +76,7 @@ impl Backend for EvmIoInterface {
         self.state.contains_key(&address)
     }
 
-    fn basic(&self, address: H160) -> Basic {
+    fn basic(&self, _address: H160) -> Basic {
         Basic {
             balance: 0.into(),
             nonce: 0.into(),

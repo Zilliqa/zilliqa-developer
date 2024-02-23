@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zillion-config
+data:
+  config.js: |
+    window['config'] = {
+        networks_config: {
+            testnet: {
+                proxy: "0x351a37e2841a45c7f2de18ee45f968e106416273",
+                impl: "0xa2e4657de8108dd3730eb51f05a1d486d77be2df",
+                blockchain: "https://dev-api.zilliqa.com",
+                node_status: "https://testnet-viewer.zilliqa.com",
+                api_list: [
+                    "https://dev-api.zilliqa.com",
+                ]
+            },
+            mainnet: {
+                proxy: "",
+                impl: "",
+                blockchain: "https://api.zilliqa.com",
+                node_status: "https://staking-viewer.zilliqa.com",
+                api_list : [
+                    "https://api.zilliqa.com",
+                    "https://ssn.zillacracy.com/api",
+                    "https://ssn-zilliqa.cex.io/api",
+                    "https://ssn.zillet.io",
+                    "https://zil-staking.ezil.me/api",
+                    "https://staking-zil.kucoin.com/api",
+                ]
+            },
+            isolated_server: {
+                proxy: "0x0578B8e9D9c2493D4a2E98f364c7ed311F7a0d71",
+                impl: "",
+                blockchain: "https://zilliqa-isolated-server.zilliqa.com",
+                node_status: "",
+                api_list : [
+                    "https://zilliqa-isolated-server.zilliqa.com"
+                ]
+            }
+        },
+        blockchain_explorer_config: "viewblock",
+        refresh_rate_config: 10000,
+        api_max_retry_attempt: 10,
+        environment_config: "stage"
+    }

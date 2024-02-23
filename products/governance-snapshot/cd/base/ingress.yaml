@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: governance-snapshot
+  namespace: governance-snapshot
+  labels:
+    "app.kubernetes.io/name": "governance-snapshot"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: governance-snapshot
+                port:
+                  number: 80
+    - host: dev-vote.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: governance-snapshot
+                port:
+                  number: 80

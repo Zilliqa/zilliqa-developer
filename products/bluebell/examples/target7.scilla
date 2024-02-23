@@ -3,6 +3,6 @@ scilla_version 0
 contract HelloWorld()
 
 transition setHello (msg : Uint64)
-  x = builtin print__impl msg;
-  y = builtin print__impl msg
+  print msg;
+  print msg
 end

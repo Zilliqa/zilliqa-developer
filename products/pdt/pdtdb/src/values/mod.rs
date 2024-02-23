@@ -7,5 +7,6 @@ mod transaction;
 
 pub type BQTransaction = transaction::BQTransaction;
 pub type PSQLTransaction = transaction::PSQLTransaction;
+pub type ZILTransactionBody = transaction::ZILTransactionBody;
 pub type BQMicroblock = microblock::BQMicroblock;
 pub type PSQLMicroblock = microblock::PSQLMicroblock;

@@ -1,20 +1,21 @@
 mod importer;
 mod listener;
 mod types;
-use anyhow::{anyhow, bail, Context, Result};
-use ethers::{prelude::*, providers::StreamExt};
+use anyhow::{anyhow, bail, Context, Error, Result};
+use ethers::{prelude::*, providers::StreamExt, utils::hex};
+use itertools::Itertools;
 use jsonrpsee::{core::client::ClientT, http_client::HttpClient, rpc_params};
 use pdtbq::{bq::ZilliqaBQProject, bq_utils::BigQueryDatasetLocation};
 use pdtdb::{
     utils::ProcessCoordinates,
-    values::{BQMicroblock, BQTransaction, PSQLMicroblock, PSQLTransaction},
+    values::{BQMicroblock, BQTransaction, PSQLMicroblock, PSQLTransaction, ZILTransactionBody},
     zqproj::{Inserter, ZilliqaDBProject},
 };
 use pdtpsql::psql::ZilliqaPSQLProject;
 use serde::Serialize;
 use serde_json::{from_value, to_value, Value};
 use sqlx::postgres::PgPoolOptions;
-use std::{marker::PhantomData, time::Duration};
+use std::{collections::HashMap, marker::PhantomData, time::Duration};
 use tokio::pin;
 use tokio::task::JoinSet;
 use tokio_stream::StreamExt as TokioStreamExt;
@@ -33,22 +34,34 @@ async fn get_block_info(number: U64, client: &HttpClient) -> Result<types::GetTx
 
 fn convert_block_and_txns(
     block: &Block<Transaction>,
+    zil_txn_bodies: &Vec<ZILTransactionBody>,
 ) -> Result<(BQMicroblock, Vec<BQTransaction>)> {
     let my_block = block.clone();
     let bq_block = BQMicroblock::from_eth(&my_block)?;
     let version = bq_block.header_version;
-    let mut txn_errs = vec![];
-    let bq_transactions: Vec<BQTransaction> = my_block
+    let zil_transactions: HashMap<&str, &ZILTransactionBody> =
+        zil_txn_bodies.iter().map(|x| (x.id.as_str(), x)).collect();
+
+    let (bq_transactions, txn_errs): (Vec<BQTransaction>, Vec<Error>) = my_block
         .transactions
         .into_iter()
-        .map(|txn| BQTransaction::from_eth(&txn, version))
-        .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
-        .collect();
+        .map(|txn| {
+            zil_transactions
+                .get(hex::encode(txn.hash.as_bytes()).as_str())
+                .map_or(
+                    Err(anyhow!("zil transaction body not found")),
+                    |&txn_body| {
+                        BQTransaction::from_eth_with_zil_txn_bodies(&txn, txn_body, version)
+                    },
+                )
+        })
+        .partition_result();
+
     if !txn_errs.is_empty() {
-        return Err(anyhow!(
+        bail!(
             "some transactions could not be converted, skipping this block: {:#?}",
             txn_errs
-        ));
+        );
     }
     Ok((bq_block, bq_transactions))
 }
@@ -59,25 +72,12 @@ async fn insert_block_and_txns<P: ZilliqaDBProject>(
     block_num: i64,
     proj: &P,
 ) -> Result<()> {
-    match proj
-        .insert_microblocks(block_req, &(block_num..(block_num + 1)))
+    proj.insert_microblocks(block_req, &(block_num..(block_num + 1)))
         .await
-    {
-        Err(e) => {
-            bail!("could not insert block due to error: {:}", e)
-        }
-        Ok(_) => (),
-    }
-    match proj
-        .insert_transactions(txn_req, &(block_num..(block_num + 1)))
+        .map_err(|e| anyhow!("could not insert block to err: {:}", e))?;
+    proj.insert_transactions(txn_req, &(block_num..(block_num + 1)))
         .await
-    {
-        Err(e) => {
-            bail!("could not insert transactions due to error: {:}", e)
-        }
-        Ok(_) => (),
-    }
-    Ok(())
+        .map_err(|e| anyhow!("could not insert transactions due to error: {:}", e))
 }
 
 async fn postgres_insert_block_and_txns(
@@ -88,19 +88,22 @@ async fn postgres_insert_block_and_txns(
     let psql_block: PSQLMicroblock = BQMicroblock::from_eth(&my_block)?.into();
     let version = psql_block.header_version;
     let block_num = psql_block.block;
-    let mut txn_errs = vec![];
-    let psql_txns: Vec<PSQLTransaction> = my_block
+
+    let (txns, txn_errs): (Vec<BQTransaction>, Vec<Error>) = my_block
         .transactions
         .into_iter()
         .map(|txn| BQTransaction::from_eth(&txn, version))
-        .filter_map(|r| r.map_err(|e| txn_errs.push(e)).ok())
+        .partition_result();
+    let psql_txns = txns
+        .into_iter()
         .map(|txn| Into::<PSQLTransaction>::into(txn))
-        .collect();
+        .collect_vec();
+
     if !txn_errs.is_empty() {
-        return Err(anyhow!(
+        bail!(
             "some transactions could not be converted, skipping this block: {:#?}",
             txn_errs
-        ));
+        );
     }
     // let err_psql_block = psql_block.clone();
     let psql_block_req = Inserter {
@@ -264,9 +267,9 @@ pub async fn listen_bq(
                     bq_importer.reset_buffer(&zilliqa_bq_proj).await?;
                 }
 
-                for block in blocks {
+                for (block, zil_txn_bodies) in blocks {
                     // convert our blocks and insert it into our buffer
-                    convert_block_and_txns(&block)
+                    convert_block_and_txns(&block, &zil_txn_bodies)
                         .and_then(|(bq_block, bq_txns)| {
                             bq_importer.insert_into_buffer(bq_block, bq_txns)
                         })

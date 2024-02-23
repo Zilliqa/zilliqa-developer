@@ -1,0 +1,11 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: xbridge-frontend
+  namespace: xbridge-fe-stg
+  labels:
+    app.kubernetes.io/name: xbridge-frontend
+spec:
+  timeoutSec: 120
+  healthCheck:
+    requestPath: /

@@ -1,11 +1,12 @@
-use crate::state::State;
-
 use std::rc::Rc;
+
 use yew::prelude::*;
 use yewdux::prelude::*;
 
+use crate::state::State;
+
 pub struct MachineView {
-    dispatch: Dispatch<State>,
+    _dispatch: Dispatch<State>,
     state: Rc<State>,
 }
 
@@ -22,7 +23,7 @@ impl Component for MachineView {
         let dispatch = Dispatch::<State>::subscribe(state_callback);
         Self {
             state: dispatch.get(),
-            dispatch,
+            _dispatch: dispatch,
         }
     }
 
