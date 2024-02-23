@@ -3,6 +3,7 @@ import "dotenv/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
 import "@openzeppelin/hardhat-upgrades";
+import "./task/bridge";
 
 const config: HardhatUserConfig = {
   solidity: {
