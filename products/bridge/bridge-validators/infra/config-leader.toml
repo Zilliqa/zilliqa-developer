@@ -1,0 +1,35 @@
+# BSC Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 36696045
+rpc_url = "https://bsc-prebsc-dataseed.bnbchain.org"
+chain_gateway_address = "0x72B9B59e48779A8b64554A3e2bC8b5297A04c68a"
+
+# BSC Mainnet
+# [[chain_configs]]
+# chain_gateway_block_deployed = 0
+# rpc_url = "https://binance.llamarpc.com"
+# chain_gateway_address = "0x2114e979b7CFDd8b358502e00f50Fd5f7787Fe63"
+
+# [[chain_configs]]
+# rpc_url = "http://localhost:8545"
+# chain_gateway_address = "0x4212b368876a54F99c741C8B5b64be2e52a6956b"
+
+# [[chain_configs]]
+# rpc_url = "http://localhost:8546"
+# chain_gateway_address = "0x4212b368876a54F99c741C8B5b64be2e52a6956b"
+
+# Zilliqa Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 6542681
+rpc_url = "https://dev-api.zilliqa.com"
+chain_gateway_address = "0x10917A34FE60eE8364a401a6b1d3adaf80D84eb6"
+block_instant_finality = true
+legacy_gas_estimation = true
+
+# Zilliqa Mainnet
+# [[chain_configs]]
+# chain_gateway_block_deployed = 0
+# rpc_url = "https://api.zilliqa.com"
+# chain_gateway_address = "0xE76669e1cCc150194eB92581baE79Ef6fa0E248E"
+# block_instant_finality = true
+# legacy_gas_estimation = true

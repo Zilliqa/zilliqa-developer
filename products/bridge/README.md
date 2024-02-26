@@ -222,19 +222,42 @@ The bridge will have the following deliverables:
 The MVP bridge will run on a gossip network with validators managed by Zilliqa
 
 - [ ] **Smart Contracts** - on hardhat (E2E testing & deployment) + foundry (Unit testing + fuzzing)
-  - [ ] Integrate foundry to support effective unit testing on contracts
-  - [ ] Finish remaining TODO tests
+  - [x] Integrate foundry to support effective unit testing on contracts
+  - [x] Finish remaining TODO tests
+  - [x] Update error handling on contracts
+  - [x] Integrate mechanism for gas reversal
+  - [x] Multichain support - appending chain-ids to event calls
+  - [x] CI automated testing
+  - [x] Gas limit parameters for dispatch
+  - [x] Move resume from core to periphery
+  - [x] Update interface to support cross-shard
+  - [x] Add cross-shard support for contracts
+  - [x] Global nonces
+  - [x] Remove Collector
+  - [ ] Validator rewards
+  - [ ] Update periphery contracts
+    - [x] Split bridged incoming and outgoing interfaces
+    - [ ] Support response instead of fire&forget
+  - [x] Update foundry tests
+  - [ ] Update hardhat tests
+  - [ ] Synchronizing validators cross-chain
+    - [ ] Update validator set
+  - [-] Fuzz + invariant testing
   - [ ] Write deployment scripts
     - [ ] Support CREATE2
     - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
-  - [ ] Integrate mechanism for gas reversal
-  - [ ] Multichain support - appending chain-ids to event calls
-  - [ ] Fuzz + variant testing
+  - [ ] Track last event block number for light client event censorship resistance
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
-  - [ ] Determine type of connection to use to connect to non-zilliqa chains
-    - Light node/client? [helios](https://github.com/a16z/helios)
-  - [ ] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
-  - [ ] Read & Write to chains
+  - [x] P2P network for sharing signatures - [rust-libp2p](https://github.com/libp2p/rust-libp2p)
+  - [x] Read & Write to chains
+  - [ ] Validator slashing
+  - [ ] Integrate into ZQ2 consensus network to share signatures
+  - [ ] Periodic gas refund for validators
+  - [ ] Light client implementation
+    - [ ] Determine type of connection to use to connect to non-zilliqa chains
+    - [ ] Zilliqa maintained full nodes of non-zq chain. UCCB validators use light nodes on it
+    - [ ] Check logsBloom for potential events in the block
+    - [ ] Retrieve block receipts, check for logs and verify receipt root
 - [ ] **Frontend DApp**
   - [ ] Boilerplate setup (Vite React with Rainbow Kit)
