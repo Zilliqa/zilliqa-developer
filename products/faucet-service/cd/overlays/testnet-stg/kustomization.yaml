@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: testnet-faucet-stg
+
+resources:
+  - ../../base
+  - app-secret.yaml
+  - certificate.yaml
+  - backend-config.yaml
+  - frontend-config.yaml
+
+patches:
+  - target:
+      kind: Ingress
+      name: faucet-service
+    patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: stg-testnet-faucet.zilliqa.com
+      - op: replace
+        path: /metadata/annotations
+        value:
+          kubernetes.io/ingress.class: gce
+          kubernetes.io/ingress.global-static-ip-name: stg-testnet-faucet-zilliqa-com
+          networking.gke.io/managed-certificates: faucet-service
+          networking.gke.io/v1beta1.FrontendConfig: faucet-service
+  - target:
+      kind: Service
+      name: faucet-service
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          beta.cloud.google.com/backend-config: '{"default": "faucet-service"}'

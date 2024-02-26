@@ -113,16 +113,16 @@ Example of creating a **non-contract** transaction object:
 === "Java"
 
     ```java
-    package com.firestack.example;
+    package com.zilliqa.example;
 
-    import com.firestack.laksaj.account.Wallet;
-    import com.firestack.laksaj.contract.Contract;
-    import com.firestack.laksaj.contract.ContractFactory;
-    import com.firestack.laksaj.contract.DeployParams;
-    import com.firestack.laksaj.contract.Value;
-    import com.firestack.laksaj.jsonrpc.HttpProvider;
-    import com.firestack.laksaj.transaction.Transaction;
-    import com.firestack.laksaj.transaction.TransactionFactory;
+    import com.zilliqa.laksaj.account.Wallet;
+    import com.zilliqa.laksaj.contract.Contract;
+    import com.zilliqa.laksaj.contract.ContractFactory;
+    import com.zilliqa.laksaj.contract.DeployParams;
+    import com.zilliqa.laksaj.contract.Value;
+    import com.zilliqa.laksaj.jsonrpc.HttpProvider;
+    import com.zilliqa.laksaj.transaction.Transaction;
+    import com.zilliqa.laksaj.transaction.TransactionFactory;
     import javafx.util.Pair;
 
     import java.io.IOException;
@@ -130,7 +130,7 @@ Example of creating a **non-contract** transaction object:
     import java.util.Arrays;
     import java.util.List;
 
-    import static com.firestack.laksaj.account.Wallet.pack;
+    import static com.zilliqa.laksaj.account.Wallet.pack;
 
     public class TransactionOperation {
         public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
@@ -292,16 +292,16 @@ Example of creating a **contract** transaction object:
 === "Java"
 
     ```java
-    package com.firestack.example;
+    package com.zilliqa.example;
 
-    import com.firestack.laksaj.account.Wallet;
-    import com.firestack.laksaj.contract.Contract;
-    import com.firestack.laksaj.contract.ContractFactory;
-    import com.firestack.laksaj.contract.DeployParams;
-    import com.firestack.laksaj.contract.Value;
-    import com.firestack.laksaj.jsonrpc.HttpProvider;
-    import com.firestack.laksaj.transaction.Transaction;
-    import com.firestack.laksaj.transaction.TransactionFactory;
+    import com.zilliqa.laksaj.account.Wallet;
+    import com.zilliqa.laksaj.contract.Contract;
+    import com.zilliqa.laksaj.contract.ContractFactory;
+    import com.zilliqa.laksaj.contract.DeployParams;
+    import com.zilliqa.laksaj.contract.Value;
+    import com.zilliqa.laksaj.jsonrpc.HttpProvider;
+    import com.zilliqa.laksaj.transaction.Transaction;
+    import com.zilliqa.laksaj.transaction.TransactionFactory;
     import javafx.util.Pair;
 
     import java.io.IOException;
@@ -309,7 +309,7 @@ Example of creating a **contract** transaction object:
     import java.util.Arrays;
     import java.util.List;
 
-    import static com.firestack.laksaj.account.Wallet.pack;
+    import static com.zilliqa.laksaj.account.Wallet.pack;
 
     public class TransactionOperation {
         public static void main(String[] args) throws IOException, NoSuchAlgorithmException {

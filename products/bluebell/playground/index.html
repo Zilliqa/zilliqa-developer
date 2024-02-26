@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html class="h-full bg-white">
+  <head>
+    <meta charset="utf-8" />
+    <title>Scilla Playground</title>
+    <link data-trunk rel="sass" href="index.scss" />
+    <link data-trunk href="./tailwind.css" rel="tailwind-css" />
+    <link data-trunk rel="copy-dir" href="img" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js"
+      integrity="sha512-UOoJElONeUNzQbbKQbjldDf9MwOHqxNz49NNJJ1d90yp+X9edsHyJoAs6O4K19CZGaIdjI5ohK+O2y5lBTW6uQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      Prism.languages.scilla = {
+        comment: /(?:\/\/.*)/,
+        string: {
+          pattern: /(["'])(?:\\[\s\S]|(?!\1)[^\\])*\1/,
+          greedy: true,
+        },
+        keyword:
+          /\b(?:contract|let|in|fun|transition|end|if|else|library|import|as|match|with|type|event|Uint|String|ByStr|Map|True|False)\b/,
+        boolean: /\b(?:true|false)\b/,
+        number: /\b\d+\b/,
+        operator: /->|:=|==|\+|\-|\*|\/|\||&|<|>|<=|>=|!/,
+        punctuation: /[{}[\];(),.]/,
+      };
+    </script>
+  </head>
+</html>

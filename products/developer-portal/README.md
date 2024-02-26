@@ -112,7 +112,7 @@ z login
      dns:
        vars:
        subdomains:
-         zilliqa-devportal: {}
+         developer-portal: {}
      ```
 
 3. Push the changes
@@ -139,3 +139,91 @@ z app sync --cache-dir=.cache developer-portal
 ```
 
 Verify your application is running correct from the staging URL and with `kubectl` commands (if required).
+
+## Deploying applications to production
+
+To deploy the production environment we need to clone the devops repository and execute `z` from there:
+
+```sh
+git clone https://github.com/Zilliqa/devops.git
+cd devops
+source setenv
+```
+
+### Set the following environment variables
+
+- `Z_ENV` to the path in which your `z.yaml` resides.
+- `ZQ_USER` to your username (the bit before `@` in your email address)
+- `GITHUB_PAT` (if you are deploying staging or production apps) to a classic PAT with all the repo permissions ticked.
+
+for example:
+
+```sh
+export Z_ENV=`pwd`/infra/live/gcp/production/prj-p-prod-apps/z_ase1.yaml
+export ZQ_USER=<user_id>@zilliqa.com
+export GITHUB_PAT=<GITHUB_PAT>
+```
+
+### Login to Google Cloud
+
+```sh
+z login
+```
+
+### Add the application to the production `z.yaml` file. Skip this step if it is an existing application
+
+1. Create a branch:
+
+   ```sh
+   git checkout -b users/<username>/add_developer_portal_to_production_cluster
+   ```
+
+2. In the file `infra/live/gcp/production/prj-p-prod-apps/z_ase1.yaml` add the following:
+
+   - in `apps` stanza add:
+
+     ```yaml
+     clusters:
+       production:
+         apps:
+           developer-portal:
+             repo: https://github.com/Zilliqa/zilliqa-developer
+             path: products/developer-portal/cd/overlays/production
+             track: production
+             type: kustomize
+     ```
+
+   - in `subdomains` stanza add:
+
+     ```yaml
+     infrastructure:
+     dns:
+       vars:
+       subdomains:
+         dev: {}
+     ```
+
+3. Push the changes
+
+   ```sh
+   git add .
+   git commit -m "Add Developer Portal to production cluster"
+   git push origin users/<username>/add_developer_portal_to_production_cluster
+   ```
+
+4. Open a Pull Request to the main branch
+
+5. Apply the changes
+
+   ```sh
+   z plan
+   z apply
+   ```
+
+### Deploy the application
+
+```sh
+z app sync --cache-dir=.cache developer-portal
+```
+
+Verify your application is running correct from the production URL and with `kubectl` commands (if required).

@@ -1,0 +1,10 @@
+scilla_version 0
+
+library HelloWorld
+contract HelloWorld()
+
+transition setHello (a : Uint64, c: Uint64)
+  b = Uint64 127;
+  d = builtin add b c;
+  x = builtin fibonacci a d
+end

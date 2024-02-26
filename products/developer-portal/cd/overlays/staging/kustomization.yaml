@@ -8,11 +8,11 @@ resources:
 patches:
   - target:
       kind: Ingress
-      name: zilliqa-devportal
+      name: developer-portal
     patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: zilliqa-devportal.zilstg.dev
+        value: developer-portal.zilstg.dev
       - op: replace
         path: "/spec/rules/1/host"
         value: stg-dev.zilliqa.com
@@ -20,7 +20,7 @@ patches:
         path: /metadata/annotations
         value:
           kubernetes.io/ingress.class: gce
-          kubernetes.io/ingress.global-static-ip-name: zilliqa-devportal-zilstg-dev
-          networking.gke.io/managed-certificates: zilliqa-devportal
+          kubernetes.io/ingress.global-static-ip-name: developer-portal-zilstg-dev
+          networking.gke.io/managed-certificates: developer-portal
 
-namespace: devportal-staging
+namespace: developer-portal-stg

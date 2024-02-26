@@ -1,0 +1,17 @@
+backend: kind
+default_cluster: main
+kind: dev
+
+clusters:
+  main:
+    name: main
+    region: localhost
+    manifests: {}
+    apps:
+      zilliqa-isolated-server:
+        path: products/zilliqa-isolated-server/cd/base
+        track: development
+        type: kustomize
+        namespace: zilliqa-isolated-server
+
+databases: {}
