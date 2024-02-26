@@ -1,0 +1,2 @@
+# Required for products/pdt to be formatted correctly
+edition = "2021"

@@ -1,0 +1,6 @@
+target/
+.vscode/
+# Target for downloaded files
+data/
+# Stores download metadata
+meta.json

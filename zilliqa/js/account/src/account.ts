@@ -15,7 +15,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as zcrypto from '@zilliqa-js/crypto';
+import * as zcrypto from "@zilliqa-js/crypto";
+
+// @ts-ignore
+import { Buffer } from "buffer";
 
 export class Account {
   /**
@@ -60,16 +63,16 @@ export class Account {
    */
   async toFile(
     passphrase: string,
-    kdf: 'pbkdf2' | 'scrypt' = 'scrypt',
+    kdf: "pbkdf2" | "scrypt" = "scrypt"
   ): Promise<string> {
     if (!passphrase || !passphrase.length) {
-      throw new Error('Passphrase cannot have a length of 0');
+      throw new Error("Passphrase cannot have a length of 0");
     }
 
     const keystore = await zcrypto.encryptPrivateKey(
       kdf,
       this.privateKey,
-      passphrase,
+      passphrase
     );
 
     return keystore;

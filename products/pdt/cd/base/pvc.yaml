@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pdt-pvc-testnet
+  namespace: pdt
+  labels:
+    "app.kubernetes.io/name": "pdt"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pdt-pvc-mainnet
+  namespace: pdt
+  labels:
+    "app.kubernetes.io/name": "pdt"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Gi
+  storageClassName: standard

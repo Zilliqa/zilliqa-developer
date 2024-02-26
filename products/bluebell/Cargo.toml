@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "core",
+    "evm_assembly",
+    "cli",
+    "playground",
+    "cargo-webdev",
+]

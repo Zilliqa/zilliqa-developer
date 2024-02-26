@@ -23,6 +23,6 @@ services:
       BLOCKS_PER_REQUEST: ${BLOCKS_PER_REQUEST}
       FAST_SYNC: ${FAST_SYNC}
     ports:
-      - 5000:5000
+      - 80:80
 volumes:
   mongodb_data_container2:
