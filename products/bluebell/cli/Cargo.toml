@@ -1,0 +1,30 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bluebell = { path = "../core" }
+
+# CLI
+clap = { version = "4.3.11", features = ["derive"] }
+log = "0.4.6"
+
+
+# DEPRECATED
+# # LLVM stuff
+# inkwell = {version = "0.2.0", features= ["llvm16-0"]}
+
+
+# EVM
+evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
+evm_assembly = { path = "../evm_assembly" }
+primitive-types = { version = "0.12", default-features = false }
+hex = "0.4"
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+scilla-parser = { git = "https://github.com/Zilliqa/rs-scilla-parser.git", branch="main" }

@@ -4,10 +4,15 @@ title: GetTotalCoinSupply
 ---
 
 ---
+There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupplyAsInt`.
 
-Returns the total supply (ZIL) of coins in the network. This is represented as a `String`.
+`GetTotalCoinSupply` Returns the total supply (ZIL) of coins in the network. This is represented as a
+`String`.
 
-### Example Request
+`GetTotalCoinSupplyAsInt` Returns the total supply (ZIL) of coins in the network. This is represented as a
+`Rounded Number`.
+
+### Example Request-1
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
@@ -86,11 +91,10 @@ func GetTotalCoinSupply() {
 	fmt.Println(string(result))
 }
 ```
-
 </TabItem>
 </Tabs>
 
-### Example Response
+### Example Response-1
 
 ```json
 {
@@ -99,7 +103,43 @@ func GetTotalCoinSupply() {
   "result": "13452081092.277490607172"
 }
 ```
+### Example Request-1
 
+<Tabs
+  defaultValue="cURL"
+  values={[
+    { label: 'cURL', value: 'cURL', },
+    { label: 'node.js', value: 'node.js', },
+    { label: 'java', value: 'java', },
+    { label: 'python', value: 'python', },
+    { label: 'go', value: 'go', },
+  ]
+}>
+
+<TabItem value="cURL">
+
+```shell
+curl -d '{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "method": "GetTotalCoinSupplyAsInt",
+    "params": [""]
+}' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+```
+
+</TabItem>
+</Tabs>
+
+### Example Response-2
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": 13452081092
+}
+```
+**NOTE:** `GetTotalCoinSupplyAsInt` is not avaliable to call through SDKs.
 ### HTTP Request
 
 | Chain(s)              | URL(s)                                       |
@@ -115,5 +155,5 @@ func GetTotalCoinSupply() {
 | --------- | ------ | -------- | ---------------------- |
 | `id`      | string | Required | `"1"`                  |
 | `jsonrpc` | string | Required | `"2.0"`                |
-| `method`  | string | Required | `"GetTotalCoinSupply"` |
+| `method`  | string | Required | `"GetTotalCoinSupply or GetTotalCoinSupplyAsint"` |
 | `params`  | string | Required | Empty string `""`      |

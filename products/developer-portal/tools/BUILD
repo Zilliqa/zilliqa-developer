@@ -22,6 +22,7 @@ py_binary(
         requirement("watchdog"),
         requirement("pymdown-extensions"),
         requirement("mkdocs-material"),
+        requirement("importlib_metadata"),
     ],
 )
 

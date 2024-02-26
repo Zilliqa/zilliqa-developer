@@ -1,0 +1,13 @@
+# BSC Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 0
+rpc_url = "https://bsc-prebsc-dataseed.bnbchain.org"
+chain_gateway_address = "0x5cE584e24f6703f3197Ca83d442807cB82474f8D"
+
+# Zilliqa Testnet
+[[chain_configs]]
+chain_gateway_block_deployed = 0
+rpc_url = "https://dev-api.zilliqa.com"
+chain_gateway_address = "0x18BCE81F9De993cdB2ebd680a44A8068B62D7f26"
+block_instant_finality = true
+legacy_gas_estimation = true

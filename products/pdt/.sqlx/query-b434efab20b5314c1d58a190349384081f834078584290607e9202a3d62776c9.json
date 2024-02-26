@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select * from (select unnest(imported_ranges) as range from transactions_meta) as r",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "range",
+        "type_info": "Int8Range"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b434efab20b5314c1d58a190349384081f834078584290607e9202a3d62776c9"
+}

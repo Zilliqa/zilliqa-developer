@@ -14,6 +14,26 @@ def is_git_dirty(path):
     return out.decode("ascii").strip() != ""
 
 
+def get_dummy_version():
+    ret = {
+        "major": 0,
+        "minor": 0,
+        "placeholder": 0,
+        "prerelease": "",
+        "patch": 0,
+        "build": "unknown",
+        "is_dirty": True,
+        "commit_hash": "000000",
+        "describe": "unknown.0",
+        "regex_match": "no_match",
+        "intersection_point": "main",
+        "dist_from_main_intersection": -1,
+        "branch": "unknown",
+        "branches": "",
+    }
+    return ret
+
+
 def get_version_from_git(path):
     subprocess.check_output("git fetch --all --tags", shell=True)
     ret = {
@@ -22,7 +42,7 @@ def get_version_from_git(path):
         "placeholder": 0,
         "prerelease": "",
         "patch": 0,
-        "build": "unkown",
+        "build": "unknown",
     }
 
     git_is_dirty = is_git_dirty(".")
@@ -168,7 +188,14 @@ def get_version(major, minor, patch, prerelease, commit_hash, is_dirty, **kwargs
 
 
 def main():
-    version = get_version_from_git(".")
+    # Use this to disable status when you have a yubikey and would
+    # otherwise need to keep touching it for every op
+    # - rrw 2023-04-25
+    if os.environ.get("DISABLE_WORKSPACE_STATUS") is not None:
+        version = get_dummy_version()
+    else:
+        version = get_version_from_git(".")
+
     version["version"] = get_version(**version)
     git_hash = version["commit_hash"]
     git_is_dirty = version["is_dirty"]

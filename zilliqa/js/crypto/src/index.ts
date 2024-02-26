@@ -15,9 +15,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as schnorr from './schnorr';
+import * as schnorr from "./schnorr";
+import { Buffer } from "buffer"; /* tslint:disable:no-unused-variable */
 
-import { Signature } from './signature';
+import { Signature } from "./signature";
 
 /**
  * sign
@@ -29,29 +30,29 @@ import { Signature } from './signature';
 export const sign = (
   msg: Buffer,
   privateKey: string,
-  pubKey: string,
+  pubKey: string
 ): string => {
   const sig = schnorr.sign(
     msg,
-    Buffer.from(privateKey, 'hex'),
-    Buffer.from(pubKey, 'hex'),
+    Buffer.from(privateKey, "hex"),
+    Buffer.from(pubKey, "hex")
   );
 
-  let r = sig.r.toString('hex');
-  let s = sig.s.toString('hex');
+  let r = sig.r.toString("hex");
+  let s = sig.s.toString("hex");
   while (r.length < 64) {
-    r = '0' + r;
+    r = "0" + r;
   }
   while (s.length < 64) {
-    s = '0' + s;
+    s = "0" + s;
   }
 
   return r + s;
 };
 
 export { schnorr, Signature };
-export * from './util';
-export * from './keystore';
-export * from './random';
-export * from './types';
-export * from './bech32';
+export * from "./util";
+export * from "./keystore";
+export * from "./random";
+export * from "./types";
+export * from "./bech32";

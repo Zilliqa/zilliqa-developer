@@ -6,13 +6,13 @@ on:
 
 jobs:
   build:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Check that PR is associated with Jira ticket
     runs-on: "ubuntu-latest"
     steps:
       - uses: deepakputhraya/action-pr-title@master
         with:
-          regex: '(DEVOPS|US|ZT)\-\d+\:\s+.*'
-          allowed_prefixes: "DEVOPS,US,ZT" # title should start with the given prefix
+          regex: '([A-Z]+)\-\d+\:\s+.*'
           disallowed_prefixes: "release/,feature/,feat/,hotfix"
           prefix_case_sensitive: false
           min_length: 5

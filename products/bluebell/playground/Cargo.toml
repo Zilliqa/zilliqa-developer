@@ -1,0 +1,38 @@
+[package]
+name = "bluebell-playground"
+version = "0.1.0"
+edition = "2021"
+
+
+[build]
+target = "./index.html"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+yew = { version = "0.20.0", features = ["csr"] }
+yew-router = "0.17.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+serde-wasm-bindgen = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3.64" }
+gloo-utils = "0.1.7"
+gloo-console = "0.2.3"
+regex = "1"
+getrandom = { version = "0.2", features = ["js"] }
+yewdux = "0.9.3"
+gloo-timers = "0.3"
+
+log = "0.4.6"
+wasm-logger = "0.2.0"
+
+# Bluebell
+bluebell = { path = "../core" }
+
+# EVM
+evm = { git = "https://github.com/Zilliqa/evm.git", branch="master" }
+evm_assembly = { path = "../evm_assembly" }
+primitive-types = { version = "0.12", default-features = false }
+hex = "0.4"
