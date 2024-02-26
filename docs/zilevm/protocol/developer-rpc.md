@@ -43,19 +43,30 @@ description: Specification of ZILEVM RPC Endpoint
 - `eth_getLogs`
 - `eth_subscribe`
 - `eth_unsubscribe`
+- `eth_gasPrice`
+- `eth_getBlockByNumber`
+- `eth_getBlockByHash`
+- `eth_estimateGas`
+- `eth_getTransactionReceipt`
+- `eth_recoverTransaction`
+- `eth_getBlockReceipts`
 
-### Partially supported API
+### Partially supported APIs
 
-Partially usually means returning some constant value or partial value, which is satisfying the current testing needs, but will have to be extended in the future for the full implementation.
+These APIs are partially supported; they will return values, but not
+necessarily meaningful ones.
 
 - `eth_accounts` - Will always return an empty set of accounts
 - `eth_syncing` - Will always return false
 
-### Will not be supported
+### Currently unsupported
 
 - `eth_getWork`
 - `eth_submitWork`
 - `eth_submitHashrate`
+- `eth_coinbase`
+- `eth_getUncleByBlockHashAndIndex`
+- `eth_getUncleByBlockNumberAndIndex`
 - `db_putString (deprecated)`
 - `db_getString (deprecated)`
 - `db_putHex (deprecated)`

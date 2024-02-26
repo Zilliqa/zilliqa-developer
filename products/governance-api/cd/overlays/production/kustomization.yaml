@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - certificate.yaml
+  - frontend-config.yaml
+  - secrets-app.yaml
+
+patches:
+  - target:
+      kind: Ingress
+      name: governance-api
+    patch: |-
+      - op: replace
+        path: "/spec/rules/0/host"
+        value: governance-api.zilliqa.com
+      - op: replace
+        path: /metadata/annotations
+        value:
+          kubernetes.io/ingress.class: gce
+          kubernetes.io/ingress.global-static-ip-name: governance-api-zilliqa-com
+          networking.gke.io/managed-certificates: governance-api
+          networking.gke.io/v1beta1.FrontendConfig: governance-api
+
+namespace: governance-api-prd

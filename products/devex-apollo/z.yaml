@@ -1,0 +1,32 @@
+define: &region "asia-southeast1"
+
+backend: kind
+
+clusters:
+  localdev:
+    manifests:
+      nginx-ingress:
+        from: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
+        options: "-f"
+      mongodb-kubernetes-operator:
+        from: "https://github.com/Zilliqa/devops/k8s-manifests/mongodb-kubernetes-operator/overlays/poc"
+        options: -k
+    region: *region
+    name: local-cluster
+    apps:
+      devex-apollo-dev:
+        path: /home/ubuntu/repos/zilliqa-developer/products/devex-apollo/cd/base
+        track: development
+        type: kustomize
+
+databases:
+  mongo:
+    cluster: localdev
+    secrets: file://db-kind-mongo-sec.yaml
+    k8s_secret: mongo-secret
+    db_engine: mongodb-operator
+    db_namespace: database
+    db_names:
+      - devex-apollo
+    db_port: 27027
+    replicas: 3

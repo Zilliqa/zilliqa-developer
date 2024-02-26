@@ -46,3 +46,8 @@ secret/*
 
 *_env
 **/*_env
+
+target/
+**/target/
+
+examples/zilliqa-js/react-zilliqa-js/build/

@@ -2,7 +2,6 @@ load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 load("@npm//:react-app-rewired/package_json.bzl", cra_bin = "bin")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("//config:expand-workspace-status.bzl", "expand_workspace_status")
 
 # Filename conventions described at
 # https://create-react-app.dev/docs/running-tests#filename-conventions
@@ -165,67 +164,30 @@ container_image(
 )
 
 container_push(
-    name = "push_image_staging",
+    name = "push_image_dev",
     format = "Docker",
     image = ":image",
-    registry = "816080630680.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "developer-explorer",
-
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
+    registry = "localhost:5001",
+    repository = "devex",
+    tag = "latest",
 )
 
 container_push(
-    name = "push_image_production",
+    name = "push_image_stg",
     format = "Docker",
     image = ":image",
-    registry = "298213327629.dkr.ecr.us-west-2.amazonaws.com",
-    repository = "developer-explorer",
-
-    # Tagging from workspace status - requires --stamp as build args
-    tag = "{FULL_VERSION_TAG}",
+    registry = "asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public",
+    repository = "devex",
+    tag = "$${IMAGE_TAG#*:}",
 )
 
-###
-# CD update
-
-pkg_tar(
-    name = "cd_base",
-    srcs = glob(["products/devex/cd/base/*.yaml"]),
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
-    name = "staging-kustomization",
-    output = "products/devex/cd/overlays/staging/kustomization.yaml",
-    template = "products/devex/cd/overlays/staging/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_staging_patch",
-    srcs = ["products/devex/cd/overlays/staging/kustomization.yaml"],
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
-)
-
-expand_workspace_status(
-    name = "production-kustomization",
-    output = "products/devex/cd/overlays/production/kustomization.yaml",
-    template = "products/devex/cd/overlays/production/kustomization.tpl.yaml",
-)
-
-pkg_tar(
-    name = "cd_production_patch",
-    srcs = ["products/devex/cd/overlays/production/kustomization.yaml"],
-    mode = "0755",
-    package_dir = "",
-    strip_prefix = ".",
-    visibility = ["//visibility:public"],
+container_push(
+    name = "push_image_prd",
+    format = "Docker",
+    image = ":image",
+    registry = "asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public",
+    repository = "devex",
+    tag = "$${IMAGE_TAG#*:}",
 )
 
 cra_bin.react_app_rewired_binary(

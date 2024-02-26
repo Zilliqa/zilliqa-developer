@@ -14,33 +14,32 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-declare module 'hmac-drbg' {
-  import hash from 'hash.js';
+declare module "hmac-drbg" {
+  import hash from "hash.js";
 
   interface DRBGOpt {
-    hash: typeof hash[keyof typeof hash];
+    hash: (typeof hash)[keyof typeof hash];
     entropy: string | Buffer;
-    entropyEnc?: 'hex';
+    entropyEnc?: "hex";
     nonce: string | Buffer;
-    nonceEnc?: 'hex';
+    nonceEnc?: "hex";
     pers: string | Buffer;
-    persEnc?: 'hex';
+    persEnc?: "hex";
   }
 
   export default class HmacDRBG {
     constructor(opt: DRBGOpt);
     reseed(
       entropy: string | Buffer,
-      entropyEnc: 'hex',
+      entropyEnc: "hex",
       add: string | Buffer,
-      addEnc: 'hex',
+      addEnc: "hex"
     ): HmacDRBG;
     generate(
       len: number,
-      enc?: 'hex',
+      enc?: "hex",
       add?: string | Buffer,
-      addEnc?: 'hex',
+      addEnc?: "hex"
     ): string;
   }
 }

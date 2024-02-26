@@ -1,0 +1,24 @@
+[package]
+name = "pdtbq"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+pdtlib = { path = "../pdtlib" }
+pdtdb = { path = "../pdtdb" }
+primitive-types = { version = "0.12.2", features = ["serde"] }
+clap = "4.2.4"
+tokio = "1.27.0"
+gcp-bigquery-client = "0.18.0"
+#gcp-bigquery-client = { path = "../../../gcp-bigquery-client" }
+anyhow = "1.0.71"
+serde = { version = "1.0.163", features = ["derive"] }
+hex = "0.4.3"
+sha2 = "0.10.6"
+serde_json = { version = "1.0.102", features = ["preserve_order"] }
+base64 = "0.21.2"
+sha3 = "0.10.8"
+async-trait = "0.1.68"
+home = "0.5.5"

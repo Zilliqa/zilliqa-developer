@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: devex-apollo
+  namespace: devex-apollo
+  labels:
+    app.kubernetes.io/name: devex-apollo
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: devex-apollo
+                port:
+                  number: 80
+    - host: dev-devex-apollo.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: devex-apollo
+                port:
+                  number: 80
