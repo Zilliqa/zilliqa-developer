@@ -1,23 +1,19 @@
-use crate::executable::TypeSourceMap;
-use crate::io_interface::EvmIoInterface;
-use evm::executor::stack::PrecompileFn;
-use evm::Capture;
-use evm::ExitReason;
-use evm::Trap;
+use std::{
+    collections::{BTreeMap, HashMap, HashSet},
+    rc::Rc,
+    str::FromStr,
+};
 
-use primitive_types::U256;
-use std::collections::BTreeMap;
+use evm::{
+    executor::stack::PrecompileFn,
+    Capture,
+    Capture::{Exit, Trap as CaptureTrap},
+    Context, ExitReason, Machine, Opcode, Trap,
+};
+use log::{error, info};
+use primitive_types::{H160, H256, U256};
 
-use evm::Capture::Exit;
-use evm::Capture::Trap as CaptureTrap;
-use evm::Context;
-use evm::Machine;
-use evm::Opcode;
-
-use primitive_types::{H160, H256};
-
-use std::collections::{HashMap, HashSet};
-use std::rc::Rc;
+use crate::{executable::TypeSourceMap, io_interface::EvmIoInterface};
 
 pub type EvmPrecompileSet = BTreeMap<H160, PrecompileFn>;
 
@@ -31,6 +27,8 @@ pub struct ObservableMachine {
     pub error_message: Option<String>,
     pub storage: HashMap<H256, H256>,
     pub precompile_set: Option<EvmPrecompileSet>,
+
+    pub caller: H160,
 }
 
 fn h160_to_usize(address: H160) -> usize {
@@ -63,7 +61,13 @@ impl ObservableMachine {
             error_message: None,
             storage: HashMap::new(),
             precompile_set,
+            caller: H160::zero(),
         }
+    }
+
+    pub fn set_caller(&mut self, caller: String) {
+        let caller_address = H160::from_str(&caller).expect("Failed to parse caller address");
+        self.caller = caller_address;
     }
 
     pub fn set_source_map(&mut self, source_map: &TypeSourceMap) {
@@ -110,6 +114,13 @@ impl ObservableMachine {
 
                             let _ = stack.push(value);
                         }
+                        Opcode::CALLER => {
+                            let stack = self.machine.stack_mut();
+
+                            let h256_bytes = [0u8; 32]; // Create h256_bytes[12..].copy_from_slice(&self.caller.0);
+
+                            let _ = stack.push(H256::from_slice(&h256_bytes));
+                        }
                         Opcode::CALLVALUE => {
                             let stack = self.machine.stack_mut();
                             // We always assume zero value caller (root call)
@@ -128,8 +139,8 @@ impl ObservableMachine {
                         Opcode::STATICCALL => {
                             // Emulating static call
                             // TODO: Attach runtime!
-
-                            let (gas, address, args_offset, args_size, ret_offset, ret_size) = {
+                            info!("Static call");
+                            let (gas, address, args_offset, args_size, _ret_offset, _ret_size) = {
                                 let stack = self.machine.stack_mut();
                                 let gas: u64 = match stack.pop() {
                                     Ok(g) => h160_to_usize(g.into()) as u64,
@@ -176,13 +187,17 @@ impl ObservableMachine {
                                     let ret = {
                                         let mem = self.machine.memory().data();
                                         let end = args_offset + args_size;
-                                        //let
-                                        let input = &mem[args_offset..end]; //args_offset, args_offset+args_size);
+
+                                        let input = if args_size > 0 {
+                                            &mem[args_offset..end]
+                                        } else {
+                                            &[]
+                                        };
 
                                         // TODO: Integrate these properly
                                         let dummy_context = Context {
                                             address: H160::zero(),
-                                            caller: H160::zero(),
+                                            caller: self.caller.clone(),
                                             apparent_value: U256::zero(),
                                         };
                                         let dummy_backend = EvmIoInterface::new(BTreeMap::new());
@@ -195,12 +210,15 @@ impl ObservableMachine {
                                         // TODO: Write ret to memory
                                         H256::zero()
                                     } else {
+                                        error!("Result error in static call");
                                         H256::zero()
                                     }
                                 } else {
+                                    error!("Contract on address {:?} not found", address);
                                     H256::zero()
                                 }
                             } else {
+                                error!("Precompile set not found");
                                 H256::zero()
                             };
 
@@ -209,6 +227,7 @@ impl ObservableMachine {
                                 panic!("Failed to push result to stack");
                             }
                         }
+
                         _ => {
                             self.failed = true;
                             self.error_message = Some(format!("{:?}", opcode).to_string());
@@ -276,5 +295,13 @@ impl ObservableMachine {
 
     pub fn did_not_visit_line(&self, pc: u32) -> bool {
         None == self.lines_visited.get(&pc)
+    }
+
+    pub fn has_record(&self, key: &H256, value: &H256) -> bool {
+        // Check if the key exists in storage and if its value matches the given value
+        match self.storage.get(&key) {
+            Some(stored_value) => *stored_value == *value,
+            None => false,
+        }
     }
 }

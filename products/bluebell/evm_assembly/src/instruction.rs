@@ -20,13 +20,15 @@ pub struct EvmInstruction {
     pub opcode: Opcode,
     pub arguments: Vec<u8>,
 
-    pub unresolved_label: Option<String>,
+    pub unresolved_argument_label: Option<String>,
 
     pub stack_size: i32, // The number of elements on the stack since the start of the block before this instruction is executed
     pub is_terminator: bool,
     pub comment: Option<String>,
     pub source_position: Option<EvmSourcePosition>,
     pub rust_position: Option<RustPosition>,
+
+    pub label: Option<String>,
 }
 
 impl EvmInstruction {

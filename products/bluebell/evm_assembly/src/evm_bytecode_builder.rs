@@ -1,20 +1,20 @@
-use crate::bytecode_ir::EvmBytecodeIr;
-use crate::compiler_context::EvmCompilerContext;
-use crate::executable::EvmExecutable;
-use crate::opcode_spec::OpcodeSpec;
-use std::collections::BTreeSet;
-use std::collections::HashSet;
-use std::mem;
+use std::{
+    collections::{BTreeSet, HashMap, HashSet},
+    mem,
+};
 
 use evm::Opcode;
 
-use std::collections::HashMap;
-
-use crate::block::EvmBlock;
-use crate::evm_decompiler::EvmAssemblyGenerator;
-use crate::function::EvmFunction;
-use crate::opcode_spec::{create_opcode_spec, OpcodeSpecification};
-use crate::types::EvmType;
+use crate::{
+    block::EvmBlock,
+    bytecode_ir::EvmBytecodeIr,
+    compiler_context::EvmCompilerContext,
+    evm_decompiler::EvmAssemblyGenerator,
+    executable::EvmExecutable,
+    function::EvmFunction,
+    opcode_spec::{create_opcode_spec, OpcodeSpec, OpcodeSpecification},
+    types::EvmType,
+};
 
 pub struct FunctionBuilder<'a, 'ctx> {
     pub builder: &'a mut EvmByteCodeBuilder<'ctx>,
@@ -437,6 +437,9 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
                 }
                 for instruction in block.instructions.iter_mut() {
                     instruction.position = Some(position);
+                    if let Some(label) = &instruction.label {
+                        self.label_positions.insert(label.to_string(), position);
+                    }
                     position += 1 + instruction.expected_args_length() as u32;
                 }
             }
@@ -455,12 +458,13 @@ impl<'ctx> EvmByteCodeBuilder<'ctx> {
         for function in self.ir.functions.iter_mut() {
             for block in function.blocks.iter_mut() {
                 for instruction in block.instructions.iter_mut() {
-                    if let Some(name) = &instruction.unresolved_label {
+                    if let Some(name) = &instruction.unresolved_argument_label {
                         match self.label_positions.get(name) {
                             Some(p) => {
                                 instruction.u32_to_arg_big_endian(*p);
                             }
                             None => {
+                                println!("Available labels: {:#?}", self.label_positions);
                                 panic!("Label not found {:#?}!", name);
                             }
                         }

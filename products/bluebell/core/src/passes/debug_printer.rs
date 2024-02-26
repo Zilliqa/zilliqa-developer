@@ -1,16 +1,15 @@
-use crate::constants::{TraversalResult, TreeTraversalMode};
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::pass_executor::PassExecutor;
-use crate::intermediate_representation::primitives::CaseClause;
-use crate::intermediate_representation::primitives::ContractField;
-use crate::intermediate_representation::primitives::Instruction;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, EnumValue, FunctionBlock, FunctionBody, FunctionKind,
-    IntermediateRepresentation, IrIdentifier, IrIndentifierKind, Operation, Tuple,
-    VariableDeclaration, Variant,
+use scilla_parser::ast::{TraversalResult, TreeTraversalMode};
+
+use crate::intermediate_representation::{
+    pass::IrPass,
+    pass_executor::PassExecutor,
+    primitives::{
+        CaseClause, ConcreteFunction, ConcreteType, ContractField, EnumValue, FunctionBlock,
+        FunctionBody, FunctionKind, Instruction, IntermediateRepresentation, IrIdentifier,
+        IrIndentifierKind, Operation, Tuple, VariableDeclaration, Variant,
+    },
+    symbol_table::SymbolTable,
 };
-use crate::intermediate_representation::symbol_table::SymbolTable;
-use log::info;
 
 pub struct DebugPrinter {
     script: String,
@@ -41,6 +40,7 @@ impl IrPass for DebugPrinter {
             IrIndentifierKind::Event => self.script.push_str("@"),
             IrIndentifierKind::Namespace => self.script.push_str("@"),
             IrIndentifierKind::BlockLabel => self.script.push_str(":"),
+            IrIndentifierKind::ContextResource => self.script.push_str("~"),
             IrIndentifierKind::VirtualRegister => self.script.push_str("%"),
             IrIndentifierKind::VirtualRegisterIntermediate => self.script.push_str("%"),
             IrIndentifierKind::Memory => self.script.push_str("%"),
@@ -155,13 +155,6 @@ impl IrPass for DebugPrinter {
             Operation::Noop => {
                 self.script.push_str("noop");
             }
-            Operation::Switch { cases, on_default } => {
-                self.script.push_str("switch ");
-                for case in cases.iter_mut() {
-                    case.visit(self, symbol_table)?;
-                }
-                on_default.visit(self, symbol_table)?;
-            }
             Operation::Jump(identifier) => {
                 self.script.push_str("jmp ");
                 identifier.visit(self, symbol_table)?;
@@ -239,12 +232,15 @@ impl IrPass for DebugPrinter {
             Operation::ResolveSymbol { symbol } => {
                 symbol.visit(self, symbol_table)?;
             }
+            Operation::ResolveContextResource { symbol } => {
+                symbol.visit(self, symbol_table)?;
+            }
+
             Operation::Literal { data, typename } => {
                 typename.visit(self, symbol_table)?;
                 self.script.push_str(" ");
                 self.script.push_str(&data);
             }
-            Operation::AcceptTransfer => self.script.push_str("accept"),
             Operation::PhiNode(arguments) => {
                 self.script.push_str("phi [");
                 for (i, arg) in arguments.iter_mut().enumerate() {

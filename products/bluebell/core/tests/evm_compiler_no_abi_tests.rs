@@ -1,17 +1,16 @@
 #[cfg(test)]
 mod tests {
-    use bluebell::support::evm::EvmCompiler;
-    use bluebell::support::modules::ScillaDebugBuiltins;
-    use bluebell::support::modules::ScillaDefaultBuiltins;
-    use bluebell::support::modules::ScillaDefaultTypes;
-    use evm_assembly::executable::EvmExecutable;
-    use evm_assembly::executor::ExecutorResult;
-    use evm_assembly::observable_machine::ObservableMachine;
-    use evm_assembly::types::EvmTypeValue;
-
-    use serde_json;
-
     use std::rc::Rc;
+
+    use bluebell::support::{
+        evm::EvmCompiler,
+        modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
+    };
+    use evm_assembly::{
+        executable::EvmExecutable, executor::ExecutorResult, observable_machine::ObservableMachine,
+        types::EvmTypeValue,
+    };
+    use serde_json;
 
     fn result_to_string(ret: ExecutorResult) -> String {
         let mut result = "".to_string();
@@ -53,10 +52,6 @@ mod tests {
         compiler.attach(&default_builtins);
         compiler.attach(&debug);
         let executable = compiler.executable_from_script(script.to_string())?;
-        println!(
-            "Produced code: {}",
-            hex::encode(&executable.executable.bytecode.clone())
-        );
 
         let arguments: Vec<EvmTypeValue> = if args == "" {
             [].to_vec()
@@ -259,10 +254,10 @@ transition setHello ()
 	x = False;
 	match x with
 	  | True =>
-	    a = builtin print__impl msg
+	    print msg
 	  | False =>
-	    a = builtin print__impl msg;
-	    b = builtin print__impl msg
+	    print msg;
+	    print msg
 	end
 end
 "#
@@ -289,8 +284,8 @@ contract HelloWorld()
 
 transition setHello ()
   msg = Uint64 12;
-  x = builtin print__impl msg;
-  y = builtin print__impl msg
+  print msg;
+  print msg
 end
 "#,
             ""
@@ -319,10 +314,10 @@ transition setHello ()
   is_owner = False;
   match is_owner with
   | True =>
-    x = builtin print__impl msg
+    print msg
   | False =>
-    x = builtin print__impl msg;
-    y = builtin print__impl msg
+    print msg;
+    print msg
   end
 
 end
@@ -351,7 +346,7 @@ transition setHello (msg : Uint64)
   is_owner = True;
   match is_owner with
   | True =>
-    x = builtin print__impl msg
+    print msg
   end
 end
 "#,
@@ -393,7 +388,7 @@ end
 transition setHello (msg : Uint64)
   setHelloImpl msg;
   msg <- welcome_msg;
-  x = builtin print msg
+  print msg
 end
 "#,
             ""

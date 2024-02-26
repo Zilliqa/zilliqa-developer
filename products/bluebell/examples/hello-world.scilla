@@ -1,15 +1,8 @@
 scilla_version 0
 
-library TheLibraryPart
+library HelloWorld
+contract HelloWorld()
 
-contract TheContractPart()
-
-transition hello()
-  msg1 = "Zilliqa Rocks!";
-  msg2 = "Zilliqa Matches!";
-  b = True;
-  match b with
-    | True => x = builtin print msg1
-    | False => x = builtin print msg2
-  end
+transition setHello (msg : String)
+  print msg
 end

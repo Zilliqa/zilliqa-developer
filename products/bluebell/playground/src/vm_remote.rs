@@ -1,12 +1,15 @@
-use crate::state::{State, StateMessage};
-use crate::vm_remote_layout::VmRemoteControlLayout;
-use crate::vm_remote_state::{VmRemoteMessage, VmRemoteState};
-use gloo_console::info;
-use gloo_timers::callback::Timeout;
 use std::rc::Rc;
+
+use gloo_timers::callback::Timeout;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yewdux::prelude::*;
+
+use crate::{
+    state::{State, StateMessage},
+    vm_remote_layout::VmRemoteControlLayout,
+    vm_remote_state::{VmRemoteMessage, VmRemoteState},
+};
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct VmRemoteProps {}
@@ -82,6 +85,10 @@ impl Component for VmRemote {
             .dispatch
             .apply_callback(|(i, value)| VmRemoteMessage::SetArgument(i, value));
 
+        let set_caller = self
+            .dispatch
+            .apply_callback(|value| VmRemoteMessage::SetCaller(value));
+
         let load_function = !self.vm_state.function_loaded;
 
         let run_button_click = {
@@ -137,7 +144,7 @@ impl Component for VmRemote {
                         { if load_function {
                             html! {
                                 <>
-                                    <div class="w-full" onmouseover={move |e: MouseEvent| e.stop_propagation()}
+                                    <div class="w-full flex flex-col space-y-2" onmouseover={move |e: MouseEvent| e.stop_propagation()}
                                      onmousedown={move |e: MouseEvent| e.stop_propagation()}
                                      onmouseup={move |e: MouseEvent| e.stop_propagation()}>
                                         <select class="w-full bg-zinc-900 py-2" onchange={move |e: Event| {
@@ -163,6 +170,10 @@ impl Component for VmRemote {
                                                 }
                                             }).collect::<Vec<_>>()}
                                         </select>
+                                        <input type="text" placeholder="Caller" class="p-1 bg-zinc-700 text-white rounded" oninput={move |e:InputEvent| {
+                                            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+                                            set_caller.emit(value);
+                                        }}/>
                                     </div>
                                     { if let Some(ref signature) = signature {
                                             html! {
@@ -199,6 +210,11 @@ impl Component for VmRemote {
                                             <span>{format!("0x{:02x}", self.vm_state.program_counter)}</span>
                                             <span>{format!("({})", self.vm_state.program_counter)}</span>
                                         </div>
+                                        <div class="flex items-center space-x-1">
+                                            <span class="font-bold">{"Caller:"}</span>
+                                            <span>{format!("({})", self.state.caller)}</span>
+                                        </div>
+
                                     </>
                                 }
                             }

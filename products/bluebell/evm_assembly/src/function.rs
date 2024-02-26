@@ -1,8 +1,8 @@
-use crate::block::EvmBlock;
-use crate::function_signature::EvmFunctionSignature;
+use std::collections::{HashMap, HashSet, VecDeque};
+
 use evm::Opcode;
-use std::collections::HashSet;
-use std::collections::{HashMap, VecDeque};
+
+use crate::{block::EvmBlock, function_signature::EvmFunctionSignature};
 
 #[derive(Debug, Clone)]
 pub struct EvmFunction {
@@ -64,7 +64,7 @@ impl EvmFunction {
                         // TODO: Check 0
                         continue;
                     }
-                    Opcode::JUMP | Opcode::JUMPI => &instr.unresolved_label,
+                    Opcode::JUMP | Opcode::JUMPI => &instr.unresolved_argument_label,
                     _ => continue,
                 };
 

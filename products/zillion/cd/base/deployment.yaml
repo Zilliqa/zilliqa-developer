@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zillion
+  namespace: zillion
+  labels:
+    "app.kubernetes.io/name": "zillion"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "zillion"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "zillion"
+    spec:
+      containers:
+        - image: zillion
+          name: zillion
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              memory: 100Mi
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html/config.js
+              name: zillion-config
+              subPath: config.js
+      volumes:
+        - name: zillion-config
+          configMap:
+            name: zillion-config

@@ -1,14 +1,18 @@
-use crate::function_signature::EvmFunctionSignature;
-use crate::instruction::{EvmInstruction, EvmSourcePosition, RustPosition};
-use crate::opcode_spec::{OpcodeSpec, OpcodeSpecification};
-use crate::types::EvmTypeValue;
+use std::{
+    collections::{BTreeSet, HashMap},
+    mem,
+};
+
 use evm::Opcode;
 use log::info;
-
 use primitive_types::U256;
-use std::collections::BTreeSet;
-use std::collections::HashMap;
-use std::mem;
+
+use crate::{
+    function_signature::EvmFunctionSignature,
+    instruction::{EvmInstruction, EvmSourcePosition, RustPosition},
+    opcode_spec::{OpcodeSpec, OpcodeSpecification},
+    types::{EvmType, EvmTypeValue},
+};
 
 pub const ALLOCATION_POINTER: u8 = 0x40;
 pub const MEMORY_OFFSET: u8 = 0x80;
@@ -138,32 +142,36 @@ impl Scope {
     }
 
     fn swap(&mut self, depth: i32) {
-        let name_at_depth: Option<String> = match self.location_name.get(&depth) {
+        let position = self.stack_counter - depth;
+
+        let name_at_position: Option<String> = match self.location_name.get(&position) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        let name_at_zero: Option<String> = match self.location_name.get(&0) {
+        let name_at_zero: Option<String> = match self.location_name.get(&self.stack_counter) {
             Some(n) => Some(n.clone()),
             None => None,
         };
 
-        if let Some(name_at_depth) = &name_at_depth {
-            self.location_name.remove(&depth);
-            self.name_location.remove(name_at_depth);
+        if let Some(name_at_position) = &name_at_position {
+            self.location_name.remove(&position);
+            self.name_location.remove(name_at_position);
         }
 
         if let Some(name_at_zero) = name_at_zero {
-            self.location_name.remove(&0);
+            self.location_name.remove(&self.stack_counter);
             self.name_location.remove(&name_at_zero);
 
-            self.name_location.insert(name_at_zero.to_string(), depth);
-            self.location_name.insert(depth, name_at_zero.to_string());
+            self.name_location
+                .insert(name_at_zero.to_string(), position);
+            self.location_name
+                .insert(position, name_at_zero.to_string());
         }
 
-        if let Some(name_at_depth) = name_at_depth {
-            self.name_location.insert(name_at_depth.to_string(), 0);
-            self.location_name.insert(0, name_at_depth.to_string());
+        if let Some(name_at_position) = name_at_position {
+            self.name_location.insert(name_at_position.to_string(), 0);
+            self.location_name.insert(0, name_at_position.to_string());
         }
     }
 }
@@ -189,6 +197,8 @@ pub struct EvmBlock {
     pub source_position: Option<EvmSourcePosition>,
     pub rust_position: Option<RustPosition>,
     pub block_arugments: Option<BTreeSet<String>>,
+    pub next_label: Option<String>,
+    pub label_counter: u32,
 }
 
 impl EvmBlock {
@@ -221,6 +231,8 @@ impl EvmBlock {
             source_position: None,
             rust_position: None,
             block_arugments: Some(arg_names.clone()),
+            next_label: None,
+            label_counter: 0,
         };
 
         for (i, name) in arg_names.iter().enumerate() {
@@ -232,6 +244,12 @@ impl EvmBlock {
         ret.jumpdest();
 
         ret
+    }
+
+    pub fn generate_label(&mut self, label: String) -> String {
+        let label = format!("{}__{}__{}", self.name, label, self.label_counter).to_string();
+        self.label_counter += 1;
+        label
     }
 
     pub fn set_next_instruction_comment(&mut self, comment: String) {
@@ -371,6 +389,82 @@ impl EvmBlock {
         }
     }
 
+    pub fn alloca(&mut self) {
+        // Stack args: [size]
+        todo!("Implement alloca");
+    }
+
+    pub fn mem_copy(&mut self) {
+        // Stack args: [dest, source, size]
+    }
+
+    pub fn copy_object(&mut self) {
+        // Stack args: [dest, source]
+        // p_dest => p_dest
+        // p_src  => p_src
+        //        => len
+        //        => 0x0
+
+        self.dup1();
+        self.mload();
+        self.push1([224].to_vec());
+        self.shr();
+        self.set_next_instruction_comment("Copy loop counter".to_string());
+        // Increasing copy len by 4 to ensure that we also copy the length
+        // of the object (stored in u32)
+        self.push([0x04].to_vec());
+        self.add();
+
+        self.push1([0x0].to_vec());
+
+        let lbl_condition = self.generate_label("copy_loop_condition".to_string());
+        let lbl_done = self.generate_label("copy_done".to_string());
+        let lbl_body = self.generate_label("copy_body".to_string());
+
+        self.create_label(lbl_condition.clone());
+        self.dup2();
+        self.dup2();
+        self.lt();
+        self.jump_if_to(&lbl_body);
+        self.jump_to(&lbl_done);
+
+        self.create_label(lbl_body);
+        // Stack:
+        // p_dest  => p_dest + 0x20
+        // p_src   => p_src + 0x20
+        // len     => len
+        // counter => counter + 0x20
+
+        self.dup3();
+        self.push([0x20].to_vec());
+        self.add();
+        self.swap3();
+
+        self.mload();
+
+        self.dup5();
+        self.push([0x20].to_vec());
+        self.add();
+        self.swap5();
+
+        self.mstore();
+
+        self.push([0x20].to_vec());
+        self.add();
+        self.jump_to(&lbl_condition);
+
+        // Stack:
+        // p_dest
+        // p_src
+        // len
+        // counter
+        self.create_label(lbl_done);
+        self.pop();
+        self.swap2();
+        self.pop();
+        self.pop();
+    }
+
     pub fn alloca_static(&mut self, size: u64) {
         self.push1([ALLOCATION_POINTER].to_vec());
         self.mload(); // Stack element is the pointer to be left on stack
@@ -381,6 +475,47 @@ impl EvmBlock {
         self.mstore();
     }
 
+    pub fn allocate_object(&mut self, value: Vec<u8>) {
+        let chunks = (4 + value.len() + 31) / 32;
+        let padded_length = chunks * 32;
+
+        self.alloca_static((padded_length).try_into().unwrap());
+
+        // Storing size
+        self.push_u32(value.len().try_into().unwrap());
+        self.push1([224].to_vec());
+        self.shl();
+        self.dup2();
+        self.mstore();
+
+        self.dup1(); // Adding rolling pointer
+        self.push1([4].to_vec());
+        self.add();
+
+        for i in 0..chunks {
+            let start = i * 32;
+            let mut end = (i + 1) * 32;
+            if end > value.len() {
+                end = value.len();
+            }
+            let mut byte_slice: Vec<u8> = value[start..end].into();
+            while byte_slice.len() < 32 {
+                byte_slice.push(0);
+            }
+
+            self.push(byte_slice);
+            self.dup2();
+            self.mstore();
+
+            if i != chunks - 1 {
+                self.push1([32].to_vec());
+                self.add();
+            }
+        }
+
+        self.pop(); // Removing rolling pointer
+    }
+
     pub fn call_internal(
         &mut self,
         _function: &EvmFunctionSignature,
@@ -389,54 +524,189 @@ impl EvmBlock {
         todo!()
     }
 
-    pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<String>) -> &mut Self {
+    pub fn call(&mut self, function: &EvmFunctionSignature, args: Vec<EvmType>) -> &mut Self {
+        if let Some(generator) = function.inline_assembly_generator {
+            generator(self);
+            return self;
+        }
+
         let address = match function.external_address {
             Some(a) => a,
-            None => panic!("TODO: Internal calls not supported yet."),
+            None => {
+                info!("{:#?}", function);
+                panic!(
+                    "TODO: Internal calls' not supported yet. Attempted to call {}",
+                    function.name
+                )
+            }
         };
         // TODO: Deal with internal calls
         // See https://medium.com/@rbkhmrcr/precompiles-solidity-e5d29bd428c4
+        // Head-tail encoding https://medium.com/@hayeah/how-to-decipher-a-smart-contract-method-call-8ee980311603
 
         self.push1([ALLOCATION_POINTER].to_vec());
+        // Stack:
+        // arg N     => arg N
+        // alloc_ptr => p
+        //           => p_data
+
         self.mload(); // Stack element is the pointer
 
-        for (i, _arg) in args.iter().enumerate().rev() {
-            self.swap1();
-            self.dup2();
-            self.push1([(i * 0x20) as u8].to_vec());
-            self.add();
-            self.mstore();
+        self.dup1(); // p_data = p + 0x20 * len(args)
+        self.push_u32((0x20 * args.len()).try_into().unwrap());
+        self.add();
+
+        for (i, arg) in args.iter().enumerate().rev() {
+            match arg {
+                EvmType::String => {
+                    // By default we store in head:
+                    // p_data - p ->  p + 0x20 * i (p_head)
+
+                    // Stack:
+                    // arg N  => p
+                    // p      => p_data
+                    // p_data => arg N
+                    self.swap1();
+                    self.swap2();
+
+                    // Stack:
+                    // p       => p
+                    // p_data  => p_data
+                    // arg N   => arg N
+                    //         => tail offset
+                    self.dup3();
+                    self.dup3();
+                    self.sub();
+
+                    // Stack:
+                    // p           => p
+                    // p_data      => p_data
+                    // arg N       => arg N
+                    // tail offset => tail offset
+                    //             => p_head
+                    self.dup4();
+                    self.push_u32((0x20 * i) as u32);
+                    self.add();
+
+                    // Stack:
+                    // p           => p
+                    // p_data      => p_data
+                    // arg N       => arg N
+                    // tail offset
+                    // p_head
+                    self.mstore();
+
+                    // Storing the tail:
+                    // arg N -> *p_data
+
+                    // Stack:
+                    // p      => p
+                    // p_data => p_data
+                    // arg N  => arg N (p_str)
+                    //        => p_data
+                    self.dup2();
+
+                    // Stack:
+                    // p      => p
+                    // p_data => p_data
+                    // arg N
+                    // p_data
+
+                    self.set_next_instruction_comment("Loading string argument".to_string());
+
+                    // Stack:
+                    // p             => p
+                    // p_data        => p_data
+                    // arg N (p_str) => p_data (dest)
+                    // p_data        => p_str  (src)
+                    self.swap1();
+
+                    // Stack:
+                    // p             => p
+                    // p_data        => p_data
+                    // p_data     (dest) => copy len
+                    // p_str_data (src)
+                    self.set_next_instruction_comment("Copying string to call data".to_string());
+                    self.copy_object();
+                    self.add();
+
+                    // panic!("Strings not supported.");
+                }
+                _ => {
+                    // By default we store in head:
+                    // arg N - > p + 0x20 * i (p_head)
+
+                    // Stack:
+                    // arg N  => p
+                    // p      => p_data
+                    // p_data => arg N
+                    self.swap1();
+                    self.swap2();
+
+                    // Stack:
+                    // p      => p
+                    // p_data => p_data
+                    // arg N  => arg N
+                    //        => p_head
+                    self.dup3();
+                    self.push_u32((0x20 * i) as u32);
+                    self.add();
+
+                    // Stack:
+                    // p      => p
+                    // p_data => p_data
+                    // arg N
+                    self.mstore();
+                    continue;
+                }
+            }
         }
 
-        for (i, _) in args.iter().enumerate().rev() {
-            let j = i + args.len();
+        // Target format: gas address argsOffset argsSize retOffset retSize
 
-            self.push1([0x20].to_vec()); // Length of the argument, TODO: Get length
-
-            self.dup2();
-            self.push1([(j * 0x20) as u8].to_vec());
-            self.add();
-            self.mstore();
-        }
+        // Stack:
+        // p        => p
+        // p_data   => data_size
+        self.dup2();
+        self.swap1();
+        self.sub();
 
         let gas = EvmTypeValue::Uint32(0x1337); // TODO: How to compute this or where to get it from
         let address = EvmTypeValue::Uint32(address);
-        let argsize = EvmTypeValue::Uint32((args.len() * 0x20) as u32); // Each argument is 32 byte long
+
+        // Stack:
+        // p         => p
+        // data_size => data_size
+        //           => 0x20
 
         self.push([0x20].to_vec()); //return size, TODO: Compute the size of the return type
 
-        self.dup2(); //
-        self.push(argsize.to_bytes_unpadded());
+        // Stack:
+        // p            => 0x20
+        // data_size    => p
+        // 0x20         => data_size
+        self.swap2();
+        self.swap1();
 
-        self.dup4(); // p
+        // Stack:
+        // 0x20         => 0x20
+        // p            => p
+        // data_size    => data_size
+        //              => p
+        self.dup2();
+
+        // Stack:
+        // 0x20         => 0x20
+        // p            => p
+        // data_size    => data_size
+        // p            => p
+        //              => address
+        //              => gas
         self.push(address.to_bytes_unpadded());
         self.push(gas.to_bytes_unpadded());
 
         // TODO: How come self.external_call(); does not call the precompile?
         self.external_staticcall();
-
-        self.swap1(); // Removing stack pointer.
-        self.pop();
 
         self
     }
@@ -463,13 +733,14 @@ impl EvmBlock {
                 position: Some(i as u32),
                 opcode,
                 arguments: Vec::new(),
-                unresolved_label: None,
+                unresolved_argument_label: None,
 
                 stack_size: 0, // TODO: Should be calculated using write_instruction
                 is_terminator,
                 comment: None,
                 source_position: None,
                 rust_position: None,
+                label: None,
             };
 
             i += 1;
@@ -521,7 +792,7 @@ impl EvmBlock {
     pub fn write_instruction(
         &mut self,
         opcode: Opcode,
-        unresolved_label: Option<String>,
+        unresolved_argument_label: Option<String>,
     ) -> &mut Self {
         let mut comment = None;
         mem::swap(&mut comment, &mut self.comment);
@@ -531,18 +802,21 @@ impl EvmBlock {
 
         let mut rust_position = None;
         mem::swap(&mut rust_position, &mut self.rust_position);
+        let mut label = None;
+        mem::swap(&mut label, &mut self.next_label);
 
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
             arguments: [].to_vec(),
-            unresolved_label,
+            unresolved_argument_label,
 
             stack_size: self.scope.stack_counter,
             is_terminator: false,
             comment,
             source_position,
             rust_position,
+            label,
         });
         self.update_stack(opcode);
 
@@ -561,18 +835,22 @@ impl EvmBlock {
         let mut rust_position = None;
         mem::swap(&mut rust_position, &mut self.rust_position);
 
+        let mut label = None;
+        mem::swap(&mut label, &mut self.next_label);
+
         self.instructions.push(EvmInstruction {
             position: None,
             opcode: opcode.clone(),
             arguments,
 
-            unresolved_label: None,
+            unresolved_argument_label: None,
 
             stack_size: self.scope.stack_counter,
             is_terminator: false,
             comment,
             source_position,
             rust_position,
+            label,
         });
 
         self.update_stack(opcode);
@@ -750,6 +1028,11 @@ impl EvmBlock {
     }
 
     pub fn jumpdest(&mut self) -> &mut Self {
+        self.write_instruction(Opcode::JUMPDEST, None)
+    }
+
+    pub fn create_label(&mut self, label: String) -> &mut Self {
+        self.next_label = Some(label);
         self.write_instruction(Opcode::JUMPDEST, None)
     }
 

@@ -1,25 +1,25 @@
-use crate::constants::TreeTraversalMode;
-use crate::intermediate_representation::pass::IrPass;
-use crate::intermediate_representation::primitives::Operation;
-use crate::intermediate_representation::primitives::{
-    ConcreteFunction, ConcreteType, IntermediateRepresentation, IrLowering,
-};
-use crate::intermediate_representation::symbol_table::StateLayoutEntry;
-use crate::passes::debug_printer::DebugPrinter;
-use evm_assembly::block::EvmBlock;
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::executable::EvmExecutable;
-use evm_assembly::instruction::EvmSourcePosition;
-use log::warn;
-use primitive_types::U256;
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, mem, str::FromStr};
 
-use evm_assembly::types::EvmTypeValue;
-use evm_assembly::EvmAssemblyGenerator;
-use evm_assembly::EvmByteCodeBuilder;
-use log::info;
+use evm_assembly::{
+    block::EvmBlock,
+    compiler_context::EvmCompilerContext,
+    executable::EvmExecutable,
+    instruction::EvmSourcePosition,
+    types::{EvmType, EvmTypeValue},
+    EvmByteCodeBuilder,
+};
+use primitive_types::U256;
+use scilla_parser::ast::TreeTraversalMode;
 use sha3::{Digest, Keccak256};
-use std::mem;
+
+use crate::{
+    intermediate_representation::{
+        pass::IrPass,
+        primitives::{IntermediateRepresentation, Operation},
+        symbol_table::StateLayoutEntry,
+    },
+    passes::debug_printer::DebugPrinter,
+};
 
 /// `EvmBytecodeGenerator` is a structure responsible for generating Ethereum Virtual Machine (EVM) bytecode.
 /// It stores an EVM bytecode builder and an intermediate representation (IR) of the program to be compiled.
@@ -76,7 +76,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
         }
 
         Ok(())
-        //        unimplemented!()
     }
 
     /// This function writes function definitions from the IR to the EVM module.
@@ -145,7 +144,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                         // Creating entry function
                         let block_args : BTreeSet<String> = block.block_arguments.clone();
-
                         let mut evm_block =
                             code_builder.new_evm_block_with_args(&block_name, block_args);
 
@@ -171,51 +169,8 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                 Operation::CallFunction {
                                     ref name,
                                     ref arguments,
-                                } => {
-                                    // TODO: Progate result, but note that in some. Formerly we used ["result".to_string()], but Scilla 
-                                    // transitions does not return any value, so that does not make sense.
-                                    // Bottom line is that it does not make sense to implement return values before we have actually functions (not transitions or procedures) 
-
-                                    // All function arguments must be added as arguments to the next block since these are copied 
-                                    // and not moved.
-                                    let exit_block_args: BTreeSet<String> = arguments.iter().map(|arg| {
-                                        match &arg.resolved {
-                                            Some(a) =>a.clone(),
-                                            None => panic!("Unable to resolve {}", arg.unresolved),
-                                        }
-                                    }).collect();
-                                    let mut exit_block = code_builder.new_evm_block_with_args("exit_block", exit_block_args);
-
-                                    // Adding return point
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.push_label(&exit_block.name);
-                                    warn!("Function '{:?}' arguments: {:#?}", name, arguments);
-                                    for arg in arguments {
-                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        let _ = match &arg.resolved {
-                                            Some(a) => evm_block.duplicate_stack_name(&a),
-                                            None => panic!("Unable to resolve {}", arg.unresolved),
-                                        };
-                                    }
-
-                                    // Jumping to function
-                                    let label = match &name.resolved {
-                                        Some(v) => v,
-                                        None => panic!(
-                                            "Unresolved function name in function call {:?}",
-                                            name
-                                        ),
-                                    };
-
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-
-                                    // Note that we do not need to add scopes to function jumps as these are 
-                                    // outside of the function scope                                    
-                                    evm_block.jump_to(&label);
-                                    mem::swap(&mut evm_block, &mut exit_block);
-                                    ret.push(exit_block);
                                 }
-                                Operation::CallExternalFunction {
+                                | Operation::CallExternalFunction {
                                     ref name,
                                     ref arguments,
                                 } => {
@@ -244,7 +199,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         match &arg.resolved {
                                             Some(n) => match evm_block.duplicate_stack_name(n) {
                                                 Err(e) => {
-                                                    warn!("{:#?}", evm_block);
+                                                    print!("Block: {:#?}", evm_block);
                                                     panic!("{} in {}", e, evm_block.name)
                                                 }
                                                 _ => (),
@@ -268,7 +223,11 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                         // Precompiled or external function
                                         evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.call(signature, args_types);
+
+                                        // TODO: Consider if argument mapping should be managed by the runtime module
+                                        evm_block.call(signature, args_types                            .iter()
+                            .map(|s| EvmType::from_str(s).unwrap())
+                            .collect());
                                     } else if ctx.inline_generics.contains_key(&name.unresolved) {
                                         // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
                                         // Builtin assembly generator
@@ -288,7 +247,50 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                             }
                                         }
                                     } else {
-                                        panic!("{}", format!("{} not found.", qualified_name));
+                                        // Internal function call
+                                        let exit_block_args: BTreeSet<String> = arguments.iter().map(|arg| {
+                                            match &arg.resolved {
+                                                Some(a) =>a.clone(),
+                                                None => panic!("Unable to resolve {}", arg.unresolved),
+                                            }
+                                        }).collect();
+                                        let mut exit_block = code_builder.new_evm_block_with_args("exit_block", exit_block_args);
+
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                        evm_block.push_label(&exit_block.name);
+
+                                        for arg in arguments {
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                            let _ = match &arg.resolved {
+                                                Some(a) => evm_block.duplicate_stack_name(&a),
+                                                None => panic!("Unable to resolve {}", arg.unresolved),
+                                            };
+                                        }
+
+                                        // Jumping to function
+                                        // TODO: Check that internal function is defined and throw an error if not.
+                                        let label = match &name.resolved {
+                                            Some(v) => {
+                                            // TODO: "Rsplit" hack to compensate for that the labels does not contain function parameter types
+                                                if let Some(index) = v.rfind("::<") {
+                                                    &v[..index]
+                                                } else {
+                                                    v
+                                                }
+                                            }
+                                            None => panic!(
+                                                "Unresolved function name in function call {:?}",
+                                                name
+                                            ),
+                                        };
+
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+
+                                        // Note that we do not need to add scopes to function jumps as these are 
+                                        // outside of the function scope                                    
+                                        evm_block.jump_to(&label);
+                                        mem::swap(&mut evm_block, &mut exit_block);
+                                        ret.push(exit_block);
                                     }
                                 }
 
@@ -310,21 +312,17 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     match qualified_name.as_str() {
                                         "String" => {
-                                            let ssa_name = match instr
-                                                .ssa_name
-                                                .clone()
-                                                .unwrap()
-                                                .qualified_name()
-                                            {
-                                                Ok(v) => v,
-                                                _ => panic!("Could not resolve SSA qualified name"),
-                                            };
-                                            let payload = data.clone().into_bytes();
-                                            code_builder.ir.data.push((ssa_name, payload));
+                                            let payload = data.clone();
+                                            evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                            let payload = payload[1..payload.len()-1].as_bytes();
+                                            evm_block.allocate_object(payload.to_vec());
+                                            match evm_block.register_stack_name(ssa_name) {
+                                                Err(_) => {
+                                                    panic!("Failed to register SSA stack name.")
+                                                }
+                                                _ => (),
+                                            }
 
-                                            // TODO: Load data from code into memory
-                                            // TODO: We need a way to reference the data section
-                                            todo!()
                                         }
                                         "Uint64" => {
                                             let value = EvmTypeValue::Uint64(data.parse().unwrap());
@@ -347,6 +345,31 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                                 )
                                             );
                                         }
+                                    }
+                                }
+                                Operation::ResolveContextResource {ref symbol} => {
+                                    let mut ctx = &mut code_builder.context;
+
+                                    if ctx.special_variables.contains_key(&symbol.unresolved) {
+                                        // TODO: This ought to be the resovled name, but it should be resovled without instance parameters - make a or update pass
+                                        // Builtin assembly generator
+                                        let block_generator =
+                                            ctx.special_variables.get(&symbol.unresolved).unwrap();
+                                        let new_blocks =
+                                            block_generator(&mut ctx, &mut evm_block );
+                                        match new_blocks {
+                                            Ok(new_blocks) => {
+                                                for block in new_blocks {
+                                                    ret.push(block);
+                                                }
+                                            }
+                                            Err(e) => {
+                                                panic!("Error in external call: {}", e);
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        panic!("Special variable {} not found", symbol.unresolved);
                                     }
                                 }
                                 Operation::ResolveSymbol { ref symbol } => {
@@ -437,7 +460,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     evm_block.push_u256(address);
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.external_sload();
-                                    evm_block.register_stack_name(value_name);
+                                    let _ = evm_block.register_stack_name(value_name);
                                 }
                                 Operation::Return(ref _value) => {
                                     // Assumes that the next element on the stack is return pointer
@@ -468,13 +491,18 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                         }
                                     };
 
-                                    // TODO: Assumes that a static call just produces the Keccak of the name
-                                    // The "correct" to do would be to make this spec dependant
-                                    let hash = Keccak256::digest(name);
-                                    let mut selector = Vec::new();
-                                    selector.extend_from_slice(&hash[..4]);
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.push(selector);
+                                    let ctx = &mut code_builder.context;
+                                    if let Some(constructor) = &ctx.default_constructors.get(name) {
+                                        constructor(&mut evm_block);
+                                    } else {
+                                        // Falling back to plain enum type naming with no data associated
+                                        // for custom types.
+                                        let hash = Keccak256::digest(name);
+                                        let mut selector = Vec::new();
+                                        selector.extend_from_slice(&hash[..4]);
+                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
+                                        evm_block.push(selector);
+                                    }
                                 }
                                 Operation::IsEqual {
                                     ref left,
@@ -499,30 +527,6 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
                                     evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
                                     evm_block.eq();
-                                }
-                                Operation::Switch {
-                                    // TODO: Deprecated?
-                                    ref cases,
-                                    ref on_default,
-                                } => {
-                                    for case in cases {
-                                        let label = match &case.label.resolved {
-                                            Some(l) => l,
-                                            None => panic!("Could not resolve case label"),
-                                        };
-                                        // TODO: This assumes order in cases
-                                        evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                        evm_block.jump_if_to(&code_builder.add_scope_to_label(label));
-                                    }
-
-                                    let label = match &on_default.resolved {
-                                        Some(l) => l,
-                                        None => panic!("Could not resolve default label"),
-                                    };
-
-                                    evm_block.set_next_rust_position(file!().to_string(), line!() as usize);
-                                    evm_block.jump_to(&code_builder.add_scope_to_label(label));
-                                    // unimplemented!() // Add handling for other operations here
                                 }
                                 Operation::Jump(label) => {
                                     let label = match &label.resolved {
@@ -650,7 +654,7 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
                                     // Ignore terminating ref as this will just be pop at the end of the block.
                                 }
                                 _ => {
-                                    unimplemented!() // Add handling for other operations here
+                                    panic!("Unhandled operation {:#?}",instr);
                                 }
                             }
 
@@ -706,37 +710,5 @@ impl<'ctx> EvmBytecodeGenerator<'ctx> {
 
         self.builder.finalize_blocks();
         Ok(self.builder.build())
-    }
-}
-
-/// This impl block provides the lowering operations for our `EvmBytecodeGenerator`.
-/// Here we translate high-level intermediate representation (IR) constructs into
-/// lower-level constructs that are suitable for generating EVM bytecode.
-impl<'ctx> IrLowering for EvmBytecodeGenerator<'ctx> {
-    /// This function takes a `ConcreteType` and lowers it into a form suitable for generating
-    /// EVM bytecode. How exactly this is done will depend on the concrete type in question.
-    fn lower_concrete_type(&mut self, _con_type: &ConcreteType) {
-        // TODO: Implement
-        unimplemented!()
-    }
-
-    /// This function takes a `ConcreteFunction` and lowers it into a form suitable
-    /// for generating EVM bytecode. This typically involves translating the function's
-    /// high-level operations into equivalent sequences of low-level EVM operations.
-    fn lower_concrete_function(&mut self, _con_function: &ConcreteFunction) {
-        // TODO: Move write_function_definitions_to_module into this structure
-        unimplemented!()
-    }
-
-    /// This is the main interface for lowering. It takes an intermediate representation (IR)
-    /// and lowers all its types and function definitions.
-    fn lower(&mut self, primitives: &IntermediateRepresentation) {
-        for con_type in &primitives.type_definitions {
-            self.lower_concrete_type(con_type);
-        }
-
-        for con_function in &primitives.function_definitions {
-            self.lower_concrete_function(con_function);
-        }
     }
 }

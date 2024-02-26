@@ -1,13 +1,13 @@
 scilla_version 0
 
-library HelloWorld
-contract HelloWorld()
+library HelloDebugModule
+contract HelloDebugModule()
 
 field welcome_msg : Uint64 = Uint64 0
 
 transition setHello (msg : Uint64)
   welcome_msg := msg;
   msg <- welcome_msg;
-  x = builtin print__impl msg
+  print msg
 end
 

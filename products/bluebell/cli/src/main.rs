@@ -1,77 +1,67 @@
-use bluebell::support::modules::BluebellModule;
-use bluebell::support::modules::ScillaDebugBuiltins;
-use std::ffi::CStr;
+use std::{fs::File, io::Read, process};
 
+use bluebell::support::{
+    evm::EvmCompiler,
+    modules::{ScillaDebugBuiltins, ScillaDefaultBuiltins, ScillaDefaultTypes},
+};
 use clap::{Parser, Subcommand, ValueEnum};
-// DEPRECATED
-// use inkwell::context::Context;
-// use inkwell::targets::{InitializationConfig, Target};
-use std::fs::File;
-use std::io::Read;
-use std::os::raw::c_char;
-use std::process;
-
-use bluebell::ast::nodes::NodeProgram;
-use bluebell::contract_executor::UnsafeContractExecutor;
-use bluebell::passes::debug_printer::DebugPrinter;
-
-use bluebell::support::evm::EvmCompiler;
-use bluebell::support::modules::{ScillaDefaultBuiltins, ScillaDefaultTypes};
-
-// use bluebell::llvm_ir_generator::LlvmIrGenerator;
-// use bluebell::support::llvm::{LlvmBackend, UnsafeLlvmTestExecutor};
-
-use bluebell::intermediate_representation::emitter::IrEmitter;
-use bluebell::intermediate_representation::pass_manager::PassManager;
-
-use bluebell::parser::lexer;
-use bluebell::parser::lexer::Lexer;
-use bluebell::parser::{parser, ParserError};
 use evm_assembly::types::EvmTypeValue;
 use log::{Log, Metadata, Record};
+use scilla_parser::{
+    ast::nodes::NodeProgram,
+    parser::{lexer, lexer::Lexer, parser, ParserError},
+};
 
+// Logger struct to capture logs
 struct CaptureLogger {}
 
+// Implementation of logger
 impl CaptureLogger {
+    // Constructor for CaptureLogger
     fn new() -> Self {
         Self {}
     }
 }
 
+// Implementing Log trait for CaptureLogger
 impl Log for CaptureLogger {
+    // Method to check if logging is enabled
     fn enabled(&self, _metadata: &Metadata) -> bool {
         // self.delegate.enabled(metadata)
         true
     }
 
+    // Method to log a record
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             print!("{}", record.args().to_string());
         }
     }
 
+    // Method to flush the logger
     fn flush(&self) {}
 }
 
-// Later, you'd set the logger as:
+// Function to setup the logger
 fn setup_logger() {
     let logger = Box::new(CaptureLogger::new());
     log::set_boxed_logger(logger).unwrap();
     log::set_max_level(log::LevelFilter::Info);
 }
 
+// Enum to define the output format of Bluebell
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellOutputFormat {
-    LlvmIr,
     FormattedScilla,
 }
 
+// Enum to define the backend of Bluebell
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 enum BluebellBackend {
-    Llvm,
     Evm,
 }
 
+// Enum to define the command of Bluebell
 #[derive(Clone, Debug, Subcommand)]
 enum BluebellCommand {
     Emit {
@@ -93,12 +83,12 @@ enum BluebellCommand {
         entry_point: String,
 
         /// Arguments to pass to function
-        #[arg(short, long, default_value_t= ("".to_string()))]
+        #[arg(short, long, default_value_t= String::new())]
         args: String,
     },
 }
 
-/// Scilla compiler and executor
+// Struct to hold the arguments for Scilla compiler and executor
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -118,7 +108,9 @@ struct Args {
     mode: BluebellCommand,
 }
 
+// Implementation of Args struct
 impl Args {
+    // Method to get the features
     fn features(&self) -> Vec<String> {
         match &self.features_raw {
             Some(v) => v.split(",").map(|s| s.to_string()).collect(),
@@ -127,6 +119,7 @@ impl Args {
     }
 }
 
+// Function to run Bluebell with EVM backend
 fn bluebell_evm_run(
     ast: &NodeProgram,
     entry_point: String,
@@ -166,155 +159,44 @@ fn bluebell_evm_run(
         serde_json::from_str(&args).expect("Failed to deserialize arguments")
     };
 
-    print!("Arguments: {:?}", args);
     executable.execute(&entry_point, arguments);
 }
 
-fn bluebell_llvm_run(ast: &NodeProgram, entry_point: String, debug: bool) {
-    // DEPRECATED
-    panic!("LLVM support is DEPRECATED for now.");
-    /*
-    /****** Executable *****/
-    ///////
-    let backend = LlvmBackend::new();
-    // TODO: runtime is a poor name.
-    let mut specification = backend.create_backend_specification();
-
-    specification.declare_integer("Int8", 8);
-    specification.declare_integer("Int16", 16);
-    specification.declare_integer("Int32", 32);
-    specification.declare_integer("Int64", 64);
-    specification.declare_unsigned_integer("Uint8", 8);
-    specification.declare_unsigned_integer("Uint16", 16);
-    specification.declare_unsigned_integer("Uint32", 32);
-    specification.declare_unsigned_integer("Uint64", 64);
-
-    let _ = specification
-        .declare_intrinsic("add", ["Int32", "Int32"].to_vec(), "Int32")
-        .attach_runtime(|| {
-            extern "C" fn addi32(a: i32, b: i32) -> i32 {
-                a + b
-            }
-
-            addi32 as usize
-        });
-
-    // let _executable = backend.create_executable("test");
-    // let executable = backend.compile(name, script);
-
-    let context = Context::create();
-    let mut module = context.create_module("main");
-
-    // Runtime struct <- contains Context
-    // VM / Executor
-    // Executable <- contains Module
-    // Compiler
-
-    // Declaring runtime
-    let ft = context.f64_type();
-    let i8_ptr_type = context.i8_type().ptr_type(inkwell::AddressSpace::default());
-    let fn_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
-
-    module.add_function("sumf", ft.fn_type(&[ft.into(), ft.into()], false), None);
-    module.add_function("builtin__print<msg>", fn_type, None);
-
-    let setup_runtime = |contract_executor: &UnsafeLlvmTestExecutor| {
-        Target::initialize_native(&InitializationConfig::default()).unwrap();
-
-        //////
-        // Defining runtime
-
-        extern "C" fn sumf(a: f64, b: f64) -> f64 {
-            a + b
-        }
-        extern "C" fn print_string(s: *const c_char) {
-            let c_str = unsafe { CStr::from_ptr(s) };
-            let str_slice: &str = c_str.to_str().unwrap();
-        }
-        unsafe {
-            contract_executor.link_symbol("sumf", sumf as usize);
-            contract_executor.link_symbol("builtin__print<msg>", print_string as usize);
-        }
-    };
-
-    /*** Compiling ***/
-
-    /////
-    // Frontend: AST -> Highlevel IR
-    let mut generator = IrEmitter::new();
-    let mut ir = generator.emit(ast).expect("Failed generating highlevel IR");
-
-    /*** Analysis ***/
-    let mut pass_manager = PassManager::default_pipeline();
-
-    if let Err(err) = pass_manager.run(&mut ir) {
-        panic!("{}", err);
-    }
-
-    let mut debug_printer = DebugPrinter::new();
-    let _ = ir.run_pass(&mut debug_printer);
-
-    ///////
-    // Lowering/"backend": Generating LLVM IR
-    let mut generator = LlvmIrGenerator::new(&context, ir, &mut module);
-
-    match generator.build_module() {
-        Err(e) => {
-            let llvm_str = module.print_to_string();
-            let output = llvm_str.to_str().expect("Failed converting to UTF8");
-            println!("{}", output);
-
-            panic!("Error: {:?}", e);
-        }
-        Ok(_) => (),
-    };
-
-    if debug {
-        let llvm_str = module.print_to_string();
-        let output = llvm_str.to_str().expect("Failed converting to UTF8");
-        println!("{}", output);
-    }
-
-    /****** Execution *****/
-    //////
-
-    //////
-    // Executing
-
-    let contract_executor = UnsafeLlvmTestExecutor::new(&mut module);
-    setup_runtime(&contract_executor);
-
-    unsafe {
-        contract_executor.execute(&entry_point);
-    }
-    */
-}
-
+// Main function
 fn main() {
+    // Setting up the logger
     setup_logger();
+    // Parsing the arguments
     let args = Args::parse();
 
+    // Getting the features
     let features = args.features();
     // Accessing the values
     let mut errors: Vec<lexer::ParseError> = [].to_vec();
+    // Opening the file
     let mut file = File::open(args.filename).expect("Unable to open file");
     let mut script = String::new();
+    // Reading the file
     file.read_to_string(&mut script)
         .expect("Unable to read file");
 
+    // Creating a new lexer
     let lexer = Lexer::new(&script);
 
+    // Creating a new parser
     let parser = parser::ProgramParser::new();
 
+    // Parsing the script
     match parser.parse(&mut errors, lexer) {
         Ok(ast) => {
+            // Running the appropriate command based on the mode
             match args.mode {
                 BluebellCommand::Run {
                     entry_point,
                     args: arguments,
                     backend,
                 } => match backend {
-                    BluebellBackend::Llvm => bluebell_llvm_run(&ast, entry_point, args.debug),
+                    // Running with EVM backend
                     BluebellBackend::Evm => {
                         bluebell_evm_run(&ast, entry_point, arguments, features, args.debug)
                     }
@@ -334,6 +216,7 @@ fn main() {
             */
         }
         Err(error) => {
+            // Handling syntax errors
             let message = format!("Syntax error {:?}", error);
             let mut pos: Vec<lexer::SourcePosition> = [].to_vec();
             error.map_location(|l| {
@@ -375,6 +258,7 @@ fn main() {
                 line_end = script.len();
             }
 
+            // Printing the line with the error
             let line = &script[line_start..line_end];
             println!("Line {},{}:{}", line_counter, char_counter, line);
             print!(
@@ -385,13 +269,16 @@ fn main() {
                 println!("{}", "^".repeat(pos[1].position - pos[0].position));
             }
 
+            // Creating a new ParserError
             let my_error = ParserError {
                 message,
                 line: 0,   //error.location_line(),
                 column: 0, // err.location_column(),
             };
+            // Printing the error
             println!("{}", my_error);
 
+            // Exiting the process with an error code
             process::exit(-1);
         }
     }

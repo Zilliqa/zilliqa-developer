@@ -43,9 +43,9 @@ Example of providing a private key:
 === "Java"
 
     ```java
-    package com.firestack.example;
+    package com.zilliqa.example;
 
-    import com.firestack.laksaj.account.Wallet;
+    import com.zilliqa.laksaj.account.Wallet;
 
     public class TransactionOperation {
         public static void main(String[] args) throws IOException, NoSuchAlgorithmException {

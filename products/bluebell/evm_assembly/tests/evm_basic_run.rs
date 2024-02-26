@@ -1,12 +1,12 @@
-use evm::backend::Backend;
-use evm::executor::stack::PrecompileFn;
-use evm::executor::stack::{PrecompileFailure, PrecompileOutput, PrecompileOutputType};
-use evm::{Context, ExitError, ExitSucceed};
-use evm_assembly::compiler_context::EvmCompilerContext;
-use evm_assembly::types::EvmTypeValue;
+use std::{collections::BTreeMap, str::FromStr};
+
+use evm::{
+    backend::Backend,
+    executor::stack::{PrecompileFailure, PrecompileFn, PrecompileOutput, PrecompileOutputType},
+    Context, ExitError, ExitSucceed,
+};
+use evm_assembly::{compiler_context::EvmCompilerContext, types::EvmTypeValue};
 use primitive_types::H160;
-use std::collections::BTreeMap;
-use std::str::FromStr;
 
 // See
 // https://odra.dev/blog/evm-at-risc0/
@@ -57,13 +57,11 @@ pub fn get_precompiles() -> BTreeMap<H160, PrecompileFn> {
 
 #[cfg(test)]
 mod tests {
-    use evm_assembly::executor::EvmExecutor;
+    use std::str::FromStr;
 
-    use crate::test_precompile;
-    use crate::{EvmCompilerContext, EvmTypeValue};
-    use evm_assembly::block::EvmBlock;
+    use evm_assembly::{executor::EvmExecutor, types::EvmType, EvmByteCodeBuilder};
 
-    use evm_assembly::EvmByteCodeBuilder;
+    use crate::{test_precompile, EvmCompilerContext, EvmTypeValue};
 
     #[test]
     fn blah() {
@@ -96,7 +94,14 @@ mod tests {
                 // EvmBlock::new(None, [].to_vec().into_iter().collect(), "entry");
 
                 let fnc = code_builder.context.get_function("fibonacci").unwrap();
-                entry.call(fnc, ["Uint256".to_string()].to_vec());
+                entry.call(
+                    fnc,
+                    ["Uint256".to_string()]
+                        .to_vec()
+                        .iter()
+                        .map(|s| EvmType::from_str(s).unwrap())
+                        .collect(),
+                );
 
                 entry.push1([1].to_vec());
                 entry.jump_if_to(&success.name);

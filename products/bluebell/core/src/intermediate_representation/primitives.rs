@@ -1,11 +1,10 @@
+use std::collections::{BTreeSet, HashMap, VecDeque};
+
+use scilla_parser::parser::lexer::SourcePosition;
+
 use crate::intermediate_representation::symbol_table::SymbolTable;
-use crate::parser::lexer::SourcePosition;
 
-use std::collections::HashMap;
-
-use std::collections::BTreeSet;
-use std::collections::VecDeque;
-
+/// Enum representing the different kinds of identifiers in the intermediate representation.
 #[derive(Debug, Clone, PartialEq)]
 pub enum IrIndentifierKind {
     FunctionName,
@@ -21,6 +20,8 @@ pub enum IrIndentifierKind {
     Namespace,
     BlockLabel,
 
+    ContextResource,
+
     // Storage and reference
     VirtualRegister,
     VirtualRegisterIntermediate,
@@ -31,6 +32,7 @@ pub enum IrIndentifierKind {
     Unknown,
 }
 
+/// Struct representing an identifier in the intermediate representation.
 #[derive(Debug, Clone, PartialEq)]
 pub struct IrIdentifier {
     pub unresolved: String,
@@ -42,6 +44,7 @@ pub struct IrIdentifier {
 }
 
 impl IrIdentifier {
+    /// Constructor for the IrIdentifier struct.
     pub fn new(
         unresolved: String,
         kind: IrIndentifierKind,
@@ -57,6 +60,7 @@ impl IrIdentifier {
         }
     }
 
+    /// Method to get the qualified name of the identifier.
     pub fn qualified_name(&self) -> Result<String, String> {
         // TODO: Change to resolved or throw
         if let Some(resolved) = &self.resolved {
@@ -67,6 +71,7 @@ impl IrIdentifier {
     }
 }
 
+/// Struct representing an enum value in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct EnumValue {
     pub name: IrIdentifier,
@@ -76,14 +81,17 @@ pub struct EnumValue {
 }
 
 impl EnumValue {
+    /// Constructor for the EnumValue struct.
     pub fn new(name: IrIdentifier, data: Option<IrIdentifier>) -> Self {
         Self { name, id: 0, data }
     }
+    /// Method to set the id of the enum value.
     pub fn set_id(&mut self, v: u64) {
         self.id = v
     }
 }
 
+/// Struct representing a tuple in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct Tuple {
     pub fields: Vec<IrIdentifier>,
@@ -91,15 +99,18 @@ pub struct Tuple {
 }
 
 impl Tuple {
+    /// Constructor for the Tuple struct.
     pub fn new() -> Self {
         Self { fields: Vec::new() }
     }
 
+    /// Method to add a field to the tuple.
     pub fn add_field(&mut self, value: IrIdentifier) {
         self.fields.push(value);
     }
 }
 
+/// Struct representing a variant in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct Variant {
     pub fields: Vec<EnumValue>, // (name, id, data)
@@ -107,12 +118,12 @@ pub struct Variant {
 }
 
 impl Variant {
-    // Constructor method for our struct
+    /// Constructor for the Variant struct.
     pub fn new() -> Self {
         Self { fields: Vec::new() }
     }
 
-    // Method to add a field into our Variant struct
+    /// Method to add a field to the variant.
     pub fn add_field(&mut self, field: EnumValue) {
         let id: u64 = match self.fields.last() {
             // if we have at least one field, use the id of the last field + 1
@@ -126,16 +137,7 @@ impl Variant {
     }
 }
 
-/*
-#[derive(Debug, Clone, PartialEq)]
-pub enum Identifier {
-    // TODO: Replace with symbol reference
-    ComponentName(String),
-    TypeName(String),
-    Event(String),
-}
-*/
-
+/// Struct representing a variable declaration in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct VariableDeclaration {
     pub name: IrIdentifier,
@@ -145,6 +147,7 @@ pub struct VariableDeclaration {
 }
 
 impl VariableDeclaration {
+    /// Constructor for the VariableDeclaration struct.
     pub fn new(name: String, mutable: bool, typename: IrIdentifier) -> Self {
         Self {
             name: IrIdentifier {
@@ -168,6 +171,7 @@ impl VariableDeclaration {
     }
 }
 
+/// Struct representing a field address in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct FieldAddress {
     pub name: IrIdentifier,
@@ -175,6 +179,7 @@ pub struct FieldAddress {
                                 // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
+/// Struct representing a case clause in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct CaseClause {
     pub expression: IrIdentifier,
@@ -182,6 +187,7 @@ pub struct CaseClause {
     // TODO:     pub source_location: (SourcePosition,SourcePosition)
 }
 
+/// Enum representing the different kinds of operations in the intermediate representation.
 #[derive(Debug, Clone)]
 pub enum Operation {
     Noop,
@@ -191,11 +197,6 @@ pub enum Operation {
         expression: IrIdentifier,
         on_success: IrIdentifier,
         on_failure: IrIdentifier,
-    },
-
-    Switch {
-        cases: Vec<CaseClause>,
-        on_default: IrIdentifier,
     },
     MemLoad,
     MemStore,
@@ -231,17 +232,20 @@ pub enum Operation {
     ResolveSymbol {
         symbol: IrIdentifier,
     },
+    ResolveContextResource {
+        symbol: IrIdentifier,
+    },
     Literal {
         data: String,
         typename: IrIdentifier,
     },
-    AcceptTransfer,
     PhiNode(Vec<IrIdentifier>),
 
     Return(Option<IrIdentifier>),
     Revert(Option<IrIdentifier>),
 }
 
+/// Struct representing an instruction in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct Instruction {
     pub ssa_name: Option<IrIdentifier>,
@@ -250,6 +254,7 @@ pub struct Instruction {
     pub source_location: (SourcePosition, SourcePosition),
 }
 
+/// Struct representing a function block in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct FunctionBlock {
     pub name: IrIdentifier,
@@ -264,10 +269,12 @@ pub struct FunctionBlock {
 }
 
 impl FunctionBlock {
+    /// Constructor for the FunctionBlock struct.
     pub fn new(name: String) -> Box<Self> {
         Self::new_from_symbol(Self::new_label(name))
     }
 
+    /// Method to create a new FunctionBlock from a symbol.
     pub fn new_from_symbol(name: IrIdentifier) -> Box<Self> {
         Box::new(Self {
             name,
@@ -281,6 +288,7 @@ impl FunctionBlock {
         })
     }
 
+    /// Method to create a new label for a FunctionBlock.
     pub fn new_label(label: String) -> IrIdentifier {
         IrIdentifier {
             unresolved: label.clone(),
@@ -296,6 +304,7 @@ impl FunctionBlock {
     }
 }
 
+/// Struct representing a function body in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct FunctionBody {
     pub blocks: Vec<Box<FunctionBlock>>,
@@ -303,11 +312,13 @@ pub struct FunctionBody {
 }
 
 impl FunctionBody {
+    /// Constructor for the FunctionBody struct.
     pub fn new() -> Box<Self> {
         Box::new(Self { blocks: Vec::new() })
     }
 }
 
+/// Enum representing the different kinds of concrete types in the intermediate representation.
 #[derive(Debug, Clone)]
 pub enum ConcreteType {
     Tuple {
@@ -322,6 +333,7 @@ pub enum ConcreteType {
     },
 }
 
+/// Enum representing the different kinds of functions in the intermediate representation.
 #[derive(Debug, Clone)]
 pub enum FunctionKind {
     Procedure,
@@ -329,6 +341,7 @@ pub enum FunctionKind {
     Function,
 }
 
+/// Struct representing a concrete function in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct ConcreteFunction {
     pub name: IrIdentifier,
@@ -339,6 +352,7 @@ pub struct ConcreteFunction {
     pub body: Box<FunctionBody>,
 }
 
+/// Struct representing a lambda function with a single argument in the intermediate representation.
 #[derive(Debug, Clone)]
 pub struct LambdaFunctionSingleArgument {
     pub name: IrIdentifier,
@@ -348,6 +362,7 @@ pub struct LambdaFunctionSingleArgument {
     pub block: FunctionBlock,
 }
 
+/// Struct representing a contract field in the intermediate representation.
 #[derive(Debug)]
 pub struct ContractField {
     pub namespace: IrIdentifier,
@@ -355,6 +370,7 @@ pub struct ContractField {
     pub initializer: Box<Instruction>,
 }
 
+/// Struct representing the intermediate representation of a program.
 #[derive(Debug)]
 pub struct IntermediateRepresentation {
     // Program IR
@@ -369,20 +385,15 @@ pub struct IntermediateRepresentation {
 }
 
 impl IntermediateRepresentation {
-    pub fn new() -> Self {
+    /// Constructor for the IntermediateRepresentation struct.
+    pub fn new(symbol_table: SymbolTable) -> Self {
         IntermediateRepresentation {
             version: "".to_string(),
             type_definitions: Vec::new(),
             function_definitions: Vec::new(),
             fields_definitions: Vec::new(),
             lambda_functions: Vec::new(),
-            symbol_table: SymbolTable::new(),
+            symbol_table,
         }
     }
-}
-
-pub trait IrLowering {
-    fn lower_concrete_type(&mut self, con_type: &ConcreteType);
-    fn lower_concrete_function(&mut self, con_function: &ConcreteFunction);
-    fn lower(&mut self, primitives: &IntermediateRepresentation);
 }

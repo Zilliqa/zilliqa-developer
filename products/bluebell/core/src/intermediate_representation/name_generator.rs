@@ -1,7 +1,8 @@
+use scilla_parser::parser::lexer::SourcePosition;
+
 use crate::intermediate_representation::primitives::{
     FunctionBlock, IrIdentifier, IrIndentifierKind,
 };
-use crate::parser::lexer::SourcePosition;
 
 #[derive(Debug, Clone)]
 pub struct NameGenerator {
@@ -23,6 +24,20 @@ impl NameGenerator {
     pub fn string_type(&self) -> IrIdentifier {
         IrIdentifier {
             unresolved: "String".to_string(),
+            resolved: None,
+            type_reference: None,
+            kind: IrIndentifierKind::TypeName,
+            is_definition: false,
+            source_location: (
+                SourcePosition::invalid_position(),
+                SourcePosition::invalid_position(),
+            ),
+        }
+    }
+
+    pub fn hex_type(&self) -> IrIdentifier {
+        IrIdentifier {
+            unresolved: "String".to_string(), // TODO: Correct structure would be Dynamic Byte String, see https://scilla-cookbook.org/recipes/scilla-recipes/addresses
             resolved: None,
             type_reference: None,
             kind: IrIndentifierKind::TypeName,
