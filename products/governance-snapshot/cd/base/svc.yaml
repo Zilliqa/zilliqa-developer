@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: governance-snapshot
+  namespace: governance-snapshot
+  labels:
+    "app.kubernetes.io/name": "governance-snapshot"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    "app.kubernetes.io/name": "governance-snapshot"

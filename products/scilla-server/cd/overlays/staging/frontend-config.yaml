@@ -1,0 +1,10 @@
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: scilla-server
+  labels:
+    app.kubernetes.io/name: scilla-server
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: RESPONSE_CODE

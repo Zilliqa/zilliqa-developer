@@ -1,7 +1,7 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@zilliqa_python_deps//:requirements.bzl", "requirement")
 load("//config:expand-workspace-status.bzl", "expand_workspace_status")
-load(":applications.bzl", "APPLICATIONS_PROD", "APPLICATIONS_STAGING")
+load(":applications.bzl", "APPLICATIONS_PROD")
 
 expand_workspace_status(
     name = "git-version-py",
@@ -19,21 +19,6 @@ py_library(
     ],
     deps = [
         ":git-version-py",
-    ],
-)
-
-py_binary(
-    name = "update_staging",
-    srcs = [
-        "update_manifests_repository.py",
-    ],
-    args = ["$(location {}:cd_staging_patch)".format(s) for s in APPLICATIONS_STAGING],
-    data = ["{}:cd_staging_patch".format(s) for s in APPLICATIONS_STAGING],
-    main = "update_manifests_repository.py",
-    visibility = ["//visibility:public"],
-    deps = [
-        ":version",
-        requirement("PyGithub"),
     ],
 )
 

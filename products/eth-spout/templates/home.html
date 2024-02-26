@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Faucet</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  </head>
+
+  <body>
+    <div class="container">
+        <p class="title">
+          Receive {{ amount }} {{ native_token_symbol }} from {{ from_addr }}
+        </p>
+
+        <form method="post">
+          <div class="field has-addons">
+            <div class="control">
+              <input class="input" type="text" placeholder="Enter your address" name="address">
+            </div>
+            <div class="control">
+              <input class="button is-link" type="submit" value="Request" />
+            </div>
+          </div>
+        </form>
+
+        {% match pending_txn_hash %}
+          {% when Some with (pending_txn_hash) %}
+            <div class="notification is-success">
+              <button class="delete" onclick="this.parentElement.style.display='none';"></button>
+              {% match explorer_url %}
+                {% when Some with (explorer_url) %}
+                  Request sent - Transaction ID: <a href="{{ explorer_url }}/tx/{{ pending_txn_hash }}">{{ pending_txn_hash }}</a>
+                {% when None %}
+                  Request sent - Transaction ID: {{ pending_txn_hash }}
+              {% endmatch %}
+            </div>
+          {% when None %}
+        {% endmatch %}
+
+
+        {% match error %}
+          {% when Some with (error) %}
+            <div class="notification is-danger">
+              <button class="delete" onclick="this.parentElement.style.display='none';"></button>
+              {{ error }}
+            </div>
+          {% when None %}
+        {% endmatch %}
+    </div>
+  </body>
+</html>

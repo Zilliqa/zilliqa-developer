@@ -1,0 +1,4 @@
+target/
+.vscode/
+# Target for downloaded files
+data/

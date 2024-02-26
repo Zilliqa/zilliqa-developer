@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdt-listen-testnet
+  namespace: pdt
+  labels:
+    "app.kubernetes.io/name": "pdt-listen-testnet"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "pdt-listen-testnet"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "pdt-listen-testnet"
+    spec:
+      serviceAccountName: default
+      containers:
+        - image: pdt
+          name: pdt-listen-testnet
+          env:
+            - name: PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: PROJECT_ID
+            - name: DATASET_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: DATASET_ID_TESTNET
+            - name: NETWORK_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: NETWORK_TYPE_TESTNET
+            - name: BUFFER_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: BUFFER_SIZE
+          command: ["/bin/bash", "-c"]
+          args:
+            - ./pdt --network-type $NETWORK_TYPE bqlisten --project-id $PROJECT_ID --dataset-id $DATASET_ID --buffer-size $BUFFER_SIZE
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdt-listen-mainnet
+  namespace: pdt
+  labels:
+    "app.kubernetes.io/name": "pdt-listen-mainnet"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      "app.kubernetes.io/name": "pdt-listen-mainnet"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        "app.kubernetes.io/name": "pdt-listen-mainnet"
+    spec:
+      serviceAccountName: default
+      containers:
+        - image: pdt
+          name: pdt-listen-mainnet
+          env:
+            - name: PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: PROJECT_ID
+            - name: DATASET_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: DATASET_ID_MAINNET
+            - name: NETWORK_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: NETWORK_TYPE_MAINNET
+            - name: BUFFER_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: pdt
+                  key: BUFFER_SIZE
+          command: ["/bin/bash", "-c"]
+          args:
+            - ./pdt --network-type $NETWORK_TYPE bqlisten --project-id $PROJECT_ID --dataset-id $DATASET_ID --buffer-size $BUFFER_SIZE

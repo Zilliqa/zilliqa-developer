@@ -1,0 +1,11 @@
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: zilliqa-isolated-server
+  namespace: zilliqa-isolated-server
+  labels:
+    app.kubernetes.io/name: zilliqa-isolated-server
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: RESPONSE_CODE
