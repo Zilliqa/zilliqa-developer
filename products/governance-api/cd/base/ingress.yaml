@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: governance-api
+  namespace: governance-api
+  labels:
+    "app.kubernetes.io/name": "governance-api"
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: governance-api
+                port:
+                  number: 80

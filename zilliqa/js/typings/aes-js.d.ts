@@ -14,8 +14,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-declare module 'aes-js' {
+declare module "aes-js" {
   export class Counter {
     constructor(iv: Buffer);
     setValue(value: number): void;

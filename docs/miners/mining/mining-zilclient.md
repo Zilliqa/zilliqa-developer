@@ -179,3 +179,43 @@ The **minimum** requirements for running the **Zilliqa Client** are:
     ```shell
     sudo docker stop <zilliqa container name>
     ```
+
+## Header hash calculation
+
+The PoW header hash by taking the SHA-256 sum of the concatenation of:
+
+* `rand1`
+* `rand2`
+* `peer`
+* `pubKey`
+* `lookupId`
+* `gasPrice`
+* `extraData` - Up to 32 bytes of arbitrary data.
+
+Mining clients or proxies may wish to calculate this for themselves if they wish to manipulate the resulting hash by changing the value of `extraData`.
+
+## External Mining APIs
+
+### Remote mining
+
+When the Zilliqa node wants to perform PoW, it will make a call to the `zil_requestWork` method, with a payload of: `[pubKey, headerHash, blockNum, boundary, powTime, signature]`.
+The node will poll for the PoW solution by calling the `zil_checkWorkStatus` method, with a payload of: `[pubKey, headerHash, boundary, signature]`.
+The response should be in the format: `[isWorkDone, nonce, headerHash, mixHash]`.
+
+If you need to customize the header hash, you can enable `REMOTE_MINE_EXTRA_DATA` in `constants.xml`.
+In this case, the node will instead make a call to the `zil_requestWorkWithHeaderHashParams` method, with a payload of: `[pubKey, rand1, rand2, peer, lookupId, gasPrice, blockNum, boundary, powTime, signature]`.
+The node will poll for the PoW solution by calling the `zil_checkWorkStatusWithExtraData` method, with a payload of: `[pubKey, headerHash, boundary, signature]`.
+The `headerHash` in this request should be ignored.
+The response should be in the format: `[isWorkDone, nonce, extraData, mixHash]`.
+
+### Get work server mining
+
+When the mining client or proxy is ready to perform PoW, it should make a call to the `eth_getWork` method.
+The response will be in the format: `[headerHash, seed, boundary, isMining, secondsToNextPow]`.
+The mining client or proxy should submit the PoW solution by calling the `eth_submitWork` method, with a payload of: `[nonce, headerHash, mixDigest, boundary, minerWallet, worker]`.
+The `minerWallet` and `worker` are ignored.
+
+If you need to customize the header has, you can instead make a call to the `zil_getWorkWithHeaderParams` method.
+The response will be in the format: `[pubKey, rand1, rand2, peer, lookupId, gasPrice, seed, boundary, isMining, secondsToNextPow]`.
+The mining client or proxy should submit the PoW solution by calling the `zil_submitWorkWithExtraData` method, with a payload of: `[nonce, extraData, mixDigest, boundary, minerWallet, worker]`.
+The `minerWallet` and `worker` are ignored.

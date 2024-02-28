@@ -5,10 +5,15 @@ title: GetTotalCoinSupply
 
 ---
 
-Returns the total supply (ZIL) of coins in the network. This is represented as a
+There are two variations of the API - `GetTotalCoinSupply` and `GetTotalCoinSupplyAsInt`.
+
+`GetTotalCoinSupply` Returns the total supply (ZIL) of coins in the network. This is represented as a
 `String`.
 
-### Example Request
+`GetTotalCoinSupplyAsInt` Returns the total supply (ZIL) of coins in the network. This is represented as a
+`Rounded Number`.
+
+### Example Request-1
 
 === "cURL"
 
@@ -69,7 +74,7 @@ Returns the total supply (ZIL) of coins in the network. This is represented as a
     }
     ```
 
-### Example Response
+### Example Response-1
 
 ```json
 {
@@ -78,6 +83,33 @@ Returns the total supply (ZIL) of coins in the network. This is represented as a
   "result": "13452081092.277490607172"
 }
 ```
+
+### Example Request-2
+
+=== "cURL"
+
+    ```shell
+    curl -d '{
+        "id": "1",
+        "jsonrpc": "2.0",
+        "method": "GetTotalCoinSupplyAsInt",
+        "params": [""]
+    }' -H "Content-Type: application/json" -X POST "https://api.zilliqa.com/"
+    ```
+
+### Example Response-2
+
+```json
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": 13452081092
+}
+```
+
+!!! note
+
+    `GetTotalCoinSupplyAsInt` is not avaliable to call through SDKs.
 
 ### HTTP Request
 
@@ -90,9 +122,9 @@ Returns the total supply (ZIL) of coins in the network. This is represented as a
 
 ### Arguments
 
-| Parameter | Type   | Required | Description            |
-| --------- | ------ | -------- | ---------------------- |
-| `id`      | string | Required | `"1"`                  |
-| `jsonrpc` | string | Required | `"2.0"`                |
-| `method`  | string | Required | `"GetTotalCoinSupply"` |
-| `params`  | string | Required | Empty string `""`      |
+| Parameter | Type   | Required | Description                                       |
+| --------- | ------ | -------- | ------------------------------------------------- |
+| `id`      | string | Required | `"1"`                                             |
+| `jsonrpc` | string | Required | `"2.0"`                                           |
+| `method`  | string | Required | `"GetTotalCoinSupply or GetTotalCoinSupplyAsInt"` |
+| `params`  | string | Required | Empty string `""`                                 |

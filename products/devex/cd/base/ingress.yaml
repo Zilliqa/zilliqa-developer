@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: devex
+  namespace: devex
+  labels:
+    "app.kubernetes.io/name": "devex"
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: devex
+                port:
+                  number: 80
+    - host: devex.zilliqa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: devex
+                port:
+                  number: 80

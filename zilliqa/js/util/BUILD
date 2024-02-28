@@ -11,6 +11,9 @@ stamped_package_json(
 _SRCS = [
     ":package",
     "//zilliqa/js:aes-js.d",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
 ] + glob(
     [
         "src/*.ts",
@@ -41,7 +44,7 @@ ts_project(
     resolve_json_module = True,
     root_dir = "src",
     source_map = True,
-    tsconfig = "tsconfig.json",
+    tsconfig = "tsconfig.bazel.json",
     visibility = ["//visibility:public"],
     deps = [
         "//:node_modules/@types/bn.js",

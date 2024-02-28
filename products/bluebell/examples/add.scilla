@@ -1,0 +1,11 @@
+scilla_version 0
+
+library TheLibraryPart
+
+contract TheContractPart()
+
+transition hello()
+  a = Uint64 23;
+  b = Uint64 209;
+  x = builtin fibonacci a b
+end

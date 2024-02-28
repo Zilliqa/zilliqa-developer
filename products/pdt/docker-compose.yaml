@@ -1,0 +1,16 @@
+version: "3"
+services:
+  pdt:
+    environment:
+      RUST_BACKTRACE: 1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdt
+    volumes:
+      - "download_data:/var/download_data"
+    command:
+      - /pdt
+      - test
+volumes:
+  download_data:
