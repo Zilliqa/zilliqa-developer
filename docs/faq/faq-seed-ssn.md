@@ -13,7 +13,7 @@ description: Frequently asked questions
 
 <!-- markdownlint-disable MD001 -->
 
-#### Do we have to upgrade the seed/ssn node after the Zilliqa upgrade?
+#### Do we have to upgrade the seed/ssn node after the Zilliqa 1 upgrade?
 
 Almost every major upgrade of the Zilliqa blockchain requires all seed or SSN node operators to upgrade their nodes immediately after the upgrade. The Zilliqa team will continually update the node operators with the instructions to upgrade the nodes through Telegram/Discord channels.
 
