@@ -1,0 +1,1013 @@
+scilla_version 0
+
+import BoolUtils IntUtils ListUtils PairUtils
+
+library StakingContract
+
+type Denom =
+  | Zil
+  | Token of ByStr20 (* token address / hash *)
+type Coins = | Coins of Denom Uint128 (* denom, amount *)
+type RewardParam = | RewardParam of Uint128 Uint128 Uint64 Uint64 (*  APR, treasury fee, start timestamp, end timestamp *)
+type Stake = | Stake of Uint128 Uint64 Uint64 Uint128 (* stake amount, staked timestamp, expiration timestamp and penalty fee if unstaked before expiration time *)
+type RewardResult = | RewardResult of Uint128 Uint128 (* rewards, treasury fee amt *)
+let fee_denom = Uint256 10000 (* fee denominated in basis points (1 b.p. = 0.01%) *)
+let zil_address = 0x0000000000000000000000000000000000000000
+let bool_active = True
+let bool_inactive = False
+let zil = Zil
+let zero = Uint128 0
+let zero_i256 = Int256 0
+let min_bps = Uint128 1
+let max_bps = Uint128 10000
+let seconds_per_year = Uint128 31536000
+let true = True
+
+let one_msg =
+  fun (m: Message) =>
+    let e = Nil {Message} in
+      Cons {Message} m e
+
+(* Error events *)
+type Error =
+  | CodeNotOwner
+  | ContractFrozenFailure
+  | Unauthorized
+  | ContractFrozenFailurePaused
+  | ContractFrozenFailureNotPaused
+  | RewardTokenNotFound
+  | NoStakeFoundBySender
+  | AmountGreaterThanStakedAmount
+  | NotAllowedToWithdrawStakeTokens
+  | InvalidBPSError
+  | CodeInsufficientFunds
+  | InvalidContractOwnershipRecipient
+  | InvalidAddressPassed
+
+let make_error =
+  fun (result : Error) =>
+    let result_code =
+      match result with
+      | CodeNotOwner                      => Int32 -1
+      | ContractFrozenFailure             => Int32 -2
+      | Unauthorized                      => Int32 -3
+      | ContractFrozenFailurePaused       => Int32 -4
+      | ContractFrozenFailureNotPaused    => Int32 -5
+      | RewardTokenNotFound               => Int32 -6
+      | NoStakeFoundBySender              => Int32 -7
+      | AmountGreaterThanStakedAmount     => Int32 -8
+      | NotAllowedToWithdrawStakeTokens   => Int32 -9
+      | InvalidBPSError                   => Int32 -10
+      | CodeInsufficientFunds             => Int32 -11
+      | InvalidContractOwnershipRecipient => Int32 -12
+      | InvalidAddressPassed              => Int32 -13
+      end
+    in
+    { _exception : "Error"; code : result_code }
+
+let get_value =
+  fun (var : Option Uint128) =>
+    match var with
+    | Some v => v
+    | None => zero (* should never happen *)
+    end
+
+let uint64_to_uint128 : Uint64 -> Uint128 =
+  fun (x : Uint64) =>
+    let ox128 = builtin to_uint128 x in
+      match ox128 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint128 0 in
+        builtin div zero zero
+      | Some x128 => x128
+      end
+
+let int256_to_uint128 : Int256 -> Uint128 =
+  fun (x : Int256) =>
+    let ox128 = builtin to_uint128 x in
+      match ox128 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint128 0 in
+        builtin div zero zero
+      | Some x128 => x128
+      end
+
+
+(* checks if a sender is an admin or owner *)
+let is_admin_or_owner : Map ByStr20 Bool -> ByStr20 -> ByStr20 -> Bool =
+  fun (administrators: Map ByStr20 Bool) =>
+  fun (owner: ByStr20) =>
+  fun (sender: ByStr20) =>
+    let is_admin = builtin contains administrators sender in
+    let is_owner = builtin eq sender owner in
+    let allowed = orb is_admin is_owner in
+    match allowed with
+    | True => True
+    | False => False
+    end
+
+let update_reward_param : RewardParam -> Uint64 -> RewardParam =
+  fun (reward_param : RewardParam) =>
+  fun (current_timestamp : Uint64) =>
+    match reward_param with
+    | RewardParam apr treasury_fee start_timestamp end_timestamp =>
+      let zero_timestamp = Uint64 0 in
+      let is_eq_timestamp_zero = builtin eq end_timestamp zero_timestamp in
+      match is_eq_timestamp_zero with
+      | True =>
+        (* Updating end_timestamp in ADT with current timestamp number *)
+          RewardParam apr treasury_fee start_timestamp current_timestamp
+      | False =>
+          (* No change required hence returning same object *)
+          RewardParam apr treasury_fee start_timestamp end_timestamp
+      end
+    end
+
+let update_all_reward_params : forall 'A. List RewardParam -> Uint64  -> List RewardParam =
+  tfun 'A =>
+  fun (l : List RewardParam) =>
+  fun (current_timestamp : Uint64) =>
+  let foldl = @list_foldl RewardParam (List RewardParam) in
+  let init = Nil {RewardParam} in
+  let iter =
+    fun (reward_params_list : List RewardParam) =>
+    fun (reward_param : RewardParam) =>
+      let updated_reward_param = update_reward_param reward_param current_timestamp in
+        Cons {RewardParam} updated_reward_param reward_params_list
+  in
+    foldl iter init l
+
+(* timestamp less than or equal to *)
+let is_timestamp_let : Uint64 -> Uint64 -> Bool =
+  fun(ts1 : Uint64) =>
+  fun(ts2 : Uint64) =>
+    let is_ts1_le_ts2 = uint64_lt ts1 ts2 in
+    let is_ts1_eq_ts2 = builtin eq  ts1 ts2 in
+    orb is_ts1_le_ts2 is_ts1_eq_ts2
+
+(* Get time difference in seconds (endtime - starttime / 1000) / 1000 *)
+let get_time_difference : Uint128 -> Uint64 -> RewardParam -> Uint64 -> Uint64 =
+  fun (staked_amount : Uint128) =>
+  fun (staked_timestamp : Uint64) =>
+  fun (reward_param : RewardParam) =>
+  fun (current_timestamp : Uint64) =>
+    match reward_param with
+    | RewardParam apr treasury_fee start_timestamp end_timestamp =>
+      let zero_timestamp = Uint64 0 in
+      let microseconds = Uint64 1000000 in
+      let is_eq_block_zero = builtin eq end_timestamp zero_timestamp in
+      match is_eq_block_zero with
+      | True =>
+        let is_staked_timestamp_leq_start_timestamp = is_timestamp_let staked_timestamp start_timestamp in
+        match is_staked_timestamp_leq_start_timestamp with
+        | True =>
+          let diff  = builtin sub current_timestamp start_timestamp in
+          builtin div diff microseconds
+        | False =>
+          let diff  = builtin sub current_timestamp staked_timestamp in
+          builtin div diff microseconds
+        end
+      | False =>
+        let is_staked_timestamp_leq_end_timestamp = is_timestamp_let staked_timestamp end_timestamp in
+        match is_staked_timestamp_leq_end_timestamp with
+        | True =>
+          let is_staked_timestamp_leq_start_timestamp = is_timestamp_let staked_timestamp start_timestamp in
+          match is_staked_timestamp_leq_start_timestamp with
+          | True =>
+            let diff  = builtin sub end_timestamp start_timestamp in
+            builtin div diff microseconds
+          | False =>
+            let diff  = builtin sub end_timestamp staked_timestamp in
+            builtin div diff microseconds
+          end
+        | False =>
+          (* do nothing, return zero *)
+          zero_timestamp
+        end
+      end
+    end
+
+let uint128_to_uint256 : Uint128 -> Uint256 =
+  fun (x : Uint128) =>
+    let ox256 = builtin to_uint256 x in
+      match ox256 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint256 0 in
+        builtin div zero zero
+      | Some x256 => x256
+      end
+
+let muldiv : Uint128 -> Uint128 -> Uint128 -> Uint128 -> Uint256 -> Uint128 =
+  fun (w: Uint128) => (*staked_amount*)
+  fun (x : Uint128) => (*time_diff*)
+  fun (y : Uint128) => (*apr*)
+  fun (z : Uint128) => (*seconds_per_year*)
+  fun (f : Uint256) => (*fee_denom*)
+    let w256 = uint128_to_uint256 w in
+    let x256 = uint128_to_uint256 x in
+    let y256 = uint128_to_uint256 y in
+    let z256 = uint128_to_uint256 z in
+    let w_mul_x256 = builtin mul w256 x256 in  
+    let w_mul_x_mul_y256 = builtin mul w_mul_x256 y256 in
+    let w_mul_x_mul_y256_div_z256 = builtin div w_mul_x_mul_y256 z256 in
+    let res256 = builtin div w_mul_x_mul_y256_div_z256 f in
+    let ores128 = builtin to_uint128 res256 in
+    match ores128 with
+    | None =>
+      (* this must never happen, hence we throw an integer overflow exception *)
+      let max_uint128 = Uint128 340282366920938463463374607431768211455 in
+      let fourtytwo128 = Uint128 42 in
+      builtin mul max_uint128 fourtytwo128
+    | Some res128 =>
+      res128
+    end
+
+let calculate_treasury_fee_amt : Uint128 -> Uint256 -> Uint128 -> Uint128 =
+  fun ( treasury_fee : Uint128) =>
+  fun ( fee_denom : Uint256) =>
+  fun ( amount : Uint128) =>
+    let tf256 = uint128_to_uint256 treasury_fee in
+    let amt256 = uint128_to_uint256 amount in
+    let tf_mul_amt = builtin mul tf256 amt256 in
+    let res256 = builtin div tf_mul_amt fee_denom in
+    let ores128 = builtin to_uint128 res256 in
+    match ores128 with
+    | None =>
+      (* this must never happen, hence we throw an integer overflow exception *)
+      let max_uint128 = Uint128 340282366920938463463374607431768211455 in
+      let fourtytwo128 = Uint128 42 in
+      builtin mul max_uint128 fourtytwo128
+    | Some res128 =>
+      res128
+    end
+
+let calculate_rewards : forall 'A. List RewardParam -> Uint128 -> Uint64 -> Uint64 -> Uint128 -> Uint256 -> RewardResult =
+  tfun 'A =>
+  fun (l : List RewardParam) =>
+  fun (staked_amount : Uint128) =>
+  fun (staked_timestamp : Uint64) =>
+  fun (current_timestamp : Uint64) =>
+  fun (seconds_per_year : Uint128) =>
+  fun (fee_denom : Uint256 ) =>
+    let foldl = @list_foldl RewardParam RewardResult in
+    let init = RewardResult zero zero in
+    let iter =
+      fun (rewards : RewardResult) =>
+      fun (reward_param : RewardParam) =>
+        match reward_param with
+        | RewardParam apr treasury_fee start_block end_block =>
+          let time_diff_ui64 = get_time_difference staked_amount staked_timestamp reward_param current_timestamp in
+          let time_diff = uint64_to_uint128 time_diff_ui64 in
+          let res_total = muldiv staked_amount time_diff apr seconds_per_year fee_denom in
+          let treasury_fee_amt = calculate_treasury_fee_amt treasury_fee fee_denom res_total in
+          let res = builtin sub res_total treasury_fee_amt in
+          match rewards with
+          | RewardResult curr_rewards_count curr_treasury_fee_amt =>
+            let new_rewards_count = builtin add curr_rewards_count res in
+            let new_treasury_fee_amt = builtin add curr_treasury_fee_amt treasury_fee_amt in
+            RewardResult new_rewards_count new_treasury_fee_amt
+          end
+        end
+    in
+      foldl iter init l
+
+let portion = 
+  fun(amount: Uint128) =>
+  fun(bps: Uint128) => 
+    (* To avoid integer overflow, use division only. *)
+    (* amount / ( 10000 / bps ) *)
+    (* bps ranges from 1 to 10000. *)
+    let max_bps = Uint128 10000 in
+    let x = builtin div max_bps bps in
+    (* x ranges from 1 to 10000. *)
+    let result = builtin div amount x in
+    result
+
+let option_value =
+  tfun 'A =>
+  fun (default: 'A) =>
+  fun (maybe_val: Option 'A) =>
+    match maybe_val with
+    | Some v => v
+    | None => default
+    end
+      
+let option_timestamp = @option_value Uint64
+  
+let get_prev_bnum=
+  fun(cur_blk:BNum) =>
+    let one_bnum = BNum 1 in
+    let zero_block = BNum 0 in
+    let prev_block =  builtin bsub cur_blk one_bnum in
+    let prev_block_uint128 = int256_to_uint128 prev_block in
+    builtin badd zero_block prev_block_uint128
+
+contract StakingContract
+(
+  initial_owner : ByStr20,
+  initial_staking_token_address : ByStr20 with contract
+    field total_supply : Uint128,
+    field balances: Map ByStr20 Uint128,
+    field allowances: Map ByStr20 (Map ByStr20 Uint128)
+  end
+)
+
+field owner : ByStr20 = initial_owner
+field staking_token_address : ByStr20 = initial_staking_token_address
+field contract_ownership_recipient : ByStr20 = zil_address
+field paused: Bool = True
+field reward_pairs : Map ByStr20 (List RewardParam) = Emp ByStr20 (List RewardParam)
+field stakes : Map ByStr20 Stake = Emp ByStr20 Stake
+field rewards : Map ByStr20 (Map ByStr20 Uint128) = Emp ByStr20 (Map ByStr20 Uint128) (* { token_address : { user_address : token_amount } } *)
+field administrators : Map ByStr20 Bool = Emp ByStr20 Bool
+field treasury_balances : Map ByStr20 Uint128 = Emp ByStr20 Uint128
+field treasury_fees_address : ByStr20 = initial_owner
+field penalty_fee_balances : Uint128 = zero
+field total_staked_amount : Uint128 = zero
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+procedure Throw(err : Error)
+  e = make_error err;
+  throw e
+end
+
+procedure EnsureContractIsNotPaused()
+  paused_tmp <- paused;
+  match paused_tmp with
+  | False =>
+  | True  =>
+    err = ContractFrozenFailurePaused;
+    Throw err
+  end
+end
+
+procedure EnsureContractIsPaused()
+  paused_tmp <- paused;
+  match paused_tmp with
+  | False =>
+    err = ContractFrozenFailureNotPaused;
+    Throw err
+  | True =>
+  end
+end
+
+procedure IsAddressValid(address: ByStr20)
+   is_address_valid = builtin eq address zil_address;
+   match is_address_valid with
+   | True =>
+     error = InvalidAddressPassed;
+     Throw error
+   | False=>
+   end
+end
+
+procedure EnsureSenderIsOwner(initiator : ByStr20)
+  current_owner <- owner;
+  is_owner = builtin eq initiator current_owner;
+  match is_owner with
+  | True =>
+  | False =>
+    err = CodeNotOwner;
+    Throw err
+  end
+end
+
+procedure EnsureSenderIsAdminOrOwner(address: ByStr20)
+  admins <- administrators;
+  current_owner <- owner;
+  check_allowed = is_admin_or_owner admins current_owner address;
+  match check_allowed with
+    | True =>
+    | False =>
+      err = Unauthorized;
+      Throw err
+  end
+end
+
+procedure EnsureNotStakeToken(address: ByStr20)
+  stake_token_addr <- staking_token_address;
+  is_same = builtin eq address stake_token_addr;
+  match is_same with
+  | True =>
+    err = NotAllowedToWithdrawStakeTokens;
+    Throw err
+  | False =>
+    (* Do nothing *)
+  end
+end
+
+procedure RequireValidBPS(val_bps: Uint128)
+  is_gte_min = uint128_ge val_bps min_bps;
+  is_lte_max = uint128_le val_bps max_bps;
+  
+  is_valid = andb is_gte_min is_lte_max;
+  match is_valid with 
+    | True => 
+    | False =>
+      error = InvalidBPSError;
+      Throw error
+  end
+end
+
+procedure Send(coins : Coins, to_address : ByStr20)
+  match coins with
+  | Coins denom amount =>
+    match denom with
+    | Zil =>
+      msg = { _tag : "AddFunds"; _recipient : to_address; _amount : amount };
+      msgs = one_msg msg;
+      send msgs
+    | Token token =>
+      msg_to_token =  {
+        _tag : "Transfer"; _recipient : token; _amount : zero;
+        to : to_address; amount : amount
+      };
+      msgs = one_msg msg_to_token;
+      send msgs
+    end
+  end
+end
+
+procedure Receive(coins : Coins, initiator : ByStr20)
+  EnsureContractIsNotPaused;
+  match coins with
+  | Coins denom amount =>
+    match denom with
+    | Zil =>
+      needs_refund = uint128_gt _amount amount;
+      accept;
+      match needs_refund with
+      | True =>
+        refund =
+          let refund_amount = builtin sub _amount amount in
+          Coins zil refund_amount;
+        Send refund initiator
+      | False =>
+      end
+    | Token token =>
+      msg_to_token = {
+        _tag : "TransferFrom"; _recipient : token; _amount : zero;
+        from : initiator; to : _this_address; amount : amount
+      };
+      msgs = one_msg msg_to_token;
+      send msgs
+    end
+  end
+end
+
+procedure UpdateTreasuryFeeAmount(reward_token : ByStr20, amount : Uint128)
+  is_amount_eq_zero = builtin eq amount zero;
+  match is_amount_eq_zero with
+  | False =>
+    maybe_treasury_fee_amount <- treasury_balances[reward_token];
+    match maybe_treasury_fee_amount with
+    | Some curr_amount =>
+      new_amount = builtin add curr_amount amount;
+      treasury_balances[reward_token] := new_amount;
+
+      e = {_eventname : "UpdateTreasuryFeeAmountWithPreviousValueSuccess"; sender : _origin;
+           reward_token : reward_token; old_amount : curr_amount; new_amount : new_amount; difference : amount};
+      event e
+    | None =>
+      treasury_balances[reward_token] := amount;
+
+      e = {_eventname : "UpdateRewardsAmountFirstClaimSuccess"; sender : _origin;
+      reward_token : reward_token; new_amount : amount};
+      event e
+    end
+  | True =>
+    (* amount is zero, do nothing. *)
+  end
+end
+
+procedure UpdateRewardsAmount(reward_token : ByStr20, amount : Uint128)
+  is_amount_eq_zero = builtin eq amount zero;
+  match is_amount_eq_zero with
+  | False =>
+    maybe_rewards_amount <- rewards[reward_token][_origin];
+    match maybe_rewards_amount with
+    | Some curr_amount =>
+      new_amount = builtin add curr_amount amount;
+      rewards[reward_token][_origin] := new_amount;
+
+      e = {_eventname : "UpdateRewardsAmountWithPreviousValueSuccess"; sender : _origin;
+      reward_token : reward_token; old_amount : curr_amount; new_amount : new_amount; difference : amount};
+      event e
+
+    | None =>
+      rewards[reward_token][_origin] := amount;
+
+      e = {_eventname : "UpdateRewardsAmountFirstClaimSuccess"; sender : _origin;
+      reward_token : reward_token; new_amount : amount};
+      event e
+    end
+  | True =>
+    (* amount is zero, do nothing. *)
+  end
+end
+
+procedure UpdateRewards(reward_token : ByStr20, reward_res : RewardResult)
+  match reward_res with
+  | RewardResult total_rewards treasury_fee_amt =>
+    UpdateRewardsAmount reward_token total_rewards;
+    UpdateTreasuryFeeAmount reward_token treasury_fee_amt
+  end
+end
+
+procedure DoClaimRewards( reward_pair : Pair ByStr20 (List RewardParam) )
+  maybe_stake <- stakes[_origin];
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+  match maybe_stake with
+  | Some stake =>
+    match stake with
+    | Stake staked_amount staked_timestamp end_block penalty_fee=>
+      reward_token_address =
+        let fst_reward_token_address = @fst ByStr20 (List RewardParam) in
+          fst_reward_token_address reward_pair;
+
+      reward_param_list =
+        let snd_reward_param_list = @snd ByStr20 (List RewardParam) in
+        snd_reward_param_list reward_pair;
+
+      calculate_rewards_fun = @calculate_rewards (List RewardParam);
+      (*For compounded interest calculation, check if user has any running interest amount. *)
+      maybe_running_interest_amount <- rewards[reward_token_address][_origin];
+      match maybe_running_interest_amount with
+      | Some running_interest_amount =>
+        total_amount = builtin add staked_amount running_interest_amount;
+        reward_res = calculate_rewards_fun reward_param_list total_amount staked_timestamp current_timestamp seconds_per_year fee_denom;
+        UpdateRewards reward_token_address reward_res
+      | None  =>
+        (* User has no running interest amount present *)
+        reward_res = calculate_rewards_fun reward_param_list staked_amount staked_timestamp current_timestamp seconds_per_year fee_denom;
+        UpdateRewards reward_token_address reward_res
+      end
+    end
+  | None =>
+    err = NoStakeFoundBySender;
+    Throw err
+  end
+end
+
+procedure DoRemoveRewardToken(reward_token_address : ByStr20)
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+  maybe_reward_params_list <-reward_pairs[reward_token_address];
+  match maybe_reward_params_list with
+  | Some reward_params_list =>
+    update_all_reward_params_fun = @update_all_reward_params (List RewardParam);
+    updated_reward_params_list = update_all_reward_params_fun reward_params_list current_timestamp;
+    reward_pairs[reward_token_address] := updated_reward_params_list
+  | None =>
+    err = RewardTokenNotFound;
+    Throw err
+  end
+end
+
+procedure DoRemoveAllRewardTokens(reward_pair : Pair ByStr20 (List RewardParam))
+  reward_token_address =
+    let fst_reward_token_address = @fst ByStr20 (List RewardParam) in
+      fst_reward_token_address reward_pair;
+
+  DoRemoveRewardToken reward_token_address
+end
+
+procedure DoWithdrawRewards(reward_pair : Pair ByStr20 (List RewardParam))
+  reward_token_address =
+  let fst_reward_token_address = @fst ByStr20 (List RewardParam) in
+    fst_reward_token_address reward_pair;
+  
+  maybe_reward_token_amt <- rewards[reward_token_address][_origin];
+  match maybe_reward_token_amt with
+  | Some reward_token_amt =>
+    is_zil = builtin eq reward_token_address zil_address;
+    match is_zil with
+    | True=>
+      stake_token_addr <- staking_token_address;
+      is_staked_token_same_as_withdraw = builtin eq reward_token_address stake_token_addr;
+      match is_staked_token_same_as_withdraw with
+      | True =>
+        balances <- _balance;
+        total_staked <- total_staked_amount;
+        available_bal_to_withdraw = builtin sub balances total_staked;
+        is_valid_withdrawal_amount = uint128_le reward_token_amt available_bal_to_withdraw;
+
+        match is_valid_withdrawal_amount with
+        | True =>
+          zils_out = Coins zil reward_token_amt;
+          Send zils_out _origin
+        | False =>
+          err = CodeInsufficientFunds;
+          Throw err
+        end
+      | False =>
+        zils_out = Coins zil reward_token_amt;
+        Send zils_out _origin
+      end
+    | False=>
+      stake_token_addr <- staking_token_address;
+      is_staked_token_same_as_withdraw = builtin eq reward_token_address stake_token_addr;
+      match is_staked_token_same_as_withdraw with
+      | True =>
+        balances <-& initial_staking_token_address.balances[_this_address];
+        contract_balance = get_value balances;
+
+        total_staked <- total_staked_amount;
+        available_bal_to_withdraw = builtin sub contract_balance total_staked;
+        is_valid_withdrawal_amount = uint128_le reward_token_amt available_bal_to_withdraw;
+        match is_valid_withdrawal_amount with
+        | True =>
+          reward_token = Token reward_token_address;
+          tokens_out = Coins reward_token reward_token_amt;
+          Send tokens_out _origin
+        | False =>
+          err = CodeInsufficientFunds;
+          Throw err
+        end
+      | False =>
+        reward_token = Token reward_token_address;
+        tokens_out = Coins reward_token reward_token_amt;
+        Send tokens_out _origin
+      end
+    end;
+    delete rewards[reward_token_address][_origin];
+
+    e = {
+      _eventname : "WithdrawRewardsSuccess"; 
+      sender : _origin;
+      reward_token : reward_token_address; 
+      amount : reward_token_amt
+    };
+    event e
+  | None =>
+    (* User owns no rewards with given token *)
+    e = {
+      _eventname : "WithdrawRewardsSuccess"; 
+      sender : _origin;
+      reward_token : reward_token_address; 
+      amount : zero
+    };
+    event e
+  end
+end
+
+(****************************************************************)
+(**********Staking, Reward Related transitions used by User *****)
+(****************************************************************)
+transition AddStake(amount : Uint128, expiration_time: Uint64, penalty_fee_bps: Uint128)
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+  maybe_stake <- stakes[_origin];
+
+  RequireValidBPS penalty_fee_bps;
+
+  (* Receive stake amount *)
+  token_address <- staking_token_address;
+  token = Token token_address;
+  tokens_in = Coins token amount;
+  Receive tokens_in _origin;
+
+  match maybe_stake with
+  | Some stake =>
+    match stake with
+    | Stake staked_amount timestamp end_timestamp penalty_fee=>
+      (* Claim all rewards for _origin *)
+      curent_reward_pairs <- reward_pairs;
+      rewards_list =  builtin to_list curent_reward_pairs;
+      forall rewards_list DoClaimRewards;
+
+      (* Update stake amount and block *)
+      total_amount = builtin add staked_amount amount;
+      updated_stake = Stake total_amount current_timestamp end_timestamp penalty_fee;
+      stakes[_origin] := updated_stake;
+
+      total_staked <- total_staked_amount;
+      new_total_staked = builtin add total_staked amount;
+      total_staked_amount := new_total_staked
+    end
+  | None =>
+    stake = Stake amount current_timestamp expiration_time penalty_fee_bps;
+    stakes[_origin] := stake;
+
+    total_staked <- total_staked_amount;
+    new_total_staked = builtin add total_staked amount;
+    total_staked_amount := new_total_staked
+  end
+end
+
+transition RemoveStake(amount : Uint128)
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+  maybe_stake <- stakes[_origin];
+  match maybe_stake with
+  | Some (Stake staked_amount staked_timestamp end_timestamp penalty_fee) =>
+      is_amount_less_than_staked_amount = builtin lt amount staked_amount;
+      is_amount_equal_to_staked_amount = builtin eq amount staked_amount;
+      is_amount_less_or_equal_to_staked_amount = orb is_amount_less_than_staked_amount is_amount_equal_to_staked_amount;
+      match is_amount_less_or_equal_to_staked_amount with
+      | True =>
+        (* Claim all rewards for _origin *)
+        curent_reward_pairs <- reward_pairs;
+        rewards_list =  builtin to_list curent_reward_pairs;
+        forall rewards_list DoClaimRewards;
+
+        is_lt_curr_timestamp = uint64_lt current_timestamp end_timestamp;
+        match is_lt_curr_timestamp with 
+        | True =>
+          fee_bps = portion amount penalty_fee;
+          new_amount = builtin sub amount fee_bps;
+
+          penalty_fee_amount <- penalty_fee_balances;
+          new_penalty_fee_amount = builtin add penalty_fee_amount fee_bps;
+          penalty_fee_balances := new_penalty_fee_amount;
+
+          (* Send tokens to user *)
+          token_address <- staking_token_address;
+          staked_token = Token token_address;
+          output = Coins staked_token new_amount;
+          Send output _origin
+        | False =>
+          (* Send tokens to user *)
+          token_address <- staking_token_address;
+          staked_token = Token token_address;
+          output = Coins staked_token amount;
+          Send output _origin
+        end;
+
+        (* remove staked amount *)
+        remaining_amount = builtin sub staked_amount amount;
+        is_remaining_amount_eq_zero = builtin eq remaining_amount zero;
+        match is_remaining_amount_eq_zero with
+        | True =>
+          delete stakes[_origin]
+        | False =>
+          updated_stake = Stake remaining_amount current_timestamp end_timestamp penalty_fee;
+          stakes[_origin] := updated_stake
+        end;
+
+        (* Update total staked amount**)
+        total_staked <- total_staked_amount;
+        new_total_staked = builtin sub total_staked amount;
+        total_staked_amount := new_total_staked
+      | False =>
+        (* invalid amount *)
+        err = AmountGreaterThanStakedAmount;
+        Throw err
+      end
+  | None =>
+    err = NoStakeFoundBySender;
+    Throw err
+  end
+end
+
+transition ClaimRewards()
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+  maybe_stake <- stakes[_origin];
+  match maybe_stake with
+  | Some (Stake staked_amount staked_timestamp end_timestamp penalty_fee) =>
+    (* Claim all rewards for _origin *)
+    curent_reward_pairs <- reward_pairs;
+    rewards_list =  builtin to_list curent_reward_pairs;
+    forall rewards_list DoClaimRewards;
+
+    (* Withdraw all rewards for _origin *)
+    forall rewards_list DoWithdrawRewards;
+
+    (* Update block in stake *)
+    updated_stake = Stake staked_amount current_timestamp end_timestamp penalty_fee;
+    stakes[_origin] := updated_stake
+  | None =>
+    (*Skip claiming of rewards as there is not staked amount and only withdraw all rewards for _origin *)
+    curent_reward_pairs <- reward_pairs;
+    rewards_list =  builtin to_list curent_reward_pairs;
+    forall rewards_list DoWithdrawRewards
+  end
+end
+
+(*****************************************************************)
+(********** Staking, Reward Related transitions used by Admin *****)
+(*****************************************************************)
+transition AddRewardToken(
+  reward_token_address : ByStr20,
+  apr : Uint128,(* stores as free number in range   0 < fee_denom ; 0.01% to be passed as 1, 0.1% to be passed as 10, 1.0% to be passed as 100.  *)
+  treasury_fee : Uint128(* stores as free number in range   0 < fee_denom ; 0.01% to be passed as 1, 0.1% to be passed as 10, 1.0% to be passed as 100.  *)
+)
+  EnsureSenderIsAdminOrOwner _sender;
+
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+
+  end_timestamp = Uint64 0;
+  reward_param = RewardParam apr treasury_fee current_timestamp end_timestamp;
+
+  maybe_reward_params_list <-reward_pairs[reward_token_address];
+  match maybe_reward_params_list with
+  | Some reward_params_list =>
+    (*Existing reward params list found, update existing with end block before adding new reward param *)
+    update_all_reward_params_fun = @update_all_reward_params (List RewardParam);
+    updated_reward_params_list = update_all_reward_params_fun reward_params_list current_timestamp;
+    reward_params_list_new = Cons {RewardParam} reward_param updated_reward_params_list;
+    reward_pairs[reward_token_address] := reward_params_list_new
+  | None =>
+    (* No reward paris exist, add new *)
+    reward_params_list = Nil {RewardParam};
+    reward_params_list_new = Cons {RewardParam} reward_param reward_params_list;
+    reward_pairs[reward_token_address] := reward_params_list_new
+  end
+end
+
+(* Used by admin to stop all running rewards for given reward token*)
+(* For all active reward params, it sets end block as current *)
+transition RemoveRewardToken(reward_token_address : ByStr20)
+  EnsureSenderIsAdminOrOwner _sender;
+  DoRemoveRewardToken reward_token_address
+end
+
+(* Used by admin to stop all running rewards for each reward token*)
+(* For all active reward params, it sets end block as current *)
+transition RemoveAllRewardTokens()
+  EnsureSenderIsAdminOrOwner _sender;
+  curent_reward_pairs <- reward_pairs;
+  rewards_list =  builtin to_list curent_reward_pairs;
+  forall rewards_list DoRemoveAllRewardTokens
+end
+
+(***************************************************)
+(*               HouseKeeping transitions          *)
+(***************************************************)
+
+(* @dev: pause the contract. Used by admin(s) only. *)
+(* @param initiator: The original caller who called the proxy. *)
+transition Pause()
+  EnsureSenderIsAdminOrOwner _sender;
+  paused := bool_active
+end
+
+transition UnPause()
+  EnsureSenderIsAdminOrOwner _sender;
+  paused := bool_inactive
+end
+
+(* @dev: Add an admin account to the contract. Used by admin(s) only. *)
+(* @param address: The address of new admin *)
+(* @param id: Some identifier for new admin *)
+transition AddAdmin (address: ByStr20)
+  EnsureSenderIsOwner _sender;
+  (* id is an identifier to know who the admin is in real-life *)
+  administrators[address] := true;
+  e = {_eventname: "AddAdminSuccess"; addressAdded: address};
+  event e
+end
+
+(* @dev: Remove an admin account from the contract. Used by contract owner only. *)
+(* @param address: The address of admin to remove *)
+transition RemoveAdmin (address: ByStr20)
+  EnsureSenderIsOwner _sender;
+  delete administrators[address];
+  e = {_eventname: "RemoveAdminSuccess"; address: address};
+  event e
+end
+
+(* @dev: Transfer ownership to new owner. Used by contract owner only. *)
+(* @param new_owner: The address of new owner *)
+transition AddContractOwnershipRecipient(address:ByStr20)
+  EnsureSenderIsOwner _sender;
+  IsAddressValid address;
+  contract_ownership_recipient:=address;
+  e = { _eventname: "AddContractOwnershipRecipientSuccess"};
+  event e
+end
+
+transition RemoveContractOwnershipRecipient()
+  EnsureSenderIsOwner _sender;
+  contract_ownership_recipient:=zil_address;
+  e = { _eventname: "RemoveContractOwnershipRecipientSuccess"};
+  event e
+end
+
+transition AcceptContractOwnershipTransfer()
+  cur_recipient <- contract_ownership_recipient;
+  is_ownership_recipient = builtin eq cur_recipient _sender;
+  match is_ownership_recipient with
+    | True =>
+      owner:=cur_recipient;
+      contract_ownership_recipient:=zil_address;
+      e = { _eventname: "AcceptContractOwnershipTransferSuccess"; recipient_address: _sender};
+      event e
+    | False =>
+      error = InvalidContractOwnershipRecipient;
+      Throw error
+  end
+end
+
+(* Used by owner to withraw excess reward tokens/zil *)
+transition WithdrawTokens(token_address : ByStr20, token_amount: Uint128)
+  EnsureSenderIsOwner _sender;
+
+  stake_token_addr <- staking_token_address;
+  is_staked_token_same_as_withdraw = builtin eq token_address stake_token_addr;
+  match is_staked_token_same_as_withdraw with
+  | True =>
+    balances <-& initial_staking_token_address.balances[_this_address];
+    contract_balance = get_value balances;
+
+    total_staked <- total_staked_amount;
+    available_bal_to_withdraw = builtin sub contract_balance total_staked;
+    is_valid_withdrawal_amount = uint128_le token_amount available_bal_to_withdraw;
+    match is_valid_withdrawal_amount with
+    | True =>
+      reward_token = Token token_address;
+      tokens_out = Coins reward_token token_amount;
+      Send tokens_out _sender
+    | False =>
+      err = CodeInsufficientFunds;
+      Throw err
+    end
+  | False =>
+    reward_token = Token token_address;
+    tokens_out = Coins reward_token token_amount;
+    Send tokens_out _sender
+  end
+end
+
+(* Used by owner to withraw excess reward zils *)
+transition WithdrawZils(zil_amount: Uint128)
+  EnsureSenderIsAdminOrOwner _sender;
+  zils_out = Coins zil zil_amount;
+  Send zils_out _sender
+end
+
+(* Used by owner to transfer Tokens to the contract *)
+transition Deposit(
+  token_address : ByStr20,
+  token_amount : Uint128
+)
+  EnsureSenderIsAdminOrOwner _sender;
+
+  token = Token token_address;
+  tokens_in = Coins token token_amount;
+  Receive tokens_in _sender
+end
+
+(***************************************************)
+(*               Callback Transitions              *)
+(***************************************************)
+
+transition TransferFromSuccessCallBack(initiator : ByStr20, sender : ByStr20, recipient : ByStr20, amount : Uint128)
+end
+
+transition TransferSuccessCallBack(sender : ByStr20, recipient : ByStr20, amount : Uint128)
+end
+
+transition RecipientAcceptTransferFrom(initiator : ByStr20, sender : ByStr20, recipient : ByStr20, amount : Uint128)
+  is_valid_transfer_to_self =
+    let self_triggered = builtin eq initiator _this_address in
+    let is_transfer_to_self = builtin eq recipient _this_address in
+    andb self_triggered is_transfer_to_self;
+
+  match is_valid_transfer_to_self with
+  | False =>
+    e = { _exception : "InvalidInvocation" };
+    throw e
+  | True => (* noop *)
+  end
+end
+
+transition AddFunds()
+  accept
+end
+
+transition RecipientAcceptTransfer(sender : ByStr20, recipient : ByStr20, amount : Uint128)
+end

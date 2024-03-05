@@ -1,0 +1,28 @@
+{
+  "name": "gaming-contracts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "jest --verbose --runInBand",
+    "format": "npx prettier --write .",
+    "generate-key-pair": "node ./scripts/generateKeyPair.js"
+  },
+  "author": "Ashish Nair <ashish@zilliqa.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@zilliqa-js/zilliqa": "3.3.4",
+    "bignumber.js": "^9.1.0",
+    "crypto-js": "^4.1.1",
+    "js-sha3": "^0.8.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "jest": "^27.3.1",
+    "prettier": "^2.5.0"
+  },
+  "jest": {
+    "testTimeout": 500000
+  }
+}
