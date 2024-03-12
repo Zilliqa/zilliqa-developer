@@ -22,8 +22,6 @@ The Hardhat Scilla Plugin community is thrilled to present version 3.8.0, packed
 
 These updates reflect our commitment to providing a robust and developer-friendly environment for Zilliqa blockchain development. Dive into the new features by visiting the [Hardhat Scilla Plugin repository](https://github.com/Zilliqa/hardhat-scilla-plugin).
 
-Happy coding, and stay tuned for more updates!
-
 ## Zilliqa-rs 0.2.0
 
 Version 0.2.0 of the zilliqa-rs SDK is officially live, offering several features that make it easy for Rust developers to build and interact with Scilla contracts using the native Zilliqa API. Read more about it on [Zilliqa blog](https://blog.zilliqa.com/zilliqa-launches-rust-sdk/). The full release notes can be read [here](https://github.com/Zilliqa/zilliqa-rs/releases)
