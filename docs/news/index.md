@@ -7,6 +7,7 @@ keywords: ["news"]
 ---
 
 ## Introducing Hardhat Scilla Plugin 3.8.0: What's New?
+*Monday, March 11, 2024*
 
 The Hardhat Scilla Plugin community is thrilled to present version 3.8.0, packed with updates that enhance your smart contract development workflow. Here's a quick rundown of the latest features and improvements:
 
@@ -21,10 +22,6 @@ The Hardhat Scilla Plugin community is thrilled to present version 3.8.0, packed
 These updates reflect our commitment to providing a robust and developer-friendly environment for Zilliqa blockchain development. Dive into the new features by visiting the [Hardhat Scilla Plugin repository](https://github.com/Zilliqa/hardhat-scilla-plugin).
 
 Happy coding, and stay tuned for more updates!
-
----
-
-Monday, March 11, 2024
 
 ## Zilliqa-rs 0.2.0
 
