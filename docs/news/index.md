@@ -8,7 +8,7 @@ keywords: ["news"]
 
 ## Introducing Hardhat Scilla Plugin 3.8.0: What's New?
 
-_Monday, March 11, 2024_
+Monday, March 11, 2024
 
 The Hardhat Scilla Plugin community is thrilled to present version 3.8.0, packed with updates that enhance your smart contract development workflow. Here's a quick rundown of the latest features and improvements:
 
