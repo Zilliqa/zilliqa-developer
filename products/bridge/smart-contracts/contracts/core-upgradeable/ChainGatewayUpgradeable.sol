@@ -10,6 +10,15 @@ import {IRelayer, RelayerUpgradeable} from "contracts/core-upgradeable/RelayerUp
 
 interface IChainGateway is IRelayer, IChainDispatcher {}
 
+/**
+ * @title ChainGateway
+ * @notice The main core contract that is deployed on everychain to handle cross-chain messaging
+ * It inherits 2 important contracts Relayer and ChainDispatcher:
+ * The Relayer handles outbound messages with `relay` and `relayWithMetadata` functions.
+ * The ChainDispatcher serves for inbound messages.
+ * The contract is also UUPS upgradeable.
+ * For future upgrades of the contract refer to: https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable
+ */
 contract ChainGatewayUpgradeable is
     Initializable,
     UUPSUpgradeable,
@@ -22,6 +31,9 @@ contract ChainGatewayUpgradeable is
         _disableInitializers();
     }
 
+    /**
+     * @dev Initializer for the contract
+     */
     function initialize(
         address _validatorManager,
         address _owner
@@ -31,5 +43,8 @@ contract ChainGatewayUpgradeable is
         __ChainDispatcher_init_unchained(_validatorManager);
     }
 
+    /**
+     * @dev Override used to secure the upgrade call to the contract owner
+     */
     function _authorizeUpgrade(address) internal virtual override onlyOwner {}
 }
