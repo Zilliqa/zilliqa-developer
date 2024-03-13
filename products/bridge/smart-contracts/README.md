@@ -134,6 +134,85 @@ Currently periphery only features ERC20 bridge that is `LockAndRelease` on one e
 
 To deploy the `TokenManagers` on new chains the `LockAndReleaseTokenManagerUpgradeableV3` and `MintAndBurnTokenManagerUpgradeableV3` on each end of the chain if not already there. The initializer function needs to be added to these functions to initialize the owner and setting the gateways necessary. Then a new deployment script can be created and used accordingly.
 
+## Creating custom cross-chain messaging protocols
+
+Essentially there are 2 main interfaces on contracts that need to be satisfied to send a cross-chain message from a source chain to the target chain:
+
+- The source chain should call the `ChainGateway.relay` function
+
+  ```solidity
+  contract Sender {
+    ChainGateway chainGateway = 0x000...;
+
+    function sendToTarget() external {
+      uint targetChainId = 12;
+      address target = 0x000...; // The contract that will receive the call
+      uint amount = 100;
+      bytes memory call = abi.encodeWithSignature("receiveFromSource(uint256)", amount);
+      uint gasLimit = 100_000;
+      chainGateway.relay(targetChainId, target, call, gasLimit);
+    }
+  }
+  ```
+
+- The target chain should have the external function that is able to receive the message (The chaingateway should be able to call it):
+
+  ```solidity
+  contract Receiver {
+    event Received(uint amount);
+
+    function receiveFromSource(uint amount) external {
+      emit Received(amount)
+    }
+  }
+  ```
+
+As you can see above in the example `Sender` contract holds the `chainGateway` address such it it can call it to notify the validator nodes about which event they want to send and to which chain. Despite calling it message passing, essentially it tries to execute the instruction on the target contract.
+
+To enable 2 way communication then both you just have to make both of these contracts symmetric.
+
+Sometimes we want to also get some extra metadata such as the sender address or the nonce of the dispatch transaction. This can be achieved by using `relayWithMetadata` instead.
+
+```solidity
+struct Receive {
+  uint amount
+}
+
+contract Sender {
+  ChainGateway chainGateway = 0x000...;
+
+  function sendToTarget() external {
+    uint targetChainId = 12;
+    address target = 0x000...; // The contract that will receive the call
+    uint amount = 100;
+    bytes4 selector = Receiver.receiveFromSource.selector;
+    bytes memory data = abi.encode(Receive(amount));
+    uint gasLimit = 100_000;
+    chainGateway.relay(targetChainId, target, selector, data, gasLimit);
+  }
+}
+```
+
+```solidity
+struct CallMetadata {
+    uint sourceChainId;
+    address sender;
+}
+
+contract Receiver {
+  event Received(address sender, uint amount);
+
+  function receiveFromSource(CallMetadata calldata metadata, bytes calldata data) external {
+    Receive memory args = abi.decode(data, (Receive));
+    emit Received(metadata.sourceChainId, metadata.sender, args.amount);
+  }
+}
+```
+
+This approach is a bit more limiting as it requires a stricter abi on the `Receiver` contract. But in return we get the message sender and source chain id. Which is useful to ensure that the incoming call originated from the trusted contract and not by a malicious user and not from the wrong chain. This is whats currently used in the `periphery` contracts for the `TokenManager`.
+
+Note as well that the `Receive` struct is flexible and can be anything depending on the application. This serves as the payload for the information that needs to be sent across chain.
+
 ## Testing information
 
 Once the bridge infrastructure has been setup as according to [here](../bridge-validators/README.md), use the following test commands:
