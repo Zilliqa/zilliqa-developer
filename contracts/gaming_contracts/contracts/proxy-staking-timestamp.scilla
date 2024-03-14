@@ -1,0 +1,843 @@
+scilla_version 0
+
+import ListUtils PairUtils BoolUtils
+
+library ProxyStaking
+
+let one = Uint128 1
+let zero = Uint128 0
+let false = False
+let true = True
+let bystr2_empty_string: ByStr2 = 0x0000
+let bystr8_empty_string: ByStr8 = 0x0000000000000000
+let bystr16_empty_string: ByStr16 = 0x00000000000000000000000000000000
+let bystr20_empty_string: ByStr20 = 0x0000000000000000000000000000000000000000
+
+let one_msg =
+  fun (m: Message) =>
+    let e = Nil {Message} in
+      Cons {Message} m e
+
+let two_msgs =
+  fun (msg1: Message) =>
+  fun (msg2: Message) =>
+    let msgs_tmp = one_msg msg2 in
+    Cons {Message} msg1 msgs_tmp
+
+type Error =
+  | NotPausedError
+  | PausedError
+  | NotContractOwnerError
+  | CodeSenderNotMatchAddress
+  | ElementAtPositionError
+  | StakingContractDifferentError
+  | ZRC6DifferentError
+  | AmountDifferentError
+  | ExpirationTimestampDifferentError
+  | PenaltyFeeDifferentError
+  | MintNftFlagDifferentError
+  | BurnNftFlagDifferentError
+  | InvalidSender
+  | CodeInvalidFlag
+  | InvalidSignature
+  
+let make_error =
+  fun (result: Error) =>
+    let result_code =
+      match result with
+      | NotPausedError                     => Int32 -1
+      | PausedError                        => Int32 -2
+      | NotContractOwnerError              => Int32 -3
+      | CodeSenderNotMatchAddress          => Int32 -4
+      | ElementAtPositionError             => Int32 -5
+      | StakingContractDifferentError      => Int32 -6
+      | ZRC6DifferentError                 => Int32 -7
+      | AmountDifferentError               => Int32 -8
+      | ExpirationTimestampDifferentError  => Int32 -9
+      | PenaltyFeeDifferentError           => Int32 -10
+      | MintNftFlagDifferentError         => Int32 -11
+      | BurnNftFlagDifferentError          => Int32 -12
+      | InvalidSender                      => Int32 -13
+      | CodeInvalidFlag                    => Int32 -14
+      | InvalidSignature                   => Int32 -15
+      end
+    in
+    { _exception: "Error"; code: result_code }
+
+let bystr_to_bystr2: ByStr -> ByStr2 =
+fun(str : ByStr) =>
+  let bystr2 = builtin to_bystr2 str in
+  match bystr2 with
+    | Some res => res
+    | None => bystr2_empty_string
+  end
+
+let bystr_to_bystr8: ByStr -> ByStr8 =
+  fun(str : ByStr) =>
+    let bystr8 = builtin to_bystr8 str in
+    match bystr8 with
+      | Some res => res
+      | None => bystr8_empty_string
+    end
+
+let bystr_to_bystr16: ByStr -> ByStr16 =
+  fun(str : ByStr) =>
+    let bystr16 = builtin to_bystr16 str in
+      match bystr16 with
+        | Some res => res
+        | None => bystr16_empty_string
+      end
+
+let bystr_to_bystr20: ByStr -> ByStr20 =
+  fun(str : ByStr) =>
+  let bystr20 = builtin to_bystr20 str in
+    match bystr20 with
+      | Some res => res
+      | None => bystr20_empty_string
+    end
+
+type ResultOrError =
+  | Result of Bool
+  | ErrorCode of Error
+
+let is_sender_match_address: ByStr20 -> ByStr20 -> ResultOrError =
+  fun(sender : ByStr20) =>
+  fun(wallet_address : ByStr20) =>
+    let is_match = builtin eq sender wallet_address in
+    match is_match with
+    | True => 
+        let valid = True in
+        Result valid
+    | False =>
+        let err = CodeSenderNotMatchAddress in
+        ErrorCode err
+      end
+
+let build_pair =
+  fun (pair_sender_pubkey : Pair ByStr20 ByStr33) =>
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+    let sender = let fst_bystr20_bystr33 = @fst ByStr20 ByStr33 in
+      fst_bystr20_bystr33 pair_sender_pubkey in
+    let pubkey = let snd_bystr20_bystr33 = @snd ByStr20 ByStr33 in
+      snd_bystr20_bystr33 pair_sender_pubkey in
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+    let sigData = let snd_bystr_bystr64 = @snd ByStr ByStr64 in
+      snd_bystr_bystr64 pair_payload_signature in
+
+    (* bytes 17 to 36: wallet address of sender *)
+    (* bytes 102 to end of string: the URI *)
+    let num_16 = Uint32 16 in
+    let num_20 = Uint32 20 in
+    let num_102 = Uint32 102 in
+
+    let address_bystr = builtin substr data num_16 num_20 in
+
+    let length_bystr = builtin strlen data in
+    let length_uri = builtin sub length_bystr num_102 in
+    let uri_bystr = builtin substr data num_102 length_uri in
+    let token_uri = builtin to_ascii uri_bystr in
+
+    (* convert bystr address to bystr20 address *)
+    let address_bystr20 = bystr_to_bystr20 address_bystr in
+    
+    let pr = Pair {ByStr20 String} sender token_uri in
+    
+    let verify_status = builtin ecdsa_verify pubkey data sigData in
+      match verify_status with
+      | True =>
+        (* the sender address has to match with the signed address *)
+        let match_result = is_sender_match_address sender address_bystr20 in
+          match match_result with
+            | Result res =>
+              match res with
+              | True => pr
+              | False => 
+                let val = builtin sub zero one in pr
+              end
+            | ErrorCode err => 
+              let val = builtin sub zero one in pr
+          end
+      | False => let val = builtin sub zero one in pr
+      end
+
+let extract_staking_contract =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_20 = Uint32 20 in
+    let num_36 = Uint32 36 in
+
+    (* bytes 37 to 56: staking contract address *)
+    
+    let staking_bystr = builtin substr data num_36 num_20 in
+      
+    (* convert bystr zrc6 address to bystr20 zrc6 address *)
+    let staking_contract = bystr_to_bystr20 staking_bystr in
+
+    staking_contract
+
+let extract_zrc6_contract =
+fun (pair_payload_signature : Pair ByStr ByStr64) =>
+  let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+    fst_bystr_bystr64 pair_payload_signature in
+
+  let num_20 = Uint32 20 in
+  let num_56 = Uint32 56 in
+
+  (* bytes 57 to 76: ZRC6 contract address *)
+  
+  let zrc6_bystr = builtin substr data num_56 num_20 in
+    
+  (* convert bystr zrc6 address to bystr20 zrc6 address *)
+  let zrc6_contract = bystr_to_bystr20 zrc6_bystr in
+
+  zrc6_contract
+
+let equal_uint32 = fun (a: Uint32) => fun(b: Uint32) =>
+  builtin eq a b
+
+let equal_uint64 = fun (a: Uint64) => fun(b: Uint64) =>
+  builtin eq a b
+
+let equal_uint128 = fun (a: Uint128) => fun(b: Uint128) =>
+  builtin eq a b
+
+let equal_bystr20 = fun (a: ByStr20) => fun(b: ByStr20) =>
+  builtin eq a b
+
+(* return true if l[i] == value for all elements l[i] in the list l *)
+let all_elements_equal_to_value_bystr20 =
+  fun(l: List ByStr20) =>
+  fun(value: ByStr20) =>
+    let f = equal_bystr20 value in
+    let for_allByStr20 = @list_forall ByStr20 in (* from ListUtiles *)
+    for_allByStr20 f l (* checks if all elements are equal to value *)
+
+let extract_amount =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_0 = Uint32 0 in
+    let num_16 = Uint32 16 in
+
+    (* bytes 1 to 16: amount *)
+    let amount_number_bystr = builtin substr data num_0 num_16 in
+    let amount_number_bystr16 = bystr_to_bystr16 amount_number_bystr in
+    let amount_number_uint128 = builtin to_uint128 amount_number_bystr16 in
+
+    amount_number_uint128
+
+let extract_expiration_timestamp =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_8 = Uint32 8 in
+    let num_76 = Uint32 76 in
+
+    (* bytes 77 to 92: block number *)
+    let expiration_timestamp_bystr = builtin substr data num_76 num_8 in
+    let expiration_timestamp_bystr16 = bystr_to_bystr8 expiration_timestamp_bystr in
+    let expiration_timestamp_uint128 = builtin to_uint64 expiration_timestamp_bystr16 in
+
+    expiration_timestamp_uint128
+
+let extract_token_ids =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_8 = Uint32 8 in
+    let num_76 = Uint32 76 in
+
+    (* bytes 77 to 84: Token Id *)
+    let token_ids_bystr = builtin substr data num_76 num_8 in
+    let token_ids_bystr16 = bystr_to_bystr8 token_ids_bystr in
+    let token_ids_uint256 = builtin to_uint256 token_ids_bystr16 in
+
+    token_ids_uint256
+
+let extract_penalty_fee = 
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+  let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+    fst_bystr_bystr64 pair_payload_signature in
+
+  let num_16 = Uint32 16 in
+  let num_84 = Uint32 84 in
+
+  (* bytes 93 to 108: penalty amount *)
+  let penalty_fee_bps_bystr = builtin substr data num_84 num_16 in
+  let penalty_fee_bps_bystr16 = bystr_to_bystr16 penalty_fee_bps_bystr in
+  let penalty_fee_bps_uint128 = builtin to_uint128 penalty_fee_bps_bystr16 in
+
+  penalty_fee_bps_uint128
+
+let extract_mint_nft_flag = 
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+  let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+    fst_bystr_bystr64 pair_payload_signature in
+
+  let num_2 = Uint32 2 in
+  let num_100 = Uint32 100 in
+
+  (* bytes 109 to 110: grant nft flag *)
+  let mint_nft_flag_bystr = builtin substr data num_100 num_2 in
+  let mint_nft_flag_bystr16 = bystr_to_bystr2 mint_nft_flag_bystr in
+  let mint_nft_flag_uint32 = builtin to_uint32 mint_nft_flag_bystr16 in
+
+  mint_nft_flag_uint32
+
+let extract_burn_nft_flag = 
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_2 = Uint32 2 in
+    let num_84 = Uint32 84 in
+
+    (* bytes 109 to 110: grant nft flag *)
+    let burn_nft_flag_bystr = builtin substr data num_84 num_2 in
+    let burn_nft_flag_bystr16 = bystr_to_bystr2 burn_nft_flag_bystr in
+    let burn_nft_flag_uint32 = builtin to_uint32 burn_nft_flag_bystr16 in
+
+    burn_nft_flag_uint32
+
+
+let all_elements_equal_to_value_uint32 =
+  fun(l: List Uint32) =>
+  fun(value: Uint32) =>
+    let f = equal_uint32 value in
+    let for_allUint32 = @list_forall Uint32 in (* from ListUtiles *)
+    for_allUint32 f l (* checks if all elements are equal to value *)
+
+let all_elements_equal_to_value_uint64 =
+  fun(l: List Uint64) =>
+  fun(value: Uint64) =>
+    let f = equal_uint64 value in
+    let for_allUint64 = @list_forall Uint64 in (* from ListUtiles *)
+    for_allUint64 f l (* checks if all elements are equal to value *)
+
+let all_elements_equal_to_value_uint128 =
+  fun(l: List Uint128) =>
+  fun(value: Uint128) =>
+    let f = equal_uint128 value in
+    let for_allUint128 = @list_forall Uint128 in (* from ListUtiles *)
+    for_allUint128 f l (* checks if all elements are equal to value *)
+        
+
+contract ProxyStaking(
+  initial_contract_owner:ByStr20,
+  pub_key: ByStr33
+)
+
+field paused : Bool = False
+
+field contract_owner:ByStr20 = initial_contract_owner
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+procedure Throw(err: Error)
+  e = make_error err;
+  throw e
+end
+
+(* Check if the contract is not paused *)
+procedure RequireNotPaused()
+  is_paused <- paused;
+  match is_paused with
+  | False =>
+  | True =>
+    (* Contract is paused *)
+    error = PausedError;
+    Throw error
+  end
+end
+
+procedure RequirePaused()
+  is_paused <- paused;
+  match is_paused with
+  | True =>
+  | False =>
+    (* Contract is paused *)
+    error = NotPausedError;
+    Throw error
+  end
+end
+
+procedure RequireContractOwner()
+  cur_owner <- contract_owner;
+  is_contract_owner = builtin eq cur_owner _sender;
+  match is_contract_owner with
+  | True => 
+  | False =>
+    error = NotContractOwnerError;
+    Throw error
+  end
+end
+
+(* Check if the sender matches the address *)
+procedure RequireSenderToMatchAddress(address: ByStr20)
+  is_match = builtin eq _sender address;
+  match is_match with
+  | True =>
+  | False =>
+    err = CodeSenderNotMatchAddress;
+    Throw err
+  end
+end
+
+procedure IsMintOrBurnFlagValid(flag: Uint32)
+  valid_zero = Uint32 0;
+  valid_one = Uint32 1;
+  is_zero = builtin eq flag valid_zero;
+  is_one = builtin eq flag valid_one;
+  is_valid = orb is_zero is_one;
+  match is_valid with
+  | False =>
+    err = CodeInvalidFlag;
+    Throw err
+  | True =>
+  end
+end
+
+procedure DoValidSignature(data_sig_pair: Pair ByStr ByStr64)
+  data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+        fst_bystr_bystr64 data_sig_pair;
+  sigData = let snd_bystr_bystr64 = @snd ByStr ByStr64 in
+        snd_bystr_bystr64 data_sig_pair;
+
+  (* verify data against signature *)
+  verify_status = builtin ecdsa_verify pub_key data sigData;
+  match verify_status with
+    | False =>
+      err = InvalidSignature;
+      Throw err
+    | True =>
+  end
+end
+
+
+procedure ValidSignature(data_sig_pair_list: List (Pair ByStr ByStr64))
+  forall data_sig_pair_list DoValidSignature
+end
+
+
+
+(**************************************)
+(*             Transitions            *)
+(**************************************)
+
+(* Pause the contract - only owner can call *)
+transition Pause()
+  RequireNotPaused;
+  RequireContractOwner;
+
+  paused := true;
+  e = {
+    _eventname: "Pause";
+    paused: true
+  };
+  event e
+end
+
+transition Unpause()
+  RequirePaused;
+  RequireContractOwner;
+
+  paused := false;
+  e = {
+    _eventname: "Unpause";
+    paused: false
+  };
+  event e
+end
+
+transition AddStake(data_sig_pair_list: List (Pair ByStr ByStr64))
+  RequireNotPaused;
+
+  ValidSignature data_sig_pair_list;
+
+  amount_list_map = @list_map (Pair ByStr ByStr64) (Uint128);
+  amount_list = amount_list_map extract_amount data_sig_pair_list;
+
+  staking_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  staking_list = staking_list_map extract_staking_contract data_sig_pair_list;
+
+  zrc6_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  zrc6_list = zrc6_list_map extract_zrc6_contract data_sig_pair_list;
+
+  expiry_timestamp_list_map = @list_map (Pair ByStr ByStr64) (Uint64);
+  expiry_timestamp_list = expiry_timestamp_list_map extract_expiration_timestamp data_sig_pair_list;
+
+  penalty_fee_list_map = @list_map (Pair ByStr ByStr64) (Uint128);
+  penalty_fee_list = penalty_fee_list_map extract_penalty_fee data_sig_pair_list;
+
+  mint_nft_flag_map = @list_map (Pair ByStr ByStr64) (Uint32);
+  mint_nft_flag_list = mint_nft_flag_map extract_mint_nft_flag data_sig_pair_list;
+
+  zero_pos = Uint32 0;
+
+  el_opt_staking =
+      let nth = @list_nth ByStr20 in (* from ListUtils *)
+      nth zero_pos staking_list; (* note that indexing starts at 0 *)
+
+  match el_opt_staking with (* Option is None if no element with index i in list *)
+  | None => (* index is out of bounds: no such element *)
+    err = ElementAtPositionError;
+    Throw err
+  | Some el => (* list[i] = el *)
+    staking_contract = el;
+    check_match_staking = all_elements_equal_to_value_bystr20 staking_list staking_contract;
+  
+    match check_match_staking with
+      | False =>
+        err = StakingContractDifferentError;
+        Throw err
+      | True =>
+        
+        el_opt_zrc6 =
+        let nth = @list_nth ByStr20 in (* from ListUtils *)
+        nth zero_pos zrc6_list; (* note that indexing starts at 0 *)
+
+        match el_opt_zrc6 with (* Option is None if no element with index i in list *)
+        | None => (* index is out of bounds: no such element *)
+          err = ElementAtPositionError;
+          Throw err
+        | Some el => (* list[i] = el *)
+          zrc6_contract = el;
+          check_match_staking = all_elements_equal_to_value_bystr20 zrc6_list zrc6_contract;
+          match check_match_staking with
+          | False =>
+            err = ZRC6DifferentError;
+            Throw err
+          | True =>
+            el_opt_amount =
+            let nth = @list_nth Uint128 in (* from ListUtils *)
+            nth zero_pos amount_list; (* note that indexing starts at 0 *)
+
+            match el_opt_amount with (* Option is None if no element with index i in list *)
+            | None => (* index is out of bounds: no such element *)
+              err = ElementAtPositionError;
+              Throw err
+            | Some el => (* list[i] = el *)
+              amount = el;
+              (* Run through the amount list and see if there is any amount mismatch *)
+              check_match_amount = all_elements_equal_to_value_uint128 amount_list amount;
+              match check_match_amount with
+              | False =>
+                err = AmountDifferentError;
+                Throw err
+              | True =>
+                el_opt_expiry_timestamp =
+                  let nth = @list_nth Uint64 in (* from ListUtils *)
+                  nth zero_pos expiry_timestamp_list; (* note that indexing starts at 0 *)
+
+                match el_opt_expiry_timestamp with (* Option is None if no element with index i in list *)
+                | None => (* index is out of bounds: no such element *)
+                  err = ElementAtPositionError;
+                  Throw err
+                | Some el => (* list[i] = el *)
+                  expiration_time = el;
+                  check_match_expiration_time = all_elements_equal_to_value_uint64 expiry_timestamp_list expiration_time;
+                  match check_match_expiration_time with
+                  | False =>
+                    err = ExpirationTimestampDifferentError;
+                    Throw err
+                  | True =>
+                    el_opt_penalty_fee =
+                      let nth = @list_nth Uint128 in (* from ListUtils *)
+                      nth zero_pos penalty_fee_list; (* note that indexing starts at 0 *)
+
+                    match el_opt_penalty_fee with (* Option is None if no element with index i in list *)
+                    | None => (* index is out of bounds: no such element *)
+                      err = ElementAtPositionError;
+                      Throw err
+                    | Some el => (* list[i] = el *)
+                      penalty_fee_bps = el;
+
+                      check_match_penalty_fee_bps = all_elements_equal_to_value_uint128 penalty_fee_list penalty_fee_bps;
+                      match check_match_penalty_fee_bps with
+                      | False =>
+                        err = PenaltyFeeDifferentError;
+                        Throw err
+                      | True =>
+                        el_opt_mint_nft_flag =
+                        let nth = @list_nth Uint32 in (* from ListUtils *)
+                        nth zero_pos mint_nft_flag_list; (* note that indexing starts at 0 *)
+
+                        match el_opt_mint_nft_flag with (* Option is None if no element with index i in list *)
+                        | None => (* index is out of bounds: no such element *)
+                          err = ElementAtPositionError;
+                          Throw err
+                        | Some el => (* list[i] = el *)
+                          mint_nft_flag = el;
+
+                          check_match_amount = all_elements_equal_to_value_uint32 mint_nft_flag_list mint_nft_flag;
+                          match check_match_amount with
+                          | False =>
+                            err = MintNftFlagDifferentError;
+                            Throw err
+                          | True =>
+                            token_owner = _sender;
+
+                            msg_to_stake = {
+                              _tag : "AddStake"; 
+                              _recipient : staking_contract; 
+                              _amount : Uint128 0; 
+                              amount : amount; 
+                              expiration_time : expiration_time;
+                              penalty_fee_bps: penalty_fee_bps
+                            };
+
+                            msgs =
+                              let nil = Nil {Message} in
+                              Cons {Message} msg_to_stake nil;
+                            send msgs;
+
+                            IsMintOrBurnFlagValid mint_nft_flag;
+
+                            mintable = Uint32 1;
+                            is_mintable = builtin eq mint_nft_flag mintable;
+                            match is_mintable with 
+                            | True =>
+                              (*Mint the reward nft*)
+                              pair_token_uri_list_map = @list_map (Pair ByStr ByStr64) (Pair ByStr20 String);
+                              pr = Pair {ByStr20 ByStr33} _sender pub_key;
+                              tmp_fun = build_pair pr;
+                              to_token_uri_pair_list = pair_token_uri_list_map tmp_fun data_sig_pair_list;
+
+                              msg_to_mint = {
+                                _tag : "BatchMint"; 
+                                _recipient : zrc6_contract; 
+                                _amount : Uint128 0; 
+                                to_token_uri_pair_list: to_token_uri_pair_list
+                              };
+
+                              msgs =
+                                let nil = Nil {Message} in
+                                Cons {Message} msg_to_mint nil;
+                              send msgs
+                            | False =>
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+    end
+  end
+end 
+
+transition RemoveStake(data_sig_pair_list: List (Pair ByStr ByStr64))
+  RequireNotPaused;
+
+  ValidSignature data_sig_pair_list;
+
+  amount_list_map = @list_map (Pair ByStr ByStr64) (Uint128);
+  amount_list = amount_list_map extract_amount data_sig_pair_list;
+
+  staking_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  staking_list = staking_list_map extract_staking_contract data_sig_pair_list;
+
+  zrc6_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  zrc6_list = zrc6_list_map extract_zrc6_contract data_sig_pair_list;
+
+  token_list_map = @list_map (Pair ByStr ByStr64) (Uint256);
+  token_list = token_list_map extract_token_ids data_sig_pair_list;
+
+  burn_nft_flag_map = @list_map (Pair ByStr ByStr64) (Uint32);
+  burn_nft_flag_list = burn_nft_flag_map extract_burn_nft_flag data_sig_pair_list;
+
+  zero_pos = Uint32 0;
+
+  el_opt_staking =
+      let nth = @list_nth ByStr20 in (* from ListUtils *)
+      nth zero_pos staking_list; (* note that indexing starts at 0 *)
+
+  match el_opt_staking with (* Option is None if no element with index i in list *)
+  | None => (* index is out of bounds: no such element *)
+    err = ElementAtPositionError;
+    Throw err
+  | Some el => (* list[i] = el *)
+    staking_contract = el;
+    check_match_staking = all_elements_equal_to_value_bystr20 staking_list staking_contract;
+  
+    match check_match_staking with
+      | False =>
+        err = StakingContractDifferentError;
+        Throw err
+      | True =>
+        
+        el_opt_zrc6 =
+        let nth = @list_nth ByStr20 in (* from ListUtils *)
+        nth zero_pos zrc6_list; (* note that indexing starts at 0 *)
+
+        match el_opt_zrc6 with (* Option is None if no element with index i in list *)
+        | None => (* index is out of bounds: no such element *)
+          err = ElementAtPositionError;
+          Throw err
+        | Some el => (* list[i] = el *)
+          zrc6_contract = el;
+          check_match_zrc6 = all_elements_equal_to_value_bystr20 zrc6_list zrc6_contract;
+          match check_match_zrc6 with
+          | False =>
+            err = ZRC6DifferentError;
+            Throw err
+          | True =>
+            el_opt_amount =
+            let nth = @list_nth Uint128 in (* from ListUtils *)
+            nth zero_pos amount_list; (* note that indexing starts at 0 *)
+
+            match el_opt_amount with (* Option is None if no element with index i in list *)
+            | None => (* index is out of bounds: no such element *)
+              err = ElementAtPositionError;
+              Throw err
+            | Some el => (* list[i] = el *)
+              amount = el;
+              (* Run through the amount list and see if there is any amount mismatch *)
+              check_match_amount = all_elements_equal_to_value_uint128 amount_list amount;
+              match check_match_amount with
+              | False =>
+                err = AmountDifferentError;
+                Throw err
+              | True =>
+                el_opt_burn_nft_flag =
+                let nth = @list_nth Uint32 in (* from ListUtils *)
+                nth zero_pos burn_nft_flag_list; (* note that indexing starts at 0 *)
+
+                match el_opt_burn_nft_flag with (* Option is None if no element with index i in list *)
+                | None => (* index is out of bounds: no such element *)
+                  err = ElementAtPositionError;
+                  Throw err
+                | Some el => (* list[i] = el *)
+                  burn_nft_flag = el;
+                  (* Run through the burn nft flag list and see if there is any burn nft flag mismatch *)
+                  check_match_burn_nft_flag = all_elements_equal_to_value_uint32 burn_nft_flag_list burn_nft_flag;
+                  match check_match_burn_nft_flag with
+                  | False =>
+                    err = BurnNftFlagDifferentError;
+                    Throw err
+                  | True =>
+                    msg_to_stake = {
+                      _tag : "RemoveStake"; 
+                      _recipient : staking_contract; 
+                      _amount : Uint128 0; 
+                      amount : amount
+                    };
+    
+                    msgs =
+                      let nil = Nil {Message} in
+                      Cons {Message} msg_to_stake nil;
+                    send msgs;
+
+                    IsMintOrBurnFlagValid burn_nft_flag;
+    
+                    burnable = Uint32 1;
+                    is_burnable =  builtin eq burn_nft_flag burnable;
+                    match is_burnable with 
+                    | True =>
+                      msg_to_mint = {
+                        _tag : "BatchBurn"; 
+                        _recipient : zrc6_contract; 
+                        _amount : Uint128 0; 
+                        token_id_list: token_list
+                      };
+    
+                      msgs =
+                        let nil = Nil {Message} in
+                        Cons {Message} msg_to_mint nil;
+                      send msgs
+                    | False =>
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+    end
+  end
+end
+
+transition ClaimRewards(data: ByStr, sigData: ByStr64)
+  RequireNotPaused;
+
+  (* verify data against signature *)
+
+  verify_status = builtin ecdsa_verify pub_key data sigData;
+
+  num_0 = Uint32 0;
+  num_20 = Uint32 20;
+
+  (* convert bystr address to bystr20 address *)
+  address_bystr = builtin substr data num_0 num_20;
+
+  staking_contract_bystr = builtin substr data num_20 num_20;
+
+  (* convert bystr address to bystr20 address *)
+  address_bystr20 = bystr_to_bystr20 address_bystr;
+
+  (* convert bystr staking address to bystr20 staking address *)
+  staking_contract_contract = bystr_to_bystr20 staking_contract_bystr;
+
+  (* the sender address has to match with the signed address *)
+  RequireSenderToMatchAddress address_bystr20;
+
+  match verify_status with
+  | True =>
+    (* do the mint *)
+    msg_to_token = {
+      _tag : "ClaimRewards"; 
+      _recipient : staking_contract_contract;
+      _amount : zero
+    };
+  
+    msgs = one_msg msg_to_token;
+    send msgs
+  | False =>
+    err = InvalidSignature;
+    Throw err
+  end
+end
+ 
+(* Callback method after mint *)
+transition ZRC6_MintCallback(
+  to: ByStr20,
+  token_id: Uint256,
+  token_uri: String
+)
+end
+
+(* Callback method after batch mint *)
+transition ZRC6_BatchMintCallback()
+end
+
+(* Callback method after burn *)
+transition ZRC6_BurnCallback(
+  token_owner: ByStr20,
+  token_id: Uint256
+)
+end
+
+(* Callback method after batch mint *)
+transition ZRC6_BatchBurnCallback()
+end
+
+(* Callback method after transfer nft *)
+transition RecipientAcceptTransfer(sender : ByStr20, recipient : ByStr20, amount : Uint128)
+end
