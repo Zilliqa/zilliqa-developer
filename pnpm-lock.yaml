@@ -389,8 +389,8 @@ importers:
         specifier: 0.17.1
         version: 0.17.1(rollup@2.3.0)(typescript@4.9.5)
       sanitize-html:
-        specifier: ^2.7.3
-        version: 2.10.0
+        specifier: ^2.12.1
+        version: 2.12.1
       scrypt-js:
         specifier: ^3.0.1
         version: 3.0.1
@@ -486,8 +486,8 @@ importers:
   contracts/experimental/ERC20ProxyForZRC2:
     dependencies:
       '@openzeppelin/contracts':
-        specifier: ^5.0.1
-        version: 5.0.1
+        specifier: ^5.0.2
+        version: 5.0.2
     devDependencies:
       '@nomicfoundation/hardhat-chai-matchers':
         specifier: ^2.0.2
@@ -641,11 +641,11 @@ importers:
   products/bridge/smart-contracts:
     dependencies:
       '@openzeppelin/contracts':
-        specifier: ^5.0.1
-        version: 5.0.1
+        specifier: ^5.0.2
+        version: 5.0.2
       '@openzeppelin/contracts-upgradeable':
-        specifier: ^5.0.1
-        version: 5.0.1(@openzeppelin/contracts@5.0.1)
+        specifier: ^5.0.2
+        version: 5.0.2(@openzeppelin/contracts@5.0.2)
       dotenv:
         specifier: ^16.3.1
         version: 16.4.1
@@ -8052,16 +8052,16 @@ packages:
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.1
     dev: true
 
-  /@openzeppelin/contracts-upgradeable@5.0.1(@openzeppelin/contracts@5.0.1):
-    resolution: {integrity: sha512-MvaLoPnVcoZr/qqZP+4cl9piuR4gg0iIGgxVSZ/AL1iId3M6IdEHzz9Naw5Lirl4KKBI6ciTVnX07yL4dOMIJg==}
+  /@openzeppelin/contracts-upgradeable@5.0.2(@openzeppelin/contracts@5.0.2):
+    resolution: {integrity: sha512-0MmkHSHiW2NRFiT9/r5Lu4eJq5UJ4/tzlOgYXNAIj/ONkQTVnz22pLxDvp4C4uZ9he7ZFvGn3Driptn1/iU7tQ==}
     peerDependencies:
-      '@openzeppelin/contracts': 5.0.1
+      '@openzeppelin/contracts': 5.0.2
     dependencies:
-      '@openzeppelin/contracts': 5.0.1
+      '@openzeppelin/contracts': 5.0.2
     dev: false
 
-  /@openzeppelin/contracts@5.0.1:
-    resolution: {integrity: sha512-yQJaT5HDp9hYOOp4jTYxMsR02gdFZFXhewX5HW9Jo4fsqSVqqyIO/xTHdWDaKX5a3pv1txmf076Lziz+sO7L1w==}
+  /@openzeppelin/contracts@5.0.2:
+    resolution: {integrity: sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==}
     dev: false
 
   /@openzeppelin/defender-admin-client@1.54.1(debug@4.3.4):
@@ -21571,6 +21571,7 @@ packages:
 
   /json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
+    requiresBuild: true
 
   /json-schema@0.4.0:
     resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
@@ -27826,15 +27827,15 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /sanitize-html@2.10.0:
-    resolution: {integrity: sha512-JqdovUd81dG4k87vZt6uA6YhDfWkUGruUu/aPmXLxXi45gZExnt9Bnw/qeQU8oGf82vPyaE0vO4aH0PbobB9JQ==}
+  /sanitize-html@2.12.1:
+    resolution: {integrity: sha512-Plh+JAn0UVDpBRP/xEjsk+xDCoOvMBwQUf/K+/cBAVuTbtX8bj2VB7S1sL1dssVpykqp0/KPSesHrqXtokVBpA==}
     dependencies:
       deepmerge: 4.3.0
       escape-string-regexp: 4.0.0
       htmlparser2: 8.0.1
       is-plain-object: 5.0.0
       parse-srcset: 1.0.2
-      postcss: 8.4.21
+      postcss: 8.4.23
     dev: false
 
   /sanitize.css@13.0.0:
