@@ -1,0 +1,675 @@
+(* SPDX-License-Identifier: GPL-3.0 *)
+scilla_version 0
+
+import BoolUtils ListUtils IntUtils
+
+library LinearSwapDex
+
+(***************************************************)
+(*               Global variables                  *)
+(***************************************************)
+
+type Denom =
+  | Zil
+  | Token of ByStr20 (* token address / hash *)
+type Coins = | Coins of Denom Uint128 (* denom, amount *)
+let zil_address = 0x0000000000000000000000000000000000000000
+let zil = Zil
+let zero = Uint128 0
+let false = False
+let true = True
+let bystr4_empty_string: ByStr4 = 0x00000000
+let bystr8_empty_string: ByStr8 = 0x0000000000000000
+let bystr16_empty_string: ByStr16 = 0x00000000000000000000000000000000
+let bystr20_empty_string: ByStr20 = 0x0000000000000000000000000000000000000000
+
+
+(***************************************************)
+(*               Library functions                 *)
+(***************************************************)
+
+let one_msg = 
+  fun (msg: Message) => 
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+(* Error exception *)
+type Error =
+  | NotPausedError
+  | PausedError
+  | NotContractOwnerError
+  | NotContractOwnerOrAdminError
+  | InvalidParameter
+  | InvalidBlockNumber
+  | InvalidAmountPassed
+  | InvalidAddressPassed
+  | InvalidParameterMinZil
+  | InvalidParameterMinToken
+  | IncorrectZilAmount
+  | InvalidSignature
+  | InsufficientBalance
+  | InvalidContractOwnershipRecipient
+  | InvalidTransitionCalled
+
+let make_error =
+  fun (result: Error) =>
+    let result_code = 
+      match result with
+      | NotPausedError                     => Int32 -1
+      | PausedError                        => Int32 -2
+      | NotContractOwnerError              => Int32 -3
+      | NotContractOwnerOrAdminError       => Int32 -4
+      | InvalidParameter                   => Int32 -5
+      | InvalidBlockNumber                 => Int32 -6
+      | InvalidAmountPassed                => Int32 -7
+      | InvalidAddressPassed               => Int32 -8
+      | InvalidParameterMinZil             => Int32 -9
+      | InvalidParameterMinToken           => Int32 -10
+      | IncorrectZilAmount                 => Int32 -11
+      | InvalidSignature                   => Int32 -12
+      | InsufficientBalance                => Int32 -13
+      | InvalidContractOwnershipRecipient  => Int32 -14
+      | InvalidTransitionCalled            => Int32 -15
+      end
+    in
+    { _exception: "Error"; code: result_code }
+  
+let get_value =
+  fun (var : Option Uint128) =>
+    match var with
+    | Some v => v
+    | None => zero (* should never happen *)
+    end
+
+let bystr_to_bystr16: ByStr -> ByStr16 =
+  fun(str : ByStr) =>
+    let bystr16 = builtin to_bystr16 str in
+      match bystr16 with
+        | Some res => res
+        | None => bystr16_empty_string
+      end
+
+let bystr_to_bystr8: ByStr -> ByStr8 =
+  fun(str : ByStr) =>
+    let bystr8 = builtin to_bystr8 str in
+      match bystr8 with
+        | Some res => res
+        | None => bystr8_empty_string
+      end
+
+let bystr_to_bystr4: ByStr -> ByStr4 =
+  fun(str : ByStr) =>
+    let bystr4 = builtin to_bystr4 str in
+      match bystr4 with
+        | Some res => res
+        | None => bystr4_empty_string
+      end
+
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+(* initial_owner                  ByStr20 - Owner of the contract                                         *)
+(* initial_token_contract         ByStr20 - ZRC2 token address which will be paired with zil for swap     *)
+(* pub_key                        ByStr33 - Public key for ecdsa verification                             *)
+
+contract LinearSwapDex(
+  initial_owner : ByStr20,
+  initial_token_contract: ByStr20 with contract
+    field total_supply : Uint128,
+    field balances: Map ByStr20 Uint128,
+    field allowances: Map ByStr20 (Map ByStr20 Uint128)
+  end,
+  pub_key: ByStr33
+)
+
+(***************************************************)
+(*             Mutable variables                   *)
+(***************************************************)
+
+(* Defaults to False *)
+field is_paused: Bool = false
+
+(* Contract Owner *)
+(* Defaults to `initial_owner` *)
+field contract_owner: ByStr20 = initial_owner
+
+field contract_ownership_recipient: ByStr20 = zil_address
+
+field token_address: ByStr20 = initial_token_contract
+
+field administrators: Map ByStr20 Bool 
+  = Emp ByStr20 Bool
+
+field commission_recipient: ByStr20 = zil_address
+
+
+(***************************************************)
+(*             Validation procedure                *)
+(***************************************************)
+
+(* Emit Errors *)
+procedure Throw(error: Error)
+  e = make_error error;
+  throw e
+end
+
+procedure RequireNotPaused()
+  paused <- is_paused;
+  match paused with
+  | False =>
+  | True =>
+    (* Contract is paused *)
+    error = PausedError;
+    Throw error
+  end
+end
+
+procedure RequirePaused()
+  paused <- is_paused;
+  match paused with
+  | True =>
+  | False =>
+    (* Contract is paused *)
+    error = NotPausedError;
+    Throw error
+  end
+end
+
+procedure RequireContractOwner()
+  cur_owner <- contract_owner;
+  is_contract_owner = builtin eq cur_owner _sender;
+  match is_contract_owner with
+  | True => 
+  | False =>
+    error = NotContractOwnerError;
+    Throw error
+  end
+end
+
+procedure RequireContractOwnerOrAdmin()
+  cur_owner <- contract_owner;
+  is_contract_owner = builtin eq cur_owner _sender;
+  is_contract_admin <- exists administrators[_sender];
+
+  is_allowed = orb is_contract_owner is_contract_admin;
+  match is_allowed with
+  | True =>
+  | False =>
+    error = NotContractOwnerOrAdminError;
+    Throw error
+  end
+end
+
+procedure EnsureAmountIsNotZero(number: Uint128)
+  gt_zero = uint128_gt number zero;
+  match gt_zero with
+  | True =>
+  | False =>
+    error = InvalidAmountPassed;
+    Throw error
+  end
+end
+
+procedure EnsureNotZeroAddress(address : ByStr20)
+  is_zil = builtin eq address zil_address;
+  match is_zil with
+  | False =>
+  | True =>
+    error = InvalidAddressPassed;
+    Throw error
+  end
+end
+
+procedure IsZilAmountValid(amount : Uint128)
+  is_valid = builtin eq _amount amount;
+  match is_valid with
+    |  False =>
+        error = IncorrectZilAmount;
+        Throw error
+    | True =>
+  end
+end
+
+(* Check if blocknumber sent in signed data is within 3 blocks of the current block *)
+procedure IsBlockNumberWithinRange(blocknum_data : Uint128)
+  current_block <- & BLOCKNUMBER;
+  
+  three_bnum = BNum 3;
+  
+  blocknum_data_bnum = builtin badd three_bnum blocknum_data;
+  bnum_limit = builtin blt current_block blocknum_data_bnum;
+  match bnum_limit with
+  | True =>
+  | False =>
+    err = InvalidBlockNumber;
+    Throw err
+  end
+end
+
+procedure VerifySignature(data: ByStr, sig_data: ByStr64)
+  verify_status = builtin ecdsa_verify pub_key data sig_data;
+  match verify_status with
+    | False =>
+      err = InvalidSignature;
+      Throw err
+    | True =>
+  end
+end
+
+procedure IsRequestValid(label: Uint32, transition_name: Uint32)
+  isValidRequest = builtin eq label transition_name;
+  match isValidRequest with
+  | False =>
+    error = InvalidTransitionCalled;
+    Throw error
+  | True =>
+  end
+end
+
+(***************************************************)
+(*             Utility procedure                   *)
+(***************************************************)
+
+procedure Send(coins : Coins, to_address : ByStr20)
+  match coins with
+  | Coins denom amount =>
+    match denom with
+    | Zil =>
+      msg = { _tag : "AddFunds"; _recipient: to_address; _amount: amount };
+      msgs = one_msg msg;
+      send msgs
+    | Token token =>
+      msg_to_token =  {
+        _tag : "Transfer"; _recipient: token; _amount: zero;
+        to: to_address; amount: amount
+      };
+      msgs = one_msg msg_to_token;
+      send msgs
+    end
+  end
+end
+
+procedure Receive(coins : Coins, initiator : ByStr20)
+  match coins with
+  | Coins denom amount =>
+    match denom with
+    | Zil =>
+      needs_refund = uint128_gt _amount amount;
+      accept;
+      match needs_refund with
+      | True =>
+        refund =
+          let refund_amount = builtin sub _amount amount in
+          Coins zil refund_amount;
+        Send refund initiator
+      | False =>
+      end
+    | Token token =>
+      msg_to_token = {
+        _tag : "TransferFrom"; _recipient : token; _amount : zero;
+        from : initiator; to : _this_address; amount : amount
+      };
+      msgs = one_msg msg_to_token;
+      send msgs
+    end
+  end
+end
+
+procedure DoSwap(denom : Denom, input_amount: Uint128, output_amount: Uint128, receiver_address: ByStr20)
+  RequireNotPaused;
+  match denom with
+  | Token token_addr =>
+      zils_in = Coins zil input_amount;
+      Receive zils_in receiver_address;
+      
+      token = Token token_addr;
+      token_out = Coins token output_amount;
+      Send token_out receiver_address
+  | Zil  =>
+      token_addr <- token_address;
+      token = Token token_addr;
+      tokens_in = Coins token input_amount;
+      Receive tokens_in receiver_address;
+      
+      zils_in = Coins zil output_amount;
+      Send zils_in receiver_address
+  end
+end
+
+(***************************************************)
+(*             Utility transition                   *)
+(***************************************************)
+  
+transition AddZil()
+  RequireContractOwnerOrAdmin;
+  EnsureAmountIsNotZero _amount;
+
+  balance <- _balance;
+
+  (* accept all zil *)
+  zils_in = Coins zil _amount;
+  Receive zils_in _sender;
+
+  new_balance = builtin add balance _amount;
+  e2 = { 
+    _eventname: "AddZilSuccess"; 
+    sender_address: _sender;
+    balance: new_balance 
+  };
+  event e2
+end
+
+transition WithdrawZil(amount: Uint128)
+  RequireContractOwnerOrAdmin;
+  balance <- _balance;
+  is_valid = uint128_ge balance amount;
+  match is_valid with
+    | True =>
+      zils_out = Coins zil amount;
+      Send zils_out _sender;
+      new_balance = builtin sub balance amount;
+      e2 = { 
+        _eventname: "WithdrawZilSuccess"; 
+        recipient_address:_sender; 
+        balance: new_balance
+      };
+      event e2
+    | False =>
+      error = InsufficientBalance;
+      Throw error
+  end
+end
+
+transition AddToken(amount : Uint128)
+  RequireContractOwnerOrAdmin;
+  EnsureAmountIsNotZero amount;
+  
+  token_addr <- token_address;
+  
+  token = Token token_addr;
+  tokens_in = Coins token amount;
+  Receive tokens_in _sender;
+  
+  e2 = {
+    _eventname: "AddTokenSuccess";
+    sender_address: _sender;
+    balance: amount
+  };
+  event e2
+end
+
+transition WithdrawToken(amount : Uint128)
+  RequireContractOwnerOrAdmin;
+
+  balances <-& initial_token_contract.balances[_this_address];
+  v_bal = get_value balances;
+  is_valid = uint128_ge v_bal amount;
+  match is_valid with
+    | True =>
+      token_addr <- token_address;
+      token = Token token_addr;
+      token_out = Coins token amount;
+      Send token_out _sender;
+      
+      new_bal = builtin sub v_bal amount;
+      
+      e2 = { 
+        _eventname: "WithdrawTokenSuccess";
+        recipient_address: _sender;
+        balance: new_bal
+      };
+      event e2
+    | False =>
+      error = InsufficientBalance;
+      Throw error
+  end
+end
+
+(* Give Zil and Get tokens*)
+transition SwapZilForToken(data: ByStr, sig_data: ByStr64)
+  transition_id = Uint32 1;
+  (* verify data against signature *)
+  VerifySignature data sig_data;
+  RequireNotPaused;
+
+  num_0 = Uint32 0;
+  num_4 = Uint32 4;
+  num_8 = Uint32 8;
+  num_16 = Uint32 16;
+  num_24 = Uint32 24;
+  num_32 = Uint32 32;
+  num_40 = Uint32 40;
+
+  block_number_bystr = builtin substr data num_0 num_16;
+
+  (* convert bystr block_number to uint128 block number *)
+  block_number_bystr16 = bystr_to_bystr16 block_number_bystr;
+  block_number_uint128 = builtin to_uint128 block_number_bystr16;
+
+  IsBlockNumberWithinRange block_number_uint128;
+
+  (* convert bystr zil amount to uint128 zil amount *)
+  min_zil_amount_bystr = builtin substr data num_16 num_8;
+  min_zil_amount_bystr16 = bystr_to_bystr8 min_zil_amount_bystr;
+  min_zil_amount_uint128 = builtin to_uint128 min_zil_amount_bystr16;
+
+  (* convert bystr token amount to uint128 token amount *)
+  min_token_amount_bystr = builtin substr data num_24 num_8;
+  min_token_amount_bystr16 = bystr_to_bystr8 min_token_amount_bystr;
+  min_token_amount_uint128 = builtin to_uint128 min_token_amount_bystr16;
+
+  (* convert bystr commission amount to uint128 commission amount *)
+  commission_amount_bystr = builtin substr data num_32 num_8;
+  commission_amount_bystr16 = bystr_to_bystr8 commission_amount_bystr;
+  commission_amount_uint128 = builtin to_uint128 commission_amount_bystr16;
+
+  transition_id_bystr = builtin substr data num_40 num_4;
+  transition_id_bystr4 = bystr_to_bystr4 transition_id_bystr;
+  transition_id_uint32 = builtin to_uint32 transition_id_bystr4;
+
+  IsRequestValid transition_id transition_id_uint32;
+  
+  IsZilAmountValid min_zil_amount_uint128;
+
+  token_addr <- token_address;
+  token = Token token_addr;
+  DoSwap token min_zil_amount_uint128 min_token_amount_uint128 _sender;
+
+  (* Transfer commission if set*)
+  recipient <- commission_recipient;
+  is_recipient_set = builtin eq recipient zil_address;
+  match is_recipient_set with
+    | False =>
+        commission = Coins zil commission_amount_uint128;
+        Send commission recipient
+    | True =>
+  end;
+      
+  e2 = { _eventname: "SwapZilForTokenSuccess"};
+  event e2
+end
+
+(* Give Token and Get Zils*)
+transition SwapTokenForZil(data: ByStr, sig_data: ByStr64)
+  transition_id = Uint32 2;
+  (* verify data against signature *)
+  VerifySignature data sig_data;
+  RequireNotPaused;
+
+  num_0 = Uint32 0;
+  num_4 = Uint32 4;
+  num_8 = Uint32 8;
+  num_16 = Uint32 16;
+  num_24 = Uint32 24;
+  num_32 = Uint32 32;
+  num_40 = Uint32 40;
+
+  block_number_bystr = builtin substr data num_0 num_16;
+
+  (* convert bystr block_number to uint128 block number *)
+  block_number_bystr16 = bystr_to_bystr16 block_number_bystr;
+  block_number_uint128 = builtin to_uint128 block_number_bystr16;
+
+  IsBlockNumberWithinRange block_number_uint128;
+
+  (* convert bystr token amount to uint128 token amount *)
+  min_token_amount_bystr = builtin substr data num_16 num_8;
+  min_token_amount_bystr16 = bystr_to_bystr8 min_token_amount_bystr;
+  min_token_amount_uint128 = builtin to_uint128 min_token_amount_bystr16;
+  
+  (* convert bystr zil amount to uint128 zil amount *)
+  min_zil_amount_bystr = builtin substr data num_24 num_8;
+  min_zil_amount_bystr16 = bystr_to_bystr8 min_zil_amount_bystr;
+  min_zil_amount_uint128 = builtin to_uint128 min_zil_amount_bystr16;
+
+  (* convert bystr commission amount to uint128 commission amount *)
+  commission_amount_bystr = builtin substr data num_32 num_8;
+  commission_amount_bystr16 = bystr_to_bystr8 commission_amount_bystr;
+  commission_amount_uint128 = builtin to_uint128 commission_amount_bystr16;
+
+  transition_id_bystr = builtin substr data num_40 num_4;
+  transition_id_bystr4 = bystr_to_bystr4 transition_id_bystr;
+  transition_id_uint32 = builtin to_uint32 transition_id_bystr4;
+
+  IsRequestValid transition_id transition_id_uint32;
+
+  DoSwap zil min_token_amount_uint128 min_zil_amount_uint128 _sender;
+
+  (* Transfer commission if set*)
+  recipient <- commission_recipient;
+  is_recipient_set = builtin eq recipient zil_address;
+  match is_recipient_set with
+    | False =>
+      token_addr <- token_address;
+      token = Token token_addr;
+      token_out = Coins token commission_amount_uint128;
+      Send token_out recipient
+    | True =>
+  end;
+
+  e2 = { _eventname: "SwapTokenForZilSuccess"};
+  event e2
+end
+
+(***************************************************)
+(*               Configuration transitions          *)
+(***************************************************)
+
+transition Pause()
+  RequireNotPaused;
+  RequireContractOwner;
+
+  is_paused := true;
+  e = {
+    _eventname: "Pause";
+    is_paused: true
+  };
+  event e
+end
+
+transition Unpause()
+  RequirePaused;
+  RequireContractOwner;
+
+  is_paused := false;
+  e = {
+    _eventname: "Unpause";
+    is_paused: false
+  };
+  event e
+end
+
+transition AddAdmin(address : ByStr20)
+  RequireContractOwner;
+  administrators[address] := true;
+  e2 = { _eventname: "AddAdminSuccess"; address: address};
+  event e2
+end
+
+transition RemoveAdmin(address : ByStr20)
+  RequireContractOwner;
+  delete administrators[address];
+  e2 = { _eventname: "RemoveAdminSuccess"; address: address};
+  event e2
+end
+
+transition AddCommissionRecipientAddress(address : ByStr20)
+  RequireContractOwnerOrAdmin;
+  EnsureNotZeroAddress address;
+  commission_recipient:= address;
+  e2 = { _eventname: "AddCommissionRecipientAddressSuccess"; address: address};
+  event e2
+end
+
+transition RemoveCommissionRecipientAddress()
+  RequireContractOwnerOrAdmin;
+  commission_recipient:=zil_address;
+  e2 = { _eventname: "RemoveCommissionRecipientAddressSuccess"};
+  event e2
+end
+
+transition AddContractOwnershipRecipient(address:ByStr20)
+  RequireContractOwner;
+  EnsureNotZeroAddress address;
+  contract_ownership_recipient:=address;
+  e2 = { _eventname: "AddContractOwnershipRecipientSuccess"};
+  event e2
+end
+
+transition RemoveContractOwnershipRecipient()
+  RequireContractOwner;
+  contract_ownership_recipient:=zil_address;
+  e2 = { _eventname: "RemoveContractOwnershipRecipientSuccess"};
+  event e2
+end
+
+transition AcceptContractOwnershipTransfer()
+  cur_recipient <- contract_ownership_recipient;
+  is_ownership_recipient = builtin eq cur_recipient _sender;
+  match is_ownership_recipient with
+    | True =>
+      contract_owner:=cur_recipient;
+      contract_ownership_recipient:=zil_address;
+      e2 = { _eventname: "AcceptContractOwnershipTransferSuccess"; recipient_address: _sender};
+      event e2
+    | False =>
+      error = InvalidContractOwnershipRecipient;
+      Throw error
+  end
+end
+
+(***************************************************)
+(*               Callback Transitions              *)
+(***************************************************)
+
+transition RecipientAcceptTransfer(
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition RecipientAcceptTransferFrom(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition TransferFromSuccessCallBack(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition TransferSuccessCallBack(
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end

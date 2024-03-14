@@ -389,8 +389,8 @@ importers:
         specifier: 0.17.1
         version: 0.17.1(rollup@2.3.0)(typescript@4.9.5)
       sanitize-html:
-        specifier: ^2.7.3
-        version: 2.10.0
+        specifier: ^2.12.1
+        version: 2.12.1
       scrypt-js:
         specifier: ^3.0.1
         version: 3.0.1
@@ -21593,6 +21593,7 @@ packages:
 
   /json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
+    requiresBuild: true
 
   /json-schema@0.4.0:
     resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
@@ -27848,15 +27849,15 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /sanitize-html@2.10.0:
-    resolution: {integrity: sha512-JqdovUd81dG4k87vZt6uA6YhDfWkUGruUu/aPmXLxXi45gZExnt9Bnw/qeQU8oGf82vPyaE0vO4aH0PbobB9JQ==}
+  /sanitize-html@2.12.1:
+    resolution: {integrity: sha512-Plh+JAn0UVDpBRP/xEjsk+xDCoOvMBwQUf/K+/cBAVuTbtX8bj2VB7S1sL1dssVpykqp0/KPSesHrqXtokVBpA==}
     dependencies:
       deepmerge: 4.3.0
       escape-string-regexp: 4.0.0
       htmlparser2: 8.0.1
       is-plain-object: 5.0.0
       parse-srcset: 1.0.2
-      postcss: 8.4.21
+      postcss: 8.4.23
     dev: false
 
   /sanitize.css@13.0.0:
