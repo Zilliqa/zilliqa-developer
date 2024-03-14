@@ -1,0 +1,1239 @@
+scilla_version 0
+
+import ListUtils IntUtils BoolUtils PairUtils
+
+library RankedMatch
+
+type MatchParam = 
+| MatchParam of Uint128 ByStr20 (List ByStr20) (* Total fee, Player list *)
+
+type RewardParams =
+| RewardParams of Uint64 Uint128 (* End timestamp, Reward Amount *)
+
+let false = False
+let true = True
+let zero = Uint128 0
+let zero_uint32 = Uint32 0
+let zero_uint64 = Uint64 0
+let one_uint256 = Uint256 1
+let bystr16_empty_string: ByStr16 = 0x00000000000000000000000000000000
+let bystr20_empty_string: ByStr20 = 0x0000000000000000000000000000000000000000
+let zero_address = 0x0000000000000000000000000000000000000000
+let min_bps = Uint128 1
+let max_bps = Uint128 10000
+
+
+(***************************************************)
+(*               Library functions                 *)
+(***************************************************)
+
+let one_msg = 
+  fun (msg: Message) => 
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+let two_msgs =
+  fun (msg1: Message) =>
+  fun (msg2: Message) =>
+    let msgs_tmp = one_msg msg2 in
+    Cons {Message} msg1 msgs_tmp
+
+let three_msgs =
+  fun (msg1: Message) =>
+  fun (msg2: Message) =>
+  fun (msg3: Message) =>
+    let msgs_tmp = two_msgs msg2 msg3 in
+    Cons {Message} msg1 msgs_tmp
+
+let four_msgs =
+  fun (msg1: Message) =>
+  fun (msg2: Message) =>
+  fun (msg3: Message) =>
+  fun (msg4: Message) =>
+    let msgs_tmp = three_msgs msg2 msg3 msg4 in
+    Cons {Message} msg1 msgs_tmp
+
+(* Error exception *)
+type Error =
+  | NotPausedError
+  | PausedError
+  | NotContractOwnerError
+  | InvalidEntryFee
+  | InvalidMatchId
+  | AlreadyExist
+  | InvalidServiceFeeBPSError
+  | ZeroAddressDestinationError
+  | FundsNotAvailable
+  | ElementAtPositionError
+  | MatchIdDifferentError
+  | InvalidAccountForWithdrawal
+  | InvalidSignature
+  | Unauthorized
+  | InvalidPlayerList
+  | SenderDifferentError
+  | InvalidSenderError
+  | InvalidAddressPassed
+  | InvalidContractOwnershipRecipient
+
+let make_error =
+  fun (result: Error) =>
+    let result_code = 
+      match result with
+      | NotPausedError                     => Int32 -1
+      | PausedError                        => Int32 -2
+      | NotContractOwnerError              => Int32 -3
+      | InvalidEntryFee                    => Int32 -4
+      | InvalidMatchId                     => Int32 -5
+      | AlreadyExist                       => Int32 -6
+      | InvalidServiceFeeBPSError          => Int32 -7
+      | ZeroAddressDestinationError        => Int32 -8
+      | FundsNotAvailable                  => Int32 -9
+      | ElementAtPositionError             => Int32 -10
+      | MatchIdDifferentError              => Int32 -11
+      | InvalidAccountForWithdrawal        => Int32 -12
+      | InvalidSignature                   => Int32 -13
+      | Unauthorized                       => Int32 -14
+      | InvalidPlayerList                  => Int32 -15
+      | SenderDifferentError               => Int32 -16
+      | InvalidSenderError                 => Int32 -17
+      | InvalidAddressPassed               => Int32 -18
+      | InvalidContractOwnershipRecipient  => Int32 -19
+      end
+    in
+    { _exception: "Error"; code: result_code }
+
+let uint32_to_uint128 : Uint32 -> Uint128 =
+  fun (x : Uint32) =>
+    let ox128 = builtin to_uint128 x in
+      match ox128 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint128 0 in
+        builtin div zero zero
+      | Some x128 => x128
+      end
+
+let uint64_to_uint256 : Uint64 -> Uint256 =
+  fun (x : Uint64) =>
+    let ox256 = builtin to_uint256 x in
+      match ox256 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint256 0 in
+        builtin div zero zero
+      | Some x256 => x256
+      end
+
+let uint256_to_uint64 : Uint256 -> Uint64 =
+  fun (x : Uint256) =>
+    let ox64 = builtin to_uint64 x in
+      match ox64 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint64 0 in
+        builtin div zero zero
+      | Some x64 => x64
+      end
+
+let uint128_to_uint256 : Uint128 -> Uint256 =
+  fun (x : Uint128) =>
+    let ox256 = builtin to_uint256 x in
+      match ox256 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint256 0 in
+        builtin div zero zero
+      | Some x256 => x256
+      end
+    
+let int256_to_uint128 : Int256 -> Uint128 =
+  fun (x : Int256) =>
+    let ox128 = builtin to_uint128 x in
+      match ox128 with
+      | None =>
+        (* this never happens, hence we throw a division by zero exception just in case *)
+        let zero = Uint128 0 in
+        builtin div zero zero
+      | Some x128 => x128
+      end
+
+let option_value =
+  tfun 'A =>
+  fun (default: 'A) =>
+  fun (maybe_val: Option 'A) =>
+    match maybe_val with
+    | Some v => v
+    | None => default
+    end
+        
+let option_timestamp = @option_value Uint64
+    
+let get_prev_bnum=
+  fun(cur_blk:BNum) =>
+    let one_bnum = BNum 1 in
+    let zero_block = BNum 0 in
+    let prev_block =  builtin bsub cur_blk one_bnum in
+    let prev_block_uint128 = int256_to_uint128 prev_block in
+    builtin badd zero_block prev_block_uint128
+
+let list_length : forall 'A. List 'A -> Uint32 =
+  tfun 'A =>
+  fun (l : List 'A) =>
+  let foldl = @list_foldl 'A Uint32 in
+  let init = Uint32 0 in
+  let one = Uint32 1 in
+  let iter =
+    fun (z : Uint32) =>
+    fun (h : 'A) =>
+      builtin add one z
+  in
+    foldl iter init l
+
+let calculate_total_entry_fee : forall 'A. List 'A -> Uint128 -> Uint128 =
+  tfun 'A =>
+  fun (pl : List 'A) =>
+  fun (ef : Uint128) =>
+  let foldl = @list_foldl 'A Uint128 in
+  let init = Uint128 0 in
+  let iter =
+    fun (z : Uint128) =>
+    fun (h : 'A) =>
+      builtin add ef z
+  in
+    foldl iter init pl
+
+let build_pair =
+  fun (match_id : Uint256) =>
+  fun (reward_amount : Uint128) =>
+  fun (player : ByStr20) =>
+  let pr = Pair {Uint256 Uint128} match_id reward_amount in
+    Pair {ByStr20 (Pair Uint256 Uint128)} player pr
+
+let build_bystr20_uint256_pair =
+  fun (match_id : Uint256) =>
+  fun (player : ByStr20) =>
+    Pair {ByStr20 Uint256} player match_id
+
+let build_bystr20_uint128_pair =
+  fun (amount : Uint128) =>
+  fun (player : ByStr20) =>
+    Pair {ByStr20 Uint128} player amount
+
+let equal_bystr20 = fun (a: ByStr20) => fun(b: ByStr20) =>
+  builtin eq a b
+
+let list_bystr20_eq =
+  fun (l : List ByStr20) =>
+  fun (value : ByStr20) =>
+    let f = equal_bystr20 value in
+    let for_allByStr20 = @list_filter ByStr20 in (* from ListUtiles *)
+    for_allByStr20 f l
+
+let validate_list_bystr20_eq =
+  fun (l1 : List ByStr20) =>
+  fun (l2 : List ByStr20) =>
+    let list_map_fun = @list_map ByStr20 (List ByStr20) in
+    let list_bystr20_eq_fun = list_bystr20_eq l2 in
+    let matching_list = list_map_fun list_bystr20_eq_fun l1 in
+
+    let lfl = @list_flatten (ByStr20) in
+    let flat_matching_list = lfl matching_list in
+    let bystr20_list_eq = @list_eq ByStr20 in
+    bystr20_list_eq equal_bystr20 flat_matching_list l1
+
+let muldiv : Uint128 -> Uint32 -> Uint128 =
+  fun (w: Uint128) =>
+  fun (x : Uint32) =>
+    let w256 = uint128_to_uint256 w in
+    let x128 = uint32_to_uint128 x in
+    let x256 = uint128_to_uint256 x128 in
+    let res256 = builtin div w256 x256 in
+    let ores128 = builtin to_uint128 res256 in
+    match ores128 with
+    | None =>
+      let max_uint128 = Uint128 340282366920938463463374607431768211455 in
+      let fourtytwo128 = Uint128 42 in
+      builtin mul max_uint128 fourtytwo128
+    | Some res128 =>
+      res128
+    end
+
+let portion =
+  fun(amount: Uint128) =>
+  fun(bps: Uint128) =>
+    let max_bps256 = uint128_to_uint256 max_bps in
+    let amount256 = uint128_to_uint256 amount in
+    let bps256 = uint128_to_uint256 bps in
+    let x256 = builtin mul amount256 bps256 in
+    let res256 = builtin div x256 max_bps256 in
+    let ores128 = builtin to_uint128 res256 in
+    match ores128 with
+    | None =>
+      zero
+    | Some res128 =>
+      res128
+    end
+
+let add_days_in_time =
+  fun(t:Uint64) =>
+  fun(d:Uint64) =>
+    let t256 = uint64_to_uint256 t in
+    let d256 = uint64_to_uint256 d in
+    let m256 = Uint256 86400000000 in
+    let d256_x_m256 = builtin mul d256 m256 in
+    let t256_add_d256_x_m256 = builtin add t256 d256_x_m256 in
+    uint256_to_uint64 t256_add_d256_x_m256
+
+(* timestamp less than or equal to *)
+let uint64_le : Uint64 -> Uint64 -> Bool =
+  fun(ts1 : Uint64) =>
+  fun(ts2 : Uint64) =>
+    let is_ts1_le_ts2 = uint64_lt ts1 ts2 in
+    let is_ts1_eq_ts2 = builtin eq  ts1 ts2 in
+    orb is_ts1_le_ts2 is_ts1_eq_ts2
+
+let bystr_to_bystr16: ByStr -> ByStr16 =
+  fun(str : ByStr) =>
+    let bystr16 = builtin to_bystr16 str in
+      match bystr16 with
+        | Some res => res
+        | None => bystr16_empty_string
+      end
+
+let bystr_to_bystr20: ByStr -> ByStr20 =
+  fun(str : ByStr) =>
+    let bystr20 = builtin to_bystr20 str in
+      match bystr20 with
+        | Some res => res
+        | None => bystr20_empty_string
+      end
+
+let equal_uint256 = fun (a: Uint256) => fun(b: Uint256) =>
+  builtin eq a b
+
+(* return true if l[i] == value for all elements l[i] in the list l *)
+let all_elements_equal_to_value_uint256 =
+  fun(l: List Uint256) =>
+  fun(value: Uint256) =>
+    let f = equal_uint256 value in
+    let for_allUint256 = @list_forall Uint256 in (* from ListUtiles *)
+    for_allUint256 f l (* checks if all elements are equal to value *)
+
+let all_elements_equal_to_value_bystr20 =
+  fun(l: List ByStr20) =>
+  fun(value: ByStr20) =>
+    let f = equal_bystr20 value in
+    let for_allbystr20 = @list_forall ByStr20 in (* from ListUtiles *)
+    for_allbystr20 f l (* checks if all elements are equal to value *)
+
+let extract_match_id =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_0 = Uint32 0 in
+    let num_16 = Uint32 16 in
+
+    let match_id_bystr = builtin substr data num_0 num_16 in
+    let match_id_bystr16 = bystr_to_bystr16 match_id_bystr in
+
+    builtin to_uint256 match_id_bystr16
+
+let extract_sender_address =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_20 = Uint32 20 in
+    let num_16 = Uint32 16 in
+
+    let sender_address_bystr = builtin substr data num_16 num_20 in
+
+    bystr_to_bystr20 sender_address_bystr
+
+let extract_player_wallet =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    let num_20 = Uint32 20 in
+    let num_36 = Uint32 36 in
+
+    let player_wallet_bystr = builtin substr data num_36 num_20 in
+
+    bystr_to_bystr20 player_wallet_bystr
+
+(* checks if a sender is an admin or owner *)
+let is_admin_or_owner : Map ByStr20 Bool -> ByStr20 -> ByStr20 -> Bool =
+  fun (administrators: Map ByStr20 Bool) =>
+  fun (owner: ByStr20) =>
+  fun (sender: ByStr20) =>
+    let is_admin = builtin contains administrators sender in
+    let is_owner = builtin eq sender owner in
+    let allowed = orb is_admin is_owner in
+    match allowed with
+    | True => True
+    | False => False
+    end
+
+contract RankedMatch(
+  initial_contract_owner: ByStr20,
+  initial_entry_fee: Uint128,
+  initial_token_contract: ByStr20 with contract
+    field total_supply : Uint128,
+    field balances: Map ByStr20 Uint128,
+    field allowances: Map ByStr20 (Map ByStr20 Uint128)
+  end,
+  pub_key: ByStr33
+)
+
+field contract_owner : ByStr20 = initial_contract_owner
+
+field contract_ownership_recipient: ByStr20 = zero_address
+
+field administrators: Map ByStr20 Bool = Emp ByStr20 Bool
+
+field entry_fee: Uint128 = initial_entry_fee
+
+field token_address: ByStr20 = initial_token_contract
+
+field ranked_matches: Map Uint256 MatchParam = Emp Uint256 MatchParam
+
+field total_matches:Uint256 = Uint256 0
+
+field rewards: Map ByStr20 (Map Uint256 RewardParams) = Emp ByStr20 (Map Uint256 RewardParams)
+
+field service_fee_bps: Uint128 = Uint128 1000
+
+field service_fee_recipient: ByStr20 = initial_contract_owner
+
+field burn_token_fee_bps: Uint128 = Uint128 200
+
+field penalty_fee_bps: Uint128 = Uint128 100
+
+(* Defaults to False *)
+field is_paused: Bool = false
+
+(* Emit Errors *)
+procedure Throw(error: Error)
+  e = make_error error;
+  throw e
+end
+
+procedure RequireContractOwner()
+  cur_owner <- contract_owner;
+  is_contract_owner = builtin eq cur_owner _sender;
+  match is_contract_owner with
+  | True => 
+  | False =>
+    error = NotContractOwnerError;
+    Throw error
+  end
+end
+
+procedure RequireSenderIsAdminOrOwner()
+  admins <- administrators;
+  current_owner <- contract_owner;
+  check_allowed = is_admin_or_owner admins current_owner _sender;
+  match check_allowed with
+    | True =>
+    | False =>
+      err = Unauthorized;
+      Throw err
+  end
+end
+
+procedure RequireNotPaused()
+  paused <- is_paused;
+  match paused with
+  | False =>
+  | True =>
+    (* Contract is paused *)
+    error = PausedError;
+    Throw error
+  end
+end
+
+procedure RequirePaused()
+  paused <- is_paused;
+  match paused with
+  | True =>
+  | False =>
+    (* Contract is paused *)
+    error = NotPausedError;
+    Throw error
+  end
+end
+
+procedure IsAddressValid(address: ByStr20)
+   is_address_valid = builtin eq address zero_address;
+   match is_address_valid with
+   | True =>
+     error = InvalidAddressPassed;
+     Throw error
+   | False=>
+   end
+end
+
+procedure RequireValidDestination(to: ByStr20)
+  is_zero_address = builtin eq to zero_address;
+  match is_zero_address with
+  | False =>
+  | True =>
+    error = ZeroAddressDestinationError;
+    Throw error
+  end
+end
+
+procedure RequireValidServiceFeeBPS(val_bps: Uint128)
+  is_gte_min = uint128_ge val_bps min_bps;
+  is_lte_max = uint128_le val_bps max_bps;
+
+  is_valid = andb is_gte_min is_lte_max;
+  match is_valid with
+    | True =>
+    | False =>
+      error = InvalidServiceFeeBPSError;
+      Throw error
+  end
+end
+
+procedure DoValidSignature(data_sig_pair: Pair ByStr ByStr64)
+  data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+        fst_bystr_bystr64 data_sig_pair;
+  sigData = let snd_bystr_bystr64 = @snd ByStr ByStr64 in
+        snd_bystr_bystr64 data_sig_pair;
+
+  (* verify data against signature *)
+  verify_status = builtin ecdsa_verify pub_key data sigData;
+  match verify_status with
+    | False =>
+      err = InvalidSignature;
+      Throw err
+    | True =>
+  end
+end
+
+procedure ValidSignature(data_sig_pair_list: List (Pair ByStr ByStr64))
+  forall data_sig_pair_list DoValidSignature
+end
+
+procedure ValidatePlayerList(player_list: List ByStr20, players: List ByStr20)
+  is_player_list_valid = validate_list_bystr20_eq player_list players;
+  match is_player_list_valid with
+  | False=>
+    error = InvalidPlayerList;
+    Throw error
+  | True=>
+  end
+end
+
+procedure ValidSender(data_sig_pair_list: List (Pair ByStr ByStr64))
+  sender_address_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  sender_address_list = sender_address_list_map extract_sender_address data_sig_pair_list;
+
+  zero_pos = Uint32 0;
+
+  el_opt =
+    let nth = @list_nth ByStr20 in (* from ListUtils *)
+    nth zero_pos sender_address_list; (* note that indexing starts at 0 *)
+
+  match el_opt with (* Option is None if no element with index i in list *)
+    | None => (* index is out of bounds: no such element *)
+      err = ElementAtPositionError;
+      Throw err
+    | Some el => (* list[i] = el *)
+     sender = el;
+     check_sender = all_elements_equal_to_value_bystr20 sender_address_list sender;
+     match check_sender with
+      | False =>
+        err = SenderDifferentError;
+        Throw err
+      | True =>
+      is_sender_valid = builtin eq sender _sender;
+      match is_sender_valid with
+      | False =>
+        err = InvalidSenderError;
+        Throw err
+      | True =>
+      end
+     end
+  end
+end
+
+procedure CalculateRewards(input_pair: Pair ByStr20 (Pair Uint256 Uint128))
+  player = let fst_string_bystr20 = @fst ByStr20 (Pair Uint256 Uint128) in
+    fst_string_bystr20 input_pair;
+  match_reward_pair = let snd_entryfee_pair = @snd ByStr20 (Pair Uint256 Uint128) in
+    snd_entryfee_pair input_pair;
+
+  match_id = let fst_string_match_id = @fst Uint256 Uint128 in
+    fst_string_match_id match_reward_pair;
+  reward_amount = let snd_string_reward_amount = @snd Uint256 Uint128 in
+    snd_string_reward_amount match_reward_pair;
+
+  current_block <- & BLOCKNUMBER;
+  prev_block = get_prev_bnum current_block;
+  ts <-& TIMESTAMP(prev_block);
+  zero_64 = Uint64 0;
+  current_timestamp = option_timestamp zero_64 ts;
+
+  one_uint64 = Uint64 1;
+
+  expiration_date = add_days_in_time current_timestamp one_uint64;
+
+  reward_params = RewardParams expiration_date reward_amount;
+  rewards[player][match_id]:=reward_params
+end
+
+procedure WithdrawByAdmin(input_pair: Pair ByStr20 Uint256)
+  player_address = let fst_string_match_id = @fst ByStr20 Uint256 in
+    fst_string_match_id input_pair;
+  match_id = let snd_string_player_address = @snd ByStr20 Uint256 in
+    snd_string_player_address input_pair;
+
+  maybe_rewards <- rewards[player_address][match_id];
+  match maybe_rewards with
+  | Some (RewardParams end_timestamp reward_amount)=>
+    (* Get current epoc time stamp*)
+    current_block <- & BLOCKNUMBER;
+    prev_block = get_prev_bnum current_block;
+    ts <-& TIMESTAMP(prev_block);
+    zero_64 = Uint64 0;
+    current_timestamp = option_timestamp zero_64 ts;
+
+    is_valid_date = uint64_le end_timestamp current_timestamp;
+    match is_valid_date with
+    | True =>
+      (* Calculate service fee amount *)
+      svc_fee_bps <- service_fee_bps;
+      svc_fee_recipient <- service_fee_recipient;
+      service_amount = portion reward_amount svc_fee_bps;
+      reward_after_service = builtin sub reward_amount service_amount;
+
+      (* Calculate burn token amount *)
+      burn_fee_bps <- burn_token_fee_bps;
+      burn_amount = portion reward_amount burn_fee_bps;
+      reward_after_service_burn_fee = builtin sub reward_after_service burn_amount;
+
+      token_addr <- token_address;
+
+      pl_fee_bps <- penalty_fee_bps;
+
+      (*Withdraw service fee in service receipt wallet*)
+      msg_to_transfer_svc_fee = {
+        _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+        to : svc_fee_recipient; amount : service_amount
+      };
+      (*Initiate token burn **)
+      msg_to_burned_token = {
+        _tag : "Burn";
+        _recipient : token_addr;
+        _amount : zero;
+        amount : burn_amount
+      };
+
+      msg_to_transfer_reward = {
+        _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+        to : player_address; amount : reward_after_service_burn_fee
+      };
+      msgs = three_msgs msg_to_transfer_svc_fee msg_to_burned_token msg_to_transfer_reward;
+      send msgs;
+
+      delete rewards[player_address][match_id];
+
+      e = {
+        _eventname: "WithdrawRewardsByAdminSuccess";
+        initiator: _sender;
+        winner_address: player_address;
+        svc_fee_bps:svc_fee_bps;
+        service_amount: service_amount;
+        svc_fee_recipient: svc_fee_recipient;
+        burn_fee_bps: burn_fee_bps;
+        burn_amount: burn_amount;
+        reward_amount: reward_after_service_burn_fee
+      };
+      event e
+    | False =>
+      error = InvalidAccountForWithdrawal;
+      Throw error
+    end
+  | None =>
+    error = FundsNotAvailable;
+    Throw error
+  end
+end
+
+procedure ReceiveToken(initiator : ByStr20, amount: Uint128)
+  IsAddressValid initiator;
+
+  token_addr <- token_address;
+
+  msg_to_token = {
+    _tag : "TransferFrom"; _recipient : token_addr; _amount : zero;
+    from : initiator; to : _this_address; amount : amount
+  };
+  msgs = one_msg msg_to_token;
+  send msgs
+end
+
+procedure Sendtoken(sender : ByStr20, amount: Uint128)
+  IsAddressValid sender;
+
+  token_addr <- token_address;
+
+  msg_to_token = {
+    _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+    to : sender; amount : amount
+  };
+  msgs = one_msg msg_to_token;
+  send msgs
+end
+
+procedure RefundEntryFee(input_pair: Pair ByStr20 Uint128)
+  player = let fst_string_bystr20 = @fst ByStr20 Uint128 in
+    fst_string_bystr20 input_pair;
+  amount = let snd_entryfee_pair = @snd ByStr20 Uint128 in
+    snd_entryfee_pair input_pair;
+
+  Sendtoken player amount
+end
+
+procedure ReceiveEntryFee(input_pair: Pair ByStr20 Uint128)
+  player = let fst_string_bystr20 = @fst ByStr20 Uint128 in
+    fst_string_bystr20 input_pair;
+  amount = let snd_entryfee_pair = @snd ByStr20 Uint128 in
+    snd_entryfee_pair input_pair;
+
+  ReceiveToken player amount
+end
+
+(***************************************************)
+(*               User Transitions                 *)
+(***************************************************)
+
+transition StartMatch(data_sig_pair_list: List (Pair ByStr ByStr64))
+  RequireNotPaused;
+  ValidSignature data_sig_pair_list;
+  ValidSender data_sig_pair_list;
+
+  player_wallet_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  player_list = player_wallet_list_map extract_player_wallet data_sig_pair_list;
+
+  fee <- entry_fee;
+
+  build_player_entryfee_pair_list = @list_map ByStr20 (Pair ByStr20 Uint128);
+  tmp_fun = build_bystr20_uint128_pair fee;
+  player_entryfee_pair_list = build_player_entryfee_pair_list tmp_fun player_list;
+
+  forall player_entryfee_pair_list ReceiveEntryFee;
+
+  no_of_matches <- total_matches;
+  new_total_matches = builtin add no_of_matches one_uint256;
+
+  calculate_total_entry_fee_fun = @calculate_total_entry_fee ByStr20;
+  total_entry_fee = calculate_total_entry_fee_fun player_list fee;
+
+  match_param = MatchParam total_entry_fee _sender player_list;
+  ranked_matches[new_total_matches]:=match_param;
+  total_matches:= new_total_matches;
+
+  e = {
+    _eventname : "StartMatch";
+    status : "Match started Successfully";
+    initiator: _sender;
+    player_list: player_list;
+    match_id: new_total_matches
+  };
+  event e
+end
+
+transition EndMatch(data_sig_pair_list: List (Pair ByStr ByStr64))
+  RequireNotPaused;
+  ValidSignature data_sig_pair_list;
+  ValidSender data_sig_pair_list;
+
+  match_id_list_map = @list_map (Pair ByStr ByStr64) (Uint256);
+  match_id_list = match_id_list_map extract_match_id data_sig_pair_list;
+
+  player_wallet_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  player_list = player_wallet_list_map extract_player_wallet data_sig_pair_list;
+
+  zero_pos = Uint32 0;
+
+  el_opt =
+    let nth = @list_nth Uint256 in (* from ListUtils *)
+    nth zero_pos match_id_list; (* note that indexing starts at 0 *)
+
+  match el_opt with (* Option is None if no element with index i in list *)
+    | None => (* index is out of bounds: no such element *)
+      err = ElementAtPositionError;
+      Throw err
+    | Some el => (* list[i] = el *)
+      match_id = el;
+      (* Run through the match id list and see if there is any matchId mismatch *)
+      check_match_id = all_elements_equal_to_value_uint256 match_id_list match_id;
+      match check_match_id with
+      | False =>
+        err = MatchIdDifferentError;
+        Throw err
+      | True =>
+        maybe_ranked_match <- ranked_matches[match_id];
+        match maybe_ranked_match with
+        | Some (MatchParam total_entry_fee host players)=>
+
+          ValidatePlayerList player_list players;
+
+          list_length_fun = @list_length ByStr20;
+          no_of_player = list_length_fun player_list;
+
+          (* Calculate reward amount for each player *)
+          reward_amount = muldiv total_entry_fee no_of_player;
+
+          build_player_entryfee_pair_list = @list_map ByStr20 (Pair ByStr20 (Pair Uint256 Uint128));
+          tmp_fun = build_pair match_id reward_amount;
+          player_with_entry_list = build_player_entryfee_pair_list tmp_fun player_list;
+
+          forall player_with_entry_list CalculateRewards;
+
+          delete ranked_matches[match_id];
+
+          e = {
+            _eventname : "EndMatch";
+            status : "Match finished Successfully";
+            initiator: _sender;
+            reward_amount: reward_amount;
+            winners_list: player_list
+          };
+          event e
+        | None =>
+          error = InvalidMatchId;
+          Throw error
+        end
+      end
+  end
+end
+
+transition CancelMatch(match_id: Uint256)
+  RequireNotPaused;
+  RequireSenderIsAdminOrOwner;
+
+  maybe_ranked_match <- ranked_matches[match_id];
+  match maybe_ranked_match with
+  | Some (MatchParam total_entry_fee host players)=>
+    (* Calculate service fee amount *)
+    svc_fee_bps <- service_fee_bps;
+    svc_fee_recipient <- service_fee_recipient;
+    service_amount = portion total_entry_fee svc_fee_bps;
+    refund_after_service = builtin sub total_entry_fee service_amount;
+
+    list_length_fun = @list_length ByStr20;
+    no_of_player = list_length_fun players;
+
+    (* Calculate reward amount for each player *)
+    refund_amount = muldiv refund_after_service no_of_player;
+
+    build_player_refund_pair_list = @list_map ByStr20 (Pair ByStr20 Uint128);
+    tmp_fun = build_bystr20_uint128_pair refund_amount;
+    player_refund_pair_list = build_player_refund_pair_list tmp_fun players;
+
+    (*Withdraw service fee in service receipt wallet*)
+    Sendtoken svc_fee_recipient service_amount;
+
+    forall player_refund_pair_list RefundEntryFee;
+
+    delete ranked_matches[match_id];
+
+    e = {
+      _eventname : "CancelMatch";
+      status : "Match cancelled Successfully";
+      initiator: _sender;
+      match_id: match_id;
+      players: players;
+      svc_fee_bps: svc_fee_bps;
+      service_amount: service_amount;
+      svc_fee_recipient: svc_fee_recipient;
+      total_refund_amount: refund_after_service
+    };
+    event e
+  | None =>
+    error = InvalidMatchId;
+    Throw error
+  end
+end
+
+transition WithdrawRewardByPlayer(match_id: Uint256)
+  RequireNotPaused;
+
+  maybe_rewards <- rewards[_sender][match_id];
+  match maybe_rewards with
+  | Some (RewardParams end_timestamp reward_amount)=>
+    (* Get current epoc time stamp*)
+    current_block <- & BLOCKNUMBER;
+    prev_block = get_prev_bnum current_block;
+    ts <-& TIMESTAMP(prev_block);
+    zero_64 = Uint64 0;
+    current_timestamp = option_timestamp zero_64 ts;
+
+    (* Calculate service fee amount *)
+    svc_fee_bps <- service_fee_bps;
+    svc_fee_recipient <- service_fee_recipient;
+    service_amount = portion reward_amount svc_fee_bps;
+    reward_after_service = builtin sub reward_amount service_amount;
+
+    (* Calculate burn token amount *)
+    burn_fee_bps <- burn_token_fee_bps;
+    burn_amount = portion reward_amount burn_fee_bps;
+    reward_after_service_burn_fee = builtin sub reward_after_service burn_amount;
+
+    token_addr <- token_address;
+
+    pl_fee_bps <- penalty_fee_bps;
+
+    is_valid_date = uint64_le end_timestamp current_timestamp;
+    match is_valid_date with
+    | True =>
+      (*Withdraw service fee in service receipt wallet*)
+      msg_to_transfer_svc_fee = {
+        _tag : "Transfer";
+        _recipient : token_addr;
+        _amount : zero;
+        to : svc_fee_recipient;
+        amount : service_amount
+      };
+      (*Initiate token burn **)
+      msg_to_burned_token = {
+        _tag : "Burn";
+        _recipient : token_addr;
+        _amount : zero;
+        amount : burn_amount
+      };
+
+      (*Transfer without penalty*)
+      msg_to_transfer_reward = {
+        _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+        to : _sender; amount : reward_after_service_burn_fee
+      };
+      msgs = three_msgs msg_to_transfer_svc_fee msg_to_burned_token msg_to_transfer_reward;
+      send msgs;
+
+      delete rewards[_sender][match_id];
+
+      e = {
+        _eventname : "WithdrawRewardsSuccess";
+        status : "Reward withdrawal was Successful.";
+        match_id: match_id;
+        initiator: _sender;
+        pl_fee_bps: pl_fee_bps;
+        penalty_amount: zero;
+        penalty_fee_recipient: svc_fee_recipient;
+        svc_fee_bps:svc_fee_bps;
+        service_amount: service_amount;
+        svc_fee_recipient: svc_fee_recipient;
+        burn_fee_bps: burn_fee_bps;
+        burn_amount: burn_amount;
+        reward_amount: reward_after_service_burn_fee
+      };
+      event e
+    | False =>
+      (* Calculate penalty amount *)
+      penalty_amount = portion reward_amount pl_fee_bps;
+      reward_after_penalty = builtin sub reward_after_service_burn_fee penalty_amount;
+
+      (*Withdraw service fee in service receipt wallet*)
+      msg_to_transfer_svc_fee = {
+        _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+        to : svc_fee_recipient; amount : service_amount
+      };
+      (*Initiate token burn **)
+      msg_to_burned_token = {
+        _tag : "Burn";
+        _recipient : token_addr;
+        _amount : zero;
+        amount : burn_amount
+      };
+
+      (*Transfer with penalty*)
+      msg_to_transfer_reward = {
+        _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+        to : _sender; amount : reward_after_penalty
+      };
+
+      (*Transfer penalty amount service recipient wallet*)
+      msg_to_transfer_penalty = {
+        _tag : "Transfer"; _recipient : token_addr; _amount : zero;
+        to : svc_fee_recipient; amount : penalty_amount
+      };
+
+      msgs = four_msgs msg_to_transfer_svc_fee msg_to_burned_token msg_to_transfer_reward msg_to_transfer_penalty;
+      send msgs;
+
+      delete rewards[_sender][match_id];
+
+      e = {
+        _eventname : "WithdrawRewardsSuccess";
+        status : "Reward withdrawal was Successful.";
+        match_id: match_id;
+        initiator: _sender;
+        pl_fee_bps: pl_fee_bps;
+        penalty_amount: penalty_amount;
+        penalty_fee_recipient: svc_fee_recipient;
+        svc_fee_bps:svc_fee_bps;
+        service_amount: service_amount;
+        svc_fee_recipient: svc_fee_recipient;
+        burn_fee_bps: burn_fee_bps;
+        burn_amount: burn_amount;
+        reward_amount: reward_after_penalty
+      };
+      event e
+    end
+  | None =>
+    error = FundsNotAvailable;
+    Throw error
+  end
+end
+
+transition WithdrawRewardByAdmin(data_sig_pair_list: List (Pair ByStr ByStr64))
+  RequireNotPaused;
+  RequireSenderIsAdminOrOwner;
+  ValidSender data_sig_pair_list;
+
+  ValidSignature data_sig_pair_list;
+
+  match_id_list_map = @list_map (Pair ByStr ByStr64) (Uint256);
+  match_id_list = match_id_list_map extract_match_id data_sig_pair_list;
+
+  player_wallet_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  player_wallet_list = player_wallet_list_map extract_player_wallet data_sig_pair_list;
+
+  zero_pos = Uint32 0;
+
+  el_opt =
+    let nth = @list_nth Uint256 in (* from ListUtils *)
+    nth zero_pos match_id_list; (* note that indexing starts at 0 *)
+
+  match el_opt with (* Option is None if no element with index i in list *)
+  | None => (* index is out of bounds: no such element *)
+    err = ElementAtPositionError;
+    Throw err
+  | Some el => (* list[i] = el *)
+    match_id = el;
+    (* Run through the match id list and see if there is any matchId mismatch *)
+    check_match_id = all_elements_equal_to_value_uint256 match_id_list match_id;
+    match check_match_id with
+      | False =>
+        err = MatchIdDifferentError;
+        Throw err
+      | True =>
+
+        build_bystr20_uint256_pair_list = @list_map ByStr20 (Pair ByStr20 Uint256);
+        tmp_fun = build_bystr20_uint256_pair match_id;
+        player_with_match_id_list = build_bystr20_uint256_pair_list tmp_fun player_wallet_list;
+
+        forall player_with_match_id_list WithdrawByAdmin
+    end
+  end
+end
+
+(***************************************************)
+(*               Admin Transitions                 *)
+(***************************************************)
+
+(* @multi-sig *)
+transition Pause()
+  RequireNotPaused;
+  RequireContractOwner;
+
+  is_paused := true;
+  e = {
+    _eventname: "Pause";
+    is_paused: true
+  };
+  event e
+end
+
+(* @multi-sig *)
+transition Unpause()
+  RequirePaused;
+  RequireContractOwner;
+
+  is_paused := false;
+  e = {
+    _eventname: "Unpause";
+    is_paused: false
+  };
+  event e
+end
+
+(* @multi-sig *)
+transition SetServiceFeeBPS(fee_bps: Uint128)
+  RequireContractOwner;
+  RequireValidServiceFeeBPS fee_bps;
+  service_fee_bps := fee_bps;
+  e = {
+    _eventname : "SetServiceFeeBPS";
+    service_fee_bps: fee_bps
+  };
+  event e
+end
+
+(* @multi-sig *)
+transition SetPenaltyFeeBPS(fee_bps: Uint128)
+  RequireContractOwner;
+  RequireValidServiceFeeBPS fee_bps;
+  penalty_fee_bps := fee_bps;
+  e = {
+    _eventname : "SetPenaltyFeeBPS";
+    penalty_fee_bps: fee_bps
+  };
+  event e
+end
+
+(* @multi-sig *)
+transition SetServiceFeeRecipient(to: ByStr20)
+  RequireContractOwner;
+  RequireValidDestination to;
+
+  service_fee_recipient := to;
+
+  e = {
+    _eventname: "SetServiceFeeRecipient";
+    to: to
+  };
+  event e
+end
+
+(* @multi-sig *)
+transition SetBurnTokenFeeBps(fee_bps: Uint128)
+  RequireContractOwner;
+  RequireValidServiceFeeBPS fee_bps;
+  burn_token_fee_bps := fee_bps;
+  e = {
+    _eventname : "SetBurnTokenFeeBps";
+    burn_token_fee_bps: fee_bps
+  };
+  event e
+end
+
+(* @multi-sig *)
+transition SetEntryFee(fee: Uint128)
+  RequireContractOwner;
+  min_entry_fee = Uint128 1;
+  is_valid_fee = uint128_le fee min_entry_fee;
+  match is_valid_fee with
+  | False =>
+    entry_fee := fee;
+    e = {
+      _eventname : "SetEntryFeeSuccess";
+      entry_fee: fee
+    };
+    event e
+  | True =>
+    e = {
+      _eventname : "SetEntryFeeError";
+      entry_fee: fee
+    };
+    event e
+  end
+end
+
+(* @multi-sig *)
+transition AddAdmin(address : ByStr20)
+  RequireContractOwner;
+  RequireValidDestination address;
+
+  administrators[address] := true;
+  e = { _eventname: "AddAdminSuccess"; addressAdded: address};
+  event e
+end
+
+
+(* @multi-sig *)
+transition RemoveAdmin(address : ByStr20)
+  RequireContractOwner;
+  delete administrators[address];
+  e = { _eventname: "RemoveAdminSuccess"; addressRemoved: address};
+  event e
+end
+
+(* @multi-sig *)
+transition WithdrawToken(amount: Uint128)
+  RequireContractOwner;
+
+  Sendtoken _sender amount;
+  e = { _eventname: "WithdrawAllFundsSuccess"; amount: amount};
+  event e
+end
+
+transition AddContractOwnershipRecipient(address:ByStr20)
+  RequireContractOwner;
+  IsAddressValid address;
+  contract_ownership_recipient:=address;
+  e = { _eventname: "AddContractOwnershipRecipientSuccess"};
+  event e
+end
+
+transition RemoveContractOwnershipRecipient()
+  RequireContractOwner;
+  contract_ownership_recipient:=zero_address;
+  e = { _eventname: "RemoveContractOwnershipRecipientSuccess"};
+  event e
+end
+
+transition AcceptContractOwnershipTransfer()
+  cur_recipient <- contract_ownership_recipient;
+  is_ownership_recipient = builtin eq cur_recipient _sender;
+  match is_ownership_recipient with
+    | True =>
+      contract_owner:=cur_recipient;
+      contract_ownership_recipient:=zero_address;
+      e = { _eventname: "AcceptContractOwnershipTransferSuccess"; recipient_address: _sender};
+      event e
+    | False =>
+      error = InvalidContractOwnershipRecipient;
+      Throw error
+  end
+end
+
+(***************************************************)
+(*               Callback Transitions              *)
+(***************************************************)
+
+transition RecipientAcceptTransfer(
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition RecipientAcceptTransferFrom(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition TransferFromSuccessCallBack(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition TransferSuccessCallBack(
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
+
+transition BurnSuccessCallBack(
+  burner : ByStr20,
+  amount : Uint128
+)
+end
