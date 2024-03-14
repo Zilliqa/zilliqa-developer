@@ -14,7 +14,7 @@
   "dependencies": {
     "@zilliqa-js/zilliqa": "3.3.4",
     "bignumber.js": "^9.1.0",
-    "crypto-js": "^4.1.1",
+    "crypto-js": "^4.2.0",
     "js-sha3": "^0.8.0"
   },
   "devDependencies": {
