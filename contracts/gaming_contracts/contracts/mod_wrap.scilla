@@ -1,0 +1,1060 @@
+scilla_version 0
+
+import ListUtils BoolUtils IntUtils PairUtils
+
+library Claim
+
+let bystr8_empty_string: ByStr8 = 0x0000000000000000
+let bystr16_empty_string: ByStr16 = 0x00000000000000000000000000000000
+let bystr20_empty_string: ByStr20 = 0x0000000000000000000000000000000000000000
+let zil_address = 0x0000000000000000000000000000000000000000
+let one = Uint128 1
+let zero = Uint128 0
+let bool_active = True
+let bool_inactive = False
+
+let one_msg =
+  fun (m: Message) =>
+    let e = Nil {Message} in
+    Cons {Message} m e
+
+let bystr_to_bystr16: ByStr -> ByStr16 =
+  fun(str : ByStr) =>
+    let bystr16 = builtin to_bystr16 str in
+      match bystr16 with
+        | Some res => res
+        | None => bystr16_empty_string
+      end
+
+let get_bnum =
+  fun (some_val: Option BNum) =>
+  let bnum_zero = BNum 0 in
+  match some_val with
+  | Some val => val
+  | None => bnum_zero
+  end
+
+let bystr_to_bystr8: ByStr -> ByStr8 =
+  fun(str : ByStr) =>
+    let bystr8 = builtin to_bystr8 str in
+      match bystr8 with
+        | Some res => res
+        | None => bystr8_empty_string
+      end
+
+let bystr_to_bystr20: ByStr -> ByStr20 =
+  fun(str : ByStr) =>
+    let bystr20 = builtin to_bystr20 str in
+      match bystr20 with
+        | Some res => res
+        | None => bystr20_empty_string
+      end
+
+(* Error events *)
+type Error =
+| CodeNotOwner
+| ContractFrozenFailure
+| Unauthorized
+| ClaimNotAllowedBlackout
+| ClaimNotAllowedWalletNotStaked
+| CodeSenderNotMatchAddress
+| CodeSenderNotMatchTokenOwnerAddress
+| ElementAtPositionError
+| BlockNumDifferentError
+| ZRC6DifferentError
+| IncorrectZilAmount
+| SelfError
+| NotContractOwnershipRecipientError
+| PaymentTokenDifferentError
+| PaymentAmountDifferentError
+| InvalidSignature
+
+let make_error =
+  fun (result : Error) =>
+    let result_code = 
+      match result with
+      | CodeNotOwner                              => Int32 -1
+      | ContractFrozenFailure                     => Int32 -2
+      | Unauthorized                              => Int32 -3
+      | ClaimNotAllowedBlackout                   => Int32 -4
+      | ClaimNotAllowedWalletNotStaked            => Int32 -5
+      | CodeSenderNotMatchAddress                 => Int32 -6
+      | CodeSenderNotMatchTokenOwnerAddress       => Int32 -7
+      | ElementAtPositionError                    => Int32 -8
+      | BlockNumDifferentError                    => Int32 -9
+      | ZRC6DifferentError                        => Int32 -10
+      | IncorrectZilAmount                        => Int32 -11
+      | SelfError                                 => Int32 -12
+      | NotContractOwnershipRecipientError        => Int32 -13
+      | PaymentTokenDifferentError                => Int32 -14
+      | PaymentAmountDifferentError               => Int32 -15
+      | InvalidSignature                          => Int32 -16
+      end
+    in
+    { _exception : "Error"; code : result_code }
+    
+type ResultOrError =
+ | Result of Bool
+ | ErrorCode of Error
+ 
+let is_sender_match_address: ByStr20 -> ByStr20 -> ResultOrError =
+  fun(sender : ByStr20) =>
+  fun(wallet_address : ByStr20) =>
+    let is_match = builtin eq sender wallet_address in
+    match is_match with
+    | True => 
+        let valid = True in
+        Result valid
+    | False =>
+        let err = CodeSenderNotMatchAddress in
+        ErrorCode err
+      end
+
+let build_pair =
+  fun (pair_sender_pubkey : Pair ByStr20 ByStr33) =>
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let sender = let fst_bystr20_bystr33 = @fst ByStr20 ByStr33 in
+      fst_bystr20_bystr33 pair_sender_pubkey in
+    let pubkey = let snd_bystr20_bystr33 = @snd ByStr20 ByStr33 in
+      snd_bystr20_bystr33 pair_sender_pubkey in
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+    let sigData = let snd_bystr_bystr64 = @snd ByStr ByStr64 in
+      snd_bystr_bystr64 pair_payload_signature in
+
+    (* have to split the datablock into block number and hex address *)
+    (* the sender has to match with the hex address *)
+
+    let num_0 = Uint32 0 in
+    let num_16 = Uint32 16 in
+    let num_20 = Uint32 20 in
+    let num_36 = Uint32 36 in
+    let num_56 = Uint32 56 in
+
+    (* bytes 1 to 16: block number *)
+    (* bytes 17 to 36: wallet address of sender *)
+    (* bytes 37 to 56: zrc6 contract address *)
+    (* bytes 57 to end of string: the URI *)
+    let block_number_bystr = builtin substr data num_0 num_16 in
+    let address_bystr = builtin substr data num_16 num_20 in
+    
+    let zrc6_bystr = builtin substr data num_36 num_20 in
+
+    let length_bystr = builtin strlen data in
+    let length_uri = builtin sub length_bystr num_56 in
+    let uri_bystr = builtin substr data num_56 length_uri in
+    let token_uri = builtin to_ascii uri_bystr in
+
+    (* convert bystr address to bystr20 address *)
+    let address_bystr20 = bystr_to_bystr20 address_bystr in
+      
+    (* convert bystr zrc6 address to bystr20 zrc6 address *)
+    let zrc6_contract = bystr_to_bystr20 zrc6_bystr in
+
+    (* convert bystr block_number to uint128 block number *)
+    let block_number_bystr16 = bystr_to_bystr16 block_number_bystr in
+    let block_number_uint128 = builtin to_uint128 block_number_bystr16 in
+    
+    let pr = Pair {ByStr20 String} sender token_uri in
+    
+    let verify_status = builtin ecdsa_verify pubkey data sigData in
+      match verify_status with
+      | True =>
+        (* the sender address has to match with the signed address *)
+        let match_result = is_sender_match_address sender address_bystr20 in
+          match match_result with
+            | Result res =>
+              match res with
+              | True => pr
+              | False => 
+                let val = builtin sub zero one in pr
+              end
+            | ErrorCode err => 
+              let val = builtin sub zero one in pr
+          end
+      | False => let val = builtin sub zero one in pr
+      end
+
+  let build_purchase_pair =
+    fun (pair_sender_pubkey : Pair ByStr20 ByStr33) =>
+    fun (pair_payload_signature : Pair ByStr ByStr64) =>
+  
+      let sender = let fst_bystr20_bystr33 = @fst ByStr20 ByStr33 in
+        fst_bystr20_bystr33 pair_sender_pubkey in
+      let pubkey = let snd_bystr20_bystr33 = @snd ByStr20 ByStr33 in
+        snd_bystr20_bystr33 pair_sender_pubkey in
+  
+      let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+        fst_bystr_bystr64 pair_payload_signature in
+      let sigData = let snd_bystr_bystr64 = @snd ByStr ByStr64 in
+        snd_bystr_bystr64 pair_payload_signature in
+  
+      (* have to split the datablock into block number and hex address *)
+      (* the sender has to match with the hex address *)
+
+      let num_16 = Uint32 16 in
+      let num_20 = Uint32 20 in
+      let num_84 = Uint32 84 in
+  
+      (* bytes 1 to 16: block number *)
+      (* bytes 17 to 36: wallet address of sender *)
+      (* bytes 37 to 56: zrc6 contract address *)
+      (* bytes 57 to end of string: the URI *)
+      let address_bystr = builtin substr data num_16 num_20 in
+  
+      let length_bystr = builtin strlen data in
+      let length_uri = builtin sub length_bystr num_84 in
+      let uri_bystr = builtin substr data num_84 length_uri in
+      let token_uri = builtin to_ascii uri_bystr in
+  
+      (* convert bystr address to bystr20 address *)
+      let address_bystr20 = bystr_to_bystr20 address_bystr in
+      
+      let pr = Pair {ByStr20 String} sender token_uri in
+      
+      let verify_status = builtin ecdsa_verify pubkey data sigData in
+        match verify_status with
+        | True =>
+          (* the sender address has to match with the signed address *)
+          let match_result = is_sender_match_address sender address_bystr20 in
+            match match_result with
+              | Result res =>
+                match res with
+                | True => pr
+                | False => 
+                  let val = builtin sub zero one in pr
+                end
+              | ErrorCode err => 
+                let val = builtin sub zero one in pr
+            end
+        | False => let val = builtin sub zero one in pr
+        end
+
+let extract_bnum =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    (* have to split the datablock into block number and hex address *)
+    (* the sender has to match with the hex address *)
+
+    let num_0 = Uint32 0 in
+    let num_16 = Uint32 16 in
+
+    (* bytes 1 to 16: block number *)
+    (* bytes 17 to 36: wallet address of sender *)
+    (* bytes 37 to 56: zrc6 contract address *)
+    (* bytes 57 to end of string: the URI *)
+    let block_number_bystr = builtin substr data num_0 num_16 in
+    let block_number_bystr16 = bystr_to_bystr16 block_number_bystr in
+    let block_number_uint128 = builtin to_uint128 block_number_bystr16 in
+
+    block_number_uint128
+
+let extract_zrc6 =
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+    let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+      fst_bystr_bystr64 pair_payload_signature in
+
+    (* have to split the datablock into block number and hex address *)
+    (* the sender has to match with the hex address *)
+
+    let num_0 = Uint32 0 in
+    let num_16 = Uint32 16 in
+    let num_20 = Uint32 20 in
+    let num_36 = Uint32 36 in
+    let num_56 = Uint32 56 in
+
+    (* bytes 1 to 16: block number *)
+    (* bytes 17 to 36: wallet address of sender *)
+    (* bytes 37 to 56: zrc6 contract address *)
+    (* bytes 57 to end of string: the URI *)
+    
+    let zrc6_bystr = builtin substr data num_36 num_20 in
+      
+    (* convert bystr zrc6 address to bystr20 zrc6 address *)
+    let zrc6_contract = bystr_to_bystr20 zrc6_bystr in
+
+    zrc6_contract
+
+let extract_payment_token = 
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+  let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+    fst_bystr_bystr64 pair_payload_signature in
+
+  (* have to split the datablock into block number and hex address *)
+  (* the sender has to match with the hex address *)
+  let num_20 = Uint32 20 in
+  let num_56 = Uint32 56 in
+
+  let payment_token_bystr = builtin substr data num_56 num_20 in
+    
+  (* convert bystr payment_token address to bystr20 payment_token address *)
+  let payment_token_contract = bystr_to_bystr20 payment_token_bystr in
+
+  payment_token_contract
+
+let extract_payment_amount = 
+  fun (pair_payload_signature : Pair ByStr ByStr64) =>
+
+  let data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+    fst_bystr_bystr64 pair_payload_signature in
+
+  (* have to split the datablock into block number and hex address *)
+  (* the sender has to match with the hex address *)
+  let num_8 = Uint32 8 in
+  let num_76 = Uint32 76 in
+
+  let payment_amount_bystr = builtin substr data num_76 num_8 in
+    
+  (* convert bystr payment_amount address to bystr20 payment_amount address *)
+  let payment_amount_bystr8 = bystr_to_bystr8 payment_amount_bystr in
+
+  let payment_amount = builtin to_uint128 payment_amount_bystr8 in
+
+  payment_amount
+
+let equal_uint128 = fun (a: Uint128) => fun(b: Uint128) =>
+  builtin eq a b
+
+let equal_bystr20 = fun (a: ByStr20) => fun(b: ByStr20) =>
+  builtin eq a b
+      
+(* return true if l[i] == value for all elements l[i] in the list l *)
+let all_elements_equal_to_value_uint128 =
+  fun(l: List Uint128) =>
+  fun(value: Uint128) =>
+    let f = equal_uint128 value in
+    let for_allUint128 = @list_forall Uint128 in (* from ListUtiles *)
+    for_allUint128 f l (* checks if all elements are equal to value *)
+
+(* return true if l[i] == value for all elements l[i] in the list l *)
+let all_elements_equal_to_value_bystr20 =
+  fun(l: List ByStr20) =>
+  fun(value: ByStr20) =>
+    let f = equal_bystr20 value in
+    let for_allByStr20 = @list_forall ByStr20 in (* from ListUtiles *)
+    for_allByStr20 f l (* checks if all elements are equal to value *)
+
+contract Claim
+(
+  initial_contract_owner: ByStr20,
+  initial_revenue_recipient:ByStr20,
+  pub_key: ByStr33
+ )
+
+field paused : Bool = False
+
+field map_wallets : Map ByStr20 BNum = Emp ByStr20 BNum
+
+(* Contract Owner *)
+(* Defaults to `initial_contract_owner` *)
+field contract_owner: ByStr20 = initial_contract_owner
+
+(* Contract ownership recipient *)
+(* Defaults to `zil_address` *)
+field contract_ownership_recipient: ByStr20 = zil_address
+
+(* Revenue recipient address*)
+(* Defaults to `initial_revenue_recipient` *)
+field revenue_recipient: ByStr20 = initial_revenue_recipient
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+procedure ThrowError(err : Error)
+  e = make_error err;
+  throw e
+end
+
+(* Check if the contract is not paused *)
+procedure IsNotPaused()
+  paused_tmp <- paused;
+  match paused_tmp with
+  | False =>
+  | True  =>
+    err = ContractFrozenFailure;
+    ThrowError err
+  end
+end
+
+(* Check if the owner *)
+procedure IsOwner(address: ByStr20)
+  cur_owner <- contract_owner;
+  is_owner = builtin eq cur_owner address;
+  match is_owner with
+  | True =>
+  | False =>
+    err = CodeNotOwner;
+    ThrowError err
+  end
+end
+
+(* Check if the sender matches the address *)
+procedure IsSenderMatchAddress(address: ByStr20)
+  is_match = builtin eq _sender address;
+  match is_match with
+  | True =>
+  | False =>
+    err = CodeSenderNotMatchAddress;
+    ThrowError err
+  end
+end
+
+(* Check if blocknumber sent in signed data is within 5 blocks of the current block *)
+procedure IsBlockNumberWithinRange(blocknum_data : Uint128)
+  current_block <- & BLOCKNUMBER;
+  
+  five_bnum = BNum 5;
+  
+  blocknum_data_bnum = builtin badd five_bnum blocknum_data;
+  bnum_limit = builtin blt current_block blocknum_data_bnum;
+  match bnum_limit with
+  | True =>
+  | False =>
+    err = Unauthorized;
+    ThrowError err
+  end
+end
+
+(* Update the block number for the wallet *)
+procedure UpdateClaimBlockNumberForWallet(blocknum_data : Uint128)
+  zero_bnum = BNum 0;
+
+  bnum_block = builtin badd zero_bnum blocknum_data;
+
+  map_wallets[_sender] := bnum_block
+end
+
+(* can the sender claim *)
+(* the blocknum sent for claim should be higher than stored against wallet *)
+(* stops repeat claim abuse using the same sig *)
+procedure IsClaimAllowed(blocknum_data : Uint128)
+  zero_bnum = BNum 0;
+
+  bnum_check_block = builtin badd zero_bnum blocknum_data;
+
+  bnum_in_map <- exists map_wallets[_sender];
+  match bnum_in_map with
+  | False =>
+    map_wallets[_sender] := bnum_check_block
+  | True =>
+    bnum_data <- map_wallets[_sender];
+    bnum_last = get_bnum bnum_data;
+
+    bnum_limit = builtin blt bnum_last bnum_check_block;
+    
+    match bnum_limit with
+      | True =>
+      | False =>
+		    err = ClaimNotAllowedBlackout;
+        ThrowError err
+      end
+  end
+end
+
+procedure IsZilAmountValid(amount : Uint128)
+  is_valid = builtin eq _amount amount;
+  match is_valid with
+    |  False =>
+        error = IncorrectZilAmount;
+        ThrowError error
+    | True =>
+  end
+end
+
+procedure AcceptPayment(payment_token: ByStr20, payment_amount: Uint128, revenue_recipient:ByStr20)
+  is_zil = builtin eq zil_address payment_token;       
+  match is_zil with
+  | True=>
+    IsZilAmountValid payment_amount;
+    accept;
+    msg = { 
+      _tag : "AddFunds"; 
+      _recipient: revenue_recipient; 
+      _amount: payment_amount 
+    };
+    msgs = one_msg msg;
+    send msgs
+  | False=>
+    msg_to_token = {
+      _tag : "TransferFrom"; 
+      _recipient : payment_token; 
+      _amount : zero;
+      from : _sender; 
+      to : revenue_recipient; 
+      amount : payment_amount
+    };
+    msgs = one_msg msg_to_token;
+    send msgs
+  end   
+end
+
+procedure RequireNotSelf(address_a: ByStr20, address_b: ByStr20)
+  is_self = builtin eq address_a address_b;
+  match is_self with
+  | False =>
+  | True =>
+    error = SelfError;
+    ThrowError error
+  end
+end
+
+procedure DoValidSignature(data_sig_pair: Pair ByStr ByStr64)
+  data = let fst_bystr_bystr64 = @fst ByStr ByStr64 in
+        fst_bystr_bystr64 data_sig_pair;
+  sigData = let snd_bystr_bystr64 = @snd ByStr ByStr64 in
+        snd_bystr_bystr64 data_sig_pair;
+
+  (* verify data against signature *)
+  verify_status = builtin ecdsa_verify pub_key data sigData;
+  match verify_status with
+    | False =>
+      err = InvalidSignature;
+      ThrowError err
+    | True =>
+  end
+end
+
+
+procedure ValidSignature(data_sig_pair_list: List (Pair ByStr ByStr64))
+  forall data_sig_pair_list DoValidSignature
+end
+
+(**************************************)
+(*             Transitions            *)
+(**************************************)
+
+(* Pause the contract - only owner can call *)
+transition Pause()
+  IsOwner _sender;
+  paused := bool_active;
+  e = {
+        _eventname: "PauseSuccess";
+        pausedBy: _sender
+      };
+  event e
+end
+
+(* Unpause the contract - only owner can call *)
+transition UnPause(factor : Uint128)
+  IsOwner _sender;
+  paused := bool_inactive;
+  e = {
+        _eventname: "UnPauseSuccess";
+        unPausedBy: _sender
+      };
+  event e
+end
+
+transition ClaimMint(data: ByStr, sigData: ByStr64)
+    (* no claims if paused *)
+    IsNotPaused;
+
+    (* verify data against signature *)
+
+    verify_status = builtin ecdsa_verify pub_key data sigData;
+    
+    (* have to split the datablock into block number and hex address *)
+    (* the sender has to match with the hex address *)
+
+    num_0 = Uint32 0;
+    num_16 = Uint32 16;
+    num_20 = Uint32 20;
+    num_36 = Uint32 36;
+    num_56 = Uint32 56;
+
+    (* bytes 1 to 16: block number *)
+    (* bytes 17 to 36: wallet address of sender *)
+    (* bytes 37 to 56: zrc6 contract address *)
+    (* bytes 57 to end of string: the URI *)
+    block_number_bystr = builtin substr data num_0 num_16;
+    address_bystr = builtin substr data num_16 num_20;
+    
+    zrc6_bystr = builtin substr data num_36 num_20;
+
+    length_bystr = builtin strlen data;
+    length_uri = builtin sub length_bystr num_56;
+    uri_bystr = builtin substr data num_56 length_uri;
+    token_uri = builtin to_ascii uri_bystr;
+
+    (* convert bystr address to bystr20 address *)
+    address_bystr20 = bystr_to_bystr20 address_bystr;
+
+    (* convert bystr zrc6 address to bystr20 zrc6 address *)
+    zrc6_contract = bystr_to_bystr20 zrc6_bystr;
+
+    (* the sender address has to match with the signed address *)
+    IsSenderMatchAddress address_bystr20;
+
+    (* convert bystr block_number to uint128 block number *)
+    block_number_bystr16 = bystr_to_bystr16 block_number_bystr;
+    block_number_uint128 = builtin to_uint128 block_number_bystr16;
+
+    (* check if claim is allowed at all *)
+    IsClaimAllowed block_number_uint128;
+    
+    (* freshness check *)
+    IsBlockNumberWithinRange block_number_uint128;
+    
+    match verify_status with
+    | True =>
+      (* do the mint *)
+      token_owner = _sender;
+      msg_to_mint = {_tag : "Mint"; _recipient : zrc6_contract; _amount : Uint128 0; to: token_owner; token_uri:token_uri};
+      msgs =
+        let nil = Nil {Message} in
+        Cons {Message} msg_to_mint nil;
+      send msgs;
+
+      (* update the current block number for the wallet *)
+      UpdateClaimBlockNumberForWallet block_number_uint128;
+
+      e = { _eventname: "MintSuccess"; status : "Mint Successful"; 
+      token_uri: token_uri;
+      nft_smart_contract: zrc6_contract;
+      block_number_uint128: block_number_uint128;
+      token_owner: address_bystr20 };
+      event e
+      
+    | False =>
+      e = { _eventname: "ClaimFailed"; status : "Claim Failed"; 
+      token_uri: token_uri;
+      nft_smart_contract: zrc6_contract;
+      block_number_uint128: block_number_uint128;
+      token_owner: address_bystr20  };
+      event e
+    end
+    
+end
+
+transition BatchClaimMint(data_sig_pair_list: List (Pair ByStr ByStr64))
+    (* no claims if paused *)
+    IsNotPaused;
+
+    pair_token_uri_list_map = @list_map (Pair ByStr ByStr64) (Pair ByStr20 String);
+    pr = Pair {ByStr20 ByStr33} _sender pub_key;
+    tmp_fun = build_pair pr;
+    to_token_uri_pair_list = pair_token_uri_list_map tmp_fun data_sig_pair_list;
+
+    bnum_list_map = @list_map (Pair ByStr ByStr64) (Uint128);
+    bnum_list = bnum_list_map extract_bnum data_sig_pair_list;
+
+    zrc6_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+    zrc6_list = zrc6_list_map extract_zrc6 data_sig_pair_list;
+
+    zero_pos = Uint32 0;
+
+    el_opt_zrc6 =
+      let nth = @list_nth ByStr20 in (* from ListUtils *)
+      nth zero_pos zrc6_list; (* note that indexing starts at 0 *)
+
+    match el_opt_zrc6 with (* Option is None if no element with index i in list *)
+    | None => (* index is out of bounds: no such element *)
+      err = ElementAtPositionError;
+      ThrowError err
+    | Some el => (* list[i] = el *)
+      zrc6_contract = el;
+      (* Run through the zrc6 list and see if there is any zrc6 mismatch *)
+      check_match_zrc6 = all_elements_equal_to_value_bystr20 zrc6_list zrc6_contract;
+
+      match check_match_zrc6 with
+      | False =>
+        err = ZRC6DifferentError;
+        ThrowError err
+
+      | True =>
+
+        el_opt =
+          let nth = @list_nth Uint128 in (* from ListUtils *)
+          nth zero_pos bnum_list; (* note that indexing starts at 0 *)
+        
+        match el_opt with (* Option is None if no element with index i in list *)
+        | None => (* index is out of bounds: no such element *)
+          err = ElementAtPositionError;
+          ThrowError err
+        | Some el => (* list[i] = el *)
+          block_number_uint128 = el;
+          (* Run through the bnum list and see if there is any bnum mismatch *)
+          check_match_bnum = all_elements_equal_to_value_uint128 bnum_list block_number_uint128;
+          match check_match_bnum with
+          | False =>
+            err = BlockNumDifferentError;
+            ThrowError err
+          | True =>
+              (* check if claim is allowed at all *)
+              IsClaimAllowed block_number_uint128;
+              
+              (* freshness check *)
+              IsBlockNumberWithinRange block_number_uint128;
+
+              (* do the mint *)
+              token_owner = _sender;
+              msg_to_mint = {_tag : "BatchMint"; _recipient : zrc6_contract; _amount : Uint128 0; to_token_uri_pair_list: to_token_uri_pair_list};
+              msgs =
+                let nil = Nil {Message} in
+                Cons {Message} msg_to_mint nil;
+              send msgs;
+
+              (* update the current block number for the wallet *)
+              UpdateClaimBlockNumberForWallet block_number_uint128;
+
+              e = { 
+                _eventname: "BatchClaimMintSuccess"; 
+                status : "Batch Mint Successful"; 
+                to_token_uri_pair_list: to_token_uri_pair_list;
+                nft_smart_contract: zrc6_contract;
+                block_number_uint128: block_number_uint128;
+                token_owner: _sender
+              };
+              event e
+          end (* match check_match_bnum *)
+        end (* match el_opt *)
+      end (* match check_match_zrc6 *)
+    end (* match el_opt_zrc6 *)
+end
+
+transition Purchase(data: ByStr, sigData: ByStr64)
+    (* no claims if paused *)
+    IsNotPaused;
+
+    (* verify data against signature *)
+
+    verify_status = builtin ecdsa_verify pub_key data sigData;
+    
+    (* have to split the datablock into block number and hex address *)
+    (* the sender has to match with the hex address *)
+
+    num_0 = Uint32 0;
+    num_8 = Uint32 8;
+    num_16 = Uint32 16;
+    num_20 = Uint32 20;
+    num_36 = Uint32 36;
+    num_56 = Uint32 56;
+    num_76 = Uint32 76;
+    num_84 = Uint32 84;
+
+    (* bytes 1 to 16: block number *)
+    (* bytes 17 to 36: wallet address of sender *)
+    (* bytes 37 to 56: zrc6 contract address *)
+    (* bytes 57 to 76: payment token *)
+    (* bytes 77 to 84: payment amount *)
+    (* bytes 85 to end of string: the URI *)
+    block_number_bystr = builtin substr data num_0 num_16;
+
+    address_bystr = builtin substr data num_16 num_20;
+    
+    zrc6_bystr = builtin substr data num_36 num_20;
+
+    payment_token_bystr = builtin substr data num_56 num_20;
+
+    payment_amount_bystr = builtin substr data num_76 num_8;
+
+    length_bystr = builtin strlen data;
+    length_uri = builtin sub length_bystr num_84;
+    uri_bystr = builtin substr data num_84 length_uri;
+    token_uri = builtin to_ascii uri_bystr;
+
+    (* convert bystr address to bystr20 address *)
+    address_bystr20 = bystr_to_bystr20 address_bystr;
+
+    (* convert bystr zrc6 address to bystr20 zrc6 address *)
+    zrc6_contract = bystr_to_bystr20 zrc6_bystr;
+
+    (* convert bystr payment token to bystr20 payment token address *)
+    payment_token = bystr_to_bystr20 payment_token_bystr;
+
+    payment_amount_bystr8 = bystr_to_bystr8 payment_amount_bystr;
+    payment_amount = builtin to_uint128 payment_amount_bystr8;
+
+    (* the sender address has to match with the signed address *)
+    IsSenderMatchAddress address_bystr20;
+
+    (* convert bystr block_number to uint128 block number *)
+    block_number_bystr16 = bystr_to_bystr16 block_number_bystr;
+    block_number_uint128 = builtin to_uint128 block_number_bystr16;
+
+    (* check if claim is allowed at all *)
+    IsClaimAllowed block_number_uint128;
+    
+    (* freshness check *)
+    IsBlockNumberWithinRange block_number_uint128;
+
+    revenue_receiver <-revenue_recipient;
+    
+    match verify_status with
+    | True =>
+      (* Accept payment*)
+      AcceptPayment payment_token payment_amount revenue_receiver;
+
+      (* do the mint *)
+      token_owner = _sender;
+      msg_to_mint = {_tag : "Mint"; _recipient : zrc6_contract; _amount : Uint128 0; to: token_owner; token_uri:token_uri};
+      msgs =
+        let nil = Nil {Message} in
+        Cons {Message} msg_to_mint nil;
+      send msgs;
+
+      (* update the current block number for the wallet *)
+      UpdateClaimBlockNumberForWallet block_number_uint128;
+
+      e = { 
+        _eventname: "PurchaseSuccess"; status : "Purchase Successful"; 
+        token_uri: token_uri;
+        nft_smart_contract: zrc6_contract;
+        block_number_uint128: block_number_uint128;
+        token_owner: address_bystr20;
+        revenue_recipient: revenue_receiver;
+        payment_token: payment_token;
+        payment_amount:payment_amount
+      };
+      event e
+      
+    | False =>
+      e = { 
+        _eventname: "PurchaseFailed"; status : "Purchase Failed"; 
+        token_uri: token_uri;
+        nft_smart_contract: zrc6_contract;
+        block_number_uint128: block_number_uint128;
+        token_owner: address_bystr20;  
+        revenue_recipient: revenue_receiver;
+        payment_token: payment_token;
+        payment_amount:payment_amount
+      };
+      event e
+    end
+    
+end
+
+transition BatchPurchase(data_sig_pair_list: List (Pair ByStr ByStr64))
+  (* no claims if paused *)
+  IsNotPaused;
+
+  ValidSignature data_sig_pair_list;
+
+  pair_token_uri_list_map = @list_map (Pair ByStr ByStr64) (Pair ByStr20 String);
+  pr = Pair {ByStr20 ByStr33} _sender pub_key;
+  tmp_fun = build_purchase_pair pr;
+  to_token_uri_pair_list = pair_token_uri_list_map tmp_fun data_sig_pair_list;
+
+  bnum_list_map = @list_map (Pair ByStr ByStr64) (Uint128);
+  bnum_list = bnum_list_map extract_bnum data_sig_pair_list;
+
+  zrc6_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  zrc6_list = zrc6_list_map extract_zrc6 data_sig_pair_list;
+
+  payment_token_list_map = @list_map (Pair ByStr ByStr64) (ByStr20);
+  payment_token_list = payment_token_list_map extract_payment_token data_sig_pair_list;
+
+  payment_amount_list_map = @list_map (Pair ByStr ByStr64) (Uint128);
+  payment_amount_list = payment_amount_list_map extract_payment_amount data_sig_pair_list;
+
+  zero_pos = Uint32 0;
+
+  el_opt_zrc6 =
+    let nth = @list_nth ByStr20 in (* from ListUtils *)
+    nth zero_pos zrc6_list; (* note that indexing starts at 0 *)
+
+  match el_opt_zrc6 with (* Option is None if no element with index i in list *)
+  | None => (* index is out of bounds: no such element *)
+    err = ElementAtPositionError;
+    ThrowError err
+  | Some el => (* list[i] = el *)
+    zrc6_contract = el;
+    (* Run through the zrc6 list and see if there is any zrc6 mismatch *)
+    check_match_zrc6 = all_elements_equal_to_value_bystr20 zrc6_list zrc6_contract;
+
+    match check_match_zrc6 with
+    | False =>
+      err = ZRC6DifferentError;
+      ThrowError err
+    | True =>
+      el_opt =
+        let nth = @list_nth Uint128 in (* from ListUtils *)
+        nth zero_pos bnum_list; (* note that indexing starts at 0 *)
+      
+      match el_opt with (* Option is None if no element with index i in list *)
+      | None => (* index is out of bounds: no such element *)
+        err = ElementAtPositionError;
+        ThrowError err
+      | Some el => (* list[i] = el *)
+        block_number_uint128 = el;
+        (* Run through the bnum list and see if there is any bnum mismatch *)
+        check_match_bnum = all_elements_equal_to_value_uint128 bnum_list block_number_uint128;
+        match check_match_bnum with
+        | False =>
+          err = BlockNumDifferentError;
+          ThrowError err
+        | True =>
+          (* check if claim is allowed at all *)
+          IsClaimAllowed block_number_uint128;
+          
+          (* freshness check *)
+          IsBlockNumberWithinRange block_number_uint128;
+
+          el_opt_payment_token =
+            let nth = @list_nth ByStr20 in (* from ListUtils *)
+            nth zero_pos payment_token_list; (* note that indexing starts at 0 *)
+
+          match el_opt_payment_token with (* Option is None if no element with index i in list *)
+          | None => (* index is out of bounds: no such element *)
+            err = ElementAtPositionError;
+            ThrowError err
+          | Some el => (* list[i] = el *)
+            payment_token = el;
+
+            check_match_payment_token = all_elements_equal_to_value_bystr20 payment_token_list payment_token;
+            match check_match_zrc6 with
+            | False =>
+              err = PaymentTokenDifferentError;
+              ThrowError err
+            | True =>
+              el_opt_payment_amount =
+                let nth = @list_nth Uint128 in (* from ListUtils *)
+                nth zero_pos payment_amount_list; (* note that indexing starts at 0 *)
+
+              match el_opt_payment_amount with (* Option is None if no element with index i in list *)
+              | None => (* index is out of bounds: no such element *)
+                err = ElementAtPositionError;
+                ThrowError err
+              | Some el => (* list[i] = el *)
+                payment_amount = el;
+
+                check_match_amount = all_elements_equal_to_value_uint128 payment_amount_list payment_amount;
+                match check_match_amount with
+                | False =>
+                  err = PaymentAmountDifferentError;
+                  ThrowError err
+                | True =>
+                  (* Accept payment*)
+                  revenue_receiver <-revenue_recipient;
+                  AcceptPayment payment_token payment_amount revenue_receiver;
+
+                  (* do the mint *)
+                  token_owner = _sender;
+                  msg_to_mint = {_tag : "BatchMint"; _recipient : zrc6_contract; _amount : Uint128 0; to_token_uri_pair_list: to_token_uri_pair_list};
+                  msgs =
+                    let nil = Nil {Message} in
+                    Cons {Message} msg_to_mint nil;
+                  send msgs;
+
+                  (* update the current block number for the wallet *)
+                  UpdateClaimBlockNumberForWallet block_number_uint128;
+
+                  e = { 
+                    _eventname: "BatchPurchaseSuccess"; 
+                    status : "Batch Purchase Successful"; 
+                    to_token_uri_pair_list: to_token_uri_pair_list;
+                    nft_smart_contract: zrc6_contract;
+                    block_number_uint128: block_number_uint128;
+                    token_owner: _sender;
+                    revenue_recipient: revenue_receiver;
+                    payment_token: payment_token;
+                    payment_amount:payment_amount
+                  };
+                  event e
+                end
+              end
+            end
+          end
+        end (* match check_match_bnum *)
+      end (* match el_opt *)
+    end (* match check_match_zrc6 *)
+  end (* match el_opt_zrc6 *)
+end 
+
+transition SetRevenueRecipient(to: ByStr20)
+  IsOwner _sender;
+  revenue_recipient := to;
+  
+  e = { 
+    _eventname: "SetRevenueRecipient";
+    to: to
+  };
+  event e
+end
+
+(* Sets `to` as the contract ownership recipient. *)
+(* To reset `contract_ownership_recipient`, use `zil_address`. *)
+(* i.e., `0x0000000000000000000000000000000000000000` *)
+(* @param: to - Address of contract ownership recipient *)
+(* @Requirements: *)
+(* - `_sender` must be the contract owner. Otherwise, it must throw `NotContractOwnerError` *)
+(* - `_sender` must not be `to`. Otherwise, it must throw `SelfError` *)
+transition SetContractOwnershipRecipient(to: ByStr20)
+  IsOwner _sender;
+  RequireNotSelf to _sender;
+  
+  contract_ownership_recipient := to;
+
+  e = {
+    _eventname: "SetContractOwnershipRecipient";
+    to: to
+  };
+  event e;
+  msg_to_sender = {
+    _tag: "ZRC6_SetContractOwnershipRecipientCallback";
+    _recipient: _sender;
+    _amount: Uint128 0;
+    to: to
+  };
+  msgs = one_msg msg_to_sender;
+  send msgs
+end
+
+(* Sets `contract_ownership_recipient` as the contract owner. *)
+(* @Requirements: *)
+(* - `_sender` must be the contract ownership recipient. Otherwise, it must throw `NotContractOwnershipRecipientError` *)
+transition AcceptContractOwnership()
+  recipient <- contract_ownership_recipient;
+
+  is_recipient = builtin eq _sender recipient;
+  match is_recipient with
+  | False =>
+    error = NotContractOwnershipRecipientError;
+    ThrowError error
+  | True =>
+    contract_owner := _sender;
+    contract_ownership_recipient := zil_address;
+
+    e = {
+      _eventname: "AcceptContractOwnership";
+      contract_owner: _sender
+    };
+    event e;
+    msg_to_sender = {
+      _tag: "ZRC6_AcceptContractOwnershipCallback";
+      _recipient: _sender;
+      _amount: Uint128 0;
+      contract_owner: _sender
+    };
+    msgs = one_msg msg_to_sender;
+    send msgs
+  end
+end
+
+(* Callback method after mint *)
+transition ZRC6_MintCallback(
+  to: ByStr20,
+  token_id: Uint256,
+  token_uri: String
+)
+end
+
+(* Callback method after batch mint *)
+transition ZRC6_BatchMintCallback()
+end
+
+transition TransferFromSuccessCallBack(
+  initiator : ByStr20,
+  sender : ByStr20,
+  recipient : ByStr20,
+  amount : Uint128
+)
+end
