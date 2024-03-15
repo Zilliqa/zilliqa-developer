@@ -249,7 +249,7 @@ function Home(props: any) {
                 onClick={() => window.location.href = 'https://stake.plunderswap.com/'}
               >
                 <img className='mr-1 cover-img' src={PlunderswapLogo} width={26} height={26}></img>
-                <span className='ml-1'>Plunderswap</span>
+                <span className='ml-1'>PlunderSwap</span>
               </div>
             </div>
 

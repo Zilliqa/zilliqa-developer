@@ -486,5 +486,9 @@ nav:
               - Diagnostic Data: contributors/core-protocol-design/mitigation-measures/core-diagnostic-data.md
               - Status Server: contributors/core-protocol-design/mitigation-measures/core-status-server.md
   - Ecosystem: ecosystem/index.md
+  - FAQ:
+      - EVM: faq/faq-introduction.md
+      - Node installation:
+          - Seed/SSN: faq/faq-seed-ssn.md
+          - Mining: faq/faq-mining.md
   - News: news/index.md
-  - FAQ: faq/faq-introduction.md
