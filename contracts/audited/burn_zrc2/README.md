@@ -84,7 +84,7 @@ call the pause and unpause transitions whilst the contract is paused.
 To run the tests against the isolated server on port 5555
 
 ```sh
-npm install
+yarn install
 npx hardhat test
 ```
 
