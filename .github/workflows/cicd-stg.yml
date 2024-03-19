@@ -110,7 +110,7 @@ jobs:
         with:
           context: ${{ matrix.path }}
           push: true # ${{ github.ref_name == github.event.repository.default_branch }}
-          tag: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private/${{ matrix.image_name }}
+          tag: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public/${{ matrix.image_name }}
           tag-length: ${{ matrix.tag_length }}
           tag-latest: ${{ matrix.tag_latest }}
           registry: asia-docker.pkg.dev
@@ -149,7 +149,7 @@ jobs:
           #   tag_latest: true
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
-      REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private
+      REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
