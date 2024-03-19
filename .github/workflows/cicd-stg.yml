@@ -109,7 +109,7 @@ jobs:
         uses: Zilliqa/gh-actions-workflows/actions/ci-dockerized-app-build-push@v2
         with:
           context: ${{ matrix.path }}
-          push: ${{ github.ref_name == github.event.repository.default_branch }}
+          push: true # ${{ github.ref_name == github.event.repository.default_branch }}
           tag: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-private/${{ matrix.image_name }}
           tag-length: ${{ matrix.tag_length }}
           tag-latest: ${{ matrix.tag_latest }}
