@@ -1,4 +1,4 @@
-FROM node:14.20.1 as build-stage
+FROM node:16.20.2 as build-stage
 
 
 ENV NODE_OPTIONS=--max-old-space-size=4096
