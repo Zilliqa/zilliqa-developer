@@ -86,7 +86,7 @@ jobs:
             path: products/zillion
             tag_length: 8
             tag_latest: false
-          - application: zilliqa-bridge
+          - application: zilliqa-bridge-validator
             image_name: zilliqa-bridge-validator
             path: products/bridge/bridge-validators
             tag_length: 8
