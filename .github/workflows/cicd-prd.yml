@@ -23,8 +23,6 @@ jobs:
         application:
           [
             bluebell-playground,
-            developer-portal,
-            devex,
             devex-apollo,
             dev-wallet,
             faucet-service,
@@ -37,22 +35,11 @@ jobs:
             zillion,
             zilliqa-bridge-validator,
             zilliqa-bridge-web,
-            zilliqa-isolated-server,
           ]
         include:
           - application: bluebell-playground
             image_name: bluebell-playground
             path: products/bluebell
-            tag_length: 8
-            tag_latest: false
-          - application: developer-portal
-            image_name: developer-portal
-            path: products/developer-portal
-            tag_length: 8
-            tag_latest: false
-          - application: devex
-            image_name: devex
-            path: products/devex
             tag_length: 8
             tag_latest: false
           - application: devex-apollo
@@ -105,11 +92,6 @@ jobs:
             path: products/zillion
             tag_length: 8
             tag_latest: false
-          - application: zilliqa-isolated-server
-            image_name: zilliqa-isolated-server
-            path: products/zilliqa-isolated-server
-            tag_length: 8
-            tag_latest: true
           - application: zilliqa-bridge-validator
             image_name: zilliqa-bridge-validator
             path: products/bridge/bridge-validators
@@ -120,6 +102,57 @@ jobs:
             path: products/bridge/bridge-web
             tag_length: 8
             tag_latest: false
+    env:
+      DOCKER_DOMAIN: asia-docker.pkg.dev
+      REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+
+      - name: Docker build and push - production
+        uses: Zilliqa/gh-actions-workflows/actions/ci-dockerized-app-build-push@v2
+        with:
+          context: ${{ matrix.path }}
+          push: true
+          tag: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public/${{ matrix.image_name }}:${{ github.ref_name }}
+          registry: asia-docker.pkg.dev
+          workload-identity-provider: "${{ secrets.GCP_PRD_GITHUB_WIF }}"
+          service-account: "${{ secrets.GCP_PRD_GITHUB_SA_DOCKER_REGISTRY }}"
+          cache-key: ${{ env.REGISTRY }}/${{ matrix.image_name }}-cache
+          build-args: |
+            DEPLOY_ENV=prd
+
+  build-makefile:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-22.04
+    name: "Build image with Makefile"
+    strategy:
+      fail-fast: false
+      matrix:
+        application: [developer-portal, devex, zilliqa-isolated-server]
+        include:
+          - application: developer-portal
+            image_name: developer-portal
+            path: products/developer-portal
+            tag_length: 8
+            tag_latest: false
+          - application: devex
+            image_name: devex
+            path: products/devex
+            tag_length: 8
+            tag_latest: false
+          - application: zilliqa-isolated-server
+            image_name: zilliqa-isolated-server
+            path: products/zilliqa-isolated-server
+            tag_length: 8
+            tag_latest: true
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
