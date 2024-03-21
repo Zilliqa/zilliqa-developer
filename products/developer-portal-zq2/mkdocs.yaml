@@ -7,6 +7,9 @@ site_author: Zilliqa
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - js/versions.js
+
 theme:
   name: material
   logo: assets/zt_logo.png
@@ -15,6 +18,9 @@ theme:
   custom_dir: overrides/
   palette:
     scheme: zilliqa
+  features:
+    - content.code.annotate
+    - navigation.indexes
 
 markdown_extensions:
   - attr_list
