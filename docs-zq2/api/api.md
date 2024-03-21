@@ -1,11 +1,11 @@
 ---
 id: api
-title: API Endpoints
+title: API Methods
 keywords:
   - api
   - introduction
   - endpoints
-description: Zilliqa API Endpoints
+description: Zilliqa API Methods
 ---
 
 ---
