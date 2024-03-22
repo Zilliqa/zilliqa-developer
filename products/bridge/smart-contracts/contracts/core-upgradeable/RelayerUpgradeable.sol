@@ -7,6 +7,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {RegistryUpgradeable, IRegistry} from "contracts/core-upgradeable/RegistryUpgradeable.sol";
 
 interface IRelayerEvents {
+    /**
+     * @dev Triggered when a outgoing message is relayed to another chain
+     */
     event Relayed(
         uint indexed targetChainId,
         address target,
@@ -17,6 +20,9 @@ interface IRelayerEvents {
 }
 
 interface IRelayer is IRelayerEvents, IRegistry {
+    /**
+     * @dev Incorporates the extra metadata to add on relay
+     */
     struct CallMetadata {
         uint sourceChainId;
         address sender;
@@ -40,13 +46,27 @@ interface IRelayer is IRelayerEvents, IRegistry {
     ) external returns (uint);
 }
 
+/**
+ * @title Relayer
+ * @notice Handles everything related to outgoing messages to be dispatched on other chains
+ * @dev This contract should be used by inherited for cross-chain messaging. It is also made upgradeable.
+ *
+ * It is able to relay message to any arbitrary chain that is part of the UCCB network
+ */
 abstract contract RelayerUpgradeable is
     IRelayer,
     Initializable,
     Ownable2StepUpgradeable,
     RegistryUpgradeable
 {
-    /// @custom:storage-location erc7201:zilliqa.storage.Relayer
+    /**
+     * @dev Storage of the initializable contract.
+     *
+     * It's implemented on a custom ERC-7201 namespace to reduce the risk of storage collisions
+     * when using with upgradeable contracts.
+     *
+     * @custom:storage-location erc7201:zilliqa.storage.Relayer
+     */
     struct RelayerStorage {
         // TargetChainId => Nonce
         mapping(uint => uint) nonce;
@@ -56,6 +76,9 @@ abstract contract RelayerUpgradeable is
     bytes32 private constant RELAYER_STORAGE_POSITION =
         0x814fccf6b0465c7c83d1a86cf4c4cdd0d8463969cbd4702358f5ae439f30a000;
 
+    /**
+     * @dev Returns a pointer to the storage namespace.
+     */
     function _getRelayerStorage()
         private
         pure
@@ -66,18 +89,36 @@ abstract contract RelayerUpgradeable is
         }
     }
 
+    /**
+     * @dev Initializes the contracts with all the inherited contracts
+     */
     function __Relayer_init(address _owner) internal onlyInitializing {
         __Ownable_init(_owner);
         __Relayer_init_unchained();
     }
 
+    /**
+     * @dev The unchained version is used to avoid repeated initializations down the inheritance path
+     */
     function __Relayer_init_unchained() internal onlyInitializing {}
 
+    /**
+     * @dev Returns the nonce for a given chain
+     */
     function nonce(uint chainId) external view returns (uint) {
         RelayerStorage storage $ = _getRelayerStorage();
         return $.nonce[chainId];
     }
 
+    /**
+     * @dev internal relay function shared by the different implementations
+     *
+     * Nonces start counting from 1
+     * It is also secured by the registry set. So only approved addresses can call relay
+     * Eventually we can remove `isRegistered` and allow it for public use.
+     * This requires a proper fee system to prevent abuse.
+
+     */
     function _relay(
         uint targetChainId,
         address target,
@@ -91,6 +132,15 @@ abstract contract RelayerUpgradeable is
         return _nonce;
     }
 
+    /**
+     * @dev Basic relay called by contracts on the source chain to send message to target chain
+     * The sender needs to encode the call data and the target chain id with abi of the callee function
+     *
+     * @param targetChainId the chain id the message is intended to be sent to
+     * @param target the address of the contract on the target chain to execute the call
+     * @param call the encoded call data to be executed on the target address on the target chain
+     * @param gasLimit the gas limit for the call executed on the target chain
+     */
     function relay(
         uint targetChainId,
         address target,
@@ -100,8 +150,19 @@ abstract contract RelayerUpgradeable is
         return _relay(targetChainId, target, call, gasLimit);
     }
 
-    // Use this function to relay a call with metadata. This is useful for calling surrogate contracts.
-    // Ensure the surrogate implements this interface
+    /**
+     * @dev Use this function to relay a call with metadata. This is useful when the dispatched function on the target chain requires the metadata
+     * For example they may need to verify the sender or the nonce of the transaction on the source chain.
+     * When packed here, we can ensure that the metadata is not tampered with
+     *
+     * NOTE: Ensure the target function conforms to the required abi format `function(CallMetadata, bytes)`
+     *
+     * @param targetChainId the chain id the message is intended to be sent to
+     * @param target the address of the contract on the target chain to execute the call
+     * @param callSelector the selector of the function to be called on target
+     * @param callData the calldata to be appended on the call selector
+     * @param gasLimit the gas limit for the call executed on the target chain
+     */
     function relayWithMetadata(
         uint targetChainId,
         address target,
@@ -122,10 +183,16 @@ abstract contract RelayerUpgradeable is
             );
     }
 
+    /**
+     * @dev Able to register new addresses that can call the relayer
+     */
     function register(address newTarget) external override onlyOwner {
         _register(newTarget);
     }
 
+    /**
+     * @dev Removes an address from the registry. Thus preventing them to call relayer
+     */
     function unregister(address removeTarget) external override onlyOwner {
         _unregister(removeTarget);
     }

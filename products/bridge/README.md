@@ -234,18 +234,12 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
   - [x] Add cross-shard support for contracts
   - [x] Global nonces
   - [x] Remove Collector
-  - [ ] Validator rewards
-  - [ ] Update periphery contracts
+  - [x] Update periphery contracts
     - [x] Split bridged incoming and outgoing interfaces
-    - [ ] Support response instead of fire&forget
   - [x] Update foundry tests
-  - [ ] Update hardhat tests
-  - [ ] Synchronizing validators cross-chain
-    - [ ] Update validator set
-  - [-] Fuzz + invariant testing
-  - [ ] Write deployment scripts
-    - [ ] Support CREATE2
-    - [ ] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
+  - [x] Write deployment scripts
+    - [x] Support CREATE2
+    - [x] [Deterministic Deployment Proxy](https://github.com/Arachnid/deterministic-deployment-proxy)
   - [ ] Track last event block number for light client event censorship resistance
 - [ ] **Off-Chain Validator Nodes** & **Validator Node Lib**
   - Binary and lib would be developed together. Lib will be refactored out later to be used for ZQ2
@@ -259,5 +253,5 @@ The MVP bridge will run on a gossip network with validators managed by Zilliqa
     - [ ] Zilliqa maintained full nodes of non-zq chain. UCCB validators use light nodes on it
     - [ ] Check logsBloom for potential events in the block
     - [ ] Retrieve block receipts, check for logs and verify receipt root
-- [ ] **Frontend DApp**
-  - [ ] Boilerplate setup (Vite React with Rainbow Kit)
+- [x] **Frontend DApp**
+  - [x] Boilerplate setup (Vite React with Rainbow Kit)
