@@ -1,0 +1,40 @@
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "CreateTransaction",
+    "params": [
+        {
+            "version": 21823489,
+            "toAddr": "0xcf2fCef30dAFeCFB257f656FE5030EBEE74b761C",
+            "nonce": 34,
+            "pubKey": "028351704d7f881138b6f7b1330464a9b92728ae30914e585fee5fa33027041149",
+            "amount": "0",
+            "gasPrice": "1000000000",
+            "gasLimit": "5000",
+            "code": "",
+            "data": "{\"_tag\":\"SignTransaction\",\"params\":[{\"vname\":\"transactionId\",\"type\":\"Uint32\",\"value\":\"1\"}]}",
+            "signature": "323075eb7f81e66250315c3925987538fa9fa5e98ffe9f76ee55c7dc2d2e7cb4e3246cdbc2ee22d61db0067c618835beebbd47dc46fd09c6d6348ba90cb802b5",
+            "priority": false
+        }
+    ]
+}
+
+{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "method": "CreateTransaction",
+    "params": [
+        {
+            "version": 21823489,
+            "toAddr": "0xcf2fCef30dAFeCFB257f656FE5030EBEE74b761C",
+            "nonce": 1,
+            "pubKey": "031c94966225bf2342e799b0078a4381cbd8c1ce2cd99166106af150e7a300a7a8",
+            "amount": "0",
+            "gasPrice": "1000000000",
+            "gasLimit": "5000",
+            "code": "",
+            "data": "{\"_tag\":\"SignTransaction\",\"params\":[{\"vname\":\"transactionId\",\"type\":\"Uint32\",\"value\":\"1\"}]}",
+            "signature": "46953e7732ab758d77b18b94d1053637faec7157391d8b77e031d27a98b3fca6acfa8eb23257b529d6ed1441728375d7c9a6d95e4bf89eaf003071c22f5d0ec3",
+        }
+    ]
+}

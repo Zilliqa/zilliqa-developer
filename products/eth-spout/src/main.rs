@@ -9,7 +9,7 @@ use std::{
 use anyhow::{anyhow, Result};
 use askama::Template;
 use axum::{extract::State, routing::get, Form, Router};
-use bech32::FromBase32;
+use bech32::Hrp;
 use ethers::{
     middleware::{nonce_manager::NonceManagerError, NonceManagerMiddleware, SignerMiddleware},
     providers::{Http, Middleware, Provider},
@@ -73,19 +73,13 @@ struct Request {
 ///
 /// Returns `None` if this does not look like a bech32 address.
 /// Returns `Some(Err(_))` if it looks like a bech32 address, but the checksum or HRP is incorrect.
-fn parse_bech32(expected_hrp: &str, address: &str) -> Option<Result<Address>> {
-    let (hrp, data, _) = bech32::decode(address).ok()?;
+fn parse_bech32(expected_hrp: Hrp, address: &str) -> Option<Result<Address>> {
+    let (hrp, data) = bech32::decode(address).ok()?;
     if hrp != expected_hrp {
         return Some(Err(anyhow!(
             "invalid HRP of bech32 address: {hrp}, expected {expected_hrp}"
         )));
     }
-    let data = match Vec::<u8>::from_base32(&data) {
-        Ok(d) => d,
-        Err(e) => {
-            return Some(Err(e.into()));
-        }
-    };
     if data.len() != Address::len_bytes() {
         return Some(Err(anyhow!(
             "invalid length after decoding: {}, expected {}",
@@ -98,11 +92,10 @@ fn parse_bech32(expected_hrp: &str, address: &str) -> Option<Result<Address>> {
 
 async fn request(State(state): State<Arc<AppState>>, Form(request): Form<Request>) -> Home {
     // If we have a bech32 HRP configured, first try parsing the address as a bech32 address.
-    let bech32_address = state
-        .config
-        .bech32_hrp
-        .as_deref()
-        .and_then(|expected_hrp| parse_bech32(expected_hrp, &request.address));
+    let bech32_address =
+        state.config.bech32_hrp.as_deref().and_then(|expected_hrp| {
+            parse_bech32(Hrp::parse(expected_hrp).unwrap(), &request.address)
+        });
 
     let address = if let Some(a) = bech32_address {
         match a {
@@ -232,7 +225,7 @@ async fn main() -> Result<()> {
     let address = provider.address();
     let provider = NonceManagerMiddleware::new(provider, address);
 
-    let addr = ("0.0.0.0".parse::<IpAddr>()?, config.http_port).into();
+    let addr = ("0.0.0.0".parse::<IpAddr>()?, config.http_port);
     let state = Arc::new(AppState {
         provider,
         config,
@@ -243,9 +236,8 @@ async fn main() -> Result<()> {
         .route("/", get(home).post(request))
         .with_state(state);
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await?;
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+    axum::serve(listener, app).await?;
 
     Ok(())
 }

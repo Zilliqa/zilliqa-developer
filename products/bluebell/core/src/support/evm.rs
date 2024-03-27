@@ -3,15 +3,17 @@ use std::collections::HashMap;
 use evm_assembly::{
     compiler_context::EvmCompilerContext, executable::EvmExecutable, executor::EvmExecutor,
 };
+use scilla_parser::{
+    ast::nodes::NodeProgram,
+    parser::{lexer, lexer::Lexer, parser},
+};
 
 use crate::{
-    ast::nodes::NodeProgram,
     evm_bytecode_generator::EvmBytecodeGenerator,
     intermediate_representation::{
         ast_queue::AstQueue, emitter::IrEmitter, pass_manager::PassManager,
         symbol_table::SymbolTableConstructor,
     },
-    parser::{lexer, lexer::Lexer, parser},
     support::modules::BluebellModule,
 };
 

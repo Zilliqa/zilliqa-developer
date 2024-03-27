@@ -1,13 +1,15 @@
 use std::mem;
 
 use log::info;
-
-use crate::{
-    ast::{converting::AstConverting, nodes::*, visitor::AstVisitor},
-    constants::{TraversalResult, TreeTraversalMode},
-    intermediate_representation::{ast_queue::AstQueue, primitives::*, symbol_table::SymbolTable},
+use scilla_parser::{
+    ast::{
+        converting::AstConverting, nodes::*, visitor::AstVisitor, TraversalResult,
+        TreeTraversalMode,
+    },
     parser::lexer::SourcePosition,
 };
+
+use crate::intermediate_representation::{primitives::*, symbol_table::SymbolTable};
 
 /// Byte Code Generation Process
 ///

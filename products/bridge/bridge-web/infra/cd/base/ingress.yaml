@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xbridge-frontend
+  namespace: xbridge-fe
+  labels:
+    app.kubernetes.io/name: xbridge-fe
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: xbridge-frontend
+                port:
+                  number: 4173

@@ -1,7 +1,6 @@
-use crate::{
-    constants::{TraversalResult, TreeTraversalMode},
-    intermediate_representation::{pass::IrPass, primitives::*, symbol_table::SymbolTable},
-};
+use scilla_parser::ast::{TraversalResult, TreeTraversalMode};
+
+use crate::intermediate_representation::{pass::IrPass, primitives::*, symbol_table::SymbolTable};
 
 /// `PassExecutor` is a trait that provides a method for visiting and altering
 /// the Intermediate Representation (IR) primitives. It is used by the `PassManager`

@@ -1,5 +1,7 @@
+use scilla_parser::ast::{TraversalResult, TreeTraversalMode};
+
 use crate::{
-    constants::{TraversalResult, TreeTraversalMode, NAMESPACE_SEPARATOR},
+    constants::NAMESPACE_SEPARATOR,
     intermediate_representation::{
         pass::IrPass,
         pass_executor::PassExecutor,

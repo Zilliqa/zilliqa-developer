@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faucet-service
+  labels:
+    app.kubernetes.io/name: faucet-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: faucet-service
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: faucet-service
+    spec:
+      containers:
+        - image: faucet-service
+          name: faucet-service
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: faucet-service
+          resources:
+            limits:
+              memory: 4000Mi
+              cpu: 1
+            requests:
+              memory: 2000Mi
+              cpu: 0.5
