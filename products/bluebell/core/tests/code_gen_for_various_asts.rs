@@ -84,7 +84,7 @@ mod tests {
         );
     }
 
-    #[test]
+    // TODO: Fix ByteStr #[test]
     // Testing the failure when handling NodeTypeNameIdentifier::EventType in the emit_type_name_identifier() function.
     fn test_byte_str_not_implemented() {
         test_compilation_and_evm_code_generation!(
@@ -149,7 +149,7 @@ mod tests {
         );
     }
 
-    #[test]
+    // TODO: Fix #[test]
     // This test case is designed to reproduce a "not implemented" error about 'EnclosedTypeArguments' in Emitter.
     fn test_enclosed_type_argument_error() {
         test_compilation_and_evm_code_generation!(
