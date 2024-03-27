@@ -9,6 +9,7 @@ use scilla_parser::{
     parser::lexer::SourcePosition,
 };
 
+use crate::intermediate_representation::ast_queue::AstQueue;
 use crate::intermediate_representation::{primitives::*, symbol_table::SymbolTable};
 
 /// Byte Code Generation Process

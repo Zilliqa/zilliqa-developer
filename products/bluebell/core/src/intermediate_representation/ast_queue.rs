@@ -1,4 +1,4 @@
-use crate::ast::nodes::NodeProgram;
+use scilla_parser::ast::nodes::NodeProgram;
 
 /// Trait for a queue that lists the next Ast to be compiled.
 pub trait AstQueue {
