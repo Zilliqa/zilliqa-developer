@@ -230,6 +230,11 @@ impl SymbolTable {
     }
 
     /// Declares a type.
+    pub fn declare_opaque_type(&mut self, symbol: &str) -> Result<String, String> {
+        self.declare_type_of(symbol, symbol)
+    }
+
+    /// Declares a type.
     pub fn declare_type(&mut self, symbol: &str) -> Result<String, String> {
         self.declare_type_of(symbol, symbol)
     }

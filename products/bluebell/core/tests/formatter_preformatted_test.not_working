@@ -5,11 +5,11 @@ mod tests {
 
     use bluebell::{
         formatter::BluebellFormatter,
-        parser::{
-            lexer,
-            lexer::{Lexer, SourcePosition},
-            parser, ParserError,
-        },
+    };
+    use scilla_parser::{
+        lexer,
+        lexer::{Lexer, SourcePosition},
+        parser, ParserError,
     };
     use diffy::{create_patch, PatchFormatter};
 

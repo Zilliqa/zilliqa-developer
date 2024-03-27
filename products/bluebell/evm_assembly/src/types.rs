@@ -89,6 +89,31 @@ pub enum EvmType {
     Address,
     Bool,
     String,
+    UserType(Box<UserType>),
+}
+
+#[derive(Clone, Debug)]
+pub enum UserType {
+    Struct {
+        type_id: String,
+        layout: Vec<(String, EvmType)>,
+    },
+    Tuple {
+        type_id: String,
+        layout: Vec<EvmType>,
+    },
+    TaggedUnion {
+        type_id: String,
+        layout: Vec<(String, EvmType)>,
+    },
+    Union {
+        type_id: String,
+        layout: Vec<EvmType>,
+    },
+    Enum {
+        type_id: String,
+        layout: Vec<String>,
+    },
 }
 
 impl EvmType {
@@ -100,6 +125,7 @@ impl EvmType {
             EvmType::Address => "address".to_string(),
             EvmType::Bool => "bool".to_string(),
             EvmType::String => "string".to_string(),
+            EvmType::UserType(_) => "user_type".to_string(),
         }
     }
 }

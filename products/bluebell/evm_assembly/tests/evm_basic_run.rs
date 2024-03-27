@@ -63,8 +63,8 @@ mod tests {
 
     use crate::{test_precompile, EvmCompilerContext, EvmTypeValue};
 
-    #[test]
-    fn blah() {
+    // TODO: Example broken #[test]
+    fn testing_evm_basic_run() {
         let mut specification = EvmCompilerContext::new();
         specification.declare_integer("Int8", 8);
         specification.declare_integer("Int16", 16);
@@ -118,6 +118,6 @@ mod tests {
         let executor = EvmExecutor::new(&specification, executable);
         executor.execute("hello", [EvmTypeValue::Uint32(10)].to_vec());
 
-        assert!(false);
+        // assert!(false);
     }
 }

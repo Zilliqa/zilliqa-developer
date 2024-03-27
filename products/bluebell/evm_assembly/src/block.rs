@@ -385,7 +385,10 @@ impl EvmBlock {
                     _ => panic!("{}", "Stack overflow.".to_string()),
                 }
             }
-            None => Err(format!("Failed to find SSA name {} on stack", name)),
+            None => {
+                println!("{:#?}", self.scope.name_location);
+                Err(format!("Failed to find SSA name {} on stack", name))
+            }
         }
     }
 

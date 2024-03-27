@@ -10,13 +10,19 @@ use crate::{
     block::EvmBlock,
     evm_bytecode_builder::EvmByteCodeBuilder,
     function_signature::{AssemblyBuilderFn, EvmFunctionSignature},
-    types::EvmType,
+    types::{EvmType, UserType},
 };
 
 type InlineGenericsFn =
     fn(&mut EvmCompilerContext, &mut EvmBlock, Vec<String>) -> Result<Vec<EvmBlock>, String>;
 type SpecialVariableFn =
     fn(&mut EvmCompilerContext, &mut EvmBlock) -> Result<Vec<EvmBlock>, String>;
+
+pub struct GenericDeclaration {
+    pub name: String,
+    pub parameters: Vec<String>,
+    pub layout: Vec<(String, String)>,
+}
 
 pub struct EvmCompilerContext {
     pub raw_function_declarations: HashMap<String, (Vec<String>, String)>,
@@ -26,6 +32,9 @@ pub struct EvmCompilerContext {
     pub function_declarations: HashMap<String, EvmFunctionSignature>,
     pub inline_generics: HashMap<String, InlineGenericsFn>,
     pub special_variables: HashMap<String, SpecialVariableFn>,
+
+    pub user_types: HashMap<String, Box<UserType>>,
+    pub generic_types: HashMap<String, GenericDeclaration>,
 
     /// Scilla types -> EVM types
     precompiles: BTreeMap<H160, PrecompileFn>,
@@ -91,6 +100,10 @@ impl EvmCompilerContext {
             function_declarations: HashMap::new(),
             inline_generics: HashMap::new(),
             special_variables: HashMap::new(),
+
+            user_types: HashMap::new(),
+            generic_types: HashMap::new(),
+
             precompile_addresses: HashMap::new(),
             precompiles: BTreeMap::new(),
             contract_offset: 5,
@@ -131,6 +144,69 @@ impl EvmCompilerContext {
         unimplemented!()
         // self.type_declarations
         //     .insert(name.to_string(), EvmType::Opaque);
+    }
+
+    pub fn declare_user_struct(&mut self, name: &str, properties: Vec<(String, String)>) {
+        let mut layout: Vec<(String, EvmType)> = Vec::new();
+        for (field_name, type_name) in properties.iter() {
+            let evm_type = self
+                .type_declarations
+                .get(type_name)
+                .expect("Type not found")
+                .clone();
+            layout.push((field_name.clone(), evm_type));
+        }
+
+        // TODO: Add support for namespace
+        let type_id = format!("user_struct::{}", name);
+
+        let strct = UserType::Struct {
+            type_id: type_id.clone(),
+            layout,
+        };
+
+        self.user_types.insert(type_id, Box::new(strct));
+    }
+
+    pub fn declare_generic_type(
+        &mut self,
+        name: &str,
+        parameters: Vec<String>,
+        fields: Vec<(String, String)>,
+    ) {
+        let decl = GenericDeclaration {
+            name: name.to_string(),
+            parameters,
+            layout: fields,
+        };
+
+        self.generic_types.insert(name.to_string(), decl);
+    }
+
+    pub fn instantiate_generic_type(&mut self, name: &str, actual_parameters: Vec<String>) {
+        let generic_declaration = self
+            .generic_types
+            .get(name)
+            .expect("Generic type not found");
+
+        let mut parameter_map: HashMap<String, String> = HashMap::new();
+        for (i, parameter) in generic_declaration.parameters.iter().enumerate() {
+            parameter_map.insert(parameter.clone(), actual_parameters[i].clone());
+        }
+
+        let actual_layout: Vec<(String, String)> = generic_declaration
+            .layout
+            .iter()
+            .map(|(field_name, type_id)| {
+                (
+                    field_name.clone(),
+                    parameter_map.get(type_id).unwrap_or(type_id).clone(),
+                )
+            })
+            .collect();
+
+        let name = format!("{}::<{}>", name, actual_parameters.join(","));
+        self.declare_user_struct(&name, actual_layout);
     }
 
     pub fn declare_special_variable(
