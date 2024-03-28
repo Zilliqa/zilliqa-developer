@@ -73,7 +73,7 @@ export default {
       changed: false,
       annotations: [],
       readonly: false,
-      SCILLA_CHECKER_URL: process.env.VUE_APP_SCILLA_CHECKER_URL,
+      SCILLA_CHECKER_URL: import.meta.VITE_SCILLA_CHECKER_URL,
     };
   },
   computed: {
@@ -110,7 +110,7 @@ export default {
           if (response.data.result === "success") {
             const message = JSON.parse(response.data.message);
 
-            if (message.warnings !== []) {
+            if (message.warnings.length !== 0) {
               const markers = message.warnings.map((err) => {
                 const row = parseInt(err.start_location.line, 10);
                 const column = parseInt(err.start_location.column, 10);

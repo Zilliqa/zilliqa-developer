@@ -17,19 +17,19 @@ Neo-Savant helps Scilla developers to create and deploy Smart Contracts using an
 ## Project setup
 
 ```bash
-npm install
+yarn install
 ```
 
 ### Compiles and hot-reloads for development
 
 ```bash
-npm run serve
+yarn dev
 ```
 
 ### Compiles and minifies for production
 
 ```bash
-npm run build
+yarn build
 ```
 
 ### Run your tests
@@ -41,7 +41,7 @@ npm run test
 ### Lints and fixes files
 
 ```bash
-npm run lint
+yarn lint
 ```
 
 ### Customize configuration

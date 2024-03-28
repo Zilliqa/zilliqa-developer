@@ -15,7 +15,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import AddressDisplay from "./AddressDisplay";
+import AddressDisplay from "./AddressDisplay.vue";
 
 export default {
   name: "ExplorerLink",
@@ -24,7 +24,7 @@ export default {
   computed: {
     ...mapGetters("networks", { selectedNetwork: "selected" }),
     link() {
-      let baseLink = process.env.VUE_APP_EXPLORER_URL;
+      let baseLink = import.meta.VITE_EXPLORER_URL;
       let networkLink = "?network=" + this.selectedNetwork.url;
       let txLink = "";
 

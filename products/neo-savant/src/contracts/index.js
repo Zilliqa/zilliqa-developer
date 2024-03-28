@@ -13,17 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-import zrc6 from "!raw-loader!./zrc6.scilla";
-import auction from "!raw-loader!./auction.scilla";
-import bookstore from "!raw-loader!./bookstore.scilla";
-import crowdfunding from "!raw-loader!./crowdfunding.scilla";
-import ecdsa from "!raw-loader!./ecdsa.scilla";
-import fungibleToken from "!raw-loader!./fungible_token.scilla";
-import helloWorld from "!raw-loader!./hello_world.scilla";
-import nonFungibleToken from "!raw-loader!./nonfungible_token.scilla";
-import schnorr from "!raw-loader!./schnorr.scilla";
-import zilGame from "!raw-loader!./zil_hash_game.scilla";
-import asciiart from "!raw-loader!./asciiart.scilla";
+import zrc6 from "./zrc6.scilla?raw";
+import auction from "./auction.scilla?raw";
+import bookstore from "./bookstore.scilla?raw";
+import crowdfunding from "./crowdfunding.scilla?raw";
+import ecdsa from "./ecdsa.scilla?raw";
+import fungibleToken from "./fungible_token.scilla?raw";
+import helloWorld from "./hello_world.scilla?raw";
+import nonFungibleToken from "./nonfungible_token.scilla?raw";
+import schnorr from "./schnorr.scilla?raw";
+import zilGame from "./zil_hash_game.scilla?raw";
+import asciiart from "./asciiart.scilla?raw";
 
 export const defaultFiles = [
   { id: "hello-world", name: "HelloWorld", code: helloWorld },

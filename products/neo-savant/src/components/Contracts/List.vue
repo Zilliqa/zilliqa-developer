@@ -27,7 +27,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import ContractName from "./ContractName";
+import ContractName from "./ContractName.vue";
 
 export default {
   name: "ContractsList",

@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import CheckerTab from "./Checker";
+import CheckerTab from "./Checker.vue";
 
 export default {
   props: ["active"],

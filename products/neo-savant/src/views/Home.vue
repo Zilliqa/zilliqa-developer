@@ -10,7 +10,7 @@
 
 <script>
 // @ is an alias to /src
-import Editor from "@/components/Editor";
+import Editor from "@/components/Editor/index.vue";
 import { mapGetters } from "vuex";
 
 export default {

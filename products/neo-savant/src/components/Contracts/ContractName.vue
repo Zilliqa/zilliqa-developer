@@ -54,9 +54,9 @@
 <script>
 import Swal from "sweetalert2";
 import VueContext from "vue-context";
-import AddressDisplay from "../UI/AddressDisplay";
+import AddressDisplay from "../UI/AddressDisplay.vue";
 import { Compact } from "vue-color";
-import Modal from "../UI/Modal";
+import Modal from "../UI/Modal.vue";
 import {lightOrDark} from "../../utils/ui.js";
 
 export default {

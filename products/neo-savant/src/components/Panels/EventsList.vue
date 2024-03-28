@@ -38,7 +38,7 @@
 <script>
 import { mapGetters } from "vuex";
 import VueJsonPretty from "vue-json-pretty";
-import AddressDisplay from "../UI/AddressDisplay";
+import AddressDisplay from "../UI/AddressDisplay.vue";
 
 export default {
   components: { VueJsonPretty, AddressDisplay },

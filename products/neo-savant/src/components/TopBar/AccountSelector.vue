@@ -61,8 +61,8 @@
 <script>
 import { mapGetters } from "vuex";
 
-import CopyToClipboard from "../UI/CopyToClipboard";
-import AddressDisplay from "../UI/AddressDisplay";
+import CopyToClipboard from "../UI/CopyToClipboard.vue";
+import AddressDisplay from "../UI/AddressDisplay.vue";
 
 export default {
   computed: {

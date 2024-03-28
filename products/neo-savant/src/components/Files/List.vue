@@ -23,7 +23,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import FileName from "./FileName";
+import FileName from "./FileName.vue";
 
 export default {
   name: "FilesList",
