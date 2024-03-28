@@ -39,7 +39,6 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "jest": "^27.3.1",
-    "node-sass": "^4.13.1",
     "sass": "^1.72.0",
     "vue2-ace-editor": "0.0.15"
   }
