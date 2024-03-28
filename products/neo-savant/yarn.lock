@@ -653,7 +653,7 @@
     "@ledgerhq/logs" "^5.30.0"
     u2f-api "0.2.7"
 
-"@ledgerhq/hw-transport-webusb@^6.3.0":
+"@ledgerhq/hw-transport-webusb@^6.28.5":
   version "6.28.5"
   resolved "https://registry.npmjs.org/@ledgerhq/hw-transport-webusb/-/hw-transport-webusb-6.28.5.tgz#2aadc6b700e5dd3b6664ead404d04d131945b8ee"
   integrity sha512-93mye+T/deqwYfJV89iTqoLxJY6zXhT57vLTWUkae0s1S9n7Lj53KNWCOGVqdlq9DMY2qGrtnAw3V0xtfgsLXw==
@@ -4028,7 +4028,7 @@ npm-run-path@^4.0.1:
   dependencies:
     path-key "^3.0.0"
 
-numbro@^2.3.0:
+numbro@^2.4.0:
   version "2.4.0"
   resolved "https://registry.npmjs.org/numbro/-/numbro-2.4.0.tgz#3cecae307ab2c2d9fd3e1c08249f4abd504bd577"
   integrity sha512-t6rVkO1CcKvffvOJJu/zMo70VIcQSR6w3AmIhfHGvmk4vHbNe6zHgomB0aWFAPZWM9JBVWBM0efJv9DBiRoSTA==
