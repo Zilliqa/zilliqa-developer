@@ -88,13 +88,13 @@ import CallContract from "@/components/Panels/CallContract.vue";
 import AccountImport from "@/components/Panels/AccountImport.vue";
 import ContractImport from "@/components/Panels/ContractImport.vue";
 
-import BottomPanel from "@/components/BottomPanel";
+import BottomPanel from "@/components/BottomPanel/index.vue";
 
 import EventsList from "@/components/Panels/EventsList.vue";
 import Settings from "@/components/Panels/Settings.vue";
 import AddCustomNetwork from "@/components/Panels/AddCustomNetwork.vue";
 
-import Tools from "@/components/Tools";
+import Tools from "@/components/Tools/index.vue";
 
 import { mapGetters } from "vuex";
 

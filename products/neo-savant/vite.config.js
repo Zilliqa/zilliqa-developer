@@ -12,4 +12,14 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
+    assetsInclude: ["src/contracts/*.scilla"],
+    css: {
+        preprocessorOptions: {
+          scss: {
+            additionalData: `
+            @import "@/styles/main.scss";
+            `
+          }
+        }
+    }
 })
