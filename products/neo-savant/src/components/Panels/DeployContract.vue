@@ -103,9 +103,9 @@
 </template>
 
 <script>
-import ContractInput from "@/components/Inputs/ContractInput";
-import TransactionParameters from "@/components/Inputs/TransactionParameters";
-import ExplorerLink from "@/components/UI/ExplorerLink";
+import ContractInput from "@/components/Inputs/ContractInput.vue";
+import TransactionParameters from "@/components/Inputs/TransactionParameters.vue";
+import ExplorerLink from "@/components/UI/ExplorerLink.vue";
 import LedgerInterface from "@/utils/ledger-interface";
 import TransportWebUsb from "@ledgerhq/hw-transport-webusb";
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
@@ -125,7 +125,7 @@ export default {
   data() {
     return {
       abi: undefined,
-      VUE_APP_ISOLATED_URL: process.env.VUE_APP_ISOLATED_URL,
+      VITE_ISOLATED_URL: import.meta.VITE_ISOLATED_URL,
       copied: false,
       init: {},
       amount: 0,
@@ -494,7 +494,7 @@ export default {
     },
     async getContractAbi() {
       axios
-        .post(process.env.VUE_APP_SCILLA_CHECKER_URL, {
+        .post(import.meta.VITE_SCILLA_CHECKER_URL, {
           code: this.file.code,
         })
         .then((response) => {

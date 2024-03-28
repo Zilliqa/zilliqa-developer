@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import InputPopover from "./InputPopover";
+import InputPopover from "./InputPopover.vue";
 
 export default {
   data() {

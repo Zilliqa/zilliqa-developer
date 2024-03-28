@@ -18,7 +18,7 @@ const state = {
   networks: [
     {
       name: "Simulated ENV",
-      url: process.env.VUE_APP_ISOLATED_URL,
+      url: import.meta.VITE_ISOLATED_URL,
       type: "default",
       chainId: 222,
       msgVersion: 1,

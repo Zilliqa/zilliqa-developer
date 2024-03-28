@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import InputPopover from "./InputPopover";
+import InputPopover from "./InputPopover.vue";
 /*eslint-disable */
 import brace from "brace"; // eslint-disable-line no-use-before-define
 /*eslint-enable */
