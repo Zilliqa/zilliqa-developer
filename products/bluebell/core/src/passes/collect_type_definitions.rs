@@ -245,30 +245,42 @@ impl IrPass for CollectTypeDefinitionsPass {
         symbol: &mut IrIdentifier,
         symbol_table: &mut SymbolTable,
     ) -> Result<TraversalResult, String> {
-        match symbol.kind {
+        match &mut symbol.kind {
             IrIndentifierKind::BlockLabel | IrIndentifierKind::Namespace => {
                 symbol.resolved = Some(symbol.unresolved.clone());
             }
-            _ => {
-                if symbol.is_definition {
-                    if let Some(namespace) = &self.current_namespace {
-                        let typename =
-                            format!("{}{}{}", namespace, NAMESPACE_SEPARATOR, symbol.unresolved)
-                                .to_string();
-                        symbol.resolved = Some(typename.clone());
-                    } else {
-                        symbol.resolved = Some(symbol.unresolved.clone());
-                    }
-                } else if let Some(resolved_name) =
-                    symbol_table.resolve_qualified_name(&symbol.unresolved, &self.current_namespace)
-                {
-                    // TODO: Consider whether this is needed.
-                    // It appears that currently this is only triggered
-                    // by builtin type defintions which really ought to have
-                    // is_definition = true
-                    symbol.resolved = Some(resolved_name);
+            IrIndentifierKind::TemplateTypeName(ref mut args) => {
+                for arg in args.iter_mut() {
+                    arg.visit(self, symbol_table)?;
                 }
+                // TODO: Figure out how to to instantiate and resolve this type.
+                panic!("Encountered template type. TODO: Instantiate and resolve");
             }
+            _ => {}
+        }
+
+        // Checking if
+        if symbol.resolved == None {
+            if symbol.is_definition {
+                if let Some(namespace) = &self.current_namespace {
+                    let typename =
+                        format!("{}{}{}", namespace, NAMESPACE_SEPARATOR, symbol.unresolved)
+                            .to_string();
+                    symbol.resolved = Some(typename.clone());
+                } else {
+                    symbol.resolved = Some(symbol.unresolved.clone());
+                }
+            } else if let Some(resolved_name) =
+                symbol_table.resolve_qualified_name(&symbol.unresolved, &self.current_namespace)
+            {
+                // TODO: Consider whether this is needed.
+                // It appears that currently this is only triggered
+                // by builtin type defintions which really ought to have
+                // is_definition = true
+                symbol.resolved = Some(resolved_name);
+            }
+
+            // We ignore unresolved names at this point as they may be resolved by inference later on.
         }
 
         Ok(TraversalResult::SkipChildren)
