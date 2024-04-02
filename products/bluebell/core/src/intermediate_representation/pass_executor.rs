@@ -238,11 +238,13 @@ impl PassExecutor for Operation {
                     name,
                     owner,
                     arguments,
+                    template_type_arguments: _,
                 }
                 | Operation::CallMemberFunction {
                     name,
                     owner,
                     arguments,
+                    // template_type_arguments: _
                 } => {
                     if let Some(owner) = owner {
                         owner.visit(pass, symbol_table)?;

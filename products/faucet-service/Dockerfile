@@ -1,4 +1,4 @@
-FROM golang:1.17.1 as build-stage
+FROM golang:1.20.14 as build-stage
 WORKDIR /app
 COPY . /app
 RUN go mod download && \
