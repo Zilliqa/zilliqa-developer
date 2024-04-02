@@ -6,7 +6,7 @@ module.exports = {
   },
   extends: ["plugin:vue/essential", "eslint:recommended"],
   rules: {
-    "no-console": import.meta.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": import.meta.NODE_ENV === "production" ? "error" : "off",
+    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
   },
 };
