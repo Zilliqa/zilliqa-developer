@@ -11,7 +11,7 @@ use ethers::{
 
 use crate::ChainConfig;
 
-pub type Client = SignerMiddleware<NonceManagerMiddleware<Provider<Http>>, LocalWallet>;
+pub type Client = NonceManagerMiddleware<SignerMiddleware<Provider<Http>, LocalWallet>>;
 
 #[derive(Debug, Clone)]
 pub struct ChainClient {
@@ -28,16 +28,22 @@ pub struct ChainClient {
 impl ChainClient {
     pub async fn new(config: &ChainConfig, wallet: LocalWallet) -> Result<Self> {
         let provider = Provider::<Http>::try_from(config.rpc_url.as_str())?;
-        let provider = provider.nonce_manager(wallet.address());
         // let provider = Provider::<Ws>::connect(&config.rpc_url).await?;
         let chain_id = provider.get_chainid().await?;
 
-        let client: Arc<Client> =
-            Arc::new(provider.with_signer(wallet.clone().with_chain_id(chain_id.as_u64())));
+        let client: Arc<Client> = Arc::new(
+            provider
+                .with_signer(wallet.clone().with_chain_id(chain_id.as_u64()))
+                .nonce_manager(wallet.address()),
+        );
+
+        // TODO: get the validator_manager_address from chain_gateway itself
+        let chain_gateway = ChainGateway::new(config.chain_gateway_address, client.clone());
+        let validator_manager_address: Address = chain_gateway.validator_manager().call().await?;
 
         Ok(ChainClient {
             client,
-            validator_manager_address: config.validator_manager_address,
+            validator_manager_address,
             chain_gateway_address: config.chain_gateway_address,
             chain_id,
             wallet,

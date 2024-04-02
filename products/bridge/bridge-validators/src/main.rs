@@ -28,7 +28,6 @@ abigen!(ValidatorManager, "abi/ValidatorManager.json");
 #[serde(deny_unknown_fields)]
 pub struct ChainConfig {
     pub rpc_url: String,
-    pub validator_manager_address: Address,
     pub chain_gateway_address: Address,
     pub chain_gateway_block_deployed: u64,
     pub block_instant_finality: Option<bool>,

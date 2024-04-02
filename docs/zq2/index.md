@@ -36,9 +36,9 @@ In terms of compatibility and transition:
 
 ### Networks
 
-| Name                 | EVM Chain Id | API                                 | Explorer                                 | Faucet                                 | Notes                                                                                |
-| -------------------- | ------------ | ----------------------------------- | ---------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
-| **Zilliqa 2 Devnet** | 33469        | <https://api.zq2-devnet.zilstg.dev> | <https://explorer.zq2-devnet.zilstg.dev> | <https://faucet.zq2-devnet.zilstg.dev> | Active unstable development network. Expect frequent updates, bugs and state resets. |
+| Name                 | EVM Chain Id | API                                  | Explorer                                  | Faucet                                  | Notes                                                                                |
+| -------------------- | ------------ | ------------------------------------ | ----------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Zilliqa 2 Devnet** | 33469        | <https://api.zq2-devnet.zilliqa.com> | <https://explorer.zq2-devnet.zilliqa.com> | <https://faucet.zq2-devnet.zilliqa.com> | Active unstable development network. Expect frequent updates, bugs and state resets. |
 
 ## Release Timeline
 

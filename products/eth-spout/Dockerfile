@@ -1,4 +1,4 @@
-FROM rust:1.72.0-slim-bullseye as builder
+FROM rust:1.73.0-slim-bullseye as builder
 
 RUN mkdir build
 

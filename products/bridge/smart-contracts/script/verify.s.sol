@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Script} from "forge-std/Script.sol";
-import {Target} from "foundry/test/Target.sol";
+import {Target} from "test/Target.sol";
 import "forge-std/console.sol";
 
 contract Verify is Script {

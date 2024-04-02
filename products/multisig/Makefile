@@ -16,5 +16,5 @@ endif
 
 ## Build and push the Docker image
 image/build-and-push:
-	docker build --build-arg REACT_APP_DEPLOY_ENV=${ENVIRONMENT} -t "${IMAGE_TAG}" .
+	docker build -t "${IMAGE_TAG}" .
 	docker push "${IMAGE_TAG}"

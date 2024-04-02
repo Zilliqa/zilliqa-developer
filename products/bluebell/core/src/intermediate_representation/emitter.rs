@@ -9,6 +9,7 @@ use scilla_parser::{
     parser::lexer::SourcePosition,
 };
 
+use crate::intermediate_representation::ast_queue::AstQueue;
 use crate::intermediate_representation::{primitives::*, symbol_table::SymbolTable};
 
 /// Byte Code Generation Process
@@ -69,7 +70,7 @@ enum StackObject {
 
 /// The `IrEmitter` struct is used for bookkeeping during the conversion of a Scilla AST to an intermediate representation.
 /// It implements the `AstConverting` trait, which is a generic trait for AST conversions.
-pub struct IrEmitter {
+pub struct IrEmitter<'a> {
     /// Stack of objects used during the conversion process.
     stack: Vec<StackObject>,
 
@@ -90,10 +91,13 @@ pub struct IrEmitter {
 
     /// Source positions of the AST nodes.
     source_positions: Vec<(SourcePosition, SourcePosition)>,
+
+    /// Queue with imported libraries
+    ast_queue: &'a mut dyn AstQueue,
 }
 
-impl IrEmitter {
-    pub fn new(symbol_table: SymbolTable) -> Self {
+impl<'a> IrEmitter<'a> {
+    pub fn new(symbol_table: SymbolTable, ast_queue: &'a mut dyn AstQueue) -> Self {
         let current_block = FunctionBlock::new("dummy".to_string());
         let current_body = FunctionBody::new();
         let ns = IrIdentifier {
@@ -121,6 +125,7 @@ impl IrEmitter {
                 SourcePosition::invalid_position(),
             )]
             .to_vec(), // TODO: this should not be necessary
+            ast_queue,
         }
     }
 
@@ -176,6 +181,25 @@ impl IrEmitter {
                         candidate
                     ));
                 }
+            }
+        } else {
+            return Err("Expected function block, but found nothing.".to_string());
+        };
+
+        Ok(ret)
+    }
+
+    fn pop_function_block_or_empty_block(&mut self) -> Result<Box<FunctionBlock>, String> {
+        let ret = if let Some(candidate) = self.stack.last() {
+            match candidate {
+                StackObject::FunctionBlock(_n) => {
+                    if let StackObject::FunctionBlock(n) = self.stack.pop().unwrap() {
+                        n
+                    } else {
+                        panic!("This will never happen");
+                    }
+                }
+                _ => FunctionBlock::new("empty_block".to_string()),
             }
         } else {
             return Err("Expected function block, but found nothing.".to_string());
@@ -265,6 +289,25 @@ impl IrEmitter {
         Ok(ret)
     }
 
+    fn pop_function_body_or_empty(&mut self) -> Result<Box<FunctionBody>, String> {
+        let ret = if let Some(candidate) = self.stack.last() {
+            match candidate {
+                StackObject::FunctionBody(_n) => {
+                    if let StackObject::FunctionBody(n) = self.stack.pop().unwrap() {
+                        n
+                    } else {
+                        panic!("This will never happen");
+                    }
+                }
+                _ => FunctionBody::new(),
+            }
+        } else {
+            return Err("Expected function body, but found nothing.".to_string());
+        };
+
+        Ok(ret)
+    }
+
     pub fn emit(&mut self, node: &NodeProgram) -> Result<Box<IntermediateRepresentation>, String> {
         // Copying original symbol table to create a new instance of the IR at the end
         // of traversing
@@ -288,7 +331,7 @@ impl IrEmitter {
     }
 }
 
-impl AstConverting for IrEmitter {
+impl<'a> AstConverting for IrEmitter<'a> {
     fn push_source_position(&mut self, start: &SourcePosition, end: &SourcePosition) {
         self.source_positions.push((start.clone(), end.clone()));
     }
@@ -300,10 +343,18 @@ impl AstConverting for IrEmitter {
     fn emit_byte_str(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodeByteStr,
+        node: &NodeByteStr,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        let symbol = IrIdentifier::new(
+            node.to_string(),
+            IrIndentifierKind::TypeLikeName(Vec::new()),
+            self.current_location(),
+        );
+
+        self.stack.push(StackObject::IrIdentifier(symbol));
+        Ok(TraversalResult::SkipChildren)
     }
+
     fn emit_type_name_identifier(
         &mut self,
         mode: TreeTraversalMode,
@@ -311,7 +362,9 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match mode {
             TreeTraversalMode::Enter => match node {
-                NodeTypeNameIdentifier::ByteStringType(_) => (),
+                NodeTypeNameIdentifier::ByteStringType(_) => {
+                    // Ignored as it is handled by emit_byte_str
+                }
                 NodeTypeNameIdentifier::EventType => {
                     /*
                     self.stack.push(StackObject::Identifier(Identifier::Event(
@@ -323,7 +376,7 @@ impl AstConverting for IrEmitter {
                 NodeTypeNameIdentifier::TypeOrEnumLikeIdentifier(name) => {
                     let symbol = IrIdentifier::new(
                         name.to_string(),
-                        IrIndentifierKind::Unknown,
+                        IrIndentifierKind::TypeLikeName(Vec::new()),
                         self.current_location(),
                     );
 
@@ -334,19 +387,36 @@ impl AstConverting for IrEmitter {
         }
         Ok(TraversalResult::Continue)
     }
+
     fn emit_imported_name(
         &mut self,
         _mode: TreeTraversalMode,
-        _node: &NodeImportedName,
+        node: &NodeImportedName,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        match node {
+            NodeImportedName::RegularImport(value) => {
+                value.node.visit(self)?;
+                let identifier = self.pop_ir_identifier()?;
+                self.ast_queue.enqueue(&identifier.unresolved)?;
+            }
+            NodeImportedName::AliasedImport(value, alias) => {
+                value.node.visit(self)?;
+                let identifier = self.pop_ir_identifier()?;
+                alias.node.visit(self)?;
+                let alias = self.pop_ir_identifier()?;
+                self.ast_queue
+                    .enqueue_with_alias(&identifier.unresolved, &alias.unresolved)?;
+            }
+        }
+        Ok(TraversalResult::SkipChildren)
     }
     fn emit_import_declarations(
         &mut self,
         _mode: TreeTraversalMode,
         _node: &NodeImportDeclarations,
     ) -> Result<TraversalResult, String> {
-        unimplemented!();
+        // Nothing to do here - we will deal with the specific kind of import, futher down the tree
+        Ok(TraversalResult::Continue)
     }
     fn emit_meta_identifier(
         &mut self,
@@ -452,9 +522,28 @@ impl AstConverting for IrEmitter {
         match node {
             NodeScillaType::GenericTypeWithArgs(lead, args) => {
                 let _ = lead.visit(self)?;
+                // Checking if it is a template type
                 if args.len() > 0 {
-                    // TODO: Deal with arguments
-                    unimplemented!()
+                    let mut template_type = self.pop_ir_identifier()?;
+                    assert!(match &template_type.kind {
+                        IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                        _ => false,
+                    });
+
+                    let mut arguments = Vec::new();
+                    for arg in args {
+                        let _ = arg.visit(self)?;
+                        let mut typename = self.pop_ir_identifier()?;
+                        assert!(match &typename.kind {
+                            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                            _ => false,
+                        });
+                        typename.kind = IrIndentifierKind::TypeName;
+                        arguments.push(typename);
+                    }
+
+                    template_type.kind = IrIndentifierKind::TypeLikeName(arguments);
+                    self.stack.push(StackObject::IrIdentifier(template_type));
                 }
             }
             NodeScillaType::MapType(key, value) => {
@@ -592,7 +681,8 @@ impl AstConverting for IrEmitter {
 
                 self.stack.push(StackObject::Instruction(instr));
             }
-            NodeFullExpression::Message(_entries) => {
+            NodeFullExpression::Message(entries) => {
+                println!("{:#?}", entries);
                 unimplemented!();
             }
             NodeFullExpression::Match {
@@ -641,7 +731,12 @@ impl AstConverting for IrEmitter {
             // Creating compare instruction
             // TODO: Pop instruction or symbol
             let expected_value = self.pop_ir_identifier()?;
-            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+            assert!(match &expected_value.kind {
+
+            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+            _ => false,
+
+            });
 
             let source_location = expected_value.source_location.clone();
 
@@ -752,22 +847,32 @@ impl AstConverting for IrEmitter {
 
                 // Expecting function name symbol
                 let mut name = self.pop_ir_identifier()?;
-                assert!(name.kind == IrIndentifierKind::Unknown);
+                assert!(match &name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                    _ => false,
+                });
                 name.kind = IrIndentifierKind::FunctionName;
 
-                let arguments: Vec<IrIdentifier> = [].to_vec();
+                let mut template_type_arguments: Vec<IrIdentifier> = [].to_vec();
 
-                if let Some(_test) = contract_type_arguments {
-                    unimplemented!()
+                if let Some(args) = contract_type_arguments {
+                    for arg in &args.node.type_arguments {
+                        arg.visit(self)?;
+                        let arg = self.pop_ir_identifier()?;
+                        template_type_arguments.push(arg);
+                    }
                 }
                 if argument_list.len() > 0 {
                     unimplemented!()
                 }
 
+                let arguments: Vec<IrIdentifier> = [].to_vec();
+
                 let operation = Operation::CallStaticFunction {
                     name,
                     owner: None, // We cannot deduce the type from the AST
                     arguments,
+                    template_type_arguments,
                 };
 
                 let instr = Box::new(Instruction {
@@ -834,7 +939,10 @@ impl AstConverting for IrEmitter {
             NodeValueLiteral::LiteralInt(typename, value) => {
                 let _ = typename.visit(self)?;
                 let mut typename = self.pop_ir_identifier()?;
-                assert!(typename.kind == IrIndentifierKind::Unknown);
+                assert!(match &typename.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                    _ => false,
+                });
                 typename.kind = IrIndentifierKind::TypeName;
                 let operation = Operation::Literal {
                     data: value.to_string(),
@@ -904,6 +1012,9 @@ impl AstConverting for IrEmitter {
             }
             NodePattern::Constructor(name, args) => {
                 if args.len() > 0 {
+                    println!("Name: {:?}", name);
+                    println!("Args: {:?}", args);
+
                     unimplemented!();
                 }
 
@@ -1186,7 +1297,10 @@ impl AstConverting for IrEmitter {
 
                             clause.node.pattern_expression.visit(self)?;
                             let expected_value = self.pop_ir_identifier()?;
-                            assert!(expected_value.kind == IrIndentifierKind::Unknown);
+                            assert!(match &expected_value.kind {
+                                IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                                _ => false,
+                            });
                             let source_location = expected_value.source_location.clone();
 
                             let jump_condition = Box::new(Instruction {
@@ -1371,9 +1485,9 @@ impl AstConverting for IrEmitter {
             let _ = block.visit(self)?;
         }
 
-        let last_block = self.pop_function_block()?;
+        let last_block = self.pop_function_block_or_empty_block()?;
         // Restoring the old body as current
-        let mut body = self.pop_function_body()?;
+        let mut body = self.pop_function_body_or_empty()?;
         mem::swap(&mut body, &mut self.current_body);
 
         // Pushing the current body onto the stack
@@ -1409,15 +1523,23 @@ impl AstConverting for IrEmitter {
         _mode: TreeTraversalMode,
         node: &NodeTypedIdentifier,
     ) -> Result<TraversalResult, String> {
-        let name = node.identifier_name.clone();
+        let name = node.identifier_name.node.clone();
         let _ = node.annotation.visit(self)?;
 
         let mut typename = self.pop_ir_identifier()?;
-        assert!(typename.kind == IrIndentifierKind::Unknown);
-        typename.kind = IrIndentifierKind::TypeName;
 
-        let s =
-            StackObject::VariableDeclaration(VariableDeclaration::new(name.node, false, typename));
+        typename.kind = match &typename.kind {
+            IrIndentifierKind::TypeLikeName(args) => {
+                if args.len() > 0 {
+                    IrIndentifierKind::TemplateTypeName(args.clone())
+                } else {
+                    IrIndentifierKind::TypeName
+                }
+            }
+            _ => panic!("Expected TypeLikeName"),
+        };
+
+        let s = StackObject::VariableDeclaration(VariableDeclaration::new(name, false, typename));
         self.stack.push(s);
 
         Ok(TraversalResult::SkipChildren)
@@ -1475,7 +1597,10 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         let _ = node.name.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
-        assert!(ns.kind == IrIndentifierKind::Unknown);
+        assert!(match &ns.kind {
+            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+            _ => false,
+        });
         ns.kind = IrIndentifierKind::Namespace;
 
         self.push_namespace(ns);
@@ -1494,28 +1619,52 @@ impl AstConverting for IrEmitter {
     ) -> Result<TraversalResult, String> {
         match node {
             NodeLibrarySingleDefinition::LetDefinition {
-                variable_name: _,
-                type_annotation: _,
+                variable_name,
+                type_annotation,
                 expression,
             } => {
-                /*
-                let declaration_start = match self.current_function {
-                    Some(_) => true,
-                    None => false
+                // TODO: Assumes that we do not visit this parts of the code recursively (which should happen in Scilla)
+                // However, this should be be fixed.
+                std::mem::swap(&mut self.current_block, &mut self.ir.global_init_block);
+
+                let name = IrIdentifier {
+                    unresolved: variable_name.node.clone(),
+                    resolved: None,
+                    type_reference: None,
+                    kind: IrIndentifierKind::VirtualRegister,
+                    is_definition: false,
+                    source_location: self.current_location(),
                 };
 
-                if declaration_start {
-                    // TODO: self.current_function
-                }
-                */
+                let typename = match type_annotation {
+                    Some(t) => {
+                        t.visit(self)?;
+                        Some(self.pop_ir_identifier()?)
+                    }
+                    None => None,
+                };
 
                 expression.visit(self)?;
-                unimplemented!();
+                let value = self.pop_instruction()?;
+
+                let global_var = GlobalVariableDefition {
+                    name,
+                    typename,
+                    value,
+                };
+
+                // TODO: See comment at the first swap
+                std::mem::swap(&mut self.current_block, &mut self.ir.global_init_block);
+
+                self.ir.global_variables.push(global_var);
             }
             NodeLibrarySingleDefinition::TypeDefinition(name, clauses) => {
                 let _ = name.visit(self)?;
                 let mut name = self.pop_ir_identifier()?;
-                assert!(name.kind == IrIndentifierKind::Unknown);
+                assert!(match &name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                    _ => false,
+                });
                 name.kind = IrIndentifierKind::TypeName;
                 // The name itself is being defined here
                 name.is_definition = true;
@@ -1551,7 +1700,10 @@ impl AstConverting for IrEmitter {
         // TODO: Decide whether the namespace should be distinct
         let _ = node.contract_name.visit(self)?;
         let mut ns = self.pop_ir_identifier()?;
-        assert!(ns.kind == IrIndentifierKind::Unknown);
+        assert!(match &ns.kind {
+            IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+            _ => false,
+        });
         ns.kind = IrIndentifierKind::Namespace;
 
         self.push_namespace(ns);
@@ -1632,7 +1784,6 @@ impl AstConverting for IrEmitter {
             let ir_arg = self.pop_variable_declaration()?;
             arguments.push(ir_arg);
         }
-
         // Function body
         let _ = node.body.visit(self)?;
 
@@ -1683,7 +1834,10 @@ impl AstConverting for IrEmitter {
             NodeTypeAlternativeClause::ClauseType(identifier) => {
                 let _ = identifier.visit(self)?;
                 let mut enum_name = self.pop_ir_identifier()?;
-                assert!(enum_name.kind == IrIndentifierKind::Unknown);
+                assert!(match &enum_name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                    _ => false,
+                });
                 enum_name.kind = IrIndentifierKind::StaticFunctionName;
                 self.stack
                     .push(StackObject::EnumValue(EnumValue::new(enum_name, None)));
@@ -1691,7 +1845,10 @@ impl AstConverting for IrEmitter {
             NodeTypeAlternativeClause::ClauseTypeWithArgs(identifier, children) => {
                 let _ = identifier.visit(self)?;
                 let mut member_name = self.pop_ir_identifier()?;
-                assert!(member_name.kind == IrIndentifierKind::Unknown);
+                assert!(match &member_name.kind {
+                    IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                    _ => false,
+                });
                 member_name.kind = IrIndentifierKind::StaticFunctionName;
 
                 let mut tuple = Tuple::new();
@@ -1699,7 +1856,10 @@ impl AstConverting for IrEmitter {
                     let _ = child.visit(self)?;
 
                     let mut item = self.pop_ir_identifier()?;
-                    assert!(item.kind == IrIndentifierKind::Unknown);
+                    assert!(match &item.kind {
+                        IrIndentifierKind::TypeLikeName(args) => args.len() == 0,
+                        _ => false,
+                    });
                     item.kind = IrIndentifierKind::TypeName;
 
                     tuple.add_field(item)

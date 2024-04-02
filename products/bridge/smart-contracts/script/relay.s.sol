@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Script} from "forge-std/Script.sol";
 import {ChainGateway} from "contracts/core/ChainGateway.sol";
-import {Target} from "foundry/test/Target.sol";
+import {Target} from "test/Target.sol";
 
 contract Relay is Script {
     function run() external {
