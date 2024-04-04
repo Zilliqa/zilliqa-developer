@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-const { BN, Long } = require("@zilliqa-js/util");
-const {encodeTransactionProto} = require("@zilliqa-js/account")
+import { BN, Long } from "@zilliqa-js/util";
+import { encodeTransactionProto } from "@zilliqa-js/account/dist/cjs/src/util";
 
 const CLA = 0xe0;
 const INS = {
