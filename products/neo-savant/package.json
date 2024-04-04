@@ -41,6 +41,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "jest": "^27.3.1",
     "sass": "^1.72.0",
+    "vite-plugin-node-polyfills": "^0.21.0",
     "vue2-ace-editor": "0.0.15"
   }
 }
