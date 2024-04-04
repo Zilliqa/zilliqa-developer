@@ -24,7 +24,7 @@ export default {
   computed: {
     ...mapGetters("networks", { selectedNetwork: "selected" }),
     link() {
-      let baseLink = import.meta.VITE_EXPLORER_URL;
+      let baseLink = import.meta.env.VITE_EXPLORER_URL;
       let networkLink = "?network=" + this.selectedNetwork.url;
       let txLink = "";
 

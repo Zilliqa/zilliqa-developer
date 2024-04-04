@@ -20,7 +20,7 @@ export default {
     link() {
       // the possible chain IDs for the faucet service: 222, 333
       const network = this.network.chainId === 222 ? 'isolated_server' : 'testnet';
-      const url = import.meta.VITE_FAUCET_URL
+      const url = import.meta.env.VITE_FAUCET_URL
       if (this.account && this.account.address) {
         const bech32Address = toBech32Address(this.account.address)
         return url+ `?address=${bech32Address}&network=${network}`

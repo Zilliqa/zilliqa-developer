@@ -202,7 +202,7 @@ export default {
   mixins: [ZilPayMixin],
   data() {
     return {
-      VITE_ISOLATED_URL: import.meta.VITE_ISOLATED_URL,
+      VITE_ISOLATED_URL: import.meta.env.VITE_ISOLATED_URL,
       abi: undefined,
       exec: false,
       contractState: undefined,
@@ -517,7 +517,7 @@ export default {
     },
     getContractAbi() {
       axios
-        .post(import.meta.VITE_SCILLA_CHECKER_URL, {
+        .post(import.meta.env.VITE_SCILLA_CHECKER_URL, {
           code: this.contractCode,
         })
         .then((response) => {

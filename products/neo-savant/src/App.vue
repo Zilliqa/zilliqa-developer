@@ -166,9 +166,9 @@ export default {
       this.$store.dispatch("networks/SelectNetwork", this.networksList[0]);
     }
 
-    if (this.network.url === import.meta.VITE_ISOLATED_URL) {
+    if (this.network.url === import.meta.env.VITE_ISOLATED_URL) {
       // Check if contracts are still on network
-      const zilliqa = new Zilliqa(import.meta.VITE_ISOLATED_URL);
+      const zilliqa = new Zilliqa(import.meta.env.VITE_ISOLATED_URL);
 
       this.contracts.forEach(async (contract) => {
         const deployed = zilliqa.contracts.at(

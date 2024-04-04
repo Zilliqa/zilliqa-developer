@@ -125,7 +125,7 @@ export default {
   data() {
     return {
       abi: undefined,
-      VITE_ISOLATED_URL: import.meta.VITE_ISOLATED_URL,
+      VITE_ISOLATED_URL: import.meta.env.VITE_ISOLATED_URL,
       copied: false,
       init: {},
       amount: 0,
@@ -494,7 +494,7 @@ export default {
     },
     async getContractAbi() {
       axios
-        .post(import.meta.VITE_SCILLA_CHECKER_URL, {
+        .post(import.meta.env.VITE_SCILLA_CHECKER_URL, {
           code: this.file.code,
         })
         .then((response) => {

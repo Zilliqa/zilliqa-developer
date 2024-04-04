@@ -73,7 +73,7 @@ export default {
       changed: false,
       annotations: [],
       readonly: false,
-      SCILLA_CHECKER_URL: import.meta.VITE_SCILLA_CHECKER_URL,
+      SCILLA_CHECKER_URL: import.meta.env.VITE_SCILLA_CHECKER_URL,
     };
   },
   computed: {
@@ -102,6 +102,7 @@ export default {
         message: `Running checker on ${this.file} contract.`,
       });
 
+      console.log("CHECK: ", this.SCILLA_CHECKER_URL);
       axios
         .post(this.SCILLA_CHECKER_URL, {
           code: this.file.code,
