@@ -2,9 +2,8 @@
 id: validator
 title: Validation
 keywords:
-  - api
-  - introduction
-  - endpoints
+  - running
+  - validator
 description: Zilliqa 2.0 Validator instructions
 ---
 
@@ -17,4 +16,5 @@ XShards). They do this by staking ZIL; when a block is proposed,
 validators vote on the block with a weighting proportional to their
 stake, and receive rewards for doing so.
 
-To run your own validator ..
+TBD
+

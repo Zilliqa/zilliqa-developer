@@ -12,7 +12,6 @@ extra_javascript:
 
 nav:
   - Home: 'index.md'
-  - 'Endpoints': 'endpoints.md'
   - Api:
     - Erigon:
       - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
@@ -26,7 +25,27 @@ nav:
       - GetMinimumGasPrice: api/zilliqa/api-transaction-get-minimum-gas-price.md
       - GetNetworkId: api/zilliqa/api-blockchain-get-network-id.md
       - GetVersion: api/zilliqa/api-blockchain-get-software-version.md
-
+  - 'Changes': 'changes.md'
+  - Ecosystem:
+      - 'Index': 'ecosystem/ecosystem.md'
+      - 'Oracles': 'ecosystem/chainlink.md'
+      - 'Wrapped ZIL': 'ecosystem/wzil.md'
+  - 'Endpoints': 'endpoints.md'
+  - 'FAQ': 'faq.md'
+  -  Running:
+      - 'Validators': 'running/validator.md'
+  - 'SDKs and tools': 'sdk.md'
+  - EVM:
+    - Interop: zilevm/interop.md
+    - Metamask: zilevm/metamask.md
+    - Tools:
+        - Hardhat: zilevm/tools/hardhat.md
+        - OpenZeppelin: zilevm/tools/openzeppelin.md
+        - RemixIDE: zilevm/tools/remix.md
+        - 'VSCode Plugins': zilevm/tools/vsc-plugins.md
+  - Ziliqa:
+    - 'Native API': zilliqa/zilliqa.md
+    - 'Introduction': zilliqa/introduction-videos.md
 
 theme:
   name: material
