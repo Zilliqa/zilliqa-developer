@@ -13,9 +13,35 @@ ifeq ($(filter $(ENVIRONMENT),$(VALID_ENVIRONMENTS)),)
 $(error Invalid value for ENVIRONMENT. Valid values are dev, stg, or prd.)
 endif
 
+
+HERE=$(shell pwd)
+
+DOC_SOURCE=$(HERE)/../../docs-zq2
+export DOC_SOURCE
+
 dev:
-	DOC_SOURCE=`pwd`/../../docs-zq2 mkdocs serve
+	mkdocs serve
+
+BINDIR=$(HERE)/obj
+HERE_FILES=Dockerfile mkdocs.yaml overrides requirements.txt
+
+# Sadly necessary because we need the docs from .., and using that as the dockerfile context
+# would be a whole world of pain.
+.PHONY: assemble build
+assemble:
+	rm -rf $(BINDIR)
+	mkdir -p $(BINDIR)
+	cp -r $(HERE_FILES) $(BINDIR)
+	cp -r $(DOC_SOURCE) $(BINDIR)
+
+IMAGE_TAG ?= zq2-docs:latest
+
+build: assemble
+	docker buildx build $(BINDIR) -t $(IMAGE_TAG)
+
+run-image: build
+	docker run --rm -p 8080:80 $(IMAGE_TAG)
 
 ## Build and push the Docker image
-image/build-and-push:
-	@echo nothing yet.
+image/build-and-push: build
+	docker push $(IMAGE_TAG)

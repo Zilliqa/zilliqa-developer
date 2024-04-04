@@ -20,18 +20,19 @@ function fillInVersionNumbers() {
         ).then(
           response => response.json())
       .then(data => {
-        elem.innerHTML = data["result"];
-        elem.zilliqaVerison = data["result"];
+        elem.innerHTML = data["result"].Version;
+        elem.zilliqaVerison = data["result"].Version;
         fillInDocumentLinks(elem.attributes['id'].value, data['result']);
       });
   }
 }
 
-function fillInDocumentLinks(version_id, vsn_value) {
+function fillInDocumentLinks(version_id, vsn_obj) {
+  console.log(JSON.stringify(vsn_obj))
   var ids = document.getElementsByClassName("zq2_docs_" + version_id);
   for (let i = 0;i < ids.length; i++) {
     let elem = ids[i]
-    elem.innerHTML = `<a href="https://github.com/zilliqa/zq2/blob/${vsn_value}/README.md#supported-apis">Supported APIs</a>`
+    elem.innerHTML = `<a href="https://github.com/zilliqa/zq2/blob/${vsn_obj["Commit"]}/README.md#supported-apis">Supported APIs</a>`
   }
 }
 

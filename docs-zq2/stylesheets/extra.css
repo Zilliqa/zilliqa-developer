@@ -34,6 +34,7 @@
   --md-code-hl-comment-color: #cccc00;
   --md-typeset-table-color: #808080;
   --md-typeset-table-stripe-color: #303030;
+  --md-code-hl-punctuation-color: #808080;
 }
 
 .md-header {
@@ -78,3 +79,11 @@ th,td {
   background-color: var(--md-typeset-table-stripe-color)
 }
 
+.center-table {
+  text-align: center;
+}
+
+.md-typeset .center-table :is(td,th):not([align]) {
+  text-align: initial; /* reset alignment for table cells */
+}
+              

@@ -10,6 +10,24 @@ extra_css:
 extra_javascript:
   - js/versions.js
 
+nav:
+  - Home: 'index.md'
+  - 'Endpoints': 'endpoints.md'
+  - Api:
+    - Erigon:
+      - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
+    - Zilliqa:
+      - CreateTransaction: api/zilliqa/api-transaction-create-tx.md
+      - GetSmartContractState: api/zilliqa/api-contract-get-smartcontract-state.md
+      - GetTransaction: api/zilliqa/api-transaction-get-tx.md
+      - GetBalance: api/zilliqa/api-account-get-balance.md
+      - GetCurrentMiniEpoch: api/zilliqa/api-blockchain-get-current-mini-epoch.md
+      - GetLatestTxBlock: api/zilliqa/api-blockchain-get-latest-tx-block.md
+      - GetMinimumGasPrice: api/zilliqa/api-transaction-get-minimum-gas-price.md
+      - GetNetworkId: api/zilliqa/api-blockchain-get-network-id.md
+      - GetVersion: api/zilliqa/api-blockchain-get-software-version.md
+
+
 theme:
   name: material
   logo: assets/zt_logo.png
