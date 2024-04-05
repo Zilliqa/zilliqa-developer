@@ -43,9 +43,6 @@
 
 <script>
 import InputPopover from "./InputPopover.vue";
-/*eslint-disable */
-import brace from "brace"; // eslint-disable-line no-use-before-define
-/*eslint-enable */
 import { Ace as AceEditor } from "vue2-brace-editor";
 
 import "brace/mode/json";
