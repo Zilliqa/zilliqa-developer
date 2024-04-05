@@ -181,9 +181,9 @@
 </template>
 
 <script>
-import ContractInput from "../Inputs/ContractInput";
-import AddressDisplay from "../UI/AddressDisplay";
-import ExplorerLink from "../UI/ExplorerLink";
+import ContractInput from "../Inputs/ContractInput.vue";
+import AddressDisplay from "../UI/AddressDisplay.vue";
+import ExplorerLink from "../UI/ExplorerLink.vue";
 import LedgerInterface from "@/utils/ledger-interface";
 import VueJsonPretty from "vue-json-pretty";
 import TransportWebUsb from "@ledgerhq/hw-transport-webusb";
@@ -202,7 +202,7 @@ export default {
   mixins: [ZilPayMixin],
   data() {
     return {
-      VUE_APP_ISOLATED_URL: process.env.VUE_APP_ISOLATED_URL,
+      VITE_ISOLATED_URL: import.meta.env.VITE_ISOLATED_URL,
       abi: undefined,
       exec: false,
       contractState: undefined,
@@ -517,7 +517,7 @@ export default {
     },
     getContractAbi() {
       axios
-        .post(process.env.VUE_APP_SCILLA_CHECKER_URL, {
+        .post(import.meta.env.VITE_SCILLA_CHECKER_URL, {
           code: this.contractCode,
         })
         .then((response) => {

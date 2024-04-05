@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import UnitsConverter from "./UnitsConverter";
-import AddressConverter from "./AddressConverter";
+import UnitsConverter from "./UnitsConverter.vue";
+import AddressConverter from "./AddressConverter.vue";
 
 export default {
   name: "Tools",

@@ -13,9 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-const txnEncoder =
-  require("@zilliqa-js/account/dist/util").encodeTransactionProto;
-const { BN, Long } = require("@zilliqa-js/util");
+import { BN, Long } from "@zilliqa-js/util";
+import { encodeTransactionProto } from "@zilliqa-js/account/dist/cjs/src/util";
 
 const CLA = 0xe0;
 const INS = {
@@ -143,7 +142,7 @@ class LedgerInterface {
       txnParams.gasLimit = Long.fromNumber(txnParams.gasLimit);
     }
 
-    var txnBytes = txnEncoder(txnParams);
+    var txnBytes = encodeTransactionProto(txnParams);
     // const message = JSON.stringify({ "Encoded transaction": txnBytes.toString('hex') }, null, 2);
     // console.log(chalk.green(message));
 

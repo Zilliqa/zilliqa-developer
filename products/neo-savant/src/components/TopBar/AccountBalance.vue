@@ -33,8 +33,8 @@
 
 <script>
 import { mapGetters } from "vuex";
-const { Zilliqa } = require("@zilliqa-js/zilliqa");
-const { units, BN } = require("@zilliqa-js/util");
+import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { units, BN } from "@zilliqa-js/util";
 
 import numbro from "numbro";
 

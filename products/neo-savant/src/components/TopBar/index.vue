@@ -32,11 +32,11 @@
 </template>
 
 <script>
-import NetworkSelector from "./NetworkSelector";
-import AccountSelector from "./AccountSelector";
-import AccountBalance from "./AccountBalance";
-import ExplorerLink from "../UI/ExplorerLink";
-import FaucetLink from "../UI/FaucetLink";
+import NetworkSelector from "./NetworkSelector.vue";
+import AccountSelector from "./AccountSelector.vue";
+import AccountBalance from "./AccountBalance.vue";
+import ExplorerLink from "../UI/ExplorerLink.vue";
+import FaucetLink from "../UI/FaucetLink.vue";
 
 import { mapGetters } from "vuex";
 

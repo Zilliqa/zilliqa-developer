@@ -78,23 +78,23 @@
 </template>
 
 <script>
-import FilesList from "@/components/Files/List";
-import ContractsList from "@/components/Contracts/List";
-import TopBar from "@/components/TopBar/index";
+import FilesList from "@/components/Files/List.vue";
+import ContractsList from "@/components/Contracts/List.vue";
+import TopBar from "@/components/TopBar/index.vue";
 
 // Panels
-import DeployContract from "@/components/Panels/DeployContract";
-import CallContract from "@/components/Panels/CallContract";
-import AccountImport from "@/components/Panels/AccountImport";
-import ContractImport from "@/components/Panels/ContractImport";
+import DeployContract from "@/components/Panels/DeployContract.vue";
+import CallContract from "@/components/Panels/CallContract.vue";
+import AccountImport from "@/components/Panels/AccountImport.vue";
+import ContractImport from "@/components/Panels/ContractImport.vue";
 
-import BottomPanel from "@/components/BottomPanel";
+import BottomPanel from "@/components/BottomPanel/index.vue";
 
-import EventsList from "@/components/Panels/EventsList";
-import Settings from "@/components/Panels/Settings";
-import AddCustomNetwork from "@/components/Panels/AddCustomNetwork";
+import EventsList from "@/components/Panels/EventsList.vue";
+import Settings from "@/components/Panels/Settings.vue";
+import AddCustomNetwork from "@/components/Panels/AddCustomNetwork.vue";
 
-import Tools from "@/components/Tools";
+import Tools from "@/components/Tools/index.vue";
 
 import { mapGetters } from "vuex";
 
@@ -166,9 +166,9 @@ export default {
       this.$store.dispatch("networks/SelectNetwork", this.networksList[0]);
     }
 
-    if (this.network.url === process.env.VUE_APP_ISOLATED_URL) {
+    if (this.network.url === import.meta.env.VITE_ISOLATED_URL) {
       // Check if contracts are still on network
-      const zilliqa = new Zilliqa(process.env.VUE_APP_ISOLATED_URL);
+      const zilliqa = new Zilliqa(import.meta.env.VITE_ISOLATED_URL);
 
       this.contracts.forEach(async (contract) => {
         const deployed = zilliqa.contracts.at(

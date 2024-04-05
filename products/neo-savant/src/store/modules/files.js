@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-import uuidv4 from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import { defaultFiles } from "@/contracts";
 

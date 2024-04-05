@@ -15,7 +15,7 @@
 
 const state = {
   mainPanel: null,
-  appVersion: process.env.PACKAGE_VERSION || "0",
+  appVersion: import.meta.env.PACKAGE_VERSION || "0",
   editor: {
     fontSize: 14,
   },
