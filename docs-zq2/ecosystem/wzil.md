@@ -26,7 +26,7 @@ asset (zETH) on the destination chain.
 
 ## Motivation for wZIL
 
-![Docusaurus](../../assets/img/dev-dapps/wzil/wZIL.png)
+![Docusaurus](../assets/img/dev-dapps/wzil/wZIL.png)
 
 **wZIL** is a wrapped tokenised version of native ZIL. As mentioned above,
 anyone may interact with the wZIL contract to either be issued wZIL or be

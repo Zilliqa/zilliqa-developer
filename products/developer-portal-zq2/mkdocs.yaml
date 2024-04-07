@@ -11,10 +11,15 @@ extra_javascript:
   - js/versions.js
 
 nav:
-  - Home: 'index.md'
+  - News: 'index.md'
+  - Home: 'home.md'
+  - 'Changes from ZQ1': 'changes.md'
+  - 'Endpoints': 'endpoints.md'
+  - 'FAQ': 'faq.md'
   - Api:
     - Erigon:
       - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
+    - Ethereum: api/ethereum/eth-rpc.md
     - Zilliqa:
       - CreateTransaction: api/zilliqa/api-transaction-create-tx.md
       - GetSmartContractState: api/zilliqa/api-contract-get-smartcontract-state.md
@@ -25,15 +30,14 @@ nav:
       - GetMinimumGasPrice: api/zilliqa/api-transaction-get-minimum-gas-price.md
       - GetNetworkId: api/zilliqa/api-blockchain-get-network-id.md
       - GetVersion: api/zilliqa/api-blockchain-get-software-version.md
-  - 'Changes': 'changes.md'
   - Ecosystem:
       - 'Index': 'ecosystem/ecosystem.md'
       - 'Oracles': 'ecosystem/chainlink.md'
       - 'Wrapped ZIL': 'ecosystem/wzil.md'
-  - 'Endpoints': 'endpoints.md'
-  - 'FAQ': 'faq.md'
   -  Running:
+      - 'Nodes' : 'running/node.md'
       - 'Validators': 'running/validator.md'
+      - 'Networks': 'running/network.md'
   - 'SDKs and tools': 'sdk.md'
   - EVM:
     - Interop: zilevm/interop.md

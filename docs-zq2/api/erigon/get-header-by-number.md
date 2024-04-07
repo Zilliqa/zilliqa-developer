@@ -19,7 +19,7 @@ title: erigon_getHeaderByNumber
     }' -H "Content-Type: application/json" -X POST "https://api.zq2-devnet.zilliqa.com/"
     ```
 
-zpi### Example Response
+### Example Response
 
 ```json
 {

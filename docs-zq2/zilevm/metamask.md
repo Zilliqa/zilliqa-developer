@@ -48,7 +48,7 @@ Navigate to [https://devex.zilliqa.com/address/](https://devex.zilliqa.com/addre
 
 By pressing the convert button, we can turn a bech32 address (zil...) into a base16 address(0x...), and vice-versa.
 
-!["Coverting address types"](../../assets/img/evm/convert_address.png)
+!["Coverting address types"](../assets/img/evm/convert_address.png)
 
 #### ZIL -> EVM
 
@@ -66,7 +66,7 @@ Once we have the converted wallet address starting 0x... - Metamask can be used 
 
 Once Metamask has been configured with EVM network details, you can send ZIL to other base 16 addresses (0x...).
 
-!["Sending EVM ZIL"](../../assets/img/evm/send_evm_zil.png)
+!["Sending EVM ZIL"](../assets/img/evm/send_evm_zil.png)
 
 !!! warning
 
