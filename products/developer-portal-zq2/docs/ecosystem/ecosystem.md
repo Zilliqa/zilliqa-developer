@@ -6,7 +6,7 @@ title: Zilliqa ecosystem
 
 This page collects information about parts of the Zilliqa ecosystem useful for developers.
 
-You should look to the [main Zilliqa website](https://zilliqa.com/) to provide information on the ecosystem more widely.
+You should look to the [main Zilliqa website](https://zilliqa.com/) to provide information on the ecosystem more widely. Our [coingecko](https://www.coingecko.com/en/coins/zilliqa) page has general information about our token, and developer tools and SDKs can be found on the [sdk](/sdk/) page.
 
 Unless specified otherwise, all addresses given here are Zilliqa mainnet addresses. Note that unless specified otherwise, Zilliqa *DOES NOT MAKE ANY REPRESENTATIONS ABOUT THESE SITES OR CONTRACTS*. You use them entirely at your own risk and you are encouraged to do your own research to satisfy yourself that they meet your needs and risk profile.
 
@@ -17,6 +17,8 @@ Entries below marked with a `[Z]` are operated by Zilliqa.
  * We have some [price oracles](./chainlink.md).
 
 ## Useful contract addresses
+
+ * Tokens: [ZilStream](https://zilstream.com/) can direct you to native token addresses.
 
  * Oracles
   **ZIL / USD (Testnet)**: `0x845f152725A2FF60cb2F5a0E024B5A749f7551C0` 
@@ -43,7 +45,7 @@ Entries below marked with a `[Z]` are operated by Zilliqa.
  * [Plunderswap](https://plunderswap.com/) - provides an EVM DEX for Zilliqa
  * [Avely](https://avely.fi/) provides a liquid staking token for Zilliqa.
      * [Contracts](https://github.com/avely-finance)
- * `[Z]` [Zillion](https://stake.zilliqa.com) is a Zilliqs staking viewer.
+ * `[Z]` [Zillion](https://stake.zilliqa.com) is a Zilliqa staking viewer.
 
 ## Wallets
 
@@ -52,7 +54,5 @@ Entries below marked with a `[Z]` are operated by Zilliqa.
 
 ## CEXs
 
-ZIL is listed on, among others:
-
- * [Binance](https://binance.com)
+See our [coingecko](https://www.coingecko.com/en/coins/zilliqa) page for a list of Zilliqa markets.
 
