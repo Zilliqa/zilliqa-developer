@@ -71,4 +71,3 @@ Once Metamask has been configured with EVM network details, you can send ZIL to 
 !!! warning
 
     Remember that, as always, if you send funds to an address that no-one has the private key for, they will be lost!
-

@@ -2,8 +2,8 @@
 id: node
 title: Node
 keywords:
- - running
- - node
+  - running
+  - node
 description: Zilliqa 2.0 Node instructions
 ---
 

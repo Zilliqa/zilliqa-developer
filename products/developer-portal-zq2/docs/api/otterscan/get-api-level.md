@@ -2,6 +2,7 @@
 id: api/ots/ots_getApiLevel
 title: ots_getApiLevel
 ---
+
 ---
 
 Returns the Otterscan API level
@@ -23,10 +24,10 @@ Returns the Otterscan API level
 
 ```json
 {
- "jsonrpc":"2.0",
- "result":8,
- "id":"1"
- }
+  "jsonrpc": "2.0",
+  "result": 8,
+  "id": "1"
+}
 ```
 
 ### Arguments

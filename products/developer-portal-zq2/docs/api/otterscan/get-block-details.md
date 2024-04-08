@@ -2,6 +2,7 @@
 id: api/ots/ots_getBlockDetails
 title: ots_getBlockDetails
 ---
+
 ---
 
 Returns details of a numbered block for otterscan
@@ -55,11 +56,10 @@ Returns details of a numbered block for otterscan
   },
   "id": "1"
 }
-
 ```
 
 ### Arguments
 
-| Parameter | Type   | Required | Description                                                                                                                                                                                              |
-| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `block`  | number | Required | The block number to query |
+| Parameter | Type   | Required | Description               |
+| --------- | ------ | -------- | ------------------------- |
+| `block`   | number | Required | The block number to query |

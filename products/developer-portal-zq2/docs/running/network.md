@@ -8,4 +8,3 @@ description: Zilliqa 2.0 Network Instructions
 ---
 
 TBD
-

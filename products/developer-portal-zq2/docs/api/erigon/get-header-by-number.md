@@ -2,9 +2,10 @@
 id: api/erigon/erigon_getHeaderByNumber
 title: erigon_getHeaderByNumber
 ---
+
 ---
 
- - Returns the erigon headers for a given block number
+- Returns the erigon headers for a given block number
 
 ### Example Request
 
@@ -51,7 +52,6 @@ title: erigon_getHeaderByNumber
 
 ### Arguments
 
-
-| Parameter | Type   | Required | Description                                                                                                                                                                                              |
-| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `block`  | number | Required | The block number to query |
+| Parameter | Type   | Required | Description               |
+| --------- | ------ | -------- | ------------------------- |
+| `block`   | number | Required | The block number to query |

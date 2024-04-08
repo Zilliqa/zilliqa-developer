@@ -2,6 +2,7 @@
 id: api/ots/ots_getBlockDetailsByHash
 title: ots_getBlockDetailsByHash
 ---
+
 ---
 
 Returns details of a block for otterscan by hash
@@ -55,12 +56,10 @@ Returns details of a block for otterscan by hash
   },
   "id": "1"
 }
-
 ```
 
 ### Arguments
 
-| Parameter | Type   | Required | Description                                                                                                                                                                                              |
-| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `hash`  | string | Required | The block hash to query |
-
+| Parameter | Type   | Required | Description             |
+| --------- | ------ | -------- | ----------------------- |
+| `hash`    | string | Required | The block hash to query |

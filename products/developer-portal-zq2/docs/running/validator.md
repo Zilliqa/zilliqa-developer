@@ -17,4 +17,3 @@ validators vote on the block with a weighting proportional to their
 stake, and receive rewards for doing so.
 
 TBD
-

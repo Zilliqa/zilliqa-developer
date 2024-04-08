@@ -2,6 +2,7 @@
 id: api/ots/ots_getBlockTransactions
 title: ots_getBlockTransactions
 ---
+
 ---
 
 Returns transaction details for a page of transactions in a block
@@ -51,9 +52,8 @@ Returns transaction details for a page of transactions in a block
 
 ### Arguments
 
-| Parameter | Type   | Required | Description                                                                                                                                                                                              |
-| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `block` | number | Required | The block number to query |
-| `page_number`  | number | Required | The page of transactions to query in that block |
-| `page_size` | number | Required | The size of each page of transactions |
-
+| Parameter     | Type   | Required | Description                                     |
+| ------------- | ------ | -------- | ----------------------------------------------- |
+| `block`       | number | Required | The block number to query                       |
+| `page_number` | number | Required | The page of transactions to query in that block |
+| `page_size`   | number | Required | The size of each page of transactions           |

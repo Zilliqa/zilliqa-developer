@@ -103,5 +103,3 @@ wrap or unwrap tokens, firstly import the wZIL contract to the Neo-Savant IDE.
 an equal burn of wZIL.</b>
 
 ![Docusaurus](../assets/img/dev-dapps/wzil/burn_wzil_2.png)
-
-

@@ -129,4 +129,3 @@ We will try to provide assistance with the most common cases as they arise, but 
 #### How do I get started with development using hardhat?
 
 See our [handy guide](zilevm/tools/hardhat.md) .
-

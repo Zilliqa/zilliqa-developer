@@ -2,6 +2,7 @@
 id: api/ots/ots_hasCode
 title: ots_hasCode
 ---
+
 ---
 
 Indicates whether an address has code associated with it at a particular block.
@@ -31,7 +32,7 @@ Indicates whether an address has code associated with it at a particular block.
 
 ### Arguments
 
-| Parameter | Type   | Required | Description                                                                                                                                                                                              |
-| --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `address` | address | Required | The address to query |
-| `block`  | number | Required | The block number to query |
+| Parameter | Type    | Required | Description               |
+| --------- | ------- | -------- | ------------------------- |
+| `address` | address | Required | The address to query      |
+| `block`   | number  | Required | The block number to query |

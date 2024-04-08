@@ -7,7 +7,7 @@ title: GetNetworkId
 
 Returns the `CHAIN_ID` of the specified network. This is represented as a `String`.
 
-Our chain ids are listed at (chainlist.org)[https://chainlist.org/?search=zilliqa&testnets=true]. 
+Our chain ids are listed at [chainlist.org](https://chainlist.org/?search=zilliqa&testnets=true).
 
 The chain id reported by the Zilliqa API has bit 15 clear (`chain_id & ~0x8000`) whilst the chain id reported by the EVM API has bit 15 set (`chain_id | 0x8000`).
 

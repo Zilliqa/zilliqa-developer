@@ -32,6 +32,7 @@ Returns the software version of the Zilliqa node. Additionally, returns a commit
   }
 }
 ```
+
 ### Arguments
 
 | Parameter | Type   | Required | Description       |

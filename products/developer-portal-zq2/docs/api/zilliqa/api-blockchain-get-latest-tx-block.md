@@ -60,7 +60,6 @@ Returns the details of the most recent Transaction block.
 
 ### Example Response
 
-
 ```json
 {
   "id": "1",

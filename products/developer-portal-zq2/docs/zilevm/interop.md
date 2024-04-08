@@ -2,6 +2,7 @@
 id: interop
 title: Zilliqa EVM/native interoperability
 ---
+
 # Zilliqa EVM characteristics and interop
 
 This page details the quirks you might see in Zilliqa as an EVM user, and describes how interoperability between EVM and the native Zilliqa layer is achieved.
@@ -23,8 +24,8 @@ Schnorr signatures, whilst Ethereum uses ECDSA.
 
 Sadly, this means that:
 
- * It isn't possible to derive the EVM address of a wallet from its Zilliqa address, or vice versa.
- * It isn't possible to derive a key which will sign EVM transactions on a Zilliqa address, or vice versa.
+- It isn't possible to derive the EVM address of a wallet from its Zilliqa address, or vice versa.
+- It isn't possible to derive a key which will sign EVM transactions on a Zilliqa address, or vice versa.
 
 This means that you need to be very careful not to send tokens (or anything else!) to a Zilliqa address in an EVM contract or vice versa.
 
@@ -64,7 +65,7 @@ the deduction made for gas.
 
 It is possible to call Scilla from EVM (though not to pass native
 tokens between the two) via
-(ZIP-21)[https://github.com/Zilliqa/ZIP/blob/master/zips/zip-21.md].
+[ZIP-21](https://github.com/Zilliqa/ZIP/blob/master/zips/zip-21.md).
 
 ## Opcode differences
 
@@ -80,6 +81,3 @@ There are a few opcodes which will give you different results on Zilliqa than on
 ## EVM precompiles
 
 We support a number of new precompiles. Documentation TBD.
-
-
-

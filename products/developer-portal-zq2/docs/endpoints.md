@@ -2,7 +2,7 @@
 id: endpoints
 title: API endpoints
 hide:
- - toc
+  - toc
 keywords:
   - api
   - introduction
