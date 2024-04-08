@@ -232,7 +232,7 @@ impl AstConverting for BluebellFormatter {
             NodeTypeMapValue::MapKeyValue(value) => {
                 let _ = (*value).node.visit(self)?;
             }
-            NodeTypeMapValue::MapValueParanthesizedType(value) => {
+            NodeTypeMapValue::MapValueParenthesizedType(value) => {
                 self.script.push_str("(");
                 let _ = (*value).node.visit(self)?;
                 self.script.push_str(")");
