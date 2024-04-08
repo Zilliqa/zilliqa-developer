@@ -136,7 +136,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [developer-portal, devex, zilliqa-isolated-server, developer-portal-zq2]
+        application:
+          [
+            developer-portal,
+            devex,
+            zilliqa-isolated-server,
+            developer-portal-zq2,
+          ]
         include:
           - application: developer-portal
             image_name: developer-portal

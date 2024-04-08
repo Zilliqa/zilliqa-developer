@@ -28,6 +28,7 @@ lint:
     - linters: [gitleaks]
       paths:
         - products/laksaj # laksaj contains a lot of embedded testnet privkeys - ignore them.
+        - products/developer-portal-zq2/docs/api # Contains a lot of hashes, etc. that are interpreted as secrets
         - docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
         - products/bridge/smart-contracts/script/config.ts
         - products/bridge/smart-contracts/script/**/*.s.sol
@@ -39,6 +40,8 @@ lint:
         - products/bridge/bridge-web
     - linters: [ALL]
       paths:
+        - products/developer-portal-zq2/Dockerfile # Annoying, but trunk is now very opinionated on how you write dockerfiles.
+        - products/developer-portal-zq2/docs/js/connect.js # trunk does not know this is looking for metamask in the user's browser.
         - needing-organisation/**/*
         - products/devex/public/*.js
         - products/dev-wallet/**
