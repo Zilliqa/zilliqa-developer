@@ -16,7 +16,7 @@ endif
 
 HERE=$(shell pwd)
 
-DOC_SOURCE=$(HERE)/../../docs-zq2
+DOC_SOURCE=$(HERE)/docs
 export DOC_SOURCE
 
 dev:
@@ -36,8 +36,8 @@ assemble:
 
 IMAGE_TAG ?= zq2-docs:latest
 
-build: assemble
-	docker buildx build $(BINDIR) -t $(IMAGE_TAG)
+build:
+	docker buildx build . -t $(IMAGE_TAG)
 
 run-image: build
 	docker run --rm -p 8080:80 $(IMAGE_TAG)

@@ -9,7 +9,7 @@ RUN apt install -y python3 python3-pip
 COPY .  /build
 RUN pip3 install -r /build/requirements.txt
 
-ENV DOC_SOURCE=/build/docs-zq2
+ENV DOC_SOURCE=docs
 RUN (cd /build && mkdocs build)
 
 FROM nginx:alpine-slim
