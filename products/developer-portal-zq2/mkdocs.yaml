@@ -53,7 +53,7 @@ nav:
 
 theme:
   name: material
-  logo: assets/zt_logo.png
+  logo: assets/zilliqa.png
   font:
     text: Poppins
   custom_dir: overrides/
