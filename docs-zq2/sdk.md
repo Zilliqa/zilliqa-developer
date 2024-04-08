@@ -43,6 +43,10 @@ In particular, `zilliqa-developer` contains contracts for vesting and burning to
 We provide a number of repositories as open source:
 
  * [zq2](https://github.com/Zilliqa/zq2) - the Zilliqa 2 source code itself.
- * [zilliqa-developer](https://github.com/Zilliqa/zilliqa-developer) - applications supported by Zilliqa; this site, the Zillion site, many of our SDKs, etc.
-
-
+ * [zilliqa-developer](https://github.com/Zilliqa/zilliqa-developer) - this contains source for, among other things
+    * [eth-spout](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/eth-spout) a simple faucet.
+    * [xbridge](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/bridge) a cross-chain contract bridge.
+    * [multisig](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/multisig) - a scilla multisig implementation
+    * [neo-savant](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/neo-savant) - the Scilla IDE
+    * [pdt](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/pdt) - a utility which turns the state of the blockchain into a BigQuery dataset or PostgreSQL database.
+    * [developer-portal-zq2](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/developer-portal-zq2) - this developer portal
