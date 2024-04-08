@@ -1,23 +1,23 @@
 ---
-id: api/erigon/erigon_getHeaderByNumber
-title: erigon_getHeaderByNumber
+id: api/ots/ots_getBlockTransactions
+title: ots_getBlockTransactions
 ---
 ---
 
- - Returns the erigon headers for a given block number
+Returns transaction details for a page of transactions in a block
 
-### Example Request
+### Example request
 
 === "cURL"
 
-    ```shell
+```shell
     curl -d '{
         "id": "1",
         "jsonrpc": "2.0",
-        "method": "erigon_getHeaderByNumber",
-        "params": [ 1000 ]
+        "method": "ots_getBlockTransactions",
+        "params": [ 1000, 0, 10 ]
     }' -H "Content-Type: application/json" -X POST "https://api.zq2-devnet.zilliqa.com/"
-    ```
+```
 
 ### Example Response
 
@@ -51,7 +51,9 @@ title: erigon_getHeaderByNumber
 
 ### Arguments
 
-
 | Parameter | Type   | Required | Description                                                                                                                                                                                              |
 | --------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `block`  | number | Required | The block number to query |
+| `block` | number | Required | The block number to query |
+| `page_number`  | number | Required | The page of transactions to query in that block |
+| `page_size` | number | Required | The size of each page of transactions |
+

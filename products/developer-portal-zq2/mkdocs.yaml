@@ -9,17 +9,24 @@ extra_css:
 
 extra_javascript:
   - js/versions.js
+  - js/connect.js
 
 nav:
   - News: 'index.md'
   - Home: 'home.md'
-  - 'Changes from ZQ1': 'changes.md'
+  - 'New in ZQ2': 'changes.md'
   - 'Endpoints': 'endpoints.md'
   - 'FAQ': 'faq.md'
   - Api:
     - Erigon:
       - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
     - Ethereum: api/ethereum/eth-rpc.md
+    - Otterscan:
+      - ots_getApiLevel: api/otterscan/get-api-level.md
+      - ots_getBlockDetails: api/otterscan/get-block-details.md
+      - ots_getBlockDetailsByHash: api/otterscan/get-block-details-by-hash.md
+      - ots_getBlockTransactions: api/otterscan/get-block-transactions.md
+      - ots_hasCode: api/otterscan/has-code.md
     - Zilliqa:
       - CreateTransaction: api/zilliqa/api-transaction-create-tx.md
       - GetSmartContractState: api/zilliqa/api-contract-get-smartcontract-state.md
