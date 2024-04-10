@@ -128,7 +128,8 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
+    #&& github.ref_name == 'main'
+    if: github.actor != 'dependabot[bot]'
     name: "Build image with Makefile"
     strategy:
       fail-fast: false
