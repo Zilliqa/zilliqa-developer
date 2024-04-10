@@ -42,6 +42,7 @@ lint:
       paths:
         - products/developer-portal-zq2/Dockerfile # Annoying, but trunk is now very opinionated on how you write dockerfiles.
         - products/developer-portal-zq2/docs/js/** # trunk does not know this is looking for metamask in the user's browser.
+        - products/developer-portal-zq2/docs/index.md # contains legitimate empty links
         - needing-organisation/**/*
         - products/devex/public/*.js
         - products/dev-wallet/**
