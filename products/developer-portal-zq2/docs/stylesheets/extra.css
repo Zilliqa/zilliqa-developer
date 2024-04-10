@@ -87,3 +87,34 @@ td {
 .md-typeset .center-table :is(td, th):not([align]) {
   text-align: initial; /* reset alignment for table cells */
 }
+
+.disp-btn {
+  height: 1em;
+  width: 1em;
+  border-radius: 3px;
+  border-padding: 5px 5px;
+  border-width: thin;
+  vertucal-align: middle;
+  color: #99a6ad;
+}
+
+.disp-btn:active {
+  background-color: #035992;
+}
+
+.disp-btn:hover {
+  background-color: #035992;
+  color: #99a6ad;
+}
+
+#converthex {
+  display: block;
+  /*visibility: hidden;*/
+}
+
+.disp-input {
+  background-color: #ffffff;
+  color: #000000;
+  width: 30em;
+  font-size: 14pt;
+}

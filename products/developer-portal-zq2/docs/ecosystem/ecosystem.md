@@ -45,6 +45,7 @@ Entries below marked with a `[Z]` are operated by Zilliqa.
   - [ZilSwap developer info](https://docs.zilswap.org/#/smart-contract)
 - [Xbridge](https://xbridge.zilliqa.com) - a token bridge based on our general contract bridge (see [github](https://github.com/Zilliqa/zilliqa-developer/tree/main/products/bridge))
 - [Plunderswap](https://plunderswap.com/) - provides an EVM DEX for Zilliqa
+  - [transfer from Zil to EVM wallet or back](https://plunderswap.com/transfer)
 - [Avely](https://avely.fi/) provides a liquid staking token for Zilliqa.
   - [Contracts](https://github.com/avely-finance)
 - `[Z]` [Zillion](https://stake.zilliqa.com) is a Zilliqa staking viewer.

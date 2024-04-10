@@ -10,6 +10,8 @@ extra_css:
 extra_javascript:
   - js/versions.js
   - js/connect.js
+  - js/chain.js
+  - js/buffer.js
 
 nav:
   - News: "index.md"

@@ -35,6 +35,6 @@ function fillInDocumentLinks(version_id, vsn_obj) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document$.subscribe( function () {
   fillInVersionNumbers();
 });
