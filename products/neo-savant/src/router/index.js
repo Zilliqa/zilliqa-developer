@@ -13,11 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-import Vue from "vue";
-import VueRouter from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
-
-Vue.use(VueRouter);
 
 const routes = [
   {
@@ -35,7 +32,8 @@ const routes = [
   },
 ];
 
-const router = new VueRouter({
+const router = new createRouter({
+  history: createWebHistory(),
   routes,
 });
 

@@ -1,7 +1,7 @@
 // vite.config.js
 
 import { defineConfig } from "vite";
-import { createVuePlugin as vue } from "vite-plugin-vue2";
+import createVuePlugin from "@vitejs/plugin-vue";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 const path = require("path");
@@ -9,7 +9,15 @@ const path = require("path");
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    createVuePlugin({
+      template: {
+        compilerOptions: {
+          compatConfig: {
+            MODE: 2,
+          },
+        },
+      },
+    }),
     nodePolyfills({
       globals: {
         Buffer: true, // can also be 'build', 'dev', or false
