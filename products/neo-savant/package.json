@@ -25,6 +25,7 @@
     "axios": "^1.6.8",
     "bootstrap": "^4.4.1",
     "floating-vue": "^5.2.2",
+    "mitt": "^3.0.1",
     "numbro": "^2.5.0",
     "sweetalert2": "^9.7.2",
     "uuid": "^9.0.1",

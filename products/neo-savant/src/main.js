@@ -24,8 +24,10 @@ import Notifications from "@kyvg/vue3-notification";
 import "@imengyu/vue3-context-menu/lib/vue3-context-menu.css";
 import ContextMenu from "@imengyu/vue3-context-menu";
 import FloatingVue from "floating-vue";
+import eventBus from "./utils/event-bus";
 
-createApp(App)
+window.EventBus = eventBus;
+const app = createApp(App)
   .use(router)
   .use(store)
   .use(Notifications)
@@ -33,6 +35,4 @@ createApp(App)
   .use(ContextMenu)
   .mount("#app");
 
-Vue.config.productionTip = false;
-
-window.EventBus = new Vue();
+app.config.productionTip = false;
