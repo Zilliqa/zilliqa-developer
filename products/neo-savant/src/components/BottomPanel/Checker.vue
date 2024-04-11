@@ -19,7 +19,7 @@ import {ref, onMounted} from 'vue'
 const events = ref([])
 onMounted(() => {
   window.EventBus.$on("checker-events", ({ warnings, errors }) => {
-    events = [];
+    events.value = [];
     if (warnings !== undefined) {
       warnings.forEach(item => {
         this.events.push(item);
