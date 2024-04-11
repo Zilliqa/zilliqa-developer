@@ -34,5 +34,3 @@ const app = createApp(App)
   .use(FloatingVue)
   .use(ContextMenu)
   .mount("#app");
-
-app.config.productionTip = false;
