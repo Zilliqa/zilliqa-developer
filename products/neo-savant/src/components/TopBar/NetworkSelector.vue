@@ -3,21 +3,23 @@
     class="network-selector d-flex"
     v-if="account && account.type === 'zilpay'"
   >
-    <v-popover trigger="click" class="d-flex align-items-center">
+    <VDropdown :triggers="['click']" class="d-flex align-items-center">
       <!-- This will be the popover target (for the events and position) -->
       <div class="selected-network d-flex align-items-center">
         <img src="@/assets/server.svg" height="24px" class="mr-2" />
         {{ selected.name }}
       </div>
-      <template slot="popover" class="text-center">
-        Accounts and Networks are managed by ZilPay Extension.
-        <br />
-        <br />
-        <button class="btn btn-success" @click="handleAccountManagerSwitch">
-          Switch back to IDE Account Manager
-        </button>
+      <template #popper class="text-center">
+        <div class="p-3">
+          Accounts and Networks are managed by ZilPay Extension.
+          <br />
+          <br />
+          <button class="btn btn-success" @click="handleAccountManagerSwitch">
+            Switch back to IDE Account Manager
+          </button>
+        </div>
       </template>
-    </v-popover>
+    </VDropdown>
   </div>
   <div class="network-selector not-zilpay d-flex" v-else>
     <div class="selected-network d-flex align-items-center">
