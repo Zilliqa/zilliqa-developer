@@ -13,7 +13,7 @@
       >
         <file-name
           :file="file"
-          v-on:select-file="handleSelect"
+          @select-file="handleSelect"
           :selected="selected && selected.id === file.id"
         />
       </div>

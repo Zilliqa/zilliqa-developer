@@ -1,5 +1,5 @@
 <template>
-  <v-popover offset="16" trigger="click" placement="top">
+  <VDropdown distance="16" :triggers="['click', 'focus']" placement="top">
     <!-- This will be the popover target (for the events and position) -->
     <a class="tooltip-target d-flex align-items-center">
       <span>{{ type }}</span>
@@ -7,12 +7,12 @@
     </a>
 
     <!-- This will be the content of the popover -->
-    <template slot="popover" v-if="selected !== undefined">
+    <template #popper v-if="selected !== undefined">
       {{selected.description}} Read more about this
       <a :href="selected.link" target="_blank">here</a>
     </template>
-    <template slot="popover" v-else>{{type}}</template>
-  </v-popover>
+    <template #popper v-else>{{type}}</template>
+  </VDropdown>
 </template>
 
 <script>

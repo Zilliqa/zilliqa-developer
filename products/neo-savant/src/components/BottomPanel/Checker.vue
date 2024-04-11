@@ -14,30 +14,25 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      events: []
-    };
-  },
-  mounted() {
-    window.EventBus.$on("checker-events", ({ warnings, errors }) => {
-      this.events = [];
-      if (warnings !== undefined) {
-        warnings.forEach(item => {
-          this.events.push(item);
-        });
-      }
+<script setup>
+import {ref, onMounted} from 'vue'
+const events = ref([])
+onMounted(() => {
+  window.EventBus.$on("checker-events", ({ warnings, errors }) => {
+    events = [];
+    if (warnings !== undefined) {
+      warnings.forEach(item => {
+        this.events.push(item);
+      });
+    }
 
-      if (errors !== undefined) {
-        errors.forEach(item => {
-          this.events.push(item);
-        });
-      }
-    });
-  }
-};
+    if (errors !== undefined) {
+      errors.forEach(item => {
+        this.events.push(item);
+      });
+    }
+  });
+})
 </script>
 
 <style lang="scss" scoped>
