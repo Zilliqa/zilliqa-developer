@@ -3,10 +3,11 @@
 import { defineConfig } from "vite";
 import createVuePlugin from "@vitejs/plugin-vue";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+import path from "path";
 
-const path = require("path");
-
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     createVuePlugin({
@@ -22,6 +23,12 @@ export default defineConfig({
       globals: {
         Buffer: true, // can also be 'build', 'dev', or false
       },
+    }),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
     }),
   ],
   resolve: {
