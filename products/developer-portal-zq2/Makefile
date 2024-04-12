@@ -40,8 +40,8 @@ build:
 	docker buildx build . -t $(IMAGE_TAG)
 
 run-image: build
-	docker run --rm -p 8080:80 $(IMAGE_TAG)
+	docker run --rm -p 8080:80 "$(IMAGE_TAG)"
 
 ## Build and push the Docker image
 image/build-and-push: build
-	docker push $(IMAGE_TAG)
+	docker push "$(IMAGE_TAG)"
