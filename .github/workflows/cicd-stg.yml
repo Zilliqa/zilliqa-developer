@@ -151,7 +151,7 @@ jobs:
             image_name: developer-portal-zq2
             path: products/developer-portal-zq2
             tag_length: 8
-            tag_latest: false
+            tag_latest: true
           - application: devex
             image_name: devex
             path: products/devex
