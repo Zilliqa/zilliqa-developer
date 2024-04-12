@@ -4,4 +4,4 @@ metadata:
   name: developer-portal-zq2
 spec:
   domains:
-    - dev-zq2.zilliqa.com
+    - zq2-dev.zilliqa.com
