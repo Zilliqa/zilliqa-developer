@@ -128,8 +128,8 @@ jobs:
       id-token: write
       contents: write
     runs-on: ubuntu-22.04
-    # To test deployments, remove the && github.ref_name clause: see devops/docs/z2-testing-apps.md - rrw 2024-04-12
-    if: github.actor != 'dependabot[bot]' && github.ref_name == "main"
+    # To test deployments, remove the github.ref_name clause: see devops/docs/z2-testing-apps.md - rrw 2024-04-12
+    if: github.actor != 'dependabot[bot]' && github.ref_name == 'main'
     name: "Build image with Makefile"
     strategy:
       fail-fast: false
