@@ -1,7 +1,7 @@
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
-  name: developer-portal-zq2
+  name: stg-zq2-dev
 spec:
   domains:
-    - developer-portal-zq2.zilstg.dev
+    - stg-zq2-dev.zilstg.dev

@@ -8,7 +8,7 @@ resources:
 patches:
   - target:
       kind: Ingress
-      name: developer-portal
+      name: developer-portal-zq2
     patch: |-
       - op: replace
         path: "/spec/rules/0/host"
