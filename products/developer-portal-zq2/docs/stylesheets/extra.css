@@ -1,0 +1,120 @@
+@media only screen and (min-width: 76.25em) {
+  .md-main__inner {
+    max-width: none;
+  }
+  .md-sidebar--primary {
+    left: 0;
+  }
+  .md-sidebar--secondary {
+    right: 0;
+    margin-left: 0;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+[data-md-color-scheme="zilliqa"] {
+  --md-primary-fg-color: #272626;
+  --md-primary-bg-color: #ffffff;
+  --md-default-fg-color: #ffffff;
+  --md-default-fg-color--light: #ffffff;
+  --md-default-fg-color--dark: #ffffff;
+
+  --md-typeset-color: #ffffff;
+  --md-typeset-a-color: #00d0c6;
+  --md-accent-fg-color: #00d0c6;
+  --md-accent-fg-color--light: #00d0c6;
+  --md-accent-fg-color--dark: #00d0c6;
+  --md-default-bg-color: #272626;
+  --md-primary-bg-color: #272626;
+  --md-primary-bg-color--light: #272626;
+
+  --md-code-bg-color: #272626;
+  --md-code-fg-color: #ffffff;
+  --md-code-hl-comment-color: #cccc00;
+  --md-typeset-table-color: #808080;
+  --md-typeset-table-stripe-color: #303030;
+  --md-code-hl-punctuation-color: #808080;
+}
+
+.md-header {
+  color: #ffffff;
+}
+
+.md-search__input + .md-search__icon {
+  color: #ff0000;
+}
+
+.md-search__input::placeholder {
+  color: #00ff00;
+}
+
+.md-typeset__table {
+  max-width: 100%;
+}
+
+th,
+td {
+  border: 1px solid var(--md-typeset-table-color);
+  border-spacing: 0;
+  border-bottom: none;
+  border-left: none;
+  border-top: none;
+}
+
+.md-typeset__table {
+  line-height: 1;
+}
+
+.md-typeset__table table:not([class]) {
+  font-size: 0.74rem;
+  border-right: none;
+}
+
+.md-typeset__table table:not([class]) td,
+.md-typeset__table table:not([class]) th {
+  padding: 9px;
+}
+
+[data-md-color-scheme="zilliqa"] .md-typeset__table tr:nth-child(2n) {
+  background-color: var(--md-typeset-table-stripe-color);
+}
+
+.center-table {
+  text-align: center;
+}
+
+.md-typeset .center-table :is(td, th):not([align]) {
+  text-align: initial; /* reset alignment for table cells */
+}
+
+.disp-btn {
+  height: 1em;
+  width: 1em;
+  border-radius: 3px;
+  border-padding: 5px 5px;
+  border-width: thin;
+  vertucal-align: middle;
+  color: #99a6ad;
+}
+
+.disp-btn:active {
+  background-color: #035992;
+}
+
+.disp-btn:hover {
+  background-color: #035992;
+  color: #99a6ad;
+}
+
+#converthex {
+  display: block;
+  /*visibility: hidden;*/
+}
+
+.disp-input {
+  background-color: #ffffff;
+  color: #000000;
+  width: 30em;
+  font-size: 14pt;
+}

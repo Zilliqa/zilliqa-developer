@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: stg-zq2-dev
+spec:
+  domains:
+    - stg-zq2-dev.zilstg.dev

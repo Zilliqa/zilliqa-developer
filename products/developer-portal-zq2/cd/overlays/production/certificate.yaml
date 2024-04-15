@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: developer-portal-zq2
+spec:
+  domains:
+    - zq2-dev.zilliqa.com
