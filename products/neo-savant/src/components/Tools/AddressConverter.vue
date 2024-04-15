@@ -1,8 +1,14 @@
 <template>
-  <div class="panel">
-    <div class="form-group mb-4">
-      <label class="d-flex align-items-center">
-        Bech32 Address
+    <el-dialog
+    :model-value="show"
+    title="Address Convertor"
+    width="500"
+  >
+    <el-row :gutter="20">
+      <el-col :span="22">
+        <el-input v-model="bech32" clearable placeholder="Bech32 Address"/>
+      </el-col>
+      <el-col :span="2">
         <el-tooltip placement="top">
           <a class="tooltip-target b3">
             <img src="@/assets/question.svg" />
@@ -18,14 +24,14 @@
             >[ZIP-1]</a>.
           </template>
         </el-tooltip>
-      </label>
-      <input type="text" class="form-control mb-2" :value="bech32" @change="handleBech32Change" />
-      <div class="text-danger text-small" v-if="bech32Error">{{ bech32Error }}</div>
-    </div>
+      </el-col>
+    </el-row> 
 
-    <div class="form-group">
-      <label class="d-flex align-items-center">
-        Base16 Address
+    <el-row :gutter="20">
+      <el-col :span="22">
+        <el-input v-model="base16" clearable placeholder="Base16 Address"/>
+      </el-col>
+      <el-col :span="2">
         <el-tooltip placement="top">
           <a class="tooltip-target">
             <img src="@/assets/question.svg" />
@@ -37,50 +43,39 @@
           in its global state and messages. This is the address format to be used by developers<br/>
           when interacting with the Zilliqa protocol.</template>
         </el-tooltip>
-      </label>
-      <input type="text" class="form-control mb-2" :value="base16" @change="handleBase16Change" />
-      <div class="text-danger text-small" v-if="base16Error">{{ base16Error }}</div>
-    </div>
-  </div>
+      </el-col>
+    </el-row>
+    <el-button type="primary" @click="handleConversion">Convert</el-button>
+  </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { toBech32Address, fromBech32Address } from "@zilliqa-js/crypto";
 import { validation } from "@zilliqa-js/util";
+import { defineProps, ref} from "vue";
 
-export default {
-  data() {
-    return {
-      bech32: "",
-      bech32Error: false,
-      base16: "",
-      base16Error: false
-    };
-  },
-  methods: {
-    handleBech32Change(ev) {
-      this.bech32Error = false;
-      this.bech32 = ev.target.value;
+const bech32 = ref("");
+const base16 = ref("");
 
-      if (!validation.isBech32(this.bech32)) {
-        return (this.bech32Error = "The string is not a valid Bech32 address.");
-      } else {
-        this.base16 = fromBech32Address(this.bech32);
-      }
-    },
+defineProps(["show"]);    // Show or hide the dialog
 
-    handleBase16Change(ev) {
-      this.bech32Error = false;
-      this.base16 = ev.target.value;
-
-      if (!validation.isAddress(this.base16)) {
-        return (this.base16Error = "The string is not a valid Base16 address.");
-      } else {
-        this.bech32 = toBech32Address(this.base16);
-      }
+const handleConversion = () => {
+  if (bech32.value.length > 0) {
+    if (!validation.isBech32(bech32.value)) {
+      return "The string is not a valid Bech32 address.";
+    } else {
+      base16.value = fromBech32Address(bech32.value);
     }
+  } else if (base16.value.length > 0) {
+    if (!validation.isAddress(base16.value)) {
+      return "The string is not a valid Base16 address.";
+    } else {
+      bech32.value = toBech32Address(base16.value);
+    }
+  } else {
+
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>
@@ -88,5 +83,9 @@ export default {
   img {
     height: 20px;
   }
+}
+
+.el-row {
+  margin-bottom: 20px;
 }
 </style>
