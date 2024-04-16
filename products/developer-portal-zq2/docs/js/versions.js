@@ -3,14 +3,13 @@ function fillInVersionNumbers() {
   for (let i = 0; i < ids.length; i++) {
     elem = ids[i];
     url = elem.innerHTML.trim();
-    console.log("ZZ - " + elem.attributes["id"].value);
     var data = {
       id: "1",
       jsonrpc: "2.0",
       method: "GetVersion",
       params: [""],
     };
-    fetch("http://" + url, {
+    fetch("https://" + url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
