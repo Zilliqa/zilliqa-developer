@@ -10,6 +10,8 @@ COPY .  /build
 RUN pip3 install --no-cache-dir -r /build/requirements.txt
 
 ENV DOC_SOURCE=docs
+ARG VERSION
+ENV VERSION=$VERSION
 WORKDIR /build
 RUN  mkdocs build
 

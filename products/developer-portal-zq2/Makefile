@@ -18,6 +18,8 @@ HERE=$(shell pwd)
 
 DOC_SOURCE=$(HERE)/docs
 export DOC_SOURCE
+VERSION=$(shell cat $(DOC_SOURCE)/../VERSION)
+export VERSION
 
 dev:
 	mkdocs serve
@@ -37,10 +39,17 @@ assemble:
 IMAGE_TAG ?= zq2-docs:latest
 
 build:
-	docker buildx build . -t $(IMAGE_TAG)
+	docker buildx build --build-arg VERSION="${VERSION}" . -t $(IMAGE_TAG)
 
 run-image: build
 	docker run --rm -p 8080:80 "$(IMAGE_TAG)"
+
+STG_TAG=asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public/developer-portal-zq2
+## This is an ugly hack - it allows me to push directly to the staging repo without going through CI - rrw 2024-04-16
+push-staging-image: build
+	docker tag "${IMAGE_TAG}" "${STG_TAG}"
+	docker push "${STG_TAG}"
+	echo Now restart the pod .. 
 
 ## Build and push the Docker image
 image/build-and-push: build

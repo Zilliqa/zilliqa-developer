@@ -71,6 +71,7 @@ theme:
   features:
     - content.code.annotate
     - navigation.indexes
+    - navigation.footer
 
 markdown_extensions:
   - attr_list
@@ -165,6 +166,7 @@ markdown_extensions:
   - pymdownx.saneheaders:
 
 extra:
+  version: !ENV VERSION
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/zilliqa
@@ -181,3 +183,4 @@ extra:
 
 plugins:
   - search
+  - markdownextradata: {}
