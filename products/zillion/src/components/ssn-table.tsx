@@ -122,11 +122,7 @@ function SsnTable(props: any) {
             {
                 Header: 'name',
                 accessor: 'name',
-                tipText: '',
-                Cell: ({ row }: any) =>
-                    <>
-                        {row.original.name === 'Ignite DAO' ? 'Torchwallet.io' : row.original.name}
-                    </>
+                tipText: ''
             },
             {
                 Header: 'address',
