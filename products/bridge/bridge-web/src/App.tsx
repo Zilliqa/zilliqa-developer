@@ -385,6 +385,17 @@ function App() {
     isLoadingApprove ||
     isWaitingForTxn;
 
+
+  const selectTokenOnDropdown = (token: TokenConfig) => {
+    const elem = document.activeElement;
+
+    if (elem) {
+      elem && (elem as any).blur();
+    }
+
+    selectedToken(token);
+  };
+
   return (
     <>
       <div className="h-screen flex items-center justify-center">
@@ -486,18 +497,54 @@ function App() {
               </div>
               <div className="join">
                 <div className="indicator">
+                  
+                  <div className="join-item">
+                    <div className="dropdown ">
+                      <button tabIndex={0} role="button" className="btn w-32">
+                        {token.logo && (
+                          <img
+                            src={token.logo}
+                            className="h-8"
+                            alt="Zilliqa Logo"
+                          />
+                        )}
+                        <p>{token.name}</p>
+
+                        <FontAwesomeIcon
+                          icon={faChevronDown}
+                          color="white"
+                          className="ml-auto"
+                        />
+                      </button>
+
+                      <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        {
+                          fromChainConfig.tokens.map(
+                            (token) => (
+                              <li
+                                key={token.address}
+                                onClick={() => selectTokenOnDropdown(token)}
+                              >
+                                {token.logo && (
+                                  <img
+                                    src={token.logo}
+                                    className="h-8"
+                                    alt="Zilliqa Logo"
+                                  />
+                                )}
+                                <p>{token.name}</p>
+                              </li>
+                            )
+                          )
+                        }
+                      </ul>
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => window.open(token.blockExplorer, "_blank")}
-                    className="btn join-item w-32"
+                    className="btn join-item"
                   >
-                    {token.logo && (
-                      <img
-                        src={token.logo}
-                        className="h-8"
-                        alt="Zilliqa Logo"
-                      />
-                    )}
-                    <p>{token.name}</p>
                     <FontAwesomeIcon
                       icon={faArrowUpRightFromSquare}
                       color="white"
