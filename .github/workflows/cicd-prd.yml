@@ -160,7 +160,7 @@ jobs:
             tag_length: 8
             tag_latest: true
           - application: developer-portal-zq2
-            image-name: developer-portal-zq2
+            image_name: developer-portal-zq2
             path: products/developer-portal-zq2
             tag_length: 8
             tag_latest: false
