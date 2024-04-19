@@ -126,6 +126,7 @@ jobs:
           cache-key: ${{ env.REGISTRY }}/${{ matrix.image_name }}-cache
           build-args: |
             DEPLOY_ENV=prd
+            VITE_ENV="PROD"
 
   build-makefile:
     permissions:
