@@ -1,6 +1,7 @@
 import { Chain } from "viem";
 import { bsc, bscTestnet, zilliqa, zilliqaTestnet } from "viem/chains";
 import fps_token from "../assets/fps_token.png";
+import hrse_token from "../assets/hrse_token.png";
 
 export enum TokenManagerType {
   MintAndBurn,
