@@ -27,6 +27,13 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
                 "https://otterscan.zilliqa.com/address/0x241c677D9969419800402521ae87C411897A029f",
               logo: fps_token,
             },
+            {
+              name: "HRSE",
+              address: "0x63B991C17010C21250a0eA58C6697F696a48cdf3",
+              blockExplorer:
+                "https://otterscan.zilliqa.com/address/0x63B991C17010C21250a0eA58C6697F696a48cdf3",
+              logo: hrse_token,
+            },
           ],
           chainId: 32769,
           isZilliqa: true,
@@ -47,6 +54,13 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               blockExplorer:
                 "https://bscscan.com/address/0x351dA1E7500aBA1d168b9435DCE73415718d212F",
               logo: fps_token,
+            },
+            {
+              name: "HRSE",
+              address: "0x3BE0E5EDC58bd55AAa381Fa642688ADC289c05a3",
+              blockExplorer:
+                "https://bscscan.com/address/0x3BE0E5EDC58bd55AAa381Fa642688ADC289c05a3",
+              logo: hrse_token,
             },
           ],
           chainId: 56,
