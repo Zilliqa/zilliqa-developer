@@ -12,5 +12,4 @@ jobs:
           use-quiet-mode: "yes"
           use-verbose-mode: "yes"
           config-file: "mlc_config.json"
-          folder-path: "products/developer-portal/zq1/docs","products/developer-portal/zq2/docs"
-          
+          folder-path: "products/developer-portal/zq1/docs,products/developer-portal/zq2/docs"
