@@ -134,24 +134,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [
-            developer-portal,
-            developer-portal-zq2,
-            devex,
-            zilliqa-isolated-server,
-          ]
+        application: [developer-portal, devex, zilliqa-isolated-server]
         include:
           - application: developer-portal
             image_name: developer-portal
             path: products/developer-portal
             tag_length: 8
             tag_latest: false
-          - application: developer-portal-zq2
-            image_name: developer-portal-zq2
-            path: products/developer-portal-zq2
-            tag_length: 8
-            tag_latest: true
           - application: devex
             image_name: devex
             path: products/devex
