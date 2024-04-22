@@ -51,7 +51,7 @@ STG_TAG=asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public/develo
 push-staging-image: build
 	docker tag "${IMAGE_TAG}" "${STG_TAG}"
 	docker push "${STG_TAG}"
-	echo Now restart the pod .. 
+	echo Now restart the pod ..
 
 ## Build and push the Docker image
 image/build-and-push: build

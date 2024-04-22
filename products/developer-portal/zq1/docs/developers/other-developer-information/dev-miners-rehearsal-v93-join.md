@@ -67,7 +67,7 @@ curl ipconfig.io
 ./launch_docker.sh
 ```
 
-### 5. You will be prompted to enter some information as shown below:
+### 5. You will be prompted to enter some information as shown below
 
     - `Assign a name to your container (default: zilliqa):` <br/> [Press
       **Enter** to skip if using default]

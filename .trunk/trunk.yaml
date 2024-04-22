@@ -29,7 +29,13 @@ lint:
       paths:
         - products/laksaj # laksaj contains a lot of embedded testnet privkeys - ignore them.
         - products/developer-portal/zq2/docs/api # Contains a lot of hashes, etc. that are interpreted as secrets
-        - products/developer-portal/zq1/docs/developers/transaction-lifecycle/dev-txn-broadcasting.md # Contains examples.
+        - products/developer-portal/zq1/docs/api # Contains a lot of hashes, etc. that are interpreted as secrets
+        - products/developer-portal/zq1/docs/scilla/interface.md # contains a lot of hashes
+        - products/developer-portal/zq1/docs/indexer             # contains a lot of hashes
+        - products/developer-portal/zq2/docs/ecosystem/indexer             # contains a lot of hashes
+        - products/developer-portal/zq1/docs/developers/transaction-lifecycle # Contains examples.
+        - products/developer-portal/zq1/docs/developers/developer-toolings
+        - products/developer-portal/zq1/docs/exchanges
         - products/bridge/smart-contracts/script/config.ts
         - products/bridge/smart-contracts/script/**/*.s.sol
         - products/bridge/bridge-web/src/config/config.ts
