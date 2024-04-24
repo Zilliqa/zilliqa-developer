@@ -46,9 +46,9 @@ build:
 run-image: build
 	docker run --rm -p 8080:80 "$(IMAGE_TAG)"
 
-STG_TAG=asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public/developer-portal-zq2
-## This is an ugly hack - it allows me to push directly to the staging repo without going through CI - rrw 2024-04-16
-push-staging-image: build
+STG_TAG=asia-docker.pkg.dev/prj-d-dev-apps-n3p4o97j/zilliqa/developer-portal
+## Push to the dev repo so you can check that the docker container actually works .. 
+push-dev-image: build
 	docker tag "${IMAGE_TAG}" "${STG_TAG}"
 	docker push "${STG_TAG}"
 	echo Now restart the pod ..
