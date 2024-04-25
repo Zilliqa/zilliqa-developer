@@ -27,3 +27,7 @@ spec:
               memory: 200Mi
             requests:
               memory: 100Mi
+          readinessProbe:
+            httpGet:
+              path: /zilliqa2/
+              port: 80

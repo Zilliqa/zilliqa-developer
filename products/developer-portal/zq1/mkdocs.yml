@@ -1,0 +1,497 @@
+site_name: Zilliqa Developer Portal
+
+site_url: https://dev.zilliqa.com/zilliqa1
+docs_dir: docs
+site_description: Zilliqa blockhain
+site_author: Zilliqa
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - markdown.extensions.toc:
+      slugify:
+        !!python/object/apply:pymdownx.slugs.slugify { kwds: { case: lower } }
+      permalink: ""
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.md_in_html:
+  - pymdownx.superfences:
+      preserve_tabs: true
+      custom_fences:
+        # Mermaid diagrams
+        - name: diagram
+          class: diagram
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: math
+          class: arithmatex
+          format:
+            !!python/object/apply:pymdownx.arithmatex.arithmatex_fenced_format {
+              kwds: { mode: generic, tag: pre },
+            }
+  # TODO: See https://github.com/facelessuser/pymdown-extensions
+  #        - name: md-render
+  #          class: md-render
+  #          format: !!python/name:tools.pymdownx_md_render.md_sub_render
+  - pymdownx.highlight:
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+        - name: pycon3
+          lang: pycon
+          options:
+            python3: true
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite:
+      custom_inline:
+        - name: math
+          class: arithmatex
+          format:
+            !!python/object/apply:pymdownx.arithmatex.arithmatex_inline_format {
+              kwds: { mode: generic },
+            }
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shorthand: true
+      social_url_shortener: true
+      user: facelessuser
+      repo: pymdown-extensions
+      normalize_issue_symbols: true
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.progressbar:
+  - pymdownx.arithmatex:
+      generic: true
+      block_tag: "pre"
+  - pymdownx.mark:
+  - pymdownx.striphtml:
+  - pymdownx.snippets:
+      base_path:
+        - docs/.snippets
+        - LICENSE.md
+      #      auto_append:
+      #      - refs.md
+      check_paths: true
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.saneheaders:
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/zilliqa
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/invite/XMRE9tt
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/ZilliqaDevs
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/zilliqa
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCvinnFbf0u71cajoxKcfZIQ
+    - icon: octicons/server-16
+      link: https://status.zilliqa.com
+
+plugins:
+  - search
+
+theme:
+  name: "material"
+  custom_dir: overrides/
+  language: en
+  logo: assets/img/logo.png
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  pymdownx:
+    sponsor: "https://github.com/sponsors/facelessuser"
+  features:
+    # - announce.dismiss
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+    # - header.autohide
+    # - navigation.expand
+    - navigation.indexes
+    - navigation.instant
+    # - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    # - toc.integrate
+  favicon: assets/images/favicon.png
+  icon: null
+  #  custom_dir: "tailwind_theme/"
+  #  theme_dir: "tailwind_theme/"
+  static_templates:
+    - 404.html
+    - 50x.html
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+  include_search_page: false
+  search_index_only: false
+  include_sidebar: yes
+  show_sidebar: true
+
+  highlightjs: true
+  hljs_languages:
+    - bash
+    - cpp
+    - python
+    - llvm
+    - json
+    - javascript
+    - go
+    - rust
+
+  hljs_style: "monokai-sublime"
+
+  #  navigation_depth: 3
+  #  nav_style: primary
+
+  shortcuts:
+    help: 191 # ?
+    next: 78 # n
+    previous: 80 # p
+    search: 83 # s
+
+nav:
+  - Basics:
+      - Blockchain Basics:
+          - Blockchain: basics/blockchain-basics/basics-intro-blockchain.md
+          - Consensus: basics/blockchain-basics/basics-intro-consensus.md
+          - Accounts: basics/blockchain-basics/basics-intro-accounts.md
+          - Transactions: basics/blockchain-basics/basics-intro-txns.md
+          - Gas: basics/blockchain-basics/basics-intro-gas.md
+      - Zilliqa Architecture:
+          - Nodes: basics/zilliqa-architecture/basics-zil-nodes.md
+          - Sharding: basics/zilliqa-architecture/basics-zil-sharding.md
+          - Consensus: basics/zilliqa-architecture/basics-zil-consensus.md
+          - Schnorr Signatures: basics/zilliqa-architecture/basics-zil-schnorr-signatures.md
+          - Reward: basics/zilliqa-architecture/basics-zil-reward.md
+          - Contract: basics/zilliqa-architecture/basics-zil-contract.md
+          - Gas: basics/zilliqa-architecture/basics-zil-gas.md
+  - API:
+      - Introduction:
+          - Introduction: api/introduction/api-introduction.md
+          - API Endpoints: api/introduction/api-endpoints.md
+          - EVM methods: api/introduction/evm-methods.md
+      - Blockchain-related Methods:
+          - Ds Block Listing: api/blockchain-related-methods/api-blockchain-ds-block-listing.md
+          - Get Blockchain Info: api/blockchain-related-methods/api-blockchain-get-blockchain-info.md
+          - Get Current Ds Epoch: api/blockchain-related-methods/api-blockchain-get-current-ds-epoch.md
+          - Get Current Ds Comm: api/blockchain-related-methods/api-blockchain-get-current-ds-comm.md
+          - Get Current Mini Epoch: api/blockchain-related-methods/api-blockchain-get-current-mini-epoch.md
+          - Get Ds Block: api/blockchain-related-methods/api-blockchain-get-ds-block.md
+          - Get Ds Block Rate: api/blockchain-related-methods/api-blockchain-get-ds-block-rate.md
+          - Get Latest Ds Block: api/blockchain-related-methods/api-blockchain-get-latest-ds-block.md
+          - Get Latest Tx Block: api/blockchain-related-methods/api-blockchain-get-latest-tx-block.md
+          - Get Miner Info: api/blockchain-related-methods/api-blockchain-get-miner-info.md
+          - Get Network Id: api/blockchain-related-methods/api-blockchain-get-network-id.md
+          - Get Node Type: api/blockchain-related-methods/api-blockchain-get-node-type.md
+          - Get Num Peers: api/blockchain-related-methods/api-blockchain-get-num-peers.md
+          - Get Sharding Structure: api/blockchain-related-methods/api-blockchain-get-sharding-structure.md
+          - Num Ds Blocks: api/blockchain-related-methods/api-blockchain-get-num-ds-blocks.md
+          - Get Num Tx: api/blockchain-related-methods/api-blockchain-get-num-tx.md
+          - Get Num Tx Blocks: api/blockchain-related-methods/api-blockchain-get-num-tx-blocks.md
+          - Get Prev Difficulty: api/blockchain-related-methods/api-blockchain-get-prev-difficulty.md
+          - Get Prev Ds Difficulty: api/blockchain-related-methods/api-blockchain-get-prev-ds-difficulty.md
+          - Get Total Coin Supply: api/blockchain-related-methods/api-blockchain-get-total-coin-supply.md
+          - Get Tx Rate: api/blockchain-related-methods/api-blockchain-get-tx-rate.md
+          - Get Tx Block: api/blockchain-related-methods/api-blockchain-get-tx-block.md
+          - Get Tx Block Rate: api/blockchain-related-methods/api-blockchain-get-tx-block-rate.md
+          - Tx Block Listing: api/blockchain-related-methods/api-blockchain-tx-block-listing.md
+          - Get Software Version: api/blockchain-related-methods/api-blockchain-get-software-version.md
+      - Transaction-related Methods:
+          - Create Tx: api/transaction-related-methods/api-transaction-create-tx.md
+          - Get Minimum Gas Price: api/transaction-related-methods/api-transaction-get-minimum-gas-price.md
+          - Get Num Txns Dsepoch: api/transaction-related-methods/api-transaction-get-num-txns-dsepoch.md
+          - Get Num Txns Txepoch: api/transaction-related-methods/api-transaction-get-num-txns-txepoch.md
+          - Get Recent Txs: api/transaction-related-methods/api-transaction-get-recent-txs.md
+          - Get Tx: api/transaction-related-methods/api-transaction-get-tx.md
+          - Get Soft Confirmed Tx: api/transaction-related-methods/api-transaction-get-soft-confirmed-tx.md
+          - Get Transaction Status: api/transaction-related-methods/api-transaction-get-transaction-status.md
+          - Get Txs For Txblock: api/transaction-related-methods/api-transaction-get-txs-for-txblock.md
+          - Get Txs For Txblock Ex: api/transaction-related-methods/api-transaction-get-txs-for-txblock-ex.md
+          - Get Txbodies For Txblock: api/transaction-related-methods/api-transaction-get-txbodies-for-txblock.md
+          - Get Txbodies For Txblock Ex: api/transaction-related-methods/api-transaction-get-txbodies-for-txblock-ex.md
+      - Contract-related Methods:
+          - Get Contractaddress From Txid: api/contract-related-methods/api-contract-get-contractaddress-from-txid.md
+          - Get Smartcontract Code: api/contract-related-methods/api-contract-get-smartcontract-code.md
+          - Get Smartcontract Init: api/contract-related-methods/api-contract-get-smartcontract-init.md
+          - Get Smartcontracts: api/contract-related-methods/api-contract-get-smartcontracts.md
+          - Get Smartcontract State: api/contract-related-methods/api-contract-get-smartcontract-state.md
+          - Get Smartcontract Substate: api/contract-related-methods/api-contract-get-smartcontract-substate.md
+          - Get State Proof: api/contract-related-methods/api-contract-get-state-proof.md
+      - Account-related Methods:
+          - Get Balance: api/account-related-methods/api-account-get-balance.md
+  - Developers:
+      - Getting Started:
+          - Introduction: developers/getting-started/dev-started-introduction.md
+          - Helloworld: developers/getting-started/dev-started-helloworld.md
+          - Environment: developers/getting-started/dev-started-env.md
+      - User Key Management:
+          - Introduction: developers/user-key-management/dev-keys-introduction.md
+          - Zilpay: developers/user-key-management/dev-keys-zilpay.md
+          - Pkey: developers/user-key-management/dev-keys-pkey.md
+          - Zrc2 Wallet Support: developers/user-key-management/dev-keys-zrc2-wallet-support.md
+          - Magic: developers/user-key-management/dev-keys-magic.md
+      - Developer Toolings:
+          - Ceres: developers/developer-toolings/dev-tools-ceres.md
+          - SDKs:
+              - Zilliqa-js: developers/developer-toolings/sdks/dev-tools-zilliqajs.md
+              - Zilliqa-rs: developers/developer-toolings/sdks/dev-tools-zilliqars.md
+              - Pyzil: developers/developer-toolings/sdks/dev-tools-pyzil.md
+              - Gozilliqa: developers/developer-toolings/sdks/dev-tools-gozilliqa.md
+              - Java: developers/developer-toolings/sdks/dev-tools-java.md
+              - Sdks: developers/developer-toolings/sdks/dev-tools-sdks.md
+          - Websockets: developers/developer-toolings/dev-tools-websockets.md
+          - Cli: developers/developer-toolings/dev-tools-cli.md
+          - Explorer: developers/developer-toolings/dev-tools-explorer.md
+          - Faucet: developers/developer-toolings/dev-tools-faucet.md
+          - Scilla Parser: developers/developer-toolings/dev-tools-scillaparser.md
+      - Other Developer Information:
+          - Dev Wrapped Zil: developers/other-developer-information/dev-wrapped-tokens.md
+          - v9.3.0 Miners rehearsal join: developers/other-developer-information/dev-miners-rehearsal-v93-join.md
+      - Transaction Lifecycle:
+          - Signing: developers/transaction-lifecycle/dev-txn-signing.md
+          - Broadcasting: developers/transaction-lifecycle/dev-txn-broadcasting.md
+          - Polling: developers/transaction-lifecycle/dev-txn-polling.md
+          - Confirmation: developers/transaction-lifecycle/dev-txn-confirmation.md
+          - Receipt: developers/transaction-lifecycle/dev-txn-receipt.md
+      - Educational Resources:
+          - Chainlink: developers/educational-resources/chainlink.md
+          - Videos: developers/educational-resources/dev-education-videos.md
+          - "Sample app RentOnZilliqa":
+              - Introduction: "developers/educational-resources/sample-app-rentonzilliqa/dev-rentonzilliqa-introduction.md"
+              - Scilla Contract:
+                  - Contract: "developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-contract.md"
+                  - Library: "developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-library.md"
+                  - Mutable Variables: "developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-mutable-variables.md"
+                  - Procedures: "developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-procedures.md"
+                  - Transitions: "developers/educational-resources/sample-app-rentonzilliqa/scilla-contract/dev-rentonzilliqa-transitions.md"
+              - Frontend Application:
+                  - Frontend: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-frontend.md"
+                  - Components: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-components.md"
+                  - Scripting: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-scripting.md"
+                  - Modals: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-modals.md"
+                  - Pages: "developers/educational-resources/sample-app-rentonzilliqa/frontend-application/dev-rentonzilliqa-pages.md"
+  - Indexer:
+      - Indexer Introduction: indexer/indexer-introduction.md
+      - ZILs:
+          - All Transactions: indexer/zil-all-transactions.md
+          - Balance: indexer/zil-balance.md
+      - ZRC-2:
+          - Contract Details: indexer/zrc2-contract-details.md
+          - Contract List: indexer/zrc2-contract-list.md
+          - Balance: indexer/zrc2-balance.md
+          - All Balances: indexer/zrc2-all-balances.md
+          - Transaction History: indexer/zrc2-transaction-history.md
+      - ZRC-6:
+          - Recently Minted: indexer/zrc6-recently-minted.md
+          - Asset Details: indexer/zrc6-asset-details.md
+          - User Assets: indexer/zrc6-user-assets.md
+          - Asset Metadata: indexer/zrc6-asset-metadata.md
+          - Search Attribute: indexer/zrc6-search-attribute.md
+      - Marketplace:
+          - Fixed Price: indexer/marketplace-fixed-price.md
+          - English Auction: indexer/marketplace-english-auction.md
+          - Brand Collectible List: indexer/marketplace-brand-collectible-list.md
+          - Brand Collectible Assets: indexer/marketplace-brand-collectible-assets.md
+          - Brand Collectible Details: indexer/marketplace-brand-collectible-details.md
+
+  - Miners:
+      - Mining:
+          - Getting Started: miners/mining/mining-getting-started.md
+          - Zilclient: miners/mining/mining-zilclient.md
+          - Zilminer: miners/mining/mining-zilminer.md
+          - Proxy: miners/mining/mining-proxy.md
+          - Additional Info: miners/mining/mining-additional-info.md
+  - Staking:
+      - Zilliqa Seed Node Staking:
+          - Staking Overview: staking/zilliqa-seed-node-staking/overview.md
+          - Staking Disclaimer: staking/zilliqa-seed-node-staking/disclaimer.md
+      - Staking Phase 1.1:
+          - Phase 1.1 Notice: staking/staking-phase-1.1/staking-phase11-notice.md
+          - Phase 1 Overview: staking/staking-phase-1.1/overview.md
+          - General Information: staking/staking-phase-1.1/staking-general-information.md
+          - Delegators:
+              - Overview: staking/staking-phase-1.1/delegators/staking-delegator-overview.md
+              - Reading Contract States: staking/staking-phase-1.1/delegators/staking-delegator-reading-contract-state.md
+              - Operations: staking/staking-phase-1.1/delegators/staking-delegator-operations.md
+              - Gzil: staking/staking-phase-1.1/delegators/staking-delegator-gzil.md
+          - SSN Operators:
+              - Before You Start: staking/staking-phase-1.1/ssn-operators/staking-ssn-before-you-start.md
+              - Setup: staking/staking-phase-1.1/ssn-operators/staking-ssn-setup.md
+              - Enrollment: staking/staking-phase-1.1/ssn-operators/staking-ssn-enrollment.md
+              - Staking Commission Management: staking/staking-phase-1.1/ssn-operators/staking-ssn-commission-management.md
+              - Maintenance: staking/staking-phase-1.1/ssn-operators/staking-ssn-maintainance.md
+              - Upgrading: staking/staking-phase-1.1/ssn-operators/staking-ssn-upgrading.md
+          - Staking Error Codes: staking/staking-phase-1.1/staking-error-codes.md
+  - Scilla:
+      - Overview: scilla/index.md
+      - Introduction: scilla/intro.md
+      - Interface: scilla/interface.md
+      - Scilla By Example: scilla/scilla-by-example.md
+      - Scilla Checker: scilla/scilla-checker.md
+      - Scilla In Depth: scilla/scilla-in-depth.md
+      - Scilla Tips and Tricks: scilla/scilla-tips-and-tricks.md
+      - Scilla Trial: scilla/scilla-trial.md
+      - Standard Library: scilla/stdlib.md
+  - EVM:
+      - Getting Started:
+          - Introduction: zilevm/getting-started/zilevm-introduction.md
+      - Onboard:
+          - Configure Metamask: zilevm/onboard/onboard-metamask.md
+      - Developer Onboarding:
+          - Introduction: zilevm/developer-onboarding/dev-onboarding-introduction.md
+          - Quirks: zilevm/developer-onboarding/dev-quirks.md
+          - Remix: zilevm/developer-onboarding/remix.md
+          - Truffle: zilevm/developer-onboarding/truffle.md
+          - HardHat: zilevm/developer-onboarding/hardhat.md
+          - OpenZeppelin: zilevm/developer-onboarding/open-zeppelin.md
+          - VSC Plugins: zilevm/developer-onboarding/vsc-plugins.md
+      - Protocol:
+          - Gas: zilevm/protocol/protocol-gas.md
+          - OPCodes: zilevm/protocol/protocol-opcodes.md
+          - Precompiles: zilevm/protocol/protocol-precompiles.md
+          - Scilla/EVM Interwork: zilevm/protocol/protocol-interwork.md
+          - RPC: zilevm/protocol/developer-rpc.md
+  - Zilliqa 2:
+      - Overview: zq2/index.md
+  - Exchanges:
+      - Exchange Integration:
+          - Getting Started:
+              - Getting Started: exchanges/exchange-integration/getting-started/exchange-introduction.md
+              - Ip Whitelisting: exchanges/exchange-integration/getting-started/exchange-ip-whitelisting.md
+              - Key Whitelisting 1: exchanges/exchange-integration/getting-started/exchange-key-whitelisting-1.md
+              - Key Whitelisting 2: exchanges/exchange-integration/getting-started/exchange-key-whitelisting-2.md
+          - Account Management: exchanges/exchange-integration/exchange-account-management.md
+          - Sending Transactions: exchanges/exchange-integration/exchange-sending-transactions.md
+          - Tracking Deposits: exchanges/exchange-integration/exchange-tracking-deposits.md
+          - Transaction Receipts: exchanges/exchange-integration/exchange-transaction-receipts.md
+          - Managing Zrc2 Tokens: exchanges/exchange-integration/exchange-managing-zrc2-tokens.md
+      - Rosetta:
+          - Introduction:
+              - Introduction: exchanges/rosetta/introduction/rosetta-introduction.md
+              - Unsupported Api: exchanges/rosetta/introduction/rosetta-unsupported-api.md
+              - Setting Up Seed Node: exchanges/rosetta/introduction/rosetta-setting-up-seed-node.md
+              - Setting Up No Seed Node: exchanges/rosetta/introduction/rosetta-setting-up-no-seed-node.md
+          - Data API:
+              - Network:
+                  - List: exchanges/rosetta/data-api/network/rosetta-data-network-list.md
+                  - Options: exchanges/rosetta/data-api/network/rosetta-data-network-options.md
+                  - Status: exchanges/rosetta/data-api/network/rosetta-data-network-status.md
+              - Account:
+                  - Account Balance: exchanges/rosetta/data-api/account/rosetta-data-account-balance.md
+              - Block:
+                  - Block: exchanges/rosetta/data-api/block/rosetta-data-block.md
+                  - Block Transaction: exchanges/rosetta/data-api/block/rosetta-data-block-transaction.md
+          - Construction API:
+              - Construction: exchanges/rosetta/construction-api/rosetta-construction.md
+              - Derive: exchanges/rosetta/construction-api/rosetta-construction-derive.md
+              - Preprocess: exchanges/rosetta/construction-api/rosetta-construction-preprocess.md
+              - Metadata: exchanges/rosetta/construction-api/rosetta-construction-metadata.md
+              - Payloads: exchanges/rosetta/construction-api/rosetta-construction-payload.md
+              - Parse: exchanges/rosetta/construction-api/rosetta-construction-parse.md
+              - Combine: exchanges/rosetta/construction-api/rosetta-construction-combine.md
+              - Hash: exchanges/rosetta/construction-api/rosetta-construction-hash.md
+              - Submit: exchanges/rosetta/construction-api/rosetta-construction-submit.md
+  - Contributors:
+      - Contributors:
+          - Buildzil: contributors/contributors/contribute-buildzil.md
+          - Guidelines: contributors/contributors/contribute-guidelines.md
+          - Standards: contributors/contributors/contribute-standards.md
+      - Core Protocol Design:
+          - Design Overview:
+              - Operation: contributors/core-protocol-design/design-overview/core-node-operation.md
+          - Consensus Layer:
+              - Consensus: contributors/core-protocol-design/consensus-layer/core-consensus.md
+              - Multisignatures: contributors/core-protocol-design/consensus-layer/core-multisignatures.md
+          - Network Layer:
+              - Gossip: contributors/core-protocol-design/network-layer/core-gossip.md
+              - Broadcasting: contributors/core-protocol-design/network-layer/core-broadcasting.md
+              - Blacklist: contributors/core-protocol-design/network-layer/core-blacklist.md
+              - Messaging Limits: contributors/core-protocol-design/network-layer/core-messaging-limits.md
+          - Messaging Layer:
+              - Message Dispatch: contributors/core-protocol-design/messaging-layer/core-message-dispatch.md
+              - Message Queues: contributors/core-protocol-design/messaging-layer/core-message-queues.md
+          - Data Layer:
+              - Accounts: contributors/core-protocol-design/data-layer/core-accounts.md
+              - Transaction Lifecycle: contributors/core-protocol-design/data-layer/core-transaction-lifecycle.md
+              - Incremental Db: contributors/core-protocol-design/data-layer/core-incremental-db.md
+              - Scilla Operation: contributors/core-protocol-design/data-layer/core-scilla-operation.md
+          - Directory Service:
+              - Ds Mimo: contributors/core-protocol-design/directory-service/core-ds-mimo.md
+              - Ds Reputation: contributors/core-protocol-design/directory-service/core-ds-reputation.md
+          - Lookup:
+              - Isolated Server: contributors/core-protocol-design/lookup/core-isolated-server.md
+              - Websocket Server: contributors/core-protocol-design/lookup/core-websocket-server.md
+              - Transaction Dispatch: contributors/core-protocol-design/lookup/core-transaction-dispatch.md
+              - Multipliers: contributors/core-protocol-design/lookup/core-multipliers.md
+          - Mining:
+              - Pow: contributors/core-protocol-design/mining/core-pow.md
+              - Difficulty Adjustment: contributors/core-protocol-design/mining/core-difficulty-adjustment.md
+              - Por: contributors/core-protocol-design/mining/core-por.md
+              - Coinbase: contributors/core-protocol-design/mining/core-coinbase.md
+              - Global Gas Price: contributors/core-protocol-design/mining/core-gas-computation.md
+          - Mitigation Measures:
+              - Guard Mode: contributors/core-protocol-design/mitigation-measures/core-guard-mode.md
+              - Rejoin Mechanism: contributors/core-protocol-design/mitigation-measures/core-rejoin-mechanism.md
+              - View Change: contributors/core-protocol-design/mitigation-measures/core-view-change.md
+              - Diagnostic Data: contributors/core-protocol-design/mitigation-measures/core-diagnostic-data.md
+              - Status Server: contributors/core-protocol-design/mitigation-measures/core-status-server.md
+  - Ecosystem: ecosystem/index.md
+  - FAQ:
+      - EVM: faq/faq-introduction.md
+      - Node installation:
+          - Seed/SSN: faq/faq-seed-ssn.md
+          - Mining: faq/faq-mining.md
+  - Guides:
+      - Hardhat: developers/guides/developing-with-hardhat.md
+  - News: news/index.md

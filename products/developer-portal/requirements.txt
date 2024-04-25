@@ -21,3 +21,4 @@ requests==2.31.0
 six==1.16.0
 urllib3==1.26.18
 watchdog==2.1.9
+mkdocs-markdownextradata-plugin==0.2.5
