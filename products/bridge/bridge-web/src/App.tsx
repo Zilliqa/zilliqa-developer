@@ -498,7 +498,7 @@ function App() {
                 <div className="indicator">
                   <div className="join-item">
                     <div className="dropdown ">
-                      <button tabIndex={0} role="button" className="btn w-32">
+                      <button tabIndex={0} role="button" className="btn w-40">
                         {token.logo && (
                           <img
                             src={token.logo}
@@ -524,14 +524,16 @@ function App() {
                             key={token.address}
                             onClick={() => selectTokenOnDropdown(token)}
                           >
-                            {token.logo && (
-                              <img
-                                src={token.logo}
-                                className="h-8"
-                                alt="Zilliqa Logo"
-                              />
-                            )}
-                            <p>{token.name}</p>
+                            <div className="flex items-center gap-2">
+                              {token.logo && (
+                                <img
+                                  src={token.logo}
+                                  className="h-8"
+                                  alt="Zilliqa Logo"
+                                />
+                              )}
+                              <p>{token.name}</p>
+                            </div>
                           </li>
                         ))}
                       </ul>

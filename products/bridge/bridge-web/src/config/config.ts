@@ -1,7 +1,8 @@
 import { Chain } from "viem";
 import { bsc, bscTestnet, zilliqa, zilliqaTestnet } from "viem/chains";
 import fps_token from "../assets/fps_token.png";
-import hrse_token from "../assets/hrse_token.png";
+import test_hrse_token from "../assets/salami_hrse.webp";
+import hrse_token from "../assets/hrse_token.webp";
 
 export enum TokenManagerType {
   MintAndBurn,
@@ -84,12 +85,14 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               address: "0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3",
               blockExplorer:
                 "https://otterscan.testnet.zilliqa.com/address/0x8618d39a8276D931603c6Bc7306af6A53aD2F1F3",
+              logo: fps_token,
             },
             {
               name: "TSLM",
               address: "0xE90Dd366D627aCc5feBEC126211191901A69f8a0",
               blockExplorer:
                 "https://otterscan.testnet.zilliqa.com/address/0xE90Dd366D627aCc5feBEC126211191901A69f8a0",
+              logo: test_hrse_token,
             },
           ],
           chainId: 33101,
@@ -110,12 +113,14 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               address: "0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B",
               blockExplorer:
                 "https://testnet.bscscan.com/address/0x5190e8b4Bbe8C3a732BAdB600b57fD42ACbB9F4B",
+              logo: fps_token,
             },
             {
               name: "TST",
               address: "0x7Cc585de659E8938Aa7d5709BeaF34bD108bdC03",
               blockExplorer:
                 "https://testnet.bscscan.com/address/0x7Cc585de659E8938Aa7d5709BeaF34bD108bdC03",
+              logo: test_hrse_token,
             },
           ],
           chainId: 97,
