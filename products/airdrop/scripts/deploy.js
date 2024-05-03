@@ -1,12 +1,10 @@
 const hre = require("hardhat");
 
 async function main() {
-
   const Disperse = await ethers.getContractFactory("Disperse");
   const disperse = await Disperse.deploy();
   await disperse.waitForDeployment();
   console.log(disperse.target);
-
 }
 
 main()
