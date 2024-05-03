@@ -1,28 +1,34 @@
 version: 0.1
 cli:
-  version: 1.5.1
+  version: 1.22.0
 plugins:
   sources:
     - id: trunk
-      ref: v0.0.11
+      ref: v1.2.1
       uri: https://github.com/trunk-io/plugins
 
 lint:
   enabled:
-    - actionlint@1.6.23
+    - clippy@1.65.0
+    - gofmt@1.20.4
+    - golangci-lint@1.57.2
+    - oxipng@9.1.1
+    - shellcheck@0.10.0
+    - taplo@0.8.1
+    - actionlint@1.6.27
     - hadolint@2.12.0
-    - eslint@8.35.0
-    - buildifier@6.0.1
+    - eslint@8.57.0
+    - buildifier@7.1.1
     - git-diff-check
-    - markdownlint@0.33.0
-    - prettier@2.8.4
-    - shfmt@3.5.0
-    - svgo@3.0.2
-    - gitleaks@8.16.0
-    - flake8@6.0.0
-    - isort@5.12.0
-    - black@23.1.0
-    - rustfmt@1.61.0
+    - markdownlint@0.40.0
+    - prettier@3.2.5
+    - shfmt@3.6.0
+    - svgo@3.2.0
+    - gitleaks@8.18.2
+    - flake8@7.0.0
+    - isort@5.13.2
+    - black@24.4.2
+    - rustfmt@1.65.0
     # - shellcheck@0.9.0 - removed for being over-prissy and wanting tab indents - rrw 2023-04-25
   ignore:
     - linters: [gitleaks]
@@ -46,6 +52,7 @@ lint:
         - products/bridge/bridge-web
     - linters: [ALL]
       paths:
+        - products/airdrop/**
         - products/developer-portal/Dockerfile # Annoying, but trunk is now very opinionated on how you write dockerfiles.
         - products/developer-portal/zq2/docs/js/** # trunk does not know this is looking for metamask in the user's browser.
         - products/developer-portal/zq2/docs/index.md # contains legitimate empty links
