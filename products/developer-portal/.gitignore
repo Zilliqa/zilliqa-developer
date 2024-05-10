@@ -1,5 +1,6 @@
 # Used for checking out versions of zq2
 cache/**
+!cache/.gitkeep
 # Used for rendering API docs.
 zq2/docs/versions/**
 docgen/target
