@@ -73,12 +73,28 @@ fn main() -> Result<()> {
             fs::remove_dir_all(&target_dir)?;
         }
 
+        let index_file_path = root_path.clone().join("zq2").join("mkdocs.yaml");
+        let index_file_name = index_file_path
+            .as_os_str()
+            .to_str()
+            .ok_or(anyhow!("unprintable index file path"))?
+            .to_string();
+        let key_prefix = format!("nav/{v}/api");
         println!(" Generating documentation from {v} into {target_dir_str}...");
         let z2_dir = zq2_checkout_dir.clone();
         println!(" Running {z2_dir:?}/z2 .. ");
         // Now we can run the docgen
         ok = Command::new("scripts/z2")
-            .args(["doc-gen", &target_dir_str, "--id-prefix", &id_prefix])
+            .args([
+                "doc-gen",
+                &target_dir_str,
+                "--id-prefix",
+                &id_prefix,
+                "--index-file",
+                &index_file_name,
+                "--key-prefix",
+                &key_prefix,
+            ])
             .current_dir(z2_dir.clone())
             .status()?
             .success();
