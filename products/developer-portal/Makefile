@@ -19,6 +19,9 @@ HERE=$(shell pwd)
 VERSION=$(shell cat $(HERE)/VERSION)
 export VERSION
 
+autogen:
+	(cd $(HERE)/docgen && cargo run $(HERE))
+
 dev1:
 	(cd zq1 && DOC_SOURCE=$(HERE)/zq1/docs mkdocs serve)
 

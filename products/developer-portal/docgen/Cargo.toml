@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.83"
-serde = { version="1.0.201", features = [ "derive" ] }
+serde = { version = "1.0.201", features = ["derive"] }
 serde_yaml = "0.9.34"
+tokio = "1.37.0"
+zqutils = { git = "https://github.com/zilliqa/zq-base", branch = "users/richard/20" }
