@@ -45,13 +45,8 @@ async fn main() -> Result<()> {
         println!("Compiling zq2 version {name}");
         let cache_dir: PathBuf = root_path.clone().join("cache");
         let zq2_checkout_dir: PathBuf = cache_dir.clone().join("zq2");
-        let id_prefix = format!("versions/{name}/");
-        let target_dir = root_path
-            .clone()
-            .join("zq2")
-            .join("docs")
-            .join("versions")
-            .join(&name);
+        let id_prefix = format!("Versions/{name}/");
+        let target_dir = root_path.clone().join("zq2").join("docs");
         let target_dir_str = target_dir
             .as_os_str()
             .to_str()
@@ -88,9 +83,10 @@ async fn main() -> Result<()> {
                 .success_or("Cannot run git checkout")?;
         }
         // First, zap the target
-        println!(" Removing {target_dir:?} ... ");
-        if fs::metadata(&target_dir).is_ok() {
-            fs::remove_dir_all(&target_dir)?;
+        let doc_dir = format!("{target_dir_str}/versions/{name}");
+        println!(" Removing {doc_dir} ... ");
+        if fs::metadata(&doc_dir).is_ok() {
+            fs::remove_dir_all(&doc_dir)?;
         }
 
         let index_file_path = root_path.clone().join("zq2").join("mkdocs.yaml");

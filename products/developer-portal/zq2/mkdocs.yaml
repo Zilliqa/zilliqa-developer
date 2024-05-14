@@ -1,15 +1,13 @@
-# Necessary because we rewrite this file when generating docs and serde_yaml doesn't
-# understand some of the odd constructs in use - rrw 2024-05-13
 INHERIT: ./parent.yaml
 nav:
-  - News: "index.md"
-  - Home: "home.md"
-  - "New in ZQ2": "changes.md"
+  - News: index.md
+  - Home: home.md
+  - New in ZQ2: changes.md
   - Zilliqa 1:
       - Documentation: zq1/index.md
-  - "Endpoints": "endpoints.md"
-  - "FAQ": "faq.md"
-  - Api:
+  - Endpoints: endpoints.md
+  - FAQ: faq.md
+  - Versions:
       - Erigon:
           - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
       - Ethereum: api/ethereum/eth-rpc.md
@@ -30,8 +28,8 @@ nav:
           - GetNetworkId: api/zilliqa/api-blockchain-get-network-id.md
           - GetVersion: api/zilliqa/api-blockchain-get-software-version.md
   - Ecosystem:
-      - "DeFi": "ecosystem/defi.md"
-      - "Indexers": "ecosystem/indexers.md"
+      - DeFi: ecosystem/defi.md
+      - Indexers: ecosystem/indexers.md
       - Indexer:
           - Indexer Introduction: ecosystem/indexer/indexer-introduction.md
           - ZILs:
@@ -55,15 +53,15 @@ nav:
               - Brand Collectible List: ecosystem/indexer/marketplace-brand-collectible-list.md
               - Brand Collectible Assets: ecosystem/indexer/marketplace-brand-collectible-assets.md
               - Brand Collectible Details: ecosystem/indexer/marketplace-brand-collectible-details.md
-      - "Oracles": "ecosystem/chainlink.md"
-      - "NFTs": "ecosystem/nft.md"
-      - "Nodes": "ecosystem/nodes.md"
-      - "Wrapped ZIL": "ecosystem/wzil.md"
+      - Oracles: ecosystem/chainlink.md
+      - NFTs: ecosystem/nft.md
+      - Nodes: ecosystem/nodes.md
+      - Wrapped ZIL: ecosystem/wzil.md
   - Running:
-      - "Nodes": "running/node.md"
-      - "Validators": "running/validator.md"
-      - "Networks": "running/network.md"
-  - "SDKs and tools": "sdk.md"
+      - Nodes: running/node.md
+      - Validators: running/validator.md
+      - Networks: running/network.md
+  - SDKs and tools: sdk.md
   - EVM:
       - Interop: zilevm/interop.md
       - Metamask: zilevm/metamask.md
@@ -71,7 +69,7 @@ nav:
           - Hardhat: zilevm/tools/hardhat.md
           - OpenZeppelin: zilevm/tools/openzeppelin.md
           - RemixIDE: zilevm/tools/remix.md
-          - "VSCode Plugins": zilevm/tools/vsc-plugins.md
+          - VSCode Plugins: zilevm/tools/vsc-plugins.md
   - Zilliqa:
-      - "Native API": zilliqa/zilliqa.md
-      - "Introduction": zilliqa/introduction-videos.md
+      - Native API: zilliqa/zilliqa.md
+      - Introduction: zilliqa/introduction-videos.md
