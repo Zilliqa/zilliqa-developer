@@ -106,7 +106,7 @@ function SsnTable(props: any) {
 
     const googleSSN: SsnStats = {
         address: "a57801697a2fcef80494928709ff9c69de832ee5",
-        name: "Google.com",
+        name: "Google Cloud",
         apiUrl: "https://api.google.ssn.zilliqa.com",
         stakeAmt: "0",
         bufferedDeposits: "0",
