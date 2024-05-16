@@ -98,10 +98,25 @@ function SsnTable(props: any) {
     const dispatch = useAppDispatch();
     const role = useAppSelector(state => state.user.role);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_ssn_stats_loading);
-    const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
+    let ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
     const totalStakeAmt = computeTotalStakeAmt(ssnList);
 
+
+
+    const googleSSN: SsnStats = {
+        address: "a57801697a2fcef80494928709ff9c69de832ee5",
+        name: "Google.com",
+        apiUrl: "https://api.google.ssn.zilliqa.com",
+        stakeAmt: "0",
+        bufferedDeposits: "0",
+        commRate: "4",
+        commReward: "0",
+        delegNum: "0",
+        status: "BELOW MIN.STAKE"
+    };
+
+    ssnList = [...ssnList, googleSSN];
     const handleStake = (name: string, address: string, commRate: string) => {
         // set dashboard state variable
         dispatch(UPDATE_STAKE_MODAL_DATA({
