@@ -1,2 +1,5 @@
 # Object files
 obj/**
+# Annoyingly, you can't merge nav lists (see https://www.mkdocs.org/user-guide/configuration/)
+# So we gitignore mkdocs.yaml and have it sourced in from mkdocs.in.yaml before adding to it.
+mkdocs.yaml

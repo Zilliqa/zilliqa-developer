@@ -30,11 +30,18 @@
   --md-primary-bg-color--light: #272626;
 
   --md-code-bg-color: #272626;
-  --md-code-fg-color: #ffffff;
+  --md-code-fg-color: #c0c0c0;
+  --md-code-fg-color--light: #ffffff;
   --md-code-hl-comment-color: #cccc00;
   --md-typeset-table-color: #808080;
   --md-typeset-table-stripe-color: #303030;
   --md-code-hl-punctuation-color: #808080;
+  --md-code-h1-name-color: #606060;
+  --md-code-default-fg-color: #c0c0c0;
+  --md-code-default-fg-color--light: #ffffff;
+  --md-code-hl-variable-color: #c02080;
+  --md-code-hl-name-color: #9090c0;
+  --md-code-hl-operator-color: #90c090;
 }
 
 .md-header {

@@ -1,75 +1,100 @@
 INHERIT: ./parent.yaml
 nav:
-  - News: index.md
-  - Home: home.md
-  - New in ZQ2: changes.md
-  - Zilliqa 1:
-      - Documentation: zq1/index.md
-  - Endpoints: endpoints.md
-  - FAQ: faq.md
-  - Versions:
-      - Erigon:
-          - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
-      - Ethereum: api/ethereum/eth-rpc.md
-      - Otterscan:
-          - ots_getApiLevel: api/otterscan/get-api-level.md
-          - ots_getBlockDetails: api/otterscan/get-block-details.md
-          - ots_getBlockDetailsByHash: api/otterscan/get-block-details-by-hash.md
-          - ots_getBlockTransactions: api/otterscan/get-block-transactions.md
-          - ots_hasCode: api/otterscan/has-code.md
-      - Zilliqa:
-          - CreateTransaction: api/zilliqa/api-transaction-create-tx.md
-          - GetSmartContractState: api/zilliqa/api-contract-get-smartcontract-state.md
-          - GetTransaction: api/zilliqa/api-transaction-get-tx.md
-          - GetBalance: api/zilliqa/api-account-get-balance.md
-          - GetCurrentMiniEpoch: api/zilliqa/api-blockchain-get-current-mini-epoch.md
-          - GetLatestTxBlock: api/zilliqa/api-blockchain-get-latest-tx-block.md
-          - GetMinimumGasPrice: api/zilliqa/api-transaction-get-minimum-gas-price.md
-          - GetNetworkId: api/zilliqa/api-blockchain-get-network-id.md
-          - GetVersion: api/zilliqa/api-blockchain-get-software-version.md
-  - Ecosystem:
-      - DeFi: ecosystem/defi.md
-      - Indexers: ecosystem/indexers.md
-      - Indexer:
-          - Indexer Introduction: ecosystem/indexer/indexer-introduction.md
-          - ZILs:
-              - All Transactions: ecosystem/indexer/zil-all-transactions.md
-              - Balance: ecosystem/indexer/zil-balance.md
-          - ZRC-2:
-              - Contract Details: ecosystem/indexer/zrc2-contract-details.md
-              - Contract List: ecosystem/indexer/zrc2-contract-list.md
-              - Balance: ecosystem/indexer/zrc2-balance.md
-              - All Balances: ecosystem/indexer/zrc2-all-balances.md
-              - Transaction History: ecosystem/indexer/zrc2-transaction-history.md
-          - ZRC-6:
-              - Recently Minted: ecosystem/indexer/zrc6-recently-minted.md
-              - Asset Details: ecosystem/indexer/zrc6-asset-details.md
-              - User Assets: ecosystem/indexer/zrc6-user-assets.md
-              - Asset Metadata: ecosystem/indexer/zrc6-asset-metadata.md
-              - Search Attribute: ecosystem/indexer/zrc6-search-attribute.md
-          - Marketplace:
-              - Fixed Price: ecosystem/indexer/marketplace-fixed-price.md
-              - English Auction: ecosystem/indexer/marketplace-english-auction.md
-              - Brand Collectible List: ecosystem/indexer/marketplace-brand-collectible-list.md
-              - Brand Collectible Assets: ecosystem/indexer/marketplace-brand-collectible-assets.md
-              - Brand Collectible Details: ecosystem/indexer/marketplace-brand-collectible-details.md
-      - Oracles: ecosystem/chainlink.md
-      - NFTs: ecosystem/nft.md
-      - Nodes: ecosystem/nodes.md
-      - Wrapped ZIL: ecosystem/wzil.md
-  - Running:
-      - Nodes: running/node.md
-      - Validators: running/validator.md
-      - Networks: running/network.md
-  - SDKs and tools: sdk.md
-  - EVM:
-      - Interop: zilevm/interop.md
-      - Metamask: zilevm/metamask.md
-      - Tools:
-          - Hardhat: zilevm/tools/hardhat.md
-          - OpenZeppelin: zilevm/tools/openzeppelin.md
-          - RemixIDE: zilevm/tools/remix.md
-          - VSCode Plugins: zilevm/tools/vsc-plugins.md
+- News: index.md
+- Home: home.md
+- New in ZQ2: changes.md
+- Zilliqa 1:
+  - Documentation: zq1/index.md
+- Endpoints: endpoints.md
+- FAQ: faq.md
+- Versions:
+  - Erigon:
+    - erigon_getHeaderByNumber: api/erigon/get-header-by-number.md
+  - Ethereum: api/ethereum/eth-rpc.md
+  - Otterscan:
+    - ots_getApiLevel: api/otterscan/get-api-level.md
+    - ots_getBlockDetails: api/otterscan/get-block-details.md
+    - ots_getBlockDetailsByHash: api/otterscan/get-block-details-by-hash.md
+    - ots_getBlockTransactions: api/otterscan/get-block-transactions.md
+    - ots_hasCode: api/otterscan/has-code.md
   - Zilliqa:
-      - Native API: zilliqa/zilliqa.md
-      - Introduction: zilliqa/introduction-videos.md
+    - CreateTransaction: api/zilliqa/api-transaction-create-tx.md
+    - GetSmartContractState: api/zilliqa/api-contract-get-smartcontract-state.md
+    - GetTransaction: api/zilliqa/api-transaction-get-tx.md
+    - GetBalance: api/zilliqa/api-account-get-balance.md
+    - GetCurrentMiniEpoch: api/zilliqa/api-blockchain-get-current-mini-epoch.md
+    - GetLatestTxBlock: api/zilliqa/api-blockchain-get-latest-tx-block.md
+    - GetMinimumGasPrice: api/zilliqa/api-transaction-get-minimum-gas-price.md
+    - GetNetworkId: api/zilliqa/api-blockchain-get-network-id.md
+    - GetVersion: api/zilliqa/api-blockchain-get-software-version.md
+  - 3d475637:
+    - api:
+      - erigon:
+        - erigon_getHeaderByNumber: versions/3d475637/api/erigon/erigon_getHeaderByNumber.md
+      - ots:
+        - ots_getApiLevel: versions/3d475637/api/ots/ots_getApiLevel.md
+        - ots_getBlockDetails: versions/3d475637/api/ots/ots_getBlockDetails.md
+        - ots_getBlockDetailsByHash: versions/3d475637/api/ots/ots_getBlockDetailsByHash.md
+      - zilliqa:
+        - DSBlockListing: versions/3d475637/api/zilliqa/DSBlockListing.md
+        - GetBalance: versions/3d475637/api/zilliqa/GetBalance.md
+        - GetBlockchainInfo: versions/3d475637/api/zilliqa/GetBlockchainInfo.md
+        - GetCurrentDSComm: versions/3d475637/api/zilliqa/GetCurrentDSComm.md
+        - GetCurrentDSEpoch: versions/3d475637/api/zilliqa/GetCurrentDSEpoch.md
+        - GetDSBlock: versions/3d475637/api/zilliqa/GetDSBlock.md
+        - GetDSBlockRate: versions/3d475637/api/zilliqa/GetDSBlockRate.md
+        - GetDSBlockVerbose: versions/3d475637/api/zilliqa/GetDSBlockVerbose.md
+        - GetLatestDSBlock: versions/3d475637/api/zilliqa/GetLatestDSBlock.md
+        - GetLatestTxBlock: versions/3d475637/api/zilliqa/GetLatestTxBlock.md
+        - GetMinerInfo: versions/3d475637/api/zilliqa/GetMinerInfo.md
+        - GetNetworkId: versions/3d475637/api/zilliqa/GetNetworkId.md
+        - GetNodeType: versions/3d475637/api/zilliqa/GetNodeType.md
+        - GetNumDSBlocks: versions/3d475637/api/zilliqa/GetNumDSBlocks.md
+        - GetNumPeers: versions/3d475637/api/zilliqa/GetNumPeers.md
+        - GetNumTxBlocks: versions/3d475637/api/zilliqa/GetNumTxBlocks.md
+- Ecosystem:
+  - DeFi: ecosystem/defi.md
+  - Indexers: ecosystem/indexers.md
+  - Indexer:
+    - Indexer Introduction: ecosystem/indexer/indexer-introduction.md
+    - ZILs:
+      - All Transactions: ecosystem/indexer/zil-all-transactions.md
+      - Balance: ecosystem/indexer/zil-balance.md
+    - ZRC-2:
+      - Contract Details: ecosystem/indexer/zrc2-contract-details.md
+      - Contract List: ecosystem/indexer/zrc2-contract-list.md
+      - Balance: ecosystem/indexer/zrc2-balance.md
+      - All Balances: ecosystem/indexer/zrc2-all-balances.md
+      - Transaction History: ecosystem/indexer/zrc2-transaction-history.md
+    - ZRC-6:
+      - Recently Minted: ecosystem/indexer/zrc6-recently-minted.md
+      - Asset Details: ecosystem/indexer/zrc6-asset-details.md
+      - User Assets: ecosystem/indexer/zrc6-user-assets.md
+      - Asset Metadata: ecosystem/indexer/zrc6-asset-metadata.md
+      - Search Attribute: ecosystem/indexer/zrc6-search-attribute.md
+    - Marketplace:
+      - Fixed Price: ecosystem/indexer/marketplace-fixed-price.md
+      - English Auction: ecosystem/indexer/marketplace-english-auction.md
+      - Brand Collectible List: ecosystem/indexer/marketplace-brand-collectible-list.md
+      - Brand Collectible Assets: ecosystem/indexer/marketplace-brand-collectible-assets.md
+      - Brand Collectible Details: ecosystem/indexer/marketplace-brand-collectible-details.md
+  - Oracles: ecosystem/chainlink.md
+  - NFTs: ecosystem/nft.md
+  - Nodes: ecosystem/nodes.md
+  - Wrapped ZIL: ecosystem/wzil.md
+- Running:
+  - Nodes: running/node.md
+  - Validators: running/validator.md
+  - Networks: running/network.md
+- SDKs and tools: sdk.md
+- EVM:
+  - Interop: zilevm/interop.md
+  - Metamask: zilevm/metamask.md
+  - Tools:
+    - Hardhat: zilevm/tools/hardhat.md
+    - OpenZeppelin: zilevm/tools/openzeppelin.md
+    - RemixIDE: zilevm/tools/remix.md
+    - VSCode Plugins: zilevm/tools/vsc-plugins.md
+- Zilliqa:
+  - Native API: zilliqa/zilliqa.md
+  - Introduction: zilliqa/introduction-videos.md
