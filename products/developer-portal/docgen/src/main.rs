@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     let here = String::from(&args[1]);
 
     // Set NO_CHECKOUT to skip the checkout steps - this allows you to do debugging with symlinks or similar.
-    let checkout = !std::env::var("NO_CHECKOUT").is_ok();
+    let checkout = std::env::var("NO_CHECKOUT").is_err();
 
     // Find the zq2 versions that we need to collect.
 
@@ -100,7 +100,7 @@ async fn main() -> Result<()> {
             .to_str()
             .ok_or(anyhow!("unprintable index file path"))?
             .to_string();
-        let key_prefix = format!("nav");
+        let key_prefix = "nav".to_string();
         println!(" Generating documentation from {refspec} into {target_dir_str}...");
         let z2_dir = zq2_checkout_dir.clone();
         println!(" Running {z2_dir:?}/z2 .. ");
