@@ -131,8 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [devex, zilliqa-isolated-server, zilliqa-bridge-web]
+        application: [devex, zilliqa-isolated-server]
         include:
           - application: devex
             image_name: devex
