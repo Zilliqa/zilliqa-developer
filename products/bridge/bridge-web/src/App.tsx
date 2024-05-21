@@ -33,17 +33,17 @@ function App() {
   const { chain } = useNetwork();
 
   const [fromChain, setFromChain] = useState<Chains>(
-    Object.values(chainConfigs)[0].chain
+    Object.values(chainConfigs)[0].chain,
   );
   const [toChain, setToChain] = useState<Chains>(
-    Object.values(chainConfigs)[1].chain
+    Object.values(chainConfigs)[1].chain,
   );
   const [amount, setAmount] = useState<string | undefined>();
   const isAmountNonZero = Number(amount) > 0;
   const [latestTxn, setLatestTxn] = useState<[TxnType, `0x${string}`]>();
   const [loadingId, setLoadingId] = useState<Id>();
   const [token, selectedToken] = useState<TokenConfig>(
-    Object.values(chainConfigs)[0].tokens[0]
+    Object.values(chainConfigs)[0].tokens[0],
   );
 
   const { recipientEth, isAddressValid } = useRecipientInput();
@@ -51,7 +51,7 @@ function App() {
   const fromChainConfig = chainConfigs[fromChain]!;
   const toChainConfig = chainConfigs[toChain]!;
 
-  const fromChainClient = usePublicClient();
+  const fromChainClient = usePublicClient({ chainId: fromChainConfig.chainId });
   const toChainClient = usePublicClient({ chainId: toChainConfig.chainId });
 
   useEffect(() => {
@@ -65,7 +65,7 @@ function App() {
   useEffect(() => {
     if (chain !== fromChainConfig.wagmiChain) {
       const newFromChain = Object.values(chainConfigs).find(
-        (chainConfig) => chainConfig.chainId == chain?.id
+        (chainConfig) => chainConfig.chainId == chain?.id,
       );
       if (!newFromChain?.chain) {
         return;
@@ -228,7 +228,7 @@ function App() {
               onClick={() =>
                 window.open(
                   `${fromChainConfig.blockExplorer}${txnReceipt.transactionHash}`,
-                  "_blank"
+                  "_blank",
                 )
               }
             >
@@ -247,7 +247,7 @@ function App() {
             blockHash: txnReceipt.blockHash,
           });
           const nonce = logs.find(
-            (log) => log.transactionHash === txnReceipt.transactionHash
+            (log) => log.transactionHash === txnReceipt.transactionHash,
           )?.args.nonce;
 
           const id = toast.loading(`Bridging to ${toChainConfig.name}...`);
@@ -271,7 +271,7 @@ function App() {
                       onClick={() =>
                         window.open(
                           `${toChainConfig.blockExplorer}${logs[0].transactionHash}`,
-                          "_blank"
+                          "_blank",
                         )
                       }
                     >
@@ -311,7 +311,7 @@ function App() {
                     onClick={() =>
                       window.open(
                         `${toChainConfig.blockExplorer}${dispatched[0].transactionHash}`,
-                        "_blank"
+                        "_blank",
                       )
                     }
                   >
@@ -335,7 +335,7 @@ function App() {
               onClick={() =>
                 window.open(
                   `${fromChainConfig.blockExplorer}${txnReceipt.transactionHash}`,
-                  "_blank"
+                  "_blank",
                 )
               }
             >
@@ -426,7 +426,7 @@ function App() {
                   >
                     {Object.values(chainConfigs)
                       .filter(
-                        (config) => config.chain !== fromChainConfig.chain
+                        (config) => config.chain !== fromChainConfig.chain,
                       )
                       .map(({ chain, name }) => (
                         <li
