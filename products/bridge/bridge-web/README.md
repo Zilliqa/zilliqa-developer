@@ -1,3 +1,5 @@
+<!-- trunk-ignore-all(markdownlint/MD029) -->
+
 # Bridge Web
 
 ## How to run
