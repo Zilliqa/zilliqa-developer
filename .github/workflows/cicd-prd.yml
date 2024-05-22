@@ -97,11 +97,6 @@ jobs:
             path: products/bridge/bridge-validators
             tag_length: 8
             tag_latest: false
-          - application: zilliqa-bridge-web
-            image_name: zilliqa-bridge-web
-            path: products/bridge/bridge-web
-            tag_length: 8
-            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
@@ -154,6 +149,11 @@ jobs:
             path: products/zilliqa-isolated-server
             tag_length: 8
             tag_latest: true
+          - application: zilliqa-bridge-web
+            image_name: zilliqa-bridge-web
+            path: products/bridge/bridge-web
+            tag_length: 8
+            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
