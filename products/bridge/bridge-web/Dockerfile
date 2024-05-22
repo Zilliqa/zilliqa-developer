@@ -41,6 +41,8 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # Copy the rest of the source files into the image.
 COPY . .
 
+RUN cp ./infra/environment/.env ./
+
 ARG VITE_ENV=""
 ENV VITE_ENV=${VITE_ENV}
 # Run the build script.

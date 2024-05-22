@@ -41,3 +41,4 @@ patches:
     target:
       kind: Deployment
       name: xbridge-frontend
+  - path: app-secrets.yaml

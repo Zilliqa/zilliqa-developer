@@ -11,6 +11,16 @@ export enum TokenManagerType {
 
 export type Chains = "bsc-testnet" | "zq-testnet" | "bsc" | "zq";
 
+function configureCustomRpcUrl(chain: Chain, rpcUrl: string): Chain {
+  return {
+    ...chain,
+    rpcUrls: {
+      default: { http: [rpcUrl] },
+      public: { http: [rpcUrl] },
+    },
+  };
+}
+
 export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
   import.meta.env.MODE === "production"
     ? {
@@ -45,7 +55,10 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
         bsc: {
           chain: "bsc",
           name: "BSC",
-          wagmiChain: bsc,
+          wagmiChain: configureCustomRpcUrl(
+            bsc,
+            `${import.meta.env.VITE_BSC_MAINNET_API}/${import.meta.env.VITE_BSC_MAINNET_KEY}`,
+          ),
           tokenManagerAddress: "0xF391A1Ee7b3ccad9a9451D2B7460Ac646F899f23",
           chainGatewayAddress: "0x3967f1a272Ed007e6B6471b942d655C802b42009",
           tokenManagerType: TokenManagerType.MintAndBurn,
@@ -88,7 +101,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               logo: fps_token,
             },
             {
-              name: "TSLM",
+              name: "TSLM Z",
               address: "0xE90Dd366D627aCc5feBEC126211191901A69f8a0",
               blockExplorer:
                 "https://otterscan.testnet.zilliqa.com/address/0xE90Dd366D627aCc5feBEC126211191901A69f8a0",
@@ -103,7 +116,10 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
         "bsc-testnet": {
           chain: "bsc-testnet",
           name: "BSC Testnet",
-          wagmiChain: bscTestnet,
+          wagmiChain: configureCustomRpcUrl(
+            bscTestnet,
+            `${import.meta.env.VITE_BSC_TESTNET_API}/${import.meta.env.VITE_BSC_TESTNET_KEY}`,
+          ),
           tokenManagerAddress: "0xA6D73210AF20a59832F264fbD991D2abf28401d0",
           tokenManagerType: TokenManagerType.MintAndBurn,
           chainGatewayAddress: "0xa9A14C90e53EdCD89dFd201A3bF94D867f8098fE",
@@ -116,7 +132,7 @@ export const chainConfigs: Partial<Record<Chains, ChainConfig>> =
               logo: fps_token,
             },
             {
-              name: "TST",
+              name: "TSLM B",
               address: "0x7Cc585de659E8938Aa7d5709BeaF34bD108bdC03",
               blockExplorer:
                 "https://testnet.bscscan.com/address/0x7Cc585de659E8938Aa7d5709BeaF34bD108bdC03",

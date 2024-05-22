@@ -32,3 +32,4 @@ patches:
         path: /metadata/annotations
         value:
           beta.cloud.google.com/backend-config: '{"default": "xbridge-frontend"}'
+  - path: app-secrets.yaml
