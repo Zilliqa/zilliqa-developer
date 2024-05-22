@@ -33,7 +33,6 @@ jobs:
             scilla-server,
             zillion,
             zilliqa-bridge-validator,
-            zilliqa-bridge-web,
           ]
         include:
           - application: devex-apollo
@@ -91,11 +90,6 @@ jobs:
             path: products/bridge/bridge-validators
             tag_length: 8
             tag_latest: false
-          - application: zilliqa-bridge-web
-            image_name: zilliqa-bridge-web
-            path: products/bridge/bridge-web
-            tag_length: 8
-            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
@@ -135,7 +129,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [developer-portal, devex, zilliqa-isolated-server]
+        application:
+          [developer-portal, devex, zilliqa-isolated-server, zilliqa-bridge-web]
         include:
           - application: developer-portal
             image_name: developer-portal
@@ -152,6 +147,11 @@ jobs:
             path: products/zilliqa-isolated-server
             tag_length: 8
             tag_latest: true
+          - application: zilliqa-bridge-web
+            image_name: zilliqa-bridge-web
+            path: products/bridge/bridge-web
+            tag_length: 8
+            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
