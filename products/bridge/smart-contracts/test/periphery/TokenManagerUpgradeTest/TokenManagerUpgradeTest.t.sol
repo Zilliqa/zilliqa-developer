@@ -62,7 +62,7 @@ contract TokenManagerUpgradeTest is Tester {
 
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV2.sol",
+            "TokenManagerTestV2.sol:TokenManagerTestV2",
             abi.encodeCall(TokenManagerTestV2.reinitialize, count),
             deployer
         );
@@ -100,7 +100,7 @@ contract TokenManagerUpgradeTest is Tester {
     function test_upgrade_new_getter_for_existing_variable() external {
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV2.sol",
+            "TokenManagerTestV2.sol:TokenManagerTestV2",
             abi.encodeCall(TokenManagerTestV2.reinitialize, 1),
             deployer
         );
@@ -119,7 +119,7 @@ contract TokenManagerUpgradeTest is Tester {
     function test_upgrade_with_field_removed_and_replaced_with_gap() external {
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV3.sol",
+            "TokenManagerTestV3.sol:TokenManagerTestV3",
             abi.encodeWithSelector(TokenManagerTestV3.reinitialize.selector),
             deployer
         );
@@ -139,7 +139,7 @@ contract TokenManagerUpgradeTest is Tester {
     {
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV4.sol",
+            "TokenManagerTestV4.sol:TokenManagerTestV4",
             abi.encodeWithSelector(TokenManagerTestV4.reinitialize.selector),
             deployer
         );
@@ -170,7 +170,7 @@ contract TokenManagerUpgradeTest is Tester {
     {
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV5.sol",
+            "TokenManagerTestV5.sol:TokenManagerTestV5",
             abi.encodeWithSelector(TokenManagerTestV5.reinitialize.selector),
             deployer
         );
@@ -201,7 +201,7 @@ contract TokenManagerUpgradeTest is Tester {
     {
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV5.sol",
+            "TokenManagerTestV5.sol:TokenManagerTestV5",
             abi.encodeWithSelector(TokenManagerTestV5.reinitialize.selector),
             deployer
         );
@@ -209,7 +209,7 @@ contract TokenManagerUpgradeTest is Tester {
         // Upgrade again to remove contract in the middle
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV6.sol",
+            "TokenManagerTestV6.sol:TokenManagerTestV6",
             abi.encodeWithSelector(TokenManagerTestV6.reinitialize.selector),
             deployer
         );
@@ -236,7 +236,7 @@ contract TokenManagerUpgradeTest is Tester {
         // Uses new reinitialize function to initialise the new values
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV7.sol",
+            "TokenManagerTestV7.sol:TokenManagerTestV7",
             abi.encodeCall(
                 TokenManagerTestV7.reinitialize,
                 (number, randomAddress)
@@ -266,7 +266,7 @@ contract TokenManagerUpgradeTest is Tester {
         // Upgrade again to remove contract in the middle
         UUPSUpgrader.upgrade(
             tokenManagerProxy,
-            "TokenManagerTestV8.sol",
+            "TokenManagerTestV8.sol:TokenManagerTestV8",
             abi.encodeWithSelector(TokenManagerTestV8.reinitialize.selector),
             deployer
         );
