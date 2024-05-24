@@ -190,6 +190,8 @@ jobs:
         env:
           ENVIRONMENT: prd
           IMAGE_TAG: ${{ steps.set-tag.outputs.tags }}
+          ENV_FILES_DECRYPTER_NONPRD: ${{ secrets.ENV_FILES_DECRYPTER_NONPRD }}
+          ENV_FILES_DECRYPTER_PRD: ${{ secrets.ENV_FILES_DECRYPTER_PRD }}
         run: |
           cd ${{ matrix.path }}
           make image/build-and-push
