@@ -151,7 +151,14 @@ async fn request(State(state): State<Arc<AppState>>, Form(request): Form<Request
     }
 
     let value = parse_ether(&state.config.eth_amount).unwrap_or(WEI_IN_ETHER);
-    let tx = TransactionRequest::pay(address, value);
+    let chain_id = match state.provider.get_chainid().await {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{e:?}");
+            return home_inner(State(state.clone()), Some(RequestStatus::SendErr(e))).await;
+        }
+    };
+    let tx = TransactionRequest::pay(address, value).chain_id(chain_id.low_u64());
     let status = match state.provider.send_transaction(tx, None).await {
         Ok(t) => RequestStatus::Sent(t.tx_hash()),
         Err(e) => {
@@ -221,7 +228,7 @@ async fn main() -> Result<()> {
 
     let provider = Provider::try_from(&config.rpc_url)?;
     let wallet: LocalWallet = config.private_key.parse()?;
-    let provider = SignerMiddleware::new_with_provider_chain(provider, wallet).await?;
+    let provider = SignerMiddleware::new(provider, wallet);
 
     let addr = ("0.0.0.0".parse::<IpAddr>()?, config.http_port);
     let state = Arc::new(AppState {
