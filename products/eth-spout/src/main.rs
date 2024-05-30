@@ -11,7 +11,7 @@ use askama::Template;
 use axum::{extract::State, routing::get, Form, Router};
 use bech32::Hrp;
 use ethers::{
-    middleware::{nonce_manager::NonceManagerError, NonceManagerMiddleware, SignerMiddleware},
+    middleware::{signer::SignerMiddlewareError, SignerMiddleware},
     providers::{Http, Middleware, Provider},
     signers::LocalWallet,
     types::{Address, TransactionRequest, H256},
@@ -34,13 +34,13 @@ struct Home {
 enum RequestStatus {
     Sent(H256),
     AddrErr(anyhow::Error),
-    SendErr(NonceManagerError<SignerMiddleware<Provider<Http>, LocalWallet>>),
+    SendErr(SignerMiddlewareError<Provider<Http>, LocalWallet>),
     RateLimitErr(Duration),
 }
 
 async fn home_inner(State(state): State<Arc<AppState>>, status: Option<RequestStatus>) -> Home {
     Home {
-        from_addr: to_checksum(&state.provider.inner().address(), None),
+        from_addr: to_checksum(&state.provider.address(), None),
         native_token_symbol: state.config.native_token_symbol.clone(),
         amount: state.config.eth_amount.clone(),
         explorer_url: state.config.explorer_url.clone(),
@@ -210,7 +210,7 @@ impl Config {
 }
 
 struct AppState {
-    provider: NonceManagerMiddleware<SignerMiddleware<Provider<Http>, LocalWallet>>,
+    provider: SignerMiddleware<Provider<Http>, LocalWallet>,
     config: Config,
     last_request: Mutex<HashMap<Address, Instant>>,
 }
@@ -222,8 +222,6 @@ async fn main() -> Result<()> {
     let provider = Provider::try_from(&config.rpc_url)?;
     let wallet: LocalWallet = config.private_key.parse()?;
     let provider = SignerMiddleware::new_with_provider_chain(provider, wallet).await?;
-    let address = provider.address();
-    let provider = NonceManagerMiddleware::new(provider, address);
 
     let addr = ("0.0.0.0".parse::<IpAddr>()?, config.http_port);
     let state = Arc::new(AppState {
