@@ -1,14 +1,6 @@
 <template>
-  <div class="tools-panel" v-if="toolsPanel">
-    <div class="header p-2">
-      <div class="title">{{ tool.name }}</div>
-      <img src="@/assets/close-color.svg" @click="handleClose" class="close-button" />
-    </div>
-    <div class="content p-4">
-      <units-converter v-if="toolsPanel === 'units-converter'" />
-      <address-converter v-if="toolsPanel === 'address-converter'" />
-    </div>
-  </div>
+  <units-converter :show="toolsPanel === 'units-converter'" />
+  <address-converter :show="toolsPanel === 'address-converter'" />
 </template>
 
 <script>
