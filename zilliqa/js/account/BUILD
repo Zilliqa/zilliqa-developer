@@ -41,10 +41,10 @@ ts_project(
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/bip39",
         "//:node_modules/buffer",
+        "//:node_modules/ethers",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/tslib",
-        "//:node_modules/ethers",
     ],
     declaration = True,
     declaration_map = True,
@@ -70,11 +70,11 @@ ts_project(
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/bip39",
         "//:node_modules/buffer",
+        "//:node_modules/ethers",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/protobufjs",  # TODO: This one should come automatically from proto
         "//:node_modules/tslib",
-        "//:node_modules/ethers",
     ],
 )
 
@@ -130,12 +130,12 @@ ts_project(
         "//:node_modules/bn.js",
         "//:node_modules/buffer-from",
         "//:node_modules/cross-fetch",
+        "//:node_modules/ethers",
         "//:node_modules/expect",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/jest-fetch-mock",
         "//:node_modules/tslib",
-        "//:node_modules/ethers",
     ],
 )
 

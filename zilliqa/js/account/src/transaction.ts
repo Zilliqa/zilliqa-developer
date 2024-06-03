@@ -119,7 +119,7 @@ export class Transaction implements Signable {
     if (this.isEth()) {
       // See implementation of Address Account::GetAddressFromPublicKeyEth in the Zilliqa repo.
       // Don't return the prefix 0x
-      return ethers.utils.computeAddress('0x' + this.pubKey).substring(2);
+      return ethers.utils.computeAddress("0x" + this.pubKey).substring(2);
     } else {
       return getAddressFromPublicKey(this.pubKey);
     }
@@ -162,7 +162,7 @@ export class Transaction implements Signable {
     provider: Provider,
     status: TxStatus = TxStatus.Initialised,
     toDS: boolean = false,
-    enableSecureToAddress: boolean = true
+    enableSecureToAddress: boolean = true,
   ) {
     // private members
     this.version = params.version;
@@ -232,7 +232,7 @@ export class Transaction implements Signable {
    * @returns {boolean}
    */
   isEth(): boolean {
-    const version16 = this.version & 0xFFFF; 
+    const version16 = this.version & 0xffff;
     // const unsigned int TRANSACTION_VERSION_ETH_LEGACY = 2;
     // const unsigned int TRANSACTION_VERSION_ETH_EIP_2930 = 3;
     // const unsigned int TRANSACTION_VERSION_ETH_EIP_1559 = 4;
@@ -281,7 +281,7 @@ export class Transaction implements Signable {
   async blockConfirm(
     txHash: string,
     maxblockCount: number = 4,
-    interval: number = 1000
+    interval: number = 1000,
   ) {
     this.status = TxStatus.Pending;
     const blockStart: BN = await this.getBlockNumber();
@@ -290,7 +290,7 @@ export class Transaction implements Signable {
       try {
         const blockLatest: BN = await this.getBlockNumber();
         const blockNext: BN = blockChecked.add(
-          new BN(attempt === 0 ? attempt : 1)
+          new BN(attempt === 0 ? attempt : 1),
         );
         if (blockLatest.gte(blockNext)) {
           blockChecked = blockLatest;
@@ -347,7 +347,7 @@ export class Transaction implements Signable {
   async confirm(
     txHash: string,
     maxAttempts = GET_TX_ATTEMPTS,
-    interval = 1000
+    interval = 1000,
   ): Promise<Transaction> {
     this.status = TxStatus.Pending;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -404,7 +404,7 @@ export class Transaction implements Signable {
   private async trackTx(txHash: string): Promise<boolean> {
     const res: RPCResponse<TxIncluded, string> = await this.provider.send(
       RPCMethod.GetTransaction,
-      txHash
+      txHash,
     );
 
     if (res.error) {
@@ -428,7 +428,7 @@ export class Transaction implements Signable {
   private async getBlockNumber(): Promise<BN> {
     try {
       const res: RPCResponse<TxBlockObj, string> = await this.provider.send(
-        RPCMethod.GetLatestTxBlock
+        RPCMethod.GetLatestTxBlock,
       );
       if (res.error === undefined && res.result.header.BlockNum) {
         // if blockNumber is too high, we use BN to be safer
