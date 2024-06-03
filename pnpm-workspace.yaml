@@ -13,4 +13,3 @@ packages:
   - "examples/zilliqa-js/react-zilliqa-js"
   - "contracts/experimental/ERC20ProxyForZRC2"
   - "products/bridge/smart-contracts"
-  - "products/devex"

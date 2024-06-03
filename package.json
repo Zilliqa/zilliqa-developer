@@ -65,6 +65,7 @@
     "enzyme-to-json": "^3.6.2",
     "eslint": "^7.32.0",
     "eslint-plugin-react": "^7.31.10",
+    "ethers": "5.7",
     "events": "^3.3.0",
     "expect": "^29.3.1",
     "graphql": "^16.8.1",
