@@ -31,6 +31,8 @@ import {
 } from "@zilliqa-js/crypto";
 import { BN, Long } from "@zilliqa-js/util";
 
+import { ethers } from "ethers";
+
 import {
   TxEventName,
   TxIncluded,
@@ -114,7 +116,13 @@ export class Transaction implements Signable {
       return "0".repeat(40);
     }
 
-    return getAddressFromPublicKey(this.pubKey);
+    if (this.isEth()) {
+      // See implementation of Address Account::GetAddressFromPublicKeyEth in the Zilliqa repo.
+      // Don't return the prefix 0x
+      return ethers.utils.computeAddress('0x' + this.pubKey).substring(2);
+    } else {
+      return getAddressFromPublicKey(this.pubKey);
+    }
   }
 
   get txParams(): TxParams {
@@ -216,6 +224,19 @@ export class Transaction implements Signable {
    */
   isRejected(): boolean {
     return this.status === TxStatus.Rejected;
+  }
+
+  /**
+   * isEth
+   *
+   * @returns {boolean}
+   */
+  isEth(): boolean {
+    const version16 = this.version & 0xFFFF; 
+    // const unsigned int TRANSACTION_VERSION_ETH_LEGACY = 2;
+    // const unsigned int TRANSACTION_VERSION_ETH_EIP_2930 = 3;
+    // const unsigned int TRANSACTION_VERSION_ETH_EIP_1559 = 4;
+    return version16 === 2 || version16 === 3 || version16 === 4;
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "@zilliqa-js/account",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "maintainers": [
     "Zilliqa Usability Team <maintainers@zilliqa.com> (https://github.com/zilliqa/)"
   ],
@@ -33,6 +33,7 @@
     "@zilliqa-js/util": "workspace:*",
     "bip39": "^2.5.0",
     "buffer": "^6.0.3",
+    "ethers": "5.7",
     "hash.js": "^1.1.7",
     "hdkey": "^1.1.0",
     "tslib": "2.3.1"
@@ -41,14 +42,14 @@
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
+    "@types/bip39": "^2.4.0",
     "@types/bn.js": "^5.1.0",
     "@types/camelcase": "^5.1.0",
     "@types/fancy-log": "^1.3.0",
+    "@types/hdkey": "^0.7.0",
     "@types/jest": "27.0.1",
     "@types/node": "^20.2.3",
     "@types/webpack": "^4.4.17",
-    "@types/bip39": "^2.4.0",
-    "@types/hdkey": "^0.7.0",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "camelcase": "^5.0.0",
