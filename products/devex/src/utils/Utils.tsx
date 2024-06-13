@@ -51,6 +51,10 @@ export const qaToZil: (
   amount: string | number,
   numOfDigits?: number
 ) => string = (amount: string | number, numOfDigits?: number) => {
+  // Check if the amount is a number and convert to string if necessary
+  if (typeof amount === "number") {
+    amount = amount.toString();
+  }
   let parsedAmt = "";
   const splitAmt = units.fromQa(new BN(amount), units.Units.Zil).split(".");
   if (splitAmt.length === 1) {
