@@ -24,7 +24,7 @@ export const zilAddrToHexAddr: (addr: string) => string = (zilAddr: string) => {
 
 // Convert timestamp to display format, M/D/YYYY, h:mm:ssa
 export const timestampToDisplay: (timestamp: string | number) => string = (
-  timestamp: string | number
+  timestamp: string | number,
 ) => {
   if (typeof timestamp === "string")
     return moment(parseInt(timestamp) / 1000).format("M/D/YYYY, h:mm:ssa");
@@ -33,7 +33,7 @@ export const timestampToDisplay: (timestamp: string | number) => string = (
 
 // Convert timestamp from microseconds to milliseconds and find timeago
 export const timestampToTimeago: (timestamp: string | number) => string = (
-  timestamp: string | number
+  timestamp: string | number,
 ) => {
   if (typeof timestamp === "string")
     return moment(parseInt(timestamp) / 1000).fromNow();
@@ -41,7 +41,7 @@ export const timestampToTimeago: (timestamp: string | number) => string = (
 };
 
 export const qaToZilSimplified: (amount: string | number) => number | string = (
-  amount: string | number
+  amount: string | number,
 ) => {
   return units.fromQa(new BN(amount), units.Units.Zil);
 };
@@ -49,7 +49,7 @@ export const qaToZilSimplified: (amount: string | number) => number | string = (
 // Convert from Qa to Zil
 export const qaToZil: (
   amount: string | number,
-  numOfDigits?: number
+  numOfDigits?: number,
 ) => string = (amount: string | number, numOfDigits?: number) => {
   // Check if the amount is a number and convert to string if necessary
   if (typeof amount === "number") {
@@ -77,7 +77,7 @@ export const qaToZil: (
 
 // Strips hex prefix if exists
 export const stripHexPrefix: (inputHex: string) => string = (
-  inputHex: string
+  inputHex: string,
 ) => {
   if (inputHex.substring(0, 2) === "0x") return inputHex.substring(2);
   return inputHex;
@@ -85,7 +85,7 @@ export const stripHexPrefix: (inputHex: string) => string = (
 
 // Add hex prefix if not already
 export const addHexPrefix: (inputHex: string) => string = (
-  inputHex: string
+  inputHex: string,
 ) => {
   if (inputHex.substring(0, 2) !== "0x") return "0x" + inputHex;
   return inputHex;
@@ -93,7 +93,7 @@ export const addHexPrefix: (inputHex: string) => string = (
 
 // Check whether is valid addr (regardless of bech32 or hex format)
 export const isValidAddr: (inputStr: string) => boolean = (
-  inputStr: string
+  inputStr: string,
 ) => {
   const trimmedInput = inputStr.trim();
   let prefixedInput = trimmedInput;
