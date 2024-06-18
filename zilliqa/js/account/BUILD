@@ -41,6 +41,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/bip39",
         "//:node_modules/buffer",
+        "//:node_modules/ethers",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/tslib",
@@ -69,6 +70,7 @@ ts_project(
         "//:node_modules/@zilliqa-js/util",
         "//:node_modules/bip39",
         "//:node_modules/buffer",
+        "//:node_modules/ethers",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
         "//:node_modules/protobufjs",  # TODO: This one should come automatically from proto
@@ -128,6 +130,7 @@ ts_project(
         "//:node_modules/bn.js",
         "//:node_modules/buffer-from",
         "//:node_modules/cross-fetch",
+        "//:node_modules/ethers",
         "//:node_modules/expect",
         "//:node_modules/hash.js",
         "//:node_modules/hdkey",
