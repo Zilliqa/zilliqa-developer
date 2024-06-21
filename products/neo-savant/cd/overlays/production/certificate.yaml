@@ -4,4 +4,4 @@ metadata:
   name: neo-savant-ide
 spec:
   domains:
-    - ide.zilliqa.com
+    - old-ide.zilliqa.com
