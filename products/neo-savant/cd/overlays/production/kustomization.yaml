@@ -13,14 +13,14 @@ patches:
     patch: |-
       - op: replace
         path: "/spec/rules/0/host"
-        value: ide.zilliqa.com
+        value: old-ide.zilliqa.com
       - op: remove
         path: "/spec/rules/1"
       - op: replace
         path: /metadata/annotations
         value:
           kubernetes.io/ingress.class: gce
-          kubernetes.io/ingress.global-static-ip-name: ide-zilliqa-com
+          kubernetes.io/ingress.global-static-ip-name: old-ide-zilliqa-com
           networking.gke.io/managed-certificates: neo-savant-ide
           networking.gke.io/v1beta1.FrontendConfig: neo-savant-ide
 
