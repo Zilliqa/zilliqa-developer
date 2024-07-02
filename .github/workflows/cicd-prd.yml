@@ -33,7 +33,6 @@ jobs:
             neo-savant,
             scilla-server,
             zillion,
-            zilliqa-bridge-validator,
           ]
         include:
           - application: bluebell-playground
@@ -91,11 +90,6 @@ jobs:
             path: products/zillion
             tag_length: 8
             tag_latest: false
-          - application: zilliqa-bridge-validator
-            image_name: zilliqa-bridge-validator
-            path: products/bridge/bridge-validators
-            tag_length: 8
-            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
@@ -131,8 +125,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [devex, zilliqa-isolated-server, zilliqa-bridge-web]
+        application: [devex, zilliqa-isolated-server]
         include:
           - application: devex
             image_name: devex
@@ -144,11 +137,6 @@ jobs:
             path: products/zilliqa-isolated-server
             tag_length: 8
             tag_latest: true
-          - application: zilliqa-bridge-web
-            image_name: zilliqa-bridge-web
-            path: products/bridge/bridge-web
-            tag_length: 8
-            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
