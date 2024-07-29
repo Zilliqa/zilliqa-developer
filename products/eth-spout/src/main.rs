@@ -14,11 +14,11 @@ use ethers::{
     middleware::{signer::SignerMiddlewareError, SignerMiddleware},
     providers::{Http, Middleware, Provider},
     signers::LocalWallet,
-    types::{Address, TransactionRequest, H256},
+    types::{Address, TransactionRequest, H160, H256},
     utils::{parse_checksummed, parse_ether, to_checksum, ConversionError, WEI_IN_ETHER},
 };
 use serde::Deserialize;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, OnceCell};
 
 #[derive(Template)]
 #[template(path = "home.html")]
@@ -36,11 +36,20 @@ enum RequestStatus {
     AddrErr(anyhow::Error),
     SendErr(SignerMiddlewareError<Provider<Http>, LocalWallet>),
     RateLimitErr(Duration),
+    ConfigErr(anyhow::Error),
 }
 
-async fn home_inner(State(state): State<Arc<AppState>>, status: Option<RequestStatus>) -> Home {
+async fn home_inner(State(state): State<Arc<AppState>>, mut status: Option<RequestStatus>) -> Home {
+    let addr = match state.provider().await {
+        Ok(p) => p.address(),
+        Err(e) => {
+            eprintln!("{e:?}");
+            status = Some(RequestStatus::ConfigErr(e));
+            H160::zero()
+        }
+    };
     Home {
-        from_addr: to_checksum(&state.provider.address(), None),
+        from_addr: to_checksum(&addr, None),
         native_token_symbol: state.config.native_token_symbol.clone(),
         amount: state.config.eth_amount.clone(),
         explorer_url: state.config.explorer_url.clone(),
@@ -55,6 +64,7 @@ async fn home_inner(State(state): State<Arc<AppState>>, status: Option<RequestSt
                 "Request made too recently, please wait {} seconds before trying again",
                 d.as_secs()
             )),
+            Some(RequestStatus::ConfigErr(e)) => Some(format!("Spout is misconfigured: {e:?}")),
             _ => None,
         },
     }
@@ -150,16 +160,17 @@ async fn request(State(state): State<Arc<AppState>>, Form(request): Form<Request
         }
     }
 
-    let value = parse_ether(&state.config.eth_amount).unwrap_or(WEI_IN_ETHER);
-    let chain_id = match state.provider.get_chainid().await {
-        Ok(c) => c,
+    let provider = match state.provider().await {
+        Ok(p) => p,
         Err(e) => {
             eprintln!("{e:?}");
-            return home_inner(State(state.clone()), Some(RequestStatus::SendErr(e))).await;
+            return home_inner(State(state.clone()), Some(RequestStatus::ConfigErr(e))).await;
         }
     };
-    let tx = TransactionRequest::pay(address, value).chain_id(chain_id.low_u64());
-    let status = match state.provider.send_transaction(tx, None).await {
+
+    let value = parse_ether(&state.config.eth_amount).unwrap_or(WEI_IN_ETHER);
+    let tx = TransactionRequest::pay(address, value);
+    let status = match provider.send_transaction(tx, None).await {
         Ok(t) => RequestStatus::Sent(t.tx_hash()),
         Err(e) => {
             eprintln!("{e:?}");
@@ -217,22 +228,29 @@ impl Config {
 }
 
 struct AppState {
-    provider: SignerMiddleware<Provider<Http>, LocalWallet>,
+    provider: OnceCell<SignerMiddleware<Provider<Http>, LocalWallet>>,
     config: Config,
     last_request: Mutex<HashMap<Address, Instant>>,
+}
+
+impl AppState {
+    async fn provider(&self) -> Result<&SignerMiddleware<Provider<Http>, LocalWallet>> {
+        let provider = Provider::try_from(&self.config.rpc_url)?;
+        let wallet: LocalWallet = self.config.private_key.parse()?;
+        Ok(self
+            .provider
+            .get_or_try_init(|| SignerMiddleware::new_with_provider_chain(provider, wallet))
+            .await?)
+    }
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let config = Config::from_env()?;
 
-    let provider = Provider::try_from(&config.rpc_url)?;
-    let wallet: LocalWallet = config.private_key.parse()?;
-    let provider = SignerMiddleware::new(provider, wallet);
-
     let addr = ("0.0.0.0".parse::<IpAddr>()?, config.http_port);
     let state = Arc::new(AppState {
-        provider,
+        provider: OnceCell::new(),
         config,
         last_request: Default::default(),
     });
