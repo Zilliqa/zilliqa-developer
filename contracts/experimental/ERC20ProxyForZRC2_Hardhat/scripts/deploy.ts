@@ -5,7 +5,7 @@ async function main() {
     "0x8b4939cc7988fdc11e30a2b7e9d26362d1cb1aa3";
 
   const contract = await ethers.deployContract(
-    "ZRC2ProxyForZRC2",
+    "ZRC2ERC20Proxy",
     [zrc2Address],
     {
       gasLimit: 1_000_000,
@@ -14,7 +14,7 @@ async function main() {
 
   await contract.waitForDeployment();
 
-  console.log("ZRC2ProxyForZRC2 deployed to:", await contract.getAddress());
+  console.log("ZRC2ERC20Proxy deployed to:", await contract.getAddress());
 }
 
 // We recommend this pattern to be able to use async/await everywhere
