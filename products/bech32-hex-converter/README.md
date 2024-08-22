@@ -9,7 +9,7 @@ If you want server-side, just grab `content/js/chain.js` and use it (`buffer.js`
 If you are on Linux:
 
 ```sh
-$ docker compose up
+docker compose up
 ```
 
 Should get you a copy of nginx on port 3000 which serves the content.

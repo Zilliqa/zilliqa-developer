@@ -6,14 +6,14 @@ const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 const GENERATOR = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
 
 const isByteString = function (str, len) {
-  return !!str.replace('0x', '').match(`^[0-9a-fA-F]{${len}}$`);
-}
+  return !!str.replace("0x", "").match(`^[0-9a-fA-F]{${len}}$`);
+};
 
 const isAddress = function (address) {
   return isByteString(address, 40);
-}
+};
 
-const convertBits = function(data,fromWidth,toWidth,pad) {
+const convertBits = function (data, fromWidth, toWidth, pad) {
   let acc = 0;
   let bits = 0;
   const ret = [];
@@ -40,7 +40,7 @@ const convertBits = function(data,fromWidth,toWidth,pad) {
   }
 
   return Buffer.from(ret);
-}
+};
 
 const polymod = function (values) {
   let chk = 1;
@@ -69,7 +69,6 @@ const hrpExpand = function (hrp) {
   return Buffer.from(ret);
 };
 
-
 function verifyChecksum(hrp, data) {
   return polymod(Buffer.concat([hrpExpand(hrp), data])) === 1;
 }
@@ -97,7 +96,6 @@ const encode = function (hrp, data) {
   }
   return ret;
 };
-
 
 const decode = function (bechString) {
   let p;
@@ -139,10 +137,8 @@ const decode = function (bechString) {
   return { hrp, data: Buffer.from(data.slice(0, data.length - 6)) };
 };
 
-
 // HRP is the human-readable part of zilliqa bech32 addresses
 const HRP = "zil";
-
 
 /**
  * toBech32Address
@@ -164,7 +160,7 @@ const toBech32Address = function (address) {
   const addrBz = convertBits(
     Buffer.from(address.replace("0x", ""), "hex"),
     8,
-    5
+    5,
   );
 
   if (addrBz === null) {
@@ -208,33 +204,37 @@ function convertAddress(id) {
   let addressValue = addressInput.value;
   try {
     if (isBech32(addressValue)) {
-    result = fromBech32Address(addressValue);
-  } else {
-    result = toBech32Address(addressValue);
-  }
-  addressInput.value= result;
+      result = fromBech32Address(addressValue);
+    } else {
+      result = toBech32Address(addressValue);
+    }
+    addressInput.value = result;
   } catch (error) {
-    alert('Cannot convert ' + error)
+    alert("Cannot convert " + error);
   }
 }
 
 function copyValue(id) {
   let addressInput = document.getElementById(id);
   addressInput.select();
-  addressInput.setSelectionRange(0,99999);
+  addressInput.setSelectionRange(0, 99999);
   navigator.clipboard.writeText(addressInput.value);
 }
 
 // Fill in dynamically because mkdocs removes onclick handlers.
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
   var ids = document.getElementsByClassName("hexconverter");
-  for (let i = 0;i < ids.length;i++) {
-    let elem= ids[i];
-    elem.onclick = function() {  convertAddress('address'); }
+  for (let i = 0; i < ids.length; i++) {
+    let elem = ids[i];
+    elem.onclick = function () {
+      convertAddress("address");
+    };
   }
   var ids2 = document.getElementsByClassName("hexcopy");
-  for (let i =0; i< ids2.length;i++) {
+  for (let i = 0; i < ids2.length; i++) {
     let elem = ids2[i];
-    elem.onclick = function () { copyValue('address'); }
+    elem.onclick = function () {
+      copyValue("address");
+    };
   }
-})
+});
