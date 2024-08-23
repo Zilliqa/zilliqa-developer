@@ -38,6 +38,7 @@ lint:
       paths:
         - contracts/audited/burn_zrc2 # eslint barfs on an internal error if you enable it on this directory.
         - contracts/reward_control # and again
+        - products/bech32-hex-converter # eslint chokes.
     - linters: [ALL]
       paths:
         - products/airdrop/**

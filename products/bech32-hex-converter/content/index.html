@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>Sample bech32 <-> hex converter</title>
+    <script type="text/javascript" src="js/chain.js"></script>
+    <script type="text/javascript" src="js/buffer.js"></script>
+    <link rel="stylesheet" href="trivial.css" />
+  </head>
+  <body>
+    <h1>Zil <-> 0x converter</h1>
+
+    <p>
+      Type a `zil1...` or a hex (`0x..`) address into the box below and hit the
+      convert button to convert to the other format.
+    </p>
+    <p>The copy button copies the current contents of the typein</p>
+
+    <p>
+      <tt>js/chain.js</tt> contains the converter code; buttons are registered
+      using <tt>addEventListener</tt> for purely historical reasons
+    </p>
+    <p>
+      <tt>js/buffer.js</tt> is just a browser-based node polyfill used so we can
+      use the same code for node and in browser.
+    </p>
+
+    <p>
+      Some example inputs and outputs - more at
+      <a href="https://devex.zilliqa.com/">https://devex.zilliqa.com/</a> :
+    </p>
+    <div class="example">
+      0x7bb3b0e8a59f3f61d9bff038f4aeb42cae2ecce8 <->
+      zil10wemp699nulkrkdl7qu0ft459jhzan8g6r5lh7
+    </div>
+    <div class="example">
+      a198b865e36612e365705b393f2acea37a23d919 <->
+      zil15xvtse0rvcfwxetstvun72kw5daz8kge0frn3y
+    </div>
+    <div class="example">
+      18a762b2697c0e863f49808bc56036371a3b8272 <->
+      zil1rznk9vnf0s8gv06fsz9u2cpkxudrhqnjq8les4
+    </div>
+    <div>&nbsp;</div>
+    <input id="address" size="50" />
+    <button class="hexconverter" style="width: 4em">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+        <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+        <path
+          d="M272 416c17.7 0 32-14.3 32-32s-14.3-32-32-32l-112 0c-17.7 0-32-14.3-32-32l0-128 32 0c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-64-64c-12.5-12.5-32.8-12.5-45.3 0l-64 64c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8l32 0 0 128c0 53 43 96 96 96l112 0zM304 96c-17.7 0-32 14.3-32 32s14.3 32 32 32l112 0c17.7 0 32 14.3 32 32l0 128-32 0c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l64 64c12.5 12.5 32.8 12.5 45.3 0l64-64c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8l-32 0 0-128c0-53-43-96-96-96L304 96z"
+        />
+      </svg>
+    </button>
+    <button class="hexcopy" style="width: 4em">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+        <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+        <path
+          d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"
+        />
+      </svg>
+    </button>
+  </body>
+  <p class="warning">
+    WARNING! This code just converts address presentation formats. It will not
+    help you send a transaction for a Zilliqa wallet to an EVM contract, or vice
+    versa. If you have questions about this, please contact your Zilliqa support
+    contact or <a href="mailto:richard@zilliqa.com">richard@zilliqa.com</a> .
+  </p>
+</html>
