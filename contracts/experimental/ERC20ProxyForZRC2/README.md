@@ -1,66 +1,28 @@
-## Foundry
+# ERC20ProxyForZRC2 Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
 
 ```shell
-$ forge build
+export PRIVATE_KEY=<...>
+pnpm exec hardhat deployProxy 0x5DD38E64dA8f7d541d8aF45fe00bF37F6a2c6195 --network zq-testnet
 ```
 
-### Test
 
-```shell
-$ forge test
-```
+This is the contract to deploy a ERC20Proxy for a ZRC2 contract living in the scilla environment. It leverages the precompiles available in Zilliqa to interoperate between the 2 environments.
 
-### Format
+Make sure to specify the `zrc2_address` on the deployment file for the ERC20Proxy to be correctly deployed. This allows EVM to execute all desired functions on the ZRC2 as if it were a ERC20. Implementing IERC20 means that all existing DApps and wallets should be compatible with this token.
 
-```shell
-$ forge fmt
-```
+Make sure to also copy `.env.example` into `.env` and fill in the necessarily variables. Also ensure that `pnpm install` to install any necessary dependencies
 
-### Gas Snapshots
+The following are the deployment commands:
 
-```shell
-$ forge snapshot
-```
+- Zilliqa Mainnet
 
-### Anvil
+  ```shell
+  pnpm exec hardhat run scripts/deploy.ts --network zq
+  ```
 
-```shell
-$ anvil
-```
+- Zilliqa Testnet
 
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+  ```shell
+  pnpm exec hardhat run scripts/deploy.ts --network zq-testnet
+  ```
