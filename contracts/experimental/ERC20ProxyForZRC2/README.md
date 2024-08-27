@@ -1,10 +1,24 @@
 # ERC20ProxyForZRC2 Contract
 
+Unless you want to build using the `zilliqa-developer` version of `zilliqa-js`, install with:
+
+```shell
+pnpm i --ignore-workspace
+```
+
 
 ```shell
 export PRIVATE_KEY=<...>
 pnpm exec hardhat deployProxy 0x5DD38E64dA8f7d541d8aF45fe00bF37F6a2c6195 --network zq-testnet
 ```
+
+To run tests:
+
+```shell
+export PRIVATE_KEY=<...>
+pnpm exec hardhat test --network zq-testnet
+```
+
 
 
 This is the contract to deploy a ERC20Proxy for a ZRC2 contract living in the scilla environment. It leverages the precompiles available in Zilliqa to interoperate between the 2 environments.

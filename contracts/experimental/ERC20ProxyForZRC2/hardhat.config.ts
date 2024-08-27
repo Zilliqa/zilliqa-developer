@@ -2,6 +2,8 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
 import "./tasks/deployProxy.ts";
+import "hardhat-scilla-plugin";
+
 
 if (!process.env.PRIVATE_KEY) {
   throw new Error("PRIVATE_KEY not set");
