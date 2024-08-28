@@ -15,14 +15,17 @@ const config: HardhatUserConfig = {
     "zq-testnet": {
       url: "https://dev-api.zilliqa.com",
       accounts: [process.env.PRIVATE_KEY ?? ""],
+      chainId: 33101,
     },
     "zq": {
       url: "https://api.zilliqa.com",
       accounts: [process.env.PRIVATE_KEY ?? ""],
+      chainId: 32769
     },
     "local-proxy": {
-      url: "http://localhost:5555",
+      url: "http://localhost:5556",
       accounts: [process.env.PRIVATE_KEY ?? ""],
+      chainId: 33101
     }
   },
   sourcify: {
@@ -48,6 +51,9 @@ const config: HardhatUserConfig = {
         }
       }
     ]
+  },
+  mocha: {
+    timeout: 1000000000
   },
 };
 

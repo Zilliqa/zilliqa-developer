@@ -3,9 +3,10 @@
 Unless you want to build using the `zilliqa-developer` version of `zilliqa-js`, install with:
 
 ```shell
-pnpm i --ignore-workspace
+pnpm --ignore-workspace i
 ```
 
+To deploy a proxy:
 
 ```shell
 export PRIVATE_KEY=<...>
@@ -16,6 +17,8 @@ To run tests:
 
 ```shell
 export PRIVATE_KEY=<...>
+export TEST_KEY_1=<...>
+export TEST_KEY_2=<...>
 pnpm exec hardhat test --network zq-testnet
 ```
 
@@ -31,12 +34,22 @@ The following are the deployment commands:
 
 - Zilliqa Mainnet
 
-  ```shell
-  pnpm exec hardhat run scripts/deploy.ts --network zq
-  ```
+```shell
+pnpm exec hardhat run scripts/deploy.ts --network zq
+```
 
 - Zilliqa Testnet
 
-  ```shell
-  pnpm exec hardhat run scripts/deploy.ts --network zq-testnet
-  ```
+```shell
+pnpm exec hardhat run scripts/deploy.ts --network zq-testnet
+```
+
+## Monitoring requests
+
+You can use the `local-proxy` network and run:
+
+```sh
+mitmweb --mode reverse:https://dev-api.zilliqa.com --no-web-open-browser --listen-port 5556 --web-port 5557
+```
+
+To monitor requests.
