@@ -1,0 +1,9 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: devex
+  labels:
+    app.kubernetes.io/name: devex
+spec:
+  securityPolicy:
+    name: gke-d-staging-01-ase1-security-policies

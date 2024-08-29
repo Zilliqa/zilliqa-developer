@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - backend-config.yaml
   - certificate.yaml
 
 patches:
