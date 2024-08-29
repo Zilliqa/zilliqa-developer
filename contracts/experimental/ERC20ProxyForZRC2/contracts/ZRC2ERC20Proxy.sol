@@ -9,10 +9,10 @@ contract ZRC2ERC20Proxy is IERC20 {
     using ScillaConnector for address;
     using SafeCast for uint256;
 
-    address public zrc2_proxy;
+    address immutable public zrc2_proxy;
 
     // Additional variables useful for wallets
-    uint8 public decimals;
+    uint8 immutable public decimals;
     string public symbol;
     string public name;
 
@@ -56,6 +56,15 @@ contract ZRC2ERC20Proxy is IERC20 {
         return true;
     }
 
+    function _transferFrom(
+        address from,
+        address to,
+        uint256 tokens
+    ) internal returns (bool) {
+        zrc2_proxy.call("TransferFrom", from, to, tokens.toUint128());
+        return true;
+    }
+
     /**
      * @notice Transfer tokens from one address to another
      * @param from The address to transfer from
@@ -68,7 +77,7 @@ contract ZRC2ERC20Proxy is IERC20 {
         address to,
         uint256 tokens
     ) external returns (bool) {
-        zrc2_proxy.call("TransferFrom", from, to, tokens.toUint128());
+        _transferFrom(from, to, tokens);
         return true;
     }
 

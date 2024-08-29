@@ -51,7 +51,7 @@ let get_val =
 (*             The contract definition             *)
 (***************************************************)
 
-contract FungibleToken
+contract FungibleTokenBurnable
 (
   contract_owner: ByStr20,
   name : String,

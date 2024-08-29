@@ -34,7 +34,7 @@ describe("basicTest", function () {
     initZilliqa(hre.network.config.url, hre.network.config.chainId & 0x7fff, hre.network.config.accounts, CONFIRM_ATTEMPTS); 
     zrc2Owner = hre.zilliqa.getDefaultAccount();
     zrc2OwnerAddress = zrc2Owner.address.toLowerCase();
-    
+
     if (!process.env.CACHED) {
       zrc2Contract = await hre.deployScillaContract("FungibleToken",
                                                     zrc2OwnerEVM.address,
@@ -42,20 +42,16 @@ describe("basicTest", function () {
                                                     ZRC2_SYMBOL,
                                                     ZRC2_DECIMALS,
                                                     ZRC2_SUPPLY);
-      console.log(`zrc2Contract ${JSON.stringify(zrc2Contract)}`);
       console.log(`Sample ZRC-2 token ${zrc2Contract.address} owned by ${zrc2Owner.address}`);
       const erc20Factory = (await ethers.getContractFactory("ZRC2ERC20Proxy")).connect(proxyDeployer);
       erc20Proxy = await erc20Factory.deploy(zrc2Contract.address.toLowerCase());
-      console.log(`erc20Proxy ${JSON.stringify(erc20Proxy)}`);
       await erc20Proxy.waitForDeployment();
     } else {
       zrc2Contract = await hre.interactWithScillaContract("0x178ABcED2552522F131E7C89E80E622862E6c00E");
       erc20Proxy = (await ethers.getContractFactory("ZRC2ERC20Proxy")).connect(proxyDeployer).attach("0x0C9fb168f7155Ea54aAaCafdbD9A652bd895b4a4");
     }
     console.log(`ERC20 proxy deployed at ${erc20Proxy.target}`);
-    console.log(`Proxy to ${await erc20Proxy.zrc2_proxy()}`);
-    console.log(`Dec ${await erc20Proxy.decimals()}`);
-    console.log(`Supply ${await erc20Proxy.totalSupply()}`);
+    console.log(` .... proxying to ZRC2 at ${await erc20Proxy.zrc2_proxy()}`);
     console.log(`Proxy deployer ${proxyDeployer.address} ; token holder ${tokenHolder.address}`);
   });
 
@@ -86,8 +82,8 @@ describe("basicTest", function () {
     const AMT=4;
     await expect(erc20Proxy.connect(tokenHolder).transfer(zrc2OwnerEVM, AMT)).not.to.be.reverted;
   });
-    
-  
+
+
   it("0003 should fail transfers if the user doesn't have balance", async function () {
     const AMT = 1;
     await expect(erc20Proxy.connect(tokenHolder).transfer(tokenHolder, AMT)).to.be.reverted;
@@ -118,5 +114,11 @@ describe("basicTest", function () {
     expect(await erc20Proxy.balanceOf(tokenHolder.address)).to.equal(0);
     expect(await erc20Proxy.balanceOf(proxyDeployer.address)).to.equal(0);
   });
+
+  it("0007 correctly limits allowances to 128 bits", async function () {
+    expect(erc20Proxy.connect(zrc2OwnerEVM).approve(tokenHolder.address, 
+                                                         BigInt("170141183460469231731687303715884105729"))).to.be.reverted;
+  });
+
 });
 
