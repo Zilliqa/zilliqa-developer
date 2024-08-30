@@ -8,7 +8,7 @@ import { initZilliqa } from "hardhat-scilla-plugin";
 /// not.to.be.reverted seems to not work here (it complains about null receipts), so ..
 describe("basicTest", function () {
   let zrc2Contract: ScillaContract;
-  let erc20Proxy: Contract;
+  let erc20Proxy: ZRC2ERC20Proxy;
   let zrc2Owner: Account;
 
   //let zrc2OwnerAddress: string;
