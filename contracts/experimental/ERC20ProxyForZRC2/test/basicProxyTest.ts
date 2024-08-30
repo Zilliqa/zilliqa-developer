@@ -13,7 +13,7 @@ describe("basicTest", function () {
 
   //let zrc2OwnerAddress: string;
 
-  let zrc2OwnerEVM: Signer;
+  let zrc2OwnerEVM: Wallet;
   let proxyDeployer: Signer;
   let tokenHolder: Signer;
 
