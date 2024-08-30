@@ -7,7 +7,7 @@ library ScillaConnector {
     uint private constant SCILLA_STATE_READ_PRECOMPILE_ADDRESS = 0x5a494c92;
 
     /**
-     * @dev Calls a ZRC2 contract function with two arguments
+     * @dev Calls a ZRC2 contract function with one argument
      * @param target The address of the ZRC2 contract
      * @param tran_name The name of the function to call
      * @param arg1 The first argument to the function
