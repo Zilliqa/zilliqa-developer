@@ -20,7 +20,7 @@ contract ZRC2ERC20ProxyBurnable is ZRC2ERC20Proxy {
    */
   function burn(uint256 value) public virtual {
     uint128 value128 = value.toUint128();
-    zrc2_proxy.callu128("Burn", value128);
+    zrc2_proxy.call("Burn", value128);
   }
 
   /**

@@ -4,8 +4,7 @@ task("deployProxy", "deploy an ERC20 proxy for a ZRC2 contract")
     console.log(`Deploying an ERC20 proxy for the ZRC-2 at ${zrc2Address}`);
     // ZRC2 addresses frequently have bad checksums, hence toLowerCase().
     const contract = await ethers.deployContract("ZRC2ERC20Proxy",
-                                                 [zrc2Address.toLowerCase()],
-                                                 { gasLimit: 1_000_000 });
+                                                 [zrc2Address.toLowerCase()]);
     await contract.waitForDeployment();
     const proxyAddress = await contract.getAddress();
     console.log(`Complete. There is now an ERC20-compliant proxy at ${proxyAddress} for the ZRC-2 contract at ${zrc2Address}`);
@@ -23,8 +22,7 @@ task("deployProxyBurnable", "deploy a burnable ERC20 proxy for a ZRC2 contract")
     console.log(`Deploying a burnable ERC20 proxy for the ZRC-2 at ${zrc2Address}`);
     // ZRC2 addresses frequently have bad checksums, hence toLowerCase().
     const contract = await ethers.deployContract("ZRC2ERC20ProxyBurnable",
-                                                 [zrc2Address.toLowerCase()],
-                                                 { gasLimit: 1_000_000 });
+                                                 [zrc2Address.toLowerCase()]);
     await contract.waitForDeployment();
     const proxyAddress = await contract.getAddress();
     console.log(`Complete. There is now an ERC20-compliant proxy at ${proxyAddress} for the ZRC-2 contract at ${zrc2Address}`);

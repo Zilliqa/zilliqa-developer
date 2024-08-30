@@ -12,7 +12,7 @@ library ScillaConnector {
      * @param tran_name The name of the function to call
      * @param arg1 The first argument to the function
      */
-    function callu128(
+    function call(
         address target,
         string memory tran_name,
         uint128 arg1
