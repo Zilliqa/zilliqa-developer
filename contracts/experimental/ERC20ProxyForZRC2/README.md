@@ -26,15 +26,14 @@ pnpm exec hardhat deployProxyBurnable 0x5DD38E64dA8f7d541d8aF45fe00bF37F6a2c6195
 
 The task should automatically verify these contracts to sourcify.
 
-
 ## Networks
 
 Various networks are available in the `hardhat.conf.ts`:
 
- * `zq-testnet` - the Zilliqa 1 testnet
- * `zq` - the Zilliqa 1 mainnet
- * `local-proxy` - a local proxy.
- 
+- `zq-testnet` - the Zilliqa 1 testnet
+- `zq` - the Zilliqa 1 mainnet
+- `local-proxy` - a local proxy.
+
 You can use the `local-proxy` network and run:
 
 ```sh

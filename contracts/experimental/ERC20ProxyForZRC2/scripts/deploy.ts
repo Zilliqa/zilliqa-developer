@@ -9,7 +9,7 @@ async function main() {
     [zrc2Address],
     {
       gasLimit: 1_000_000,
-    }
+    },
   );
 
   await contract.waitForDeployment();

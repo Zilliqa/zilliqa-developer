@@ -1,13 +1,16 @@
 task("deployProxy", "deploy an ERC20 proxy for a ZRC2 contract")
   .addPositionalParam("zrc2Address")
-  .setAction(async ({zrc2Address}) => {
+  .setAction(async ({ zrc2Address }) => {
     console.log(`Deploying an ERC20 proxy for the ZRC-2 at ${zrc2Address}`);
     // ZRC2 addresses frequently have bad checksums, hence toLowerCase().
-    const contract = await ethers.deployContract("ZRC2ERC20Proxy",
-                                                 [zrc2Address.toLowerCase()]);
+    const contract = await ethers.deployContract("ZRC2ERC20Proxy", [
+      zrc2Address.toLowerCase(),
+    ]);
     await contract.waitForDeployment();
     const proxyAddress = await contract.getAddress();
-    console.log(`Complete. There is now an ERC20-compliant proxy at ${proxyAddress} for the ZRC-2 contract at ${zrc2Address}`);
+    console.log(
+      `Complete. There is now an ERC20-compliant proxy at ${proxyAddress} for the ZRC-2 contract at ${zrc2Address}`,
+    );
     console.log(`Verifying .. `);
     // verify:verify just throws unknown network errors, no matter how hard you try to disable etherscan, so ..
     await hre.run("verify:sourcify", {
@@ -18,14 +21,19 @@ task("deployProxy", "deploy an ERC20 proxy for a ZRC2 contract")
 
 task("deployProxyBurnable", "deploy a burnable ERC20 proxy for a ZRC2 contract")
   .addPositionalParam("zrc2Address")
-  .setAction(async ({zrc2Address}) => {
-    console.log(`Deploying a burnable ERC20 proxy for the ZRC-2 at ${zrc2Address}`);
+  .setAction(async ({ zrc2Address }) => {
+    console.log(
+      `Deploying a burnable ERC20 proxy for the ZRC-2 at ${zrc2Address}`,
+    );
     // ZRC2 addresses frequently have bad checksums, hence toLowerCase().
-    const contract = await ethers.deployContract("ZRC2ERC20ProxyBurnable",
-                                                 [zrc2Address.toLowerCase()]);
+    const contract = await ethers.deployContract("ZRC2ERC20ProxyBurnable", [
+      zrc2Address.toLowerCase(),
+    ]);
     await contract.waitForDeployment();
     const proxyAddress = await contract.getAddress();
-    console.log(`Complete. There is now an ERC20-compliant proxy at ${proxyAddress} for the ZRC-2 contract at ${zrc2Address}`);
+    console.log(
+      `Complete. There is now an ERC20-compliant proxy at ${proxyAddress} for the ZRC-2 contract at ${zrc2Address}`,
+    );
     console.log(`Verifying .. `);
     // verify:verify just throws unknown network errors, no matter how hard you try to disable etherscan, so ..
     await hre.run("verify:sourcify", {
