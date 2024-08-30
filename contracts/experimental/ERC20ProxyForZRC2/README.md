@@ -2,7 +2,7 @@
 
 These contracts allow ZRC-2 tokens to look like ERC-20 tokens.
 
-Unless you want to build using the `zilliqa-developer` version of `zilliqa-js`, install our dependencies with:
+Unless you want to build using the `zilliqa-developer` version of `zilliqa-js`, or you encounter missing modules issues while running tests, install our dependencies with:
 
 ```shell
 pnpm --ignore-workspace i
