@@ -55,9 +55,12 @@ pnpm exec hardhat test --network zq-testnet
 
 Each test has a number prefix so you can select them individually.
 
-If you set the `CACHED` environment variable, we will use a built-in
-cached contract deployment whose addresses appear in the source -
-please update it if you change the contracts.
+If you set the `CACHED` environment variable, we will use:
+
+- `CACHED_ZRC2` - address of a ZRC-2
+- `CACHED_ERC20` - address of an ERC-20
+
+To run the tests; this saves you having to redeploy each time.
 
 This allows you to run tests quickly, without waiting for contract
 deployment.

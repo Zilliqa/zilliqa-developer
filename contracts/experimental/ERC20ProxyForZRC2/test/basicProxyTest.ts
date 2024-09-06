@@ -5,6 +5,20 @@ import { ScillaContract } from "hardhat-scilla-plugin";
 import { Account } from "@zilliqa-js/zilliqa";
 import { initZilliqa } from "hardhat-scilla-plugin";
 
+async function assertedTransfer(
+  proxy: ZRC2ERC20Proxy,
+  from: Wallet,
+  to: Wallet,
+  amt: number,
+) {
+  const receipt = await (await proxy.connect(from).transfer(to, amt)).wait();
+
+  expect(
+    receipt?.status === 1,
+    `Transfer of ${amt} from ${from.address} to ${to.address} failed. Transaction status ${receipt?.status || "unknown"}`,
+  );
+}
+
 /// not.to.be.reverted seems to not work here (it complains about null receipts), so ..
 describe("basicTest", function () {
   let zrc2Contract: ScillaContract;
@@ -40,6 +54,7 @@ describe("basicTest", function () {
     //zrc2OwnerAddress = zrc2Owner.address.toLowerCase();
 
     if (!process.env.CACHED) {
+      console.log(`Deploying contracts ..`);
       zrc2Contract = await hre.deployScillaContract(
         "FungibleToken",
         zrc2OwnerEVM.address,
@@ -59,12 +74,14 @@ describe("basicTest", function () {
       );
       await erc20Proxy.waitForDeployment();
     } else {
+      console.log(`Using predeployed contracts ..`);
       zrc2Contract = await hre.interactWithScillaContract(
-        "0x178ABcED2552522F131E7C89E80E622862E6c00E",
+        process.env.CACHED_ZRC2,
       );
       erc20Proxy = (await ethers.getContractFactory("ZRC2ERC20Proxy"))
         .connect(proxyDeployer)
-        .attach("0x0C9fb168f7155Ea54aAaCafdbD9A652bd895b4a4");
+        .attach(process.env.CACHED_ERC20);
+      console.log(`proxy ${JSON.stringify(erc20Proxy)}`);
     }
     console.log(`ERC20 proxy deployed at ${erc20Proxy.target}`);
     console.log(` .... proxying to ZRC2 at ${await erc20Proxy.zrc2_proxy()}`);
@@ -73,12 +90,12 @@ describe("basicTest", function () {
     );
   });
 
-  it("0000 Should deploy successfully", async function () {
+  it("T0000 Should deploy successfully", async function () {
     expect(zrc2Contract.address).to.be.properAddress;
     expect(erc20Proxy.target).to.be.properAddress;
   });
 
-  it("0001 Should report parameters correctly", async function () {
+  it("T0001 Should report parameters correctly", async function () {
     expect(await erc20Proxy.decimals()).to.equal(ZRC2_DECIMALS);
     expect(await erc20Proxy.symbol()).to.equal(ZRC2_SYMBOL);
     expect(await erc20Proxy.name()).to.equal(ZRC2_NAME);
@@ -88,37 +105,33 @@ describe("basicTest", function () {
     );
   });
 
-  it("0002 Should deal with transfers correctly", async function () {
+  it("T0002 Should deal with transfers correctly", async function () {
     const AMT = 540;
     expect(await erc20Proxy.balanceOf(zrc2OwnerEVM.address)).to.equal(
       ZRC2_SUPPLY,
     );
     expect(await erc20Proxy.balanceOf(tokenHolder.address)).to.equal(0);
-    await (
-      await erc20Proxy.connect(zrc2OwnerEVM).transfer(tokenHolder, AMT)
-    ).wait();
+    await assertedTransfer(erc20Proxy, zrc2OwnerEVM, tokenHolder, AMT);
     expect(await erc20Proxy.balanceOf(tokenHolder.address)).to.equal(AMT);
     expect(await erc20Proxy.balanceOf(zrc2OwnerEVM.address)).to.equal(
       ZRC2_SUPPLY - AMT,
     );
-    await (
-      await erc20Proxy.connect(tokenHolder).transfer(zrc2OwnerEVM, AMT)
-    ).wait();
+    await assertedTransfer(erc20Proxy, tokenHolder, zrc2OwnerEVM, AMT);
   });
 
-  it("MOVE", async function () {
+  // Use this test to "manually" transfer tokens back from the tokenHolder after a test fails (if it does).
+  xit("MOVE", async function () {
     const AMT = 4;
-    await expect(erc20Proxy.connect(tokenHolder).transfer(zrc2OwnerEVM, AMT))
-      .not.to.be.reverted;
+    await assertedTransfer(erc20Proxy, tokenHolder, zrc2OwnerEVM, AMT);
   });
 
-  it("0003 should fail transfers if the user doesn't have balance", async function () {
+  it("T0003 should fail transfers if the user doesn't have balance", async function () {
     const AMT = 1;
     await expect(erc20Proxy.connect(tokenHolder).transfer(tokenHolder, AMT)).to
       .be.reverted;
   });
 
-  it("0004 should fail transferFrom if the user doesn't have allowance", async function () {
+  it("T0004 should fail transferFrom if the user doesn't have allowance", async function () {
     expect(
       await erc20Proxy.allowance(zrc2OwnerEVM.address, tokenHolder.address),
     ).to.equal(0);
@@ -129,24 +142,36 @@ describe("basicTest", function () {
     ).to.be.reverted;
   });
 
-  it("0005 should succeed transferFrom if there is enough allowance", async function () {
+  it("T0005 should succeed transferFrom if there is enough allowance", async function () {
     const AMT = 4;
     expect(await erc20Proxy.balanceOf(zrc2OwnerEVM.address)).to.equal(
       ZRC2_SUPPLY,
     );
     expect(await erc20Proxy.balanceOf(tokenHolder.address)).to.equal(0);
     expect(await erc20Proxy.balanceOf(proxyDeployer.address)).to.equal(0);
-    await (
-      await erc20Proxy.connect(zrc2OwnerEVM).approve(proxyDeployer, AMT)
-    ).wait();
+    {
+      const receipt = await (
+        await erc20Proxy.connect(zrc2OwnerEVM).approve(proxyDeployer, AMT)
+      ).wait();
+      expect(
+        receipt?.status === 1,
+        `Approval of ${AMT} from ${zrc2OwnerEVM.address} to ${proxyDeployer.address} failed`,
+      );
+    }
     expect(
       await erc20Proxy.allowance(zrc2OwnerEVM.address, proxyDeployer.address),
     ).to.equal(AMT);
-    await (
-      await erc20Proxy
-        .connect(proxyDeployer)
-        .transferFrom(zrc2OwnerEVM, tokenHolder, AMT)
-    ).wait();
+    {
+      const receipt = await (
+        await erc20Proxy
+          .connect(proxyDeployer)
+          .transferFrom(zrc2OwnerEVM, tokenHolder, AMT)
+      ).wait();
+      expect(
+        receipt?.status === 1,
+        `transferFrom called by ${proxyDeployer.address} for ${zrc2OwnerEVM.address}  -> ${tokenHolder.address} for ${AMT} failed`,
+      );
+    }
     expect(await erc20Proxy.balanceOf(zrc2OwnerEVM.address)).to.equal(
       ZRC2_SUPPLY - AMT,
     );
@@ -154,11 +179,10 @@ describe("basicTest", function () {
     expect(await erc20Proxy.balanceOf(proxyDeployer.address)).to.equal(0);
   });
 
-  it("0006 transfer 0005's tokens back", async function () {
+  it("T0006 transfer 0005's tokens back", async function () {
     // Now transfer it all back.
-    await (
-      await erc20Proxy.connect(tokenHolder).transfer(zrc2OwnerEVM, AMT)
-    ).wait();
+    const AMT = 4;
+    await assertedTransfer(erc20Proxy, tokenHolder, zrc2OwnerEVM, AMT);
     expect(await erc20Proxy.balanceOf(zrc2OwnerEVM.address)).to.equal(
       ZRC2_SUPPLY,
     );
@@ -166,7 +190,7 @@ describe("basicTest", function () {
     expect(await erc20Proxy.balanceOf(proxyDeployer.address)).to.equal(0);
   });
 
-  it("0007 correctly limits allowances to 128 bits", async function () {
+  it("T0007 correctly limits allowances to 128 bits", async function () {
     expect(
       erc20Proxy
         .connect(zrc2OwnerEVM)

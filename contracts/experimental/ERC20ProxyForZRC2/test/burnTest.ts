@@ -83,7 +83,13 @@ describe("burnTest", function () {
     const supply = await erc20Proxy.totalSupply();
     const AMT = 1;
     expect(balance).to.be.at.least(AMT);
-    await (await erc20Proxy.connect(zrc2OwnerEVM).burn(AMT)).wait();
+    const receipt = await (
+      await erc20Proxy.connect(zrc2OwnerEVM).burn(AMT)
+    ).wait();
+    expect(
+      receipt?.status === 1,
+      `Burn of ${AMT} from ${zrc2OwnerEVM.address} failed`,
+    );
     expect(await erc20Proxy.balanceOf(zrc2OwnerEVM.address)).to.equal(
       balance - BigInt(AMT),
     );
@@ -96,12 +102,26 @@ describe("burnTest", function () {
     const supply = await erc20Proxy.totalSupply();
     const AMT = 1;
     expect(balance).to.equal(0);
-    await (
-      await erc20Proxy.connect(zrc2OwnerEVM).approve(tokenHolder.address, AMT)
-    ).wait();
-    await (
-      await erc20Proxy.connect(tokenHolder).burnFrom(zrc2OwnerEVM.address, AMT)
-    ).wait();
+    {
+      const receipt = await (
+        await erc20Proxy.connect(zrc2OwnerEVM).approve(tokenHolder.address, AMT)
+      ).wait();
+      expect(
+        receipt?.status === 1,
+        `Approval of ${AMT} from ${zrc2OwnerEVM.address} for ${tokenHolder.address} failed`,
+      );
+    }
+    {
+      const receipt = await (
+        await erc20Proxy
+          .connect(tokenHolder)
+          .burnFrom(zrc2OwnerEVM.address, AMT)
+      ).wait();
+      expect(
+        receipt?.status === 1,
+        `BurnFrom for ${AMT} from ${zrc2OwnerEVM.address} issued by ${tokenHolder.address} failed`,
+      );
+    }
     const holderBalanceAfter = await erc20Proxy.balanceOf(zrc2OwnerEVM.address);
     expect(holderBalance - holderBalanceAfter).to.equal(BigInt(AMT));
     const supplyAfter = await erc20Proxy.totalSupply();
