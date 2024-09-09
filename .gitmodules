@@ -1,0 +1,3 @@
+[submodule "contracts/experimental/ERC20ProxyForZRC2/lib/openzeppelin-contracts"]
+	path = contracts/experimental/ERC20ProxyForZRC2/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

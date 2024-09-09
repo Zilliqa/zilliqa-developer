@@ -1,21 +1,66 @@
 # ERC20ProxyForZRC2 Contract
 
-This is the contract to deploy a ERC20Proxy for a ZRC2 contract living in the scilla environment. It leverages the precompiles available in Zilliqa to interoperate between the 2 environments.
+These contracts allow ZRC-2 tokens to look like ERC-20 tokens.
 
-Make sure to specify the `zrc2_address` on the deployment file for the ERC20Proxy to be correctly deployed. This allows EVM to execute all desired functions on the ZRC2 as if it were a ERC20. Implementing IERC20 means that all existing DApps and wallets should be compatible with this token.
+Unless you want to build using the `zilliqa-developer` version of `zilliqa-js`, or you encounter missing modules issues while running tests, install our dependencies with:
 
-Make sure to also copy `.env.example` into `.env` and fill in the necessarily variables. Also ensure that `pnpm install` to install any necessary dependencies
+```shell
+pnpm --ignore-workspace i
+```
 
-The following are the deployment commands:
+## Deploying a proxy
 
-- Zilliqa Mainnet
+You can deploy a proxy with:
 
-  ```shell
-  pnpm exec hardhat run scripts/deploy.ts --network zq
-  ```
+```shell
+export PRIVATE_KEY=<...>
+pnpm exec hardhat deployProxy 0x5DD38E64dA8f7d541d8aF45fe00bF37F6a2c6195 --network zq-testnet
+```
 
-- Zilliqa Testnet
+If your ZRC-2 is burnable (ie. supports the `Burn()` transition), you can use:
 
-  ```shell
-  pnpm exec hardhat run scripts/deploy.ts --network zq-testnet
-  ```
+```shell
+export PRIVATE_KEY=<...>
+pnpm exec hardhat deployProxyBurnable 0x5DD38E64dA8f7d541d8aF45fe00bF37F6a2c6195 --network zq-testnet
+```
+
+The task should automatically verify these contracts to sourcify.
+
+## Networks
+
+Various networks are available in the `hardhat.conf.ts`:
+
+- `zq-testnet` - the Zilliqa 1 testnet
+- `zq` - the Zilliqa 1 mainnet
+- `local-proxy` - a local proxy.
+
+You can use the `local-proxy` network and run:
+
+```sh
+mitmweb --mode reverse:https://dev-api.zilliqa.com --no-web-open-browser --listen-port 5556 --web-port 5557
+```
+
+To monitor requests.
+
+## Testing
+
+To run the tests:
+
+```shell
+export PRIVATE_KEY=<...>
+export TEST_KEY_1=<...>
+export TEST_KEY_2=<...>
+pnpm exec hardhat test --network zq-testnet
+```
+
+Each test has a number prefix so you can select them individually.
+
+If you set the `CACHED` environment variable, we will use:
+
+- `CACHED_ZRC2` - address of a ZRC-2
+- `CACHED_ERC20` - address of an ERC-20
+
+To run the tests; this saves you having to redeploy each time.
+
+This allows you to run tests quickly, without waiting for contract
+deployment.

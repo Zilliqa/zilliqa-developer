@@ -7,6 +7,39 @@ library ScillaConnector {
     uint private constant SCILLA_STATE_READ_PRECOMPILE_ADDRESS = 0x5a494c92;
 
     /**
+     * @dev Calls a ZRC2 contract function with one argument
+     * @param target The address of the ZRC2 contract
+     * @param tran_name The name of the function to call
+     * @param arg1 The first argument to the function
+     */
+    function call(
+        address target,
+        string memory tran_name,
+        uint128 arg1
+    ) internal {
+        bytes memory encodedArgs = abi.encode(
+            target,
+            tran_name,
+            CALL_SCILLA_WITH_THE_SAME_SENDER,
+            arg1
+        );
+        uint256 argsLength = encodedArgs.length;
+
+        assembly {
+            let alwaysSuccessForThisPrecompile := call(
+                gas(),
+                SCILLA_CALL_PRECOMPILE_ADDRESS,
+                0,
+                add(encodedArgs, 0x20),
+                argsLength,
+                0x20,
+                0
+            )
+        }
+    }
+
+
+    /**
      * @dev Calls a ZRC2 contract function with two arguments
      * @param target The address of the ZRC2 contract
      * @param tran_name The name of the function to call
@@ -30,7 +63,7 @@ library ScillaConnector {
 
         assembly {
             let alwaysSuccessForThisPrecompile := call(
-                21000,
+                gas(),
                 SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
                 add(encodedArgs, 0x20),
@@ -68,7 +101,7 @@ library ScillaConnector {
 
         assembly {
             let alwaysSuccessForThisPrecompile := call(
-                21000,
+                gas(),
                 SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
                 add(encodedArgs, 0x20),
@@ -95,7 +128,7 @@ library ScillaConnector {
 
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
-                21000,
+                gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
@@ -123,7 +156,7 @@ library ScillaConnector {
 
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
-                21000,
+                gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
@@ -152,7 +185,7 @@ library ScillaConnector {
         uint256 output_len = output.length - 4;
         assembly {
             success := staticcall(
-                21000,
+                gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
@@ -187,7 +220,7 @@ library ScillaConnector {
 
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
-                21000,
+                gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
@@ -224,7 +257,7 @@ library ScillaConnector {
 
         assembly {
             let alwaysSuccessForThisPrecompile := staticcall(
-                21000,
+                gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
                 argsLength,
