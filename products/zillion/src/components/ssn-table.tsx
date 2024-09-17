@@ -116,6 +116,18 @@ function SsnTable(props: any) {
         status: "BELOW MIN.STAKE"
     };
 
+    const cardanoSSN: SsnStats = {
+        address: "Coming soon",
+        name: "Cardano SSN",
+        apiUrl: "Coming soon",
+        stakeAmt: "0",
+        bufferedDeposits: "0",
+        commRate: "4",
+        commReward: "0",
+        delegNum: "0",
+        status: "BELOW MIN.STAKE"
+    };
+
     ssnList = [...ssnList, googleSSN];
     const handleStake = (name: string, address: string, commRate: string) => {
         // set dashboard state variable
@@ -130,7 +142,11 @@ function SsnTable(props: any) {
 
     var array = [...ssnList];
 
-    array= array.sort((a, b) => parseInt(b.stakeAmt) - parseInt(a.stakeAmt));
+    array = array.sort((a, b) => parseInt(b.stakeAmt) - parseInt(a.stakeAmt));
+
+    array.unshift(cardanoSSN);
+
+
 
     const columns = useMemo(
         () => [
