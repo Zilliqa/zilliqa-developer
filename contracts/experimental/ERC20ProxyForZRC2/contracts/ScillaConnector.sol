@@ -25,8 +25,9 @@ library ScillaConnector {
         );
         uint256 argsLength = encodedArgs.length;
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := call(
+            success := call(
                 gas(),
                 SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
@@ -36,6 +37,7 @@ library ScillaConnector {
                 0
             )
         }
+        require(success);
     }
 
 
@@ -61,8 +63,9 @@ library ScillaConnector {
         );
         uint256 argsLength = encodedArgs.length;
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := call(
+            success := call(
                 gas(),
                 SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
@@ -72,6 +75,7 @@ library ScillaConnector {
                 0
             )
         }
+        require(success);
     }
 
     /**
@@ -99,8 +103,9 @@ library ScillaConnector {
         );
         uint256 argsLength = encodedArgs.length;
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := call(
+            success := call(
                 gas(),
                 SCILLA_CALL_PRECOMPILE_ADDRESS,
                 0,
@@ -110,6 +115,7 @@ library ScillaConnector {
                 0
             )
         }
+        require(success);
     }
 
     /**
@@ -126,8 +132,9 @@ library ScillaConnector {
         uint256 argsLength = encodedArgs.length;
         bytes memory output = new bytes(36);
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := staticcall(
+            success := staticcall(
                 gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
@@ -136,6 +143,7 @@ library ScillaConnector {
                 32
             )
         }
+        require(success);
 
         return abi.decode(output, (uint128));
     }
@@ -154,8 +162,9 @@ library ScillaConnector {
         uint256 argsLength = encodedArgs.length;
         bytes memory output = new bytes(36);
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := staticcall(
+            success := staticcall(
                 gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
@@ -164,6 +173,7 @@ library ScillaConnector {
                 32
             )
         }
+        require(success);
 
         return abi.decode(output, (uint32));
     }
@@ -183,6 +193,8 @@ library ScillaConnector {
         bool success;
         bytes memory output = new bytes(128);
         uint256 output_len = output.length - 4;
+
+        bool success;
         assembly {
             success := staticcall(
                 gas(),
@@ -218,8 +230,9 @@ library ScillaConnector {
         uint256 argsLength = encodedArgs.length;
         bytes memory output = new bytes(36);
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := staticcall(
+            success := staticcall(
                 gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
@@ -228,6 +241,7 @@ library ScillaConnector {
                 32
             )
         }
+        require(success);
 
         return abi.decode(output, (uint128));
     }
@@ -255,8 +269,9 @@ library ScillaConnector {
         uint256 argsLength = encodedArgs.length;
         bytes memory output = new bytes(36);
 
+        bool success;
         assembly {
-            let alwaysSuccessForThisPrecompile := staticcall(
+            success := staticcall(
                 gas(),
                 SCILLA_STATE_READ_PRECOMPILE_ADDRESS,
                 add(encodedArgs, 0x20),
@@ -265,6 +280,7 @@ library ScillaConnector {
                 32
             )
         }
+        require(success);
 
         return abi.decode(output, (uint128));
     }
