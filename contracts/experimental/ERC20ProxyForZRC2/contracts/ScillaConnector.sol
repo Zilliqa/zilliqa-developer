@@ -190,7 +190,6 @@ library ScillaConnector {
     ) internal view returns (string memory retVal) {
         bytes memory encodedArgs = abi.encode(target, variable_name);
         uint256 argsLength = encodedArgs.length;
-        bool success;
         bytes memory output = new bytes(128);
         uint256 output_len = output.length - 4;
 
