@@ -13,8 +13,7 @@ import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
-
-const { BN } = require('@zilliqa-js/util');
+import { BN } from '@zilliqa-js/util';
 
 function WithdrawCommModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);

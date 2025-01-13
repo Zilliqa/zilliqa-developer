@@ -3,9 +3,9 @@ import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { Constants } from "./util/enum";
-
-const { BN, Long } = require("@zilliqa-js/util");
-const { encodeTransactionProto } = require("@zilliqa-js/zilliqa");
+import { BN, Long } from "@zilliqa-js/util";
+import { util } from "@zilliqa-js/account";
+import { Buffer } from 'buffer';
 
 const CLA = 0xe0;
 const INS = {
@@ -152,7 +152,7 @@ export class LedgerZilliqa {
             txnParams.gasLimit = Long.fromNumber(txnParams.gasLimit);
         }
 
-        var txnBytes = encodeTransactionProto(txnParams);
+        var txnBytes = util.encodeTransactionProto(txnParams);
 
         const STREAM_LEN = 128; // Stream in batches of STREAM_LEN bytes each.
         var txn1Bytes;

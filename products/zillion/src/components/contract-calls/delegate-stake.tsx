@@ -13,8 +13,8 @@ import { StakeModalData } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import GasSettings from './gas-settings';
 
-const BigNumber = require('bignumber.js');
-const { BN, units } = require('@zilliqa-js/util');
+import { BigNumber } from 'bignumber.js';
+import { BN, units } from '@zilliqa-js/util';
 
 
 function DelegateStakeModal(props: any) {

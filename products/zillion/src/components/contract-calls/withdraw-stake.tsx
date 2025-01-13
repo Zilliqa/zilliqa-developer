@@ -16,9 +16,7 @@ import { ZilSigner } from '../../zilliqa-signer';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
 import { logger } from '../../util/logger';
-
-
-const { BN, units } = require('@zilliqa-js/util');
+import { BN, units } from '@zilliqa-js/util';
 
 
 function WithdrawStakeModal(props: any) {
