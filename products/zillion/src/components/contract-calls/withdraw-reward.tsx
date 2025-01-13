@@ -11,11 +11,9 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import { StakeModalData } from '../../util/interface';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
-import { units } from '@zilliqa-js/zilliqa';
 import GasSettings from './gas-settings';
-
-const BigNumber = require('bignumber.js');
-const { BN } = require('@zilliqa-js/util');
+import { BigNumber } from 'bignumber.js';
+import { BN, units } from '@zilliqa-js/util';
 
 
 function WithdrawRewardModal(props: any) {

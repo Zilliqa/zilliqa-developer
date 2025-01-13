@@ -1,6 +1,6 @@
 import { NetworkURL } from "./enum";
+import { Random, MersenneTwister19937 } from "random-js";
 
-const { Random, MersenneTwister19937 } = require("random-js");
 const randomJS = new Random(MersenneTwister19937.autoSeed());
 
 /**

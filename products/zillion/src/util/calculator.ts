@@ -1,7 +1,5 @@
-import BN from "bn.js";
-
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-
+import { BN } from "@zilliqa-js/util";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 const KEY_LAST_REWARD_CYCLE = 'lastrewardcycle';
 const KEY_DIRECT_DEPOSIT_DELEG = 'direct_deposit_deleg';
 const KEY_BUFF_DEPOSIT_DELEG = 'buff_deposit_deleg';
@@ -14,7 +12,7 @@ export class RewardCalculator {
     contract: any;
     last_reward_cycle_json: any;
 
-    constructor(url: String, ssnlist: String) {
+    constructor(url: string, ssnlist: string) {
          this.zilliqa = new Zilliqa(url);
          this.contract = this.zilliqa.contracts.at(ssnlist);
     }

@@ -15,7 +15,7 @@ import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
 import { logger } from '../../util/logger';
 
-const { BN } = require('@zilliqa-js/util');
+import { BN } from '@zilliqa-js/util';
 
 function UpdateCommRateModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);

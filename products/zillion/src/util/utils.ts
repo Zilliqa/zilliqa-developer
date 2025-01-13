@@ -5,8 +5,8 @@ import { ZilSigner } from '../zilliqa-signer';
 import { getBlockchainExplorer } from './config-json-helper';
 import { SsnStats } from './interface';
 import { ZilSdk } from '../zilliqa-api';
-const { BN, validation, units } = require('@zilliqa-js/util');
-const BigNumber = require('bignumber.js');
+import { BN, validation, units } from '@zilliqa-js/util';
+import BigNumber from 'bignumber.js';
 
 
 // config.js from public folder
@@ -58,8 +58,8 @@ export const computeTotalStakeAmt = (ssnlist: SsnStats[]) => {
 
 // compute the stake amount as a percentage of total stake amount
 // returns a BigNumber
-export const computeStakeAmtPercent = (inputStake: string, totalStake: string) => {
-    if (!inputStake || !totalStake || totalStake === '0') {
+export const computeStakeAmtPercent = (inputStake: string, totalStake: BigNumber) => {
+    if (!inputStake || totalStake.isZero()) {
         return 0;
     }
     const inputStakeBN = new BigNumber(inputStake);

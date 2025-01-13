@@ -30,9 +30,8 @@ import { ZilSdk } from '../../zilliqa-api';
 import { units } from '@zilliqa-js/zilliqa';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
+import { BN, validation } from '@zilliqa-js/util';
 
-
-const { BN, validation } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
     const {updateData, updateRecentTransactions} = props;

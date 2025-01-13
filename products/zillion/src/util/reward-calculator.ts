@@ -2,14 +2,14 @@ import store from "../store/store";
 import { ApiRandomizer } from "./api-randomizer";
 import { getApiMaxRetry } from "./config-json-helper";
 import { NetworkURL } from "./enum";
+import { RewardCalculator } from "./calculator";
 
 const apiRandomizer = ApiRandomizer.getInstance();
-const { RewardCalculator } = require('./calculator');
 
 // config.js from public folder
 const API_MAX_ATTEMPT = getApiMaxRetry();
 
-let rewardCalculator: typeof RewardCalculator;
+let rewardCalculator: RewardCalculator | null = null;
 
 export const computeDelegRewardsExec = async (impl: string, networkURL: string, ssn: string, delegator: string) => {
     if (!rewardCalculator) {

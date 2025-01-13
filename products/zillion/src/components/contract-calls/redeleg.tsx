@@ -20,7 +20,7 @@ import BigNumber from 'bignumber.js';
 import { logger } from '../../util/logger';
 
 
-const { BN, units } = require('@zilliqa-js/util');
+import { BN, units } from '@zilliqa-js/util';
 
 
 // hide the data that contains the sender address

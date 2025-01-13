@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo } from 'react';
-import { useTable, useSortBy } from 'react-table';
-
-import { SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress, computeTotalStakeAmt } from '../util/utils';
-import { SsnStats, StakeModalData } from '../util/interface';
+import React, { useMemo } from 'react';
+import { useSortBy, useTable } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import SpinnerNormal from './spinner-normal';
 import { UPDATE_STAKE_MODAL_DATA } from '../store/userSlice';
+import { ContractState, OperationStatus, Role, SsnStatus } from '../util/enum';
+import { SsnStats, StakeModalData } from '../util/interface';
+import { computeStakeAmtPercent, computeTotalStakeAmt, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress } from '../util/utils';
+import SpinnerNormal from './spinner-normal';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -101,8 +100,6 @@ function SsnTable(props: any) {
     let ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
     const totalStakeAmt = computeTotalStakeAmt(ssnList);
-
-
 
     const googleSSN: SsnStats = {
         address: "a57801697a2fcef80494928709ff9c69de832ee5",

@@ -4,8 +4,7 @@ import { RPCMethod } from "@zilliqa-js/core"
 import { LedgerZilliqa } from "./ledger-zilliqa";
 import { AccountType, Constants, LedgerIndex, NetworkURL, OperationStatus } from "./util/enum";
 import { logger } from "./util/logger";
-
-const { bytes } = require('@zilliqa-js/util');
+import { bytes } from "@zilliqa-js/util";
 
 
 let zilliqa: Zilliqa = new Zilliqa("https://dev-api.zilliqa.com"); // defaults to testnet, would be updated during login
