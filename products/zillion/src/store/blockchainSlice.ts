@@ -1,13 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getNetworkConfigByEnv } from '../util/config-json-helper'
+import { getNetworkConfigForCurrentEnv } from '../util/config-helper'
 
 export interface BlockchainState {
     proxy: string,
     impl: string,
     blockchain: string,
     staking_viewer: string,
-    api_list: [],
-    blockchain_explorer: string,
+    api_list: string[],
     refresh_rate: number,
     api_max_retry_attempt: number,
 }
@@ -18,7 +17,6 @@ const initialState: BlockchainState = {
     blockchain: '',
     staking_viewer: '',
     api_list: [],
-    blockchain_explorer: '',
     refresh_rate: 300000,
     api_max_retry_attempt: 10,
 }
@@ -35,10 +33,6 @@ const blockchainSlice = createSlice({
             state.staking_viewer = staking_viewer
             state.api_list = api_list
         },
-        UPDATE_BLOCKCHAIN_EXPLORER(state, action) {
-            const { blockchain_explorer } = action.payload
-            state.blockchain_explorer = blockchain_explorer
-        },
         UPDATE_REFRESH_RATE(state, action) {
             const { refresh_rate } = action.payload
             state.refresh_rate = refresh_rate
@@ -49,7 +43,7 @@ const blockchainSlice = createSlice({
         },
         RESET_BLOCKCHAIN_STATE(state) {
             // reset config on logout
-            const networkConfig = getNetworkConfigByEnv()
+            const networkConfig = getNetworkConfigForCurrentEnv()
             state.proxy = networkConfig.proxy
             state.impl = networkConfig.impl
             state.blockchain = networkConfig.blockchain
@@ -62,7 +56,6 @@ const blockchainSlice = createSlice({
 
 export const {
     UPDATE_API_MAX_ATTEMPT,
-    UPDATE_BLOCKCHAIN_EXPLORER,
     UPDATE_CHAIN_INFO,
     UPDATE_REFRESH_RATE,
     RESET_BLOCKCHAIN_STATE,

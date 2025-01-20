@@ -39,7 +39,6 @@
             ]
         }
     },
-    blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
     api_max_retry_attempt: 10,
     environment_config: "dev"

@@ -30,12 +30,8 @@ export enum Constants {
 export enum Environment {
     DEV = "dev",
     PROD = "prod",
-    STAGE = "stage"
-}
-
-export enum Explorer {
-    DEVEX = "devex",
-    VIEWBLOCK = "viewblock"
+    STAGE = "stage",
+    STAGE_ZQ2_PROTOMAINNET = "stage_zq2_protomainnet"
 }
 
 export enum LedgerIndex {
@@ -46,13 +42,15 @@ export enum Network {
     TESTNET = "testnet",
     MAINNET = "mainnet",
     ISOLATED_SERVER = "isolated_server",
-    PRIVATE = "private"
+    PRIVATE = "private",
+    ZQ2_PROTOMAINNET = "zq2_protomainnet",
 }
 
 export enum NetworkURL {
     TESTNET = "https://dev-api.zilliqa.com",
     MAINNET = "https://api.zilliqa.com",
-    ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com"
+    ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com",
+    ZQ2_PROTOMAINNET = "https://api.zq2-protomainnet.zilliqa.com"
 }
 
 export enum OperationStatus {

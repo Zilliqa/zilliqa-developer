@@ -2,15 +2,21 @@
  * helper file to extract info from public/config.js
  */
 
-import { Environment, Network } from "./enum";
+import { Network } from "./enum";
 
 const {
     api_max_retry_attempt,
-    blockchain_explorer_config, 
     environment_config, 
     networks_config,
     refresh_rate_config
-} = (window as { [key: string]: any })['config'];
+} = (window as any as {
+        config: {
+            api_max_retry_attempt: number,
+            environment_config: string,
+            networks_config: Networks,
+            refresh_rate_config: number
+        }
+    })['config'];
 
 
 export interface NetworkConfig {
@@ -18,22 +24,19 @@ export interface NetworkConfig {
     impl: string
     blockchain: string
     node_status: string
-    api_list: []
+    api_list: string[]
 }
 
 export interface Networks {
     [Network.TESTNET]: NetworkConfig
     [Network.MAINNET]: NetworkConfig
     [Network.ISOLATED_SERVER]: NetworkConfig
+    [Network.ZQ2_PROTOMAINNET]: NetworkConfig
     [Network.PRIVATE]: NetworkConfig          // not in used in config.json
 }
 
 export const getEnvironment = () => {
     return environment_config;
-}
-
-export const getBlockchainExplorer = () => {
-    return blockchain_explorer_config;
 }
 
 export const getRefreshRate = (): number => {
@@ -44,19 +47,18 @@ export const getApiMaxRetry = () => {
     return api_max_retry_attempt || 10;
 }
 
-// returns entire networks_config json
-// e.g. networks_config : { testnet: { ... } , mainnet: { ... } }
-export const getNetworks = (): Networks => {
+export const getNetworks = () => {
     return networks_config;
 }
 
-// return only specfic networks_config section
-// according to environment_config
-// e.g. mainnet : { proxy: "", impl: "" }
-export const getNetworkConfigByEnv = (): NetworkConfig => {
-    if (environment_config === Environment.PROD) {
-        return networks_config[Network.MAINNET]
-    }
-    // defaults to testnet
-    return networks_config[Network.TESTNET]
+export const tryGetNetworkLabelByApiUrl = (api: string): Network | undefined => {
+    const availableNetworks = Object.entries(getNetworks()) as [string, NetworkConfig][];
+
+    const formattedApiName = api.startsWith("https://") ? api : `https://${api}`;
+
+    const networkWithApi = availableNetworks.find(
+        ([label, config]) => config.api_list.includes(formattedApiName) 
+    );
+
+    return networkWithApi ? networkWithApi[0] as Network : undefined;
 }

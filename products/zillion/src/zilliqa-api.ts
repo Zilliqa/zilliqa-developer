@@ -1,14 +1,35 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import store from "./store/store";
-import { ApiRandomizer } from "./util/api-randomizer";
 import { getApiMaxRetry } from "./util/config-json-helper";
-import { NetworkURL, OperationStatus } from "./util/enum";
+import { OperationStatus } from "./util/enum";
 import { logger } from "./util/logger";
 
 const API_MAX_ATTEMPT = getApiMaxRetry();
-const API_RANDOMIZER = ApiRandomizer.getInstance();
 
 export class ZilSdk {
+
+    private static currentApiIndextoCallForNetwork: Record<string, number> = {};
+
+    /**
+     * return the zilliqa api object based on the selected url from the networks_config.api_list
+     * It follows according to round robbin through the api list starting at random index
+     */
+    public static getZilliqaApi() {
+        const { blockchain, api_list }  = store.getState().blockchain
+
+        if (ZilSdk.currentApiIndextoCallForNetwork[blockchain] === undefined) {
+            // we start counter from random index to avoid all clients calling the same api at start
+            ZilSdk.currentApiIndextoCallForNetwork[blockchain] = Math.floor(Math.random() * api_list.length)
+        }
+
+        // we could do that after creating object, but if for some reason the config changes
+        // then with doing this first we never go out of bound
+        ZilSdk.currentApiIndextoCallForNetwork[blockchain] += 1 % api_list.length;
+
+        const currentApi = api_list[ZilSdk.currentApiIndextoCallForNetwork[blockchain]];
+
+        return new Zilliqa(currentApi);
+    }
 
     /**
      * query the contract state using random api via batch JSON-RPC
@@ -27,9 +48,7 @@ export class ZilSdk {
 
     private static getActualSmartContractSubStateBatch = async (queryList: any[]): Promise<any> => {
         try {
-            const { blockchain, api_list }  = store.getState().blockchain
-            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
-            const zilliqa = new Zilliqa(randomAPI);
+            const zilliqa = ZilSdk.getZilliqaApi()
 
             let response: any = await zilliqa.blockchain.getSmartContractSubStateBatch(queryList);
 
@@ -134,9 +153,7 @@ export class ZilSdk {
 
     private static getActualNumTxBlocks = async () => {
         try {
-            const { blockchain, api_list }  = store.getState().blockchain
-            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
-            const zilliqa = new Zilliqa(randomAPI);
+            const zilliqa = ZilSdk.getZilliqaApi()
             const response =  await zilliqa.blockchain.getBlockChainInfo();
 
             if (!response.hasOwnProperty("result") || response.result === undefined) {
@@ -150,9 +167,7 @@ export class ZilSdk {
 
     private static getActualTotalCoinSupply = async () => {
         try {
-            const { blockchain, api_list }  = store.getState().blockchain
-            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
-            const zilliqa = new Zilliqa(randomAPI);
+            const zilliqa = ZilSdk.getZilliqaApi()
             const response =  await zilliqa.blockchain.getTotalCoinSupply();
 
             if (!response.hasOwnProperty("result") || response.result === undefined) {
@@ -166,9 +181,7 @@ export class ZilSdk {
 
     private static getActualBalance = async (address: string) => {
         try {
-            const { blockchain, api_list }  = store.getState().blockchain
-            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
-            const zilliqa = new Zilliqa(randomAPI);
+            const zilliqa = ZilSdk.getZilliqaApi()
             const response =  await zilliqa.blockchain.getBalance(address);
 
             if (!response.hasOwnProperty("result") || response.result.balance === undefined) {
@@ -196,9 +209,7 @@ export class ZilSdk {
         }
 
         try {
-            const { blockchain, api_list }  = store.getState().blockchain
-            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
-            const zilliqa = new Zilliqa(randomAPI);
+            const zilliqa = ZilSdk.getZilliqaApi()
 
             let response: any = null;
             if (indices !== null) {

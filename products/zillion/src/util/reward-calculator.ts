@@ -1,19 +1,16 @@
-import store from "../store/store";
-import { ApiRandomizer } from "./api-randomizer";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { getApiMaxRetry } from "./config-json-helper";
-import { NetworkURL } from "./enum";
 import { RewardCalculator } from "./calculator";
-
-const apiRandomizer = ApiRandomizer.getInstance();
+import { ZilSdk } from "../zilliqa-api";
 
 // config.js from public folder
 const API_MAX_ATTEMPT = getApiMaxRetry();
 
 let rewardCalculator: RewardCalculator | null = null;
 
-export const computeDelegRewardsExec = async (impl: string, networkURL: string, ssn: string, delegator: string) => {
+export const computeDelegRewardsExec = async (impl: string, zilliqa: Zilliqa, ssn: string, delegator: string) => {
     if (!rewardCalculator) {
-        rewardCalculator = new RewardCalculator(networkURL, impl);
+        rewardCalculator = new RewardCalculator(zilliqa, impl);
         try {
             await rewardCalculator.compute_maps();
         } catch (err) {
@@ -32,9 +29,8 @@ export const computeDelegRewards = async (impl: string, ssn: string, delegator: 
 
     for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
         try {
-            const { blockchain, api_list }  = store.getState().blockchain
-            const randomAPI = apiRandomizer.fetchApi(blockchain as NetworkURL, api_list);
-            result = await computeDelegRewardsExec(impl, randomAPI, ssn, delegator);
+            const zilliqa = ZilSdk.getZilliqaApi();
+            result = await computeDelegRewardsExec(impl, zilliqa, ssn, delegator);
             break;
         } catch (err) {
             // error with querying api

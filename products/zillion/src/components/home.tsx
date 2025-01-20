@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withRouter } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 
-import { AccountType, Environment, Network, Role, ContractState } from '../util/enum';
+import { AccountType, ContractState, Role } from '../util/enum';
 import DisclaimerModal from './disclaimer';
-import SsnTable from './ssn-table';
 import Footer from './footer';
+import SsnTable from './ssn-table';
 
 import WalletKeystore from './wallet-keystore';
 import WalletLedger from './wallet-ledger';
@@ -14,29 +14,28 @@ import WalletZilPay from './wallet-zilpay';
 import IconKeystoreLine from './icons/keystore-line';
 import IconLedgerLine from './icons/ledger-line';
 import IconZilPayLine from './icons/zil-pay-line';
-import IconSun from './icons/sun';
-import IconMoon from './icons/moon';
 
-import ZillionLogo from '../static/zillion.svg';
 import ZillionLightLogo from '../static/light/zillion.svg';
+import ZillionLogo from '../static/zillion.svg';
 import LandingStatsTable from './landing-stats-table';
 
 import AvelyLogo from '../static/avely.svg';
-import TorchWalletLogo from '../static/torch_wallet.png';
 import PlunderswapLogo from '../static/plunderswap_dao.png';
+import TorchWalletLogo from '../static/torch_wallet.png';
 
-import useDarkMode from '../util/use-dark-mode';
 import { ToastContainer } from 'react-toastify';
+import useDarkMode from '../util/use-dark-mode';
 import IconSearch from './icons/search';
 import WarningBanner from './warning-banner';
 
-import RewardCountdownTable from './reward-countdown-table';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { getEnvironment } from '../util/config-json-helper';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
-import { logger } from '../util/logger';
 import { INIT_USER, QUERY_AND_UPDATE_USER_STATS, UPDATE_LEDGER_INDEX } from '../store/userSlice';
+import { envStringToEnv, getDefaultNetworkForEnv, networkToNetworkName } from '../util/config-helper';
+import { getEnvironment } from '../util/config-json-helper';
+import { logger } from '../util/logger';
 import { ZilSigner } from '../zilliqa-signer';
+import RewardCountdownTable from './reward-countdown-table';
 
 
 function Home(props: any) {
@@ -51,14 +50,9 @@ function Home(props: any) {
   const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
-  const [selectedNetwork, setSelectedNetwork] = useState(() => {
-    if (env === Environment.PROD) {
-      return Network.MAINNET;
-    } else {
-      // default to testnet
-      return Network.TESTNET;
-    }
-  });
+  const [selectedNetwork, setSelectedNetwork] = useState(
+    () => getDefaultNetworkForEnv(envStringToEnv(env))
+  );
 
   const darkMode = useDarkMode(true);
 
@@ -146,13 +140,13 @@ function Home(props: any) {
     );
   }
 
-  const toggleTheme = () => {
-    if (darkMode.value === true) {
-      darkMode.disable();
-    } else {
-      darkMode.enable();
-    }
-  }
+  // const toggleTheme = () => {
+  //   if (darkMode.value === true) {
+  //     darkMode.disable();
+  //   } else {
+  //     darkMode.enable();
+  //   }
+  // }
 
   const toggleZillionLogo = () => {
     if (darkMode.value === true) {
@@ -180,13 +174,9 @@ function Home(props: any) {
   };
 
   useEffect(() => {
-    if (env === Environment.PROD) {
-      setSelectedNetwork(Network.MAINNET);
-    } else {
-      setSelectedNetwork(Network.TESTNET);
-    }
+    setSelectedNetwork(getDefaultNetworkForEnv(envStringToEnv(env)));
     dispatch(QUERY_AND_UPDATE_STAKING_STATS());
-  }, [env, selectedNetwork, dispatch]);
+  }, [env]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     window.onbeforeunload = null;
@@ -219,8 +209,8 @@ function Home(props: any) {
               </div> */}
 
               {
-                (env === Environment.STAGE || env === Environment.PROD) &&
-                <span className="mr-2">{selectedNetwork}</span>
+                selectedNetwork &&
+                  <span className="mr-2">{networkToNetworkName(selectedNetwork)}</span>
               }
 
             </div>
@@ -234,21 +224,21 @@ function Home(props: any) {
                 className='btn-logos d-flex justify-content-center align-items-center mx-2'
                 onClick={() => window.location.href = 'https://dapp.avely.fi/'}
               >
-                <img className='mr-1' src={AvelyLogo} ></img>
+                <img className='mr-1' src={AvelyLogo} alt="Avely logo"></img>
                 <span className='ml-1'>Avely</span>
               </div>
               <div
                 className='btn-logos d-flex justify-content-center align-items-center mx-2 mt-3 mt-sm-0'
                 onClick={() => window.location.href = 'https://instantunstaking.torchwallet.io/'}
               >
-                <img className='mr-1 cover-img' src={TorchWalletLogo} width={26} height={26}></img>
+                <img className='mr-1 cover-img' src={TorchWalletLogo} width={26} height={26} alt="Torch wallet logo"></img>
                 <span className='ml-1'>Torch Wallet</span>
               </div>
                 <div
                 className='btn-logos d-flex justify-content-center align-items-center mx-2 mt-3 mt-sm-0'
                 onClick={() => window.location.href = 'https://stake.plunderswap.com/'}
               >
-                <img className='mr-1 cover-img' src={PlunderswapLogo} width={26} height={26}></img>
+                <img className='mr-1 cover-img' src={PlunderswapLogo} width={26} height={26} alt="Plunderswap logo"></img>
                 <span className='ml-1'>PlunderSwap</span>
               </div>
             </div>
@@ -329,7 +319,8 @@ function Home(props: any) {
                       <div
                         className="btn-wallet-access d-block"
                         onClick={() => handleAccessMethod(AccountType.ZILPAY)}
-                        data-tip={env === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network"}>
+                        data-tip={`Ensure your ZilPay is on ${getDefaultNetworkForEnv(envStringToEnv(env))} network`}
+                      >
                         <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
                       </div>
 

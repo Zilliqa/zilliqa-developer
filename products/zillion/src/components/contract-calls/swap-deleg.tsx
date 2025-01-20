@@ -27,10 +27,9 @@ import { useAppSelector } from '../../store/hooks';
 import { SwapDelegModalData } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import { ZilSdk } from '../../zilliqa-api';
-import { units } from '@zilliqa-js/zilliqa';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
-import { BN, validation } from '@zilliqa-js/util';
+import { BN, validation, units } from '@zilliqa-js/util';
 
 
 function SwapDelegModal(props: any) {
