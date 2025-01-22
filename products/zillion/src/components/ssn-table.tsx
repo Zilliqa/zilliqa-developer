@@ -251,6 +251,11 @@ function SsnTable(props: any) {
                 loading === OperationStatus.PENDING &&
                 <SpinnerNormal class="spinner-border dashboard-spinner mb-4" />
             }
+            { loading === OperationStatus.ERROR &&
+                <div className="my-4">
+                    Error fetching available SSNs. Please refresh the page.
+                </div>
+            }
             {
                 loading === OperationStatus.COMPLETE &&
                 <Table

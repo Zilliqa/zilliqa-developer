@@ -10,12 +10,11 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
-import { units } from '@zilliqa-js/zilliqa';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
 import { logger } from '../../util/logger';
 
-import { BN } from '@zilliqa-js/util';
+import { BN, units } from '@zilliqa-js/util';
 
 function UpdateCommRateModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);

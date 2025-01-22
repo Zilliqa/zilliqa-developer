@@ -1,7 +1,4 @@
 /* config file
- *
- * blockchain_explorer_config: [viewblock (default) | devex]
- * - domain link to blockchain explorer
  * 
  * node_status
  *  - link to staking viewer
@@ -45,18 +42,26 @@ window['config'] = {
             ]
         },
         mainnet: {
-            proxy: "",
-            impl: "",
+            proxy: "0x62A9d5D611CDCaE8D78005F31635898330e06B93",
+            impl: "0xa7C67D49C82c7dc1B73D231640B2e4d0661D37c1",
             blockchain: "https://api.zilliqa.com",
             node_status: "https://staking-viewer.zilliqa.com",
             api_list : [
-                "https://ssn.zillacracy.com/api",
+                "https://api.zilliqa.com",
                 "https://ssn-zilliqa.cex.io/api",
+                // "https://ssn.ignitedao.io/api",
                 "https://ssn.zillet.io",
                 "https://zil-staking.ezil.me/api",
                 "https://staking-zil.kucoin.com/api",
-                "https://stakingseed-api.seed.zilliqa.com",
-                "https://api.zilliqa.com",
+            ]
+        },
+        zq2_protomainnet: {
+            proxy: "0x62A9d5D611CDCaE8D78005F31635898330e06B93",
+            impl: "0xa7C67D49C82c7dc1B73D231640B2e4d0661D37c1",
+            blockchain: "https://api.zq2-protomainnet.zilliqa.com",
+            node_status: "https://staking-viewer.zilliqa.com",
+            api_list : [
+                "https://api.zq2-protomainnet.zilliqa.com",
             ]
         },
         isolated_server: {
@@ -69,8 +74,7 @@ window['config'] = {
             ]
         }
     },
-    blockchain_explorer_config: "viewblock",
     refresh_rate_config: 300000,
     api_max_retry_attempt: 10,
-    environment_config: "stage"
+    environment_config: "stage_zq2_protomainnet"
 }

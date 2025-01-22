@@ -19,6 +19,12 @@ function LandingStatsTable(props: any) {
             
             <div className="col-12 align-items-center">
                 { loading === OperationStatus.PENDING && <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> }
+
+                { loading === OperationStatus.ERROR &&
+                    <div className="mb-4">
+                        Error fetching statistics. Please refresh the page.
+                    </div>
+                }
                 
                 { loading === OperationStatus.COMPLETE && 
 

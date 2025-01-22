@@ -1,16 +1,12 @@
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL, Network, TransactionType, AccountType, Constants, OperationStatus } from './enum';
+import { NetworkURL, Network, TransactionType, AccountType, Constants, OperationStatus } from './enum';
 import Alert from '../components/alert';
 import { ZilSigner } from '../zilliqa-signer';
-import { getBlockchainExplorer } from './config-json-helper';
+import { tryGetNetworkLabelByApiUrl } from './config-json-helper';
 import { SsnStats } from './interface';
 import { ZilSdk } from '../zilliqa-api';
 import { BN, validation, units } from '@zilliqa-js/util';
 import BigNumber from 'bignumber.js';
-
-
-// config.js from public folder
-const blockchain_explorer_config = getBlockchainExplorer();
 
 export const bech32ToChecksum = (address: string) => {
     if (validation.isAddress(address)) {
@@ -126,34 +122,17 @@ export const convertGzilToCommaStr = (inputVal: string) => {
     return frontAmt + "." + backAmt;
 }
 
-export const convertNetworkUrlToLabel = (url: string) => {
-    let label = '';
-    switch (url) {
-        case NetworkURL.MAINNET:
-            label = Network.MAINNET;        
-            break;
-        case NetworkURL.TESTNET:
-            label = Network.TESTNET;
-            break;
-        default:
-            label = Network.TESTNET;
-            break;
-    }
-    return label;
-}
-
 export const getTxnLink = (txnId: string, networkURL: string) => {
     let link = "";
 
-    if (blockchain_explorer_config === Explorer.VIEWBLOCK) {
-        if (networkURL === NetworkURL.MAINNET) {
-            link = "https://viewblock.io/zilliqa/tx/0x" + txnId
-        } else {
-            link = "https://viewblock.io/zilliqa/tx/0x" + txnId  + "?network=testnet"
-        }
-    } else {
-        // devex
-        link = "https://devex.zilliqa.com/tx/0x" + txnId + "?network=" + networkURL;
+    const network = tryGetNetworkLabelByApiUrl(networkURL);
+
+    switch (network) {
+        case Network.MAINNET: link = "https://viewblock.io/zilliqa/tx/0x" + txnId; break;
+        case Network.PRIVATE:
+        case Network.ISOLATED_SERVER:
+        case Network.TESTNET: link = "https://viewblock.io/zilliqa/tx/0x" + txnId + "?network=testnet"; break;
+        case Network.ZQ2_PROTOMAINNET: link = "https://explorer.zq2-protomainnet.zilliqa.com/tx/" + txnId; break;
     }
 
     return link;
@@ -161,16 +140,14 @@ export const getTxnLink = (txnId: string, networkURL: string) => {
 
 export const getAddressLink = (address: string, networkURL: string) => {
     let link = "";
+    const network = tryGetNetworkLabelByApiUrl(networkURL);
 
-    if (blockchain_explorer_config === Explorer.VIEWBLOCK) {
-        if (networkURL === NetworkURL.MAINNET) {
-            link = "https://viewblock.io/zilliqa/address/" + address
-        } else {
-            link = "https://viewblock.io/zilliqa/address/" + address  + "?network=testnet"
-        }
-    } else {
-        // devex
-        link = "https://devex.zilliqa.com/address/" + address + "?network=" + networkURL;
+    switch (network) {
+        case Network.MAINNET: link = "https://viewblock.io/zilliqa/address/" + address; break;
+        case Network.PRIVATE:
+        case Network.ISOLATED_SERVER:
+        case Network.TESTNET: link = "https://viewblock.io/zilliqa/address/" + address + "?network=testnet"; break;
+        case Network.ZQ2_PROTOMAINNET: link = "https://explorer.zq2-protomainnet.zilliqa.com/address/" + address; break;
     }
     
     return link;

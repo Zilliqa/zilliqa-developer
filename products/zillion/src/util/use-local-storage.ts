@@ -1,4 +1,4 @@
-import { convertNetworkUrlToLabel } from "./utils";
+import { tryGetNetworkLabelByApiUrl } from "./config-json-helper";
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#Feature-detecting_localStorage
@@ -36,13 +36,13 @@ export function isStorageAvailable(type: string) {
  * value: storage value
  * 
 */
-export function storeLocalItem(wallet: string, proxy: string, network: string, key: string, value: any) {
+export function storeLocalItem(wallet: string, proxy: string, networkUrl: string, key: string, value: any) {
     
     if (!isStorageAvailable("localStorage")) {
         return null;
     }
 
-    network = convertNetworkUrlToLabel(network);
+    const network = tryGetNetworkLabelByApiUrl(networkUrl);
     const storedValue: any = window.localStorage.getItem(wallet);
     let currStorageMap: any;
 
@@ -91,12 +91,12 @@ export function storeLocalItem(wallet: string, proxy: string, network: string, k
  * network: blockchain url will convert to label later
  * key: storage key
 */
-export function getLocalItem(wallet: string, proxy: string, network: string, key: string, defaultValue: any) {
+export function getLocalItem(wallet: string, proxy: string, networkUrl: string, key: string, defaultValue: any) {
     if (!isStorageAvailable("localStorage")) {
         return defaultValue;
     }
 
-    network = convertNetworkUrlToLabel(network);
+    const network = tryGetNetworkLabelByApiUrl(networkUrl);
     const storedValue: any = window.localStorage.getItem(wallet);
 
     if (proxy === null || proxy === "") {

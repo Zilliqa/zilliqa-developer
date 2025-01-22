@@ -1,5 +1,6 @@
 import { BN } from "@zilliqa-js/util";
-import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { Zilliqa, Contract, State } from "@zilliqa-js/zilliqa";
+
 const KEY_LAST_REWARD_CYCLE = 'lastrewardcycle';
 const KEY_DIRECT_DEPOSIT_DELEG = 'direct_deposit_deleg';
 const KEY_BUFF_DEPOSIT_DELEG = 'buff_deposit_deleg';
@@ -8,12 +9,12 @@ const KEY_LAST_WITHDRAW_CYCLE = 'last_withdraw_cycle_deleg'
 const KEY_DELEG_PER_CYCLE = 'deleg_stake_per_cycle'
 
 export class RewardCalculator {
-    zilliqa: any;
-    contract: any;
-    last_reward_cycle_json: any;
+    zilliqa: Zilliqa;
+    contract: Contract;
+    last_reward_cycle_json: State;
 
-    constructor(url: string, ssnlist: string) {
-         this.zilliqa = new Zilliqa(url);
+    constructor(zilliqa: Zilliqa, ssnlist: string) {
+         this.zilliqa = zilliqa;
          this.contract = this.zilliqa.contracts.at(ssnlist);
     }
 
@@ -33,7 +34,7 @@ export class RewardCalculator {
 
 
     // get reward cycle list
-    async get_reward_cycle_list(last_withdraw_cycle_map: any, last_reward_cycle_json: any, ssnaddr: string, delegator: string) {
+    async get_reward_cycle_list(last_withdraw_cycle_map: any, last_reward_cycle_json: State, ssnaddr: string, delegator: string) {
         // remove this
         // console.log(last_withdraw_cycle_map);
         

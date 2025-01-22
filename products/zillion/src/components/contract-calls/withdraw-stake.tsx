@@ -136,6 +136,7 @@ function WithdrawStakeModal(props: any) {
         // check if deleg has unwithdrawn rewards or buffered deposits for this ssn address
         const hasRewards = await hasRewardToWithdraw();
         if (hasRewards) {
+            Alert('info', "Withdraw rewards first", "Withdraw your rewards before withdrawing your staked amount.");
             setIsPending('');
             return null;
         }

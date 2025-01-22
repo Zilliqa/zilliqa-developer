@@ -1,31 +1,31 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import DisclaimerModal from './disclaimer';
 import Footer from './footer';
 
-import { Environment, Network, PromiseArea, ContractState, OperationStatus } from '../util/enum';
-import { DelegStats, DelegStakingPortfolioStats, initialDelegStats, PendingWithdrawStats } from '../util/interface';
+import { ContractState, OperationStatus, PromiseArea } from '../util/enum';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, PendingWithdrawStats } from '../util/interface';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from "@zilliqa-js/util";
 import { computeDelegRewards } from '../util/reward-calculator';
+import useDarkMode from '../util/use-dark-mode';
 import { convertQaToCommaStr, isRespOk } from '../util/utils';
 import Spinner from './spinner';
-import useDarkMode from '../util/use-dark-mode';
 
-import ZillionLogo from '../static/zillion.svg';
+import { BigNumber } from 'bignumber.js';
 import ZillionLightLogo from '../static/light/zillion.svg';
-import IconSun from './icons/sun';
+import ZillionLogo from '../static/zillion.svg';
+import { useAppSelector } from '../store/hooks';
+import { getDefaultNetworkForCurrentEnv } from '../util/config-helper';
+import { ZilSdk } from '../zilliqa-api';
+import ExplorerPendingWithdrawalTable from './explorer-pending-withdrawal-table';
+import ExplorerStakingPortfolio from './explorer-staking-portfolio';
 import IconMoon from './icons/moon';
 import IconSearch from './icons/search';
-import ExplorerStakingPortfolio from './explorer-staking-portfolio';
-import WarningBanner from './warning-banner';
-import ExplorerPendingWithdrawalTable from './explorer-pending-withdrawal-table';
+import IconSun from './icons/sun';
 import RewardCountdownTable from './reward-countdown-table';
-import { getEnvironment } from '../util/config-json-helper';
-import { useAppSelector } from '../store/hooks';
-import { ZilSdk } from '../zilliqa-api';
-import { BigNumber } from 'bignumber.js';
+import WarningBanner from './warning-banner';
 
 function Explorer(props: any) {
     const address = props.match.params.address; // bech32 wallet address;
@@ -39,8 +39,8 @@ function Explorer(props: any) {
 
     // config.js from public folder
     const impl = useAppSelector(state => state.blockchain.impl);
-    const env = getEnvironment();
-    const network = env === Environment.PROD ? Network.MAINNET : Network.TESTNET;
+
+    const network = getDefaultNetworkForCurrentEnv();
 
     const mountedRef = useRef(true);
 
@@ -268,8 +268,7 @@ function Explorer(props: any) {
                         </div>
 
                         { 
-                            ( env === Environment.STAGE || env === Environment.PROD ) && 
-                            <span className="mr-2">{network}</span>
+                            network && <span className="mr-2">{network}</span>
                         }
 
                         </div>

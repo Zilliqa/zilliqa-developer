@@ -10,11 +10,12 @@ import './media-queries.css';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './store/store'
-import { CONFIG_LOADED, UPDATE_API_MAX_ATTEMPT, UPDATE_BLOCKCHAIN_EXPLORER, UPDATE_CHAIN_INFO, UPDATE_REFRESH_RATE } from './store/blockchainSlice';
-import { getApiMaxRetry, getBlockchainExplorer, getNetworkConfigByEnv, getRefreshRate } from './util/config-json-helper';
+import { CONFIG_LOADED, UPDATE_API_MAX_ATTEMPT, UPDATE_CHAIN_INFO, UPDATE_REFRESH_RATE } from './store/blockchainSlice';
+import { getApiMaxRetry, getRefreshRate } from './util/config-json-helper';
+import { getNetworkConfigForCurrentEnv } from './util/config-helper';
 
 
-const network_config = getNetworkConfigByEnv()
+const network_config = getNetworkConfigForCurrentEnv()
 // store the config file info to redux
 // to allow other components to read the contract
 store.dispatch(UPDATE_CHAIN_INFO({
@@ -27,7 +28,6 @@ store.dispatch(UPDATE_CHAIN_INFO({
 
 store.dispatch(UPDATE_REFRESH_RATE({ refresh_rate: getRefreshRate() }));
 store.dispatch(UPDATE_API_MAX_ATTEMPT({ api_max_attempt: getApiMaxRetry() }));
-store.dispatch(UPDATE_BLOCKCHAIN_EXPLORER({ blockchain_explorer: getBlockchainExplorer() }));
 store.dispatch(CONFIG_LOADED()); // informs saga to start polling data
 
 ReactDOM.render(

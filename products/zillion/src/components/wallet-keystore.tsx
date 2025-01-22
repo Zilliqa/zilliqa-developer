@@ -1,4 +1,4 @@
-import { toBech32Address } from '@zilliqa-js/zilliqa';
+import { toBech32Address } from '@zilliqa-js/crypto';
 import React, { useState } from 'react';
 import { AccountType, OperationStatus } from '../util/enum';
 import { logger } from '../util/logger';

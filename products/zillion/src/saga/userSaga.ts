@@ -1,4 +1,4 @@
-import { toBech32Address } from '@zilliqa-js/zilliqa';
+import { toBech32Address } from '@zilliqa-js/crypto';
 import { BigNumber } from 'bignumber.js';
 import { all, call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { PRELOAD_INFO_READY, UPDATE_REWARD_BLK_COUNTDOWN } from '../store/stakingSlice';
@@ -25,7 +25,7 @@ function* queryAndUpdateBalance() {
         logger("user balance: ", balance);
         yield put(UPDATE_BALANCE({ balance: balance }));
     } catch (e) {
-        console.warn("query and update balance failed");
+        console.error("query and update balance failed", e);
         yield put(UPDATE_BALANCE({ balance: "0" }));
     }
 }
@@ -52,8 +52,7 @@ function* queryAndUpdateBalance() {
         }
         yield put(UPDATE_ROLE({ role: role }));
     } catch (e) {
-        console.warn("query and update role failed");
-        console.warn(e);
+        console.error("query and update role failed", e);
     }
 }
 
@@ -82,11 +81,10 @@ function* queryAndUpdateGzil() {
         if (!isRespOk(response)) {
             yield put(UPDATE_GZIL_BALANCE({ gzil_balance: "0" }));
         } else {
-            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: (response as any)['balances'][address_base16] }));
+            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: (response as any)['balances']?.[address_base16] || "0" }));
         }
     } catch (e) {
-        console.warn("query and update gzil failed");
-        console.warn(e);
+        console.error("query and update gzil failed", e);
         yield put(UPDATE_GZIL_BALANCE({ gzil_balance: "0" }));
     }
 }
@@ -107,7 +105,7 @@ function* populateStakingPortfolio() {
         let staking_portfolio_list: DelegStakingPortfolioStats[] = [];
         let totalDeposits = new BigNumber(0);
         let totalRewards = new BigNumber(0);
-        
+ 
         for (const ssnAddress in depositAmtDeleg) {
             // compute total deposits
             const deposit = new BigNumber(depositAmtDeleg[ssnAddress]);
@@ -141,8 +139,7 @@ function* populateStakingPortfolio() {
         yield put(UPDATE_DELEG_STATS({ deleg_stats: delegStats }));
         yield put(UPDATE_DELEG_PORTFOLIO({ portfolio_list: staking_portfolio_list }));
     } catch (e) {
-        console.warn("populate staking portfolio failed");
-        console.warn(e);
+        console.error("populate staking portfolio failed", e);
         yield put(UPDATE_DELEG_STATS({ deleg_stats: initialDelegStats }));
         yield put(UPDATE_DELEG_PORTFOLIO({ portfolio_list: [] }));
     }
@@ -185,8 +182,7 @@ function* populateSwapRequests() {
 
         yield put(UPDATE_SWAP_DELEG_MODAL({ swap_deleg_modal: swapDelegModal }));
     } catch (e) {
-        console.warn("populate swap requests failed");
-        console.warn(e);
+        console.error("populate swap requests failed", e);
         yield put(UPDATE_SWAP_DELEG_MODAL({ swap_deleg_modal: initialSwapDelegModalData }));
     }
 }
@@ -210,7 +206,7 @@ function* populatePendingWithdrawal() {
         let progress = '0';
         let pendingWithdrawList: PendingWithdrawStats[] = [];
         let totalWithdrawAmt = new BigNumber(0);
-        const pendingWithdrawal = (response as any)['withdrawal_pending'][address_base16];
+        const pendingWithdrawal = (response as any)['withdrawal_pending']?.[address_base16] || [];
         const { min_bnum_req } = yield select(getStakingState);
         const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
         const currBlkNum = isRespOk(numTxBlk) === true ? new BigNumber(numTxBlk).minus(1) : new BigNumber(0);
@@ -250,7 +246,7 @@ function* populatePendingWithdrawal() {
         yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: pendingWithdrawList }));
         yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: `${totalWithdrawAmt}` }));
     } catch (e) {
-        console.warn("populate pending withdrawal failed");
+        console.error("populate pending withdrawal failed", e);
         yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: [] }));
         yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: "0" }));
     }
@@ -272,7 +268,7 @@ function* populateRewardBlkCountdown() {
         }
         yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: `${rewardBlkCountdown}` }))
     } catch (e) {
-        console.warn("populate reward blk countdown failed");
+        console.error("populate reward blk countdown failed", e);
         yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: "0" }))
     }
 }
@@ -316,7 +312,7 @@ function* populateOperatorStats() {
 
         yield put(UPDATE_OPERATOR_STATS({ operator_stats: operatorStats }));
     } catch (e) {
-        console.warn("populate operator stats failed");
+        console.error("populate operator stats failed", e);
         yield put(UPDATE_OPERATOR_STATS({ operator_stats: initialOperatorStats }));
     } finally {
         yield put(UPDATE_FETCH_OPERATOR_STATS_STATUS(OperationStatus.COMPLETE));
@@ -366,7 +362,7 @@ function* pollUserSaga() {
                 yield call(pollDelegatorData)
             }
         } catch (e) {
-            console.warn("poll user data failed");
+            console.error("poll user data failed", e);
         } finally {
             yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
             yield delay(REFRESH_INTERVAL);

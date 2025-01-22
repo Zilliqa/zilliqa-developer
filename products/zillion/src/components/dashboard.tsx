@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import ReactTooltip from 'react-tooltip';
 
-import { Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
+import { Role, NetworkURL, Network, AccountType, Environment, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -49,10 +49,11 @@ import WarningDashboardBanner from './warning-dashboard-banner';
 import { POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logger } from '../util/logger';
-import { getEnvironment, getNetworks, NetworkConfig, Networks } from '../util/config-json-helper';
+import { getEnvironment, getNetworks, NetworkConfig, Networks, tryGetNetworkLabelByApiUrl } from '../util/config-json-helper';
 import { RESET_BLOCKCHAIN_STATE, UPDATE_CHAIN_INFO } from '../store/blockchainSlice';
 import { ZilSigner } from '../zilliqa-signer';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
+import { networkStringToNetwork } from '../util/config-helper';
 
 
 function Dashboard(props: any) {
@@ -146,32 +147,12 @@ function Dashboard(props: any) {
 
     // for zilpay to toggle different network
     const networkChanger = (net: string) => {
-        let label;
+        const label = networkStringToNetwork(net);
 
-        switch (net) {
-            case NetworkLabel.MAINNET:
-                // do nothing
-                Alert("info", "Info", "You are on Mainnet.");
-                label = NetworkLabel.MAINNET;
-                break;
-            case NetworkLabel.TESTNET:
-                label = NetworkLabel.TESTNET;
-                if (env === Environment.PROD) {
-                    // warn users not to switch to testnet on production
-                    Alert("warn", "Testnet not supported", "Please switch to Mainnet via ZilPay.");
-                }
-                break;
-            case NetworkLabel.ISOLATED_SERVER:
-            case NetworkLabel.PRIVATE:
-                label = NetworkLabel.ISOLATED_SERVER;
-                if (env === Environment.PROD) {
-                    // warn users not to switch to testnet on production
-                    Alert("warn", "Private network not supported", "Please switch to Mainnet via ZilPay.");
-                }
-                break;
-            default:
-                label = NetworkLabel.TESTNET;
-                break;
+        if (label === Network.MAINNET) {
+            Alert("info", "Info", "You are on Mainnet.");
+        } else if (env === Environment.PROD) {
+            Alert("warn", "Warning", "Currently connected network is not supported. Please switch to Mainnet via ZilPay.");
         }
 
         const networkConfig: NetworkConfig = networks[label];
@@ -191,9 +172,12 @@ function Dashboard(props: any) {
         if (userState.account_type === AccountType.ZILPAY) {
             const zilPay = (window as any).zilPay;
 
+            console.log({ zilpay_data: zilPay.wallet });
+
             if (zilPay) {
-                // switch to the zilpay network on load
-                networkChanger(zilPay.wallet.net);
+                networkChanger(
+                    tryGetNetworkLabelByApiUrl(zilPay.wallet.http) || zilPay.wallet.net
+                );
 
                 const accountStreamChanged = zilPay.wallet.observableAccount().subscribe((account: any) => {
                     console.log("zil pay account changing...");
