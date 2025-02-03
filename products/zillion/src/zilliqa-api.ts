@@ -46,15 +46,30 @@ export class ZilSdk {
         return result;
     }
 
-    private static getActualSmartContractSubStateBatch = async (queryList: any[]): Promise<any> => {
+    private static getActualSmartContractSubStateBatch = async (queryList: Array<[string, string, any[]]>): Promise<any> => {
+
+        const startTime = performance.now();
+
+        const printPerformance = (readStatus: "Success" | "Failure") => {
+            const endTime = performance.now();
+            const executionTime = ((endTime - startTime) / 1000.).toFixed(2);
+
+            const name = queryList.map(([impl, state, indices]) => `(${impl}.${state}${indices?.length > 0 ? ` [${indices}] ` : ""})`).join(", ");
+
+            console.log(`[BlockchainRead][${readStatus}] ${name} ~ ${executionTime}s`);
+        }
+
         try {
             const zilliqa = ZilSdk.getZilliqaApi()
 
             let response: any = await zilliqa.blockchain.getSmartContractSubStateBatch(queryList);
 
             if (!response.hasOwnProperty("batch_result") || response.batch_result === undefined) {
+                printPerformance("Failure");
                 return OperationStatus.ERROR;
             }
+
+            printPerformance("Success");
 
             // sort response by id in ascending order
             return response.batch_result.sort(function (a: any, b: any) {
@@ -63,6 +78,7 @@ export class ZilSdk {
 
         } catch (err) {
             console.error(err);
+            printPerformance("Failure");
             return OperationStatus.ERROR;
         }
     }
@@ -171,10 +187,15 @@ export class ZilSdk {
             const response =  await zilliqa.blockchain.getTotalCoinSupply();
 
             if (!response.hasOwnProperty("result") || response.result === undefined) {
+                console.error("TotalCoinSupply response invalid", response);
                 return OperationStatus.ERROR;
             }
+
+
+            console.log("TotalCoinSupply: ", response);
             return response.result;
         } catch (err) {
+            console.error("error getting TotalCoinSupply", err);
             return OperationStatus.ERROR;
         }
     }
@@ -203,8 +224,18 @@ export class ZilSdk {
      * @param indices   JSOn array to specify the indices if the variable is a map type
      */
     private static getActualSmartContractSubState = async (impl: string, state: string, indices?: any) => {
+        const startTime = performance.now();
+
+        const printPerformance = (readStatus: "Success" | "Failure") => {
+            const endTime = performance.now();
+            const executionTime = ((endTime - startTime) / 1000).toFixed(2);
+
+            console.log(`[BlockchainRead][${readStatus}] ${impl}.${state}${indices?.length > 0 ? ` [${indices}] ` : ""} ~ ${executionTime}s`);
+        }
+
         if (!impl) {
             console.error("error: get contract sub state - no implementation contract found");
+            printPerformance("Failure");
             return OperationStatus.ERROR;
         }
 
@@ -219,12 +250,16 @@ export class ZilSdk {
             }
 
             if (!response.hasOwnProperty("result") || response.result === undefined) {
+                printPerformance("Failure");
                 return OperationStatus.ERROR;
             }
+
+            printPerformance("Success");
             return response.result;
             
         } catch (err) {
             console.error(err);
+            printPerformance("Failure");
             return OperationStatus.ERROR;
         }
     }

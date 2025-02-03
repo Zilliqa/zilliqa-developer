@@ -59,6 +59,7 @@ function* watchInitOnce() {
         if (isRespOk(totalCoinSupply)) {
             const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply));
             circulatingSupplyStake = (new BigNumber(totalstakeamount).dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+            console.log({totalCoinSupplyBN, totalstakeamount, circulatingSupplyStake});
         } else {
             // if total coin supply is not available, show loading so user hit refresh and try his luck with Zilliqa API again
             circulatingSupplyStake = 'Loading';
