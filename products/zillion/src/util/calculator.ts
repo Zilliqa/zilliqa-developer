@@ -18,13 +18,40 @@ export class RewardCalculator {
          this.contract = this.zilliqa.contracts.at(ssnlist);
     }
 
+    async get_contract_substate(key: string, params: string[] = []): Promise<any> {
+        const startTime = performance.now();
+
+        const printPerformance = (readStatus: "Success" | "Failure") => {
+            const endTime = performance.now();
+            const executionTime = ((endTime - startTime) / 1000).toFixed(2);
+
+            console.log(`[BlockchainRead][${readStatus}] ${this.contract.address}.${key}${params?.length > 0 ? ` [${params}] ` : ""} ~ ${executionTime}s`);
+        }
+
+        try {
+            let response: any = null;
+            if (params !== null) {
+                response = await this.contract.getSubState(key, params);
+            } else {
+                response = await this.contract.getSubState(key);
+            }
+
+            printPerformance("Success");
+            return response;
+        } catch (err) {
+            console.error(err);
+            printPerformance("Failure");
+            return null
+        }
+    }
+
     // store the required maps first
     async compute_maps() {
-        this.last_reward_cycle_json = await this.contract.getSubState(KEY_LAST_REWARD_CYCLE);
+        this.last_reward_cycle_json = await this.get_contract_substate(KEY_LAST_REWARD_CYCLE);
     }
 
     async get_rewards(ssnaddr: string, delegator: string) {
-        const last_withdraw_cycle_map = await this.contract.getSubState(KEY_LAST_WITHDRAW_CYCLE, [delegator.toLowerCase()]);
+        const last_withdraw_cycle_map = await this.get_contract_substate(KEY_LAST_WITHDRAW_CYCLE, [delegator.toLowerCase()]);
         const reward_list = await this.get_reward_cycle_list(last_withdraw_cycle_map, this.last_reward_cycle_json, ssnaddr, delegator);
         const delegate_per_cycle = await this.combine_buff_direct(ssnaddr,delegator,reward_list);
         const need_list = await this.get_reward_need_cycle_list(last_withdraw_cycle_map, this.last_reward_cycle_json, ssnaddr, delegator);
@@ -77,9 +104,9 @@ export class RewardCalculator {
     async combine_buff_direct(ssnaddr: string, delegator: string, reward_list: number[]) {
         const result_map = new Map <number, BN>();
 
-        const direct_deposit_json = await this.contract.getSubState(KEY_DIRECT_DEPOSIT_DELEG, [delegator.toLowerCase(), ssnaddr]);
-        const buffer_deposit_json = await this.contract.getSubState(KEY_BUFF_DEPOSIT_DELEG, [delegator.toLowerCase(), ssnaddr]);
-        const deleg_stake_per_cycle_json = await this.contract.getSubState(KEY_DELEG_PER_CYCLE, [delegator.toLowerCase(), ssnaddr]);
+        const direct_deposit_json = await this.get_contract_substate(KEY_DIRECT_DEPOSIT_DELEG, [delegator.toLowerCase(), ssnaddr]);
+        const buffer_deposit_json = await this.get_contract_substate(KEY_BUFF_DEPOSIT_DELEG, [delegator.toLowerCase(), ssnaddr]);
+        const deleg_stake_per_cycle_json = await this.get_contract_substate(KEY_DELEG_PER_CYCLE, [delegator.toLowerCase(), ssnaddr]);
 
         let direct_deposit_map: any = null;
         let buffer_deposit_map: any = null;
@@ -139,7 +166,7 @@ export class RewardCalculator {
     async calculate_rewards(ssnaddr: string, delegate_per_cycle: Map<number, BN>, need_list: number[]) {
         var result_rewards = new BN(0);
 
-        const stake_ssn_per_cycle_map = await this.contract.getSubState(KEY_STAKE_SSN_PER_CYCLE, [ssnaddr]);
+        const stake_ssn_per_cycle_map = await this.get_contract_substate(KEY_STAKE_SSN_PER_CYCLE, [ssnaddr]);
 
         if (stake_ssn_per_cycle_map === null) {
             return result_rewards;
