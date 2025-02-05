@@ -33,6 +33,7 @@ export const computeDelegRewards = async (impl: string, ssn: string, delegator: 
             result = await computeDelegRewardsExec(impl, zilliqa, ssn, delegator);
             break;
         } catch (err) {
+            console.error(`Error while calculating rewards. Attempt ${attempt + 1}\\${API_MAX_ATTEMPT}`, err);
             // error with querying api
             // retry
             continue;

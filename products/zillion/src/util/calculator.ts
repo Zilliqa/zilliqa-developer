@@ -36,6 +36,13 @@ export class RewardCalculator {
                 response = await this.contract.getSubState(key);
             }
 
+            // this is hack for ZQ2 returning _balance field for all substate queries
+            delete response?._balance;
+
+            if (Object.keys(response || {}).length === 0) {
+                response = null;
+            }
+
             printPerformance("Success");
             return response;
         } catch (err) {
