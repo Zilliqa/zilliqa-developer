@@ -21,7 +21,7 @@ patches:
           kubernetes.io/ingress.global-static-ip-name: zillion-zilstg-dev
           networking.gke.io/managed-certificates: zillion
 
-- target:
+  - target:
       kind: ConfigMap
       name: zillion-config
     patch: |-
