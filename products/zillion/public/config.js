@@ -58,10 +58,10 @@ window['config'] = {
         zq2_protomainnet: {
             proxy: "0x62A9d5D611CDCaE8D78005F31635898330e06B93",
             impl: "0xa7C67D49C82c7dc1B73D231640B2e4d0661D37c1",
-            blockchain: "http://stakingportal.zq2-protomainnet.zilliqa.com:4201",
+            blockchain: "https://api.zq2-protomainnet.zilliqa.com",
             node_status: "https://staking-viewer.zilliqa.com",
             api_list : [
-                "http://stakingportal.zq2-protomainnet.zilliqa.com:4201",
+                "https://api.zq2-protomainnet.zilliqa.com",
             ]
         },
         isolated_server: {
