@@ -1,6 +1,6 @@
 <template>
   <div class="account-selector d-flex" v-if="selected && selected.type === 'zilpay'">
-    <v-popover trigger="click" class="d-flex align-items-center">
+    <VDropdown :triggers="['click']" class="d-flex align-items-center">
       <!-- This will be the popover target (for the events and position) -->
       <div class="selected-account">
         <div class="selected-item d-flex align-items-center" v-if="selected !== undefined">
@@ -12,13 +12,15 @@
           <img src="@/assets/user.svg" height="24px" class="mr-5" /> Select an account
         </div>
       </div>
-      <template slot="popover" class="text-center">
-        Accounts and Networks are managed by ZilPay Extension.
-        <br />
-        <br />
-        <button class="btn btn-success" @click="handleAccountManagerSwitch">Switch back to IDE Account Manager</button>
+      <template #popper class="text-center">
+        <div class="p-3">
+          Accounts and Networks are managed by ZilPay Extension.
+          <br />
+          <br />
+          <button class="btn btn-success" @click="handleAccountManagerSwitch">Switch back to IDE Account Manager</button>
+        </div>
       </template>
-    </v-popover>
+    </VDropdown>
   </div>
   <div class="account-selector d-flex align-items-center mr-4" v-else>
     <div class="selected-account">
@@ -49,7 +51,7 @@
           <address-display
             class="select-account"
             :address="account.address"
-            @click.native="handleSelect(account)"
+            @click="handleSelect(account)"
             title="Click to select account"
           ></address-display>
         </div>
