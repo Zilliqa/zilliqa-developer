@@ -30,7 +30,6 @@ jobs:
             governance-api,
             governance-snapshot,
             multisig,
-            neo-savant,
             scilla-server,
             zillion,
           ]
@@ -73,11 +72,6 @@ jobs:
           - application: multisig
             image_name: multisig
             path: products/multisig
-            tag_length: 8
-            tag_latest: false
-          - application: neo-savant
-            image_name: neo-savant
-            path: products/neo-savant
             tag_length: 8
             tag_latest: false
           - application: scilla-server
