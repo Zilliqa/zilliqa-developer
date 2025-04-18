@@ -702,6 +702,13 @@ input:focus {
   stroke-width: 2.2px;
 }
 
+.icon-torch-line .cls-1 {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-miterlimit: 10;
+  stroke-width: 16px;
+}
+
 .inner-section {
   background-color: var(--secondary-color);
 }
