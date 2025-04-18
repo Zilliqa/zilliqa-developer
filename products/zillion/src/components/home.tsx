@@ -10,10 +10,12 @@ import SsnTable from './ssn-table';
 import WalletKeystore from './wallet-keystore';
 import WalletLedger from './wallet-ledger';
 import WalletZilPay from './wallet-zilpay';
+import WalletTorch from "./wallet-torch";
 
 import IconKeystoreLine from './icons/keystore-line';
 import IconLedgerLine from './icons/ledger-line';
 import IconZilPayLine from './icons/zil-pay-line';
+import IconTorchLine from "./icons/torch-line";
 
 import ZillionLightLogo from '../static/light/zillion.svg';
 import ZillionLogo from '../static/zillion.svg';
@@ -117,6 +119,15 @@ function Home(props: any) {
           onWalletLoadingCallback={toggleDirectToDashboard}
           onSuccessCallback={redirectToDashboard}
           role={role} />;
+      case AccountType.TORCH:
+        return (
+          <WalletTorch
+            onReturnCallback={resetWalletsClicked}
+            onWalletLoadingCallback={toggleDirectToDashboard}
+            onSuccessCallback={redirectToDashboard}
+            role={role}
+          />
+        );
       case AccountType.LEDGER:
         return <WalletLedger
           onReturnCallback={resetWalletsClicked}
@@ -324,6 +335,14 @@ function Home(props: any) {
                         <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
                       </div>
 
+                      <div
+                        className="btn-wallet-access d-block"
+                        onClick={() => handleAccessMethod(AccountType.TORCH)}
+                        data-tip={`Ensure your Torch is on ${getDefaultNetworkForEnv(envStringToEnv(env))} network`}
+                      >
+                        <IconTorchLine className="home-icon icon-torch-line my-4" width={40} height={40} /><span className="d-block mt-0.5">Torch</span>
+                      </div>
+
                       <ReactTooltip place="bottom" type="light" effect="float" />
                     </div>
                     <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
@@ -340,7 +359,6 @@ function Home(props: any) {
                       :
 
                       <>{DisplayAccessMethod()}</>}
-
                   </>
             }
           </div>
