@@ -3,7 +3,7 @@ import { fromBech32Address } from "@zilliqa-js/crypto";
 import { cloneDeep } from "lodash";
 import BN from "bn.js";
 
-const { blockchain } = new Zilliqa("https://api.zilliqa.com");
+const { blockchain } = new Zilliqa("https://api.zq2-protomainnet.zilliqa.com");
 const zilswap = "0xBa11eB7bCc0a02e947ACF03Cc651Bfaf19C9EC00";
 const _100 = new BN(100000);
 const _zero = new BN(0);

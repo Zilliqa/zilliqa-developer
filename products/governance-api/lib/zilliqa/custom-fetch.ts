@@ -14,7 +14,7 @@ export enum DexFields {
 }
 
 export class blockchain {
-  private _http = `https://api.zilliqa.com/`;
+  private _http = `https://api.zq2-protomainnet.zilliqa.com/`;
   private _zilswap = "459cb2d3baf7e61cfbd5fe362f289ae92b2babb0";
   private _xcad = "1fb1a4fd7ba94b1617641d6022ba48cafa77eef0";
   private _xcadToken = "0x153feaddc48871108e286de3304b9597c817b456";

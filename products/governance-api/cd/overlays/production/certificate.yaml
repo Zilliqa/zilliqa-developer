@@ -4,4 +4,4 @@ metadata:
   name: governance-api
 spec:
   domains:
-    - governance-api.zilliqa.com
+    - localhost:3000

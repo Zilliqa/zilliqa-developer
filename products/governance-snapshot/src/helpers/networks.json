@@ -3,8 +3,8 @@
     "name": "Zilliqa Mainnet",
     "chainId": 1,
     "network": "homestead",
-    "rpcUrl": "https://api.zilliqa.com",
-    "wsUrl": "wss://api-ws.zilliqa.com",
+    "rpcUrl": "https://api.zq2-protomainnet.zilliqa.com",
+    "wsUrl": "https://api.zq2-protomainnet.zilliqa.com",
     "explorer": "https://viewblock.io/zilliqa"
   },
   "testnet": {

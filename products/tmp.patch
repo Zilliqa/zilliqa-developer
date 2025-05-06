@@ -1,0 +1,85 @@
+diff --git a/products/governance-api/cd/overlays/production/certificate.yaml b/products/governance-api/cd/overlays/production/certificate.yaml
+index 6e148270..5eb82109 100644
+--- a/products/governance-api/cd/overlays/production/certificate.yaml
++++ b/products/governance-api/cd/overlays/production/certificate.yaml
+@@ -4,4 +4,4 @@ metadata:
+   name: governance-api
+ spec:
+   domains:
+-    - governance-api.zilliqa.com
++    - localhost:3000
+diff --git a/products/governance-api/lib/zilliqa/balances.ts b/products/governance-api/lib/zilliqa/balances.ts
+index 872e7c48..7bfa54ec 100644
+--- a/products/governance-api/lib/zilliqa/balances.ts
++++ b/products/governance-api/lib/zilliqa/balances.ts
+@@ -3,7 +3,7 @@ import { fromBech32Address } from "@zilliqa-js/crypto";
+ import { cloneDeep } from "lodash";
+ import BN from "bn.js";
+ 
+-const { blockchain } = new Zilliqa("https://api.zilliqa.com");
++const { blockchain } = new Zilliqa("https://api.zq2-protomainnet.zilliqa.com");
+ const zilswap = "0xBa11eB7bCc0a02e947ACF03Cc651Bfaf19C9EC00";
+ const _100 = new BN(100000);
+ const _zero = new BN(0);
+diff --git a/products/governance-api/lib/zilliqa/custom-fetch.ts b/products/governance-api/lib/zilliqa/custom-fetch.ts
+index cbf82adc..b787b6cb 100644
+--- a/products/governance-api/lib/zilliqa/custom-fetch.ts
++++ b/products/governance-api/lib/zilliqa/custom-fetch.ts
+@@ -14,7 +14,7 @@ export enum DexFields {
+ }
+ 
+ export class blockchain {
+-  private _http = `https://api.zilliqa.com/`;
++  private _http = `https://api.zq2-protomainnet.zilliqa.com/`;
+   private _zilswap = "459cb2d3baf7e61cfbd5fe362f289ae92b2babb0";
+   private _xcad = "1fb1a4fd7ba94b1617641d6022ba48cafa77eef0";
+   private _xcadToken = "0x153feaddc48871108e286de3304b9597c817b456";
+diff --git a/products/governance-api/lib/zilliqa/total-supply.ts b/products/governance-api/lib/zilliqa/total-supply.ts
+index 65def4fb..59014771 100644
+--- a/products/governance-api/lib/zilliqa/total-supply.ts
++++ b/products/governance-api/lib/zilliqa/total-supply.ts
+@@ -2,7 +2,7 @@ import { Zilliqa } from "@zilliqa-js/zilliqa";
+ import { fromBech32Address } from "@zilliqa-js/crypto";
+ 
+ export async function getTotalSupply(token: string) {
+-  const { blockchain } = new Zilliqa("https://api.zilliqa.com");
++  const { blockchain } = new Zilliqa("https://api.zq2-protomainnet.zilliqa.com");
+   const base16 = fromBech32Address(token);
+   const field = "total_supply";
+   const res = await blockchain.getSmartContractSubState(base16, field);
+diff --git a/products/governance-snapshot/cd/overlays/production/kustomization.yaml b/products/governance-snapshot/cd/overlays/production/kustomization.yaml
+index 8430b8f0..148e2fb4 100644
+--- a/products/governance-snapshot/cd/overlays/production/kustomization.yaml
++++ b/products/governance-snapshot/cd/overlays/production/kustomization.yaml
+@@ -31,7 +31,7 @@ patches:
+       - op: replace
+         path: "/data/config.js"
+         value: |
+-          window['VUE_APP_HUB_URL'] = 'https://governance-api.zilliqa.com';
++          window['VUE_APP_HUB_URL'] = 'http://localhost:3000';
+           window['VUE_APP_IPFS_NODE'] = 'gateway.pinata.cloud';
+ 
+ namespace: governance-snapshot-prd
+diff --git a/products/governance-snapshot/public/config.js b/products/governance-snapshot/public/config.js
+index ab697245..427956ce 100644
+--- a/products/governance-snapshot/public/config.js
++++ b/products/governance-snapshot/public/config.js
+@@ -1,2 +1,2 @@
+-window['VUE_APP_HUB_URL'] = 'https://governance-api.zilliqa.com';
++window['VUE_APP_HUB_URL'] = 'http://localhost:3000';
+ window['VUE_APP_IPFS_NODE'] = 'gateway.pinata.cloud';
+diff --git a/products/governance-snapshot/src/helpers/networks.json b/products/governance-snapshot/src/helpers/networks.json
+index 617199b3..77d90c26 100644
+--- a/products/governance-snapshot/src/helpers/networks.json
++++ b/products/governance-snapshot/src/helpers/networks.json
+@@ -3,8 +3,8 @@
+     "name": "Zilliqa Mainnet",
+     "chainId": 1,
+     "network": "homestead",
+-    "rpcUrl": "https://api.zilliqa.com",
+-    "wsUrl": "wss://api-ws.zilliqa.com",
++    "rpcUrl": "https://api.zq2-protomainnet.zilliqa.com",
++    "wsUrl": "https://api.zq2-protomainnet.zilliqa.com",
+     "explorer": "https://viewblock.io/zilliqa"
+   },
+   "testnet": {

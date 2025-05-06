@@ -2,7 +2,7 @@ import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 
 export async function getTotalSupply(token: string) {
-  const { blockchain } = new Zilliqa("https://api.zilliqa.com");
+  const { blockchain } = new Zilliqa("https://api.zq2-protomainnet.zilliqa.com");
   const base16 = fromBech32Address(token);
   const field = "total_supply";
   const res = await blockchain.getSmartContractSubState(base16, field);
