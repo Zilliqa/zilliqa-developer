@@ -73,6 +73,9 @@ export class ZilSigner {
             case AccountType.ZILPAY:
                 result = await ZilSigner.zilPaySign(txParams);
                 break;
+            case AccountType.TORCH:
+                result = await ZilSigner.torchSign(txParams);
+                break;
             case AccountType.KEYSTORE:
             case AccountType.PRIVATEKEY:
             case AccountType.MNEMONIC:
@@ -208,6 +211,35 @@ export class ZilSigner {
             return OperationStatus.ERROR;
         }
     }
+    /**
+    * create and sign txn with torch
+    */
+    private static torchSign = async (txParams: any) => {
+        const torch = (window as any).torch;
+        const tx = zilliqa.transactions.new(
+          {
+            toAddr: txParams.toAddr,
+            amount: txParams.amount,
+            data: txParams.data,
+            gasPrice: new BN(txParams.gasPrice || gasPrice),
+            gasLimit: Long.fromNumber(Number(txParams.gasLimit || gasLimit)),
+            version: bytes.pack(chainId, msgVersion),
+          },
+          true
+        );
+        console.log(tx);
+
+        try {
+          const txn = await torch.blockchain.createTransaction(tx);
+          return txn.ID;
+        } catch (err) {
+          console.error(
+            "error torch sign - something is wrong with broadcasting the transaction: %o",
+            JSON.stringify(err)
+          );
+          return OperationStatus.ERROR;
+        }
+    };
 
     /**
      * create and sign txn via vanilla zilliqaJS

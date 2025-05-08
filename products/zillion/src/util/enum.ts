@@ -3,6 +3,7 @@ export enum AccountType {
     KEYSTORE = "KEYSTORE",
     MNEMONIC = "MNEMONIC",
     ZILPAY = "ZILPAY",
+    TORCH = "TORCH",
     MOONLET = "MOONLET",
     LEDGER = "LEDGER",
     NONE = ""
