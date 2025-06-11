@@ -255,6 +255,7 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
  * @param obj the contract result
  * @returns true if response has no errors, false otherwise
  */
+<<<<<<< Updated upstream
  export const isRespOk = (obj: any): boolean => {
     if (
         obj !== undefined &&
@@ -264,4 +265,16 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
         return true;
     }
     return false;
+=======
+export const isRespOk = (obj: any): boolean => {
+    const result =
+        obj &&
+        obj.result !== undefined &&
+        obj.result !== null &&
+        obj.result !== OperationStatus.ERROR &&
+        Object.keys(obj.result).length > 0;
+
+    console.log("isRespOk result:", result);
+    return result;
+>>>>>>> Stashed changes
 }
