@@ -47,11 +47,9 @@ function WithdrawStakeModal(props: any) {
     // checks if there are any unwithdrawn rewards
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-
+        
         const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
         const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
-        console.log("last_buf_deposit_cycle_deleg_json:", JSON.stringify(last_buf_deposit_cycle_deleg_json, null, 2));
-
 
         if (!isRespOk(last_reward_cycle_json)) {
             return false;
@@ -72,12 +70,12 @@ function WithdrawStakeModal(props: any) {
 
         // check if user has buffered deposits
         if (last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
-            const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
-            const lastRewardCycle = parseInt(last_reward_cycle_json.lastrewardcycle);
-            if (lastRewardCycle <= lastDepositCycleDeleg) {
-                Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before withdrawing the staked amount.");
-                return true;
-            }
+                const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
+                const lastRewardCycle = parseInt(last_reward_cycle_json.lastrewardcycle);
+                if (lastRewardCycle <= lastDepositCycleDeleg) {
+                    Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before withdrawing the staked amount.");
+                    return true;
+                }
         }
 
         // corner case check
@@ -126,9 +124,9 @@ function WithdrawStakeModal(props: any) {
 
         if (await validateBalance(wallet) === false) {
             const gasFees = computeGasFees(gasPrice, gasLimit);
-            Alert('error',
-                "Insufficient Balance",
-                "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
             Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
             return null;
         }
@@ -153,13 +151,13 @@ function WithdrawStakeModal(props: any) {
 
         // check if withdraw more than delegated
         if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
-            Alert('info', "Invalid Withdraw Amount", "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw.");
+            Alert('info', "Invalid Withdraw Amount", "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
             setIsPending('');
             return null;
         } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
             // check leftover amount
             // if less than min stake amount
-            Alert('info', "Invalid Withdraw Amount", "Please leave at least " + minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
+            Alert('info', "Invalid Withdraw Amount", "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
             setIsPending('');
             return null;
         }
@@ -187,7 +185,7 @@ function WithdrawStakeModal(props: any) {
             gasPrice: gasPrice,
             gasLimit: gasLimit,
         };
-
+        
         showWalletsPrompt(accountType);
 
         trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
@@ -220,7 +218,7 @@ function WithdrawStakeModal(props: any) {
             updateRecentTransactions(TransactionType.INITIATE_STAKE_WITHDRAW, txnId);
             updateData();
         }
-
+        
         // reset state
         // timeout to wait for modal to fade out before clearing
         // so that the animation is smoother
@@ -276,57 +274,57 @@ function WithdrawStakeModal(props: any) {
                     {
                         isPending ?
 
-                            <ModalPending />
+                        <ModalPending />
 
-                            :
+                        :
 
-                            txnId ?
+                        txnId ?
 
-                                <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
+                        <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
-                                :
+                        :
 
-                                <>
-                                    <div className="modal-header">
-                                        <h5 className="modal-title" id="withdrawStakeModalLabel">Initiate Stake Withdrawal</h5>
-                                        <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div className="modal-body">
-                                        <div className="row node-details-wrapper mb-4">
-                                            <div className="col node-details-panel mr-4">
-                                                <h3>{stakeModalData.ssnName}</h3>
-                                                <span>{stakeModalData.ssnAddress}</span>
-                                            </div>
-                                            <div className="col node-details-panel">
-                                                <h3>Deposit</h3>
-                                                <span>{convertQaToCommaStr(stakeModalData.delegAmt)} ZIL</span>
-                                            </div>
-                                        </div>
+                        <>
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="withdrawStakeModalLabel">Initiate Stake Withdrawal</h5>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{stakeModalData.ssnName}</h3>
+                                    <span>{stakeModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Deposit</h3>
+                                    <span>{convertQaToCommaStr(stakeModalData.delegAmt)} ZIL</span>
+                                </div>
+                            </div>
 
-                                        <div className="modal-label mb-2"><strong>Enter withdrawal amount</strong></div>
-                                        <div className="input-group mb-4">
-                                            <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} />
-                                            <div className="input-group-append">
-                                                <span className="input-group-text pl-4 pr-3">ZIL</span>
-                                            </div>
-                                        </div>
-                                        <GasSettings
-                                            gasOption={gasOption}
-                                            gasPrice={gasPrice}
-                                            gasLimit={gasLimit}
-                                            setGasOption={setGasOption}
-                                            onBlurGasPrice={onBlurGasPrice}
-                                            onBlurGasLimit={onBlurGasLimit}
-                                            onGasPriceChange={onGasPriceChange}
-                                            onGasLimitChange={onGasLimitChange}
-                                        />
-                                        <div className="d-flex">
-                                            <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
-                                        </div>
-                                    </div>
-                                </>
+                            <div className="modal-label mb-2"><strong>Enter withdrawal amount</strong></div>
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
+                            <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
+                            <div className="d-flex">
+                                <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
+                            </div>
+                        </div>
+                        </>
                     }
                 </div>
             </div>
