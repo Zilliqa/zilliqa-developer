@@ -37,7 +37,7 @@ export const convertToProperCommRate = (rate: string) => {
     if (!rate) {
         return 0;
     }
-    let commRate = new BigNumber(rate).dividedBy(10**7);
+    let commRate = new BigNumber(rate).dividedBy(10 ** 7);
     return commRate;
 };
 
@@ -83,7 +83,7 @@ export const percentToContractCommRate = (userInputRate: string) => {
     if (!userInputRate) {
         return 0;
     }
-    let scillaFloat = new BigNumber(userInputRate).times(10**7);
+    let scillaFloat = new BigNumber(userInputRate).times(10 ** 7);
     return scillaFloat;
 };
 
@@ -93,9 +93,9 @@ export const convertQaToCommaStr = (inputVal: string) => {
     let zil = units.fromQa(new BN(inputVal), units.Units.Zil);
     let zilProperDecimalStr = new BigNumber(zil).toFixed(3);
     const splitAmt = zilProperDecimalStr.split('.');
-    
+
     // add comma separator to front part
-    let frontAmt = splitAmt[0].replace(/(.)(?=(\d{3})+$)/g,'$1,')
+    let frontAmt = splitAmt[0].replace(/(.)(?=(\d{3})+$)/g, '$1,')
     let backAmt = splitAmt[1];
     return frontAmt + "." + backAmt;
 }
@@ -117,7 +117,7 @@ export const convertGzilToCommaStr = (inputVal: string) => {
     const splitAmt = gzil.split('.');
 
     // add comma separator to front part
-    let frontAmt = splitAmt[0].replace(/(.)(?=(\d{3})+$)/g,'$1,')
+    let frontAmt = splitAmt[0].replace(/(.)(?=(\d{3})+$)/g, '$1,')
     let backAmt = splitAmt[1];
     return frontAmt + "." + backAmt;
 }
@@ -149,7 +149,7 @@ export const getAddressLink = (address: string, networkURL: string) => {
         case Network.TESTNET: link = "https://viewblock.io/zilliqa/address/" + address + "?network=testnet"; break;
         case Network.ZQ2_PROTOMAINNET: link = "https://explorer.zq2-protomainnet.zilliqa.com/address/" + address; break;
     }
-    
+
     return link;
 }
 
@@ -165,7 +165,7 @@ export const getTruncatedAddress = (address: string) => {
     }
     const addressLen = address.length;
     const front = address.substring(0, 6);
-    const end = address.substring(addressLen-4);
+    const end = address.substring(addressLen - 4);
     return front.concat("...", end);
 }
 
@@ -246,7 +246,7 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
     const blockDiff = blockNum - sampleRewardBlockNum;
     const blockTraverse = blockDiff % rewardBlockCount;
     const blockCountdown = rewardBlockCount - blockTraverse;
-    
+
     return blockCountdown;
 }
 
@@ -255,17 +255,6 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
  * @param obj the contract result
  * @returns true if response has no errors, false otherwise
  */
-<<<<<<< Updated upstream
- export const isRespOk = (obj: any): boolean => {
-    if (
-        obj !== undefined &&
-        obj !== null &&
-        obj !== OperationStatus.ERROR
-    ) {
-        return true;
-    }
-    return false;
-=======
 export const isRespOk = (obj: any): boolean => {
     const result =
         obj &&
@@ -276,5 +265,4 @@ export const isRespOk = (obj: any): boolean => {
 
     console.log("isRespOk result:", result);
     return result;
->>>>>>> Stashed changes
 }
