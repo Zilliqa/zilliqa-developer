@@ -256,10 +256,13 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
  * @returns true if response has no errors, false otherwise
  */
 export const isRespOk = (obj: any): boolean => {
-    return (
-        obj !== undefined &&
-        obj !== null &&
-        obj !== OperationStatus.ERROR &&
-        Object.keys(obj).length > 0
-    );
+   const result =
+        obj &&
+        obj.result !== undefined &&
+        obj.result !== null &&
+        obj.result !== OperationStatus.ERROR &&
+        Object.keys(obj.result).length > 0;
+
+    console.log("isRespOk result:", result);
+    return result;
 }
