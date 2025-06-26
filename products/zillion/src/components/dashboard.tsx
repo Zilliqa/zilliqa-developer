@@ -176,7 +176,7 @@ function Dashboard(props: any) {
 
             if (zilPay) {
                 networkChanger(
-                    tryGetNetworkLabelByApiUrl(zilPay.wallet.http) || zilPay.wallet.net
+                    Boolean(zilPay.wallet.http) ? tryGetNetworkLabelByApiUrl(zilPay.wallet.http) : zilPay.wallet.net
                 );
 
                 const accountStreamChanged = zilPay.wallet.observableAccount().subscribe((account: any) => {
