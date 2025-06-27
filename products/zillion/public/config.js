@@ -48,11 +48,6 @@ window['config'] = {
             node_status: "https://staking-viewer.zilliqa.com",
             api_list : [
                 "https://api.zilliqa.com",
-                "https://ssn-zilliqa.cex.io/api",
-                // "https://ssn.ignitedao.io/api",
-                "https://ssn.zillet.io",
-                "https://zil-staking.ezil.me/api",
-                "https://staking-zil.kucoin.com/api",
             ]
         },
         zq2_protomainnet: {
@@ -76,5 +71,5 @@ window['config'] = {
     },
     refresh_rate_config: 300000,
     api_max_retry_attempt: 10,
-    environment_config: "stage_zq2_protomainnet"
+    environment_config: "prod"
 }
