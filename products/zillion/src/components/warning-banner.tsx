@@ -18,7 +18,7 @@ function WarningBanner(props: any) {
                     </div>
 
                     <div className='mt-2'>
-                        Check out <a rel="noopener noreferrer" target='_blank' href="https://blog.zilliqa.com/how-to-restake-on-zilliqa-evm">this blog post</a> to learn how to move your stakes and benefit from high APR.
+                        Check out <a rel="noopener noreferrer" target='_blank' href="https://blog.zilliqa.com/how-to-stake-on-zilliqa-evm">this blog post</a> to learn how to move your stakes and benefit from high APR.
                     </div>
                 </div>
                 {
