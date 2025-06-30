@@ -8,14 +8,18 @@ function WarningBanner(props: any) {
     const env = getEnvironment();
 
     return (
-        <div id="banner" className="mb-4 text-center">
+        <div id="banner" className="mb-4 text-center ">
             { 
                 env === Environment.PROD ? 
                 <>
                 <div className="px-3 py-3">
-                    <strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.
-                    <br/>
-                    <div className="mt-3"><strong>Important</strong>: Please note that gZIL minting has concluded as of <span className="final-gzil-mint-block ml-2">Block 1483713</span>. <span className="mx-2">No further gZIL will be minted.</span> The Zilliqa staking program will still continue to distribute ZIL for staking rewards.</div>
+                    <div>
+                        <strong>Announcement</strong>: <span style={{ color: "#00D0C6" }}>Zilliqa 2.0 is live!</span> The new staking platform for the upgraded network can be found at <a rel="noopener noreferrer" target='_blank' href='https://stake.zilliqa.com'>stake.zilliqa.com</a>.
+                    </div>
+
+                    <div className='mt-2'>
+                        Check out <a rel="noopener noreferrer" target='_blank' href="https://blog.zilliqa.com/how-to-restake-on-zilliqa-evm">this blog post</a> to learn how to move your stakes and benefit from high APR.
+                    </div>
                 </div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 

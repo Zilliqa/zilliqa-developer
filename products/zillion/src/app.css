@@ -2041,7 +2041,7 @@ input:focus {
 }
 
 #banner {
-  font-size: 0.78em;
+  font-size: 1em;
   font-weight: 400;
   border: none;
   color: var(--text-color);
