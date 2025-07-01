@@ -1,6 +1,6 @@
 <template>
   <div class="bottom-panel">
-    <div class="header" @click="handleToggle">
+    <div class="header" @click="$emit('toggle')">
       <div class="tab d-flex align-items-center">
         <img height="13px" class="pr-1" src="@/assets/terminal.svg" /> Checker
       </div>
@@ -11,18 +11,13 @@
   </div>
 </template>
 
-<script>
-import CheckerTab from "./Checker.vue";
+<script setup>
 
-export default {
-  props: ["active"],
-  components: { CheckerTab },
-  methods: {
-    handleToggle() {
-      this.$emit("toggle");
-    }
-  }
-};
+import { defineProps, defineEmits } from "vue";
+import CheckerTab from "./Checker.vue";
+defineProps(["active"])
+const emit = defineEmits(["toggle"])
+
 </script>
 
 <style lang="scss" scoped>
