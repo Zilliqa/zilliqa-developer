@@ -115,6 +115,7 @@ function SsnTable(props: any) {
 
     ssnList = [...ssnList, googleSSN];
     const handleStake = (name: string, address: string, commRate: string) => {
+        throw new Error('handleStake function disabled');
         // set dashboard state variable
         dispatch(UPDATE_STAKE_MODAL_DATA({
             stake_modal: {
@@ -217,7 +218,7 @@ function SsnTable(props: any) {
                             data-keyboard="false"
                             data-backdrop="static"
                             onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
-                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                            disabled={true}>
                             Stake
                         </button>
                     </>,
