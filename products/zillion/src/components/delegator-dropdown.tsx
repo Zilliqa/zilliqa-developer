@@ -28,6 +28,8 @@ function DelegatorDropdown(props: any) {
     };
 
     const handleTransferStake = () => {
+        throw new Error('handleTransferStake function disabled');
+
         dispatch(UPDATE_STAKE_MODAL_DATA({
             stake_modal: {
                 ssnName: ssnName,
@@ -82,7 +84,7 @@ function DelegatorDropdown(props: any) {
                     data-keyboard="false" 
                     data-backdrop="static"
                     onClick={handleTransferStake}
-                    disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                    disabled={true}>
                         {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Transfer Stake'}
                 </button>
                 <button
