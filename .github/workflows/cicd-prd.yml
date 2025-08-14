@@ -23,7 +23,6 @@ jobs:
         application:
           [
             bluebell-playground,
-            devex-apollo,
             dev-wallet,
             faucet-service,
             eth-spout,
@@ -37,11 +36,6 @@ jobs:
           - application: bluebell-playground
             image_name: bluebell-playground
             path: products/bluebell
-            tag_length: 8
-            tag_latest: false
-          - application: devex-apollo
-            image_name: devex-apollo
-            path: products/devex-apollo
             tag_length: 8
             tag_latest: false
           - application: dev-wallet
