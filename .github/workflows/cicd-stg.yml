@@ -23,8 +23,6 @@ jobs:
       matrix:
         application:
           [
-            dev-wallet,
-            faucet-service,
             governance-api,
             governance-snapshot,
             multisig,
@@ -32,16 +30,6 @@ jobs:
             zillion,
           ]
         include:
-          - application: dev-wallet
-            image_name: dev-wallet
-            path: products/dev-wallet
-            tag_length: 8
-            tag_latest: false
-          - application: faucet-service
-            image_name: faucet-service
-            path: products/faucet-service
-            tag_length: 8
-            tag_latest: false
           - application: multisig
             image_name: multisig
             path: products/multisig
