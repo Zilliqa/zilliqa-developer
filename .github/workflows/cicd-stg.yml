@@ -111,18 +111,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [devex, zilliqa-isolated-server]
+        application: [devex]
         include:
           - application: devex
             image_name: devex
             path: products/devex
             tag_length: 8
             tag_latest: false
-          - application: zilliqa-isolated-server
-            image_name: zilliqa-isolated-server
-            path: products/zilliqa-isolated-server
-            tag_length: 8
-            tag_latest: true
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-d-devops-services-4dgwlsse/zilliqa-public
