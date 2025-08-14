@@ -23,7 +23,6 @@ jobs:
       matrix:
         application:
           [
-            devex-apollo,
             dev-wallet,
             faucet-service,
             governance-api,
@@ -33,11 +32,6 @@ jobs:
             zillion,
           ]
         include:
-          - application: devex-apollo
-            image_name: devex-apollo
-            path: products/devex-apollo
-            tag_length: 8
-            tag_latest: false
           - application: dev-wallet
             image_name: dev-wallet
             path: products/dev-wallet
