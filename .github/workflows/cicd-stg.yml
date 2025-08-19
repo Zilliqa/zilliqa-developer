@@ -45,11 +45,6 @@ jobs:
             path: products/governance-snapshot
             tag_length: 8
             tag_latest: false
-          - application: pdt
-            image_name: pdt
-            path: products/pdt
-            tag_length: 8
-            tag_latest: false
           - application: scilla-server
             image_name: scilla-server
             path: products/scilla-server
