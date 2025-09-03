@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+/npm-debug.log
+.npm
+
+# Node.js specific
+npm-debug.log*
+yarn-error.log*
+
+# Git ignore
+.git
+.gitignore
+
+# OS generated files
+.DS_Store
+.vscode
+.idea
+.env
+
+# Build artifacts
+dist
+build
+*.log
+
+# Test files
+coverage
+*.test.js
+*.spec.js
