@@ -23,6 +23,34 @@ following table is a place holder:
 | `//products/ceres`            | zilliqa.com/apps   |                   |
 | `//products/neo-savant`       | ide.zilliqa.com    |                   |
 
+#### Building and publishing `zilliqa-js`
+
+To publish the `zilliqa-js` packages, you can use the provided Dockerfile to ensure a consistent build environment.
+
+First, build the Docker image:
+
+```sh
+docker build -t zilliqa_js_publish -f build_and_publish.Dockerfile .
+```
+
+Then, run the container in interactive mode:
+
+```sh
+docker run --rm -it zilliqa_js_publish sh
+```
+
+Finally, from within the container's shell, publish the packages using `pnpm`. First run it with `--dry-run` to test publish without publishing anything.
+
+```sh
+pnpm publish --dry-run
+```
+
+If everything looks correct then run
+
+```sh
+pnpm publish
+```
+
 ## Building
 
 To disable our git queries on build, set the `DISABLE_WORKSPACE_STATUS`
@@ -117,36 +145,6 @@ ibazel run //products/developer-portal:image
 which is served on port `80`.
 
 #### Building libraries
-
-#### Building and publishing `zilliqa-js`
-
-Checkout out the repository. First ensure that tests are passing:
-
-```sh
-bazelisk test //zilliqa/js/...
-```
-
-Next navigate to the `zilliqa/js` folder. If you have not done so, install all
-dependencies:
-
-```sh
-pnpm i
-```
-
-Then build all libraries:
-
-```sh
-pnpm -r build
-```
-
-Finally, publish:
-
-```sh
-pnpm -r publish
-```
-
-Add `--dry-run` in the event you want to test publish without publishing
-anything.
 
 #### Building and running Docker images
 
