@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https:www.gnu.org/licenses/>.
 
-import Vue from "vue";
 import Vuex from "vuex";
 import VuexPersist from "vuex-persist";
 
@@ -25,8 +24,6 @@ import events from "./modules/events";
 import general from "./modules/general";
 import transactions from "./modules/transactions";
 // import console from './modules/console'
-
-Vue.use(Vuex);
 
 const vuexPersist = new VuexPersist({
   key: "savant-ide",
@@ -45,7 +42,7 @@ const vuexPersist = new VuexPersist({
   }),
 });
 
-export default new Vuex.Store({
+export default Vuex.createStore({
   modules: {
     accounts,
     networks,
