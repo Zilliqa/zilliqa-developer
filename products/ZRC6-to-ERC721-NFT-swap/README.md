@@ -13,14 +13,7 @@ This project is a generic template that enables users to swap Scilla NFTs for EV
 
 ### Web
 
-Contains the NextJS web application. The application flow is as follows:
-1. User connects ZilPay
-2. Application checks what Scilla NFTs user has
-3. Application displays a list of user owned Scilla collection NFTs
-4. User selects the Scilla collection NFTs to be swapped for EVM collection NFTs
-4. User connect EVM wallet
-5. User approves the swap contract as a spender of Scilla NFT using ZilPay
-6. User calls `burnAndReceive` using EVM wallet
+Contains the implementation of the web application that user interacts with to swap NFTs.
 
 ### Contracts
 
@@ -35,3 +28,12 @@ This contract allows user to call the `burnAndReceive` method using EVM wallet. 
 Successful `burnAndReceive` call:
 1. makes all the NFTs on Scilla NFTs collection among `list of Scilla NFT ids to be burned and swapped` owned by zero address
 2. makes all the NFTs on EVM NFTs collection among `list of NFT ids to be burned and swapped` owned by the EVM wallet address of the caller
+
+### Testing environment
+
+To test this page you can use already deployed NFTs contracts.
+
+Scilla NFT: https://otterscan.testnet.zilliqa.com/address/0x9796b1e3adfb73ca354fa5920521fb7ef21f71af
+EVM NFT: https://otterscan.testnet.zilliqa.com/address/0x02C5908A23Edf9bA26969E00e3d246FF77cA0706
+
+You can mint yourself Scilla NFTs by going to https://ide.zilliqa.com, importing the contract, and calling `mint` function on it. Everybody can call `mint` on this NFT contract.
