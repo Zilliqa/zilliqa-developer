@@ -1,13 +1,9 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import {
-  zilliqaTestnet
-} from 'wagmi/chains';
+import { createWagmiConfig } from './chains'
 
-export const config = getDefaultConfig({
-  appName: 'ZRC6 to ERC721 NFT Swap',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID', // Get this from https://cloud.walletconnect.com
-  chains: [
-    zilliqaTestnet
-  ],
-  ssr: true, // If your dApp uses server side rendering (SSR)
-});
+// This will be set up dynamically in _app.tsx with proper configuration
+export const config = createWagmiConfig(
+  33469, // Default to testnet
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '',
+  'ZRC6 to ERC721 NFT Swap',
+  process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+)

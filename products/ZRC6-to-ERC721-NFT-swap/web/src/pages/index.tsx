@@ -1,7 +1,9 @@
-import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useWallet } from '@/context/WalletContext';
+import CustomWalletConnect from '@/components/CustomWalletConnect';
+import MockWalletSelector from '@/components/MockWalletSelector';
+import { formatAddress, formatZIL } from '@/utils/formatting';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,203 +17,267 @@ const geistMono = Geist_Mono({
 
 export default function Home() {
   const { 
+    // ZilPay wallet
     zilPayAccount, 
     isZilPayConnected, 
+    isZilPayConnecting,
     connectZilPay, 
     disconnectZilPay,
+    
+    // EVM wallet
     evmAccount,
     isEvmConnected,
-    disconnectEvm
+    
+    // Mock wallet
+    connectDummyWallet,
+    isDummyWalletConnected,
+    dummyWallet,
+    
+    // General
+    connectedWalletType,
+    walletAddress,
+    zilAvailable,
   } = useWallet();
 
+  // Determine if we have both wallets connected
+  const hasZilliqaWallet = isZilPayConnected || isDummyWalletConnected;
+  const hasEvmWallet = isEvmConnected;
+  const canSwap = hasZilliqaWallet && hasEvmWallet;
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1 className="text-4xl font-bold">ZRC6 to ERC721 NFT Swap</h1>
-        <p className="text-lg">
-          Swap your ZRC6 tokens for ERC721 NFTs seamlessly.
-        </p>
-
-        <div className="flex flex-col gap-4 w-full max-w-md">
-          {/* ZilPay Wallet Connection */}
-          <div className="border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Zilliqa non-EVM Network</h3>
-            {isZilPayConnected ? (
-              <div className="space-y-2">
-                <p className="text-sm text-green-600">✓ Connected</p>
-                <p className="text-xs font-mono break-all">{zilPayAccount}</p>
-                <button
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
-                  onClick={disconnectZilPay}
-                >
-                  Disconnect ZilPay
-                </button>
-              </div>
-            ) : (
-              <button
-                className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition w-full"
-                onClick={connectZilPay}
-              >
-                Connect ZilPay Wallet
-              </button>
-            )}
+    <>
+      <div
+        className={`${geistSans.className} ${geistMono.className} font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20`}
+      >
+        <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+          <div className="text-center sm:text-left">
+            <h1 className="text-4xl font-bold mb-4">ZRC6 to ERC721 NFT Swap</h1>
+            <p className="text-lg text-gray-600">
+              Swap your ZRC6 tokens for ERC721 NFTs seamlessly across Zilliqa networks.
+            </p>
           </div>
 
-          {/* EVM Wallet Connection */}
-          <div className="border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Zilliqa EVM Network</h3>
-            {isEvmConnected ? (
-              <div className="space-y-2">
-                <p className="text-sm text-green-600">✓ Connected</p>
-                <p className="text-xs font-mono break-all">{evmAccount}</p>
+          <div className="flex flex-col gap-6 w-full max-w-2xl">
+            
+            {/* Development Tools Section */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+              <h3 className="text-lg font-semibold mb-3 text-gray-700">🚀 Development Tools</h3>
+              <div className="flex flex-wrap gap-2">
                 <button
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
-                  onClick={disconnectEvm}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition text-sm"
+                  onClick={connectDummyWallet}
                 >
-                  Disconnect EVM Wallet
+                  Connect Mock Wallet
                 </button>
-              </div>
-            ) : (
-              <div className="w-full">
-                <ConnectButton.Custom>
-                  {({
-                    account,
-                    chain,
-                    openAccountModal,
-                    openChainModal,
-                    openConnectModal,
-                    authenticationStatus,
-                    mounted,
-                  }) => {
-                    const ready = mounted && authenticationStatus !== 'loading';
-                    const connected =
-                      ready &&
-                      account &&
-                      chain &&
-                      (!authenticationStatus ||
-                        authenticationStatus === 'authenticated');
-
-                    return (
-                      <div
-                        {...(!ready && {
-                          'aria-hidden': true,
-                          'style': {
-                            opacity: 0,
-                            pointerEvents: 'none',
-                            userSelect: 'none',
-                          },
-                        })}
-                      >
-                        {(() => {
-                          if (!connected) {
-                            return (
-                              <button
-                                onClick={openConnectModal}
-                                type="button"
-                                className="px-6 py-3 bg-purple-600 text-white rounded hover:bg-purple-700 transition w-full"
-                              >
-                                Connect EVM Wallet
-                              </button>
-                            );
-                          }
-
-                          if (chain.unsupported) {
-                            return (
-                              <button
-                                onClick={openChainModal}
-                                type="button"
-                                className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition w-full"
-                              >
-                                Wrong network
-                              </button>
-                            );
-                          }
-
-                          return (
-                            <div style={{ display: 'flex', gap: 12 }}>
-                              <button
-                                onClick={openChainModal}
-                                style={{ display: 'flex', alignItems: 'center' }}
-                                type="button"
-                                className="px-3 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                              >
-                                {chain.hasIcon && (
-                                  <div
-                                    style={{
-                                      background: chain.iconBackground,
-                                      width: 12,
-                                      height: 12,
-                                      borderRadius: 999,
-                                      overflow: 'hidden',
-                                      marginRight: 4,
-                                    }}
-                                  >
-                                    {chain.iconUrl && (
-                                      <img
-                                        alt={chain.name ?? 'Chain icon'}
-                                        src={chain.iconUrl}
-                                        style={{ width: 12, height: 12 }}
-                                      />
-                                    )}
-                                  </div>
-                                )}
-                                {chain.name}
-                              </button>
-
-                              <button
-                                onClick={openAccountModal}
-                                type="button"
-                                className="px-3 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                              >
-                                {account.displayName}
-                                {account.displayBalance
-                                  ? ` (${account.displayBalance})`
-                                  : ''}
-                              </button>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    );
+                <button
+                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition text-sm"
+                  onClick={() => {
+                    console.log('Current wallet state:', {
+                      connectedWalletType,
+                      walletAddress,
+                      zilAvailable: zilAvailable?.toString(),
+                      isZilPayConnected,
+                      isEvmConnected
+                    });
                   }}
-                </ConnectButton.Custom>
+                >
+                  Debug State
+                </button>
+              </div>
+            </div>
+
+            {/* Zilliqa Non-EVM Network (ZRC6) */}
+            <div className="border rounded-lg p-6 bg-white shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">Zilliqa Network (ZRC6)</h3>
+                <div className="text-sm text-gray-500">Non-EVM</div>
+              </div>
+              
+              {isZilPayConnected ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-700">Connected via ZilPay</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <div className="font-mono text-xs break-all text-gray-700">
+                      {zilPayAccount}
+                    </div>
+                  </div>
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm"
+                    onClick={disconnectZilPay}
+                  >
+                    Disconnect ZilPay
+                  </button>
+                </div>
+              ) : isDummyWalletConnected ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-blue-700">Connected via Mock Wallet</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <div className="font-semibold">{dummyWallet?.name}</div>
+                    <div className="font-mono text-xs break-all text-gray-700">
+                      {dummyWallet?.address}
+                    </div>
+                    <div className="text-green-600 font-medium">
+                      {dummyWallet ? formatZIL(dummyWallet.balance) : '0'} ZIL
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Connect your ZilPay wallet to access ZRC6 tokens on the Zilliqa network.
+                  </p>
+                  <button
+                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-medium"
+                    onClick={connectZilPay}
+                    disabled={isZilPayConnecting}
+                  >
+                    {isZilPayConnecting ? 'Connecting...' : 'Connect ZilPay Wallet'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Zilliqa EVM Network (ERC721) */}
+            <div className="border rounded-lg p-6 bg-white shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">Zilliqa EVM Network (ERC721)</h3>
+                <div className="text-sm text-gray-500">EVM Compatible</div>
+              </div>
+              
+              {isEvmConnected ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-700">Connected via EVM Wallet</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <div className="font-mono text-xs break-all text-gray-700">
+                      {evmAccount}
+                    </div>
+                  </div>
+                  <div className="flex justify-start">
+                    <ConnectButton />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Connect your EVM wallet (MetaMask, WalletConnect, etc.) to receive ERC721 NFTs.
+                  </p>
+                  <CustomWalletConnect notConnectedClassName="w-full">
+                    Connect EVM Wallet
+                  </CustomWalletConnect>
+                </div>
+              )}
+            </div>
+
+            {/* Swap Section */}
+            {canSwap && (
+              <div className="border-2 border-green-500 rounded-lg p-6 bg-green-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                  <h3 className="text-xl font-semibold text-green-800">Ready to Swap!</h3>
+                </div>
+                <p className="text-sm text-green-700 mb-4">
+                  Both wallets are connected. You can now proceed with the NFT swap.
+                </p>
+                
+                <div className="bg-white p-4 rounded border mb-4">
+                  <div className="text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Zilliqa Wallet:</span>
+                      <span className="font-mono text-xs">
+                        {formatAddress(isZilPayConnected ? (zilPayAccount || '') : (dummyWallet?.address || ''))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">EVM Wallet:</span>
+                      <span className="font-mono text-xs">
+                        {formatAddress(evmAccount || '')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-lg"
+                  onClick={() => {
+                    alert('NFT swap functionality will be implemented here!\n\nThis will include:\n- ZRC6 token selection\n- NFT metadata configuration\n- Cross-network transaction coordination\n- Confirmation and status tracking');
+                  }}
+                >
+                  Start NFT Swap
+                </button>
               </div>
             )}
-          </div>
 
-          {/* Swap Section */}
-          {isZilPayConnected && isEvmConnected && (
-            <div className="border-2 border-green-500 rounded-lg p-4 bg-green-50">
-              <h3 className="text-lg font-semibold mb-2 text-green-800">Ready to Swap!</h3>
-              <p className="text-sm text-green-700 mb-3">
-                Both wallets connected. You can now proceed with the NFT swap.
-              </p>
-              <button
-                className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700 transition w-full"
-                onClick={() => {
-                  // TODO: Implement swap functionality
-                  alert('Swap functionality will be implemented here');
-                }}
-              >
-                Start NFT Swap
-              </button>
+            {/* Connection Status */}
+            {!canSwap && (
+              <div className="border border-yellow-400 rounded-lg p-4 bg-yellow-50">
+                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Connection Required</h3>
+                <div className="text-sm text-yellow-700 space-y-1">
+                  <div className="flex items-center gap-2">
+                    {hasZilliqaWallet ? '✅' : '❌'}
+                    <span>Zilliqa wallet (for ZRC6 tokens)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {hasEvmWallet ? '✅' : '❌'}
+                    <span>EVM wallet (for ERC721 NFTs)</span>
+                  </div>
+                </div>
+                <p className="text-xs text-yellow-600 mt-2">
+                  Connect both wallets to enable the swap functionality.
+                </p>
+              </div>
+            )}
+
+            {/* Features Overview */}
+            <div className="border rounded-lg p-6 bg-gray-50">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">✨ Features</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2">
+                  <div className="font-medium text-gray-700">🔄 Cross-Network Swapping</div>
+                  <div className="text-gray-600">Convert ZRC6 tokens to ERC721 NFTs</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="font-medium text-gray-700">💳 Multiple Wallets</div>
+                  <div className="text-gray-600">ZilPay + EVM wallets (MetaMask, etc.)</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="font-medium text-gray-700">🛠️ Developer Tools</div>
+                  <div className="text-gray-600">Mock wallets for testing</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="font-medium text-gray-700">🔒 Secure Transactions</div>
+                  <div className="text-gray-600">Type-safe contract interactions</div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <div>
-          ZRC6 to ERC721 NFT Swap application template by{" "}
-          <a
-            className="underline"
-            href="https://zilliqa.com"
-          >
-            Zilliqa
-          </a>
-        </div>
-      </footer>
-    </div>
+          </div>
+        </main>
+
+        <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center text-sm text-gray-500">
+          <div>
+            ZRC6 to ERC721 NFT Swap • Template by{" "}
+            <a
+              className="underline hover:text-gray-700 transition"
+              href="https://zilliqa.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Zilliqa
+            </a>
+          </div>
+        </footer>
+      </div>
+      
+      {/* Mock Wallet Selector Modal */}
+      <MockWalletSelector />
+    </>
   );
 }
