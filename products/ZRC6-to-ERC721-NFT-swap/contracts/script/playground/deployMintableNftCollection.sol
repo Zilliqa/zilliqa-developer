@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {Script, console} from "forge-std/Script.sol";
-import {NFToken} from "../src/playground/erc721.sol";
+import {NFToken} from "../../src/playground/erc721.sol";
 
 contract DeployMintableNftCollection is Script {
     NFToken public nfToken;

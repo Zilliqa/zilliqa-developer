@@ -7,3 +7,6 @@
 [submodule "products/ZRC6-to-ERC721-NFT-swap/contracts/lib/openzeppelin-contracts"]
 	path = products/ZRC6-to-ERC721-NFT-swap/contracts/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "products/ZRC6-to-ERC721-NFT-swap/contracts/lib/openzeppelin-contracts-upgradeable"]
+	path = products/ZRC6-to-ERC721-NFT-swap/contracts/lib/openzeppelin-contracts-upgradeable
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable

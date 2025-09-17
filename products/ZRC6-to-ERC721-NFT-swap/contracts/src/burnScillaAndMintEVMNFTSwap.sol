@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+
 
 /**
  * @title BurnScillaAndMintEVMNFTSwap
@@ -18,8 +21,16 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
  * a signature, and a list of NFT IDs to be burned and swapped.
  * 
  * The signature is provided as proof that the EVM wallet that calls the contract also owns the ZilPay address.
+ * 
+ * @custom:security-contact security@zilliqa.com
  */
-contract BurnScillaAndMintEVMNFTSwap is Ownable, ReentrancyGuard, Pausable {
+contract BurnScillaAndMintEVMNFTSwap is 
+    Initializable, 
+    OwnableUpgradeable, 
+    ReentrancyGuardUpgradeable, 
+    PausableUpgradeable,
+    UUPSUpgradeable 
+{
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
@@ -30,9 +41,9 @@ contract BurnScillaAndMintEVMNFTSwap is Ownable, ReentrancyGuard, Pausable {
         uint256[] tokenIds
     );
 
-    // State variables - immutable since they're set only in constructor
-    address public immutable scillaNFTAddress;
-    address public immutable evmNFTAddress;
+    // State variables - no longer immutable since they need to be set in initializer
+    address public scillaNFTAddress;
+    address public evmNFTAddress;
     
     // Mapping to track used signatures to prevent replay attacks
     mapping(bytes32 => bool) public usedSignatures;
@@ -42,24 +53,35 @@ contract BurnScillaAndMintEVMNFTSwap is Ownable, ReentrancyGuard, Pausable {
     error SignatureAlreadyUsed();
     error InvalidTokenIdsLength();
     error ZeroAddress();
+    error AlreadyInitialized();
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     /**
-     * @dev Constructor sets the addresses of the Scilla NFT collection and EVM NFT collection
+     * @dev Initializes the contract with the addresses of the Scilla NFT collection and EVM NFT collection
      * @param _scillaNFTAddress Address of the Scilla NFT collection contract
      * @param _evmNFTAddress Address of the EVM NFT collection contract
      * @param _initialOwner Address of the initial owner of the contract
      */
-    constructor(
+    function initialize(
         address _scillaNFTAddress,
         address _evmNFTAddress,
         address _initialOwner
-    ) Ownable(_initialOwner) {
+    ) public initializer {
         if (_scillaNFTAddress == address(0) || _evmNFTAddress == address(0)) {
             revert ZeroAddress();
         }
         if (_initialOwner == address(0)) {
             revert ZeroAddress();
         }
+        
+        __Ownable_init(_initialOwner);
+        __ReentrancyGuard_init();
+        __Pausable_init();
+        __UUPSUpgradeable_init();
         
         scillaNFTAddress = _scillaNFTAddress;
         evmNFTAddress = _evmNFTAddress;
@@ -92,8 +114,10 @@ contract BurnScillaAndMintEVMNFTSwap is Ownable, ReentrancyGuard, Pausable {
             revert InvalidTokenIdsLength();
         }
         
-        // Verify contract addresses are set (they're immutable so this check is redundant but kept for clarity)
-        // Note: Since addresses are now immutable and set in constructor, they cannot be zero at runtime
+        // Verify contract addresses are set
+        if (scillaNFTAddress == address(0) || evmNFTAddress == address(0)) {
+            revert ZeroAddress();
+        }
         
         // Create message hash for signature verification
         bytes32 messageHash = keccak256(abi.encodePacked(zilPayAddress, msg.sender, block.chainid));
@@ -180,6 +204,44 @@ contract BurnScillaAndMintEVMNFTSwap is Ownable, ReentrancyGuard, Pausable {
      */
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    /**
+     * @dev Authorizes contract upgrades
+     * 
+     * Requirements:
+     * - Only callable by owner
+     */
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+    /**
+     * @dev Updates the Scilla NFT contract address
+     * @param _scillaNFTAddress New Scilla NFT contract address
+     * 
+     * Requirements:
+     * - Only callable by owner
+     * - New address cannot be zero address
+     */
+    function setScillaNFTAddress(address _scillaNFTAddress) external onlyOwner {
+        if (_scillaNFTAddress == address(0)) {
+            revert ZeroAddress();
+        }
+        scillaNFTAddress = _scillaNFTAddress;
+    }
+
+    /**
+     * @dev Updates the EVM NFT contract address
+     * @param _evmNFTAddress New EVM NFT contract address
+     * 
+     * Requirements:
+     * - Only callable by owner
+     * - New address cannot be zero address
+     */
+    function setEvmNFTAddress(address _evmNFTAddress) external onlyOwner {
+        if (_evmNFTAddress == address(0)) {
+            revert ZeroAddress();
+        }
+        evmNFTAddress = _evmNFTAddress;
     }
 
     /**
