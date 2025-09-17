@@ -1,4 +1,4 @@
-# ZRC6 to ERC712 NFT Swap web application
+# **ZRC6 to ERC712 NFT Swap** web application
 
 This is a NextJS powered web application
 

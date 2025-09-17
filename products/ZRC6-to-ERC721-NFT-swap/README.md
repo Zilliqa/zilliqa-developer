@@ -1,4 +1,4 @@
-# ZRC6 to ERC721 NFT Swap
+# **ZRC6 to ERC712 NFT Swap** Project
 
 ## Intro
 
@@ -18,16 +18,6 @@ Contains the implementation of the web application that user interacts with to s
 ### Contracts
 
 Contains solidity smart contract deployed with Forge.
-
-#### Swap Contract
-
-This contract handles one specific pair of Scilla NFTs collection and its corresponding EVM NFTs collection.
-Addresses of those collections are specified through constructor.
-The contract is using Zilliqa interop to call the Scilla NFTs collection contract. 
-This contract allows user to call the `burnAndReceive` method using EVM wallet. This method takes the owner' ZilPay wallet address (the current address that owns Scilla NFTs), signature, and a `list of NFT ids to be burned and swapped`. The signature data is a signed owner' ZilPay wallet address signed with ZilPay. The signature is provided as a proof that EVM wallet that calls the contract also owns the the ZilPay address.
-Successful `burnAndReceive` call:
-1. makes all the NFTs on Scilla NFTs collection among `list of Scilla NFT ids to be burned and swapped` owned by zero address
-2. makes all the NFTs on EVM NFTs collection among `list of NFT ids to be burned and swapped` owned by the EVM wallet address of the caller
 
 ### Testing environment
 

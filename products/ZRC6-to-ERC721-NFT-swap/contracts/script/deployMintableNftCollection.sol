@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 import {Script, console} from "forge-std/Script.sol";
-import {NFToken} from "../src/testEnvContracts/erc721.sol";
+import {NFToken} from "../src/playground/erc721.sol";
 
-contract NFTokenScript is Script {
+contract DeployMintableNftCollection is Script {
     NFToken public nfToken;
 
     function setUp() public {}
