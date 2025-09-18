@@ -235,29 +235,6 @@ export default function Home() {
                 </p>
               </div>
             )}
-
-            {/* Features Overview */}
-            <div className="border rounded-lg p-6 bg-gray-50">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">✨ Features</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="space-y-2">
-                  <div className="font-medium text-gray-700">🔄 Cross-Network Swapping</div>
-                  <div className="text-gray-600">Convert ZRC6 tokens to ERC721 NFTs</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="font-medium text-gray-700">💳 Multiple Wallets</div>
-                  <div className="text-gray-600">ZilPay + EVM wallets (MetaMask, etc.)</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="font-medium text-gray-700">🛠️ Developer Tools</div>
-                  <div className="text-gray-600">Mock wallets for testing</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="font-medium text-gray-700">🔒 Secure Transactions</div>
-                  <div className="text-gray-600">Type-safe contract interactions</div>
-                </div>
-              </div>
-            </div>
           </div>
         </main>
 

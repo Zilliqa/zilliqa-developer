@@ -1,158 +1,111 @@
 # Zilliqa Wallet Integration Guide
 
-A comprehensive guide to implementing wallet connectivity Zilliqa network applications using RainbowKit, Wagmi, and WalletConnect. This guide focuses on EVM-compatible wallets (MetaMask, WalletConnect, Coinbase, etc.) as the primary integration method, with optional native Zilliqa wallet support like ZilPay for enhanced functionality.
+A comprehensive guide to **adding Zilliqa wallet connectivity to your existing React/Next.js application** using RainbowKit, Wagmi, and WalletConnect. This guide focuses on EVM-compatible wallets (MetaMask, WalletConnect, Coinbase, etc.) as the primary integration method, with optional native Zilliqa wallet support like ZilPay for enhanced functionality.
 
 ## Table of Contents
 
-This guide is organized into progressive sections that will take you from initial setup to production-ready wallet integration:
+This guide shows you how to integrate Zilliqa wallet functionality into your existing application with minimal changes to your current architecture:
 
-1. **[Technology Stack](#technology-stack)** - Core libraries and their roles
-2. **[Project Structure](#project-structure)** - Recommended file organization
-3. **[Installation & Dependencies](#installation--dependencies)** - Package installation and setup
-4. **[Configuration Setup](#configuration-setup)** - Environment variables and API configuration
-5. **[Chain Configuration](#chain-configuration)** - Zilliqa network definitions and RPC setup
-6. **[Wallet Integration](#wallet-integration)** - EVM wallet connectors and ZilPay (optional)
-7. **[Provider Setup](#provider-setup)** - React context and provider hierarchy
+1. **[Prerequisites](#prerequisites)** - What your existing app needs
+2. **[Installation & Dependencies](#installation--dependencies)** - Adding required packages
+3. **[Configuration Setup](#configuration-setup)** - Environment variables and API configuration
+4. **[Chain Configuration](#chain-configuration)** - Zilliqa network definitions
+5. **[Wallet Integration](#wallet-integration)** - EVM wallet connectors setup
+6. **[Provider Integration](#provider-integration)** - Adding providers to your existing app
+7. **[Development and Testing](#development-and-testing)** - Using testnet for development
 8. **[Transaction Management](#transaction-management)** - Hooks for contract interactions
-9. **[Mock Wallet System](#mock-wallet-system)** - Development and testing tools
-10. **[UI Components](#ui-components)** - Wallet connection buttons and status displays
-11. **[Advanced Features](#advanced-features)** - Multi-chain, deep linking, and performance
-12. **[Best Practices](#best-practices)** - Security, error handling, and optimization
-13. **[Troubleshooting](#troubleshooting)** - Common issues and solutions
+9. **[Integration Examples](#integration-examples)** - Adding wallet features to existing components
+10. **[Best Practices](#best-practices)** - Security, error handling, and optimization
+11. **[Troubleshooting](#troubleshooting)** - Common issues and solutions
 
-## Technology Stack
+## Prerequisites
 
-This section outlines the core technologies used in this wallet integration approach. Understanding these dependencies will help you make informed decisions about implementation.
+This guide assumes you have an existing React or Next.js application that you want to extend with Zilliqa wallet functionality. Your application should have:
 
-### Core Dependencies
-- **RainbowKit**: Primary wallet connection UI and management
+### Required Foundation
+- **React 18+** or **Next.js 13+** application
+- **TypeScript** support (recommended for type safety)
+- **Package manager**: npm, yarn, or pnpm
+- **Build system**: Webpack, Vite, or Next.js built-in
+
+### What This Guide Adds
+- **RainbowKit**: Wallet connection UI and management
 - **Wagmi**: React hooks for EVM wallet interactions
 - **Viem**: TypeScript interface for EVM chains
 - **WalletConnect**: Protocol for mobile wallet connections
-- **React/Next.js**: Frontend framework
-- **UI Library**: Any React component library (Ant Design, Chakra UI, etc.)
-- **TanStack Query**: Data fetching and caching
+- **TanStack Query**: Data fetching and caching (if not already present)
 
-### Why EVM Wallets for Zilliqa?
-Zilliqa's EVM-compatible network allows standard Ethereum wallets to work seamlessly. This approach offers significant advantages:
+### Integration Approach
+This guide uses EVM-compatible wallets for Zilliqa integration, which means:
 
-- **Broader Adoption**: Most Web3 users already have MetaMask, Coinbase Wallet, or other EVM wallets installed
-- **Familiar UX**: Users don't need to learn new wallet connection flows - they use the same process as other dApps
-- **Mobile Support**: WalletConnect protocol enables seamless mobile wallet integration across dozens of wallets
-- **Developer Experience**: Leverage the mature Ethereum tooling ecosystem (Wagmi, Viem, RainbowKit)
-- **Future-Proof**: As Zilliqa EVM adoption grows, wallet support will improve automatically
+- **Minimal App Changes**: Integrates cleanly with existing React patterns
+- **Familiar User Experience**: Users can use their existing MetaMask, Coinbase Wallet, etc.
+- **No Architecture Overhaul**: Adds wallet functionality without changing your app structure
+- **Incremental Adoption**: Add wallet features to specific components as needed
+- **Testnet Development**: Test with real wallets on Zilliqa testnet
 
-### Additional Dependencies
-```json
-{
-  "@rainbow-me/rainbowkit": "^2.0.0",
-  "wagmi": "^2.0.0",
-  "viem": "^2.0.0",
-  "@tanstack/react-query": "^5.0.0"
-}
-```
+### Files You'll Add
+This integration adds these files to your existing project structure:
 
-## Project Structure
-
-A well-organized project structure makes wallet integration maintainable and scalable. This recommended structure separates concerns and follows React/Next.js best practices.
-
-```
-src/
-├── components/
-│   ├── WalletConnect.tsx           # Main wallet connection UI
-│   └── MockWalletSelector.tsx      # Mock wallet selector (optional)
-├── contexts/
-│   ├── WalletProvider.tsx          # Wallet state management
-│   ├── TransactionProvider.tsx     # Transaction operations
-│   └── AppConfig.tsx               # App configuration
-├── config/
-│   ├── chains.ts                   # Zilliqa chain configurations
-│   ├── wallets.ts                  # Supported wallet configurations
-│   └── contracts.ts                # Contract ABIs and addresses
-├── utils/
-│   ├── connector.ts                # Provider detection utilities
-│   └── formatting.ts               # Utility functions
-└── pages/
-    ├── _app.tsx                    # Provider hierarchy setup
-    └── api/
-        └── config.ts               # Environment configuration
-```
+- `config/zilliqa-chains.ts` - Network configurations
+- `config/wallet-config.ts` - Wallet connector setup
+- `contexts/WalletProvider.tsx` - Wallet state management (optional)
+- `utils/wallet-helpers.ts` - Helper functions
+- Updates to your existing `_app.tsx` or main app file
 
 ## Installation & Dependencies
 
-This section covers installing the required packages for wallet connectivity. We'll start with core dependencies and then add UI libraries based on your project needs.
+Add the required packages to your existing React/Next.js application. These packages integrate seamlessly with most existing setups.
 
-### 1. Install Core Packages
+### Install Required Packages
 
-These are the essential packages for wallet connectivity on Zilliqa:
+Add these wallet connectivity packages to your project:
 
 ```bash
 npm install @rainbow-me/rainbowkit wagmi viem @tanstack/react-query
 ```
 
-### 2. Install UI Dependencies
+**Compatibility Notes:**
+- Works with React 18+ and Next.js 13+
+- Compatible with existing UI libraries (no conflicts)
+- TanStack Query may already be in your project (that's fine)
+- TypeScript types are included
 
-Choose a UI library that fits your project. Examples shown use basic styling, but you can adapt to any framework:
+### CSS Imports (Required)
 
-```bash
-npm install antd @ant-design/icons
-```
+Add RainbowKit styles to your main CSS file or `_app.tsx`:
 
-### 3. Install Additional Utilities
-
-These packages provide helpful utilities for date/time handling and formatting:
-
-```bash
-npm install luxon
-npm install -D @types/luxon
+```css
+@import '@rainbow-me/rainbowkit/styles.css';
 ```
 
 ## Configuration Setup
 
-Proper configuration is crucial for wallet connectivity. This section sets up environment variables and API endpoints that your wallet integration will use.
+Add these configuration variables to your existing environment setup. This integrates with your current configuration approach.
 
-### 1. Environment Variables
+### Add Environment Variables
 
-Environment variables keep sensitive data secure and allow different configurations for development, staging, and production:
-
-Create your environment configuration in `.env.local`:
+Add these variables to your existing `.env.local` file:
 
 ```env
-NEXT_PUBLIC_CHAIN_ID=32769
+# Add these to your existing environment variables
+NEXT_PUBLIC_CHAIN_ID=33469
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Your_Zilliqa_App
 ```
 
-### 2. API Configuration Endpoint
+**Get WalletConnect Project ID:**
+1. Visit [WalletConnect Cloud](https://cloud.walletconnect.com/)
+2. Create a free account
+3. Create a new project
+4. Copy the Project ID
 
-This API endpoint provides configuration data to your frontend application, keeping sensitive keys on the server side:
+### Configuration in Your App
 
-Create `src/pages/api/config.ts`:
+You can access these variables in your components like any other environment variable:
 
 ```typescript
-import { NextApiRequest, NextApiResponse } from "next"
-
-export interface AppConfig {
-  chainId: number
-  walletConnectProjectId: string
-  appUrl: string
-  appName: string
-}
-
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<AppConfig>
-) {
-  const config: AppConfig = {
-    chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "32769"),
-    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
-    appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    appName: process.env.NEXT_PUBLIC_APP_NAME || "Zilliqa DApp",
-  }
-
-  res.status(200).json(config)
-}
+const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33469")
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
 ```
 
 ## Chain Configuration
@@ -223,23 +176,6 @@ export const ZILLIQA_DEVNET = defineChain({
   },
 })
 
-// Local development chain
-export const ZILLIQA_LOCAL = defineChain({
-  id: 32768,
-  name: "Zilliqa Local",
-  nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["http://localhost:4201"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Local Explorer",
-      url: "http://localhost:5100",
-    },
-  },
-})
 ```
 
 ### 2. Chain Selection Utilities
@@ -251,8 +187,7 @@ export function getChain(chainId: number) {
   const chains = [
     ZILLIQA_MAINNET,
     ZILLIQA_TESTNET,
-    ZILLIQA_PROTO_TESTNET,
-    ZILLIQA_LOCAL
+    ZILLIQA_DEVNET
   ]
   const chain = chains.find((chain) => chain.id === chainId)
 
@@ -268,8 +203,7 @@ export function getAllZilliqaChains() {
   return [
     ZILLIQA_MAINNET,
     ZILLIQA_TESTNET,
-    ZILLIQA_PROTO_TESTNET,
-    ZILLIQA_LOCAL
+    ZILLIQA_DEVNET
   ]
 }
 ```
@@ -488,68 +422,51 @@ export function getViemClient(chainId: number) {
 }
 ```
 
-## Provider Setup
+## Provider Integration
 
-### 1. App Provider Hierarchy
+Integrate wallet providers into your existing app structure. This works with your current provider setup.
 
-Update `src/pages/_app.tsx`:
+### Update Your Main App File
+
+Modify your existing `_app.tsx` (Next.js) or main app component (React) to add wallet providers:
 
 ```typescript
+// Add these imports to your existing _app.tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { WagmiProvider } from "wagmi"
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit"
-import { createWagmiConfig } from "@/config/chains"
-import { WalletProvider } from "@/contexts/WalletProvider"
-import type { AppProps } from "next/app"
-import { useEffect, useState } from "react"
-import type { AppConfig } from "./api/config"
+import { createWagmiConfig } from "@/config/zilliqa-chains" // You'll create this
+import '@rainbow-me/rainbowkit/styles.css'
 
+// Create QueryClient (or use existing one)
 const queryClient = new QueryClient()
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [appConfig, setAppConfig] = useState<AppConfig | null>(null)
-
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const res = await fetch("/api/config")
-        const data = await res.json()
-        setAppConfig(data)
-      } catch (error) {
-        console.error("Failed to load app config:", error)
-      }
-    }
-    fetchConfig()
-  }, [])
-
-  if (!appConfig) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div>Loading...</div>
-      </div>
-    )
-  }
+  // Your existing app logic here...
 
   const wagmiConfig = createWagmiConfig(
-    appConfig.chainId,
-    appConfig.walletConnectProjectId,
-    appConfig.appName,
-    appConfig.appUrl
+    parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33469"),
+    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
   )
 
   return (
-    <WagmiProvider config={wagmiConfig} reconnectOnMount={true}>
+    // Wrap your existing providers with wallet providers
+    <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider showRecentTransactions={true}>
-          <WalletProvider>
-            <Component {...pageProps} />
-          </WalletProvider>
+          {/* Your existing providers go here */}
+          <Component {...pageProps} />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
 }
 ```
+
+**Integration Notes:**
+- Add wallet providers **outside** your existing providers
+- Keep your existing routing, themes, and state management
+- QueryClient can be shared if you already use TanStack Query
 
 ### 2. Wallet State Management Context
 
@@ -565,53 +482,33 @@ import { createContainer } from "./context"
 
 export enum ConnectedWalletType {
   None,
-  MockWallet,
   RealWallet,
 }
 
 const useWalletConnector = () => {
   const walletAccount = useAccount()
-  const [isDummyWalletConnected, setIsDummyWalletConnected] = useState(false)
-  const [dummyWallet, setDummyWallet] = useState<any>(null)
 
-  const connectedWalletType = isDummyWalletConnected
-    ? ConnectedWalletType.MockWallet
-    : walletAccount.isConnected
-      ? ConnectedWalletType.RealWallet
-      : ConnectedWalletType.None
+  const connectedWalletType = walletAccount.isConnected
+    ? ConnectedWalletType.RealWallet
+    : ConnectedWalletType.None
 
-  const walletAddress = connectedWalletType === ConnectedWalletType.MockWallet
-    ? dummyWallet?.address
-    : connectedWalletType === ConnectedWalletType.RealWallet
-      ? walletAccount.address
-      : null
+  const walletAddress = connectedWalletType === ConnectedWalletType.RealWallet
+    ? walletAccount.address
+    : null
 
   const { data: balanceData, refetch: refetchBalance } = useBalance({
     address: walletAddress ? (walletAddress as Address) : undefined,
   })
 
-  const connectDummyWallet = () => {
-    // Mock wallet connection logic
-  }
-
-  const disconnectDummyWallet = () => {
-    setIsDummyWalletConnected(false)
-    setDummyWallet(null)
-  }
-
   const updateWalletBalance = () => {
-    if (!isDummyWalletConnected) {
-      refetchBalance()
-    }
+    refetchBalance()
   }
 
   return {
-    isWalletConnected: walletAccount.isConnected || isDummyWalletConnected,
+    isWalletConnected: walletAccount.isConnected,
     connectedWalletType,
     walletAddress,
-    zilAvailable: balanceData?.value || dummyWallet?.balance,
-    connectDummyWallet,
-    disconnectDummyWallet,
+    zilAvailable: balanceData?.value,
     updateWalletBalance,
   }
 }
@@ -638,6 +535,28 @@ export function createContainer<T>(useHook: () => T) {
   return { Provider, useContainer }
 }
 ```
+
+## Development and Testing
+
+For development and testing, use the Zilliqa testnet instead of mock wallet systems. This approach provides:
+
+- **Real Blockchain Interaction**: Test with actual blockchain behavior
+- **Authentic User Experience**: Users interact with real wallets and transactions
+- **Simplified Development**: No need to maintain complex mock systems
+- **Better Integration Testing**: Catch integration issues early
+
+### Getting Testnet ZIL
+
+1. **Faucet**: Use the [Zilliqa testnet faucet](https://dev.zilliqa.com/faucet) to get testnet ZIL
+2. **MetaMask Setup**: Add Zilliqa testnet to MetaMask using the chain configuration provided in this guide
+3. **Multiple Accounts**: Create multiple MetaMask accounts to test different scenarios
+
+### Testnet Development Benefits
+
+- **Real Gas Estimation**: Accurate gas calculations
+- **Actual Network Latency**: Test with real network conditions
+- **Wallet Integration**: Test with actual wallet implementations
+- **Error Handling**: Experience real blockchain errors
 
 ## Transaction Management
 
@@ -678,19 +597,11 @@ const useTransaction = (
     setIsTxInPreparation(true)
     setTxHash(undefined)
 
-    if (isDummyWalletConnected) {
-      // Mock transaction simulation
-      setTimeout(() => {
-        setTxHash("0x1234567890234567890234567890234567890" as Address)
-        setIsTxInPreparation(false)
-      }, 2000)
-    } else {
-      try {
-        writeContract(txCallParams)
-      } catch (error) {
-        console.error("Transaction failed:", error)
-        setIsTxInPreparation(false)
-      }
+    try {
+      writeContract(txCallParams)
+    } catch (error) {
+      console.error("Transaction failed:", error)
+      setIsTxInPreparation(false)
     }
   }
 
@@ -718,7 +629,7 @@ const useTransaction = (
 
   return {
     isTxInPreparation: isTxInPreparation || txSubmissionStatus === "pending",
-    isTxProcessedByChain: isTxProcessedByChain && !isDummyWalletConnected,
+    isTxProcessedByChain,
     txHash,
     txContractError,
     callContract,
@@ -800,307 +711,96 @@ const sendZIL = (to: string, amount: bigint) => {
 }
 ```
 
-## Mock Wallet System
 
-The mock wallet system enables development and testing without requiring real wallets or testnet tokens. This is essential for rapid development and automated testing.
 
-### 1. Mock Wallet Definitions (Optional)
+## Integration Examples
 
-Define various wallet scenarios for testing different user conditions:
+Here's how to add wallet functionality to your existing components and features.
 
-Create `src/config/mock-wallets.ts`:
+### Adding Wallet Connection to Existing Components
+
+Integrate wallet connection into your existing navigation or header:
 
 ```typescript
-export interface MockWallet {
-  id: string
-  name: string
-  address: string
-  balance: bigint
-  description: string
-}
+// In your existing Header/Navigation component
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
-export const mockWallets: MockWallet[] = [
-  {
-    id: "wallet-1",
-    name: "Developer Wallet",
-    address: "0x1234567890123456789012345678901234567890",
-    balance: BigInt("1000000000000000000000"), // 1000 ZIL
-    description: "High balance for testing large transactions",
-  },
-  {
-    id: "wallet-2",
-    name: "User Wallet",
-    address: "0x0987654321098765432109876543210987654321",
-    balance: BigInt("100000000000000000000"), // 100 ZIL
-    description: "Medium balance for typical user scenarios",
-  },
-  {
-    id: "wallet-3",
-    name: "Low Balance Wallet",
-    address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-    balance: BigInt("1000000000000000000"), // 1 ZIL
-    description: "Low balance for testing insufficient funds",
-  },
-]
+function YourExistingHeader() {
+  return (
+    <header className="your-existing-classes">
+      {/* Your existing navigation */}
+      <nav>...</nav>
+
+      {/* Add wallet connection */}
+      <ConnectButton />
+    </header>
+  )
+}
 ```
 
-### 2. Mock Wallet Selector Component
+### Adding Wallet State to Existing Features
 
-This component allows developers to quickly switch between different mock wallet scenarios during development:
+Use wallet data in your existing components:
 
 ```typescript
-import { mockWallets } from "@/config/mock-wallets"
+// In any existing component
+import { useAccount, useBalance } from 'wagmi'
 
-const MockWalletSelector = () => {
-  const {
-    isMockWalletSelectorOpen,
-    selectMockWallet,
-    setIsMockWalletSelectorOpen
-  } = WalletProvider.useContainer()
+function YourExistingComponent() {
+  const { address, isConnected } = useAccount()
+  const { data: balance } = useBalance({ address })
+
+  // Your existing component logic...
 
   return (
-    <div className="modal" style={{ display: isMockWalletSelectorOpen ? 'block' : 'none' }}>
-      <div className="modal-content">
-        <h3>Select Mock Wallet</h3>
-        <div className="wallet-list">
-          {mockWallets.map((wallet) => (
-            <div
-              key={wallet.id}
-              className="wallet-item"
-              onClick={() => selectMockWallet(wallet)}
-              style={{ cursor: "pointer", padding: "10px", border: "1px solid #ccc", margin: "5px" }}
-            >
-              <div className="wallet-name">{wallet.name}</div>
-              <div className="wallet-balance">
-                {(Number(wallet.balance) / 1e18).toFixed(2)} ZIL
-              </div>
-              <div className="wallet-description">{wallet.description}</div>
-            </div>
-          ))}
+    <div className="your-existing-component">
+      {/* Your existing content */}
+
+      {/* Add wallet-aware features */}
+      {isConnected && (
+        <div className="wallet-info">
+          <p>Connected: {address}</p>
+          <p>Balance: {balance?.formatted} ZIL</p>
         </div>
-        <button onClick={() => setIsMockWalletSelectorOpen(false)}>
-          Cancel
-        </button>
-      </div>
+      )}
     </div>
   )
 }
 ```
 
-## UI Components
+### Adding Transaction Features to Existing Actions
 
-UI components provide the user interface for wallet interactions. These components handle the complex logic of wallet states while presenting a clean interface to users.
-
-### 1. Wallet Connect Component
-
-The main wallet connection component handles different wallet states and provides appropriate UI for each:
-
-Create `src/components/customWalletConnect.tsx`:
+Extend existing user actions with blockchain transactions:
 
 ```typescript
-import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { Button } from "antd"
-import { WalletOutlined } from "@ant-design/icons"
+// In your existing component with user actions
+import { useWriteContract } from 'wagmi'
 
-interface CustomWalletConnectProps {
-  children: React.ReactNode
-  notConnectedClassName: string
-}
+function YourExistingActionComponent() {
+  const { writeContract } = useWriteContract()
 
-const CustomWalletConnect: React.FC<CustomWalletConnectProps> = ({
-  children,
-  notConnectedClassName,
-}) => {
-  const { appConfig } = AppConfigStorage.useContainer()
-  const {
-    isDummyWalletConnecting,
-    connectDummyWallet,
-    disconnectDummyWallet,
-    isDummyWalletConnected,
-    walletAddress,
-    zilAvailable,
-  } = WalletConnector.useContainer()
+  const handleExistingAction = async () => {
+    // Your existing logic...
 
-  // Mock chain handling
-  if (appConfig.chainId === MOCK_CHAIN.id) {
-    if (!isDummyWalletConnected) {
-      return (
-        <Button
-          type="primary"
-          onClick={connectDummyWallet}
-          loading={isDummyWalletConnecting}
-          className={notConnectedClassName}
-        >
-          {children}
-        </Button>
-      )
-    } else {
-      return (
-        <Button
-          type="primary"
-          className="group relative"
-          onClick={disconnectDummyWallet}
-        >
-          <div className="group-hover:hidden flex items-center">
-            <WalletOutlined className="mr-2" />
-            {formatAddress(walletAddress || "")} |{" "}
-            {formatUnits(zilAvailable || 0n, 18)} ZIL
-          </div>
-          <span className="hidden group-hover:block">
-            Disconnect
-          </span>
-        </Button>
-      )
+    // Add blockchain transaction
+    if (shouldInteractWithBlockchain) {
+      writeContract({
+        address: '0x...', // Your contract address
+        abi: yourContractAbi,
+        functionName: 'yourFunction',
+        args: [/* your args */]
+      })
     }
   }
 
-  // Real wallet handling
   return (
-    <ConnectButton.Custom>
-      {({ account, chain, openConnectModal, mounted }) => {
-        if (!mounted) {
-          return <Button className={notConnectedClassName}>Loading...</Button>
-        }
-
-        if (!account || !chain) {
-          return (
-            <Button
-              onClick={openConnectModal}
-              className={notConnectedClassName}
-            >
-              {children}
-            </Button>
-          )
-        }
-
-        return (
-          <div className="flex justify-end items-center">
-            <ConnectButton />
-          </div>
-        )
-      }}
-    </ConnectButton.Custom>
+    <div className="your-existing-component">
+      {/* Your existing UI */}
+      <button onClick={handleExistingAction}>
+        Your Existing Action
+      </button>
+    </div>
   )
-}
-```
-
-### 2. Transaction Status Display
-
-This component provides real-time feedback on transaction status, keeping users informed during the transaction lifecycle:
-
-```typescript
-const TransactionStatus = ({
-  isPreparation,
-  isProcessing,
-  txHash,
-  error
-}) => {
-  if (isPreparation) {
-    return <span>⏳ Preparing transaction...</span>
-  }
-
-  if (isProcessing) {
-    return <span>🔄 Processing transaction...</span>
-  }
-
-  if (error) {
-    return <span>❌ Transaction failed: {error.message}</span>
-  }
-
-  if (txHash) {
-    return <span>✅ Transaction successful!</span>
-  }
-
-  return null
-}
-```
-
-## Advanced Features
-
-Advanced features enhance the user experience and provide additional functionality for sophisticated applications. Implement these based on your specific requirements.
-
-### 1. Multiple Chain Support
-
-Enable users to switch between different Zilliqa networks (mainnet, testnet, etc.):
-
-```typescript
-const chains = [
-  CHAIN_MAINNET,
-  CHAIN_DEVNET,
-  CHAIN_TESTNET,
-  MOCK_CHAIN
-]
-
-export function getWagmiConfig(chainId: number, ...) {
-  const selectedChain = getChain(chainId)
-
-  return createConfig({
-    chains: [selectedChain],
-    // ... other config
-  })
-}
-```
-
-### 2. Network Switching
-
-Provide UI for users to switch between different networks:
-
-```typescript
-import { useSwitchChain } from "wagmi"
-
-const NetworkSwitcher = () => {
-  const { switchChain } = useSwitchChain()
-
-  const handleNetworkSwitch = (chainId: number) => {
-    switchChain({ chainId })
-  }
-
-  return (
-    <Select onChange={handleNetworkSwitch}>
-      <Option value={32769}>Mainnet</Option>
-      <Option value={33469}>Devnet</Option>
-    </Select>
-  )
-}
-```
-
-### 3. Transaction History
-
-Track and display user transaction history for better UX:
-
-```typescript
-const useTransactionHistory = () => {
-  const [transactions, setTransactions] = useState([])
-
-  const addTransaction = (tx: Transaction) => {
-    setTransactions(prev => [tx, ...prev])
-  }
-
-  const updateTransaction = (txHash: string, update: Partial<Transaction>) => {
-    setTransactions(prev =>
-      prev.map(tx =>
-        tx.hash === txHash ? { ...tx, ...update } : tx
-      )
-    )
-  }
-
-  return { transactions, addTransaction, updateTransaction }
-}
-```
-
-### 4. Deep Linking for Mobile Wallets
-
-Enable direct mobile wallet integration through deep links:
-
-```typescript
-const getDeepLink = (uri: string, walletType: string) => {
-  const links = {
-    zilpay: `zilpay://wc?uri=${encodeURIComponent(uri)}`,
-    metamask: `metamask://wc?uri=${encodeURIComponent(uri)}`,
-    trust: `trust://wc?uri=${encodeURIComponent(uri)}`,
-  }
-
-  return links[walletType] || uri
 }
 ```
 
@@ -1116,22 +816,13 @@ Comprehensive error handling prevents user confusion and provides actionable fee
 const handleTransactionError = (error: any) => {
   if (error.code === 4001) {
     // User rejected transaction
-    notification.warning({
-      message: "Transaction Cancelled",
-      description: "You cancelled the transaction.",
-    })
+    console.warn("Transaction Cancelled: You cancelled the transaction.")
   } else if (error.code === -32000) {
     // Insufficient funds
-    notification.error({
-      message: "Insufficient Funds",
-      description: "You don't have enough balance for this transaction.",
-    })
+    console.error("Insufficient Funds: You don't have enough balance for this transaction.")
   } else {
     // Generic error
-    notification.error({
-      message: "Transaction Failed",
-      description: "An unexpected error occurred. Please try again.",
-    })
+    console.error("Transaction Failed: An unexpected error occurred. Please try again.")
   }
 }
 ```
@@ -1346,32 +1037,33 @@ const usePerformanceMonitor = () => {
 }
 ```
 
-## Quick Start Checklist
+## Quick Integration Checklist
 
-### 1. Environment Setup
-- [ ] Install dependencies: RainbowKit, Wagmi, Viem
-- [ ] Set up environment variables
-- [ ] Configure WalletConnect project ID
+### 1. Prerequisites Check
+- [ ] React 18+ or Next.js 13+ app running
+- [ ] TypeScript configured (recommended)
+- [ ] Access to modify your main app file
 
-### 2. Chain Configuration
-- [ ] Define Zilliqa chain configurations
-- [ ] Set up Wagmi config with chain selection
-- [ ] Configure RPC endpoints
+### 2. Package Installation
+- [ ] Install RainbowKit, Wagmi, Viem packages
+- [ ] Add RainbowKit CSS import
+- [ ] Get WalletConnect Project ID
 
-### 3. Wallet Integration
-- [ ] Configure primary EVM wallets (MetaMask, WalletConnect, Coinbase)
-- [ ] Test wallet connection flow with standard wallets
-- [ ] Optionally add ZilPay for enhanced Zilliqa features
+### 3. Configuration
+- [ ] Add environment variables to existing `.env.local`
+- [ ] Create Zilliqa chain configuration file
+- [ ] Set up wallet connectors
 
-### 4. Transaction Management
-- [ ] Implement transaction hooks
-- [ ] Add error handling
-- [ ] Set up gas estimation
+### 4. Provider Integration
+- [ ] Add wallet providers to your existing `_app.tsx`
+- [ ] Test basic wallet connection
+- [ ] Verify integration with existing app flow
 
-### 5. UI Components
-- [ ] Create wallet connect button
-- [ ] Add transaction status display
-- [ ] Implement responsive design
+### 5. Feature Integration
+- [ ] Add ConnectButton to existing components
+- [ ] Use wallet hooks in existing features
+- [ ] Test on Zilliqa testnet
+
 
 ## Example Zilliqa DApp Use Cases
 
@@ -1486,29 +1178,30 @@ const bridgeTokens = (targetChain: number, amount: bigint) => {
 
 ## Conclusion
 
-This guide provides a complete foundation for implementing wallet connectivity for Zilliqa EVM applications. The architecture prioritizes:
+This guide shows you how to **extend your existing React/Next.js application** with Zilliqa wallet functionality using minimal changes to your current architecture.
 
-- **EVM-First Approach**: Leverage the broader Web3 wallet ecosystem
-- **Standard Web3 UX**: Familiar wallet connection flows for users
-- **Mobile Support**: WalletConnect enables mobile wallet integration
-- **Production Ready**: Type-safe transactions with comprehensive error handling
-- **Broad Compatibility**: Support for all major EVM wallets
-- **Optional Enhancement**: ZilPay for Zilliqa-specific features
+### Integration Benefits:
+- **Non-Disruptive**: Works with your existing app structure
+- **Incremental**: Add wallet features where needed
+- **Familiar Patterns**: Uses standard React hooks and components
+- **Testnet Ready**: Test with real wallets immediately
+- **Production Safe**: Type-safe with comprehensive error handling
 
-### Key Benefits of EVM-First Strategy:
-- **Larger User Base**: Most Web3 users already have MetaMask/Coinbase Wallet
-- **Reduced Friction**: No need to install new wallets
-- **Better Mobile Support**: WalletConnect works with many mobile wallets
-- **Future-Proof**: As Zilliqa EVM grows, standard wallets will add native support
+### What You've Added:
+- Zilliqa network connectivity
+- EVM wallet support (MetaMask, WalletConnect, etc.)
+- Transaction capabilities
+- Balance checking
+- Network switching
 
-The EVM-first implementation patterns shown here can be adapted for any Zilliqa application, from simple token transfers to complex DeFi protocols, NFT marketplaces, and gaming platforms.
+### Next Steps:
+1. **Start Small**: Add ConnectButton to one component
+2. **Test Integration**: Verify wallet connection works with your app
+3. **Expand Features**: Add wallet functionality to existing user flows
+4. **Deploy to Testnet**: Test with real users before mainnet
+5. **Monitor Usage**: Track which wallet features users prefer
 
-### Next Steps
-1. Start with basic MetaMask + WalletConnect integration
-2. Test thoroughly on Zilliqa testnet
-3. Add additional EVM wallets based on user demand
-4. Consider ZilPay only if you need Zilliqa-specific functionality
-5. Monitor wallet usage analytics to optimize your wallet selection
+Your existing application now has full Zilliqa wallet integration without architectural changes.
 
 ### Resources
 - [Zilliqa EVM Documentation](https://dev.zilliqa.com/)

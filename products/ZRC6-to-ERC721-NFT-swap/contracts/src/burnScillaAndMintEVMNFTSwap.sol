@@ -37,7 +37,7 @@ contract BurnScillaAndMintEVMNFTSwap is
     // Events
     event NFTSwapped(
         address indexed evmWallet,
-        address indexed zilPayAddress,
+        string zilPayAddress,
         uint256[] tokenIds
     );
 
@@ -45,15 +45,16 @@ contract BurnScillaAndMintEVMNFTSwap is
     address public scillaNFTAddress;
     address public evmNFTAddress;
     
-    // Mapping to track used signatures to prevent replay attacks
-    mapping(bytes32 => bool) public usedSignatures;
-    
+    // Mapping to link Scilla ZRC-6 token IDs to EVM ERC-721 token IDs
+    mapping(uint256 => uint256) private nftSwapMapping;
+
     // Custom errors
     error InvalidSignature();
-    error SignatureAlreadyUsed();
     error InvalidTokenIdsLength();
     error ZeroAddress();
     error AlreadyInitialized();
+    error InvalidMapping();
+    error InvalidLength();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -89,28 +90,28 @@ contract BurnScillaAndMintEVMNFTSwap is
 
     /**
      * @dev Swaps ZRC6 NFTs for ERC721 NFTs by burning ZRC6 tokens and minting corresponding ERC721 tokens
-     * @param zilPayAddress The ZilPay wallet address that currently owns the Scilla NFTs
+     * @param scillaAddress The ZilPay wallet address that currently owns the Scilla NFTs
+     * @param scillaNftIdsToSwap List of NFT IDs to be burned and swapped
      * @param signature Signature proving ownership of the ZilPay address, signed with ZilPay
-     * @param tokenIds List of NFT IDs to be burned and swapped
      * 
      * Requirements:
      * - Contract must not be paused
-     * - tokenIds array must not be empty
-     * - signature must be valid and not previously used
-     * - All specified NFTs must be owned by the zilPayAddress on the Scilla side
+     * - scillaNftIdsToSwap array must not be empty
+     * - signature must be valid
+     * - All specified NFTs must have a mapping
+     * - All specified NFTs must be owned by the scillaAddress on the Scilla side
      * 
      * Effects:
      * - Burns all specified NFTs on the Scilla NFT collection (sets owner to zero address)
      * - Mints corresponding NFTs on the EVM NFT collection to the caller's address
-     * - Marks the signature as used to prevent replay attacks
      */
     function swapZRC6NFTForErc721NFTByByrningZRC6(
-        address zilPayAddress,
-        bytes memory signature,
-        uint256[] memory tokenIds
+        string memory scillaAddress,
+        uint256[] memory scillaNftIdsToSwap,
+        bytes memory signature
     ) external nonReentrant whenNotPaused {
         // Input validation
-        if (tokenIds.length == 0) {
+        if (scillaNftIdsToSwap.length == 0) {
             revert InvalidTokenIdsLength();
         }
         
@@ -120,32 +121,34 @@ contract BurnScillaAndMintEVMNFTSwap is
         }
         
         // Create message hash for signature verification
-        bytes32 messageHash = keccak256(abi.encodePacked(zilPayAddress, msg.sender, block.chainid));
+        bytes32 messageHash = keccak256(abi.encodePacked(msg.sender));
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
-        
-        // Check if signature was already used
-        if (usedSignatures[ethSignedMessageHash]) {
-            revert SignatureAlreadyUsed();
-        }
         
         // Verify signature
         address recoveredAddress = ethSignedMessageHash.recover(signature);
-        if (recoveredAddress != zilPayAddress) {
+        if (keccak256(abi.encodePacked(recoveredAddress)) != keccak256(abi.encodePacked(scillaAddress))) {
             revert InvalidSignature();
         }
         
-        // Mark signature as used
-        usedSignatures[ethSignedMessageHash] = true;
+        // Mapping check
+        for (uint256 i = 0; i < scillaNftIdsToSwap.length; i++) {
+            if (nftSwapMapping[scillaNftIdsToSwap[i]] == 0) {
+                revert InvalidMapping();
+            }
+        }
         
         // TODO: Implement Zilliqa interop call to burn ZRC6 NFTs
         // This would involve calling the Scilla contract to transfer ownership to zero address
-        _burnScillaNFTs(zilPayAddress, tokenIds);
+        _burnScillaNFTs(scillaAddress, scillaNftIdsToSwap);
         
-        // TODO: Implement minting of ERC721 NFTs
-        // This would involve calling the EVM NFT contract to mint tokens to msg.sender
-        _mintEvmNFTs(msg.sender, tokenIds);
+        // Transfer corresponding ERC721 NFTs
+        uint256[] memory mappedIds = new uint256[](scillaNftIdsToSwap.length);
+        for (uint256 i = 0; i < scillaNftIdsToSwap.length; i++) {
+            mappedIds[i] = nftSwapMapping[scillaNftIdsToSwap[i]];
+        }
+        _transferEvmNFTs(msg.sender, mappedIds);
         
-        emit NFTSwapped(msg.sender, zilPayAddress, tokenIds);
+        emit NFTSwapped(msg.sender, scillaAddress, scillaNftIdsToSwap);
     }
 
     /**
@@ -156,14 +159,9 @@ contract BurnScillaAndMintEVMNFTSwap is
      * NOTE: This is a placeholder implementation. The actual implementation would use
      * Zilliqa interop to call the Scilla contract methods.
      */
-    function _burnScillaNFTs(address owner, uint256[] memory tokenIds) internal {
-        // TODO: Implement actual Zilliqa interop call
-        // This would involve:
-        // 1. Calling the Scilla contract through interop
-        // 2. Verifying ownership of tokens
-        // 3. Transferring ownership to zero address
-        
-        // Placeholder - in actual implementation this would be an interop call
+    function _burnScillaNFTs(string memory owner, uint256[] memory tokenIds) internal {
+        // TODO: Implement Zilliqa interop call to burn ZRC6 NFTs
+        // Verify ownership of tokens
         // Example: ScillaContract(scillaNFTAddress).burnTokens(owner, tokenIds);
     }
 
@@ -175,7 +173,7 @@ contract BurnScillaAndMintEVMNFTSwap is
      * NOTE: This is a placeholder implementation. The actual implementation would call
      * the EVM NFT contract's minting function.
      */
-    function _mintEvmNFTs(address to, uint256[] memory tokenIds) internal {
+    function _transferEvmNFTs(address to, uint256[] memory tokenIds) internal {
         // TODO: Implement actual EVM NFT minting
         // This would involve calling the EVM NFT contract's mint function
         // The contract should have this contract address as an authorized minter
@@ -215,44 +213,25 @@ contract BurnScillaAndMintEVMNFTSwap is
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /**
-     * @dev Updates the Scilla NFT contract address
-     * @param _scillaNFTAddress New Scilla NFT contract address
-     * 
-     * Requirements:
-     * - Only callable by owner
-     * - New address cannot be zero address
+     * @dev Sets the NFT swap mapping for a single pair
+     * @param scillaId The Scilla NFT ID
+     * @param evmId The corresponding EVM NFT ID
      */
-    function setScillaNFTAddress(address _scillaNFTAddress) external onlyOwner {
-        if (_scillaNFTAddress == address(0)) {
-            revert ZeroAddress();
-        }
-        scillaNFTAddress = _scillaNFTAddress;
+    function setNftSwapMapping(uint256 scillaId, uint256 evmId) external onlyOwner {
+        nftSwapMapping[scillaId] = evmId;
     }
 
     /**
-     * @dev Updates the EVM NFT contract address
-     * @param _evmNFTAddress New EVM NFT contract address
-     * 
-     * Requirements:
-     * - Only callable by owner
-     * - New address cannot be zero address
+     * @dev Sets multiple NFT swap mappings
+     * @param scillaIds Array of Scilla NFT IDs
+     * @param evmIds Array of corresponding EVM NFT IDs
      */
-    function setEvmNFTAddress(address _evmNFTAddress) external onlyOwner {
-        if (_evmNFTAddress == address(0)) {
-            revert ZeroAddress();
+    function setNftSwapMappings(uint256[] memory scillaIds, uint256[] memory evmIds) external onlyOwner {
+        if (scillaIds.length != evmIds.length) {
+            revert InvalidLength();
         }
-        evmNFTAddress = _evmNFTAddress;
-    }
-
-    /**
-     * @dev Checks if a signature has been used
-     * @param zilPayAddress The ZilPay address
-     * @param evmAddress The EVM address
-     * @return bool True if signature has been used
-     */
-    function isSignatureUsed(address zilPayAddress, address evmAddress) external view returns (bool) {
-        bytes32 messageHash = keccak256(abi.encodePacked(zilPayAddress, evmAddress, block.chainid));
-        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
-        return usedSignatures[ethSignedMessageHash];
+        for (uint256 i = 0; i < scillaIds.length; i++) {
+            nftSwapMapping[scillaIds[i]] = evmIds[i];
+        }
     }
 }

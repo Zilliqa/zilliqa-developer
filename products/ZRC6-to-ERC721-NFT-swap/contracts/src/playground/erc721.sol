@@ -398,6 +398,24 @@ contract NFToken
   }
 
   /**
+   * @notice Mints multiple new NFTs to the specified address. Only authorized minters can call this function.
+   * @dev Mints new NFTs to `_to` with token IDs from `_tokenIds`.
+   * @param _to The address that will receive the minted NFTs.
+   * @param _tokenIds The array of token IDs of the NFTs to be minted.
+   */
+  function batchMint(
+    address _to,
+    uint256[] memory _tokenIds
+  )
+    external
+    onlyMinter
+  {
+    for (uint256 i = 0; i < _tokenIds.length; i++) {
+      _mint(_to, _tokenIds[i]);
+    }
+  }
+
+  /**
    * @dev Adds a new authorized minter. Only the contract owner can call this function.
    * @param _minter The address to be added as an authorized minter.
    */
