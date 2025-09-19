@@ -44,7 +44,7 @@ This is the primary function for users to execute the NFT swap.
      * After authenticating the signature, the contract must use the Zilliqa interop layer to confirm that the scilla\_address is the actual owner of all NFTs in the scilla\_nft\_ids\_to\_swap array. If the ownership check fails for any NFT, the transaction must revert.  
   2. **Mapping Check:** For each ID in scilla\_nft\_ids\_to\_swap, the contract must verify that a corresponding mapping to an ERC-721 ID exists in nftSwapMapping. If any ID is not found, the transaction must revert.  
   3. **Burn Operation:** The contract will use the Zilliqa interoperability layer to call the burn (or equivalent) function on the scillaNFTCollectionAddress for each token ID in scilla\_nft\_ids\_to\_swap.  
-  4. **Mint/Transfer Operation:** Upon successful completion of the burn, the contract will transfer the corresponding ERC-721 NFTs (retrieved from nftSwapMapping) to the msg.sender (the caller's EVM wallet address).  
+  4. **Transfer Operation:** Upon successful completion of the burn, the contract will transfer the corresponding ERC-721 NFTs (retrieved from nftSwapMapping) to the msg.sender (the caller's EVM wallet address).  
 * **Effects of a Successful Call:**  
   1. The ownership of all specified ZRC-6 NFTs on the Scilla collection is transferred to the zero address (or otherwise designated as burned).  
   2. The ownership of all corresponding ERC-721 NFTs on the EVM collection is transferred to the msg.sender.
@@ -55,7 +55,7 @@ This is a privileged function for the contract owner to manage the NFT swap mapp
 
 * **Access Control:** This function must be restricted so that only the contract owner or an authorized administrator can call it.  
 * **Purpose:** To add, update, or remove entries in the nftSwapMapping.  
-* **Suggested Parameters:**  
+* **Parameters:**  
   * scillaTokenIds (uint256\[\]): An array of ZRC-6 token IDs.  
   * erc721TokenIds (uint256\[\]): An array of corresponding ERC-721 token IDs.  
 * **Logic:** The function will iterate through the provided arrays and update the nftSwapMapping accordingly. It should ensure that the input arrays have the same length.

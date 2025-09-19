@@ -27,9 +27,34 @@ This application follows the **EVM-first approach** recommended in the Zilliqa W
 2. User connects EVM wallet (Zilliqa EVM network)
 3. Application checks ZRC6 token balance
 4. User selects ZRC6 tokens to swap for ERC721 NFTs
-5. User approves the swap contract as spender using ZilPay
-6. User calls swap function using EVM wallet
-7. ERC721 NFT is minted to user's EVM address
+5. User signs the EVM wallet address using ZilPay wallet to create a `signature` parameter for `burnScillaAndMintEVMNFTSwap` function
+6. User calls `swapZRC6NFTForErc721NFTByByrningZRC6` function on `burnScillaAndMintEVMNFTSwap` using EVM wallet
+7. The user is informed about the outcome
+
+## Technical Implementation
+
+### Signature Creation (Step 5)
+The application uses ZilPay's signing functionality to create a cryptographic signature of the EVM wallet address. This signature proves ownership of both the ZilPay and EVM wallets:
+
+```typescript
+// Create signature using ZilPay
+const signature = await createEvmAddressSignature(evmAddress)
+
+// The signature is created by signing: keccak256(abi.encodePacked(evmAddress))
+```
+
+### Contract Interaction (Step 6)
+The signature is passed to the smart contract along with the ZilPay address and token IDs:
+
+```solidity
+function swapZRC6NFTForErc721NFTByByrningZRC6(
+    string memory scillaAddress,    // ZilPay wallet address
+    uint256[] memory scillaNftIdsToSwap, // Token IDs to swap
+    bytes memory signature          // Proof of ownership
+) external nonReentrant whenNotPaused
+```
+
+The contract verifies the signature and ensures the signer owns both wallets before proceeding with the swap.
 
 ## Getting Started
 

@@ -3,6 +3,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useWallet } from '@/context/WalletContext';
 import CustomWalletConnect from '@/components/CustomWalletConnect';
 import MockWalletSelector from '@/components/MockWalletSelector';
+import SwapComponent from '@/components/SwapComponent';
 import { formatAddress, formatZIL } from '@/utils/formatting';
 
 const geistSans = Geist({
@@ -205,14 +206,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <button
-                  className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-lg"
-                  onClick={() => {
-                    alert('NFT swap functionality will be implemented here!\n\nThis will include:\n- ZRC6 token selection\n- NFT metadata configuration\n- Cross-network transaction coordination\n- Confirmation and status tracking');
-                  }}
-                >
-                  Start NFT Swap
-                </button>
+                <SwapComponent />
               </div>
             )}
 

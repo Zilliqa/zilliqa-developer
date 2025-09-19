@@ -22,6 +22,7 @@ declare global {
           base16: string;
         } | null;
         connect: () => Promise<boolean>;
+        signMessage?: (message: Uint8Array) => Promise<string>;
       };
     };
   }
