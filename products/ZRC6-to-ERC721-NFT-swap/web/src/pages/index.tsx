@@ -4,6 +4,7 @@ import { useWallet } from '@/context/WalletContext';
 import CustomWalletConnect from '@/components/CustomWalletConnect';
 import SwapComponent from '@/components/SwapComponent';
 import MintNFTComponent from '@/components/MintNFTComponent';
+import OwnedNFTs from '@/components/OwnedNFTs';
 import { formatAddress } from '@/utils/formatting';
 
 const geistSans = Geist({
@@ -71,6 +72,9 @@ export default function Home() {
 
                   {/* Mint NFT Component */}
                   <MintNFTComponent zilPayAccount={zilPayAccount || ''} />
+
+                  {/* Owned NFTs Component */}
+                  <OwnedNFTs zilPayAccount={zilPayAccount || ''} />
                 </div>
               ) : (
                 <div className="space-y-3">
