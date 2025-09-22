@@ -35,7 +35,7 @@ contract DeployBurnScillaAndMintEVMNFTSwap is Script {
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
         console.log("Proxy deployed to:", address(proxy));
         
-        // Cast the proxy to the contract interface
+        // // Cast the proxy to the contract interface
         BurnScillaAndMintEVMNFTSwap swapContract = BurnScillaAndMintEVMNFTSwap(address(proxy));
         
         console.log("BurnScillaAndMintEVMNFTSwap contract deployed at:", address(swapContract));
