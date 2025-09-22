@@ -41,24 +41,11 @@ const useTransactionProvider = () => {
     setIsTxInPreparation(true)
     setTxHash(undefined)
 
-    if (connectedWalletType === ConnectedWalletType.MockWallet) {
-      // Mock transaction simulation
-      setTimeout(() => {
-        const mockTxHash = `0x${Math.random().toString(16).slice(2).padStart(64, '0')}` as Address
-        setTxHash(mockTxHash)
-        setIsTxInPreparation(false)
-        console.log(successMessage, { txHash: mockTxHash })
-        if (onSuccess) {
-          setTimeout(onSuccess, 1000) // Simulate block confirmation delay
-        }
-      }, 2000)
-    } else {
-      try {
-        writeContract(txCallParams)
-      } catch (error) {
-        console.error(errorMessage, error)
-        setIsTxInPreparation(false)
-      }
+    try {
+      writeContract(txCallParams)
+    } catch (error) {
+      console.error(errorMessage, error)
+      setIsTxInPreparation(false)
     }
   }, [connectedWalletType, writeContract])
 
@@ -130,7 +117,7 @@ const useTransactionProvider = () => {
   return {
     // Transaction state
     isTxInPreparation: isTxInPreparation || txSubmissionStatus === "pending",
-    isTxProcessedByChain: isTxProcessedByChain && connectedWalletType !== ConnectedWalletType.MockWallet,
+    isTxProcessedByChain: isTxProcessedByChain,
     txHash,
     txContractError,
     txSubmissionError,

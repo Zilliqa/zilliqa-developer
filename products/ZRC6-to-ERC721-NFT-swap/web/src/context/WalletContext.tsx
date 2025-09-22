@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react"
 import { useAccount, useBalance } from "wagmi"
 import { Address } from "viem"
 import { createContainer } from "../utils/context"
-import { mockWallets, MockWallet } from "../config/mock-wallets"
 import { formatAddress } from "../utils/formatting"
 
 export enum ConnectedWalletType {
@@ -22,6 +21,28 @@ declare global {
         } | null;
         connect: () => Promise<boolean>;
         signMessage?: (message: Uint8Array) => Promise<string>;
+      };
+      contracts?: {
+        at: (address: string) => {
+          call: (transition: string, params: unknown[], options: {
+            amount: unknown;
+            gasPrice: unknown;
+            gasLimit: unknown;
+          }) => Promise<{ ID: string } | null>;
+          error?: unknown;
+        };
+      };
+      utils?: {
+        units: {
+          toQa: (amount: string, unit: unknown) => unknown;
+          Units: {
+            Zil: unknown;
+            Li: unknown;
+          };
+        };
+        Long: {
+          fromNumber: (num: number) => unknown;
+        };
       };
     };
   }

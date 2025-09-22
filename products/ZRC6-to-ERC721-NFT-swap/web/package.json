@@ -8,10 +8,17 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.5.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.87.0",
+    "@zilliqa-js/account": "^3.5.2",
+    "@zilliqa-js/blockchain": "^3.5.0",
+    "@zilliqa-js/contract": "^3.5.0",
+    "@zilliqa-js/core": "^3.5.0",
+    "@zilliqa-js/crypto": "^3.5.0",
+    "@zilliqa-js/util": "^3.5.0",
+    "@zilliqa-js/zilliqa": "^3.5.0",
     "antd": "^5.21.0",
-    "@ant-design/icons": "^5.5.0",
     "luxon": "^3.5.0",
     "next": "15.5.2",
     "react": "18.3.1",

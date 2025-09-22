@@ -2,9 +2,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useWallet } from '@/context/WalletContext';
 import CustomWalletConnect from '@/components/CustomWalletConnect';
-import MockWalletSelector from '@/components/MockWalletSelector';
 import SwapComponent from '@/components/SwapComponent';
-import { formatAddress, formatZIL } from '@/utils/formatting';
+import MintNFTComponent from '@/components/MintNFTComponent';
+import { formatAddress } from '@/utils/formatting';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,17 +28,7 @@ export default function Home() {
     // EVM wallet
     evmAccount,
     isEvmConnected,
-    
-    // General
-    connectedWalletType,
-    walletAddress,
-    zilAvailable,
   } = useWallet();
-
-  // Determine if we have both wallets connected
-  const hasZilliqaWallet = isZilPayConnected;
-  const hasEvmWallet = isEvmConnected;
-  const canSwap = hasZilliqaWallet && hasEvmWallet;
 
   return (
     <>
@@ -78,6 +68,9 @@ export default function Home() {
                   >
                     Disconnect ZilPay
                   </button>
+
+                  {/* Mint NFT Component */}
+                  <MintNFTComponent zilPayAccount={zilPayAccount || ''} />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -130,7 +123,7 @@ export default function Home() {
             </div>
 
             {/* Swap Section */}
-            {canSwap && (
+            {isZilPayConnected && isEvmConnected && (
               <div className="border-2 border-green-500 rounded-lg p-6 bg-green-50">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-4 h-4 bg-green-500 rounded-full"></div>
@@ -162,16 +155,16 @@ export default function Home() {
             )}
 
             {/* Connection Status */}
-            {!canSwap && (
+            {!(isZilPayConnected && isEvmConnected) && (
               <div className="border border-yellow-400 rounded-lg p-4 bg-yellow-50">
                 <h3 className="text-lg font-semibold text-yellow-800 mb-2">Connection Required</h3>
                 <div className="text-sm text-yellow-700 space-y-1">
                   <div className="flex items-center gap-2">
-                    {hasZilliqaWallet ? '✅' : '❌'}
+                    {isZilPayConnected ? '✅' : '❌'}
                     <span>Zilliqa wallet (for ZRC6 tokens)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {hasEvmWallet ? '✅' : '❌'}
+                    {isEvmConnected ? '✅' : '❌'}
                     <span>EVM wallet (for ERC721 NFTs)</span>
                   </div>
                 </div>
@@ -197,9 +190,6 @@ export default function Home() {
           </div>
         </footer>
       </div>
-      
-      {/* Mock Wallet Selector Modal */}
-      <MockWalletSelector />
     </>
   );
 }

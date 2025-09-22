@@ -2,22 +2,8 @@ import {
   Wallet,
 } from "@rainbow-me/rainbowkit"
 import { hasInjectedProvider } from "../utils/connector"
-
-declare global {
-  interface Window {
-    zilPay?: {
-      wallet: {
-        isConnect: boolean;
-        defaultAccount: {
-          bech32: string;
-          base16: string;
-        } | null;
-        connect: () => Promise<boolean>;
-        signMessage?: (message: Uint8Array) => Promise<string>;
-      };
-    };
-  }
-}
+import { BN } from "bn.js"
+import Long from "long"
 
 export const zilPayWallet = (): Wallet => {
   const isZilPayInjected = hasInjectedProvider({
@@ -83,4 +69,76 @@ export async function createEvmAddressSignature(evmAddress: string): Promise<str
   const message = evmAddress.toLowerCase()
 
   return await signMessageWithZilPay(message)
+}
+
+/**
+ * Mints a new ZRC6 NFT using ZilPay
+ * @param contractAddress The ZRC6 contract address
+ * @param toAddress The recipient address (bech32 format)
+ * @param tokenUri The token URI (optional, can be empty string)
+ * @param gasLimit Gas limit for the transaction
+ * @returns Promise<{transactionId: string}> The transaction result
+ */
+export async function mintZRC6NFT(
+  contractAddress: string,
+  toAddress: string,
+  tokenUri: string = "",
+  gasLimit: number = 50000
+): Promise<{ transactionId: string }> {
+  if (typeof window === 'undefined' || !window.zilPay) {
+    throw new Error('ZilPay is not available')
+  }
+
+  if (!window.zilPay.contracts || !window.zilPay.utils) {
+    throw new Error('ZilPay contract calling is not supported. Please update your ZilPay extension.')
+  }
+
+  if (!window.zilPay.wallet.isConnect || !window.zilPay.wallet.defaultAccount) {
+    throw new Error('ZilPay wallet is not connected')
+  }
+
+  try {
+    // Get contract instance
+    const contract = window.zilPay.contracts.at(contractAddress);
+
+    const MinimalGasPrice = new BN("3000000000");
+    const DefaultGasLimit = Long.fromString("25000");
+
+    const params = [
+        {
+            vname: "to",
+            type: "ByStr20",
+            value: `${toAddress}`,
+        },
+        {
+            vname: "token_uri",
+            type: "String",
+            value: tokenUri,
+        },
+      ];
+    
+    const tx = await contract.call(
+      'Mint',
+      params,
+      {
+        amount: new BN(0),
+        gasPrice: MinimalGasPrice,
+        gasLimit: DefaultGasLimit
+      }
+    );
+
+    if (!tx?.ID) {
+      console.error('Transaction ID missing', { tx, error: contract.error });
+      throw new Error('Transaction ID missing');
+    }
+
+    console.log('Transaction submitted', { transactionId: tx.ID });
+
+    return {
+      transactionId: tx.ID,
+    };
+  } catch (error) {
+    console.error('Error minting ZRC6 NFT with ZilPay:', error);
+    throw new Error('Failed to mint ZRC6 NFT');
+  }
 }

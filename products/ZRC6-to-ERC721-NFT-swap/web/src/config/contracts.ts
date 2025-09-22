@@ -3,7 +3,6 @@ import { Address } from 'viem'
 // Sample contract ABIs and addresses
 // Replace these with your actual contract addresses and ABIs
 
-export const ZRC6_CONTRACT_ADDRESS = "0x..." // Your ZRC6 contract address
 export const ERC721_CONTRACT_ADDRESS = "0x..." // Your ERC721 contract address
 export const SWAP_CONTRACT_ADDRESS = "0x..." // Your swap contract address
 
