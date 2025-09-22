@@ -29,11 +29,6 @@ export default function Home() {
     evmAccount,
     isEvmConnected,
     
-    // Mock wallet
-    connectDummyWallet,
-    isDummyWalletConnected,
-    dummyWallet,
-    
     // General
     connectedWalletType,
     walletAddress,
@@ -41,7 +36,7 @@ export default function Home() {
   } = useWallet();
 
   // Determine if we have both wallets connected
-  const hasZilliqaWallet = isZilPayConnected || isDummyWalletConnected;
+  const hasZilliqaWallet = isZilPayConnected;
   const hasEvmWallet = isEvmConnected;
   const canSwap = hasZilliqaWallet && hasEvmWallet;
 
@@ -59,34 +54,6 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col gap-6 w-full max-w-2xl">
-            
-            {/* Development Tools Section */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
-              <h3 className="text-lg font-semibold mb-3 text-gray-700">🚀 Development Tools</h3>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition text-sm"
-                  onClick={connectDummyWallet}
-                >
-                  Connect Mock Wallet
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition text-sm"
-                  onClick={() => {
-                    console.log('Current wallet state:', {
-                      connectedWalletType,
-                      walletAddress,
-                      zilAvailable: zilAvailable?.toString(),
-                      isZilPayConnected,
-                      isEvmConnected
-                    });
-                  }}
-                >
-                  Debug State
-                </button>
-              </div>
-            </div>
-
             {/* Zilliqa Non-EVM Network (ZRC6) */}
             <div className="border rounded-lg p-6 bg-white shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -111,22 +78,6 @@ export default function Home() {
                   >
                     Disconnect ZilPay
                   </button>
-                </div>
-              ) : isDummyWalletConnected ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-blue-700">Connected via Mock Wallet</span>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded text-sm">
-                    <div className="font-semibold">{dummyWallet?.name}</div>
-                    <div className="font-mono text-xs break-all text-gray-700">
-                      {dummyWallet?.address}
-                    </div>
-                    <div className="text-green-600 font-medium">
-                      {dummyWallet ? formatZIL(dummyWallet.balance) : '0'} ZIL
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -194,7 +145,7 @@ export default function Home() {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Zilliqa Wallet:</span>
                       <span className="font-mono text-xs">
-                        {formatAddress(isZilPayConnected ? (zilPayAccount || '') : (dummyWallet?.address || ''))}
+                        {formatAddress(isZilPayConnected ? (zilPayAccount || '') : '')}
                       </span>
                     </div>
                     <div className="flex justify-between">

@@ -7,7 +7,6 @@ import { formatAddress } from "../utils/formatting"
 
 export enum ConnectedWalletType {
   None,
-  MockWallet,
   RealWallet,
   ZilPayWallet,
 }
@@ -31,12 +30,6 @@ declare global {
 const useWalletConnector = () => {
   // Wagmi state for EVM wallets
   const walletAccount = useAccount()
-  
-  // Mock wallet state
-  const [isDummyWalletConnected, setIsDummyWalletConnected] = useState(false)
-  const [isDummyWalletConnecting, setIsDummyWalletConnecting] = useState(false)
-  const [dummyWallet, setDummyWallet] = useState<MockWallet | null>(null)
-  const [isMockWalletSelectorOpen, setIsMockWalletSelectorOpen] = useState(false)
 
   // ZilPay state
   const [zilPayAccount, setZilPayAccount] = useState<string | null>(null)
@@ -46,8 +39,6 @@ const useWalletConnector = () => {
   // Determine connected wallet type
   const connectedWalletType = isZilPayConnected
     ? ConnectedWalletType.ZilPayWallet
-    : isDummyWalletConnected
-    ? ConnectedWalletType.MockWallet
     : walletAccount.isConnected
     ? ConnectedWalletType.RealWallet
     : ConnectedWalletType.None
@@ -55,8 +46,6 @@ const useWalletConnector = () => {
   // Get wallet address based on connection type
   const walletAddress = connectedWalletType === ConnectedWalletType.ZilPayWallet
     ? zilPayAccount
-    : connectedWalletType === ConnectedWalletType.MockWallet
-    ? dummyWallet?.address
     : connectedWalletType === ConnectedWalletType.RealWallet
     ? walletAccount.address
     : null
@@ -69,9 +58,7 @@ const useWalletConnector = () => {
   })
 
   // Get available balance
-  const zilAvailable = connectedWalletType === ConnectedWalletType.MockWallet
-    ? dummyWallet?.balance
-    : connectedWalletType === ConnectedWalletType.RealWallet
+  const zilAvailable = connectedWalletType === ConnectedWalletType.RealWallet
     ? balanceData?.value
     : BigInt(0)
 
@@ -122,25 +109,6 @@ const useWalletConnector = () => {
     setIsZilPayConnected(false)
   }
 
-  const connectDummyWallet = () => {
-    setIsMockWalletSelectorOpen(true)
-  }
-
-  const selectMockWallet = (wallet: MockWallet) => {
-    setIsDummyWalletConnecting(true)
-    setTimeout(() => {
-      setDummyWallet(wallet)
-      setIsDummyWalletConnected(true)
-      setIsDummyWalletConnecting(false)
-      setIsMockWalletSelectorOpen(false)
-    }, 1000) // Simulate connection delay
-  }
-
-  const disconnectDummyWallet = () => {
-    setIsDummyWalletConnected(false)
-    setDummyWallet(null)
-  }
-
   const updateWalletBalance = useCallback(() => {
     if (connectedWalletType === ConnectedWalletType.RealWallet) {
       refetchBalance()
@@ -167,17 +135,6 @@ const useWalletConnector = () => {
     // EVM wallet
     evmAccount: walletAccount.address || null,
     isEvmConnected: walletAccount.isConnected,
-
-    // Mock wallet
-    isDummyWalletConnected,
-    isDummyWalletConnecting,
-    dummyWallet,
-    connectDummyWallet,
-    selectMockWallet,
-    disconnectDummyWallet,
-    isMockWalletSelectorOpen,
-    setIsMockWalletSelectorOpen,
-    mockWallets,
 
     // Utility functions
     formatAddress,
