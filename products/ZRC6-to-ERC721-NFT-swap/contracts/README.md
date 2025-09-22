@@ -6,7 +6,7 @@
 
 ### **Core Functionality**
 
-* **Atomic Swap:** The primary function of the contract is to execute a burn-and-mint operation. A user initiates a transaction that first triggers a burn of one or more ZRC-6 NFTs on a designated Scilla contract and then mints/transfers the corresponding, pre-mapped ERC-721 NFTs to their EVM wallet.  
+* **Atomic Swap:** The primary function of the contract is to execute a burn-and-transfer operation. A user initiates a transaction that first triggers a burn of one or more ZRC-6 NFTs on a designated Scilla contract and then transfers the corresponding, pre-mapped ERC-721 NFTs to their EVM wallet.  
 * **Single Collection Pair:** The contract is designed to work with a single, specific pair of NFT collections: one Scilla-based ZRC-6 collection and one EVM-based ERC-721 collection.  
 * **Cross-Wallet Ownership Verification:** The contract must verify that the user initiating the EVM transaction is also the owner of the Scilla-based assets. This is achieved through a signature verification mechanism.
 
@@ -72,7 +72,7 @@ TODO add some description for `notScarceZRC6.scilla`that can be minted by anyone
 
 ### erc721.sol
 
-TODO add some description for `erc721.sol` that can mint tokens on the fly by addresses set as allowed minters. One of the addresses is the `burnScillaAndMintEVMNFTSwap.sol` contract  
+TODO add some description for `erc721.sol` that can mint tokens on the fly by addresses set as allowed minters. The swap contract is set as an approved operator to transfer the pre-minted NFTs.  
 
 ## Foundry usage
 

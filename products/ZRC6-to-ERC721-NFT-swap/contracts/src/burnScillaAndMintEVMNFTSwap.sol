@@ -12,7 +12,7 @@ import "./ScillaConnector.sol";
 
 /**
  * @title BurnScillaAndMintEVMNFTSwap
- * @dev This contract enables the burning of ZRC6 NFTs (through Zilliqa interop) and minting of new ERC721 NFTs in one transaction.
+ * @dev This contract enables the burning of ZRC6 NFTs (through Zilliqa interop) and transferring of existing ERC721 NFTs in one transaction.
  * This contract handles a single specific pair of Scilla NFT collection and its corresponding EVM NFT collection.
  * 
  * The contract uses Zilliqa interop to call the Scilla NFT collection contract and allows users to call the 
@@ -85,7 +85,7 @@ contract BurnScillaAndMintEVMNFTSwap is
     }
 
     /**
-     * @dev Swaps ZRC6 NFTs for ERC721 NFTs by burning ZRC6 tokens and minting corresponding ERC721 tokens
+     * @dev Swaps ZRC6 NFTs for ERC721 NFTs by burning ZRC6 tokens and transferring corresponding ERC721 tokens
      * @param scillaNftIdsToSwap List of NFT IDs to be burned and swapped
      * 
      * Requirements:
@@ -96,7 +96,7 @@ contract BurnScillaAndMintEVMNFTSwap is
      * 
      * Effects:
      * - Burns all specified NFTs on the Scilla NFT collection (sets owner to zero address)
-     * - Mints corresponding NFTs on the EVM NFT collection to the caller's address
+     * - Transfers corresponding NFTs on the EVM NFT collection to the caller's address
      */
     function swapZRC6NFTForErc721NFTByByrningZRC6(
         uint256[] memory scillaNftIdsToSwap
@@ -156,22 +156,20 @@ contract BurnScillaAndMintEVMNFTSwap is
     }
 
     /**
-     * @dev Mints EVM NFTs to the specified recipient
-     * @param to Address to mint the NFTs to
-     * @param tokenIds Array of token IDs to mint
+     * @dev Transfers EVM NFTs to the specified recipient
+     * @param to Address to transfer the NFTs to
+     * @param tokenIds Array of token IDs to transfer
      * 
-     * NOTE: This is a placeholder implementation. The actual implementation would call
-     * the EVM NFT contract's minting function.
+     * Requirements:
+     * - The contract must own or be approved to transfer each tokenId
+     * - Transfers are done via ERC721 transferFrom
      */
     function _transferEvmNFTs(address to, uint256[] memory tokenIds) internal {
-        // TODO: Implement actual EVM NFT minting
-        // This would involve calling the EVM NFT contract's mint function
-        // The contract should have this contract address as an authorized minter
-        
-        // Placeholder - in actual implementation this would be:
-        // for (uint256 i = 0; i < tokenIds.length; i++) {
-        //     IERC721Mintable(evmNFTAddress).mint(to, tokenIds[i]);
-        // }
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            // Verify the contract owns the NFT before transferring
+            require(IERC721(evmNFTAddress).ownerOf(tokenIds[i]) == address(this), "Contract does not own the NFT");
+            IERC721(evmNFTAddress).transferFrom(address(this), to, tokenIds[i]);
+        }
     }
 
     /**
