@@ -142,3 +142,68 @@ export async function mintZRC6NFT(
     throw new Error('Failed to mint ZRC6 NFT');
   }
 }
+
+/**
+ * Approves the EVM wallet as an operator for ZRC6 NFTs using ZilPay
+ * @param contractAddress The ZRC6 contract address
+ * @param operatorAddress The EVM wallet address to approve as operator (hex format)
+ * @param gasLimit Gas limit for the transaction
+ * @returns Promise<{transactionId: string}> The transaction result
+ */
+export async function approveEvmWalletAsOperator(
+  contractAddress: string,
+  operatorAddress: string,
+  gasLimit: number = 25000
+): Promise<{ transactionId: string }> {
+  if (typeof window === 'undefined' || !window.zilPay) {
+    throw new Error('ZilPay is not available')
+  }
+
+  if (!window.zilPay.contracts || !window.zilPay.utils) {
+    throw new Error('ZilPay contract calling is not supported. Please update your ZilPay extension.')
+  }
+
+  if (!window.zilPay.wallet.isConnect || !window.zilPay.wallet.defaultAccount) {
+    throw new Error('ZilPay wallet is not connected')
+  }
+
+  try {
+    // Get contract instance
+    const contract = window.zilPay.contracts.at(contractAddress);
+
+    const MinimalGasPrice = new BN("3000000000");
+    const DefaultGasLimit = Long.fromString(gasLimit.toString());
+
+    const params = [
+        {
+            vname: "operator",
+            type: "ByStr20",
+            value: operatorAddress, // EVM address in hex format
+        },
+      ];
+    
+    const tx = await contract.call(
+      'AddOperator',
+      params,
+      {
+        amount: new BN(0),
+        gasPrice: MinimalGasPrice,
+        gasLimit: DefaultGasLimit
+      }
+    );
+
+    if (!tx?.ID) {
+      console.error('Transaction ID missing', { tx, error: contract.error });
+      throw new Error('Transaction ID missing');
+    }
+
+    console.log('Operator approval transaction submitted', { transactionId: tx.ID });
+
+    return {
+      transactionId: tx.ID,
+    };
+  } catch (error) {
+    console.error('Error approving EVM wallet as operator with ZilPay:', error);
+    throw new Error('Failed to approve EVM wallet as operator');
+  }
+}

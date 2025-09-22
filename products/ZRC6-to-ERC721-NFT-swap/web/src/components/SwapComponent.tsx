@@ -2,6 +2,9 @@ import { useWallet } from '../context/WalletContext'
 import { useNFTSwap } from '../hooks/useNFTSwap'
 import TransactionStatus from './TransactionStatus'
 import { formatAddress } from '../utils/formatting'
+import { useState } from 'react'
+import { approveEvmWalletAsOperator } from '../config/zilpay-wallet'
+import { CONTRACT_ADDRESSES } from '../config/contracts'
 
 interface SwapComponentProps {
   onSwapComplete?: () => void
@@ -12,6 +15,7 @@ interface SwapComponentProps {
 export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemoveSelected }: SwapComponentProps) {
   const { zilPayAccount, evmAccount } = useWallet()
   const { swapNFTs, swapState, reset } = useNFTSwap()
+  const [isApproving, setIsApproving] = useState(false)
 
   const handleRemoveTokenId = (tokenId: string) => {
     onRemoveSelected(tokenId)
@@ -37,7 +41,25 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
     // selectedTokenIds are now managed by parent component
   }
 
+  const handleApprove = async () => {
+    if (!zilPayAccount || !evmAccount) return
+
+    setIsApproving(true)
+    try {
+      // Use testnet contract address
+      const contractAddress = CONTRACT_ADDRESSES[33101].ZRC6
+      await approveEvmWalletAsOperator(contractAddress, evmAccount)
+      // Optionally, set a state to indicate approval success
+    } catch (error) {
+      console.error('Approval failed:', error)
+      // Handle error, perhaps show a message
+    } finally {
+      setIsApproving(false)
+    }
+  }
+
   const canSwap = evmAccount && selectedTokenIds.length > 0 && !swapState.isSwapping && !swapState.isConfirming
+  const isApproved = false // Replace with actual approval state check
 
   return (
     <div className="space-y-6">
@@ -109,6 +131,14 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
              'Swap NFTs'}
           </button>
 
+          <button
+            onClick={handleApprove}
+            disabled={isApproving || isApproved}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+          >
+            {isApproving ? 'Approving...' : 'Approve Wallet'}
+          </button>
+
           {(swapState.txHash || swapState.error) && (
             <button
               onClick={handleReset}
@@ -124,11 +154,26 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <h4 className="font-medium text-blue-800 mb-2">How it works:</h4>
         <ol className="text-sm text-blue-700 space-y-1">
-          <li>1. Ensure your EVM wallet is approved as an operator for your ZRC6 tokens in ZilPay</li>
+          <li>1. Approve your EVM wallet as an operator for your ZRC6 NFTs using ZilPay</li>
           <li>2. Select the ZRC6 token IDs you want to swap</li>
           <li>3. Click &quot;Swap NFTs&quot; to execute the swap</li>
           <li>4. Your ZRC6 tokens will be burned and ERC721 tokens will be minted</li>
         </ol>
+      </div>
+
+      {/* Operator Approval Section */}
+      <div className="mb-6">
+        <h4 className="font-medium text-gray-700 mb-3">Step 1: Approve EVM Wallet as Operator</h4>
+        <p className="text-sm text-gray-600 mb-3">
+          Your EVM wallet must be approved as an operator for your ZRC6 NFTs to enable burning them during the swap.
+        </p>
+        <button
+          onClick={handleApprove}
+          disabled={isApproving || !zilPayAccount || !evmAccount}
+          className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+        >
+          {isApproving ? 'Approving...' : 'Approve EVM Wallet as Operator'}
+        </button>
       </div>
     </div>
   )
