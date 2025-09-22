@@ -6,26 +6,18 @@ import { formatAddress } from '../utils/formatting'
 
 interface SwapComponentProps {
   onSwapComplete?: () => void
+  selectedTokenIds: string[]
+  onRemoveSelected: (tokenId: string) => void
 }
 
-export default function SwapComponent({ onSwapComplete }: SwapComponentProps) {
+export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemoveSelected }: SwapComponentProps) {
   const { zilPayAccount, evmAccount } = useWallet()
   const { swapNFTs, swapState, reset } = useNFTSwap()
 
-  const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([])
-  const [newTokenId, setNewTokenId] = useState<string>('')
   const [signature, setSignature] = useState<string>('')
 
-  const handleAddTokenId = () => {
-    const id = parseInt(newTokenId)
-    if (!isNaN(id) && !selectedTokenIds.includes(id)) {
-      setSelectedTokenIds([...selectedTokenIds, id])
-      setNewTokenId('')
-    }
-  }
-
-  const handleRemoveTokenId = (id: number) => {
-    setSelectedTokenIds(selectedTokenIds.filter(tokenId => tokenId !== id))
+  const handleRemoveTokenId = (tokenId: string) => {
+    onRemoveSelected(tokenId)
   }
 
   const handleSwap = async () => {
@@ -36,7 +28,7 @@ export default function SwapComponent({ onSwapComplete }: SwapComponentProps) {
     try {
       await swapNFTs(
         zilPayAccount,
-        selectedTokenIds,
+        selectedTokenIds.map(id => parseInt(id)),
         (createdSignature) => {
           setSignature(createdSignature)
         }
@@ -49,7 +41,7 @@ export default function SwapComponent({ onSwapComplete }: SwapComponentProps) {
 
   const handleReset = () => {
     reset()
-    setSelectedTokenIds([])
+    // selectedTokenIds are now managed by parent component
     setSignature('')
   }
 
@@ -78,24 +70,8 @@ export default function SwapComponent({ onSwapComplete }: SwapComponentProps) {
 
         {/* Token ID Selection */}
         <div className="mb-6">
-          <h4 className="font-medium text-gray-700 mb-3">Select ZRC6 Token IDs to Swap</h4>
-          <div className="flex gap-2 mb-3">
-            <input
-              type="number"
-              value={newTokenId}
-              onChange={(e) => setNewTokenId(e.target.value)}
-              placeholder="Enter token ID"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onKeyPress={(e) => e.key === 'Enter' && handleAddTokenId()}
-            />
-            <button
-              onClick={handleAddTokenId}
-              disabled={!newTokenId || selectedTokenIds.includes(parseInt(newTokenId))}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              Add
-            </button>
-          </div>
+          <h4 className="font-medium text-gray-700 mb-3">Selected ZRC6 Token IDs to Swap</h4>
+          <p className="text-sm text-gray-600 mb-3">Click on NFTs in your owned list above to select them for swapping.</p>
 
           {selectedTokenIds.length > 0 && (
             <div className="bg-gray-50 p-3 rounded">

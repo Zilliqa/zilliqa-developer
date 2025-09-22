@@ -6,6 +6,7 @@ import SwapComponent from '@/components/SwapComponent';
 import MintNFTComponent from '@/components/MintNFTComponent';
 import OwnedNFTs from '@/components/OwnedNFTs';
 import { formatAddress } from '@/utils/formatting';
+import { useEffect, useState } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,25 @@ export default function Home() {
     evmAccount,
     isEvmConnected,
   } = useWallet();
+
+  const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
+
+  // Clear selected tokens when ZilPay wallet changes
+  useEffect(() => {
+    setSelectedTokenIds([]);
+  }, [zilPayAccount]);
+
+  const handleToggleTokenSelection = (tokenId: string) => {
+    setSelectedTokenIds(prev => 
+      prev.includes(tokenId) 
+        ? prev.filter(id => id !== tokenId)
+        : [...prev, tokenId]
+    );
+  };
+
+  const handleRemoveSelectedToken = (tokenId: string) => {
+    setSelectedTokenIds(prev => prev.filter(id => id !== tokenId));
+  };
 
   return (
     <>
@@ -74,7 +94,12 @@ export default function Home() {
                   <MintNFTComponent zilPayAccount={zilPayAccount || ''} />
 
                   {/* Owned NFTs Component */}
-                  <OwnedNFTs zilPayAccount={zilPayAccount || ''} />
+                  <OwnedNFTs 
+                    zilPayAccount={zilPayAccount || ''} 
+                    selectedTokenIds={selectedTokenIds}
+                    onToggleSelect={handleToggleTokenSelection}
+                    onRemoveSelected={handleRemoveSelectedToken}
+                  />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -154,7 +179,10 @@ export default function Home() {
                   </div>
                 </div>
 
-                <SwapComponent />
+                <SwapComponent 
+                  selectedTokenIds={selectedTokenIds}
+                  onRemoveSelected={handleRemoveSelectedToken}
+                />
               </div>
             )}
 

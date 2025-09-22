@@ -5,9 +5,12 @@ import { CONTRACT_ADDRESSES } from '@/config/contracts';
 
 interface OwnedNFTsProps {
   zilPayAccount: string;
+  selectedTokenIds: string[];
+  onToggleSelect: (tokenId: string) => void;
+  onRemoveSelected: (tokenId: string) => void;
 }
 
-const OwnedNFTs: React.FC<OwnedNFTsProps> = ({ zilPayAccount }) => {
+const OwnedNFTs: React.FC<OwnedNFTsProps> = ({ zilPayAccount, selectedTokenIds, onToggleSelect }) => {
   const [ownedTokenIds, setOwnedTokenIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,11 +84,27 @@ const OwnedNFTs: React.FC<OwnedNFTsProps> = ({ zilPayAccount }) => {
       ) : (
         <div className="max-h-40 overflow-y-auto border rounded p-2 bg-white">
           <ul className="space-y-1">
-            {ownedTokenIds.map((tokenId) => (
-              <li key={tokenId} className="text-sm font-mono text-gray-700">
-                Token ID: {tokenId}
-              </li>
-            ))}
+            {ownedTokenIds.map((tokenId) => {
+              const isSelected = selectedTokenIds.includes(tokenId);
+              return (
+                <li
+                  key={tokenId}
+                  className={`text-sm font-mono p-2 rounded cursor-pointer transition-colors ${
+                    isSelected
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                  onClick={() => onToggleSelect(tokenId)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>Token ID: {tokenId}</span>
+                    {isSelected && (
+                      <span className="text-blue-600 font-bold">✓</span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
