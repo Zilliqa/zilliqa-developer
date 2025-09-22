@@ -24,7 +24,7 @@ const OwnedNFTs: React.FC<OwnedNFTsProps> = ({ zilPayAccount, selectedTokenIds, 
 
       try {
         const zilliqa = new Zilliqa(appConfig.zilliqaNodeUrl);
-        const contractAddress = CONTRACT_ADDRESSES[33469].ZRC6;
+        const contractAddress = CONTRACT_ADDRESSES[33101].ZRC6;
 
         // Get the base16 address from ZilPay
         const base16Address = window.zilPay?.wallet?.defaultAccount?.base16?.toLowerCase();

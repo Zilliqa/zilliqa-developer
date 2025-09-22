@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useWallet } from '../context/WalletContext'
 import { useNFTSwap } from '../hooks/useNFTSwap'
 import TransactionStatus from './TransactionStatus'
@@ -14,24 +13,18 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
   const { zilPayAccount, evmAccount } = useWallet()
   const { swapNFTs, swapState, reset } = useNFTSwap()
 
-  const [signature, setSignature] = useState<string>('')
-
   const handleRemoveTokenId = (tokenId: string) => {
     onRemoveSelected(tokenId)
   }
 
   const handleSwap = async () => {
-    if (!zilPayAccount || !evmAccount || selectedTokenIds.length === 0) {
+    if (!evmAccount || selectedTokenIds.length === 0) {
       return
     }
 
     try {
       await swapNFTs(
-        zilPayAccount,
-        selectedTokenIds.map(id => parseInt(id)),
-        (createdSignature) => {
-          setSignature(createdSignature)
-        }
+        selectedTokenIds.map(id => parseInt(id))
       )
       onSwapComplete?.()
     } catch (error) {
@@ -42,10 +35,9 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
   const handleReset = () => {
     reset()
     // selectedTokenIds are now managed by parent component
-    setSignature('')
   }
 
-  const canSwap = zilPayAccount && evmAccount && selectedTokenIds.length > 0 && !swapState.isPreparing && !swapState.isSigning && !swapState.isSwapping && !swapState.isConfirming
+  const canSwap = evmAccount && selectedTokenIds.length > 0 && !swapState.isSwapping && !swapState.isConfirming
 
   return (
     <div className="space-y-6">
@@ -96,20 +88,10 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
           )}
         </div>
 
-        {/* Signature Display */}
-        {signature && (
-          <div className="mb-6">
-            <h4 className="font-medium text-gray-700 mb-2">Generated Signature</h4>
-            <div className="bg-gray-50 p-3 rounded">
-              <p className="text-xs font-mono break-all text-gray-600">{signature}</p>
-            </div>
-          </div>
-        )}
-
         {/* Transaction Status */}
         <TransactionStatus
-          isPreparation={swapState.isPreparing}
-          isProcessing={swapState.isSigning || swapState.isSwapping}
+          isPreparation={false}
+          isProcessing={swapState.isSwapping}
           txHash={swapState.txHash}
           error={swapState.error}
           className="mb-4"
@@ -122,9 +104,7 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
             disabled={!canSwap}
             className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
           >
-            {swapState.isPreparing ? 'Preparing...' :
-             swapState.isSigning ? 'Signing with ZilPay...' :
-             swapState.isSwapping ? 'Swapping NFTs...' :
+            {swapState.isSwapping ? 'Swapping NFTs...' :
              swapState.isConfirming ? 'Confirming...' :
              'Swap NFTs'}
           </button>
@@ -144,9 +124,10 @@ export default function SwapComponent({ onSwapComplete, selectedTokenIds, onRemo
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <h4 className="font-medium text-blue-800 mb-2">How it works:</h4>
         <ol className="text-sm text-blue-700 space-y-1">
-          <li>1. Select the ZRC6 token IDs you want to swap</li>
-          <li>2. Click &quot;Swap NFTs&quot; to sign with ZilPay and execute the swap</li>
-          <li>3. Your ZRC6 tokens will be burned and ERC721 tokens will be minted</li>
+          <li>1. Ensure your EVM wallet is approved as an operator for your ZRC6 tokens in ZilPay</li>
+          <li>2. Select the ZRC6 token IDs you want to swap</li>
+          <li>3. Click &quot;Swap NFTs&quot; to execute the swap</li>
+          <li>4. Your ZRC6 tokens will be burned and ERC721 tokens will be minted</li>
         </ol>
       </div>
     </div>

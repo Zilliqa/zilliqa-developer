@@ -23,72 +23,18 @@ export const ZILLIQA_MAINNET = defineChain({
 
 // Zilliqa Testnet (EVM-compatible)
 export const ZILLIQA_TESTNET = defineChain({
-  id: 33469,
+  id: 33101,
   name: "Zilliqa EVM Testnet",
   nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
   rpcUrls: {
     default: {
-      http: ["https://api.zq2-devnet.zilliqa.com"],
+      http: ["https://api.testnet.zilliqa.com"],
     },
   },
   blockExplorers: {
     default: {
       name: "Otterscan",
-      url: "https://explorer.zq2-devnet.zilliqa.com",
-    },
-  },
-})
-
-// Zilliqa Devnet
-export const ZILLIQA_DEVNET = defineChain({
-  id: 33469,
-  name: "Zilliqa Devnet",
-  nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["https://api.zq2-devnet.zilliqa.com"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Otterscan",
-      url: "https://otterscan.zq2-devnet.zilliqa.com",
-    },
-  },
-})
-
-// Local development chain
-export const ZILLIQA_LOCAL = defineChain({
-  id: 32768,
-  name: "Zilliqa Local",
-  nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["http://localhost:4201"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Local Explorer",
-      url: "http://localhost:5100",
-    },
-  },
-})
-
-// Mock chain for development
-export const MOCK_CHAIN = defineChain({
-  id: 31337,
-  name: "Mock Chain",
-  nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["http://localhost:8545"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Mock Explorer",
-      url: "http://localhost:3000",
+      url: "https://otterscan.testnet.zilliqa.com",
     },
   },
 })
@@ -97,9 +43,6 @@ export function getChain(chainId: number) {
   const chains = [
     ZILLIQA_MAINNET,
     ZILLIQA_TESTNET,
-    ZILLIQA_DEVNET,
-    ZILLIQA_LOCAL,
-    MOCK_CHAIN
   ]
   const chain = chains.find((chain) => chain.id === chainId)
 
@@ -115,8 +58,6 @@ export function getAllZilliqaChains() {
   return [
     ZILLIQA_MAINNET,
     ZILLIQA_TESTNET,
-    ZILLIQA_DEVNET,
-    ZILLIQA_LOCAL
   ]
 }
 

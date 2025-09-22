@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
 import { SWAP_CONTRACT_ABI, CONTRACT_ADDRESSES } from '../config/contracts'
-import { createEvmAddressSignature } from '../config/zilpay-wallet'
 
 export interface SwapState {
-  isPreparing: boolean
-  isSigning: boolean
   isSwapping: boolean
   isConfirming: boolean
   txHash?: string
@@ -14,8 +11,6 @@ export interface SwapState {
 
 export function useNFTSwap() {
   const [swapState, setSwapState] = useState<SwapState>({
-    isPreparing: false,
-    isSigning: false,
     isSwapping: false,
     isConfirming: false,
   })
@@ -27,9 +22,7 @@ export function useNFTSwap() {
   })
 
   const swapNFTs = async (
-    zilPayAddress: string,
-    nftIds: number[],
-    onSignatureCreated?: (signature: string) => void
+    nftIds: number[]
   ) => {
     if (!evmAddress) {
       throw new Error('EVM wallet not connected')
@@ -42,21 +35,13 @@ export function useNFTSwap() {
     const contractAddress = CONTRACT_ADDRESSES[chain.id as keyof typeof CONTRACT_ADDRESSES].SWAP
 
     setSwapState({
-      isPreparing: true,
-      isSigning: false,
       isSwapping: false,
       isConfirming: false,
     })
 
     try {
-      // Step 1: Create signature using ZilPay
-      setSwapState(prev => ({ ...prev, isPreparing: false, isSigning: true }))
-
-      const signature = await createEvmAddressSignature(evmAddress)
-      onSignatureCreated?.(signature)
-
-      // Step 2: Call the swap contract
-      setSwapState(prev => ({ ...prev, isSigning: false, isSwapping: true }))
+      // Step 1: Call the swap contract
+      setSwapState(prev => ({ ...prev, isSwapping: true }))
 
       // Convert number[] to bigint[]
       const tokenIds = nftIds.map(id => BigInt(id))
@@ -66,9 +51,7 @@ export function useNFTSwap() {
         abi: SWAP_CONTRACT_ABI,
         functionName: 'swapZRC6NFTForErc721NFTByByrningZRC6',
         args: [
-          zilPayAddress,
-          tokenIds,
-          signature as `0x${string}`
+          tokenIds
         ],
       })
 
@@ -78,8 +61,6 @@ export function useNFTSwap() {
       console.error('Swap failed:', error)
       setSwapState(prev => ({
         ...prev,
-        isPreparing: false,
-        isSigning: false,
         isSwapping: false,
         isConfirming: false,
         error: error as Error
@@ -107,8 +88,6 @@ export function useNFTSwap() {
 
   const reset = () => {
     setSwapState({
-      isPreparing: false,
-      isSigning: false,
       isSwapping: false,
       isConfirming: false,
     })

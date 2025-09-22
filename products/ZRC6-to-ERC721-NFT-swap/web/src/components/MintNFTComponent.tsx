@@ -28,7 +28,7 @@ export default function MintNFTComponent({ zilPayAccount }: MintNFTComponentProp
 
     try {
       // Use the configured ZRC6 contract address for testnet
-      const contractAddress = CONTRACT_ADDRESSES[33469].ZRC6;
+      const contractAddress = CONTRACT_ADDRESSES[33101].ZRC6;
 
       if (!contractAddress) {
         throw new Error('ZRC6 contract address not configured for testnet. Please update CONTRACT_ADDRESSES in config/contracts.ts');

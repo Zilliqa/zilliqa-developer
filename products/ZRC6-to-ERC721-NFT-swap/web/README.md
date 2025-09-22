@@ -25,36 +25,27 @@ This application follows the **EVM-first approach** recommended in the Zilliqa W
 
 1. User connects ZilPay wallet (Zilliqa non-EVM network)
 2. User connects EVM wallet (Zilliqa EVM network)
-3. Application checks ZRC6 token balance
-4. User selects ZRC6 tokens to swap for ERC721 NFTs
-5. User signs the EVM wallet address using ZilPay wallet to create a `signature` parameter for `burnScillaAndMintEVMNFTSwap` function
+3. User approves EVM wallet as operator for their ZRC6 NFTs using ZilPay
+4. Application checks ZRC6 token balance
+5. User selects ZRC6 tokens to swap for ERC721 NFTs
 6. User calls `swapZRC6NFTForErc721NFTByByrningZRC6` function on `burnScillaAndMintEVMNFTSwap` using EVM wallet
 7. The user is informed about the outcome
 
 ## Technical Implementation
 
-### Signature Creation (Step 5)
-The application uses ZilPay's signing functionality to create a cryptographic signature of the EVM wallet address. This signature proves ownership of both the ZilPay and EVM wallets:
-
-```typescript
-// Create signature using ZilPay
-const signature = await createEvmAddressSignature(evmAddress)
-
-// The signature is created by signing: keccak256(abi.encodePacked(evmAddress))
-```
+### Approval Setup (Step 3)
+The application requires users to approve their EVM wallet as an operator for their ZRC6 NFTs using ZilPay. This approval allows the EVM wallet to burn the NFTs on behalf of the ZilPay wallet during the swap process.
 
 ### Contract Interaction (Step 6)
-The signature is passed to the smart contract along with the ZilPay address and token IDs:
+The approval is verified by the smart contract during the burn operation:
 
 ```solidity
 function swapZRC6NFTForErc721NFTByByrningZRC6(
-    string memory scillaAddress,    // ZilPay wallet address
-    uint256[] memory scillaNftIdsToSwap, // Token IDs to swap
-    bytes memory signature          // Proof of ownership
+    uint256[] memory scillaNftIdsToSwap
 ) external nonReentrant whenNotPaused
 ```
 
-The contract verifies the signature and ensures the signer owns both wallets before proceeding with the swap.
+The contract verifies the caller's operator approval on the Scilla side before proceeding with the swap.
 
 ## Getting Started
 
@@ -75,7 +66,7 @@ cp .env.example .env.local
 Update `.env.local` with your configuration:
 
 ```env
-NEXT_PUBLIC_CHAIN_ID=33469
+NEXT_PUBLIC_CHAIN_ID=33101
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=ZRC6_to_ERC721_NFT_Swap

@@ -46,7 +46,7 @@ const TransactionStatus: React.FC<TransactionStatusProps> = ({
       <div className={`flex items-center gap-2 text-green-600 ${className}`}>
         <span>✅ Transaction successful!</span>
         <a 
-          href={`https://explorer.zq2-devnet.zilliqa.com/tx/${txHash}`}
+          href={`https://otterscan.testnet.zilliqa.com/tx/${txHash}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:text-blue-800 underline text-sm"

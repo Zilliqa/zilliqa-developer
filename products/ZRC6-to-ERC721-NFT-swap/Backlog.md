@@ -1,16 +1,16 @@
 # Backlog
 
-## 024 Enable minting new Scilla NFTs after collecting ZilPay
+## 24 Modify the `swapZRC6NFTForErc721NFTByByrningZRC6` to rely on the ZilPay approval for EVM wallet address instead of signatures
 
-- This feature should be available after connecting the ZilPay wallet
-- There should be an UI that enables user to go through the process of minting a single new Scilla NFT on ZRC6 address
-- Use ZilPay to send a mint transaction to a ZRC6 address
+The `function swapZRC6NFTForErc721NFTByByrningZRC6` currently takes in `signature`. We don't need it cause the safeguard mechanism here is ZilPay wallet approving the EVM wallet as operator before calling this method. Remove the `signature` from the code and any documentation.
 
-## 025 Show owned Scilla NFT tokens after connecting ZilPay
+## 25 Implement the _transferEvmNFTs
 
-- Use zilliqa.js library to query the state of the ZRC6 token
+Transfer NFTs from _evmNFTAddress according to the `nftSwapMapping`
 
-## 026 Implement a UI for selecting Scilla NFT to be swapped
 
 ## 027 Add tooltips and descriptions in UI to make the application straightforward to use
 
+## 028 Modify the web UI around minting new Scilla NFTs
+
+so it is better described that minting the new Scilla NFT is for testing purpose only and normally, for other collections, users would need to acquire NFTs outside of the swaping app

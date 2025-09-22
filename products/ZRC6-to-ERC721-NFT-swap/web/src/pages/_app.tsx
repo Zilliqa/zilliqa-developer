@@ -23,13 +23,6 @@ export default function App({ Component, pageProps }: AppProps) {
         setAppConfig(data);
       } catch (error) {
         console.error("Failed to load app config:", error);
-        // Use default config if fetch fails
-        setAppConfig({
-          chainId: 33469,
-          walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '',
-          appUrl: 'http://localhost:3000',
-          appName: 'ZRC6 to ERC721 NFT Swap',
-        });
       }
     };
     fetchConfig();

@@ -89,7 +89,7 @@ Add these variables to your existing `.env.local` file:
 
 ```env
 # Add these to your existing environment variables
-NEXT_PUBLIC_CHAIN_ID=33469
+NEXT_PUBLIC_CHAIN_ID=33101
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
 ```
 
@@ -104,7 +104,7 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
 You can access these variables in your components like any other environment variable:
 
 ```typescript
-const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33469")
+const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33101")
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
 ```
 
@@ -141,37 +141,18 @@ export const ZILLIQA_MAINNET = defineChain({
 
 // Zilliqa Testnet (EVM-compatible)
 export const ZILLIQA_TESTNET = defineChain({
-  id: 33469,
+  id: 33101,
   name: "Zilliqa EVM Testnet",
   nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
   rpcUrls: {
     default: {
-      http: ["https://api.zq2-devnet.zilliqa.com"],
+      http: ["https://api.testnet.zilliqa.com"],
     },
   },
   blockExplorers: {
     default: {
       name: "Otterscan",
-      url: "https://explorer.zq2-devnet.zilliqa.com",
-    },
-  },
-})
-
-
-// Zilliqa Devnet
-export const ZILLIQA_DEVNET = defineChain({
-  id: 33469,
-  name: "Zilliqa Devnet",
-  nativeCurrency: { name: "ZIL", symbol: "ZIL", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["https://api.zq2-devnet.zilliqa.com"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Otterscan",
-      url: "https://otterscan.zq2-devnet.zilliqa.com",
+      url: "https://otterscan.testnet.zilliqa.com",
     },
   },
 })
@@ -445,7 +426,7 @@ export default function App({ Component, pageProps }: AppProps) {
   // Your existing app logic here...
 
   const wagmiConfig = createWagmiConfig(
-    parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33469"),
+    parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33101"),
     process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ""
   )
 
