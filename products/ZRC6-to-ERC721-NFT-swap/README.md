@@ -17,6 +17,7 @@ This project is a generic template that enables users to swap Scilla NFTs (ZRC6)
 Contains the implementation of the Next.js web application that users interact with to swap NFTs. The application features:
 
 - **Multi-wallet support**: ZilPay for Zilliqa non-EVM network, EVM wallets for Zilliqa EVM network
+- **Operator approval**: Users can approve their EVM wallet as an operator for ZRC6 NFTs using ZilPay
 - **Token selection interface**: Users can select specific ZRC6 token IDs to swap
 - **Signature creation**: Automatic signing of EVM wallet address using ZilPay
 - **Contract interaction**: Direct interaction with the swap smart contract
@@ -38,7 +39,8 @@ You can mint yourself Scilla NFTs by going to https://ide.zilliqa.com, importing
 ## Swap Process
 
 1. **Connect Wallets**: User connects both ZilPay (for ZRC6) and EVM wallet (for ERC721)
-2. **Select Tokens**: User chooses which ZRC6 token IDs to swap
-3. **Create Signature**: Application signs the EVM wallet address using ZilPay
-4. **Execute Swap**: Smart contract burns ZRC6 tokens and mints ERC721 tokens
-5. **Confirmation**: User receives transaction confirmation
+2. **Approve Operator**: User approves their EVM wallet as an operator for their ZRC6 NFTs using ZilPay
+3. **Select Tokens**: User chooses which ZRC6 token IDs to swap
+4. **Create Signature**: Application signs the EVM wallet address using ZilPay
+5. **Execute Swap**: Smart contract burns ZRC6 tokens and mints ERC721 tokens
+6. **Confirmation**: User receives transaction confirmation
