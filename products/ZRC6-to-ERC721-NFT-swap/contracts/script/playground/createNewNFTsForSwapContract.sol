@@ -5,21 +5,26 @@ import "forge-std/Script.sol";
 import "../../src/playground/erc721.sol";
 import "../../src/burnScillaAndMintEVMNFTSwap.sol";
 
-contract MintNewEvmNFTs is Script {
+contract CreateNewNFTsForSwapContract is Script {
     function run() external {
         vm.startBroadcast();
 
-        // Get contract addresses from environment variables
         address evmNftAddress = vm.envAddress("EVM_NFT_ADDRESS");
         address swapAddress = vm.envAddress("SWAP_CONTRACT_ADDRESS");
         uint256 count = vm.envUint("NFT_COUNT");
 
-        // Attach to existing contracts
+        runWithParameters(evmNftAddress, swapAddress, count);
+
+        vm.stopBroadcast();
+    }
+
+    function runWithParameters(
+        address evmNftAddress,
+        address swapAddress,
+        uint256 count
+    ) public {
         NFToken nft = NFToken(evmNftAddress);
         BurnScillaAndMintEVMNFTSwap swap = BurnScillaAndMintEVMNFTSwap(swapAddress);
-
-        // Ensure the deployer is an authorized minter
-        nft.addMinter(msg.sender);
 
         // Collect exactly 'count' available NFT IDs
         address recipient = msg.sender;
@@ -55,7 +60,5 @@ contract MintNewEvmNFTs is Script {
         // Set mintedIds for the swap mappings
         uint256[] memory mintedIds = actualIdsToMint;
         swap.setNftSwapMappings(mintedIds, mintedIds);
-
-        vm.stopBroadcast();
     }
 }

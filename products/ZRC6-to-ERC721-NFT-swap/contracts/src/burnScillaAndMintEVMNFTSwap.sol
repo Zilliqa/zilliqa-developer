@@ -117,9 +117,7 @@ contract BurnScillaAndMintEVMNFTSwap is
                 revert InvalidMapping();
             }
         }
-        
-        // TODO: Implement Zilliqa interop call to burn ZRC6 NFTs
-        // This would involve calling the Scilla contract to transfer ownership to zero address
+
         _burnScillaNFTs(scillaNftIdsToSwap);
         
         // Transfer corresponding ERC721 NFTs
@@ -166,8 +164,6 @@ contract BurnScillaAndMintEVMNFTSwap is
      */
     function _transferEvmNFTs(address to, uint256[] memory tokenIds) internal {
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            // Verify the contract owns the NFT before transferring
-            require(IERC721(evmNFTAddress).ownerOf(tokenIds[i]) == address(this), "Contract does not own the NFT");
             IERC721(evmNFTAddress).transferFrom(address(this), to, tokenIds[i]);
         }
     }

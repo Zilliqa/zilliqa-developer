@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
 import { SWAP_CONTRACT_ABI, CONTRACT_ADDRESSES } from '../config/contracts'
 
@@ -69,22 +69,30 @@ export function useNFTSwap() {
     }
   }
 
+  // Update state when transaction hash is available
+  useEffect(() => {
+    if (hash && !swapState.txHash) {
+      setSwapState(prev => ({ ...prev, txHash: hash, isConfirming: true }))
+    }
+  }, [hash, swapState.txHash])
+
   // Update state when transaction is confirmed
-  if (isConfirming && swapState.isConfirming) {
-    setSwapState(prev => ({ ...prev, isConfirming: true }))
-  }
+  useEffect(() => {
+    if (!isConfirming && swapState.isConfirming) {
+      setSwapState(prev => ({ ...prev, isConfirming: false }))
+    }
+  }, [isConfirming, swapState.isConfirming])
 
-  if (hash && !swapState.txHash) {
-    setSwapState(prev => ({ ...prev, txHash: hash, isConfirming: true }))
-  }
-
-  if (writeError || confirmError) {
-    setSwapState(prev => ({
-      ...prev,
-      error: (writeError || confirmError) as Error,
-      isConfirming: false
-    }))
-  }
+  // Handle errors
+  useEffect(() => {
+    if (writeError || confirmError) {
+      setSwapState(prev => ({
+        ...prev,
+        error: (writeError || confirmError) as Error,
+        isConfirming: false
+      }))
+    }
+  }, [writeError, confirmError])
 
   const reset = () => {
     setSwapState({

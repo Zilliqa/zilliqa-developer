@@ -12,9 +12,9 @@ export default function handler(
   res: NextApiResponse<AppConfig>
 ) {
   const config: AppConfig = {
-    chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "33101"),
+    chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "0"),
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
-    appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    appUrl: process.env.NEXT_PUBLIC_APP_URL || "",
     appName: process.env.NEXT_PUBLIC_APP_NAME || "ZRC6 to ERC721 NFT Swap",
   }
 

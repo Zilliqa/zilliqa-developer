@@ -49,16 +49,15 @@ export const SWAP_CONTRACT_ABI = [
   }
 ] as const
 
-// Contract addresses - these should be updated with actual deployed addresses
 export const CONTRACT_ADDRESSES = {
   33101: { // Zilliqa Testnet
-    ZRC6: "0x9796b1e3adfb73ca354fa5920521fb7ef21f71af", // Replace with your Scilla NFT collection address
-    ERC721: "0x02C5908A23Edf9bA26969E00e3d246FF77cA0706.", // Replace with your EVM NFT collection address
-    SWAP: "0x0000000000000000000000000000000000000000" as Address, // Replace with actual address
+    ZRC6: "0x9796b1e3adfb73ca354fa5920521fb7ef21f71af" as Address, // Replace with your Scilla NFT collection address
+    ERC721: "0xC768f120Ea2e1EDB9805942cF569a4eB2D4eb5fE" as Address, // Replace with your EVM NFT collection address
+    SWAP: "0x8ac210608DDA334D44b35FFf9C5511AA01b9E7Dc" as Address, // Replace with actual address
   },
   // 32769: { // Zilliqa Mainnet not yet deployed
   //   ZRC6: "0x...", // Replace with actual address
   //   ERC721: "0x...", // Replace with actual address  
-  //   SWAP: "0x0000000000000000000000000000000000000000" as Address, // Replace with actual address
+  //   SWAP: "0x" as Address, // Replace with actual address
   // }
 } as const
