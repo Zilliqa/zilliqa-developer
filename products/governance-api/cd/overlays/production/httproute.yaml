@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: governance-api
+  labels:
+    app.kubernetes.io/name: governance-api
+spec:
+  parentRefs:
+    - name: gke-gateway
+      namespace: gke-gateway-stg
+      sectionName: https
+  hostnames:
+    - governance-api.zilliqa.com
+  rules:
+    - backendRefs:
+        - name: governance-api
+          port: 80

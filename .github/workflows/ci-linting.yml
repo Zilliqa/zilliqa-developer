@@ -16,7 +16,7 @@ jobs:
     name: "Linting"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
 
       - uses: pnpm/action-setup@v2
         with:
@@ -28,10 +28,10 @@ jobs:
 
       - name: Trunk cache
         id: cache-trunk
-        uses: actions/cache@v3.0.4
+        uses: actions/cache@v4.2.2
         with:
           path: ~/.cache/trunk/
           key: ${{ runner.os }}-trunk
 
       - name: Trunk Check
-        uses: trunk-io/trunk-action@v1.0.4
+        uses: trunk-io/trunk-action@v1.1.19
