@@ -1,0 +1,23 @@
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: governance-snapshot
+  namespace: governance-snapshot
+  labels:
+    app.kubernetes.io/name: "governance-snapshot"
+spec:
+  default:
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+    config:
+      type: HTTP
+      httpHealthCheck:
+        portSpecification: USE_FIXED_PORT
+        requestPath: /
+        port: 80
+  targetRef:
+    group: ""
+    kind: Service
+    name: governance-snapshot
