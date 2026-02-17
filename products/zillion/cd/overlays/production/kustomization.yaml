@@ -3,28 +3,9 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - certificate.yaml
-  - frontend-config.yaml
+  - httproute.yaml
 
 patches:
-  - target:
-      kind: Ingress
-      name: zillion
-    patch: |-
-      - op: replace
-        path: "/spec/rules/0/host"
-        value: zillion.zilliqa.com
-      - op: remove
-        path: "/spec/rules/2"
-      - op: remove
-        path: "/spec/rules/1"
-      - op: replace
-        path: /metadata/annotations
-        value:
-          kubernetes.io/ingress.class: gce
-          kubernetes.io/ingress.global-static-ip-name: zillion-zilliqa-com
-          networking.gke.io/managed-certificates: zillion
-          networking.gke.io/v1beta1.FrontendConfig: zillion
   - target:
       kind: ConfigMap
       name: zillion-config

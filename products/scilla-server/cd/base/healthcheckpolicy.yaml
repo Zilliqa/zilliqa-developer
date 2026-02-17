@@ -1,0 +1,23 @@
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: scilla-server
+  namespace: scilla-server
+  labels:
+    app.kubernetes.io/name: scilla-server
+spec:
+  default:
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+    config:
+      type: HTTP
+      httpHealthCheck:
+        portSpecification: USE_FIXED_PORT
+        requestPath: /healthcheck
+        port: 4000
+  targetRef:
+    group: ""
+    kind: Service
+    name: scilla-server
