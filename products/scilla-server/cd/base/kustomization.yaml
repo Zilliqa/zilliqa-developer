@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - configmap.yaml
   - deployment.yaml
-  - ingress.yaml
+  - healthcheckpolicy.yaml
   - namespace.yaml
   - svc.yaml
 
