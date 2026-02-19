@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - backendpolicy.yaml
   - httproute.yaml
 
 patches:
