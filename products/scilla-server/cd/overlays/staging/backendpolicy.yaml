@@ -4,7 +4,7 @@ metadata:
   name: scilla-server
 spec:
   default:
-    securityPolicy: staging-apps-gateway
+    securityPolicy: staging-gateway
   targetRef:
     group: ""
     kind: Service
