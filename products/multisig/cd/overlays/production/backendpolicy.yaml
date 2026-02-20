@@ -4,7 +4,7 @@ metadata:
   name: multisig
 spec:
   default:
-    securityPolicy: prod-apps-gateway
+    securityPolicy: blockchain-infra-gateway
   targetRef:
     group: ""
     kind: Service
