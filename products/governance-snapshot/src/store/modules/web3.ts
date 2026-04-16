@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { getInstance } from '@/helpers/plugins/LockPlugin';
 import store from '@/store';
 import config from '@/helpers/config';
+import { toBech32Address } from '@zilliqa-js/crypto';
 
 let wsProvider;
 let auth;
@@ -76,6 +77,27 @@ const actions = {
   loadProvider: async ({ commit }) => {
     commit('LOAD_PROVIDER_REQUEST');
     try {
+      if (auth.provider?.isEVM) {
+        // EVM path — address is carried on the provider sentinel from EVMConnector.connect()
+        const base16 = auth.provider.address.slice(2).toLowerCase();
+        const bech32 = toBech32Address('0x' + base16);
+        commit('HANDLE_CHAIN_CHANGED', 'mainnet');
+        commit('LOAD_PROVIDER_SUCCESS', { account: { base16, bech32 }, name: bech32 });
+
+        // Subscribe to future account changes (e.g. user switches wallet in MetaMask)
+        window['ethereum'].on('accountsChanged', (accounts: string[]) => {
+          if (accounts.length) {
+            const b16 = accounts[0].slice(2).toLowerCase();
+            const b32 = toBech32Address('0x' + b16);
+            commit('HANDLE_ACCOUNTS_CHANGED', { base16: b16, bech32: b32 });
+          } else {
+            commit('LOGOUT');
+          }
+        });
+        return;
+      }
+
+      // ZilPay path
       if (auth.provider) {
         auth.provider.wallet
           .observableAccount()

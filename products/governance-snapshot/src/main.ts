@@ -34,6 +34,17 @@ Vue.directive('autofocus', autofocus);
 
 Vue.config.productionTip = false;
 
+// Unregister any previously cached service workers — this project does not use
+// a service worker, and stale registrations from older builds cause noisy
+// console output and stale resource caching.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
+
 new Vue({
   i18n,
   router,

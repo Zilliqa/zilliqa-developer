@@ -5,7 +5,6 @@ import client from '@/helpers/client';
 import ipfs from '@/helpers/ipfs';
 import { formatProposal, formatProposals, formatSpace } from '@/helpers/utils';
 import { getBlockNumber, signMessage } from '@/helpers/web3';
-import { waitZilPay } from '@/helpers/wait-zipay';
 import { version } from '@/../package.json';
 
 const state = {
@@ -82,12 +81,13 @@ const actions = {
     commit('SET', { spaces });
     return spaces;
   },
-  send: async ({ commit, dispatch, rootState }, { token, type, payload }) => {
+  send: async ({ commit, dispatch, rootState }, { space, token, type, payload }) => {
     const auth = getInstance();
     commit('SEND_REQUEST');
     try {
       const msg: any = {
         address: rootState.web3.account.base16,
+        space,
         msg: JSON.stringify({
           version,
           timestamp: (Date.now() / 1e3).toFixed(),
@@ -96,7 +96,9 @@ const actions = {
           payload
         })
       };
+      const sigType = auth.provider?.isEVM ? 'evm' : 'schnorr';
       msg.sig = await signMessage(auth.web3, msg.msg);
+      msg.sigType = sigType;
       const result = await client.request('message', msg);
       commit('SEND_SUCCESS');
       dispatch('notify', ['green', `Your ${type} is in!`]);
@@ -113,20 +115,13 @@ const actions = {
   },
   getProposals: async ({ commit }, space) => {
     commit('GET_PROPOSALS_REQUEST');
-    let zilPay = null;
-
-    try {
-      zilPay = await waitZilPay();
-    } catch {
-      //
-    }
 
     try {
       let proposals: any = await client.request(`${space.key}/proposals`);
       if (proposals) {
         const scores = await getScores(
           space.strategies,
-          zilPay,
+          null,
           Object.values(proposals).map((proposal: any) => proposal.address)
         );
         proposals = Object.fromEntries(
@@ -148,12 +143,6 @@ const actions = {
   },
   getProposal: async ({ commit }, payload) => {
     commit('GET_PROPOSAL_REQUEST');
-    let zilPay = {};
-    try {
-      zilPay = await waitZilPay();
-    } catch {
-      ///
-    }
     try {
       const result: any = {};
       const [proposal, votes] = await Promise.all([
@@ -168,7 +157,7 @@ const actions = {
 
       const scores: any = await getScores(
         payload.space.strategies,
-        zilPay,
+        null,
         Object.keys(result.votes)
       );
       result.votes = Object.fromEntries(
@@ -217,12 +206,11 @@ const actions = {
   getPower: async ({ commit }, { space, address, snapshot }) => {
     commit('GET_POWER_REQUEST');
     try {
-      const zilPay = await waitZilPay();
-      const blockNumber = await getBlockNumber(zilPay);
+      const blockNumber = await getBlockNumber();
       const blockTag = snapshot > blockNumber ? 'latest' : parseInt(snapshot);
       let scores: any = await getScores(
         space.strategies,
-        zilPay,
+        null,
         [address],
         // @ts-ignore
         blockTag
@@ -237,6 +225,7 @@ const actions = {
       };
     } catch (e) {
       commit('GET_POWER_FAILURE', e);
+      return { scores: [], totalScore: 0 };
     }
   }
 };

@@ -84,6 +84,7 @@ export default {
     async handleSubmit() {
       this.loading = true;
       await this.send({
+        space: this.space.key,
         token: this.space.token,
         type: 'vote',
         payload: {

@@ -6,13 +6,13 @@
 </template>
 
 <script>
+import { toBech32Address } from '@zilliqa-js/zilliqa';
+
 export default {
   props: ['address', 'space'],
   computed: {
     isCore() {
       try {
-        const { toBech32Address } = window.zilPay.crypto;
-
         return this.space && this.space.members
           ? this.space.members.includes(toBech32Address(this.address))
           : false;

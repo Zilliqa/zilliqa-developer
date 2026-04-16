@@ -13,7 +13,7 @@ function encodeCallsScript(actions) {
     const dataLength = abi
       // @ts-ignore
       .encodeParameter('uint256', (data.length - 2) / 2)
-      .toString('hex');
+      .toString();
     return script + address.slice(26) + dataLength.slice(58) + data.slice(2);
   }, CALLSCRIPT_ID);
 }

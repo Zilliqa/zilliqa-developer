@@ -217,7 +217,7 @@ export default {
         this.space.invalids = this.space.filters.invalids.join('\n');
       this.form = this.space;
     } catch (e) {
-      console.log(e);
+      console.log("Error while loading space", e);
     }
     if (this.from) this.form = this.app.spaces[this.from];
     this.loaded = true;

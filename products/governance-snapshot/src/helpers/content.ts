@@ -53,7 +53,7 @@ export function isValidContenthash(encoded) {
     const codec = contentHash.getCodec(encoded);
     return isHexString(encoded) && supportedCodecs.includes(codec);
   } catch (e) {
-    console.log(e);
+    console.log("Error while validating contenthash", e);
   }
 }
 

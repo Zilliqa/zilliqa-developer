@@ -1,0 +1,28 @@
+# Dependencies (reinstalled inside the image)
+node_modules
+
+# Version control
+.git
+
+# Secrets
+.env
+*.sql
+
+# Docker artifacts
+docker-compose.yml
+Dockerfile
+
+# Deployment / CI configs
+cd/
+
+# Editor / OS artifacts
+.DS_Store
+.idea
+.editorconfig
+
+# Docs and tooling not needed at runtime
+*.md
+LICENSE
+Makefile
+tslint.json
+example.env

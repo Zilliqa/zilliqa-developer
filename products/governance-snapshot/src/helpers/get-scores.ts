@@ -1,24 +1,22 @@
+import { fromBech32Address } from '@zilliqa-js/zilliqa';
+import { validation } from "@zilliqa-js/util";
+import { zilliqa } from '@/helpers/zilliqa';
+
 export const _strategies = {
   'zrc2-balance-of': {
     author: 'zilpay',
     key: 'zrc2-balance-of',
     version: '0.0.1',
-    strategy: async function(provider: any, addresses: string[], options: any) {
+    strategy: async function(_provider: any, addresses: string[], options: any) {
       if (Array.isArray(addresses) && addresses.length === 0) {
         return [];
       }
 
       const balances = await Promise.all(
         addresses.map(async address => {
-          if (!provider) {
-            return [
-              address,
-              Number(0)
-            ];
-          }
-
-          address = provider.crypto.normaliseAddress(address);
-          address = String(address).toLowerCase();
+          address = validation.isBech32(address)
+            ? fromBech32Address(address).toLowerCase()
+            : String(address).toLowerCase();
 
           try {
             const proposal = window['proposal'];
@@ -41,7 +39,7 @@ export const _strategies = {
 
           const {
             result
-          } = await provider.blockchain.getSmartContractSubState(
+          } = await zilliqa.blockchain.getSmartContractSubState(
             options.address,
             'balances',
             [address]
@@ -66,13 +64,13 @@ export const _strategies = {
 
 export async function getScores(
   strategies: any[],
-  provider: any,
-  addresses: string[]
+  _provider?: any,
+  addresses: string[] = []
 ) {
   return await Promise.all(
     strategies.map(strategy => {
       return _strategies[strategy.name].strategy(
-        provider,
+        _provider,
         addresses,
         strategy.params
       );

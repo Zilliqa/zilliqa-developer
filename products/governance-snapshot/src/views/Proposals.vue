@@ -61,6 +61,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import { toBech32Address, fromBech32Address } from '@zilliqa-js/zilliqa';
 
 export default {
   data() {
@@ -104,9 +105,7 @@ export default {
           .filter(proposal => {
             const core = this.space.members.map(address => {
               try {
-                return String(
-                  window['zilPay'].crypto.fromBech32Address(address)
-                ).toLowerCase()
+                return String(fromBech32Address(address)).toLowerCase();
               } catch {
                 return address;
               }
@@ -144,9 +143,7 @@ export default {
           .sort((a, b) => b[1].msg.payload.end - a[1].msg.payload.end, 0)
           .map(proposal => {
             try {
-              proposal[1].address = window['zilPay'].crypto.toBech32Address(
-                proposal[1].address
-              );
+              proposal[1].address = toBech32Address(proposal[1].address);
             } catch {
               //
             }

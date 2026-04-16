@@ -1,11 +1,20 @@
-FROM node:14.17.3
+FROM node:20
 
 WORKDIR /app
-COPY . .
+
+COPY package.json yarn.lock ./
 RUN npm install
+
+COPY . .
+
+RUN groupadd -r app \
+    && useradd -r -g app app \
+    && chown -R app:app /app
+
+USER app
+
+ENV SCRIPT=start
 
 EXPOSE 3000
 
-ARG SCRIPT="start"
-ENV SCRIPT=${SCRIPT}
 ENTRYPOINT ["bash", "run.sh"]

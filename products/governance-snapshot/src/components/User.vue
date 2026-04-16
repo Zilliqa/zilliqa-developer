@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import { toBech32Address } from '@zilliqa-js/zilliqa';
+
 export default {
   props: ['address', 'space'],
   data() {
@@ -24,12 +26,14 @@ export default {
   },
   computed: {
     name() {
-      const { toBech32Address } = window['zilPay'].crypto;
-
-      return this.web3.account.base16 &&
-        this.address.toLowerCase() === this.web3.account.base16.toLowerCase()
-        ? 'You'
-        : this._shorten(toBech32Address(this.address));
+      try {
+        return this.web3.account.base16 &&
+          this.address.toLowerCase() === this.web3.account.base16.toLowerCase()
+          ? 'You'
+          : this._shorten(toBech32Address(this.address));
+      } catch {
+        return this._shorten(this.address);
+      }
     }
   }
 };
