@@ -121,7 +121,7 @@ export default {
         document.body.appendChild(link);
         link.click();
       } catch (e) {
-        console.error(e);
+        console.error("error while processing report", e);
       }
     },
     async submitOnChain() {
@@ -145,9 +145,9 @@ Callsscript: ${callsScript}`
           'delayExecution',
           [callsScript, this.id]
         ]);
-        console.log(tx);
+        console.log("Transaction", tx);
       } catch (e) {
-        console.error(e);
+        console.error("Error while submitting on-chain", e);
       }
       this.notify(['green', `The settlement is on-chain, congrats!`]);
       this.loading = false;

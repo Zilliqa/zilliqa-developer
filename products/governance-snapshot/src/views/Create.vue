@@ -207,9 +207,9 @@ export default {
   async mounted() {
     this.addChoice(2);
 
-    this.blockNumber = await getBlockNumber(this.$auth.web3);
-    this.totalSupply = await getTotalSupply(this.$auth.web3, this.space.token);
+    this.blockNumber = await getBlockNumber();
     this.form.snapshot = this.blockNumber;
+    this.totalSupply = await getTotalSupply(this.space.token);
   },
   methods: {
     ...mapActions(['send']),
@@ -232,6 +232,7 @@ export default {
       this.form.choices = this.choices.map(choice => choice.text);
       try {
         const { ipfsHash } = await this.send({
+          space: this.key,
           token: this.space.token,
           type: 'proposal',
           payload: this.form
@@ -244,7 +245,7 @@ export default {
           }
         });
       } catch (e) {
-        console.error(e);
+        console.error("Error while submitting proposal", e);
         this.loading = false;
       }
     }

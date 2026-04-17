@@ -2,5 +2,9 @@
   "zlp": {
     "id": "zlp",
     "name": "ZilPay"
+  },
+  "evm": {
+    "id": "evm",
+    "name": "EVM Wallet"
   }
 }

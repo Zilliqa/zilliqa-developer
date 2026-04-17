@@ -22,13 +22,13 @@ jobs:
       matrix:
         application:
           [
-            bluebell-playground,
-            eth-spout,
+            # bluebell-playground,
+            # eth-spout,
             governance-api,
             governance-snapshot,
             multisig,
-            scilla-server,
-            zillion,
+            # scilla-server,
+            # zillion,
           ]
         include:
           - application: bluebell-playground

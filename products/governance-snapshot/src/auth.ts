@@ -1,10 +1,10 @@
 import Vue from 'vue';
-import { LockPlugin, ZilPay as zlp } from '@/helpers/plugins/LockPlugin';
+import { LockPlugin, ZilPay as zlp, EVMConnector as evm } from '@/helpers/plugins/LockPlugin';
 
 import config from '@/helpers/config';
 
 const options: any = { connectors: [] };
-const connectors = { zlp };
+const connectors = { zlp, evm };
 
 Object.entries(config.connectors).forEach((connector: any) => {
   options.connectors.push({

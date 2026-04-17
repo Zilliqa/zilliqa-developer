@@ -1,0 +1,107 @@
+# Standalone Zilliqa Governance Portal
+#
+# Services:
+#   postgres          — relational store for proposal/vote index
+#   ipfs              — kubo node for immutable proposal/vote storage
+#   governance-api    — REST API (validates, pins, indexes)
+#   governance-snapshot — Vue 2 SPA served by nginx
+#
+# Quick start:
+#   cp .env.governance.example .env   # fill in POSTGRES_PASSWORD
+#   docker compose up --build
+#
+# Frontend: http://localhost:8000
+# API:      http://localhost:3000
+# IPFS GW:  http://localhost:8080
+
+services:
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-snapshot}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── IPFS (kubo) ──────────────────────────────────────────────────────────
+  ipfs:
+    image: ipfs/kubo:latest
+    restart: unless-stopped
+    environment:
+      # Disable MDNS discovery; use the server profile for a headless node.
+      IPFS_PROFILE: server
+    ports:
+      - "4001:4001"       # Swarm (P2P) — omit if not joining the public DHT
+      - "5001:5001"       # RPC API     — do not expose publicly in production
+      - "8080:8080"       # HTTP Gateway — browser IPFS reads
+    volumes:
+      - ipfs_data:/data/ipfs
+      # Init script: opens API/gateway to 0.0.0.0 so governance-api can reach
+      # it via the docker network before the daemon starts.
+      - ./ipfs/init.sh:/container-init.d/001-init.sh:ro
+    healthcheck:
+      test: ["CMD", "ipfs", "id"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── governance-api ────────────────────────────────────────────────────────
+  governance-api:
+    build:
+      context: ./governance-api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      POSTGRES_DB: ${POSTGRES_DB:-snapshot}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_HOST: postgres
+      # Point at the local kubo node instead of Pinata.
+      # Remove this variable (and set PINATA_* below) to use Pinata instead.
+      IPFS_API_URL: http://ipfs:5001
+      # Pinata credentials — leave empty when IPFS_API_URL is set.
+      PINATA_API_KEY: ${PINATA_API_KEY:-}
+      PINATA_SECRET_API_KEY: ${PINATA_SECRET_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ipfs:
+        condition: service_healthy
+
+  # ── governance-snapshot ───────────────────────────────────────────────────
+  governance-snapshot:
+    build:
+      context: ./governance-snapshot
+      dockerfile: Dockerfile
+      args:
+        # VUE_APP_IPFS_NODE is baked in at build time (process.env in compiled JS).
+        # Must be reachable from the user's browser, not from inside docker.
+        VUE_APP_IPFS_NODE: ${VUE_APP_IPFS_NODE:-http://localhost:8080}
+        # Set to \"production\" for an optimised production build.
+        # Defaults to \"development\" for unminified JS with source maps (readable stack traces).
+        BUILD_MODE: ${BUILD_MODE:-development}
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      # Override runtime config so the browser points at the local API.
+      # VUE_APP_HUB_URL is read as window['VUE_APP_HUB_URL'] at runtime.
+      - ./governance-snapshot/config.docker.js:/usr/share/nginx/html/config.js:ro
+    depends_on:
+      - governance-api
+
+volumes:
+  postgres_data:
+  ipfs_data:

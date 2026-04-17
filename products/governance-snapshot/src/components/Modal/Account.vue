@@ -12,9 +12,16 @@
         >
           <UiButton class="button-outline width-full v-align-middle">
             <img
-              :src="`https://zilpay.xyz/icons/${connector.id}.png`"
+              v-if="connector.id === 'zlp'"
+              src="@/assets/zlp.png"
               height="28"
               width="28"
+              class="mr-1 v-align-middle"
+            />
+            <Icon
+              v-else
+              name="wallet"
+              size="28"
               class="mr-1 v-align-middle"
             />
             {{ connector.name }}

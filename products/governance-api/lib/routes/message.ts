@@ -1,25 +1,22 @@
 import { Router } from "express";
 import BN from "bn.js";
-import fromentries from "object.fromentries";
 import spaces from "@snapshot-labs/snapshot-spaces";
 import { verifySignature, pinJson } from "../utils";
+import { verifyEVMSignature } from "../utils/verify-evm-signature";
 import { Message } from "../models";
 import { blockchain } from "../zilliqa/custom-fetch";
 
 import pkg from "../../package.json";
 
 import { ErrorCodes } from "../config";
-import { fromBech32Address, validation } from "@zilliqa-js/zilliqa";
+import { fromBech32Address } from "@zilliqa-js/zilliqa";
+import { validation } from "@zilliqa-js/util";
 
 export const message = Router();
 const gZIL = "zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e";
 const blk = new blockchain();
 
-const tokens = fromentries(
-  Object.entries(spaces).map((space: any) => {
-    return [space[1].token, space[0]];
-  })
-);
+
 
 const proposal = (res: any, msg: any) => {
   if (msg.type !== "proposal") {
@@ -149,10 +146,18 @@ message.post("/message", async (req, res) => {
       });
     }
 
-    if (!tokens[msg.token]) {
+    const spaceKey = body.space;
+    if (!spaceKey || !spaces[spaceKey]) {
       return res.status(400).json({
         code: ErrorCodes.UNKNOWN_SPACE,
         error_description: "unknown space",
+      });
+    }
+
+    if (spaces[spaceKey].token !== msg.token) {
+      return res.status(400).json({
+        code: ErrorCodes.UNKNOWN_SPACE,
+        error_description: "token does not match space",
       });
     }
 
@@ -179,17 +184,29 @@ message.post("/message", async (req, res) => {
       });
     }
 
-    try {
-      const checked = verifySignature(
-        body.sig.message,
-        body.sig.publicKey,
-        body.sig.signature,
-        body.address
-      );
+    // Normalise EVM addresses to always have the 0x prefix
+    if (body.sigType === 'evm' && body.address && !body.address.startsWith('0x')) {
+      body.address = '0x' + body.address;
+    }
 
-      if (!checked) {
-        throw new Error();
+    try {
+      let checked: boolean;
+      if (body.sigType === 'evm') {
+        checked = verifyEVMSignature(
+          body.sig.message,
+          body.sig.signature,
+          body.address
+        );
+      } else {
+        // Default to Schnorr for ZilPay and legacy submissions
+        checked = verifySignature(
+          body.sig.message,
+          body.sig.publicKey,
+          body.sig.signature,
+          body.address
+        );
       }
+      if (!checked) throw new Error('signature mismatch');
     } catch (err) {
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_SIGNATURE,
@@ -200,7 +217,7 @@ message.post("/message", async (req, res) => {
     proposal(res, msg);
     await vote(res, msg, ts);
 
-    const space = tokens[msg.token];
+    const space = spaceKey;
     let authorIpfsRes: any | null = null;
 
     if (msg.type === "proposal") {

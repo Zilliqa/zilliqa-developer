@@ -72,13 +72,13 @@ export const useLock = ({ ...options }) => {
 
 export class ZilPay extends LockConnector {
   async connect() {
-    let provider;
+    let provider = null;
     if (window['zilPay']) {
-      provider = window['zilPay'];
       try {
         await window['zilPay'].wallet.connect();
+        provider = window['zilPay'];
       } catch (e) {
-        console.error(e);
+        console.error("error getting ZilPay provider", e);
       }
     } else if (window['zilliqa']) {
       provider = window['zilliqa'];
@@ -88,6 +88,24 @@ export class ZilPay extends LockConnector {
 
   isLoggedIn(): boolean {
     return Boolean(window['zilPay']);
+  }
+}
+
+export class EVMConnector extends LockConnector {
+  async connect() {
+    if (!window['ethereum'])
+      throw new Error('No EVM wallet found. Install MetaMask or another browser wallet.');
+    const accounts: string[] = await window['ethereum'].request({ method: 'eth_requestAccounts' });
+    if (!accounts.length) throw new Error('No accounts returned by wallet.');
+    return { isEVM: true, address: accounts[0] };
+  }
+
+  isLoggedIn(): boolean {
+    return Boolean(window['ethereum']);
+  }
+
+  async logout() {
+    // window.ethereum has no disconnect method; app state is cleared by useLock.logout()
   }
 }
 

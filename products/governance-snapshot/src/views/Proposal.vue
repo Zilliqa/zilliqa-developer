@@ -237,18 +237,22 @@ export default {
       this.votes = proposalObj.votes;
       this.results = proposalObj.results;
 
-      console.log(this.proposalObj);
+      console.log("Proposal details", proposalObj);
     },
     async loadPower() {
       if (!this.web3.account.bech32) return;
 
-      const { scores, totalScore } = await this.getPower({
+      const result = await this.getPower({
         space: this.space,
         address: this.web3.account.bech32,
         snapshot: this.payload.snapshot
       });
-      this.totalScore = totalScore;
-      this.scores = scores;
+      if (!result) {
+        console.error("Error while loading voting power");
+        return;
+      }
+      this.totalScore = result.totalScore;
+      this.scores = result.scores;
     }
   },
   async created() {

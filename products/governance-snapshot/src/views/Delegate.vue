@@ -105,10 +105,10 @@ export default {
           'setDelegate',
           [keccak256(toUtf8Bytes(this.form.id)), this.form.address]
         ]);
-        console.log(tx);
+        console.log("Transaction details", tx);
         this.notify('You did it!');
       } catch (e) {
-        console.log(e);
+        console.log("Error while submitting delegation", e);
       }
       this.loading = false;
     }
