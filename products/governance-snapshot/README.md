@@ -70,6 +70,17 @@ When confirmed, the application ([src/store/modules/app.ts](src/store/modules/ap
 3.  **Authorize**: The address owner calculates the vote intention locally and cryptographically signs it using their private key (managed by the wallet software).
 4.  **Submit**: The signed intent is relayed to a centralized hub for aggregation.
 
+## Wallet Connectivity
+
+The portal supports two wallet types, both of which require **mainnet**. Testnet is not supported and no fix is planned, as this portal is scheduled for deprecation.
+
+| Wallet | Connector ID | Notes |
+|--------|-------------|-------|
+| ZilPay | `zlp` | Native Zilliqa wallet; displays bech32 address; links to the configured network explorer |
+| EVM Wallet (e.g. MetaMask) | `evm` | MetaMask-compatible; displays `0x`-prefixed address; links to [zilliqa.blockscout.com](https://zilliqa.blockscout.com) (mainnet only — hardcoded) |
+
+The EVM wallet block-explorer link is hardcoded to `https://zilliqa.blockscout.com`, so it will always point to mainnet regardless of the connected network. This is a known limitation that will not be addressed before deprecation.
+
 ## Development
 
 
