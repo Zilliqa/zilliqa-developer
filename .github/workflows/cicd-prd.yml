@@ -79,7 +79,7 @@ jobs:
           fetch-depth: 0
 
       - name: Docker build and push - production
-        uses: Zilliqa/gh-actions-workflows/actions/ci-dockerized-app-build-push@v2
+        uses: Zilliqa/gh-actions-workflows/actions/ci-dockerized-app-build-push@v4
         with:
           context: ${{ matrix.path }}
           push: true
