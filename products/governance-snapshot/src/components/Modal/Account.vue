@@ -1,6 +1,6 @@
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <div v-if="!web3.account.bech32 || step === 'connect'">
+    <div v-if="!web3.account.bech32">
       <h3 class="m-4 mb-0 text-center">Connect wallet</h3>
       <div class="m-4 mb-5">
         <a
@@ -48,11 +48,10 @@
           </UiButton>
         </a>
         <UiButton
-          v-show="!web3"
-          @click="step = 'connect'"
-          class="button-outline width-full mb-2"
+          @click="handleLogout"
+          class="button-outline width-full text-red mb-2"
         >
-          Connect wallet
+          Disconnect
         </UiButton>
       </div>
     </div>
@@ -64,11 +63,6 @@ import { mapActions } from 'vuex';
 
 export default {
   props: ['open'],
-  data() {
-    return {
-      step: null
-    };
-  },
   computed: {
     accountDisplayAddress() {
       if (this.web3.isEVM) {
@@ -81,11 +75,6 @@ export default {
         return `https://zilliqa.blockscout.com/address/0x${this.web3.account.base16}`;
       }
       return this._explorer(this.web3.network.name, this.web3.account.bech32);
-    }
-  },
-  watch: {
-    open() {
-      this.step = null;
     }
   },
   methods: {

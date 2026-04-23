@@ -25,7 +25,7 @@ const state = {
 
 const mutations = {
   LOGOUT(_state) {
-    Vue.set(_state, 'account', null);
+    Vue.set(_state, 'account', { base16: '', bech32: '' });
     Vue.set(_state, 'name', null);
     Vue.set(_state, 'isEVM', false);
     console.debug('LOGOUT');
@@ -40,7 +40,7 @@ const mutations = {
     console.debug('LOAD_PROVIDER_SUCCESS');
   },
   LOAD_PROVIDER_FAILURE(_state, payload) {
-    Vue.set(_state, 'account', null);
+    Vue.set(_state, 'account', { base16: '', bech32: '' });
     console.debug('LOAD_PROVIDER_FAILURE', payload);
   },
   HANDLE_CHAIN_CHANGED(_state, net) {
@@ -76,7 +76,7 @@ const actions = {
     }
   },
   logout: async ({ commit }) => {
-    Vue.prototype.$auth.logout();
+    await Vue.prototype.$auth.logout();
     commit('LOGOUT');
   },
   loadProvider: async ({ commit }) => {
