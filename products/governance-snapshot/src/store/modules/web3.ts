@@ -19,13 +19,15 @@ const state = {
     bech32: ''
   },
   name: null,
-  network: config.networks['mainnet']
+  network: config.networks['mainnet'],
+  isEVM: false
 };
 
 const mutations = {
   LOGOUT(_state) {
     Vue.set(_state, 'account', null);
     Vue.set(_state, 'name', null);
+    Vue.set(_state, 'isEVM', false);
     console.debug('LOGOUT');
   },
   LOAD_PROVIDER_REQUEST() {
@@ -57,6 +59,9 @@ const mutations = {
   HANDLE_ACCOUNTS_CHANGED(_state, payload) {
     Vue.set(_state, 'account', payload);
     console.debug('HANDLE_ACCOUNTS_CHANGED', payload);
+  },
+  SET_IS_EVM(_state, value: boolean) {
+    Vue.set(_state, 'isEVM', value);
   }
 };
 
@@ -82,7 +87,8 @@ const actions = {
         const base16 = auth.provider.address.slice(2).toLowerCase();
         const bech32 = toBech32Address('0x' + base16);
         commit('HANDLE_CHAIN_CHANGED', 'mainnet');
-        commit('LOAD_PROVIDER_SUCCESS', { account: { base16, bech32 }, name: bech32 });
+        commit('SET_IS_EVM', true);
+        commit('LOAD_PROVIDER_SUCCESS', { account: { base16, bech32 }, name: '0x' + base16 });
 
         // Subscribe to future account changes (e.g. user switches wallet in MetaMask)
         window['ethereum'].on('accountsChanged', (accounts: string[]) => {
