@@ -1,6 +1,6 @@
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <div v-if="!web3.account.bech32 || step === 'connect'">
+    <div v-if="!web3.account.bech32">
       <h3 class="m-4 mb-0 text-center">Connect wallet</h3>
       <div class="m-4 mb-5">
         <a
@@ -33,7 +33,7 @@
       <h3 class="m-4 mb-0 text-center">Account</h3>
       <div v-if="$auth.isAuthenticated" class="m-4">
         <a
-          :href="_explorer(web3.network.name, web3.account.bech32)"
+          :href="accountExplorerUrl"
           target="_blank"
           class="mb-2 d-block"
         >
@@ -43,17 +43,15 @@
               size="16"
               class="mr-2 ml-n1"
             />
-            <span v-if="web3.name" v-text="_shorten(web3.name)" />
-            <span v-else v-text="_shorten(web3.account.bech32)" />
+            <span v-text="_shorten(accountDisplayAddress)" />
             <Icon name="external-link" class="ml-1" />
           </UiButton>
         </a>
         <UiButton
-          v-show="!web3"
-          @click="step = 'connect'"
-          class="button-outline width-full mb-2"
+          @click="handleLogout"
+          class="button-outline width-full text-red mb-2"
         >
-          Connect wallet
+          Disconnect
         </UiButton>
       </div>
     </div>
@@ -65,14 +63,18 @@ import { mapActions } from 'vuex';
 
 export default {
   props: ['open'],
-  data() {
-    return {
-      step: null
-    };
-  },
-  watch: {
-    open() {
-      this.step = null;
+  computed: {
+    accountDisplayAddress() {
+      if (this.web3.isEVM) {
+        return '0x' + this.web3.account.base16;
+      }
+      return this.web3.account.bech32;
+    },
+    accountExplorerUrl() {
+      if (this.web3.isEVM) {
+        return `https://zilliqa.blockscout.com/address/0x${this.web3.account.base16}`;
+      }
+      return this._explorer(this.web3.network.name, this.web3.account.bech32);
     }
   },
   methods: {

@@ -19,13 +19,15 @@ const state = {
     bech32: ''
   },
   name: null,
-  network: config.networks['mainnet']
+  network: config.networks['mainnet'],
+  isEVM: false
 };
 
 const mutations = {
   LOGOUT(_state) {
-    Vue.set(_state, 'account', null);
+    Vue.set(_state, 'account', { base16: '', bech32: '' });
     Vue.set(_state, 'name', null);
+    Vue.set(_state, 'isEVM', false);
     console.debug('LOGOUT');
   },
   LOAD_PROVIDER_REQUEST() {
@@ -38,7 +40,7 @@ const mutations = {
     console.debug('LOAD_PROVIDER_SUCCESS');
   },
   LOAD_PROVIDER_FAILURE(_state, payload) {
-    Vue.set(_state, 'account', null);
+    Vue.set(_state, 'account', { base16: '', bech32: '' });
     console.debug('LOAD_PROVIDER_FAILURE', payload);
   },
   HANDLE_CHAIN_CHANGED(_state, net) {
@@ -57,6 +59,9 @@ const mutations = {
   HANDLE_ACCOUNTS_CHANGED(_state, payload) {
     Vue.set(_state, 'account', payload);
     console.debug('HANDLE_ACCOUNTS_CHANGED', payload);
+  },
+  SET_IS_EVM(_state, value: boolean) {
+    Vue.set(_state, 'isEVM', value);
   }
 };
 
@@ -70,9 +75,14 @@ const actions = {
       await dispatch('loadProvider');
     }
   },
-  logout: async ({ commit }) => {
-    Vue.prototype.$auth.logout();
-    commit('LOGOUT');
+  logout: async ({ commit, dispatch }) => {
+    try {
+      await Vue.prototype.$auth.logout();
+    } catch (e) {
+      dispatch('notify', ['red', 'Logout failed. Please try again.']);
+    } finally {
+      commit('LOGOUT');
+    }
   },
   loadProvider: async ({ commit }) => {
     commit('LOAD_PROVIDER_REQUEST');
@@ -82,7 +92,8 @@ const actions = {
         const base16 = auth.provider.address.slice(2).toLowerCase();
         const bech32 = toBech32Address('0x' + base16);
         commit('HANDLE_CHAIN_CHANGED', 'mainnet');
-        commit('LOAD_PROVIDER_SUCCESS', { account: { base16, bech32 }, name: bech32 });
+        commit('SET_IS_EVM', true);
+        commit('LOAD_PROVIDER_SUCCESS', { account: { base16, bech32 }, name: '0x' + base16 });
 
         // Subscribe to future account changes (e.g. user switches wallet in MetaMask)
         window['ethereum'].on('accountsChanged', (accounts: string[]) => {
