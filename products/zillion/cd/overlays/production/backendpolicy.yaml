@@ -3,8 +3,6 @@ kind: GCPBackendPolicy
 metadata:
   name: zillion
 spec:
-  default:
-    securityPolicy: prod-apps-gateway
   targetRef:
     group: ""
     kind: Service
