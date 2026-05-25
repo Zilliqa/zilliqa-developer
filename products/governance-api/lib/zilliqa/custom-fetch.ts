@@ -1,6 +1,7 @@
 // import { cloneDeep } from 'lodash';
 import BN from "bn.js";
 import { RPCMethod } from "@zilliqa-js/core";
+import { logger } from "../logger";
 
 export enum TokenFields {
   TotalSupply = "total_supply",
@@ -64,7 +65,13 @@ export class blockchain {
         jsonrpc: `2.0`,
       },
     ];
-    const res = await this._send(batch);
+    let res: object[];
+    try {
+      res = await this._send(batch);
+    } catch (err) {
+      logger.error({ err, error_code: "ZILLIQA_RPC_FAILED" }, "Zilliqa RPC call failed");
+      throw err;
+    }
     let tokenBalances = res[4]["result"][TokenFields.Balances];
     const totalSupply = res[5]["result"][TokenFields.TotalSupply];
 
@@ -73,6 +80,7 @@ export class blockchain {
 
     const userBalance = tokenBalances[address];
 
+    logger.info({ token, address, userBalance }, "Zilliqa liquidity fetched");
     return {
       balances: tokenBalances,
       totalSupply,
@@ -121,7 +129,7 @@ export class blockchain {
         }
       }
     } catch (err) {
-      console.log("parse-xcad", err);
+      logger.error({ err, error_code: "PARSE_XCAD_FAILED" }, "XCAD parse error");
     }
 
     return tokenBalances;
@@ -163,7 +171,7 @@ export class blockchain {
         }
       }
     } catch (err) {
-      console.log("zilswap-parse", err);
+      logger.error({ err, error_code: "PARSE_ZILSWAP_FAILED" }, "ZilSwap parse error");
     }
 
     return tokenBalances;

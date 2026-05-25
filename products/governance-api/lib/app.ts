@@ -1,9 +1,21 @@
 import express from "express";
 import * as bodyParser from "body-parser";
 import errorhandler from "strong-error-handler";
+import pinoHttp from "pino-http";
 import router from "./routes";
+import { logger } from "./logger";
 
 export const app = express();
+
+app.use(
+  pinoHttp({
+    logger,
+    customLogLevel: (_req, res, _err) => {
+      if (res.statusCode >= 400) return "error";
+      return "info";
+    },
+  })
+);
 
 // middleware for parsing application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
