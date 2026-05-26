@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import pinataSDK from "@pinata/sdk";
+import { logger } from "../logger";
 
 export async function pinJson(body: object): Promise<string> {
   if (process.env.IPFS_API_URL) {
@@ -11,6 +12,7 @@ export async function pinJson(body: object): Promise<string> {
     String(process.env.PINATA_SECRET_API_KEY)
   );
   const result = await pinata.pinJSONToIPFS(body);
+  logger.info({ ipfsHash: result.IpfsHash }, "IPFS pin succeeded (Pinata)");
   return result.IpfsHash;
 }
 
@@ -39,12 +41,13 @@ async function pinToLocalNode(body: object): Promise<string> {
   );
 
   if (!response.ok) {
+    logger.error({ status: response.status }, "IPFS pin failed");
     throw new Error(
       `IPFS add failed: ${response.status} ${await response.text()}`
     );
   }
 
   const data = (await response.json()) as { Hash: string };
-  console.log("IPFS pin success", data.Hash);
+  logger.info({ ipfsHash: data.Hash }, "IPFS pin succeeded (local node)");
   return data.Hash;
 }

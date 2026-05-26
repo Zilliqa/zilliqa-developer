@@ -83,7 +83,7 @@ const proposal = (res: any, msg: any) => {
     });
   }
 };
-const vote = async (res: any, msg: any, ts: string) => {
+const vote = async (res: any, msg: any, ts: string, log: any) => {
   if (msg.type !== "vote") {
     return null;
   }
@@ -118,6 +118,7 @@ const vote = async (res: any, msg: any, ts: string) => {
   });
 
   if (!proposal) {
+    log.error({ error_code: ErrorCodes.INCORRECT_PROPOSAL_FORMAT, token: msg.token }, "Proposal not found");
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_FORMAT,
       error_description: "incorect vote proposal",
@@ -126,6 +127,7 @@ const vote = async (res: any, msg: any, ts: string) => {
   const payload = JSON.parse(proposal.payload);
 
   if (Number(ts) > Number(payload.end) || Number(payload.start) > Number(ts)) {
+    log.error({ error_code: ErrorCodes.INCORRECT_VOTE_FORMAT, address: msg.address }, "Not in voting window");
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_VOTE_FORMAT,
       error_description: "not in voting window",
@@ -134,12 +136,14 @@ const vote = async (res: any, msg: any, ts: string) => {
 };
 
 message.post("/message", async (req, res) => {
+  const log = (req as any).log;
   try {
     const body = req.body;
     const msg = JSON.parse(body.msg);
     const ts = (Date.now() / 1e3).toFixed();
 
     if (!body || !body.address || !body.msg || !body.sig) {
+      log.error({ error_code: ErrorCodes.INCORRECT_DATA, address: body && body.address }, "incorrect message body");
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_DATA,
         error_description: "incorect message body",
@@ -148,6 +152,7 @@ message.post("/message", async (req, res) => {
 
     const spaceKey = body.space;
     if (!spaceKey || !spaces[spaceKey]) {
+      log.error({ error_code: ErrorCodes.UNKNOWN_SPACE, address: body && body.address }, "unknown space");
       return res.status(400).json({
         code: ErrorCodes.UNKNOWN_SPACE,
         error_description: "unknown space",
@@ -155,6 +160,7 @@ message.post("/message", async (req, res) => {
     }
 
     if (spaces[spaceKey].token !== msg.token) {
+      log.error({ error_code: ErrorCodes.UNKNOWN_SPACE, address: body && body.address }, "token does not match space");
       return res.status(400).json({
         code: ErrorCodes.UNKNOWN_SPACE,
         error_description: "token does not match space",
@@ -164,6 +170,7 @@ message.post("/message", async (req, res) => {
     msg.timestamp = Number(msg.timestamp);
 
     if (!msg.timestamp || isNaN(msg.timestamp) || msg.timestamp > ts + 30) {
+      log.error({ error_code: ErrorCodes.INCORRECT_DATA, address: body && body.address }, "wrong timestamp");
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_DATA,
         error_description: "wrong timestamp",
@@ -171,6 +178,7 @@ message.post("/message", async (req, res) => {
     }
 
     if (!msg.version || msg.version !== pkg.version) {
+      log.error({ error_code: ErrorCodes.INCORRECT_VER, address: body && body.address }, "incorrect version");
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_VER,
         error_description: "incorrect version",
@@ -178,6 +186,7 @@ message.post("/message", async (req, res) => {
     }
 
     if (!msg.type || !["proposal", "vote"].includes(msg.type)) {
+      log.error({ error_code: ErrorCodes.INCORRECT_TYPE, address: body && body.address }, "incorrect type");
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_TYPE,
         error_description: "incorrect type",
@@ -208,14 +217,17 @@ message.post("/message", async (req, res) => {
       }
       if (!checked) throw new Error('signature mismatch');
     } catch (err) {
+      log.error({ error_code: ErrorCodes.INCORRECT_SIGNATURE, address: body.address }, "Signature verification failed");
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_SIGNATURE,
         error_description: "incorrect signature",
       });
     }
 
+    log.info({ address: body.address, sigType: body.sigType || "schnorr" }, "Signature verified");
+
     proposal(res, msg);
-    await vote(res, msg, ts);
+    await vote(res, msg, ts, log);
 
     const space = spaceKey;
     let authorIpfsRes: any | null = null;
@@ -230,10 +242,13 @@ message.post("/message", async (req, res) => {
         base16owner
       );
 
+      log.info({ token: base16Token, address: base16owner, userBalance }, "Zilliqa liquidity fetched");
+
       const _balance = new BN(userBalance);
       const _minGZIL = new BN("30000000000000000");
 
       if (msg.token == gZIL && _balance.lt(_minGZIL)) {
+        log.error({ error_code: ErrorCodes.MIN_BALANCE_ERROR, balance: _balance.toString(), threshold: _minGZIL.toString() }, "Balance below minimum gZIL");
         return res.status(400).json({
           code: ErrorCodes.MIN_BALANCE_ERROR,
           error_description:
@@ -260,6 +275,7 @@ message.post("/message", async (req, res) => {
         payload: JSON.stringify(msg.payload),
         sig: JSON.stringify(body.sig),
       });
+      log.info({ type: msg.type, ipfsHash: authorIpfsRes, address: body.address }, "DB record created");
     }
 
     if (msg.type === "vote") {
@@ -281,17 +297,14 @@ message.post("/message", async (req, res) => {
         payload: JSON.stringify(msg.payload),
         sig: JSON.stringify(body.sig),
       });
+      log.info({ type: msg.type, ipfsHash: authorIpfsRes, address: body.address }, "DB record created");
     }
 
-    console.log(
-      `Address "${body.address}"\n`,
-      `Token "${msg.token}"\n`,
-      `Type "${msg.type}"\n`,
-      `IPFS hash "${authorIpfsRes}"`
-    );
+    log.info({ address: body.address, token: msg.token, type: msg.type, ipfsHash: authorIpfsRes }, "Message processed successfully");
 
     return res.json({ ipfsHash: authorIpfsRes });
   } catch (err) {
+    log.error({ err, error_code: 500 }, "Unhandled error in message handler");
     return res.status(400).json({
       code: 500,
       error_description: err.message,
