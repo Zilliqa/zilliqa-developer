@@ -23,8 +23,14 @@ export class blockchain {
   private _zero = new BN(0);
 
   public async getLiquidity(token: string, address: string) {
-    // ZRC2 `balances` is keyed by lowercase 0x addresses; normalise the submitter's key so
-    // we can fetch ONLY their entry instead of downloading the entire (multi-MB) holder map.
+    // Normalise the submitter's key (lowercase 0x, matching Scilla map keys) for the gate
+    // lookup + LP seeding below.
+    //
+    // NOTE: the FULL holder map is fetched on purpose (index [] below). It is pinned to IPFS
+    // as the whole-electorate voter-scoring snapshot (governance-snapshot get-scores.ts reads
+    // proposal.balances[voter]). Do NOT scope this to [ownerKey]: that shrinks the snapshot
+    // and collapses vote tallies to the submitter alone. The resulting ~30s fetch is covered
+    // by the raised gateway/client timeouts.
     const ownerKey = "0x" + this._toHex(address);
     const batch = [
       {
@@ -57,7 +63,7 @@ export class blockchain {
       },
       {
         method: RPCMethod.GetSmartContractSubState,
-        params: [this._toHex(token), TokenFields.Balances, [ownerKey]],
+        params: [this._toHex(token), TokenFields.Balances, []],
         id: 1,
         jsonrpc: `2.0`,
       },

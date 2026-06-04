@@ -7,7 +7,11 @@ import { blockchain } from "./custom-fetch";
 // api.zilliqa.com). getLiquidity must (a) fetch ONLY the submitter's entry — not the whole
 // multi-MB map — and (b) read it back with a normalized lowercase-0x key.
 
-async function scopedFetchTest() {
+async function fullMapFetchTest() {
+  // The balances RPC MUST fetch the FULL holder map (index []): it is pinned to IPFS as the
+  // whole-electorate voter-scoring snapshot. Scoping it to the submitter collapses vote tallies
+  // to the submitter alone (regression C1). The submitter's own balance is still read back via a
+  // normalized lowercase-0x key (fixes a latent bech32 checksum mismatch).
   const b: any = new blockchain();
   let sent: any;
   b._send = async (batch: any[]) => {
@@ -17,22 +21,22 @@ async function scopedFetchTest() {
       { result: { balances: {} } },
       { result: { xpools: {} } },
       { result: { xbalances: {} } },
-      { result: { balances: { "0xabc": "123" } } },
+      { result: { balances: { "0xabc": "123", "0xdef": "999" } } },
       { result: { total_supply: "1000" } },
     ];
   };
 
-  // Mixed-case inputs to prove normalization.
+  // Mixed-case submitter input to prove read-key normalization.
   const out = await b.getLiquidity("0xA845c1034CD077bd8D32be0447239c7E4be6cb21", "0xABC");
 
   assert.deepStrictEqual(
     sent[4].params[2],
-    ["0xabc"],
-    "balances call must be scoped to the submitter (lowercase 0x), not the full map"
+    [],
+    "balances must fetch the FULL map (index []) for the voter-scoring snapshot (guards C1)"
   );
-  assert.notDeepStrictEqual(sent[4].params[2], [], "must NOT fetch the entire balances map");
-  assert.strictEqual(out.userBalance, "123", "userBalance read via normalized key");
-  console.log("OK scopedFetchTest");
+  assert.strictEqual(out.userBalance, "123", "submitter balance read via normalized lowercase key");
+  assert.ok("0xdef" in out.balances, "full electorate snapshot retained for scoring");
+  console.log("OK fullMapFetchTest");
 }
 
 async function nullResultTest() {
@@ -75,7 +79,7 @@ async function lpHolderCreditedWithoutDirectBalance() {
 }
 
 (async () => {
-  await scopedFetchTest();
+  await fullMapFetchTest();
   await nullResultTest();
   await lpHolderCreditedWithoutDirectBalance();
   console.log("ALL PASS");

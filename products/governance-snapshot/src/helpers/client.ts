@@ -1,7 +1,10 @@
 // ABOUTME: Thin fetch wrapper for the governance-api. Guarantees the returned promise always
 // ABOUTME: settles (timeout + defensive error parsing) so the UI never hangs on a 504/non-JSON.
 
-const REQUEST_TIMEOUT_MS = 45000;
+// Proposal creation pins the full gZIL holder snapshot (~30s); the gateway backend timeout is
+// raised to 90s to match, so keep this client ceiling just above it to surface a real 504
+// instead of aborting first. It is a safety net against an indefinitely hung backend.
+const REQUEST_TIMEOUT_MS = 95000;
 
 class Client {
   async request(command, body?) {
@@ -16,8 +19,7 @@ class Client {
       init.body = JSON.stringify(body);
     }
 
-    // Bound the request so a hung/slow backend (e.g. the gateway 504s at 30s) can never
-    // leave the caller waiting forever.
+    // Bound the request so a hung/slow backend can never leave the caller waiting forever.
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     init.signal = controller.signal;
