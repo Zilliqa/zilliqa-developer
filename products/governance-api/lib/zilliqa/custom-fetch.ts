@@ -23,6 +23,9 @@ export class blockchain {
   private _zero = new BN(0);
 
   public async getLiquidity(token: string, address: string) {
+    // ZRC2 `balances` is keyed by lowercase 0x addresses; normalise the submitter's key so
+    // we can fetch ONLY their entry instead of downloading the entire (multi-MB) holder map.
+    const ownerKey = "0x" + this._toHex(address);
     const batch = [
       {
         method: RPCMethod.GetSmartContractSubState,
@@ -54,7 +57,7 @@ export class blockchain {
       },
       {
         method: RPCMethod.GetSmartContractSubState,
-        params: [this._toHex(token), TokenFields.Balances, []],
+        params: [this._toHex(token), TokenFields.Balances, [ownerKey]],
         id: 1,
         jsonrpc: `2.0`,
       },
@@ -72,13 +75,19 @@ export class blockchain {
       logger.error({ err, error_code: "ZILLIQA_RPC_FAILED" }, "Zilliqa RPC call failed");
       throw err;
     }
-    let tokenBalances = res[4]["result"][TokenFields.Balances];
-    const totalSupply = res[5]["result"][TokenFields.TotalSupply];
+    let tokenBalances = res[4]?.["result"]?.[TokenFields.Balances] ?? {};
+    const totalSupply = res[5]?.["result"]?.[TokenFields.TotalSupply] ?? "0";
+
+    // Seed the submitter's key so the LP crediting below can augment it even when the user
+    // holds no *direct* token balance (their gZIL may sit only in ZilSwap/XCAD liquidity).
+    if (!(ownerKey in tokenBalances)) {
+      tokenBalances[ownerKey] = "0";
+    }
 
     tokenBalances = this._parseZilSwap(res, token, tokenBalances);
     tokenBalances = this._parseXcad(res, token, tokenBalances);
 
-    const userBalance = tokenBalances[address];
+    const userBalance = tokenBalances[ownerKey] ?? "0";
 
     logger.info({ token, address, userBalance }, "Zilliqa liquidity fetched");
     return {
@@ -178,7 +187,7 @@ export class blockchain {
   }
 
   private _toHex(address: string) {
-    return String(address).replace("0x", "").toLowerCase();
+    return String(address).replace(/^0x/i, "").toLowerCase();
   }
 
   private async _send(batch: object[]) {
