@@ -3,6 +3,10 @@ kind: GCPBackendPolicy
 metadata:
   name: governance-api
 spec:
+  default:
+    # Proposal creation fetches + pins the full gZIL holder balances snapshot (~30s). Raise the
+    # backend timeout above GKE's 30s default so the request is not killed with a 504.
+    timeoutSec: 90
   targetRef:
     group: ""
     kind: Service

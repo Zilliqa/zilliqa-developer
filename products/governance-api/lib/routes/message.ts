@@ -244,7 +244,7 @@ message.post("/message", async (req, res) => {
 
       log.info({ token: base16Token, address: base16owner, userBalance }, "Zilliqa liquidity fetched");
 
-      const _balance = new BN(userBalance);
+      const _balance = new BN(userBalance || "0");
       const _minGZIL = new BN("30000000000000000");
 
       if (msg.token == gZIL && _balance.lt(_minGZIL)) {
