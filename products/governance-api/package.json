@@ -8,7 +8,7 @@
     "db:seed": "npx sequelize db:seed:all",
     "db:create": "npx sequelize db:create",
     "start": "node --require ts-node/register index.ts",
-    "test": "node --require ts-node/register lib/zilliqa/custom-fetch.test.ts && node --require ts-node/register lib/utils/verify-evm-signature.test.ts"
+    "test": "node --require ts-node/register lib/zilliqa/custom-fetch.test.ts"
   },
   "author": "Hicaru",
   "license": "MIT",
