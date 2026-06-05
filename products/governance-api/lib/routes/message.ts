@@ -198,6 +198,17 @@ message.post("/message", async (req, res) => {
       body.address = '0x' + body.address;
     }
 
+    // The signature is verified over body.sig.message, but every downstream check uses body.msg
+    // (parsed above). Require them to be byte-identical so a client cannot sign one string and
+    // submit a different proposal/vote body. Applies to both EVM and Schnorr submissions.
+    if (body.sig.message !== body.msg) {
+      log.error({ error_code: ErrorCodes.INCORRECT_SIGNATURE, address: body.address }, "Signed message does not match submitted message");
+      return res.status(400).json({
+        code: ErrorCodes.INCORRECT_SIGNATURE,
+        error_description: "incorrect signature",
+      });
+    }
+
     try {
       let checked: boolean;
       if (body.sigType === 'evm') {
