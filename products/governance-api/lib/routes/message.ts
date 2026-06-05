@@ -2,7 +2,7 @@ import { Router } from "express";
 import BN from "bn.js";
 import spaces from "@snapshot-labs/snapshot-spaces";
 import { verifySignature, pinJson } from "../utils";
-import { verifyEVMSignature } from "../utils/verify-evm-signature";
+import { verifyEVMSignature, zilliqaAddressFromEVMSignature } from "../utils/verify-evm-signature";
 import { Message } from "../models";
 import { blockchain } from "../zilliqa/custom-fetch";
 
@@ -225,6 +225,16 @@ message.post("/message", async (req, res) => {
     }
 
     log.info({ address: body.address, sigType: body.sigType || "schnorr" }, "Signature verified");
+
+    // EVM users sign with their 0x (Keccak) address, but their gZIL/ZRC2 balances and space
+    // membership are keyed by their Zilliqa (SHA256) address. Replace body.address with the
+    // canonical Zilliqa address recovered from the signature so the gZIL gate, the pinned
+    // voter-scoring snapshot, and the members/score checks all resolve against the user's real
+    // Zilliqa identity. Applies to both proposals and votes (same handler).
+    if (body.sigType === "evm") {
+      body.address = zilliqaAddressFromEVMSignature(body.sig.message, body.sig.signature);
+      log.info({ zilAddress: body.address }, "EVM identity normalized to Zilliqa address");
+    }
 
     proposal(res, msg);
     await vote(res, msg, ts, log);
