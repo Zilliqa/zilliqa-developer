@@ -5,6 +5,7 @@ import client from '@/helpers/client';
 import ipfs from '@/helpers/ipfs';
 import { formatProposal, formatProposals, formatSpace } from '@/helpers/utils';
 import { getBlockNumber, signMessage } from '@/helpers/web3';
+import { toHex0x } from '@/helpers/account';
 import { version } from '@/../package.json';
 
 const state = {
@@ -81,24 +82,33 @@ const actions = {
     commit('SET', { spaces });
     return spaces;
   },
-  send: async ({ commit, dispatch, rootState }, { space, token, type, payload }) => {
+  send: async ({ commit, dispatch }, { space, token, type, payload }) => {
     const auth = getInstance();
     commit('SEND_REQUEST');
     try {
-      const msg: any = {
-        address: rootState.web3.account.base16,
-        space,
-        msg: JSON.stringify({
-          version,
-          timestamp: (Date.now() / 1e3).toFixed(),
-          token,
-          type,
-          payload
-        })
-      };
       const sigType = auth.provider?.isEVM ? 'evm' : 'schnorr';
-      msg.sig = await signMessage(auth.web3, msg.msg);
-      msg.sigType = sigType;
+      const message = JSON.stringify({
+        version,
+        timestamp: (Date.now() / 1e3).toFixed(),
+        token,
+        type,
+        payload
+      });
+
+      // Sign first, then learn exactly which account signed. The wallet may use
+      // a different active account than the one connected, so bind the
+      // submission to the REAL signer (msg.address must match the signature the
+      // backend verifies) and let the web3 module adopt it as the session account.
+      const { sig, signer } = await signMessage(auth.web3, message);
+      await dispatch('reconcileSigner', signer);
+
+      const msg: any = {
+        address: toHex0x(signer),
+        space,
+        msg: message,
+        sig,
+        sigType
+      };
       const result = await client.request('message', msg);
       commit('SEND_SUCCESS');
       dispatch('notify', ['green', `Your ${type} is in!`]);

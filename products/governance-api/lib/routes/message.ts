@@ -31,21 +31,21 @@ const proposal = (res: any, msg: any) => {
   ) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_FORMAT,
-      error_description: "incorect proposal format",
+      error_description: "incorrect proposal format",
     });
   }
 
   if (isNaN(msg.payload.snapshot) || Number(msg.payload.snapshot) === 0) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_FORMAT,
-      error_description: "incorect snapshot blocknumber",
+      error_description: "incorrect snapshot blocknumber",
     });
   }
 
   if (!msg.payload.quorum || Number(msg.payload.quorum) > 100) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_QUORUM,
-      error_description: "incorect quorum",
+      error_description: "incorrect quorum",
     });
   }
 
@@ -57,7 +57,7 @@ const proposal = (res: any, msg: any) => {
   ) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_SIZE,
-      error_description: "incorect proposal size",
+      error_description: "incorrect proposal size",
     });
   }
 
@@ -67,7 +67,7 @@ const proposal = (res: any, msg: any) => {
   ) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_METADATA,
-      error_description: "incorect proposal metadata",
+      error_description: "incorrect proposal metadata",
     });
   }
 
@@ -79,7 +79,7 @@ const proposal = (res: any, msg: any) => {
   ) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_PERIOD,
-      error_description: "incorect proposal period",
+      error_description: "incorrect proposal period",
     });
   }
 };
@@ -96,7 +96,7 @@ const vote = async (res: any, msg: any, ts: string, log: any) => {
   ) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_VOTE_FORMAT,
-      error_description: "incorect vote format",
+      error_description: "incorrect vote format",
     });
   }
 
@@ -106,7 +106,7 @@ const vote = async (res: any, msg: any, ts: string, log: any) => {
   ) {
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_VOTE_METADATA,
-      error_description: "incorect vote metadata",
+      error_description: "incorrect vote metadata",
     });
   }
 
@@ -121,7 +121,7 @@ const vote = async (res: any, msg: any, ts: string, log: any) => {
     log.error({ error_code: ErrorCodes.INCORRECT_PROPOSAL_FORMAT, token: msg.token }, "Proposal not found");
     return res.status(400).json({
       code: ErrorCodes.INCORRECT_PROPOSAL_FORMAT,
-      error_description: "incorect vote proposal",
+      error_description: "incorrect vote proposal",
     });
   }
   const payload = JSON.parse(proposal.payload);
@@ -146,7 +146,7 @@ message.post("/message", async (req, res) => {
       log.error({ error_code: ErrorCodes.INCORRECT_DATA, address: body && body.address }, "incorrect message body");
       return res.status(400).json({
         code: ErrorCodes.INCORRECT_DATA,
-        error_description: "incorect message body",
+        error_description: "incorrect message body",
       });
     }
 

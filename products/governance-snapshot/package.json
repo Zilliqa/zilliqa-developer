@@ -6,7 +6,7 @@
     "serve": "NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve",
     "build": "NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "TS_NODE_TRANSPILE_ONLY=1 TS_NODE_SKIP_PROJECT=1 TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\",\"target\":\"es2019\",\"esModuleInterop\":true}' node --require ../governance-api/node_modules/ts-node/register src/helpers/client.test.ts"
+    "test": "for f in client account; do TS_NODE_TRANSPILE_ONLY=1 TS_NODE_SKIP_PROJECT=1 TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\",\"target\":\"es2019\",\"esModuleInterop\":true}' node --require ../governance-api/node_modules/ts-node/register src/helpers/$f.test.ts || exit 1; done"
   },
   "dependencies": {
     "@zilliqa-js/zilliqa": "3.5.0",

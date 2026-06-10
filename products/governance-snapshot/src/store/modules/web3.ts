@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { getInstance } from '@/helpers/plugins/LockPlugin';
 import store from '@/store';
 import config from '@/helpers/config';
-import { toBech32Address } from '@zilliqa-js/crypto';
+import { toAccount, addressesMatch, Account } from '@/helpers/account';
 
 let wsProvider;
 let auth;
@@ -84,23 +84,38 @@ const actions = {
       commit('LOGOUT');
     }
   },
+  // Adopt the account that actually signed as the session account. The wallet
+  // signs with its ACTIVE account, which can differ from the connected one
+  // (multiple accounts, or the account-change subscription never fired under
+  // the wallet's compat layer). Sync the session to the real signer and warn
+  // when it changed so the user sees who they are acting as.
+  reconcileSigner: ({ commit, dispatch, state }, signer: Account) => {
+    if (addressesMatch(signer.base16, state.account.base16)) return;
+    commit('HANDLE_ACCOUNTS_CHANGED', signer);
+    dispatch('notify', [
+      'yellow',
+      `Signing as ${signer.bech32.slice(0, 9)}…${signer.bech32.slice(
+        -4
+      )} — the account active in your wallet. Switch accounts in your wallet if this isn't who you meant to act as.`
+    ]);
+  },
   loadProvider: async ({ commit }) => {
     commit('LOAD_PROVIDER_REQUEST');
     try {
       if (auth.provider?.isEVM) {
         // EVM path — address is carried on the provider sentinel from EVMConnector.connect()
-        const base16 = auth.provider.address.slice(2).toLowerCase();
-        const bech32 = toBech32Address('0x' + base16);
+        const account = toAccount(auth.provider.address);
         commit('HANDLE_CHAIN_CHANGED', 'mainnet');
         commit('SET_IS_EVM', true);
-        commit('LOAD_PROVIDER_SUCCESS', { account: { base16, bech32 }, name: '0x' + base16 });
+        commit('LOAD_PROVIDER_SUCCESS', {
+          account,
+          name: '0x' + account.base16
+        });
 
         // Subscribe to future account changes (e.g. user switches wallet in MetaMask)
         window['ethereum'].on('accountsChanged', (accounts: string[]) => {
           if (accounts.length) {
-            const b16 = accounts[0].slice(2).toLowerCase();
-            const b32 = toBech32Address('0x' + b16);
-            commit('HANDLE_ACCOUNTS_CHANGED', { base16: b16, bech32: b32 });
+            commit('HANDLE_ACCOUNTS_CHANGED', toAccount(accounts[0]));
           } else {
             commit('LOGOUT');
           }

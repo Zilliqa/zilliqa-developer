@@ -10,7 +10,7 @@ zilliqa.wallet.addByPrivateKey(privateKey);
 const relayer = zilliqa.wallet.defaultAccount;
 
 if (!relayer) {
-  throw new Error("Incorect RELAYER_PK");
+  throw new Error("Incorrect RELAYER_PK");
 }
 
 export default relayer;
