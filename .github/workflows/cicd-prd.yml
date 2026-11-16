@@ -26,9 +26,6 @@ jobs:
             # eth-spout,
             governance-api,
             governance-snapshot,
-            multisig,
-            # scilla-server,
-            # zillion,
           ]
         include:
           - application: bluebell-playground
@@ -49,21 +46,6 @@ jobs:
           - application: governance-snapshot
             image_name: governance-snapshot
             path: products/governance-snapshot
-            tag_length: 8
-            tag_latest: false
-          - application: multisig
-            image_name: multisig
-            path: products/multisig
-            tag_length: 8
-            tag_latest: false
-          - application: scilla-server
-            image_name: scilla-server
-            path: products/scilla-server
-            tag_length: 8
-            tag_latest: false
-          - application: zillion
-            image_name: zillion
-            path: products/zillion
             tag_length: 8
             tag_latest: false
     env:
