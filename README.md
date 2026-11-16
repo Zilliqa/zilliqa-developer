@@ -21,7 +21,6 @@ following table is a place holder:
 | `//products/dev-wallet`       | wallet.zilliqa.com |                   |
 | `//products/devex`            | devex.zilliqa.com  |                   |
 | `//products/ceres`            | zilliqa.com/apps   |                   |
-| `//products/neo-savant`       | ide.zilliqa.com    |                   |
 
 ## Building
 
