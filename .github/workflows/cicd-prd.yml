@@ -22,17 +22,11 @@ jobs:
       matrix:
         application:
           [
-            # bluebell-playground,
-            # eth-spout,
+            eth-spout,
             governance-api,
             governance-snapshot,
           ]
         include:
-          - application: bluebell-playground
-            image_name: bluebell-playground
-            path: products/bluebell
-            tag_length: 8
-            tag_latest: false
           - application: eth-spout
             image_name: eth-spout
             path: products/eth-spout
