@@ -7,3 +7,18 @@ resources:
   - httproute.yaml
 
 namespace: governance-snapshot-stg
+
+patches:
+  # Autopilot bills requests: explicit CPU and memory (measured use ~1m CPU)
+  - target:
+      kind: Deployment
+      name: governance-snapshot
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+          limits:
+            memory: 200Mi

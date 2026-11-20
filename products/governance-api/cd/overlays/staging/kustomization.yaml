@@ -8,3 +8,18 @@ resources:
   - secrets-app.yaml
 
 namespace: governance-api-stg
+
+patches:
+  # Autopilot bills requests: explicit CPU and memory (measured use ~1m CPU)
+  - target:
+      kind: Deployment
+      name: governance-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 50m
+            memory: 300Mi
+          limits:
+            memory: 500Mi
