@@ -20,12 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application:
-          [
-            eth-spout,
-            governance-api,
-            governance-snapshot,
-          ]
+        application: [eth-spout, governance-api, governance-snapshot]
         include:
           - application: eth-spout
             image_name: eth-spout
