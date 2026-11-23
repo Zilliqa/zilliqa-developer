@@ -26,6 +26,7 @@ spec:
             limits:
               memory: 200Mi
             requests:
+              cpu: 50m
               memory: 100Mi
           volumeMounts:
           - mountPath: /usr/share/nginx/html/config.js
