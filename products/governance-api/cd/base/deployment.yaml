@@ -26,7 +26,8 @@ spec:
             limits:
               memory: 500Mi
             requests:
-              memory: 300Mi
+              cpu: 100m
+              memory: 320Mi
           env:
             - name: NODE_ENV
               valueFrom:
