@@ -22,3 +22,8 @@ patches:
             memory: 100Mi
           limits:
             memory: 200Mi
+
+# Scaled to 0 in staging to cut cost (2026-11-24): set the count back to 1 to bring it back.
+replicas:
+  - name: governance-snapshot
+    count: 0
