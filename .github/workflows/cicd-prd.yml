@@ -20,23 +20,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        application: [eth-spout, governance-api, governance-snapshot]
+        application: [eth-spout]
         include:
           - application: eth-spout
             image_name: eth-spout
             path: products/eth-spout
             tag_length: 9
             tag_latest: true
-          - application: governance-api
-            image_name: governance-api
-            path: products/governance-api
-            tag_length: 8
-            tag_latest: false
-          - application: governance-snapshot
-            image_name: governance-snapshot
-            path: products/governance-snapshot
-            tag_length: 8
-            tag_latest: false
     env:
       DOCKER_DOMAIN: asia-docker.pkg.dev
       REGISTRY: asia-docker.pkg.dev/prj-p-devops-services-tvwmrf63/zilliqa-public
