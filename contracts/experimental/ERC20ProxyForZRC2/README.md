@@ -1,6 +1,18 @@
 # ERC20ProxyForZRC2 Contract
 
+## Intro
+
 These contracts allow ZRC-2 tokens to look like ERC-20 tokens.
+
+## Deployed proxies
+
+| name | ZRC2 address | ERC20 proxy address | isBurnable |
+|------|--------------------------------------------|--------------------------------------------|-----|
+| ZWAP | zil1p5suryq6q647usxczale29cu3336hhp376c627 | 0xf54e97D672196CdC5a580338149e009Cef4d5A81 | yes |
+
+TODO some proxies were deployed in the past and are not listed here. Find them and add to the list
+
+## How to use
 
 Unless you want to build using the `zilliqa-developer` version of `zilliqa-js`, or you encounter missing modules issues while running tests, install our dependencies with:
 
